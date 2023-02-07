@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 import java.lang.ref.SoftReference;
 import java.util.List;
@@ -11,11 +11,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.event.Event;
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.event.ResourceCreatedEvent;
-import org.highmed.dsf.fhir.event.ResourceDeletedEvent;
-import org.highmed.dsf.fhir.event.ResourceUpdatedEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Resource;
@@ -29,6 +24,11 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import dev.dsf.fhir.event.Event;
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.ResourceCreatedEvent;
+import dev.dsf.fhir.event.ResourceDeletedEvent;
+import dev.dsf.fhir.event.ResourceUpdatedEvent;
 
 public class ValidationSupportWithCache implements IValidationSupport, EventHandler
 {

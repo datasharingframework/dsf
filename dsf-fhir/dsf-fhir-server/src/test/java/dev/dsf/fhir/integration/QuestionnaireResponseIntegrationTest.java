@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,10 +18,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.fhir.authentication.OrganizationProvider;
-import org.highmed.dsf.fhir.dao.QuestionnaireDao;
-import org.highmed.dsf.fhir.dao.QuestionnaireResponseDao;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -33,6 +29,11 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.junit.Test;
+
+import dev.dsf.bpe.ConstantsBase;
+import dev.dsf.fhir.authentication.OrganizationProvider;
+import dev.dsf.fhir.dao.QuestionnaireDao;
+import dev.dsf.fhir.dao.QuestionnaireResponseDao;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest
 {

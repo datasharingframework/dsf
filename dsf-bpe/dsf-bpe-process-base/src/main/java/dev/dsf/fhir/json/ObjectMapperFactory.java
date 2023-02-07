@@ -1,8 +1,5 @@
-package org.highmed.dsf.fhir.json;
+package dev.dsf.fhir.json;
 
-import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
-import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.hl7.fhir.r4.model.Resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -12,6 +9,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.variables.FhirResourceJacksonDeserializer;
+import dev.dsf.fhir.variables.FhirResourceJacksonSerializer;
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
 
 public class ObjectMapperFactory
 {

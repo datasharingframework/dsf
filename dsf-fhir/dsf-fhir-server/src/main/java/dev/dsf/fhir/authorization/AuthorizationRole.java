@@ -1,8 +1,8 @@
-package org.highmed.dsf.fhir.authorization;
+package dev.dsf.fhir.authorization;
 
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.authentication.UserRole;
+import dev.dsf.fhir.authentication.UserRole;
 
 public enum AuthorizationRole
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.profiles;
+package dev.dsf.fhir.profiles;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -6,9 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
-import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionKind;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -24,6 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ResourceValidatorImpl;
+import dev.dsf.fhir.validation.ValidationSupportRule;
 
 public class ActivityDefinitionProfileTest
 {

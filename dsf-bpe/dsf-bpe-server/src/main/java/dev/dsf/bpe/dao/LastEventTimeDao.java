@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.dao;
+package dev.dsf.bpe.dao;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;

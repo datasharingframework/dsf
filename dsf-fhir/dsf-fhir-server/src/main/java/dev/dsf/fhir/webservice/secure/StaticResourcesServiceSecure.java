@@ -1,14 +1,15 @@
-package org.highmed.dsf.fhir.webservice.secure;
+package dev.dsf.fhir.webservice.secure;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.webservice.specification.StaticResourcesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.webservice.specification.StaticResourcesService;
 
 public class StaticResourcesServiceSecure extends AbstractServiceSecure<StaticResourcesService>
 		implements StaticResourcesService

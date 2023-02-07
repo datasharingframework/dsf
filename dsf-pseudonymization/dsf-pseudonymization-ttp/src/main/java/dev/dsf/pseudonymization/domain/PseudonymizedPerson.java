@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.domain;
+package dev.dsf.pseudonymization.domain;
 
 public interface PseudonymizedPerson
 {

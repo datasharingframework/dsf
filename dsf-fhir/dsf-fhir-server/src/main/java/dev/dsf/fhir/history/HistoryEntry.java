@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.history;
+package dev.dsf.fhir.history;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

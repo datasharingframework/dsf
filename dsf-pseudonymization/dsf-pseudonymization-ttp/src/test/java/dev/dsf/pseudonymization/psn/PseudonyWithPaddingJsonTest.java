@@ -1,15 +1,16 @@
-package org.highmed.pseudonymization.psn;
+package dev.dsf.pseudonymization.psn;
 
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
-import org.highmed.pseudonymization.recordlinkage.MedicId;
-import org.highmed.pseudonymization.recordlinkage.TestMedicId;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
+
+import dev.dsf.pseudonymization.recordlinkage.MedicId;
+import dev.dsf.pseudonymization.recordlinkage.TestMedicId;
 
 public class PseudonyWithPaddingJsonTest
 {

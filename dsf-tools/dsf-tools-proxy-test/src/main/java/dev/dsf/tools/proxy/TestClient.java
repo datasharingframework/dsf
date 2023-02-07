@@ -1,13 +1,14 @@
-package org.highmed.dsf.tools.proxy;
+package dev.dsf.tools.proxy;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.ws.rs.core.Response;
 
-import org.highmed.fhir.client.AbstractJerseyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.client.AbstractJerseyClient;
 
 public class TestClient extends AbstractJerseyClient
 {

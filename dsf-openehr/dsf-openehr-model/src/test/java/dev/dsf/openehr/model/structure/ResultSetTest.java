@@ -1,4 +1,4 @@
-package org.highmed.openehr.model.structure;
+package dev.dsf.openehr.model.structure;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,9 +13,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.openehr.model.datatypes.IntegerRowElement;
-import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -25,6 +22,10 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
+import dev.dsf.openehr.model.datatypes.IntegerRowElement;
+import dev.dsf.openehr.model.datatypes.StringRowElement;
 
 public class ResultSetTest
 {

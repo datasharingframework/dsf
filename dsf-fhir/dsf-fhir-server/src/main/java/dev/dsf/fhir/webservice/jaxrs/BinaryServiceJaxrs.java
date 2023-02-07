@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,14 +24,14 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.webservice.specification.BinaryService;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.webservice.specification.BinaryService;
 
 @Path(BinaryServiceJaxrs.PATH)
 public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, BinaryService> implements BinaryService

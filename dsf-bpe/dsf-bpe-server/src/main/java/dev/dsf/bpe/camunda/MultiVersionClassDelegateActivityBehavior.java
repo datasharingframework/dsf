@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.camunda;
+package dev.dsf.bpe.camunda;
 
 import java.util.List;
 
@@ -12,8 +12,9 @@ import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.pvm.delegate.ActivityBehavior;
 import org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
-import org.highmed.dsf.bpe.delegate.DelegateProvider;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
+
+import dev.dsf.bpe.delegate.DelegateProvider;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
 
 public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActivityBehavior
 {

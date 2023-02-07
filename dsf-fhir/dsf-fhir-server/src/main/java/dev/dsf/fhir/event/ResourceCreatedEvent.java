@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.event;
+package dev.dsf.fhir.event;
 
 import org.hl7.fhir.r4.model.Resource;
 

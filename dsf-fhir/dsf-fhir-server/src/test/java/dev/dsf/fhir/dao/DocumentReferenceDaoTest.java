@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
 
-import org.highmed.dsf.fhir.dao.jdbc.DocumentReferenceDaoJdbc;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.DocumentReferenceDaoJdbc;
 
 public class DocumentReferenceDaoTest extends AbstractResourceDaoTest<DocumentReference, DocumentReferenceDao>
 		implements ReadAccessDaoTest<DocumentReference>

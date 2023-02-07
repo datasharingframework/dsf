@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.BundleDaoJdbc;
 
 public class BundleDaoTest extends AbstractResourceDaoTest<Bundle, BundleDao> implements ReadAccessDaoTest<Bundle>
 {

@@ -1,14 +1,15 @@
-package org.highmed.dsf.fhir.authorization.process;
+package dev.dsf.fhir.authorization.process;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.UserRole;
 
 public class All implements Recipient, Requester
 {

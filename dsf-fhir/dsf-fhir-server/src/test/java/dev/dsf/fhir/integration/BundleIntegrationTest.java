@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
@@ -35,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+
+import dev.dsf.fhir.dao.StructureDefinitionDao;
 
 public class BundleIntegrationTest extends AbstractIntegrationTest
 {

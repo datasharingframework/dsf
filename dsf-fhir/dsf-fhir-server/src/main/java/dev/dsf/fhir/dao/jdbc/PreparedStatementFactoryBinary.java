@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;

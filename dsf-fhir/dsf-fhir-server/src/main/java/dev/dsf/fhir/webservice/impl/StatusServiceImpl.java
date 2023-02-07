@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.impl;
+package dev.dsf.fhir.webservice.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -10,10 +10,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.webservice.specification.StatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.webservice.specification.StatusService;
 
 public class StatusServiceImpl implements StatusService, InitializingBean
 {

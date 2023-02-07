@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.impl;
+package dev.dsf.fhir.webservice.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,10 +21,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.codec.binary.Hex;
-import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
-import org.highmed.dsf.fhir.webservice.specification.StaticResourcesService;
 
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.webservice.base.AbstractBasicService;
+import dev.dsf.fhir.webservice.specification.StaticResourcesService;
 
 public class StaticResourcesServiceImpl extends AbstractBasicService implements StaticResourcesService
 {

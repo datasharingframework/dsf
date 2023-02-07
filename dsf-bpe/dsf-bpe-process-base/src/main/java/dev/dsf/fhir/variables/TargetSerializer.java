@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.variables;
+package dev.dsf.fhir.variables;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -6,11 +6,12 @@ import java.util.Objects;
 import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.highmed.dsf.fhir.variables.TargetValues.TargetValue;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.fhir.variables.TargetValues.TargetValue;
 
 public class TargetSerializer extends PrimitiveValueSerializer<TargetValue> implements InitializingBean
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters;
+package dev.dsf.fhir.search.parameters;
 
 import java.sql.Array;
 import java.sql.Connection;
@@ -6,21 +6,22 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.IncludeParameterDefinition;
-import org.highmed.dsf.fhir.search.IncludeParts;
-import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import dev.dsf.fhir.search.IncludeParameterDefinition;
+import dev.dsf.fhir.search.IncludeParts;
+import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
+import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 
 @IncludeParameterDefinition(resourceType = OrganizationAffiliation.class, parameterName = OrganizationAffiliationPrimaryOrganization.PARAMETER_NAME, targetResourceTypes = Organization.class)
 @SearchParameterDefinition(name = OrganizationAffiliationPrimaryOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/OrganizationAffiliation-primary-organization", type = SearchParamType.REFERENCE, documentation = "The organization that receives the services from the participating organization")

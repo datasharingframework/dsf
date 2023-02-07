@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,15 +6,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
-import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import org.highmed.dsf.fhir.search.DbSearchQuery;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
+import dev.dsf.fhir.search.DbSearchQuery;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
 
 public interface ResourceDao<R extends Resource>
 {

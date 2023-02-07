@@ -1,9 +1,9 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
-import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.Resource;
 
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.authentication.User;
 
 public interface ValidationHelper
 {

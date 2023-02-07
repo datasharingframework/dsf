@@ -1,6 +1,6 @@
-package org.highmed.openehr.model.datatypes;
+package dev.dsf.openehr.model.datatypes;
 
-import org.highmed.openehr.model.structure.RowElement;
+import dev.dsf.openehr.model.structure.RowElement;
 
 public class StringRowElement implements RowElement
 {

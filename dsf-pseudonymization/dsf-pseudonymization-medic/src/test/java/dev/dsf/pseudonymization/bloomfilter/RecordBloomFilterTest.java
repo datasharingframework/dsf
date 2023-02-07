@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.bloomfilter;
+package dev.dsf.pseudonymization.bloomfilter;
 
 import static org.junit.Assert.*;
 

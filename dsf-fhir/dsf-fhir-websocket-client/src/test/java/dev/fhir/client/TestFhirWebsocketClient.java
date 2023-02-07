@@ -1,4 +1,4 @@
-package org.highmed.fhir.client;
+package dev.fhir.client;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
+import dev.dsf.fhir.client.WebsocketClientTyrus;
 
 public class TestFhirWebsocketClient
 {

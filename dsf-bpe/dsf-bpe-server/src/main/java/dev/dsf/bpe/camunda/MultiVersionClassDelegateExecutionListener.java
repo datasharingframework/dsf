@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.camunda;
+package dev.dsf.bpe.camunda;
 
 import java.util.List;
 
@@ -12,8 +12,9 @@ import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
-import org.highmed.dsf.bpe.delegate.DelegateProvider;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
+
+import dev.dsf.bpe.delegate.DelegateProvider;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
 
 public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExecutionListener
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service.migration;
+package dev.dsf.fhir.service.migration;
 
 public interface MigrationJob
 {

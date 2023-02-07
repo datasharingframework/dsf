@@ -1,13 +1,13 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
-import org.highmed.dsf.fhir.search.parameters.DocumentReferenceIdentifier;
-import org.highmed.dsf.fhir.search.parameters.user.DocumentReferenceUserFilter;
 import org.hl7.fhir.r4.model.DocumentReference;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.DocumentReferenceDao;
+import dev.dsf.fhir.search.parameters.DocumentReferenceIdentifier;
+import dev.dsf.fhir.search.parameters.user.DocumentReferenceUserFilter;
 
 public class DocumentReferenceDaoJdbc extends AbstractResourceDaoJdbc<DocumentReference> implements DocumentReferenceDao
 {

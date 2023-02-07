@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.process;
+package dev.dsf.bpe.process;
 
 public enum ProcessState
 {

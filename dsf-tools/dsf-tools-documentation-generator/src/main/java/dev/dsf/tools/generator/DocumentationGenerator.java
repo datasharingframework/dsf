@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.generator;
+package dev.dsf.tools.generator;
 
 import static java.util.stream.Collectors.toList;
 
@@ -23,7 +23,6 @@ import java.util.function.Function;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.highmed.dsf.bpe.ProcessPluginDefinition;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
@@ -31,6 +30,8 @@ import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+
+import dev.dsf.bpe.ProcessPluginDefinition;
 
 public class DocumentationGenerator
 {

@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -8,16 +8,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Random;
 
-import org.highmed.mpi.client.Idat;
-import org.highmed.mpi.client.IdatNotFoundException;
-import org.highmed.mpi.client.MasterPatientIndexClient;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator;
-import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
-import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl;
-import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldBloomFilterLengths;
-import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldWeights;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +15,17 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.mpi.client.Idat;
+import dev.dsf.mpi.client.IdatNotFoundException;
+import dev.dsf.mpi.client.MasterPatientIndexClient;
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.pseudonymization.bloomfilter.BloomFilterGenerator;
+import dev.dsf.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
+import dev.dsf.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl;
+import dev.dsf.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldBloomFilterLengths;
+import dev.dsf.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldWeights;
 
 public class ResultSetTranslatorToTtpCreateRbfTest
 {

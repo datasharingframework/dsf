@@ -1,4 +1,4 @@
-package org.highmed.mpi.client;
+package dev.dsf.mpi.client;
 
 public class IdatNotFoundException extends RuntimeException
 {

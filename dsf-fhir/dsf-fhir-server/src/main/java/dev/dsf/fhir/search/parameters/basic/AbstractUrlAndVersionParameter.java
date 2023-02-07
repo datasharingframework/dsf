@@ -1,13 +1,14 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
 public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 		extends AbstractCanonicalUrlParameter<R>

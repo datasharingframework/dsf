@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,11 +9,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
-import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.DocumentReferenceDao;
 
 public class DocumentReferenceIntegrationTest extends AbstractIntegrationTest
 {

@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
-import org.highmed.dsf.fhir.authentication.UserProvider;
-import org.highmed.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
-import org.highmed.dsf.fhir.webservice.base.BasicService;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.authentication.UserProvider;
+import dev.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
+import dev.dsf.fhir.webservice.base.BasicService;
 
 public abstract class AbstractServiceJaxrs<S extends BasicService> extends AbstractDelegatingBasicService<S>
 		implements BasicService, InitializingBean

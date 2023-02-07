@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir;
+package dev.dsf.fhir;
 
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;

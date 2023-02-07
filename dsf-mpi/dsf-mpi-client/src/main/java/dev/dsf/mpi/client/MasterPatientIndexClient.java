@@ -1,4 +1,4 @@
-package org.highmed.mpi.client;
+package dev.dsf.mpi.client;
 
 /**
  * Client interface for fetching a subject's IDAT from a Master Patient Index.

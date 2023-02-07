@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.generator;
+package dev.dsf.tools.generator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +17,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 
 public class ConfigGenerator
 {

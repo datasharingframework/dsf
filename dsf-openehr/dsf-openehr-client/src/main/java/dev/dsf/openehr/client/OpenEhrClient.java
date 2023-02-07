@@ -1,8 +1,8 @@
-package org.highmed.openehr.client;
+package dev.dsf.openehr.client;
 
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.highmed.openehr.model.structure.ResultSet;
+import dev.dsf.openehr.model.structure.ResultSet;
 
 public interface OpenEhrClient
 {

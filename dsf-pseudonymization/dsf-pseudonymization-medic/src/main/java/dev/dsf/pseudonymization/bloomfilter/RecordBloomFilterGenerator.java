@@ -1,6 +1,6 @@
-package org.highmed.pseudonymization.bloomfilter;
+package dev.dsf.pseudonymization.bloomfilter;
 
-import org.highmed.mpi.client.Idat;
+import dev.dsf.mpi.client.Idat;
 
 public interface RecordBloomFilterGenerator
 {

@@ -1,9 +1,9 @@
-package org.highmed.dsf.fhir.function;
+package dev.dsf.fhir.function;
 
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 
 @FunctionalInterface
 public interface RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir;
+package dev.dsf.fhir;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -20,7 +20,7 @@ public class FhirSpringApplication implements WebApplicationInitializer
 	private AnnotationConfigWebApplicationContext getContext()
 	{
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setConfigLocation("org.highmed.dsf.fhir.spring.config");
+		context.setConfigLocation("dev.dsf.fhir.spring.config");
 
 		return context;
 	}

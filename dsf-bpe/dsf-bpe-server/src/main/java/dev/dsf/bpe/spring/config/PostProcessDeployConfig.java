@@ -1,25 +1,26 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.ProcessEngine;
-import org.highmed.dsf.bpe.delegate.DelegateProvider;
-import org.highmed.dsf.bpe.plugin.ProcessPluginProvider;
-import org.highmed.dsf.bpe.process.BpmnFileAndModel;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
-import org.highmed.dsf.bpe.process.ProcessStateChangeOutcome;
-import org.highmed.dsf.bpe.service.BpmnProcessStateChangeService;
-import org.highmed.dsf.bpe.service.BpmnProcessStateChangeServiceImpl;
-import org.highmed.dsf.bpe.service.BpmnServiceDelegateValidationService;
-import org.highmed.dsf.bpe.service.BpmnServiceDelegateValidationServiceImpl;
-import org.highmed.dsf.bpe.service.FhirResourceHandler;
-import org.highmed.dsf.bpe.service.FhirResourceHandlerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+
+import dev.dsf.bpe.delegate.DelegateProvider;
+import dev.dsf.bpe.plugin.ProcessPluginProvider;
+import dev.dsf.bpe.process.BpmnFileAndModel;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.process.ProcessStateChangeOutcome;
+import dev.dsf.bpe.service.BpmnProcessStateChangeService;
+import dev.dsf.bpe.service.BpmnProcessStateChangeServiceImpl;
+import dev.dsf.bpe.service.BpmnServiceDelegateValidationService;
+import dev.dsf.bpe.service.BpmnServiceDelegateValidationServiceImpl;
+import dev.dsf.bpe.service.FhirResourceHandler;
+import dev.dsf.bpe.service.FhirResourceHandlerImpl;
 
 @Configuration
 public class PostProcessDeployConfig

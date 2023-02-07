@@ -1,19 +1,17 @@
-package org.highmed.dsf.fhir.client;
+package dev.dsf.fhir.client;
 
 import java.security.KeyStore;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.EndpointDao;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.EndpointDao;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.service.ReferenceCleaner;
 
 public class ClientProviderImpl implements ClientProvider, InitializingBean
 {

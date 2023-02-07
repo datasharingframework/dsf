@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.test;
+package dev.dsf.pseudonymization.test;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -10,22 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
-import org.highmed.pseudonymization.domain.PersonWithMdat;
-import org.highmed.pseudonymization.domain.PseudonymizedPersonWithMdat;
-import org.highmed.pseudonymization.domain.impl.MatchedPersonImpl;
-import org.highmed.pseudonymization.domain.impl.PseudonymizedPersonImpl;
-import org.highmed.pseudonymization.psn.PseudonymGenerator;
-import org.highmed.pseudonymization.psn.PseudonymGeneratorImpl;
-import org.highmed.pseudonymization.recordlinkage.FederatedMatcher;
-import org.highmed.pseudonymization.recordlinkage.FederatedMatcherImpl;
-import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
-import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedic;
-import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicWithRbfImpl;
-import org.highmed.pseudonymization.translation.ResultSetTranslatorToMedic;
-import org.highmed.pseudonymization.translation.ResultSetTranslatorToMedicImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,6 +18,23 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.pseudonymization.crypto.AesGcmUtil;
+import dev.dsf.pseudonymization.domain.PersonWithMdat;
+import dev.dsf.pseudonymization.domain.PseudonymizedPersonWithMdat;
+import dev.dsf.pseudonymization.domain.impl.MatchedPersonImpl;
+import dev.dsf.pseudonymization.domain.impl.PseudonymizedPersonImpl;
+import dev.dsf.pseudonymization.psn.PseudonymGenerator;
+import dev.dsf.pseudonymization.psn.PseudonymGeneratorImpl;
+import dev.dsf.pseudonymization.recordlinkage.FederatedMatcher;
+import dev.dsf.pseudonymization.recordlinkage.FederatedMatcherImpl;
+import dev.dsf.pseudonymization.recordlinkage.MatchedPerson;
+import dev.dsf.pseudonymization.translation.ResultSetTranslatorFromMedic;
+import dev.dsf.pseudonymization.translation.ResultSetTranslatorFromMedicWithRbfImpl;
+import dev.dsf.pseudonymization.translation.ResultSetTranslatorToMedic;
+import dev.dsf.pseudonymization.translation.ResultSetTranslatorToMedicImpl;
 
 public class RecordLinkagePseudonymizationIntegrationTest
 {

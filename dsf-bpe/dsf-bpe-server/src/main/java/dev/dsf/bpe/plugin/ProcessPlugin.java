@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.plugin;
+package dev.dsf.bpe.plugin;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,9 +15,10 @@ import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
 
 public class ProcessPlugin implements ProcessEnginePlugin
 {

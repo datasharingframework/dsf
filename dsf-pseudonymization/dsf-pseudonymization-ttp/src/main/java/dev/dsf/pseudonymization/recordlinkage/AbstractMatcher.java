@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.recordlinkage;
+package dev.dsf.pseudonymization.recordlinkage;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;

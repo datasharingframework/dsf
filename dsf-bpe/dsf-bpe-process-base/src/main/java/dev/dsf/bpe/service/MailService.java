@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.service;
+package dev.dsf.bpe.service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.questionnaire;
+package dev.dsf.fhir.questionnaire;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.cors;
+package dev.dsf.fhir.cors;
 
 import java.util.List;
 import java.util.Objects;

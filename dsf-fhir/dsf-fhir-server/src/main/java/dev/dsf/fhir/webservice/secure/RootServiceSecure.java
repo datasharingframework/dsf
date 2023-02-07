@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.secure;
+package dev.dsf.fhir.webservice.secure;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -7,15 +7,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authorization.AuthorizationRule;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authorization.AuthorizationRule;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.webservice.specification.RootService;
 
 public class RootServiceSecure extends AbstractServiceSecure<RootService> implements RootService
 {

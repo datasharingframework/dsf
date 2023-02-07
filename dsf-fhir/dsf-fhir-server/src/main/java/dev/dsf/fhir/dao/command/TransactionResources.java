@@ -1,6 +1,6 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.SnapshotGenerator;
 
 public class TransactionResources
 {

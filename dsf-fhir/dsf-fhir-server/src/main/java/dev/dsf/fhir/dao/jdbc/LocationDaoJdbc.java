@@ -1,13 +1,13 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.LocationDao;
-import org.highmed.dsf.fhir.search.parameters.LocationIdentifier;
-import org.highmed.dsf.fhir.search.parameters.user.LocationUserFilter;
 import org.hl7.fhir.r4.model.Location;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.LocationDao;
+import dev.dsf.fhir.search.parameters.LocationIdentifier;
+import dev.dsf.fhir.search.parameters.user.LocationUserFilter;
 
 public class LocationDaoJdbc extends AbstractResourceDaoJdbc<Location> implements LocationDao
 {

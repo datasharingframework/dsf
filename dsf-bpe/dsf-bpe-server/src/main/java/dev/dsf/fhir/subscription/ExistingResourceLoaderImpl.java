@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.subscription;
+package dev.dsf.fhir.subscription;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -12,9 +12,6 @@ import java.util.Optional;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.bpe.dao.LastEventTimeDao;
-import org.highmed.dsf.fhir.websocket.ResourceHandler;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
@@ -22,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.bpe.dao.LastEventTimeDao;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.websocket.ResourceHandler;
 
 public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingResourceLoader<R>
 {

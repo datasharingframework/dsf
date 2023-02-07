@@ -1,16 +1,17 @@
-package org.highmed.dsf.fhir.subscription;
+package dev.dsf.fhir.subscription;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.search.Matcher;
-import org.highmed.dsf.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.search.Matcher;
+import dev.dsf.fhir.search.SearchQuery;
 
 public class MatcherFactory
 {

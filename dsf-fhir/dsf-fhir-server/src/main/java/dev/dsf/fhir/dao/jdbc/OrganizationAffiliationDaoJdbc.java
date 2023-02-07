@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,19 +11,19 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
-import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationActive;
-import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationEndpoint;
-import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationIdentifier;
-import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationParticipatingOrganization;
-import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationPrimaryOrganization;
-import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationRole;
-import org.highmed.dsf.fhir.search.parameters.user.OrganizationAffiliationUserFilter;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.OrganizationAffiliationDao;
+import dev.dsf.fhir.search.parameters.OrganizationAffiliationActive;
+import dev.dsf.fhir.search.parameters.OrganizationAffiliationEndpoint;
+import dev.dsf.fhir.search.parameters.OrganizationAffiliationIdentifier;
+import dev.dsf.fhir.search.parameters.OrganizationAffiliationParticipatingOrganization;
+import dev.dsf.fhir.search.parameters.OrganizationAffiliationPrimaryOrganization;
+import dev.dsf.fhir.search.parameters.OrganizationAffiliationRole;
+import dev.dsf.fhir.search.parameters.user.OrganizationAffiliationUserFilter;
 
 public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<OrganizationAffiliation>
 		implements OrganizationAffiliationDao

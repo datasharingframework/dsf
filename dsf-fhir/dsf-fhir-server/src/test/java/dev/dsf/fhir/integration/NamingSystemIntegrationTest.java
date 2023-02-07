@@ -1,16 +1,17 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.junit.Assert.*;
 
 import java.util.Date;
 
-import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
 import org.hl7.fhir.r4.model.NamingSystem.NamingSystemType;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.NamingSystemDao;
 
 public class NamingSystemIntegrationTest extends AbstractIntegrationTest
 {

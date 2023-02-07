@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe;
+package dev.dsf.bpe;
 
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir;
+package dev.dsf.fhir;
 
 import static de.rwh.utils.jetty.JettyServer.httpConfiguration;
 import static de.rwh.utils.jetty.JettyServer.start;
@@ -30,17 +30,17 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
-import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
-import org.highmed.dsf.fhir.cors.CorsFilter;
-import org.highmed.dsf.fhir.webservice.specification.StatusService;
-import org.highmed.dsf.tools.db.DbMigrator;
-import org.highmed.dsf.tools.db.DbMigratorConfig;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
 import de.rwh.utils.jetty.Log4jInitializer;
+import dev.dsf.fhir.authentication.AuthenticationFilter;
+import dev.dsf.fhir.cors.CorsFilter;
+import dev.dsf.fhir.webservice.specification.StatusService;
+import dev.dsf.tools.db.DbMigrator;
+import dev.dsf.tools.db.DbMigratorConfig;
 
 public final class FhirServer
 {

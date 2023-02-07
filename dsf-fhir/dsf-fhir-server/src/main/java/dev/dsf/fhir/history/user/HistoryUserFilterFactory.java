@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.history.user;
+package dev.dsf.fhir.history.user;
 
 import java.util.List;
 
-import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.authentication.User;
 
 public interface HistoryUserFilterFactory
 {

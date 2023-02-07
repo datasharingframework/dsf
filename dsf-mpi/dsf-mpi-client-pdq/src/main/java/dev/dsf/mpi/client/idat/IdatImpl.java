@@ -1,6 +1,6 @@
-package org.highmed.mpi.client.idat;
+package dev.dsf.mpi.client.idat;
 
-import org.highmed.mpi.client.Idat;
+import dev.dsf.mpi.client.Idat;
 
 public class IdatImpl implements Idat
 {

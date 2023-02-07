@@ -1,9 +1,10 @@
-package org.highmed.dsf.bpe.listener;
+package dev.dsf.bpe.listener;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.variable.Variables;
-import org.highmed.dsf.bpe.ConstantsBase;
+
+import dev.dsf.bpe.ConstantsBase;
 
 /**
  * Added to each BPMN CallActivity Task by the {@link DefaultBpmnParseListener}. Sets the variable

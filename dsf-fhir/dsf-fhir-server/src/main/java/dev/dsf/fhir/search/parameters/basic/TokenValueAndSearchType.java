@@ -1,11 +1,11 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError;
 
 public class TokenValueAndSearchType
 {

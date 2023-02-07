@@ -1,9 +1,9 @@
-package org.highmed.dsf.fhir.search.parameters.user;
+package dev.dsf.fhir.search.parameters.user;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.User;
 
 public class TaskUserFilter extends AbstractUserFilter
 {

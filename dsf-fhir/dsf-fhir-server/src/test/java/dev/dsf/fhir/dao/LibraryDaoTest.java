@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.LibraryDaoJdbc;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.LibraryDaoJdbc;
 
 public class LibraryDaoTest extends AbstractResourceDaoTest<Library, LibraryDao>
 		implements ReadByUrlDaoTest<Library>, ReadAccessDaoTest<Library>

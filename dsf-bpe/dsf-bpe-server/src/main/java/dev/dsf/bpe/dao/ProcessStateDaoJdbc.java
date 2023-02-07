@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.dao;
+package dev.dsf.bpe.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,10 +10,11 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
-import org.highmed.dsf.bpe.process.ProcessState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.process.ProcessState;
 
 public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessStateDao
 {

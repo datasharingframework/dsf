@@ -1,14 +1,15 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import java.util.NoSuchElementException;
 
-import org.highmed.mpi.client.MasterPatientIndexClientFactory;
-import org.highmed.mpi.client.MasterPatientIndexClientServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.mpi.client.MasterPatientIndexClientFactory;
+import dev.dsf.mpi.client.MasterPatientIndexClientServiceLoader;
 
 @Configuration
 public class MasterPatientIndexConfig
@@ -32,7 +33,7 @@ public class MasterPatientIndexConfig
 				.orElseThrow(() -> new NoSuchElementException("Master patient index client factory with classname='"
 						+ propertiesConfig.getMasterPatientIndexClientFactoryClass() + "' not found"));
 
-		if ("org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory".equals(factory.getClass().getName()))
+		if ("dev.dsf.mpi.client.stub.MasterPatientIndexClientStubFactory".equals(factory.getClass().getName()))
 			logger.warn("Using {} as MPI client factory", factory.getClass().getName());
 		else
 			logger.info("Using {} as MPI client factory", factory.getClass().getName());

@@ -1,9 +1,9 @@
-package org.highmed.mpi.client.stub;
+package dev.dsf.mpi.client.stub;
 
 import java.util.function.BiFunction;
 
-import org.highmed.mpi.client.MasterPatientIndexClient;
-import org.highmed.mpi.client.MasterPatientIndexClientFactory;
+import dev.dsf.mpi.client.MasterPatientIndexClient;
+import dev.dsf.mpi.client.MasterPatientIndexClientFactory;
 
 public class MasterPatientIndexClientStubFactory implements MasterPatientIndexClientFactory
 {

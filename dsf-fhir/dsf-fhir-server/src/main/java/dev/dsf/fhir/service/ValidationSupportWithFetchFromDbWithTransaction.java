@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,10 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.dao.CodeSystemDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.ValueSetDao;
-import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -25,6 +21,10 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import dev.dsf.fhir.dao.CodeSystemDao;
+import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.dao.ValueSetDao;
+import dev.dsf.fhir.function.SupplierWithSqlException;
 
 public class ValidationSupportWithFetchFromDbWithTransaction implements IValidationSupport, InitializingBean
 {

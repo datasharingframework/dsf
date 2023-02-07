@@ -1,6 +1,6 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
-import org.highmed.mpi.client.Idat;
+import dev.dsf.mpi.client.Idat;
 
 class IdatTestImpl implements Idat
 {

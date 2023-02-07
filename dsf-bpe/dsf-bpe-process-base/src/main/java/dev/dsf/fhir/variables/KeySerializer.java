@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.variables;
+package dev.dsf.fhir.variables;
 
 import java.io.IOException;
 import java.security.Key;

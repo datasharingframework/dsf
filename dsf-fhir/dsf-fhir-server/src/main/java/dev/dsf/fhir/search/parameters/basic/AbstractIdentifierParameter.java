@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
@@ -6,9 +6,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
 public abstract class AbstractIdentifierParameter<R extends Resource> extends AbstractTokenParameter<R>
 {

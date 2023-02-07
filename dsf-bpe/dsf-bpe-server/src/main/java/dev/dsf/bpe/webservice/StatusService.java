@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.webservice;
+package dev.dsf.bpe.webservice;
 
 import java.sql.Connection;
 import java.sql.SQLException;

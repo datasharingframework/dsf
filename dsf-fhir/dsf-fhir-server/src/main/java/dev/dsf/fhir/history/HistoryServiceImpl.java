@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.history;
+package dev.dsf.fhir.history;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,23 +11,23 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.HistoryDao;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.history.user.HistoryUserFilterFactory;
-import org.highmed.dsf.fhir.prefer.PreferHandlingType;
-import org.highmed.dsf.fhir.search.PageAndCount;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.dao.HistoryDao;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.history.user.HistoryUserFilterFactory;
+import dev.dsf.fhir.prefer.PreferHandlingType;
+import dev.dsf.fhir.search.PageAndCount;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.ReferenceCleaner;
 
 public class HistoryServiceImpl implements HistoryService, InitializingBean
 {

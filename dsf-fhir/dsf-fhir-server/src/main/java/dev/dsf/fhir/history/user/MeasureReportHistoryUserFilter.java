@@ -1,10 +1,10 @@
-package org.highmed.dsf.fhir.history.user;
+package dev.dsf.fhir.history.user;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.search.parameters.user.MeasureReportUserFilter;
 import org.hl7.fhir.r4.model.MeasureReport;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.search.parameters.user.MeasureReportUserFilter;
 
 public class MeasureReportHistoryUserFilter extends MeasureReportUserFilter implements HistoryUserFilter
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authentication;
+package dev.dsf.fhir.authentication;
 
 import java.security.cert.X509Certificate;
 import java.util.Optional;

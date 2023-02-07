@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.client;
+package dev.dsf.fhir.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,15 +12,14 @@ import static org.mockito.Mockito.when;
 import java.security.KeyStore;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.EndpointDao;
-import org.highmed.dsf.fhir.function.SupplierWithSqlException;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.EndpointDao;
+import dev.dsf.fhir.function.SupplierWithSqlException;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.service.ReferenceCleaner;
 
 public class ClientProviderTest
 {

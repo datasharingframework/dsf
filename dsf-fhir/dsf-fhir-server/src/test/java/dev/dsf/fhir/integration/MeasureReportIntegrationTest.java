@@ -1,15 +1,16 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Date;
 
-import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.MeasureDao;
 
 public class MeasureReportIntegrationTest extends AbstractIntegrationTest
 {

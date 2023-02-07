@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir;
+package dev.dsf.fhir;
 
 public class FhirJettyServerHttps
 {

@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
 
 public class HealthcareServiceDaoTest extends AbstractResourceDaoTest<HealthcareService, HealthcareServiceDao>
 		implements ReadAccessDaoTest<HealthcareService>

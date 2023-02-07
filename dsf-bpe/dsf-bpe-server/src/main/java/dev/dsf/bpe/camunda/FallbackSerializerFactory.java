@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.camunda;
+package dev.dsf.bpe.camunda;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -1,14 +1,15 @@
-package org.highmed.openehr.client.impl;
+package dev.dsf.openehr.client.impl;
 
 import java.util.function.BiFunction;
 
-import org.highmed.openehr.client.OpenEhrClient;
-import org.highmed.openehr.client.OpenEhrClientFactory;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.client.OpenEhrClient;
+import dev.dsf.openehr.client.OpenEhrClientFactory;
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
 
 public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 {

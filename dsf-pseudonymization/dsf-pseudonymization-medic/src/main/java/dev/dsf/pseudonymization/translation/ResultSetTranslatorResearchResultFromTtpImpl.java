@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,14 +9,14 @@ import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.structure.Column;
-import org.highmed.openehr.model.structure.Meta;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.openehr.model.structure.RowElement;
-import org.highmed.pseudonymization.openehr.Constants;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.model.datatypes.StringRowElement;
+import dev.dsf.openehr.model.structure.Column;
+import dev.dsf.openehr.model.structure.Meta;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.openehr.model.structure.RowElement;
+import dev.dsf.pseudonymization.openehr.Constants;
 
 public class ResultSetTranslatorResearchResultFromTtpImpl extends AbstractResultSetTranslator
 		implements ResultSetTranslatorResearchResultFromTtp

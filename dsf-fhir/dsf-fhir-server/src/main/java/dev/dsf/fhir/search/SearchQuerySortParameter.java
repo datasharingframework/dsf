@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search;
+package dev.dsf.fhir.search;
 
 public class SearchQuerySortParameter
 {

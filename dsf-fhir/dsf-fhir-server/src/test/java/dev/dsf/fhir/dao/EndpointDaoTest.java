@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,10 +7,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 
 public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointDao>
 		implements ReadAccessDaoTest<Endpoint>

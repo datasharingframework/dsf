@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.dao;
+package dev.dsf.bpe.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,14 +13,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
-import org.highmed.dsf.bpe.process.ProcessesResource;
-import org.highmed.dsf.bpe.process.ResourceInfo;
 import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.process.ProcessesResource;
+import dev.dsf.bpe.process.ResourceInfo;
 
 public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements ProcessPluginResourcesDao
 {

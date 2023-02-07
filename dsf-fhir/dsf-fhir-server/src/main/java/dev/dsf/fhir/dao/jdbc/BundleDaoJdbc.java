@@ -1,17 +1,17 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.BundleDao;
-import org.highmed.dsf.fhir.search.parameters.BundleIdentifier;
-import org.highmed.dsf.fhir.search.parameters.user.BundleUserFilter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.BundleDao;
+import dev.dsf.fhir.search.parameters.BundleIdentifier;
+import dev.dsf.fhir.search.parameters.user.BundleUserFilter;
 
 public class BundleDaoJdbc extends AbstractResourceDaoJdbc<Bundle> implements BundleDao
 {

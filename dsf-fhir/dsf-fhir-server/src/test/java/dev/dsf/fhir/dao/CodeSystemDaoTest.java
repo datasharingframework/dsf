@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 
 public class CodeSystemDaoTest extends AbstractResourceDaoTest<CodeSystem, CodeSystemDao>
 		implements ReadByUrlDaoTest<CodeSystem>, ReadAccessDaoTest<CodeSystem>

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,16 +6,16 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.QuestionnaireDao;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireDate;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireIdentifier;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireStatus;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireUrl;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireVersion;
-import org.highmed.dsf.fhir.search.parameters.user.QuestionnaireUserFilter;
 import org.hl7.fhir.r4.model.Questionnaire;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.QuestionnaireDao;
+import dev.dsf.fhir.search.parameters.QuestionnaireDate;
+import dev.dsf.fhir.search.parameters.QuestionnaireIdentifier;
+import dev.dsf.fhir.search.parameters.QuestionnaireStatus;
+import dev.dsf.fhir.search.parameters.QuestionnaireUrl;
+import dev.dsf.fhir.search.parameters.QuestionnaireVersion;
+import dev.dsf.fhir.search.parameters.user.QuestionnaireUserFilter;
 
 public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire> implements QuestionnaireDao
 {

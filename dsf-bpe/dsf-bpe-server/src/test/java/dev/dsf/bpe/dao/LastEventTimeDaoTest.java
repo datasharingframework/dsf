@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.dao;
+package dev.dsf.bpe.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

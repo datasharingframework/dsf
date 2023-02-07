@@ -1,9 +1,10 @@
-package org.highmed.pseudonymization.client.stub;
+package dev.dsf.pseudonymization.client.stub;
 
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.pseudonymization.client.PseudonymizationClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.pseudonymization.client.PseudonymizationClient;
 
 public class PseudonymizationClientStub implements PseudonymizationClient
 {

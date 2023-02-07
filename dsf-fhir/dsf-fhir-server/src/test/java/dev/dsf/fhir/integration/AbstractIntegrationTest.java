@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static de.rwh.utils.jetty.JettyServer.httpConfiguration;
 import static de.rwh.utils.jetty.JettyServer.httpsConnector;
@@ -47,19 +47,6 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
-import org.highmed.dsf.fhir.FhirContextLoaderListener;
-import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
-import org.highmed.dsf.fhir.dao.AbstractDbTest;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.dsf.fhir.test.X509Certificates;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
-import org.highmed.fhir.client.WebsocketClient;
-import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
@@ -80,6 +67,19 @@ import de.rwh.utils.jetty.JettyServer;
 import de.rwh.utils.jetty.PropertiesReader;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
 import de.rwh.utils.test.LiquibaseTemplateTestRule;
+import dev.dsf.fhir.FhirContextLoaderListener;
+import dev.dsf.fhir.authentication.AuthenticationFilter;
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClientJersey;
+import dev.dsf.fhir.client.WebsocketClient;
+import dev.dsf.fhir.client.WebsocketClientTyrus;
+import dev.dsf.fhir.dao.AbstractDbTest;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceCleanerImpl;
+import dev.dsf.fhir.service.ReferenceExtractorImpl;
+import dev.dsf.fhir.test.X509Certificates;
 
 public abstract class AbstractIntegrationTest extends AbstractDbTest
 {

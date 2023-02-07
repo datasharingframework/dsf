@@ -1,14 +1,14 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.PractitionerDao;
-import org.highmed.dsf.fhir.search.parameters.PractitionerActive;
-import org.highmed.dsf.fhir.search.parameters.PractitionerIdentifier;
-import org.highmed.dsf.fhir.search.parameters.user.PractitionerUserFilter;
 import org.hl7.fhir.r4.model.Practitioner;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.PractitionerDao;
+import dev.dsf.fhir.search.parameters.PractitionerActive;
+import dev.dsf.fhir.search.parameters.PractitionerIdentifier;
+import dev.dsf.fhir.search.parameters.user.PractitionerUserFilter;
 
 public class PractitionerDaoJdbc extends AbstractResourceDaoJdbc<Practitioner> implements PractitionerDao
 {

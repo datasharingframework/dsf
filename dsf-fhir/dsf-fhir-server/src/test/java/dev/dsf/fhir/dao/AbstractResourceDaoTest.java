@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -13,10 +13,6 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
-import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,6 +26,10 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
 import de.rwh.utils.test.LiquibaseTemplateTestRule;
+import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 
 public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>> extends AbstractDbTest
 {

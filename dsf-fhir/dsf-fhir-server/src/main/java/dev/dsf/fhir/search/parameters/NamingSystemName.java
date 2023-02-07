@@ -1,17 +1,18 @@
-package org.highmed.dsf.fhir.search.parameters;
+package dev.dsf.fhir.search.parameters;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractStringParameter;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.parameters.basic.AbstractStringParameter;
 
 @SearchParameterDefinition(name = NamingSystemName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/NamingSystem-name", type = SearchParamType.STRING, documentation = "A name that this NamingSystem can be identified by")
 public class NamingSystemName extends AbstractStringParameter<NamingSystem>

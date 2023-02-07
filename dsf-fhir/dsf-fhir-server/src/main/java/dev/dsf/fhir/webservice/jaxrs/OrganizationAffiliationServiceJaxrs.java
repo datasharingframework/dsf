@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.highmed.dsf.fhir.webservice.specification.OrganizationAffiliationService;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
+
+import dev.dsf.fhir.webservice.specification.OrganizationAffiliationService;
 
 @Path(OrganizationAffiliationServiceJaxrs.PATH)
 public class OrganizationAffiliationServiceJaxrs

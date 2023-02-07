@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.*;
 
@@ -10,17 +10,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
-import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 import org.postgresql.util.PGobject;
+
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 
 public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, OrganizationDao>
 		implements ReadAccessDaoTest<Organization>

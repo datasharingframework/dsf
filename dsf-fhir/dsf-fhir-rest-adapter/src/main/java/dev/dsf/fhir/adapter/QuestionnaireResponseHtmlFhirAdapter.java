@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.adapter;
+package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

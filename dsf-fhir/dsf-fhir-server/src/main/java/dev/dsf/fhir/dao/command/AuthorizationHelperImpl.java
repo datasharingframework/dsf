@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.List;
@@ -7,10 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authorization.AuthorizationRule;
-import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
@@ -19,6 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authorization.AuthorizationRule;
+import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
+import dev.dsf.fhir.help.ResponseGenerator;
 
 public class AuthorizationHelperImpl implements AuthorizationHelper
 {

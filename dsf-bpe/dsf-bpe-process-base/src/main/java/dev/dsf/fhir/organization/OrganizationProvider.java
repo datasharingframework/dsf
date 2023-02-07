@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.organization;
+package dev.dsf.fhir.organization;
 
 import java.util.List;
 import java.util.NoSuchElementException;

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,16 +6,16 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.CodeSystemDao;
-import org.highmed.dsf.fhir.search.parameters.CodeSystemDate;
-import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
-import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
-import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
-import org.highmed.dsf.fhir.search.parameters.CodeSystemVersion;
-import org.highmed.dsf.fhir.search.parameters.user.CodeSystemUserFilter;
 import org.hl7.fhir.r4.model.CodeSystem;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.CodeSystemDao;
+import dev.dsf.fhir.search.parameters.CodeSystemDate;
+import dev.dsf.fhir.search.parameters.CodeSystemIdentifier;
+import dev.dsf.fhir.search.parameters.CodeSystemStatus;
+import dev.dsf.fhir.search.parameters.CodeSystemUrl;
+import dev.dsf.fhir.search.parameters.CodeSystemVersion;
+import dev.dsf.fhir.search.parameters.user.CodeSystemUserFilter;
 
 public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> implements CodeSystemDao
 {

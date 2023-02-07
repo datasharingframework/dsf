@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 
 public abstract class AbstractVersionParameter<R extends MetadataResource> extends AbstractTokenParameter<R>
 {

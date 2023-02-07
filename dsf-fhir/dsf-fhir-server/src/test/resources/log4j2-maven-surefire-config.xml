@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO" monitorInterval="30" verbose="false">
 
 	<Appenders>
@@ -8,7 +7,7 @@
 	</Appenders>
 
 	<Loggers>
-		<AsyncLogger name="org.highmed" level="INFO"/>
+		<AsyncLogger name="dev.dsf" level="INFO"/>
 		<AsyncLogger name="org.eclipse.jetty" level="INFO"/>
 
 		<AsyncRoot level="WARN">

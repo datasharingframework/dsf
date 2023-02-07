@@ -1,11 +1,11 @@
-package org.highmed.openehr.client.impl;
-
-import org.highmed.openehr.client.OpenEhrClient;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.openehr.model.datatypes.JsonNodeRowElement;
-import org.highmed.openehr.model.structure.ResultSet;
+package dev.dsf.openehr.client.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.client.OpenEhrClient;
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
+import dev.dsf.openehr.model.datatypes.JsonNodeRowElement;
+import dev.dsf.openehr.model.structure.ResultSet;
 
 public class TestOpenEhrClientJersey
 {

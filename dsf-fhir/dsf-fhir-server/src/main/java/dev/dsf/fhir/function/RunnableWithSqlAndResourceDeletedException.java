@@ -1,8 +1,8 @@
-package org.highmed.dsf.fhir.function;
+package dev.dsf.fhir.function;
 
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 
 @FunctionalInterface
 public interface RunnableWithSqlAndResourceDeletedException

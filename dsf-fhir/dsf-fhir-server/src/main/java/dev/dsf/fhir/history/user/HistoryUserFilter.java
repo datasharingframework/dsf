@@ -1,6 +1,6 @@
-package org.highmed.dsf.fhir.history.user;
+package dev.dsf.fhir.history.user;
 
-import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
+import dev.dsf.fhir.search.SearchQueryUserFilter;
 
 public interface HistoryUserFilter extends SearchQueryUserFilter
 {

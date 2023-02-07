@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.process;
+package dev.dsf.bpe.process;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

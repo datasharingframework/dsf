@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -11,11 +11,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.webservice.specification.ConformanceService;
 
 @Path(ConformanceServiceJaxrs.PATH)
 @Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,

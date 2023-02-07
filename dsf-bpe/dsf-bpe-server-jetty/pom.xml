@@ -82,7 +82,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.dsf.bpe.BpeJettyServer</mainClass>
+							<mainClass>dev.dsf.bpe.BpeJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -162,10 +162,10 @@
 						<argument>-classpath</argument>
 						<classpath/>
 						<argument>
-							org.highmed.dsf.tools.generator.DocumentationGenerator
+							dev.dsf.tools.generator.DocumentationGenerator
 						</argument>
 						<argument>
-							org.highmed.dsf.bpe
+							dev.dsf.bpe
 						</argument>
 					</arguments>
 					<includeProjectDependencies>true</includeProjectDependencies>

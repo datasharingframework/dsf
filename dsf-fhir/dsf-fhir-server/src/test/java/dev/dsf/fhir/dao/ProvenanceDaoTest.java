@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,10 +8,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import org.highmed.dsf.fhir.dao.jdbc.ProvenanceDaoJdbc;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Signature;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.ProvenanceDaoJdbc;
 
 public class ProvenanceDaoTest extends AbstractResourceDaoTest<Provenance, ProvenanceDao>
 		implements ReadAccessDaoTest<Provenance>

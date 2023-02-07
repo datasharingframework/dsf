@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,15 +14,16 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.search.IncludeParts;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.search.IncludeParts;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryIncludeParameter;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {

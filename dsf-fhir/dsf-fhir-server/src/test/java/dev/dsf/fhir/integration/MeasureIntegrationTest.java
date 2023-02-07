@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -10,8 +10,6 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.dao.LibraryDao;
-import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -20,6 +18,9 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.LibraryDao;
+import dev.dsf.fhir.dao.MeasureDao;
 
 public class MeasureIntegrationTest extends AbstractIntegrationTest
 {

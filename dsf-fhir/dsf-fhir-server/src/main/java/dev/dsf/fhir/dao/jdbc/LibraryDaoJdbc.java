@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,16 +6,16 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.LibraryDao;
-import org.highmed.dsf.fhir.search.parameters.LibraryDate;
-import org.highmed.dsf.fhir.search.parameters.LibraryIdentifier;
-import org.highmed.dsf.fhir.search.parameters.LibraryStatus;
-import org.highmed.dsf.fhir.search.parameters.LibraryUrl;
-import org.highmed.dsf.fhir.search.parameters.LibraryVersion;
-import org.highmed.dsf.fhir.search.parameters.user.LibraryUserFilter;
 import org.hl7.fhir.r4.model.Library;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.LibraryDao;
+import dev.dsf.fhir.search.parameters.LibraryDate;
+import dev.dsf.fhir.search.parameters.LibraryIdentifier;
+import dev.dsf.fhir.search.parameters.LibraryStatus;
+import dev.dsf.fhir.search.parameters.LibraryUrl;
+import dev.dsf.fhir.search.parameters.LibraryVersion;
+import dev.dsf.fhir.search.parameters.user.LibraryUserFilter;
 
 public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements LibraryDao
 {

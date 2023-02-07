@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.highmed.dsf.fhir.dao.GroupDao;
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -26,6 +24,9 @@ import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.GroupDao;
+import dev.dsf.fhir.dao.ResearchStudyDao;
 
 public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 {

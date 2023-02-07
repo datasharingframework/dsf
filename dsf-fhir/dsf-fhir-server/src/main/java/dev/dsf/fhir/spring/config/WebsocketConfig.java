@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
-import org.highmed.dsf.fhir.websocket.ServerEndpoint;
-import org.highmed.dsf.fhir.websocket.ServerEndpointRegistrationForAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 import org.springframework.web.socket.server.standard.ServerEndpointRegistration;
+
+import dev.dsf.fhir.websocket.ServerEndpoint;
+import dev.dsf.fhir.websocket.ServerEndpointRegistrationForAuthentication;
 
 @Configuration
 public class WebsocketConfig

@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.authorization;
+package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authentication.User;
 
 public class RootAuthorizationRule implements AuthorizationRule<Resource>
 {

@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
+
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 
 public abstract class AbstractCanonicalReferenceParameter<R extends DomainResource>
 		extends AbstractReferenceParameter<R>

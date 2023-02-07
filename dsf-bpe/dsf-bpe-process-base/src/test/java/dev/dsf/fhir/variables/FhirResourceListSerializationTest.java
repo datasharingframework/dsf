@@ -1,10 +1,9 @@
-package org.highmed.dsf.fhir.variables;
+package dev.dsf.fhir.variables;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.highmed.dsf.fhir.json.ObjectMapperFactory;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Test;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.json.ObjectMapperFactory;
 
 public class FhirResourceListSerializationTest
 {

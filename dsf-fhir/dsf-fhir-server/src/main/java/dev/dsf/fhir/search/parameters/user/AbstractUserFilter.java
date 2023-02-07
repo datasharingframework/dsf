@@ -1,7 +1,7 @@
-package org.highmed.dsf.fhir.search.parameters.user;
+package dev.dsf.fhir.search.parameters.user;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.search.SearchQueryUserFilter;
 
 abstract class AbstractUserFilter implements SearchQueryUserFilter
 {

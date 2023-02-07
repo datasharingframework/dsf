@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,17 +10,17 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.SubscriptionDao;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionCriteria;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionPayload;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionStatus;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionType;
-import org.highmed.dsf.fhir.search.parameters.user.SubscriptionUserFilter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.SubscriptionDao;
+import dev.dsf.fhir.search.parameters.SubscriptionCriteria;
+import dev.dsf.fhir.search.parameters.SubscriptionPayload;
+import dev.dsf.fhir.search.parameters.SubscriptionStatus;
+import dev.dsf.fhir.search.parameters.SubscriptionType;
+import dev.dsf.fhir.search.parameters.user.SubscriptionUserFilter;
 
 public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> implements SubscriptionDao
 {

@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -7,15 +7,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.structure.Column;
-import org.highmed.openehr.model.structure.Meta;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.openehr.model.structure.RowElement;
-import org.highmed.pseudonymization.domain.MdatContainer;
-import org.highmed.pseudonymization.domain.PersonWithMdat;
-import org.highmed.pseudonymization.domain.impl.OpenEhrMdatContainer;
-import org.highmed.pseudonymization.openehr.Constants;
+import dev.dsf.openehr.model.datatypes.StringRowElement;
+import dev.dsf.openehr.model.structure.Column;
+import dev.dsf.openehr.model.structure.Meta;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.openehr.model.structure.RowElement;
+import dev.dsf.pseudonymization.domain.MdatContainer;
+import dev.dsf.pseudonymization.domain.PersonWithMdat;
+import dev.dsf.pseudonymization.domain.impl.OpenEhrMdatContainer;
+import dev.dsf.pseudonymization.openehr.Constants;
 
 public class ResultSetTranslatorResearchResultToMedicImpl implements ResultSetTranslatorResearchResultToMedic
 {

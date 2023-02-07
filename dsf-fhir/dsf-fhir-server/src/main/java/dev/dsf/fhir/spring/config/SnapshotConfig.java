@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
-import org.highmed.dsf.fhir.validation.SnapshotGeneratorImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.SnapshotGeneratorImpl;
 
 @Configuration
 public class SnapshotConfig

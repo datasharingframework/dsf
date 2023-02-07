@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.validation;
+package dev.dsf.fhir.validation;
 
 import java.util.regex.Pattern;
 

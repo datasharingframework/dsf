@@ -1,23 +1,24 @@
-package org.highmed.dsf.fhir.webservice.secure;
+package dev.dsf.fhir.webservice.secure;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authorization.AuthorizationRule;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authorization.AuthorizationRule;
+import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 
 public class StructureDefinitionServiceSecure
 		extends AbstractResourceServiceSecure<StructureDefinitionDao, StructureDefinition, StructureDefinitionService>

@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -8,9 +8,6 @@ import java.nio.file.Paths;
 
 import javax.crypto.SecretKey;
 
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +15,10 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.pseudonymization.crypto.AesGcmUtil;
 
 public class ResultSetTranslatorToTtpEncryptTest
 {

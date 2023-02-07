@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.bloomfilter;
+package dev.dsf.pseudonymization.bloomfilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;

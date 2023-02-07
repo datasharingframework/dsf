@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,14 +11,14 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.authentication.UserRole;
-import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.fhir.dao.ReadAccessDao;
 
 public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
 {

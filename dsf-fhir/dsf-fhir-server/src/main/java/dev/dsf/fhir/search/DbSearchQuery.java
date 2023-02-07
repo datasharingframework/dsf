@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.search;
+package dev.dsf.fhir.search;
 
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
 public interface DbSearchQuery
 {

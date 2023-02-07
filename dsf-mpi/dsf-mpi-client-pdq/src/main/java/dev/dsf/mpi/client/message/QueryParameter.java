@@ -1,4 +1,4 @@
-package org.highmed.mpi.client.message;
+package dev.dsf.mpi.client.message;
 
 public class QueryParameter
 {

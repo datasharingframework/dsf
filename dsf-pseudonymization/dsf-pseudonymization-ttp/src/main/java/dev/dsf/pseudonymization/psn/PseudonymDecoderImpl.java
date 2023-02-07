@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.psn;
+package dev.dsf.pseudonymization.psn;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -13,14 +13,15 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
-import org.highmed.pseudonymization.domain.PseudonymizedPerson;
-import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
-import org.highmed.pseudonymization.recordlinkage.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.pseudonymization.crypto.AesGcmUtil;
+import dev.dsf.pseudonymization.domain.PseudonymizedPerson;
+import dev.dsf.pseudonymization.recordlinkage.MatchedPerson;
+import dev.dsf.pseudonymization.recordlinkage.Person;
 
 public class PseudonymDecoderImpl<P extends Person> implements PseudonymDecoder<P>
 {

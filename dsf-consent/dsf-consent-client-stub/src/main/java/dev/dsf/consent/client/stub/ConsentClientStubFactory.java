@@ -1,12 +1,12 @@
-package org.highmed.consent.client.stub;
+package dev.dsf.consent.client.stub;
 
-import static org.highmed.consent.client.ConsentClient.EHRID_COLUMN_DEFAULT_NAME;
-import static org.highmed.consent.client.ConsentClient.EHRID_COLUMN_DEFAULT_PATH;
+import static dev.dsf.consent.client.ConsentClient.EHRID_COLUMN_DEFAULT_NAME;
+import static dev.dsf.consent.client.ConsentClient.EHRID_COLUMN_DEFAULT_PATH;
 
 import java.util.function.BiFunction;
 
-import org.highmed.consent.client.ConsentClient;
-import org.highmed.consent.client.ConsentClientFactory;
+import dev.dsf.consent.client.ConsentClient;
+import dev.dsf.consent.client.ConsentClientFactory;
 
 public class ConsentClientStubFactory implements ConsentClientFactory
 {

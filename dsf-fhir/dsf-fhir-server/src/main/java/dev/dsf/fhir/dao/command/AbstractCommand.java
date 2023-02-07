@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.prefer.PreferReturnType;
 
 public abstract class AbstractCommand implements Command
 {

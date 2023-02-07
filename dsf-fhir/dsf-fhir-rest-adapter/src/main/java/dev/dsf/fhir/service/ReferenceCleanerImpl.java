@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 import java.util.Objects;
 import java.util.stream.Stream;

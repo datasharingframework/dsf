@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,14 +7,14 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.BinaryDao;
-import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
-import org.highmed.dsf.fhir.search.parameters.user.BinaryUserFilter;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.BinaryDao;
+import dev.dsf.fhir.search.parameters.BinaryContentType;
+import dev.dsf.fhir.search.parameters.user.BinaryUserFilter;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {

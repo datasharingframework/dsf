@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.plugin;
+package dev.dsf.bpe.plugin;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,10 +19,6 @@ import org.apache.commons.io.IOUtils;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.highmed.dsf.bpe.ProcessPluginDefinition;
-import org.highmed.dsf.bpe.process.BpmnFileAndModel;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
-import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanCreationException;
@@ -32,6 +28,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.ProcessPluginDefinition;
+import dev.dsf.bpe.process.BpmnFileAndModel;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.fhir.resources.ResourceProvider;
 
 public class ProcessPluginDefinitionAndClassLoader
 {

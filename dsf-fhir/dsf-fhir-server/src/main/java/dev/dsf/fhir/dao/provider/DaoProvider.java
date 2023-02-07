@@ -1,38 +1,39 @@
-package org.highmed.dsf.fhir.dao.provider;
+package dev.dsf.fhir.dao.provider;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
-import org.highmed.dsf.fhir.dao.BinaryDao;
-import org.highmed.dsf.fhir.dao.BundleDao;
-import org.highmed.dsf.fhir.dao.CodeSystemDao;
-import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
-import org.highmed.dsf.fhir.dao.EndpointDao;
-import org.highmed.dsf.fhir.dao.GroupDao;
-import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
-import org.highmed.dsf.fhir.dao.LibraryDao;
-import org.highmed.dsf.fhir.dao.LocationDao;
-import org.highmed.dsf.fhir.dao.MeasureDao;
-import org.highmed.dsf.fhir.dao.MeasureReportDao;
-import org.highmed.dsf.fhir.dao.NamingSystemDao;
-import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.dao.PatientDao;
-import org.highmed.dsf.fhir.dao.PractitionerDao;
-import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
-import org.highmed.dsf.fhir.dao.ProvenanceDao;
-import org.highmed.dsf.fhir.dao.QuestionnaireDao;
-import org.highmed.dsf.fhir.dao.QuestionnaireResponseDao;
-import org.highmed.dsf.fhir.dao.ReadAccessDao;
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.SubscriptionDao;
-import org.highmed.dsf.fhir.dao.TaskDao;
-import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.dao.ActivityDefinitionDao;
+import dev.dsf.fhir.dao.BinaryDao;
+import dev.dsf.fhir.dao.BundleDao;
+import dev.dsf.fhir.dao.CodeSystemDao;
+import dev.dsf.fhir.dao.DocumentReferenceDao;
+import dev.dsf.fhir.dao.EndpointDao;
+import dev.dsf.fhir.dao.GroupDao;
+import dev.dsf.fhir.dao.HealthcareServiceDao;
+import dev.dsf.fhir.dao.LibraryDao;
+import dev.dsf.fhir.dao.LocationDao;
+import dev.dsf.fhir.dao.MeasureDao;
+import dev.dsf.fhir.dao.MeasureReportDao;
+import dev.dsf.fhir.dao.NamingSystemDao;
+import dev.dsf.fhir.dao.OrganizationAffiliationDao;
+import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.dao.PatientDao;
+import dev.dsf.fhir.dao.PractitionerDao;
+import dev.dsf.fhir.dao.PractitionerRoleDao;
+import dev.dsf.fhir.dao.ProvenanceDao;
+import dev.dsf.fhir.dao.QuestionnaireDao;
+import dev.dsf.fhir.dao.QuestionnaireResponseDao;
+import dev.dsf.fhir.dao.ReadAccessDao;
+import dev.dsf.fhir.dao.ResearchStudyDao;
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.dao.SubscriptionDao;
+import dev.dsf.fhir.dao.TaskDao;
+import dev.dsf.fhir.dao.ValueSetDao;
 
 public interface DaoProvider
 {

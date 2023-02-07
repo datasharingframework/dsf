@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.secure;
+package dev.dsf.fhir.webservice.secure;
 
 import java.util.Objects;
 
@@ -8,10 +8,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.webservice.specification.StatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.webservice.specification.StatusService;
 
 public class StatusServiceSecure implements StatusService, InitializingBean
 {

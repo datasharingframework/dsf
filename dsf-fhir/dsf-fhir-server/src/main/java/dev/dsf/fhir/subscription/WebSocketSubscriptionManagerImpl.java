@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.subscription;
+package dev.dsf.fhir.subscription;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -21,15 +21,6 @@ import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.Session;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authorization.AuthorizationRule;
-import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
-import org.highmed.dsf.fhir.dao.SubscriptionDao;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.event.Event;
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.search.Matcher;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
@@ -42,6 +33,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authorization.AuthorizationRule;
+import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
+import dev.dsf.fhir.dao.SubscriptionDao;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.event.Event;
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.search.Matcher;
 
 public class WebSocketSubscriptionManagerImpl
 		implements WebSocketSubscriptionManager, EventHandler, InitializingBean, DisposableBean

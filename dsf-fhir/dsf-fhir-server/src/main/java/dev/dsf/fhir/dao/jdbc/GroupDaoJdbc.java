@@ -1,13 +1,13 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.GroupDao;
-import org.highmed.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevInclude;
-import org.highmed.dsf.fhir.search.parameters.user.GroupUserFilter;
 import org.hl7.fhir.r4.model.Group;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.GroupDao;
+import dev.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevInclude;
+import dev.dsf.fhir.search.parameters.user.GroupUserFilter;
 
 public class GroupDaoJdbc extends AbstractResourceDaoJdbc<Group> implements GroupDao
 {

@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.recordlinkage;
+package dev.dsf.pseudonymization.recordlinkage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

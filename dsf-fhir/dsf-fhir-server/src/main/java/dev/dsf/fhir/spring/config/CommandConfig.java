@@ -1,17 +1,7 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import java.sql.Connection;
 
-import org.highmed.dsf.fhir.dao.command.CommandFactory;
-import org.highmed.dsf.fhir.dao.command.CommandFactoryImpl;
-import org.highmed.dsf.fhir.dao.command.TransactionEventHandler;
-import org.highmed.dsf.fhir.dao.command.TransactionResources;
-import org.highmed.dsf.fhir.dao.command.ValidationHelper;
-import org.highmed.dsf.fhir.dao.command.ValidationHelperImpl;
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
-import org.highmed.dsf.fhir.validation.SnapshotGeneratorImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +9,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import dev.dsf.fhir.dao.command.CommandFactory;
+import dev.dsf.fhir.dao.command.CommandFactoryImpl;
+import dev.dsf.fhir.dao.command.TransactionEventHandler;
+import dev.dsf.fhir.dao.command.TransactionResources;
+import dev.dsf.fhir.dao.command.ValidationHelper;
+import dev.dsf.fhir.dao.command.ValidationHelperImpl;
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.validation.ResourceValidatorImpl;
+import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.SnapshotGeneratorImpl;
 
 @Configuration
 public class CommandConfig

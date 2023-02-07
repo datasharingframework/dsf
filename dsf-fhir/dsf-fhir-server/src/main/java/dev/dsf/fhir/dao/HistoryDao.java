@@ -1,15 +1,16 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.history.AtParameter;
-import org.highmed.dsf.fhir.history.History;
-import org.highmed.dsf.fhir.history.SinceParameter;
-import org.highmed.dsf.fhir.history.user.HistoryUserFilter;
-import org.highmed.dsf.fhir.search.PageAndCount;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.history.AtParameter;
+import dev.dsf.fhir.history.History;
+import dev.dsf.fhir.history.SinceParameter;
+import dev.dsf.fhir.history.user.HistoryUserFilter;
+import dev.dsf.fhir.search.PageAndCount;
 
 public interface HistoryDao
 {

@@ -1,11 +1,11 @@
-package org.highmed.pseudonymization.bloomfilter;
+package dev.dsf.pseudonymization.bloomfilter;
 
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import org.highmed.mpi.client.Idat;
-import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator.BiGramHasher;
+import dev.dsf.mpi.client.Idat;
+import dev.dsf.pseudonymization.bloomfilter.BloomFilterGenerator.BiGramHasher;
 
 public class RecordBloomFilterGeneratorImpl implements RecordBloomFilterGenerator
 {

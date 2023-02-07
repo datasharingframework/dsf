@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.recordlinkage;
+package dev.dsf.pseudonymization.recordlinkage;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -21,13 +21,14 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator;
-import org.highmed.pseudonymization.bloomfilter.FieldBloomFilter;
-import org.highmed.pseudonymization.bloomfilter.RecordBloomFilter;
-import org.highmed.pseudonymization.domain.IdatImpl;
-import org.highmed.pseudonymization.domain.impl.MedicIdImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import dev.dsf.pseudonymization.bloomfilter.BloomFilterGenerator;
+import dev.dsf.pseudonymization.bloomfilter.FieldBloomFilter;
+import dev.dsf.pseudonymization.bloomfilter.RecordBloomFilter;
+import dev.dsf.pseudonymization.domain.IdatImpl;
+import dev.dsf.pseudonymization.domain.impl.MedicIdImpl;
 
 public class WeightDistributionTest
 {

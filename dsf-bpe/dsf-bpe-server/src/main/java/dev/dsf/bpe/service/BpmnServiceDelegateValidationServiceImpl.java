@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.service;
+package dev.dsf.bpe.service;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,13 +22,14 @@ import org.camunda.bpm.model.bpmn.instance.UserTask;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
-import org.highmed.dsf.bpe.delegate.DelegateProvider;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+
+import dev.dsf.bpe.delegate.DelegateProvider;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
 
 public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDelegateValidationService, InitializingBean
 {

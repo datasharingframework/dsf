@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.build;
+package dev.dsf.tools.build;
 
 import java.io.IOException;
 import java.io.InputStream;

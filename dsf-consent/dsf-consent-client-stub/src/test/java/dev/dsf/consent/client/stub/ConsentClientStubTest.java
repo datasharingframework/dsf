@@ -1,4 +1,4 @@
-package org.highmed.consent.client.stub;
+package dev.dsf.consent.client.stub;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -6,12 +6,13 @@ import static org.junit.Assert.assertNotNull;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.highmed.consent.client.ConsentClient;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.openehr.model.structure.ResultSet;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.consent.client.ConsentClient;
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
+import dev.dsf.openehr.model.structure.ResultSet;
 
 public class ConsentClientStubTest
 {

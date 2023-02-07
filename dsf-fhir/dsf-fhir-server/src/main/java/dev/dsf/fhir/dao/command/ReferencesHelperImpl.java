@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.Map;
@@ -13,18 +13,19 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ResourceReference;
-import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.service.ResourceReference;
+import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 
 public final class ReferencesHelperImpl<R extends Resource> implements ReferencesHelper<R>
 {

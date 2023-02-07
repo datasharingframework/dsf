@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
-import org.highmed.dsf.fhir.history.HistoryService;
-import org.highmed.dsf.fhir.history.HistoryServiceImpl;
-import org.highmed.dsf.fhir.history.user.HistoryUserFilterFactory;
-import org.highmed.dsf.fhir.history.user.HistoryUserFilterFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.fhir.history.HistoryService;
+import dev.dsf.fhir.history.HistoryServiceImpl;
+import dev.dsf.fhir.history.user.HistoryUserFilterFactory;
+import dev.dsf.fhir.history.user.HistoryUserFilterFactoryImpl;
 
 @Configuration
 public class HistoryConfig

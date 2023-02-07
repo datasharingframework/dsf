@@ -1,14 +1,14 @@
-package org.highmed.pseudonymization.domain.impl;
+package dev.dsf.pseudonymization.domain.impl;
 
 import java.util.BitSet;
-
-import org.highmed.pseudonymization.domain.MdatContainer;
-import org.highmed.pseudonymization.domain.PersonWithMdat;
-import org.highmed.pseudonymization.recordlinkage.MedicId;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import dev.dsf.pseudonymization.domain.MdatContainer;
+import dev.dsf.pseudonymization.domain.PersonWithMdat;
+import dev.dsf.pseudonymization.recordlinkage.MedicId;
 
 public class PersonImpl implements PersonWithMdat
 {

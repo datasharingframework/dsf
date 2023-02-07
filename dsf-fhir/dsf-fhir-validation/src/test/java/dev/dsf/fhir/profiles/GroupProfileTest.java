@@ -1,12 +1,9 @@
-package org.highmed.dsf.fhir.profiles;
+package dev.dsf.fhir.profiles;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
-import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Group;
@@ -18,6 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ResourceValidatorImpl;
+import dev.dsf.fhir.validation.ValidationSupportRule;
 
 public class GroupProfileTest
 {

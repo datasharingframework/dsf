@@ -1,18 +1,19 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
-import org.highmed.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
-import org.highmed.dsf.tools.generator.Documentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
+
+import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
+import dev.dsf.tools.generator.Documentation;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
@@ -139,19 +140,19 @@ public class PropertiesConfig
 	private long websocketRetrySleepMillis;
 
 	@Documentation(description = "Factory for client implementations used to connect to a Master Patient Index (MPI) server in order to read patient demographic data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your MPI")
-	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class:org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory}")
+	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class:dev.dsf.mpi.client.stub.MasterPatientIndexClientStubFactory}")
 	private String masterPatientIndexClientFactoryClass;
 
 	@Documentation(description = "Factory for client implementations used to connect to a consent server in order to check permissions to access patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your Consent server")
-	@Value("${org.highmed.dsf.bpe.consent.webservice.factory.class:org.highmed.consent.client.stub.ConsentClientStubFactory}")
+	@Value("${org.highmed.dsf.bpe.consent.webservice.factory.class:dev.dsf.consent.client.stub.ConsentClientStubFactory}")
 	private String consentClientFactoryClass;
 
 	@Documentation(description = "Factory for client implementations used to connect to an openEHR repository in order to read patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your openEHR repository")
-	@Value("${org.highmed.dsf.bpe.openehr.webservice.factory.class:org.highmed.openehr.client.stub.OpenEhrClientStubFactory}")
+	@Value("${org.highmed.dsf.bpe.openehr.webservice.factory.class:dev.dsf.openehr.client.stub.OpenEhrClientStubFactory}")
 	private String openEhrClientFactoryClass;
 
 	@Documentation(description = "Factory for client implementations used to connect to a pseudonymization service in order to pseudonymize patient demographic and medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your pseudonymization service")
-	@Value("${org.highmed.dsf.bpe.pseudonymization.webservice.factory.class:org.highmed.pseudonymization.client.stub.PseudonymizationClientStubFactory}")
+	@Value("${org.highmed.dsf.bpe.pseudonymization.webservice.factory.class:dev.dsf.pseudonymization.client.stub.PseudonymizationClientStubFactory}")
 	private String pseudonymizationClientFactoryClass;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")

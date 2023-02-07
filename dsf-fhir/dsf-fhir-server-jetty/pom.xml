@@ -83,7 +83,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.dsf.fhir.FhirJettyServer</mainClass>
+							<mainClass>dev.dsf.fhir.FhirJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -156,10 +156,10 @@
 						<argument>-classpath</argument>
 						<classpath/>
 						<argument>
-							org.highmed.dsf.tools.generator.DocumentationGenerator
+							dev.dsf.tools.generator.DocumentationGenerator
 						</argument>
 						<argument>
-							org.highmed.dsf.fhir
+							dev.dsf.fhir
 						</argument>
 					</arguments>
 					<includeProjectDependencies>true</includeProjectDependencies>

@@ -1,18 +1,18 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.validation.ResourceValidator;
 
 public class ValidationHelperImpl implements ValidationHelper
 {

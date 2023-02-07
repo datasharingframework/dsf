@@ -1,12 +1,13 @@
-package org.highmed.dsf.bpe.plugin;
+package dev.dsf.bpe.plugin;
 
 import java.util.List;
 import java.util.Map;
 
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
-import org.highmed.dsf.bpe.process.ProcessStateChangeOutcome;
-import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.springframework.context.ApplicationContext;
+
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.process.ProcessStateChangeOutcome;
+import dev.dsf.fhir.resources.ResourceProvider;
 
 public interface ProcessPluginProvider
 {

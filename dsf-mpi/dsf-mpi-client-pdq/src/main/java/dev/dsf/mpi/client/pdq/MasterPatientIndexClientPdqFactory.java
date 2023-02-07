@@ -1,18 +1,18 @@
-package org.highmed.mpi.client.pdq;
+package dev.dsf.mpi.client.pdq;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-import org.highmed.mpi.client.MasterPatientIndexClient;
-import org.highmed.mpi.client.MasterPatientIndexClientFactory;
-import org.highmed.mpi.client.message.MessageHelper;
-import org.highmed.mpi.client.security.CustomSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.util.SocketFactory;
+import dev.dsf.mpi.client.MasterPatientIndexClient;
+import dev.dsf.mpi.client.MasterPatientIndexClientFactory;
+import dev.dsf.mpi.client.message.MessageHelper;
+import dev.dsf.mpi.client.security.CustomSocketFactory;
 
 public class MasterPatientIndexClientPdqFactory implements MasterPatientIndexClientFactory
 {

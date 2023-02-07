@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import java.util.Set;
 
@@ -27,7 +27,7 @@ public class AdapterConfig implements BeanDefinitionRegistryPostProcessor
 	{
 		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
 		scanner.addIncludeFilter(new AnnotationTypeFilter(Provider.class));
-		Set<BeanDefinition> adapters = scanner.findCandidateComponents("org.highmed.dsf.fhir.adapter");
+		Set<BeanDefinition> adapters = scanner.findCandidateComponents("dev.dsf.fhir.adapter");
 		adapters.forEach(def -> registry.registerBeanDefinition(def.getBeanClassName(), def));
 	}
 }

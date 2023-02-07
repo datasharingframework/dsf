@@ -1,15 +1,16 @@
-package org.highmed.dsf.fhir.search.parameters;
+package dev.dsf.fhir.search.parameters;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractCanonicalUrlParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.parameters.basic.AbstractCanonicalUrlParameter;
 
 @SearchParameterDefinition(name = ResourceProfile.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-profile", type = SearchParamType.TOKEN, documentation = "Profiles this resource claims to conform to")
 public class ResourceProfile<R extends DomainResource> extends AbstractCanonicalUrlParameter<R>

@@ -1,8 +1,9 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
-import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.CodeSystemDao;
 
 public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 {

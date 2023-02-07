@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -6,16 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
-import org.highmed.dsf.fhir.history.AtParameter;
-import org.highmed.dsf.fhir.history.History;
-import org.highmed.dsf.fhir.history.SinceParameter;
-import org.highmed.dsf.fhir.history.user.HistoryUserFilterFactory;
-import org.highmed.dsf.fhir.history.user.HistoryUserFilterFactoryImpl;
-import org.highmed.dsf.fhir.search.PageAndCount;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.AfterClass;
 import org.junit.ClassRule;
@@ -25,6 +15,16 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
 import de.rwh.utils.test.LiquibaseTemplateTestRule;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import dev.dsf.fhir.history.AtParameter;
+import dev.dsf.fhir.history.History;
+import dev.dsf.fhir.history.SinceParameter;
+import dev.dsf.fhir.history.user.HistoryUserFilterFactory;
+import dev.dsf.fhir.history.user.HistoryUserFilterFactoryImpl;
+import dev.dsf.fhir.search.PageAndCount;
 
 public class HistoryDaoTest extends AbstractDbTest
 {

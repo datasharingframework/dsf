@@ -1,17 +1,17 @@
-package org.highmed.openehr.json;
+package dev.dsf.openehr.json;
 
 import java.io.IOException;
-
-import org.highmed.openehr.model.datatypes.DoubleRowElement;
-import org.highmed.openehr.model.datatypes.IntegerRowElement;
-import org.highmed.openehr.model.datatypes.JsonNodeRowElement;
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.datatypes.ZonedDateTimeRowElement;
-import org.highmed.openehr.model.structure.RowElement;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+
+import dev.dsf.openehr.model.datatypes.DoubleRowElement;
+import dev.dsf.openehr.model.datatypes.IntegerRowElement;
+import dev.dsf.openehr.model.datatypes.JsonNodeRowElement;
+import dev.dsf.openehr.model.datatypes.StringRowElement;
+import dev.dsf.openehr.model.datatypes.ZonedDateTimeRowElement;
+import dev.dsf.openehr.model.structure.RowElement;
 
 public class RowElementSerializer extends JsonSerializer<RowElement>
 {

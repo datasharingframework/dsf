@@ -1,15 +1,7 @@
-package org.highmed.pseudonymization.domain.json;
+package dev.dsf.pseudonymization.domain.json;
 
 import java.util.BitSet;
 
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.pseudonymization.domain.impl.FhirMdatContainer;
-import org.highmed.pseudonymization.domain.impl.MatchedPersonImpl;
-import org.highmed.pseudonymization.domain.impl.MedicIdImpl;
-import org.highmed.pseudonymization.domain.impl.OpenEhrMdatContainer;
-import org.highmed.pseudonymization.domain.impl.PersonImpl;
-import org.highmed.pseudonymization.json.BitSetDeserializer;
-import org.highmed.pseudonymization.json.BitSetSerializer;
 import org.hl7.fhir.r4.model.Resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -18,6 +10,14 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
+import dev.dsf.pseudonymization.domain.impl.FhirMdatContainer;
+import dev.dsf.pseudonymization.domain.impl.MatchedPersonImpl;
+import dev.dsf.pseudonymization.domain.impl.MedicIdImpl;
+import dev.dsf.pseudonymization.domain.impl.OpenEhrMdatContainer;
+import dev.dsf.pseudonymization.domain.impl.PersonImpl;
+import dev.dsf.pseudonymization.json.BitSetDeserializer;
+import dev.dsf.pseudonymization.json.BitSetSerializer;
 
 public final class TtpObjectMapperFactory
 {

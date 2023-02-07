@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.psn;
+package dev.dsf.pseudonymization.psn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.highmed.pseudonymization.recordlinkage.MedicId;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import dev.dsf.pseudonymization.recordlinkage.MedicId;
 
 class PseudonymWithPadding
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,16 +6,16 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.ValueSetDao;
-import org.highmed.dsf.fhir.search.parameters.ValueSetDate;
-import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
-import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
-import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
-import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
-import org.highmed.dsf.fhir.search.parameters.user.ValueSetUserFilter;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.ValueSetDao;
+import dev.dsf.fhir.search.parameters.ValueSetDate;
+import dev.dsf.fhir.search.parameters.ValueSetIdentifier;
+import dev.dsf.fhir.search.parameters.ValueSetStatus;
+import dev.dsf.fhir.search.parameters.ValueSetUrl;
+import dev.dsf.fhir.search.parameters.ValueSetVersion;
+import dev.dsf.fhir.search.parameters.user.ValueSetUserFilter;
 
 public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implements ValueSetDao
 {

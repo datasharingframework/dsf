@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,18 +6,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.event.EventManager;
-import org.highmed.dsf.fhir.event.EventManagerImpl;
-import org.highmed.dsf.fhir.subscription.MatcherFactory;
-import org.highmed.dsf.fhir.subscription.WebSocketSubscriptionManager;
-import org.highmed.dsf.fhir.subscription.WebSocketSubscriptionManagerImpl;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.EventManager;
+import dev.dsf.fhir.event.EventManagerImpl;
+import dev.dsf.fhir.subscription.MatcherFactory;
+import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
+import dev.dsf.fhir.subscription.WebSocketSubscriptionManagerImpl;
 
 @Configuration
 public class EventConfig

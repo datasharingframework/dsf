@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization;
+package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,16 +11,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.authentication.OrganizationProvider;
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
@@ -31,6 +21,17 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authentication.OrganizationProvider;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.dao.PractitionerRoleDao;
+import dev.dsf.fhir.dao.ResearchStudyDao;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.service.ReferenceResolver;
 
 public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorizationRule<ResearchStudy, ResearchStudyDao>
 {

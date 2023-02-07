@@ -1,4 +1,4 @@
-package org.highmed.consent.client;
+package dev.dsf.consent.client;
 
 import java.util.Optional;
 import java.util.ServiceLoader;

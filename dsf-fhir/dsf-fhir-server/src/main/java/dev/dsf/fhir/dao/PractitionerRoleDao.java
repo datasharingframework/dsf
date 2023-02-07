@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import org.hl7.fhir.r4.model.PractitionerRole;
 

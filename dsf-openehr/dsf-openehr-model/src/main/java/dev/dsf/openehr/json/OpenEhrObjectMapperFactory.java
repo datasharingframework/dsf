@@ -1,15 +1,15 @@
-package org.highmed.openehr.json;
-
-import org.highmed.openehr.model.datatypes.DoubleRowElement;
-import org.highmed.openehr.model.datatypes.IntegerRowElement;
-import org.highmed.openehr.model.datatypes.JsonNodeRowElement;
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.datatypes.ZonedDateTimeRowElement;
-import org.highmed.openehr.model.structure.RowElement;
+package dev.dsf.openehr.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import dev.dsf.openehr.model.datatypes.DoubleRowElement;
+import dev.dsf.openehr.model.datatypes.IntegerRowElement;
+import dev.dsf.openehr.model.datatypes.JsonNodeRowElement;
+import dev.dsf.openehr.model.datatypes.StringRowElement;
+import dev.dsf.openehr.model.datatypes.ZonedDateTimeRowElement;
+import dev.dsf.openehr.model.structure.RowElement;
 
 public final class OpenEhrObjectMapperFactory
 {

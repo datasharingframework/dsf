@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe;
+package dev.dsf.bpe;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;

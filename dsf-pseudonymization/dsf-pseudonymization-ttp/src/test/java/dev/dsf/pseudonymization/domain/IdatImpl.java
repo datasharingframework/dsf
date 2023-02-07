@@ -1,6 +1,6 @@
-package org.highmed.pseudonymization.domain;
+package dev.dsf.pseudonymization.domain;
 
-import org.highmed.mpi.client.Idat;
+import dev.dsf.mpi.client.Idat;
 
 public class IdatImpl implements Idat
 {

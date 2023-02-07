@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.generator;
+package dev.dsf.tools.generator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,9 +13,10 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 
 public class EnvGenerator
 {

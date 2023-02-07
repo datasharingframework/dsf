@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,10 +7,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.dao.jdbc.SubscriptionDaoJdbc;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.SubscriptionDaoJdbc;
 
 public class SubscriptionDaoTest extends AbstractResourceDaoTest<Subscription, SubscriptionDao>
 		implements ReadAccessDaoTest<Subscription>

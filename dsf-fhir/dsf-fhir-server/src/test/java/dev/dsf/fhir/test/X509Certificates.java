@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.test;
+package dev.dsf.fhir.test;
 
 import java.io.IOException;
 import java.nio.file.Files;

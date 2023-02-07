@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.websocket;
+package dev.dsf.fhir.websocket;
 
 import org.hl7.fhir.r4.model.Resource;
 

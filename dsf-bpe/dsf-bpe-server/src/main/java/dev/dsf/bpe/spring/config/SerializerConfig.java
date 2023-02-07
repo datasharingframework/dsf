@@ -1,10 +1,5 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
-import org.highmed.dsf.fhir.json.ObjectMapperFactory;
-import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
-import org.highmed.dsf.fhir.variables.FhirResourcesListSerializer;
-import org.highmed.dsf.fhir.variables.TargetSerializer;
-import org.highmed.dsf.fhir.variables.TargetsSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.json.ObjectMapperFactory;
+import dev.dsf.fhir.variables.FhirResourceSerializer;
+import dev.dsf.fhir.variables.FhirResourcesListSerializer;
+import dev.dsf.fhir.variables.TargetSerializer;
+import dev.dsf.fhir.variables.TargetsSerializer;
 
 @Configuration
 public class SerializerConfig

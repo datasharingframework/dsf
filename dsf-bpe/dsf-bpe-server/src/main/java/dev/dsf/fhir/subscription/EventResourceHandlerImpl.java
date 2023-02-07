@@ -1,15 +1,15 @@
-package org.highmed.dsf.fhir.subscription;
+package dev.dsf.fhir.subscription;
 
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.highmed.dsf.bpe.dao.LastEventTimeDao;
-import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.bpe.dao.LastEventTimeDao;
+import dev.dsf.fhir.websocket.ResourceHandler;
 
 public class EventResourceHandlerImpl<R extends Resource> implements EventResourceHandler<R>
 {

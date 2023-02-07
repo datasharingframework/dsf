@@ -1,16 +1,11 @@
-package org.highmed.dsf.bpe.start;
+package dev.dsf.bpe.start;
 
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ENV_DSF_CLIENT_CERTIFICATE_PASSWORD;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ENV_DSF_CLIENT_CERTIFICATE_PATH;
+import static dev.dsf.bpe.start.ConstantsExampleStarters.ENV_DSF_CLIENT_CERTIFICATE_PASSWORD;
+import static dev.dsf.bpe.start.ConstantsExampleStarters.ENV_DSF_CLIENT_CERTIFICATE_PATH;
 
 import java.nio.file.Paths;
 import java.security.KeyStore;
 
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -19,6 +14,11 @@ import org.hl7.fhir.r4.model.Task;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClientJersey;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceCleanerImpl;
+import dev.dsf.fhir.service.ReferenceExtractorImpl;
 
 public class ExampleStarter
 {

@@ -1,12 +1,12 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.ProvenanceDao;
-import org.highmed.dsf.fhir.search.parameters.user.ProvenanceUserFilter;
 import org.hl7.fhir.r4.model.Provenance;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.ProvenanceDao;
+import dev.dsf.fhir.search.parameters.user.ProvenanceUserFilter;
 
 public class ProvenanceDaoJdbc extends AbstractResourceDaoJdbc<Provenance> implements ProvenanceDao
 {

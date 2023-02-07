@@ -70,12 +70,12 @@ services:
         read_only: true
 
   medic1-fhir:
-    image: highmed/fhir
+    image: datasharingframework/fhir
     restart: "no"
     ports:
      - 127.0.0.1:5001:5001
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -127,12 +127,12 @@ services:
       - proxy
 
   medic2-fhir:
-    image: highmed/fhir
+    image: datasharingframework/fhir
     restart: "no"
     ports:
      - 127.0.0.1:5002:5002
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -184,12 +184,12 @@ services:
       - proxy
 
   medic3-fhir:
-    image: highmed/fhir
+    image: datasharingframework/fhir
     restart: "no"
     ports:
      - 127.0.0.1:5003:5003
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -241,12 +241,12 @@ services:
       - proxy
 
   ttp-fhir:
-    image: highmed/fhir
+    image: datasharingframework/fhir
     restart: "no"
     ports:
      - 127.0.0.1:5004:5004
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -300,12 +300,12 @@ services:
       - proxy
 
   medic1-bpe:
-    image: highmed/bpe
+    image: datasharingframework/bpe
     restart: "no"
     ports:
      - 127.0.0.1:5011:5011
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -366,12 +366,12 @@ services:
       - medic1-fhir
 
   medic2-bpe:
-    image: highmed/bpe
+    image: datasharingframework/bpe
     restart: "no"
     ports:
      - 127.0.0.1:5012:5012
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -432,12 +432,12 @@ services:
       - medic2-fhir
 
   medic3-bpe:
-    image: highmed/bpe
+    image: datasharingframework/bpe
     restart: "no"
     ports:
      - 127.0.0.1:5014:5014
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -503,12 +503,12 @@ services:
       - mailhog
 
   ttp-bpe:
-    image: highmed/bpe
+    image: datasharingframework/bpe
     restart: "no"
     ports:
      - 127.0.0.1:5013:5013
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5

@@ -1,14 +1,15 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import org.highmed.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
 
 public class PractitionerDaoTest extends AbstractResourceDaoTest<Practitioner, PractitionerDao>
 		implements ReadAccessDaoTest<Practitioner>

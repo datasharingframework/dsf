@@ -1,14 +1,15 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import java.util.NoSuchElementException;
 
-import org.highmed.consent.client.ConsentClientFactory;
-import org.highmed.consent.client.ConsentClientServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.consent.client.ConsentClientFactory;
+import dev.dsf.consent.client.ConsentClientServiceLoader;
 
 @Configuration
 public class ConsentConfig
@@ -32,7 +33,7 @@ public class ConsentConfig
 				.orElseThrow(() -> new NoSuchElementException("Consent client factory with classname='"
 						+ propertiesConfig.getConsentClientFactoryClass() + "' not found"));
 
-		if ("org.highmed.consent.client.stub.ConsentClientStubFactory".equals(factory.getClass().getName()))
+		if ("dev.dsf.consent.client.stub.ConsentClientStubFactory".equals(factory.getClass().getName()))
 			logger.warn("Using {} as consent client factory", factory.getClass().getName());
 		else
 			logger.info("Using {} as consent client factory", factory.getClass().getName());

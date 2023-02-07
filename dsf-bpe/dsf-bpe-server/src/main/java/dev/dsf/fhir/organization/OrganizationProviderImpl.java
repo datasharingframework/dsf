@@ -1,8 +1,8 @@
-package org.highmed.dsf.fhir.organization;
+package dev.dsf.fhir.organization;
 
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
-import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
+import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -24,6 +23,8 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.client.FhirWebserviceClientProvider;
 
 public class OrganizationProviderImpl implements OrganizationProvider, InitializingBean
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.function;
+package dev.dsf.fhir.function;
 
 import java.sql.SQLException;
 

@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.QuestionnaireResponseDaoJdbc;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+
+import dev.dsf.fhir.dao.jdbc.QuestionnaireResponseDaoJdbc;
 
 public class QuestionnaireResponseDaoTest
 		extends AbstractResourceDaoTest<QuestionnaireResponse, QuestionnaireResponseDao>

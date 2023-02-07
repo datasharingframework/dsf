@@ -1,9 +1,9 @@
-package org.highmed.pseudonymization.client.stub;
+package dev.dsf.pseudonymization.client.stub;
 
 import java.util.function.BiFunction;
 
-import org.highmed.pseudonymization.client.PseudonymizationClient;
-import org.highmed.pseudonymization.client.PseudonymizationClientFactory;
+import dev.dsf.pseudonymization.client.PseudonymizationClient;
+import dev.dsf.pseudonymization.client.PseudonymizationClientFactory;
 
 public class PseudonymizationClientStubFactory implements PseudonymizationClientFactory
 {

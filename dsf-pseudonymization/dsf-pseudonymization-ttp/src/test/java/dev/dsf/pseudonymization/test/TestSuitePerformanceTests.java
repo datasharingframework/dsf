@@ -1,10 +1,11 @@
-package org.highmed.pseudonymization.test;
+package dev.dsf.pseudonymization.test;
 
-import org.highmed.pseudonymization.recordlinkage.MatchingTimeTest;
-import org.highmed.pseudonymization.recordlinkage.WeightDistributionTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
+import dev.dsf.pseudonymization.recordlinkage.MatchingTimeTest;
+import dev.dsf.pseudonymization.recordlinkage.WeightDistributionTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({ MatchingTimeTest.class, WeightDistributionTest.class })

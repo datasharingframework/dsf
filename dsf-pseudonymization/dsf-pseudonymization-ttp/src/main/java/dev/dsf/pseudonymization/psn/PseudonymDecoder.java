@@ -1,11 +1,11 @@
-package org.highmed.pseudonymization.psn;
+package dev.dsf.pseudonymization.psn;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.highmed.pseudonymization.domain.PseudonymizedPerson;
-import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
-import org.highmed.pseudonymization.recordlinkage.Person;
+import dev.dsf.pseudonymization.domain.PseudonymizedPerson;
+import dev.dsf.pseudonymization.recordlinkage.MatchedPerson;
+import dev.dsf.pseudonymization.recordlinkage.Person;
 
 public interface PseudonymDecoder<P extends Person>
 {

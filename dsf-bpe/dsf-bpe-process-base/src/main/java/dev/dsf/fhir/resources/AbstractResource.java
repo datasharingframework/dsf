@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.resources;
+package dev.dsf.fhir.resources;
 
 import org.hl7.fhir.r4.model.MetadataResource;
 

@@ -1,10 +1,10 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
 import java.util.List;
 
-import org.highmed.openehr.model.structure.Column;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.pseudonymization.domain.PersonWithMdat;
+import dev.dsf.openehr.model.structure.Column;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.pseudonymization.domain.PersonWithMdat;
 
 public interface ResultSetTranslatorResearchResultToMedic
 {

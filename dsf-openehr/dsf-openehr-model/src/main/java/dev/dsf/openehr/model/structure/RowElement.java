@@ -1,4 +1,4 @@
-package org.highmed.openehr.model.structure;
+package dev.dsf.openehr.model.structure;
 
 public interface RowElement
 {

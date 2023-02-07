@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.impl;
+package dev.dsf.fhir.webservice.impl;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -33,28 +33,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authorization.AuthorizationRule;
-import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.command.CheckReferencesCommand;
-import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.history.HistoryService;
-import org.highmed.dsf.fhir.prefer.PreferHandlingType;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ResourceReference;
-import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
-import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -82,6 +60,28 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.authorization.AuthorizationRule;
+import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.command.CheckReferencesCommand;
+import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.history.HistoryService;
+import dev.dsf.fhir.prefer.PreferHandlingType;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.service.ResourceReference;
+import dev.dsf.fhir.service.ResourceReference.ReferenceType;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.webservice.base.AbstractBasicService;
+import dev.dsf.fhir.webservice.specification.BasicResourceService;
 
 public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R extends Resource>
 		extends AbstractBasicService implements BasicResourceService<R>, InitializingBean

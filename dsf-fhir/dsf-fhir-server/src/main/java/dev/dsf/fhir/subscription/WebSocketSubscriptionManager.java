@@ -1,8 +1,8 @@
-package org.highmed.dsf.fhir.subscription;
+package dev.dsf.fhir.subscription;
 
 import javax.websocket.Session;
 
-import org.highmed.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.User;
 
 public interface WebSocketSubscriptionManager
 {

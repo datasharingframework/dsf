@@ -1,13 +1,14 @@
-package org.highmed.dsf.fhir.authorization.process;
+package dev.dsf.fhir.authorization.process;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.junit.Test;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.UserRole;
 
 public class OrganizationTest
 {

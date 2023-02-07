@@ -1,10 +1,10 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.highmed.mpi.client.Idat;
-import org.highmed.mpi.client.MasterPatientIndexClient;
+import dev.dsf.mpi.client.Idat;
+import dev.dsf.mpi.client.MasterPatientIndexClient;
 
 class MasterPatientIndexClientTestImpl implements MasterPatientIndexClient
 {

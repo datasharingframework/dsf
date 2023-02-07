@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe;
+package dev.dsf.bpe;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,7 +19,7 @@ public class BpeSpringApplication implements WebApplicationInitializer
 	private AnnotationConfigWebApplicationContext getContext()
 	{
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setConfigLocation("org.highmed.dsf.bpe.spring.config");
+		context.setConfigLocation("dev.dsf.bpe.spring.config");
 
 		return context;
 	}

@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe;
+package dev.dsf.bpe;
 
 import org.hl7.fhir.r4.model.CodeType;
 

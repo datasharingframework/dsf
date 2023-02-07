@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,10 +10,11 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
 class ReadByUrlDaoJdbc<R extends DomainResource>
 {

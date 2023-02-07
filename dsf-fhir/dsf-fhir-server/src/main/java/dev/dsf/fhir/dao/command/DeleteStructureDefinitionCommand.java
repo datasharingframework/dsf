@@ -1,23 +1,24 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.prefer.PreferReturnType;
 
 public class DeleteStructureDefinitionCommand extends DeleteCommand
 {

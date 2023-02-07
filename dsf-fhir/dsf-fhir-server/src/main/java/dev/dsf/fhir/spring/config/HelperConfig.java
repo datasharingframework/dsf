@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
 
 @Configuration
 public class HelperConfig

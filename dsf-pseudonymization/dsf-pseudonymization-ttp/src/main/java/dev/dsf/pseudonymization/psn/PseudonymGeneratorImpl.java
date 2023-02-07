@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.psn;
+package dev.dsf.pseudonymization.psn;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -22,11 +22,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
-import org.highmed.pseudonymization.domain.PseudonymizedPerson;
-import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
-import org.highmed.pseudonymization.recordlinkage.MedicId;
-import org.highmed.pseudonymization.recordlinkage.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +29,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.pseudonymization.crypto.AesGcmUtil;
+import dev.dsf.pseudonymization.domain.PseudonymizedPerson;
+import dev.dsf.pseudonymization.recordlinkage.MatchedPerson;
+import dev.dsf.pseudonymization.recordlinkage.MedicId;
+import dev.dsf.pseudonymization.recordlinkage.Person;
 
 public class PseudonymGeneratorImpl<P extends Person, PP extends PseudonymizedPerson>
 		implements PseudonymGenerator<P, PP>

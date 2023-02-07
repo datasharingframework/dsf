@@ -1,6 +1,6 @@
-package org.highmed.dsf.fhir.search.parameters.user;
+package dev.dsf.fhir.search.parameters.user;
 
-import org.highmed.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.User;
 
 public class QuestionnaireUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {

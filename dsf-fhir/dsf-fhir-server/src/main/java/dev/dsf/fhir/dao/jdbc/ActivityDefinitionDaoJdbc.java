@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,19 +11,19 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
-import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionDate;
-import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
-import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
-import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
-import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionUrl;
-import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionVersion;
-import org.highmed.dsf.fhir.search.parameters.user.ActivityDefinitionUserFilter;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.ActivityDefinitionDao;
+import dev.dsf.fhir.search.parameters.ActivityDefinitionDate;
+import dev.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
+import dev.dsf.fhir.search.parameters.ActivityDefinitionName;
+import dev.dsf.fhir.search.parameters.ActivityDefinitionStatus;
+import dev.dsf.fhir.search.parameters.ActivityDefinitionUrl;
+import dev.dsf.fhir.search.parameters.ActivityDefinitionVersion;
+import dev.dsf.fhir.search.parameters.user.ActivityDefinitionUserFilter;
 
 public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityDefinition>
 		implements ActivityDefinitionDao

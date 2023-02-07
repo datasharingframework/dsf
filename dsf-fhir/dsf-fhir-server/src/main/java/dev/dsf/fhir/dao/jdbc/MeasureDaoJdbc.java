@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,17 +6,17 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.MeasureDao;
-import org.highmed.dsf.fhir.search.parameters.MeasureDate;
-import org.highmed.dsf.fhir.search.parameters.MeasureDependsOn;
-import org.highmed.dsf.fhir.search.parameters.MeasureIdentifier;
-import org.highmed.dsf.fhir.search.parameters.MeasureStatus;
-import org.highmed.dsf.fhir.search.parameters.MeasureUrl;
-import org.highmed.dsf.fhir.search.parameters.MeasureVersion;
-import org.highmed.dsf.fhir.search.parameters.user.MeasureUserFilter;
 import org.hl7.fhir.r4.model.Measure;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.MeasureDao;
+import dev.dsf.fhir.search.parameters.MeasureDate;
+import dev.dsf.fhir.search.parameters.MeasureDependsOn;
+import dev.dsf.fhir.search.parameters.MeasureIdentifier;
+import dev.dsf.fhir.search.parameters.MeasureStatus;
+import dev.dsf.fhir.search.parameters.MeasureUrl;
+import dev.dsf.fhir.search.parameters.MeasureVersion;
+import dev.dsf.fhir.search.parameters.user.MeasureUserFilter;
 
 public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements MeasureDao
 {

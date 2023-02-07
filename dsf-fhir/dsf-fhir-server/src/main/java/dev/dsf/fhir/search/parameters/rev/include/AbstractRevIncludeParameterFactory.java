@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters.rev.include;
+package dev.dsf.fhir.search.parameters.rev.include;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -7,12 +7,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.search.IncludeParts;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.search.IncludeParts;
+import dev.dsf.fhir.search.SearchQueryIncludeParameter;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
 
 public abstract class AbstractRevIncludeParameterFactory implements SearchQueryRevIncludeParameterFactory
 {

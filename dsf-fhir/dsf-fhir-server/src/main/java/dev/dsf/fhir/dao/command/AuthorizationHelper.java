@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 
-import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.authentication.User;
 
 public interface AuthorizationHelper
 {

@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.domain.impl;
+package dev.dsf.pseudonymization.domain.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.highmed.pseudonymization.domain.PersonWithMdat;
-import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import dev.dsf.pseudonymization.domain.PersonWithMdat;
+import dev.dsf.pseudonymization.recordlinkage.MatchedPerson;
 
 public class MatchedPersonImpl implements MatchedPerson<PersonWithMdat>
 {

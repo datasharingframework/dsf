@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,10 +25,6 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
-import org.highmed.dsf.bpe.service.LoggingMailService;
-import org.highmed.dsf.bpe.service.MailService;
-import org.highmed.dsf.bpe.service.SmtpMailService;
-import org.highmed.dsf.tools.build.BuildInfoReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,6 +37,10 @@ import org.springframework.context.event.EventListener;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
+import dev.dsf.bpe.service.LoggingMailService;
+import dev.dsf.bpe.service.MailService;
+import dev.dsf.bpe.service.SmtpMailService;
+import dev.dsf.tools.build.BuildInfoReader;
 
 @Configuration
 public class MailConfig implements InitializingBean

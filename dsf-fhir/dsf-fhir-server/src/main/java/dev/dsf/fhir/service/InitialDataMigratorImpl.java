@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.highmed.dsf.fhir.service.migration.MigrationJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.service.migration.MigrationJob;
 
 public class InitialDataMigratorImpl implements InitialDataMigrator
 {

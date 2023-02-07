@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,22 +21,6 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
-import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import org.highmed.dsf.fhir.search.DbSearchQuery;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
-import org.highmed.dsf.fhir.search.SearchQueryParameter;
-import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
-import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
-import org.highmed.dsf.fhir.search.parameters.ResourceId;
-import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
-import org.highmed.dsf.fhir.search.parameters.ResourceProfile;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
@@ -51,6 +35,22 @@ import com.google.gson.JsonParser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
+import dev.dsf.fhir.search.DbSearchQuery;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
+import dev.dsf.fhir.search.SearchQueryParameter;
+import dev.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
+import dev.dsf.fhir.search.SearchQueryUserFilter;
+import dev.dsf.fhir.search.parameters.ResourceId;
+import dev.dsf.fhir.search.parameters.ResourceLastUpdated;
+import dev.dsf.fhir.search.parameters.ResourceProfile;
 
 abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
 {

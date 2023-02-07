@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.crypto;
+package dev.dsf.pseudonymization.crypto;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;

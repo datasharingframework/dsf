@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.docker.secrets;
+package dev.dsf.tools.docker.secrets;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

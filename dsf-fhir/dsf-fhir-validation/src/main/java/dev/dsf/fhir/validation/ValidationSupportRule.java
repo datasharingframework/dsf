@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.validation;
+package dev.dsf.fhir.validation;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -31,6 +30,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 
 public class ValidationSupportRule extends ExternalResource
 {

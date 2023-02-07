@@ -1,10 +1,10 @@
-package org.highmed.openehr.model.datatypes;
-
-import org.highmed.openehr.model.structure.RowElement;
+package dev.dsf.openehr.model.datatypes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.model.structure.RowElement;
 
 public class JsonNodeRowElement implements RowElement
 {

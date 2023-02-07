@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.psn;
+package dev.dsf.pseudonymization.psn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -8,19 +8,20 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
-import org.highmed.pseudonymization.domain.PseudonymizedPerson;
-import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
-import org.highmed.pseudonymization.recordlinkage.TestMatchedPerson;
-import org.highmed.pseudonymization.recordlinkage.TestMedicId;
-import org.highmed.pseudonymization.recordlinkage.TestPerson;
-import org.highmed.pseudonymization.recordlinkage.TestPseudonymizedPerson;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
+
+import dev.dsf.pseudonymization.crypto.AesGcmUtil;
+import dev.dsf.pseudonymization.domain.PseudonymizedPerson;
+import dev.dsf.pseudonymization.recordlinkage.MatchedPerson;
+import dev.dsf.pseudonymization.recordlinkage.TestMatchedPerson;
+import dev.dsf.pseudonymization.recordlinkage.TestMedicId;
+import dev.dsf.pseudonymization.recordlinkage.TestPerson;
+import dev.dsf.pseudonymization.recordlinkage.TestPseudonymizedPerson;
 
 public class PseudonymGeneratorImplTest
 {

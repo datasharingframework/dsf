@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.exception;
+package dev.dsf.fhir.dao.exception;
 
 import java.time.LocalDateTime;
 

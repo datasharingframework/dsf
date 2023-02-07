@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.generator;
+package dev.dsf.tools.generator;
 
 import java.util.ArrayList;
 import java.util.HashMap;

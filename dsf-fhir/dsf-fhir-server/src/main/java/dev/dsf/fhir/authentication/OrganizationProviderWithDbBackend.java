@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authentication;
+package dev.dsf.fhir.authentication;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.codec.binary.Hex;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.help.ExceptionHandler;
 
 public class OrganizationProviderWithDbBackend implements OrganizationProvider, InitializingBean
 {

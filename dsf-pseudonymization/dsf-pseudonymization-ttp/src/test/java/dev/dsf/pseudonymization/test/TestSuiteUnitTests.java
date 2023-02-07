@@ -1,15 +1,16 @@
-package org.highmed.pseudonymization.test;
+package dev.dsf.pseudonymization.test;
 
-import org.highmed.pseudonymization.domain.MatchedPersonImplJsonTest;
-import org.highmed.pseudonymization.domain.PersonImplJsonTest;
-import org.highmed.pseudonymization.domain.PseudonymizedPersonImplJsonTest;
-import org.highmed.pseudonymization.psn.PseudonyWithPaddingJsonTest;
-import org.highmed.pseudonymization.psn.PseudonymGeneratorImplTest;
-import org.highmed.pseudonymization.recordlinkage.FederatedMatcherTest;
-import org.highmed.pseudonymization.recordlinkage.SingleOrganizationMatcherTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
+import dev.dsf.pseudonymization.domain.MatchedPersonImplJsonTest;
+import dev.dsf.pseudonymization.domain.PersonImplJsonTest;
+import dev.dsf.pseudonymization.domain.PseudonymizedPersonImplJsonTest;
+import dev.dsf.pseudonymization.psn.PseudonyWithPaddingJsonTest;
+import dev.dsf.pseudonymization.psn.PseudonymGeneratorImplTest;
+import dev.dsf.pseudonymization.recordlinkage.FederatedMatcherTest;
+import dev.dsf.pseudonymization.recordlinkage.SingleOrganizationMatcherTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({ MatchedPersonImplJsonTest.class, PersonImplJsonTest.class, PseudonymizedPersonImplJsonTest.class,

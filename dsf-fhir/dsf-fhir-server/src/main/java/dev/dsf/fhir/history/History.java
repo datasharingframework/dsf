@@ -1,11 +1,11 @@
-package org.highmed.dsf.fhir.history;
+package dev.dsf.fhir.history;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.highmed.dsf.fhir.search.PageAndCount;
+import dev.dsf.fhir.search.PageAndCount;
 
 public class History
 {

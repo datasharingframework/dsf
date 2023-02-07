@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.search.parameters.user;
+package dev.dsf.fhir.search.parameters.user;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.postgresql.util.PGobject;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.UserRole;
 
 abstract class AbstractMetaTagAuthorizationRoleUserFilter extends AbstractUserFilter
 {

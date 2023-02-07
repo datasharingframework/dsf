@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.impl;
+package dev.dsf.fhir.webservice.impl;
 
 import java.io.InputStream;
 import java.util.List;
@@ -8,22 +8,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
-import org.highmed.dsf.fhir.dao.BinaryDao;
-import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.history.HistoryService;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.webservice.specification.BinaryService;
 import org.hl7.fhir.r4.model.Binary;
 
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
+import dev.dsf.fhir.dao.BinaryDao;
+import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.history.HistoryService;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.webservice.specification.BinaryService;
 
 public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Binary> implements BinaryService
 {

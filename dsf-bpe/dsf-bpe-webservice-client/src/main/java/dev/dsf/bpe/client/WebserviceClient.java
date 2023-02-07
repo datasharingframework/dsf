@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.client;
+package dev.dsf.bpe.client;
 
 import java.util.List;
 import java.util.Map;

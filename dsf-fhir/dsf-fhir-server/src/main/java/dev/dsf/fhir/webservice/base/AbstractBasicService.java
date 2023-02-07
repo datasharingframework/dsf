@@ -1,7 +1,7 @@
-package org.highmed.dsf.fhir.webservice.base;
+package dev.dsf.fhir.webservice.base;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserProvider;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.UserProvider;
 
 public class AbstractBasicService implements BasicService
 {

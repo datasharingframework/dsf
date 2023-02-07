@@ -1,10 +1,10 @@
-package org.highmed.dsf.fhir.history.user;
+package dev.dsf.fhir.history.user;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.search.parameters.user.DocumentReferenceUserFilter;
 import org.hl7.fhir.r4.model.DocumentReference;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.search.parameters.user.DocumentReferenceUserFilter;
 
 public class DocumentReferenceHistoryUserFilter extends DocumentReferenceUserFilter implements HistoryUserFilter
 {

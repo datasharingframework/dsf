@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.highmed.dsf.fhir.webservice.specification.QuestionnaireService;
 import org.hl7.fhir.r4.model.Questionnaire;
+
+import dev.dsf.fhir.webservice.specification.QuestionnaireService;
 
 @Path(QuestionnaireServiceJaxrs.PATH)
 public class QuestionnaireServiceJaxrs extends AbstractResourceServiceJaxrs<Questionnaire, QuestionnaireService>

@@ -1,4 +1,4 @@
-package org.highmed.openehr.client.stub;
+package dev.dsf.openehr.client.stub;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,15 +8,15 @@ import java.util.stream.IntStream;
 
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.highmed.openehr.client.OpenEhrClient;
-import org.highmed.openehr.model.datatypes.IntegerRowElement;
-import org.highmed.openehr.model.datatypes.JsonNodeRowElement;
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.structure.Column;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.openehr.model.structure.RowElement;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.client.OpenEhrClient;
+import dev.dsf.openehr.model.datatypes.IntegerRowElement;
+import dev.dsf.openehr.model.datatypes.JsonNodeRowElement;
+import dev.dsf.openehr.model.datatypes.StringRowElement;
+import dev.dsf.openehr.model.structure.Column;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.openehr.model.structure.RowElement;
 
 public class OpenEhrClientStub implements OpenEhrClient
 {

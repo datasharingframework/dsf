@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,19 +7,19 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.EndpointDao;
-import org.highmed.dsf.fhir.search.parameters.EndpointAddress;
-import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
-import org.highmed.dsf.fhir.search.parameters.EndpointName;
-import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
-import org.highmed.dsf.fhir.search.parameters.EndpointStatus;
-import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
-import org.highmed.dsf.fhir.search.parameters.user.EndpointUserFilter;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.EndpointDao;
+import dev.dsf.fhir.search.parameters.EndpointAddress;
+import dev.dsf.fhir.search.parameters.EndpointIdentifier;
+import dev.dsf.fhir.search.parameters.EndpointName;
+import dev.dsf.fhir.search.parameters.EndpointOrganization;
+import dev.dsf.fhir.search.parameters.EndpointStatus;
+import dev.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
+import dev.dsf.fhir.search.parameters.user.EndpointUserFilter;
 
 public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implements EndpointDao
 {

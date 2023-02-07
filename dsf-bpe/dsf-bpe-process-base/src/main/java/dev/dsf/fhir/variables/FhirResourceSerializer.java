@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.variables;
+package dev.dsf.fhir.variables;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -7,7 +7,6 @@ import java.util.Objects;
 import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.highmed.dsf.fhir.variables.FhirResourceValues.FhirResourceValue;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import dev.dsf.fhir.variables.FhirResourceValues.FhirResourceValue;
 
 public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourceValue> implements InitializingBean
 {

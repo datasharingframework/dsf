@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.group;
+package dev.dsf.fhir.group;
 
 import org.hl7.fhir.r4.model.Group;
 

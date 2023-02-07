@@ -1,8 +1,9 @@
-package org.highmed.dsf.fhir.history;
+package dev.dsf.fhir.history;
 
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 
 public class AtParameter extends AbstractDateTimeParameter<DomainResource>
 {

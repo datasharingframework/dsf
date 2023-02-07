@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.ValueSetDaoJdbc;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.ValueSetDaoJdbc;
 
 public class ValueSetDaoTest extends AbstractResourceDaoTest<ValueSet, ValueSetDao>
 		implements ReadByUrlDaoTest<ValueSet>, ReadAccessDaoTest<ValueSet>

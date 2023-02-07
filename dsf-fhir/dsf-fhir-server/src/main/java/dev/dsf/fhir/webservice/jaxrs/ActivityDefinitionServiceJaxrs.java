@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.highmed.dsf.fhir.webservice.specification.ActivityDefinitionService;
 import org.hl7.fhir.r4.model.ActivityDefinition;
+
+import dev.dsf.fhir.webservice.specification.ActivityDefinitionService;
 
 @Path(ActivityDefinitionServiceJaxrs.PATH)
 public class ActivityDefinitionServiceJaxrs extends

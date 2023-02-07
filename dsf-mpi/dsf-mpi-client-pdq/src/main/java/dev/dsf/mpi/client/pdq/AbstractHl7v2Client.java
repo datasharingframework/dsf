@@ -1,4 +1,4 @@
-package org.highmed.mpi.client.pdq;
+package dev.dsf.mpi.client.pdq;
 
 import java.io.IOException;
 

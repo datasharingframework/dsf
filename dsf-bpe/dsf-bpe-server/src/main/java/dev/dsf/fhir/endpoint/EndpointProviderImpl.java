@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.endpoint;
+package dev.dsf.fhir.endpoint;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,10 +8,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.organization.EndpointProvider;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -20,6 +16,11 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.bpe.ConstantsBase;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClientProvider;
+import dev.dsf.fhir.organization.EndpointProvider;
 
 public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 {

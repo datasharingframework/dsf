@@ -1,4 +1,4 @@
-package org.highmed.openehr.client.impl;
+package dev.dsf.openehr.client.impl;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -12,14 +12,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import org.highmed.openehr.client.OpenEhrClient;
-import org.highmed.openehr.model.structure.Request;
-import org.highmed.openehr.model.structure.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.client.OpenEhrClient;
+import dev.dsf.openehr.model.structure.Request;
+import dev.dsf.openehr.model.structure.ResultSet;
 
 public class OpenEhrClientJersey extends AbstractJerseyClient implements OpenEhrClient
 {

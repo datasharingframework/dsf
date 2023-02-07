@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization;
+package dev.dsf.fhir.authorization;
 
 import java.util.Optional;
 

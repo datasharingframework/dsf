@@ -1,10 +1,10 @@
-package org.highmed.dsf.bpe.dao;
+package dev.dsf.bpe.dao;
 
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
-import org.highmed.dsf.bpe.process.ProcessState;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.process.ProcessState;
 
 public interface ProcessStateDao
 {

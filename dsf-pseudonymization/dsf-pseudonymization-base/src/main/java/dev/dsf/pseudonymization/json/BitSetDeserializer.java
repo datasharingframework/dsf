@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.json;
+package dev.dsf.pseudonymization.json;
 
 import java.io.IOException;
 import java.util.Base64;

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization;
+package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,18 +9,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.authentication.OrganizationProvider;
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authentication.OrganizationProvider;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.dao.OrganizationAffiliationDao;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.service.ReferenceResolver;
 
 public class OrganizationAffiliationAuthorizationRule
 		extends AbstractMetaTagAuthorizationRule<OrganizationAffiliation, OrganizationAffiliationDao>

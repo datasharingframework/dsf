@@ -1,13 +1,14 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import java.util.List;
 
-import org.highmed.dsf.fhir.authentication.AuthenticationFilterConfig;
-import org.highmed.dsf.fhir.authentication.AuthenticationFilterConfigImpl;
-import org.highmed.dsf.fhir.authentication.DoesNotNeedAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.fhir.authentication.AuthenticationFilterConfig;
+import dev.dsf.fhir.authentication.AuthenticationFilterConfigImpl;
+import dev.dsf.fhir.authentication.DoesNotNeedAuthentication;
 
 @Configuration
 public class AuthenticationConfig

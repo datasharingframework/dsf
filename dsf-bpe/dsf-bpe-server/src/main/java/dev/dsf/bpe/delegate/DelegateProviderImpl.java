@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.delegate;
+package dev.dsf.bpe.delegate;
 
 import java.util.List;
 import java.util.Map;
@@ -6,9 +6,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
 
 public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization;
+package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,20 +11,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.authentication.OrganizationProvider;
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.dao.CodeSystemDao;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ResourceReference;
-import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Coding;
@@ -36,6 +22,21 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.authentication.OrganizationProvider;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.dao.CodeSystemDao;
+import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.service.ResourceReference;
+import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 
 public abstract class AbstractAuthorizationRule<R extends Resource, D extends ResourceDao<R>>
 		implements AuthorizationRule<R>, InitializingBean

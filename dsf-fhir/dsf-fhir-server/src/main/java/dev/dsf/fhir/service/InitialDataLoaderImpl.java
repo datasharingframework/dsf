@@ -1,13 +1,7 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.dao.command.CommandFactory;
-import org.highmed.dsf.fhir.dao.command.CommandList;
-import org.highmed.dsf.fhir.prefer.PreferHandlingType;
-import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Organization;
@@ -16,6 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.dao.command.CommandFactory;
+import dev.dsf.fhir.dao.command.CommandList;
+import dev.dsf.fhir.prefer.PreferHandlingType;
+import dev.dsf.fhir.prefer.PreferReturnType;
 
 public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBean
 {

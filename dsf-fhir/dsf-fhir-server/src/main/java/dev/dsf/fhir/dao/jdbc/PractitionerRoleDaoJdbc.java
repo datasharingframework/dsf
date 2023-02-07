@@ -1,16 +1,16 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
-import org.highmed.dsf.fhir.search.parameters.PractitionerRoleActive;
-import org.highmed.dsf.fhir.search.parameters.PractitionerRoleIdentifier;
-import org.highmed.dsf.fhir.search.parameters.PractitionerRoleOrganization;
-import org.highmed.dsf.fhir.search.parameters.PractitionerRolePractitioner;
-import org.highmed.dsf.fhir.search.parameters.user.PractitionerRoleUserFilter;
 import org.hl7.fhir.r4.model.PractitionerRole;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.PractitionerRoleDao;
+import dev.dsf.fhir.search.parameters.PractitionerRoleActive;
+import dev.dsf.fhir.search.parameters.PractitionerRoleIdentifier;
+import dev.dsf.fhir.search.parameters.PractitionerRoleOrganization;
+import dev.dsf.fhir.search.parameters.PractitionerRolePractitioner;
+import dev.dsf.fhir.search.parameters.user.PractitionerRoleUserFilter;
 
 public class PractitionerRoleDaoJdbc extends AbstractResourceDaoJdbc<PractitionerRole> implements PractitionerRoleDao
 {

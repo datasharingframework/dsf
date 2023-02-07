@@ -1,17 +1,18 @@
-package org.highmed.dsf.fhir.search.parameters;
+package dev.dsf.fhir.search.parameters;
 
-import static org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationRole.PARAMETER_NAME;
+import static dev.dsf.fhir.search.parameters.OrganizationAffiliationRole.PARAMETER_NAME;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 
 @SearchParameterDefinition(name = PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/OrganizationAffiliation-role", type = SearchParamType.TOKEN, documentation = "Definition of the role the participatingOrganization plays")
 public class OrganizationAffiliationRole extends AbstractTokenParameter<OrganizationAffiliation>

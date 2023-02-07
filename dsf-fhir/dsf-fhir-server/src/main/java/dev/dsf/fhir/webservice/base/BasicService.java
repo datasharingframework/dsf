@@ -1,6 +1,6 @@
-package org.highmed.dsf.fhir.webservice.base;
+package dev.dsf.fhir.webservice.base;
 
-import org.highmed.dsf.fhir.authentication.UserProvider;
+import dev.dsf.fhir.authentication.UserProvider;
 
 public interface BasicService
 {

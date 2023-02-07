@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.search;
+package dev.dsf.fhir.search;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.function.BiConsumerWithSqlException;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiConsumerWithSqlException;
 
 public class SearchQueryIncludeParameter
 {

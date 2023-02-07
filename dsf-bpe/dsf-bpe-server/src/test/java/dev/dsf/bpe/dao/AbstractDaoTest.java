@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.dao;
+package dev.dsf.bpe.dao;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.AfterClass;

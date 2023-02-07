@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.hapi;
+package dev.dsf.fhir.hapi;
 
 import java.util.Date;
 import java.util.UUID;

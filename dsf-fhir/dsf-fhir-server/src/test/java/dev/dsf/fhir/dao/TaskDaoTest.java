@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.TaskDaoJdbc;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
+
+import dev.dsf.fhir.dao.jdbc.TaskDaoJdbc;
 
 public class TaskDaoTest extends AbstractResourceDaoTest<Task, TaskDao>
 {

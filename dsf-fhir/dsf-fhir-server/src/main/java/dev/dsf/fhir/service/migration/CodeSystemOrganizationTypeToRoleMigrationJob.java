@@ -1,16 +1,17 @@
-package org.highmed.dsf.fhir.service.migration;
+package dev.dsf.fhir.service.migration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.dao.OrganizationAffiliationDao;
 
 public class CodeSystemOrganizationTypeToRoleMigrationJob implements MigrationJob, InitializingBean
 {

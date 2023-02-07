@@ -1,21 +1,21 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_CONDITIONAL_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_TEMPORARY_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_UNKNOWN_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.CONDITIONAL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_EXTERNAL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_INTERNAL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LOGICAL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.TEMPORARY;
-import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.UNKNOWN;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_CONDITIONAL_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_TEMPORARY_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_UNKNOWN_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.CONDITIONAL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_EXTERNAL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_INTERNAL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.LOGICAL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.TEMPORARY;
+import static dev.dsf.fhir.service.ResourceReference.ReferenceType.UNKNOWN;
 
 import java.util.ArrayList;
 import java.util.Arrays;

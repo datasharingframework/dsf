@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,9 +8,10 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
+
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 
 public abstract class AbstractStringParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {

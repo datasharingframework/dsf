@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.client;
+package dev.dsf.pseudonymization.client;
 
 import java.util.Optional;
 import java.util.ServiceLoader;

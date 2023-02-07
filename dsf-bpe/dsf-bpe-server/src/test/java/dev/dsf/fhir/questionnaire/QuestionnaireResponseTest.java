@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.questionnaire;
+package dev.dsf.fhir.questionnaire;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

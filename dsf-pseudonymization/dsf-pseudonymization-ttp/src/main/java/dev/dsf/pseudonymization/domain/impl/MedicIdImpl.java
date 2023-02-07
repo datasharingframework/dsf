@@ -1,9 +1,9 @@
-package org.highmed.pseudonymization.domain.impl;
-
-import org.highmed.pseudonymization.recordlinkage.MedicId;
+package dev.dsf.pseudonymization.domain.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import dev.dsf.pseudonymization.recordlinkage.MedicId;
 
 public class MedicIdImpl implements MedicId
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir;
+package dev.dsf.fhir;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;

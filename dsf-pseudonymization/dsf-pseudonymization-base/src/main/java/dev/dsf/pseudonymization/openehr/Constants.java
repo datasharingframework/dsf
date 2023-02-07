@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.openehr;
+package dev.dsf.pseudonymization.openehr;
 
 public interface Constants
 {

@@ -1,6 +1,6 @@
-package org.highmed.dsf.fhir.organization;
+package dev.dsf.fhir.organization;
 
-import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
+import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
 
 import java.util.Map;
 import java.util.Map.Entry;

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,8 +15,6 @@ import java.util.UUID;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
-import org.highmed.dsf.fhir.client.ClientProvider;
-import org.highmed.dsf.fhir.client.ClientProviderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,6 +25,8 @@ import org.springframework.context.annotation.Configuration;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
+import dev.dsf.fhir.client.ClientProvider;
+import dev.dsf.fhir.client.ClientProviderImpl;
 
 @Configuration
 public class ClientConfig implements InitializingBean

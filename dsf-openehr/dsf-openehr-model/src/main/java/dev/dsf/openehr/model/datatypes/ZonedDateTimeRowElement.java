@@ -1,10 +1,10 @@
-package org.highmed.openehr.model.datatypes;
+package dev.dsf.openehr.model.datatypes;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import org.highmed.openehr.model.structure.RowElement;
+import dev.dsf.openehr.model.structure.RowElement;
 
 public class ZonedDateTimeRowElement implements RowElement
 {

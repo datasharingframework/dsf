@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters.basic;
+package dev.dsf.fhir.search.parameters.basic;
 
 public enum TokenSearchType
 {

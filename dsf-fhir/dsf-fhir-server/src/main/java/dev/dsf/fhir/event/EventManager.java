@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.event;
+package dev.dsf.fhir.event;
 
 public interface EventManager extends EventHandler
 {

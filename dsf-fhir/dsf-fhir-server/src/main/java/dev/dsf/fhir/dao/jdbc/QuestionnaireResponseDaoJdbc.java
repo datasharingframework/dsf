@@ -1,17 +1,17 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.QuestionnaireResponseDao;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseAuthored;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseIdentifier;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseQuestionnaire;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseStatus;
-import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseSubject;
-import org.highmed.dsf.fhir.search.parameters.user.QuestionnaireResponseUserFilter;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.QuestionnaireResponseDao;
+import dev.dsf.fhir.search.parameters.QuestionnaireResponseAuthored;
+import dev.dsf.fhir.search.parameters.QuestionnaireResponseIdentifier;
+import dev.dsf.fhir.search.parameters.QuestionnaireResponseQuestionnaire;
+import dev.dsf.fhir.search.parameters.QuestionnaireResponseStatus;
+import dev.dsf.fhir.search.parameters.QuestionnaireResponseSubject;
+import dev.dsf.fhir.search.parameters.user.QuestionnaireResponseUserFilter;
 
 public class QuestionnaireResponseDaoJdbc extends AbstractResourceDaoJdbc<QuestionnaireResponse>
 		implements QuestionnaireResponseDao

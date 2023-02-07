@@ -1,13 +1,14 @@
-package org.highmed.mpi.client.stub;
+package dev.dsf.mpi.client.stub;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.highmed.mpi.client.Idat;
-import org.highmed.mpi.client.IdatNotFoundException;
-import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.mpi.client.Idat;
+import dev.dsf.mpi.client.IdatNotFoundException;
+import dev.dsf.mpi.client.MasterPatientIndexClient;
 
 public class MasterPatientIndexClientStub implements MasterPatientIndexClient
 {

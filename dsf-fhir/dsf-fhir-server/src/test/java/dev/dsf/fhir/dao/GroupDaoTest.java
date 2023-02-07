@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.hl7.fhir.r4.model.Group;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 
 public class GroupDaoTest extends AbstractResourceDaoTest<Group, GroupDao> implements ReadAccessDaoTest<Group>
 {

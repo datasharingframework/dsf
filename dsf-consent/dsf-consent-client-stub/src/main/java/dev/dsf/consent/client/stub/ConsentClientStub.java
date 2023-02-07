@@ -1,13 +1,14 @@
-package org.highmed.consent.client.stub;
+package dev.dsf.consent.client.stub;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-import org.highmed.consent.client.ConsentClient;
-import org.highmed.openehr.model.structure.Column;
-import org.highmed.openehr.model.structure.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.consent.client.ConsentClient;
+import dev.dsf.openehr.model.structure.Column;
+import dev.dsf.openehr.model.structure.ResultSet;
 
 public class ConsentClientStub implements ConsentClient
 {

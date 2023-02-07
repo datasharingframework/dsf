@@ -1,14 +1,15 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.nio.charset.StandardCharsets;
 
-import org.highmed.dsf.fhir.dao.LibraryDao;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.LibraryDao;
 
 public class LibraryIntegrationTest extends AbstractIntegrationTest
 {

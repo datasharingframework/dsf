@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.recordlinkage;
+package dev.dsf.pseudonymization.recordlinkage;
 
 @FunctionalInterface
 public interface MatchedPersonFactory<P extends Person>

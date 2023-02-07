@@ -1,12 +1,12 @@
-package org.highmed.openehr.client.stub;
+package dev.dsf.openehr.client.stub;
 
 import java.util.function.BiFunction;
 
-import org.highmed.openehr.client.OpenEhrClient;
-import org.highmed.openehr.client.OpenEhrClientFactory;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.openehr.client.OpenEhrClient;
+import dev.dsf.openehr.client.OpenEhrClientFactory;
+import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
 
 public class OpenEhrClientStubFactory implements OpenEhrClientFactory
 {

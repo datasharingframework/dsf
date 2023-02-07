@@ -1,16 +1,17 @@
-package org.highmed.dsf.fhir.webservice.secure;
+package dev.dsf.fhir.webservice.secure;
 
-import org.highmed.dsf.fhir.authorization.AuthorizationRule;
-import org.highmed.dsf.fhir.dao.ValueSetDao;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.webservice.specification.ValueSetService;
 import org.hl7.fhir.r4.model.ValueSet;
+
+import dev.dsf.fhir.authorization.AuthorizationRule;
+import dev.dsf.fhir.dao.ValueSetDao;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.webservice.specification.ValueSetService;
 
 public class ValueSetServiceSecure extends AbstractResourceServiceSecure<ValueSetDao, ValueSet, ValueSetService>
 		implements ValueSetService

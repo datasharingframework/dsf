@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,16 +23,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.authentication.OrganizationProvider;
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.dao.TaskDao;
-import org.highmed.dsf.fhir.dao.command.ReferencesHelperImpl;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -50,6 +40,17 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.Test;
+
+import dev.dsf.fhir.authentication.OrganizationProvider;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.dao.TaskDao;
+import dev.dsf.fhir.dao.command.ReferencesHelperImpl;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {

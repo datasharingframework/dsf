@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -10,15 +10,16 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
-import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.Test;
+
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 
 public class OrganizationAffiliationDaoTest
 		extends AbstractResourceDaoTest<OrganizationAffiliation, OrganizationAffiliationDao>

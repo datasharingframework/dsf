@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: registry:5000/highmed/fhir_proxy
+    image: registry:5000/datasharingframework/fhir_proxy
     restart: "no"
     ports:
       - 80:80
@@ -28,10 +28,10 @@ services:
       - app
 
   app:
-    image: registry:5000/highmed/fhir
+    image: registry:5000/datasharingframework/fhir
     restart: "no"
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5

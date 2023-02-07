@@ -1,15 +1,15 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.dsf.fhir.search.parameters.ResearchStudyEnrollment;
-import org.highmed.dsf.fhir.search.parameters.ResearchStudyIdentifier;
-import org.highmed.dsf.fhir.search.parameters.ResearchStudyPrincipalInvestigator;
-import org.highmed.dsf.fhir.search.parameters.user.ResearchStudyUserFilter;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.ResearchStudyDao;
+import dev.dsf.fhir.search.parameters.ResearchStudyEnrollment;
+import dev.dsf.fhir.search.parameters.ResearchStudyIdentifier;
+import dev.dsf.fhir.search.parameters.ResearchStudyPrincipalInvestigator;
+import dev.dsf.fhir.search.parameters.user.ResearchStudyUserFilter;
 
 public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy> implements ResearchStudyDao
 {

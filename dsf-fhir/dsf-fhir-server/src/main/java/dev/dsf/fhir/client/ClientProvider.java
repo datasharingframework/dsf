@@ -1,8 +1,6 @@
-package org.highmed.dsf.fhir.client;
+package dev.dsf.fhir.client;
 
 import java.util.Optional;
-
-import org.highmed.fhir.client.FhirWebserviceClient;
 
 public interface ClientProvider
 {

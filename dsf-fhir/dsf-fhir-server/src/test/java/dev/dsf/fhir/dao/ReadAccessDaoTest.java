@@ -1,10 +1,10 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ALL;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_LOCAL;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ORGANIZATION;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ROLE;
+import static dev.dsf.fhir.authorization.read.ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static dev.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ALL;
+import static dev.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_LOCAL;
+import static dev.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ORGANIZATION;
+import static dev.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ROLE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -21,12 +21,6 @@ import java.util.function.Function;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
-import org.highmed.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Resource;
@@ -35,6 +29,12 @@ import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
 
 public interface ReadAccessDaoTest<D extends Resource>
 {

@@ -1,13 +1,13 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.dao.MeasureReportDao;
-import org.highmed.dsf.fhir.search.parameters.MeasureReportIdentifier;
-import org.highmed.dsf.fhir.search.parameters.user.MeasureReportUserFilter;
 import org.hl7.fhir.r4.model.MeasureReport;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.MeasureReportDao;
+import dev.dsf.fhir.search.parameters.MeasureReportIdentifier;
+import dev.dsf.fhir.search.parameters.user.MeasureReportUserFilter;
 
 public class MeasureReportDaoJdbc extends AbstractResourceDaoJdbc<MeasureReport> implements MeasureReportDao
 {

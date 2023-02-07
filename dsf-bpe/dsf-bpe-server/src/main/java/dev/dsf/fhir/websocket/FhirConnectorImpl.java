@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.websocket;
+package dev.dsf.fhir.websocket;
 
 import java.util.List;
 import java.util.Map;
@@ -7,13 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
-import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
-import org.highmed.dsf.fhir.subscription.EventResourceHandler;
-import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
-import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
-import org.highmed.dsf.fhir.subscription.SubscriptionHandlerFactory;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
@@ -28,6 +21,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebsocketClientProvider;
+import dev.dsf.fhir.client.WebsocketClient;
+import dev.dsf.fhir.subscription.EventResourceHandler;
+import dev.dsf.fhir.subscription.ExistingResourceLoader;
+import dev.dsf.fhir.subscription.PingEventResourceHandler;
+import dev.dsf.fhir.subscription.SubscriptionHandlerFactory;
 
 public class FhirConnectorImpl<R extends Resource> implements FhirConnector, InitializingBean
 {

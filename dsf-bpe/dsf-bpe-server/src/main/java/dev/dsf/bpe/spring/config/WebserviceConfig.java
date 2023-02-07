@@ -1,11 +1,12 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import org.camunda.bpm.engine.ProcessEngine;
-import org.highmed.dsf.bpe.webservice.ProcessService;
-import org.highmed.dsf.bpe.webservice.StatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.bpe.webservice.ProcessService;
+import dev.dsf.bpe.webservice.StatusService;
 
 @Configuration
 public class WebserviceConfig

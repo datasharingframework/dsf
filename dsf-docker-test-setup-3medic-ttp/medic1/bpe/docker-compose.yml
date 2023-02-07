@@ -1,10 +1,10 @@
 version: '3.8'
 services:
   app:
-    image: registry:5000/highmed/bpe
+    image: registry:5000/datasharingframework/bpe
     restart: "no"
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5

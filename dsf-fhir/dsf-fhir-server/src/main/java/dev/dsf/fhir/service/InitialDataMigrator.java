@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 public interface InitialDataMigrator
 {

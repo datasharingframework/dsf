@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.Map;
@@ -6,9 +6,10 @@ import java.util.function.Predicate;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.service.ResourceReference;
 
 public interface ReferencesHelper<R extends Resource>
 {

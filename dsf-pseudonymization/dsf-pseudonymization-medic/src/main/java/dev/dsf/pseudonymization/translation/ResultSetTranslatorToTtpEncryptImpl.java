@@ -1,6 +1,6 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
-import static org.highmed.pseudonymization.openehr.Constants.RBF_COLUMN_PATH;
+import static dev.dsf.pseudonymization.openehr.Constants.RBF_COLUMN_PATH;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +12,12 @@ import java.util.stream.Stream;
 
 import javax.crypto.SecretKey;
 
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.structure.Column;
-import org.highmed.openehr.model.structure.Meta;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.openehr.model.structure.RowElement;
-import org.highmed.pseudonymization.openehr.Constants;
+import dev.dsf.openehr.model.datatypes.StringRowElement;
+import dev.dsf.openehr.model.structure.Column;
+import dev.dsf.openehr.model.structure.Meta;
+import dev.dsf.openehr.model.structure.ResultSet;
+import dev.dsf.openehr.model.structure.RowElement;
+import dev.dsf.pseudonymization.openehr.Constants;
 
 public class ResultSetTranslatorToTtpEncryptImpl extends AbstractResultSetTranslator
 		implements ResultSetTranslatorToTtpEncrypt

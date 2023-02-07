@@ -1,12 +1,7 @@
-package org.highmed.mpi.client.pdq;
+package dev.dsf.mpi.client.pdq;
 
 import java.util.List;
 
-import org.highmed.mpi.client.Idat;
-import org.highmed.mpi.client.IdatNotFoundException;
-import org.highmed.mpi.client.MasterPatientIndexClient;
-import org.highmed.mpi.client.message.MessageHelper;
-import org.highmed.mpi.client.message.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +11,11 @@ import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.v25.message.QBP_Q21;
 import ca.uhn.hl7v2.model.v25.message.RSP_K21;
 import ca.uhn.hl7v2.util.SocketFactory;
+import dev.dsf.mpi.client.Idat;
+import dev.dsf.mpi.client.IdatNotFoundException;
+import dev.dsf.mpi.client.MasterPatientIndexClient;
+import dev.dsf.mpi.client.message.MessageHelper;
+import dev.dsf.mpi.client.message.QueryParameter;
 
 public class MasterPatientIndexClientPdq extends AbstractHl7v2Client implements MasterPatientIndexClient
 {

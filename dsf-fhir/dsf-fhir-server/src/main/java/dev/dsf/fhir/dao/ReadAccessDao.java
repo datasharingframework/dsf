@@ -1,11 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.authentication.UserRole;
+import dev.dsf.fhir.authentication.UserRole;
 
 public interface ReadAccessDao
 {

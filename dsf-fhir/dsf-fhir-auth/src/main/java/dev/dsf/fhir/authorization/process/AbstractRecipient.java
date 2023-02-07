@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization.process;
+package dev.dsf.fhir.authorization.process;
 
 abstract class AbstractRecipient implements Recipient
 {

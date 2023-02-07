@@ -1,4 +1,4 @@
-package org.highmed.mpi.client.security;
+package dev.dsf.mpi.client.security;
 
 import java.io.IOException;
 import java.net.ServerSocket;

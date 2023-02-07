@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.listener;
+package dev.dsf.bpe.listener;
 
 import java.util.Objects;
 

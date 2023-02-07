@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.MeasureReportDaoJdbc;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.MeasureReportDaoJdbc;
 
 public class MeasureReportDaoTest extends AbstractResourceDaoTest<MeasureReport, MeasureReportDao>
 		implements ReadAccessDaoTest<MeasureReport>

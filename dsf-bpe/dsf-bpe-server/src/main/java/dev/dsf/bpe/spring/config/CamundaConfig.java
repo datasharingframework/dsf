@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,19 +10,6 @@ import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.VariableSerializerFactory;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
-import org.highmed.dsf.bpe.camunda.FallbackSerializerFactory;
-import org.highmed.dsf.bpe.camunda.MultiVersionSpringProcessEngineConfiguration;
-import org.highmed.dsf.bpe.delegate.DelegateProvider;
-import org.highmed.dsf.bpe.delegate.DelegateProviderImpl;
-import org.highmed.dsf.bpe.listener.CallActivityListener;
-import org.highmed.dsf.bpe.listener.DebugLoggingBpmnParseListener;
-import org.highmed.dsf.bpe.listener.DefaultBpmnParseListener;
-import org.highmed.dsf.bpe.listener.DefaultUserTaskListener;
-import org.highmed.dsf.bpe.listener.EndListener;
-import org.highmed.dsf.bpe.listener.StartListener;
-import org.highmed.dsf.bpe.plugin.ProcessPluginProvider;
-import org.highmed.dsf.bpe.plugin.ProcessPluginProviderImpl;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -32,6 +19,20 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import dev.dsf.bpe.camunda.FallbackSerializerFactory;
+import dev.dsf.bpe.camunda.MultiVersionSpringProcessEngineConfiguration;
+import dev.dsf.bpe.delegate.DelegateProvider;
+import dev.dsf.bpe.delegate.DelegateProviderImpl;
+import dev.dsf.bpe.listener.CallActivityListener;
+import dev.dsf.bpe.listener.DebugLoggingBpmnParseListener;
+import dev.dsf.bpe.listener.DefaultBpmnParseListener;
+import dev.dsf.bpe.listener.DefaultUserTaskListener;
+import dev.dsf.bpe.listener.EndListener;
+import dev.dsf.bpe.listener.StartListener;
+import dev.dsf.bpe.plugin.ProcessPluginProvider;
+import dev.dsf.bpe.plugin.ProcessPluginProviderImpl;
+import dev.dsf.fhir.client.FhirWebserviceClientProvider;
 
 @Configuration
 public class CamundaConfig

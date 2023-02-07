@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.highmed.dsf.fhir.webservice.specification.NamingSystemService;
 import org.hl7.fhir.r4.model.NamingSystem;
+
+import dev.dsf.fhir.webservice.specification.NamingSystemService;
 
 @Path(NamingSystemServiceJaxrs.PATH)
 public class NamingSystemServiceJaxrs extends AbstractResourceServiceJaxrs<NamingSystem, NamingSystemService>

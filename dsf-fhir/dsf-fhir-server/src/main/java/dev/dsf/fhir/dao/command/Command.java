@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -7,10 +7,11 @@ import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
+
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.validation.SnapshotGenerator;
 
 public interface Command
 {

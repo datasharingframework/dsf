@@ -1,14 +1,13 @@
-package org.highmed.dsf.fhir.task;
+package dev.dsf.fhir.task;
 
-import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK;
-import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
+import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK;
+import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -22,6 +21,8 @@ import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.UrlType;
+
+import dev.dsf.fhir.variables.FhirResourceValues;
 
 public class TaskHelperImpl implements TaskHelper
 {

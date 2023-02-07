@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.generator;
+package dev.dsf.tools.generator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

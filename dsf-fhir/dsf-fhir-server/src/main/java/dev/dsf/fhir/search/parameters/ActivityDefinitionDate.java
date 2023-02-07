@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.search.parameters;
+package dev.dsf.fhir.search.parameters;
 
-import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+
+import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 
 @SearchParameterDefinition(name = ActivityDefinitionDate.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition-date", type = SearchParamType.DATE, documentation = "The activity definition publication date")
 public class ActivityDefinitionDate extends AbstractDateTimeParameter<ActivityDefinition>

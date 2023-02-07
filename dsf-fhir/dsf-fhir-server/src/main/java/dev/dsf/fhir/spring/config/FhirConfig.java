@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import java.util.Locale;
 

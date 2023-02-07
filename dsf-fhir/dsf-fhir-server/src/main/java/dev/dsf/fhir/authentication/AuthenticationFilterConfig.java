@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authentication;
+package dev.dsf.fhir.authentication;
 
 import javax.servlet.http.HttpServletRequest;
 

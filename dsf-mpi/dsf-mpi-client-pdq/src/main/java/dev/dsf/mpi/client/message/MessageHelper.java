@@ -1,12 +1,9 @@
-package org.highmed.mpi.client.message;
+package dev.dsf.mpi.client.message;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.highmed.mpi.client.Idat;
-import org.highmed.mpi.client.IdatNotFoundException;
-import org.highmed.mpi.client.idat.IdatImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +23,9 @@ import ca.uhn.hl7v2.model.v25.segment.PID;
 import ca.uhn.hl7v2.model.v25.segment.QPD;
 import ca.uhn.hl7v2.model.v25.segment.RCP;
 import ca.uhn.hl7v2.util.Terser;
+import dev.dsf.mpi.client.Idat;
+import dev.dsf.mpi.client.IdatNotFoundException;
+import dev.dsf.mpi.client.idat.IdatImpl;
 
 public class MessageHelper
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -22,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.webservice.specification.BasicResourceService;
 
 public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends BasicResourceService<R>>
 		extends AbstractServiceJaxrs<S> implements BasicResourceService<R>, InitializingBean

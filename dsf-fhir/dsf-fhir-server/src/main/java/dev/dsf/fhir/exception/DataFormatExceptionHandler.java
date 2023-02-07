@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.exception;
+package dev.dsf.fhir.exception;
 
 import java.util.Objects;
 
@@ -7,7 +7,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import dev.dsf.fhir.help.ResponseGenerator;
 
 @Provider
 public class DataFormatExceptionHandler implements ExceptionMapper<DataFormatException>, InitializingBean

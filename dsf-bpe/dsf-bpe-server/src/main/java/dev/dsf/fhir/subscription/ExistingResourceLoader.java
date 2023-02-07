@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.subscription;
+package dev.dsf.fhir.subscription;
 
 import java.util.List;
 import java.util.Map;

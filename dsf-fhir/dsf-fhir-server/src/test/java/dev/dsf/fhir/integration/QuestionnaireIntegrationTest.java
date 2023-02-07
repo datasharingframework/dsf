@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -10,12 +10,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
-import org.highmed.dsf.fhir.dao.QuestionnaireDao;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.QuestionnaireDao;
 
 public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
 {

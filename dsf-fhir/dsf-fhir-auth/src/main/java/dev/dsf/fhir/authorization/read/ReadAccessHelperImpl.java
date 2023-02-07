@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization.read;
+package dev.dsf.fhir.authorization.read;
 
 import java.util.Arrays;
 import java.util.List;

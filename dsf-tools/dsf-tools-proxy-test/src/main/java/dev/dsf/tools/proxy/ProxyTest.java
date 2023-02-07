@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.proxy;
+package dev.dsf.tools.proxy;
 
 import java.io.Console;
 import java.util.Arrays;

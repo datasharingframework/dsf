@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.prefer;
+package dev.dsf.fhir.prefer;
 
 public enum PreferHandlingType
 {

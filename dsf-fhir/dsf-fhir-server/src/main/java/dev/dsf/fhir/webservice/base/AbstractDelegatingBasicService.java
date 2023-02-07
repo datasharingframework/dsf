@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.webservice.base;
+package dev.dsf.fhir.webservice.base;
 
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserProvider;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.UserProvider;
 
 public class AbstractDelegatingBasicService<S extends BasicService> implements BasicService, InitializingBean
 {

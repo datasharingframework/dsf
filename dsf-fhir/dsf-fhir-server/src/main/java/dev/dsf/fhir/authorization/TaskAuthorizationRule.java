@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization;
+package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,14 +12,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.authentication.OrganizationProvider;
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.dao.TaskDao;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
@@ -33,6 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.authentication.OrganizationProvider;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.dao.TaskDao;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.service.ResourceReference;
 
 public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskDao>
 {

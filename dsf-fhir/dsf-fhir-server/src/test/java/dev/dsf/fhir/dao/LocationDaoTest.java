@@ -1,10 +1,11 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 import org.hl7.fhir.r4.model.Location;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 
 public class LocationDaoTest extends AbstractResourceDaoTest<Location, LocationDao>
 		implements ReadAccessDaoTest<Location>

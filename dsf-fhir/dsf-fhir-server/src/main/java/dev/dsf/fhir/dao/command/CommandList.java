@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import javax.ws.rs.WebApplicationException;
 

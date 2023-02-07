@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -9,11 +9,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 
 @Path(StructureDefinitionServiceJaxrs.PATH)
 public class StructureDefinitionServiceJaxrs

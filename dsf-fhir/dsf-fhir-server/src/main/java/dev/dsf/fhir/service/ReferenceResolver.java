@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 import java.sql.Connection;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.authentication.User;
 
 public interface ReferenceResolver
 {

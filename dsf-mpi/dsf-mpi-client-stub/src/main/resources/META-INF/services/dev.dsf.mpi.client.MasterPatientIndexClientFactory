@@ -1,1 +1,1 @@
-org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory
+dev.dsf.mpi.client.stub.MasterPatientIndexClientStubFactory

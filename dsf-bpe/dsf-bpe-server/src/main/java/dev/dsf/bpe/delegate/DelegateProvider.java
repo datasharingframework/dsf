@@ -1,10 +1,11 @@
-package org.highmed.dsf.bpe.delegate;
+package dev.dsf.bpe.delegate;
 
 import java.util.List;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.springframework.context.ApplicationContext;
+
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
 
 public interface DelegateProvider
 {

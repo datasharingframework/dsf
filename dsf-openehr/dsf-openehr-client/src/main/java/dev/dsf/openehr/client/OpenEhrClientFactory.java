@@ -1,4 +1,4 @@
-package org.highmed.openehr.client;
+package dev.dsf.openehr.client;
 
 import java.util.function.BiFunction;
 

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -7,17 +7,6 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.prefer.PreferReturnType;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ResourceReference;
-import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -27,6 +16,18 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.service.ResourceReference;
+import dev.dsf.fhir.service.ResourceReference.ReferenceType;
+import dev.dsf.fhir.validation.SnapshotGenerator;
 
 public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>>
 		extends AbstractCommandWithResource<R, D> implements Command

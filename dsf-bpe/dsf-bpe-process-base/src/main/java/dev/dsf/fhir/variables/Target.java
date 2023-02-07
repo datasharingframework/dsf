@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.variables;
+package dev.dsf.fhir.variables;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;

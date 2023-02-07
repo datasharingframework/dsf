@@ -1,6 +1,4 @@
-package org.highmed.dsf.fhir.client;
-
-import org.highmed.fhir.client.WebsocketClient;
+package dev.dsf.fhir.client;
 
 public interface FhirWebsocketClientProvider extends FhirWebserviceClientProvider
 {

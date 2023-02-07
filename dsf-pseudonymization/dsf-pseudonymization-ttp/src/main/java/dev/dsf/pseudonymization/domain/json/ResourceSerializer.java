@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.domain.json;
+package dev.dsf.pseudonymization.domain.json;
 
 import java.io.IOException;
 

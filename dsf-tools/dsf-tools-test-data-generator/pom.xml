@@ -60,7 +60,7 @@
 					<arguments>
 						<argument>-classpath</argument>
 						<classpath/>
-						<argument>org.highmed.dsf.tools.generator.TestDataGenerator</argument>
+						<argument>dev.dsf.tools.generator.TestDataGenerator</argument>
 					</arguments>
 					<workingDirectory>${project.basedir}</workingDirectory>
 				</configuration>

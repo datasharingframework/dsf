@@ -1,4 +1,4 @@
-package org.highmed.openehr.client.impl;
+package dev.dsf.openehr.client.impl;
 
 import java.io.IOException;
 import java.nio.file.Files;

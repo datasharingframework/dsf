@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.service;
+package dev.dsf.bpe.service;
 
 public interface BpmnServiceDelegateValidationService
 {

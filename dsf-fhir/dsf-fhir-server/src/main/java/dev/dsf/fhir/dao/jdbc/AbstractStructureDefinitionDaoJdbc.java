@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.jdbc;
+package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -7,17 +7,17 @@ import java.util.function.Function;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
-import org.highmed.dsf.fhir.search.parameters.StructureDefinitionDate;
-import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
-import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
-import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
-import org.highmed.dsf.fhir.search.parameters.StructureDefinitionVersion;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.search.SearchQueryUserFilter;
+import dev.dsf.fhir.search.parameters.StructureDefinitionDate;
+import dev.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
+import dev.dsf.fhir.search.parameters.StructureDefinitionStatus;
+import dev.dsf.fhir.search.parameters.StructureDefinitionUrl;
+import dev.dsf.fhir.search.parameters.StructureDefinitionVersion;
 
 abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdbc<StructureDefinition>
 		implements StructureDefinitionDao

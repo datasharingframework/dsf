@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.resources;
+package dev.dsf.fhir.resources;
 
 import java.time.LocalDate;
 import java.util.List;

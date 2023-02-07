@@ -1,6 +1,6 @@
-package org.highmed.pseudonymization.translation;
+package dev.dsf.pseudonymization.translation;
 
-import org.highmed.openehr.model.structure.ResultSet;
+import dev.dsf.openehr.model.structure.ResultSet;
 
 public interface ResultSetTranslator
 {

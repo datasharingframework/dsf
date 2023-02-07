@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.resources;
+package dev.dsf.fhir.resources;
 
 import java.util.Objects;
 

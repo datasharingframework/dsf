@@ -1,14 +1,15 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import org.highmed.dsf.fhir.dao.jdbc.PatientDaoJdbc;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.PatientDaoJdbc;
 
 public class PatientDaoTest extends AbstractResourceDaoTest<Patient, PatientDao> implements ReadAccessDaoTest<Patient>
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization.read;
+package dev.dsf.fhir.authorization.read;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

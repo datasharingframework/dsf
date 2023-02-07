@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.impl;
+package dev.dsf.fhir.webservice.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,25 +15,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventHandler;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.history.HistoryService;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
-import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -47,6 +28,26 @@ import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
+import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.history.HistoryService;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.parameters.ResourceLastUpdated;
+import dev.dsf.fhir.search.parameters.StructureDefinitionUrl;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 
 public class StructureDefinitionServiceImpl extends
 		AbstractResourceServiceImpl<StructureDefinitionDao, StructureDefinition> implements StructureDefinitionService

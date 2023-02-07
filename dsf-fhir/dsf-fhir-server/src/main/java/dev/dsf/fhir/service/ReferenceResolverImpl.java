@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service;
+package dev.dsf.fhir.service;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -12,19 +12,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.client.ClientProvider;
-import org.highmed.dsf.fhir.dao.NamingSystemDao;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.help.ParameterConverter;
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -35,6 +22,20 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.client.ClientProvider;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.dao.NamingSystemDao;
+import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 
 public class ReferenceResolverImpl implements ReferenceResolver, InitializingBean
 {

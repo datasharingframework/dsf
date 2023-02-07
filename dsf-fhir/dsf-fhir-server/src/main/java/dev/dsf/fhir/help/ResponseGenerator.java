@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.help;
+package dev.dsf.fhir.help;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -16,14 +16,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.history.History;
-import org.highmed.dsf.fhir.history.HistoryEntry;
-import org.highmed.dsf.fhir.prefer.PreferReturnType;
-import org.highmed.dsf.fhir.search.PageAndCount;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -43,6 +35,14 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.history.History;
+import dev.dsf.fhir.history.HistoryEntry;
+import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.search.PageAndCount;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.ResourceReference;
 
 public class ResponseGenerator
 {

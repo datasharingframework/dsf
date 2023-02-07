@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao.exception;
+package dev.dsf.fhir.dao.exception;
 
 public class ResourceNotFoundException extends Exception
 {

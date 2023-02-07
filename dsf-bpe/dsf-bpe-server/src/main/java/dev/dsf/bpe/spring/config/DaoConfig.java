@@ -1,16 +1,17 @@
-package org.highmed.dsf.bpe.spring.config;
+package dev.dsf.bpe.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.bpe.dao.LastEventTimeDao;
-import org.highmed.dsf.bpe.dao.LastEventTimeDaoJdbc;
-import org.highmed.dsf.bpe.dao.ProcessPluginResourcesDao;
-import org.highmed.dsf.bpe.dao.ProcessPluginResourcesDaoJdbc;
-import org.highmed.dsf.bpe.dao.ProcessStateDao;
-import org.highmed.dsf.bpe.dao.ProcessStateDaoJdbc;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.bpe.dao.LastEventTimeDao;
+import dev.dsf.bpe.dao.LastEventTimeDaoJdbc;
+import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
+import dev.dsf.bpe.dao.ProcessPluginResourcesDaoJdbc;
+import dev.dsf.bpe.dao.ProcessStateDao;
+import dev.dsf.bpe.dao.ProcessStateDaoJdbc;
 
 @Configuration
 public class DaoConfig

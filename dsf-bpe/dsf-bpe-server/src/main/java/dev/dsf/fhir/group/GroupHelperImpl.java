@@ -1,7 +1,7 @@
-package org.highmed.dsf.fhir.group;
+package dev.dsf.fhir.group;
 
-import static org.highmed.dsf.bpe.ConstantsBase.CODE_TYPE_AQL_QUERY;
-import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
+import static dev.dsf.bpe.ConstantsBase.CODE_TYPE_AQL_QUERY;
+import static dev.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
 
 import java.util.List;
 import java.util.stream.Collectors;

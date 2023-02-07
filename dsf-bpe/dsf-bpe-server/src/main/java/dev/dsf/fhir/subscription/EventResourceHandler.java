@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.subscription;
+package dev.dsf.fhir.subscription;
 
 import org.hl7.fhir.r4.model.Resource;
 

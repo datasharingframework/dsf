@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.plugin;
+package dev.dsf.bpe.plugin;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,11 +24,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.bpe.ProcessPluginDefinition;
-import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
-import org.highmed.dsf.bpe.process.ProcessState;
-import org.highmed.dsf.bpe.process.ProcessStateChangeOutcome;
-import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -36,6 +31,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.ProcessPluginDefinition;
+import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.process.ProcessState;
+import dev.dsf.bpe.process.ProcessStateChangeOutcome;
+import dev.dsf.fhir.resources.ResourceProvider;
 
 public class ProcessPluginProviderImpl implements ProcessPluginProvider, InitializingBean
 {

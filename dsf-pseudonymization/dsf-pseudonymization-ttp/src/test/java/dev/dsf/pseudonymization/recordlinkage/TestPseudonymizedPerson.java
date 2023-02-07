@@ -1,6 +1,6 @@
-package org.highmed.pseudonymization.recordlinkage;
+package dev.dsf.pseudonymization.recordlinkage;
 
-import org.highmed.pseudonymization.domain.PseudonymizedPerson;
+import dev.dsf.pseudonymization.domain.PseudonymizedPerson;
 
 public class TestPseudonymizedPerson implements PseudonymizedPerson
 {

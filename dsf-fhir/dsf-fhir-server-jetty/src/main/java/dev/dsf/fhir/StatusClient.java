@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir;
+package dev.dsf.fhir;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -7,7 +7,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 
-import org.highmed.dsf.fhir.webservice.specification.StatusService;
+import dev.dsf.fhir.webservice.specification.StatusService;
 
 public class StatusClient
 {

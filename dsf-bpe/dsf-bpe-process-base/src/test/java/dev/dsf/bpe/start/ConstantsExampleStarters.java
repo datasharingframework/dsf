@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.start;
+package dev.dsf.bpe.start;
 
 public interface ConstantsExampleStarters
 {

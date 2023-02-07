@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.highmed.dsf.fhir.webservice.specification.PractitionerService;
 import org.hl7.fhir.r4.model.Practitioner;
+
+import dev.dsf.fhir.webservice.specification.PractitionerService;
 
 @Path(PractitionerServiceJaxrs.PATH)
 public class PractitionerServiceJaxrs extends AbstractResourceServiceJaxrs<Practitioner, PractitionerService>

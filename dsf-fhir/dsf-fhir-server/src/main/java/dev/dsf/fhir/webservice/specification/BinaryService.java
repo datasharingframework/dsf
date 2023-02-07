@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.webservice.specification;
+package dev.dsf.fhir.webservice.specification;
 
 import java.io.InputStream;
 

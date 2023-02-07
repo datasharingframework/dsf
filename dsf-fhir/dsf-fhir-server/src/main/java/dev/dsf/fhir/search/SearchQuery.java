@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search;
+package dev.dsf.fhir.search;
 
 import java.sql.Array;
 import java.sql.Connection;
@@ -17,12 +17,13 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.dao.provider.DaoProvider;
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 
 public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 {

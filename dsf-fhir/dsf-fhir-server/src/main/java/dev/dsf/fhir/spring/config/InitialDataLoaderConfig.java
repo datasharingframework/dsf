@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
@@ -11,8 +11,6 @@ import java.nio.file.Paths;
 import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
-import org.highmed.dsf.fhir.service.InitialDataLoader;
-import org.highmed.dsf.fhir.service.InitialDataLoaderImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
 import ca.uhn.fhir.parser.IParser;
+import dev.dsf.fhir.service.InitialDataLoader;
+import dev.dsf.fhir.service.InitialDataLoaderImpl;
 
 @Configuration
 public class InitialDataLoaderConfig

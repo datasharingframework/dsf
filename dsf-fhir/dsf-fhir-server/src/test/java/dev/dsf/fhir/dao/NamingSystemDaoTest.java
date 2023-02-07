@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.dao;
+package dev.dsf.fhir.dao;
 
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.junit.Assert.assertEquals;
@@ -8,11 +8,12 @@ import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 
 public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, NamingSystemDao>
 		implements ReadAccessDaoTest<NamingSystem>

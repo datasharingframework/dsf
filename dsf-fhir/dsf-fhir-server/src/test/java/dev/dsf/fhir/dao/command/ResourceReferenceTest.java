@@ -1,17 +1,18 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import static org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DOCUMENTATION;
 import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.service.ResourceReference;
-import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.junit.Test;
+
+import dev.dsf.fhir.service.ResourceReference;
+import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 
 public class ResourceReferenceTest
 {

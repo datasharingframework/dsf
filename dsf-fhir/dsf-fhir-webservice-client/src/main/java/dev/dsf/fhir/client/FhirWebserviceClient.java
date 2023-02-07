@@ -1,4 +1,4 @@
-package org.highmed.fhir.client;
+package dev.dsf.fhir.client;
 
 public interface FhirWebserviceClient extends BasicFhirWebserviceClient, RetryClient<BasicFhirWebserviceClient>
 {

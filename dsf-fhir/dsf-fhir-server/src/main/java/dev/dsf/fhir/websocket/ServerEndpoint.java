@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.websocket;
+package dev.dsf.fhir.websocket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -19,13 +19,14 @@ import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
 import org.apache.commons.codec.binary.Hex;
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
-import org.highmed.dsf.fhir.subscription.WebSocketSubscriptionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
 
 public class ServerEndpoint extends Endpoint implements InitializingBean, DisposableBean
 {

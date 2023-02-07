@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe;
+package dev.dsf.bpe;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -7,18 +7,18 @@ import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
-import org.highmed.dsf.fhir.resources.ActivityDefinitionResource;
-import org.highmed.dsf.fhir.resources.CodeSystemResource;
-import org.highmed.dsf.fhir.resources.NamingSystemResource;
-import org.highmed.dsf.fhir.resources.ResourceProvider;
-import org.highmed.dsf.fhir.resources.StructureDefinitionResource;
-import org.highmed.dsf.fhir.resources.ValueSetResource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.resources.ActivityDefinitionResource;
+import dev.dsf.fhir.resources.CodeSystemResource;
+import dev.dsf.fhir.resources.NamingSystemResource;
+import dev.dsf.fhir.resources.ResourceProvider;
+import dev.dsf.fhir.resources.StructureDefinitionResource;
+import dev.dsf.fhir.resources.ValueSetResource;
 
 /**
  * A provider configuration file named "org.highmed.dsf.DsfProcessPluginDefinition" containing the canonical name of the

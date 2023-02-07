@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.hapi;
+package dev.dsf.fhir.hapi;
 
 import static org.junit.Assert.*;
 

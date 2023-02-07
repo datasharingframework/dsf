@@ -1,14 +1,7 @@
-package org.highmed.dsf.fhir.spring.config;
+package dev.dsf.fhir.spring.config;
 
 import java.sql.Connection;
 
-import org.highmed.dsf.fhir.dao.command.ValidationHelper;
-import org.highmed.dsf.fhir.dao.command.ValidationHelperImpl;
-import org.highmed.dsf.fhir.service.ValidationSupportWithCache;
-import org.highmed.dsf.fhir.service.ValidationSupportWithFetchFromDb;
-import org.highmed.dsf.fhir.service.ValidationSupportWithFetchFromDbWithTransaction;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -21,6 +14,13 @@ import org.springframework.context.annotation.Scope;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import dev.dsf.fhir.dao.command.ValidationHelper;
+import dev.dsf.fhir.dao.command.ValidationHelperImpl;
+import dev.dsf.fhir.service.ValidationSupportWithCache;
+import dev.dsf.fhir.service.ValidationSupportWithFetchFromDb;
+import dev.dsf.fhir.service.ValidationSupportWithFetchFromDbWithTransaction;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ResourceValidatorImpl;
 
 @Configuration
 public class ValidationConfig

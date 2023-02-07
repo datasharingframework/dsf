@@ -1,4 +1,4 @@
-package org.highmed.fhir.client;
+package dev.dsf.fhir.client;
 
 import java.security.KeyStore;
 import java.util.List;

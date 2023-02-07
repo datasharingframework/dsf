@@ -1,8 +1,9 @@
-package org.highmed.dsf.bpe.camunda;
+package dev.dsf.bpe.camunda;
 
 import org.camunda.bpm.engine.impl.telemetry.dto.TelemetryDataImpl;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
-import org.highmed.dsf.bpe.delegate.DelegateProvider;
+
+import dev.dsf.bpe.delegate.DelegateProvider;
 
 public class MultiVersionSpringProcessEngineConfiguration extends SpringProcessEngineConfiguration
 {

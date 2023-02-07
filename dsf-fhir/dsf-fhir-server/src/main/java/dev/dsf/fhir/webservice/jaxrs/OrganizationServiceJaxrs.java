@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.highmed.dsf.fhir.webservice.specification.OrganizationService;
 import org.hl7.fhir.r4.model.Organization;
+
+import dev.dsf.fhir.webservice.specification.OrganizationService;
 
 @Path(OrganizationServiceJaxrs.PATH)
 public class OrganizationServiceJaxrs extends AbstractResourceServiceJaxrs<Organization, OrganizationService>

@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.integration;
+package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,12 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MediaType;
 
-import org.highmed.dsf.fhir.dao.BinaryDao;
-import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
-import org.highmed.dsf.fhir.search.PartialResult;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -43,6 +37,13 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
 import org.junit.Test;
+
+import dev.dsf.fhir.dao.BinaryDao;
+import dev.dsf.fhir.dao.DocumentReferenceDao;
+import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.dao.ResearchStudyDao;
+import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.search.PartialResult;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {

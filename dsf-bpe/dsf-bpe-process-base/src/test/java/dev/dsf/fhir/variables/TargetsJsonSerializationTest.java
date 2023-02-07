@@ -1,11 +1,10 @@
-package org.highmed.dsf.fhir.variables;
+package dev.dsf.fhir.variables;
 
 import static org.junit.Assert.*;
 
 import java.util.Collections;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.json.ObjectMapperFactory;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.json.ObjectMapperFactory;
 
 public class TargetsJsonSerializationTest
 {

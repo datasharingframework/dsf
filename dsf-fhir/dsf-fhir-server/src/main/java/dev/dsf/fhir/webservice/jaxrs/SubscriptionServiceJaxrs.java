@@ -1,9 +1,10 @@
-package org.highmed.dsf.fhir.webservice.jaxrs;
+package dev.dsf.fhir.webservice.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.highmed.dsf.fhir.webservice.specification.SubscriptionService;
 import org.hl7.fhir.r4.model.Subscription;
+
+import dev.dsf.fhir.webservice.specification.SubscriptionService;
 
 @Path(SubscriptionServiceJaxrs.PATH)
 public class SubscriptionServiceJaxrs extends AbstractResourceServiceJaxrs<Subscription, SubscriptionService>

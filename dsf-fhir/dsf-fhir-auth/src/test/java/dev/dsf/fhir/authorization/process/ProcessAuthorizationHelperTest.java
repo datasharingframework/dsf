@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.authorization.process;
+package dev.dsf.fhir.authorization.process;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionKind;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -27,6 +26,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.authentication.User;
 
 public class ProcessAuthorizationHelperTest
 {

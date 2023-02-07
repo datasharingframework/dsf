@@ -1,17 +1,18 @@
-package org.highmed.dsf.fhir.search.parameters;
+package dev.dsf.fhir.search.parameters;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
+import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 
 @SearchParameterDefinition(name = BundleIdentifier.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Bundle-identifier", type = SearchParamType.TOKEN, documentation = "Persistent identifier for the bundle")
 public class BundleIdentifier extends AbstractTokenParameter<Bundle>

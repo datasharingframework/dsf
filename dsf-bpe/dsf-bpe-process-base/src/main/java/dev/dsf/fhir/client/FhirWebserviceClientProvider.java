@@ -1,6 +1,4 @@
-package org.highmed.dsf.fhir.client;
-
-import org.highmed.fhir.client.FhirWebserviceClient;
+package dev.dsf.fhir.client;
 
 public interface FhirWebserviceClientProvider
 {

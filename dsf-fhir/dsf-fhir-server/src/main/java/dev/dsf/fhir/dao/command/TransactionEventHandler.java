@@ -1,11 +1,11 @@
-package org.highmed.dsf.fhir.dao.command;
+package dev.dsf.fhir.dao.command;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.event.Event;
-import org.highmed.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.Event;
+import dev.dsf.fhir.event.EventHandler;
 
 public class TransactionEventHandler implements EventHandler
 {

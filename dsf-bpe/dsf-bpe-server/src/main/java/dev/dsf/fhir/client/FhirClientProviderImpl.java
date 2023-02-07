@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.client;
+package dev.dsf.fhir.client;
 
 import java.net.URI;
 import java.security.KeyStore;
@@ -6,16 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
-import org.highmed.fhir.client.WebsocketClient;
-import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.service.ReferenceCleaner;
 
 public class FhirClientProviderImpl
 		implements FhirWebserviceClientProvider, FhirWebsocketClientProvider, InitializingBean

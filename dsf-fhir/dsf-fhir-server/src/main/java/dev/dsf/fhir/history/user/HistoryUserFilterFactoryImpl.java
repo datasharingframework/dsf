@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.history.user;
+package dev.dsf.fhir.history.user;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -34,6 +33,8 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
+
+import dev.dsf.fhir.authentication.User;
 
 public class HistoryUserFilterFactoryImpl implements HistoryUserFilterFactory
 {

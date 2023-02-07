@@ -1,10 +1,10 @@
-package org.highmed.dsf.fhir.history.user;
+package dev.dsf.fhir.history.user;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.search.parameters.user.SubscriptionUserFilter;
 import org.hl7.fhir.r4.model.Subscription;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.fhir.authentication.User;
+import dev.dsf.fhir.search.parameters.user.SubscriptionUserFilter;
 
 public class SubscriptionHistoryUserFilter extends SubscriptionUserFilter implements HistoryUserFilter
 {

@@ -1,16 +1,17 @@
-package org.highmed.dsf.fhir.webservice.secure;
+package dev.dsf.fhir.webservice.secure;
 
 import java.util.Objects;
 
 import javax.ws.rs.core.Response;
 
-import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
-import org.highmed.dsf.fhir.webservice.base.BasicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
+import dev.dsf.fhir.webservice.base.BasicService;
 
 public abstract class AbstractServiceSecure<S extends BasicService> extends AbstractDelegatingBasicService<S>
 		implements BasicService, InitializingBean

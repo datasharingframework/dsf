@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.validation;
+package dev.dsf.fhir.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

@@ -1,6 +1,6 @@
-package org.highmed.pseudonymization.client;
+package dev.dsf.pseudonymization.client;
 
-import org.highmed.openehr.model.structure.ResultSet;
+import dev.dsf.openehr.model.structure.ResultSet;
 
 /**
  * Client interface to check consent based on a {@link ResultSet}

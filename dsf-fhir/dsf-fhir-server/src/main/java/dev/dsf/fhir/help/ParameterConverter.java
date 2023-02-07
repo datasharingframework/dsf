@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.help;
+package dev.dsf.fhir.help;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -19,13 +19,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
-import org.highmed.dsf.fhir.prefer.PreferHandlingType;
-import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.adapter.AbstractFhirAdapter;
+import dev.dsf.fhir.prefer.PreferHandlingType;
+import dev.dsf.fhir.prefer.PreferReturnType;
 
 public class ParameterConverter
 {

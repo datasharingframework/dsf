@@ -1,13 +1,14 @@
-package org.highmed.dsf.fhir.history;
+package dev.dsf.fhir.history;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
+
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import dev.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 
 public class SinceParameter extends AbstractDateTimeParameter<DomainResource>
 {

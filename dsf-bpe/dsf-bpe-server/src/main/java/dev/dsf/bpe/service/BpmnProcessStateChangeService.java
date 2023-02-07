@@ -1,10 +1,10 @@
-package org.highmed.dsf.bpe.service;
+package dev.dsf.bpe.service;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.bpe.process.BpmnFileAndModel;
-import org.highmed.dsf.bpe.process.ProcessStateChangeOutcome;
+import dev.dsf.bpe.process.BpmnFileAndModel;
+import dev.dsf.bpe.process.ProcessStateChangeOutcome;
 
 public interface BpmnProcessStateChangeService
 {

@@ -1,4 +1,4 @@
-package org.highmed.dsf.tools.db;
+package dev.dsf.tools.db;
 
 import java.util.Map;
 
