@@ -7,12 +7,12 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/ValueSet/bpmn-message"/>
 	<version value="0.5.0"/>
-	<name value="HiGHmed_Bpmn_Message_Values"/>
-	<title value="HiGHmed BPMN message values"/>
+	<name value="DSF_Bpmn_Message_Values"/>
+	<title value="DSF BPMN message values"/>
 	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
+	<publisher value="DSF"/>
 	<description
 			value="ValueSet with standard BPMN message values for Task resources"/>
 	<immutable value="true"/>

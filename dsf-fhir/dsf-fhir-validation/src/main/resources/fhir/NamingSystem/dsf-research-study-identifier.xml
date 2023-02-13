@@ -5,15 +5,14 @@
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<name value="HiGHmed_ResearchStudy_Identifier"/>
+	<name value="DSF_ResearchStudy_Identifier"/>
 	<status value="active" />
 	<kind value="identifier"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
-	<responsible value="HiGHmed"/>
+	<publisher value="DSF"/>
 	<description
 			value="UUID used to identify a ResearchStudy"/>
-	<usage value="Used withing HiGHmed to identify research studies"/>
+	<usage value="Used withing the DSF to identify research studies"/>
 	<uniqueId>
 		<type value="uuid"/>
 		<value value="http://dsf.dev/sid/research-study-identifier"/>

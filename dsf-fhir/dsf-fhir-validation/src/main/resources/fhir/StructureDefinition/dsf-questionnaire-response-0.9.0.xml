@@ -37,7 +37,7 @@
       <path value="QuestionnaireResponse.questionnaire"/>
       <min value="1"/>
     </element>
-    <!-- TODO: QuestionnaireResponse.author must be of highmed-organization profile -->
+    <!-- TODO: QuestionnaireResponse.author must be of dsf-organization profile -->
     <element id="QuestionnaireResponse.item">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
         <valueString value="Parameter"/>

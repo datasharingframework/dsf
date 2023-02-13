@@ -7,12 +7,12 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/CodeSystem/bpmn-message"/>
 	<version value="0.5.0"/>
-	<name value="HiGHmed_Bpmn_Message_Values"/>
-	<title value="HiGHmed BPMN message values"/>
+	<name value="DSF_Bpmn_Message_Values"/>
+	<title value="DSF BPMN message values"/>
 	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
+	<publisher value="DSF"/>
 	<description value="CodeSystem with standard BPMN message values for Task resources"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
@@ -33,7 +33,7 @@
 		<code value="correlation-key"/>
 		<display value="Correlation Key"/>
 		<definition
-				value="HiGHmed BPE correlation key used to identify multi-instance instances used for messaging multiple targets"/>
+				value="DSF BPE correlation key used to identify multi-instance instances used for messaging multiple targets"/>
 	</concept>
 	<concept>
 		<code value="error"/>

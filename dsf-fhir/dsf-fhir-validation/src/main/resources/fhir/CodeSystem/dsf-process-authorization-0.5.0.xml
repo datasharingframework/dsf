@@ -7,12 +7,12 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/CodeSystem/process-authorization"/>
 	<version value="0.5.0"/>
-	<name value="Process_Authorization"/>
-	<title value="Process Authorization"/>
+	<name value="DSF_Process_Authorization"/>
+	<title value="DSF Process Authorization"/>
 	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
+	<publisher value="DSF"/>
 	<description value="CodeSystem with proces authorization codes"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>

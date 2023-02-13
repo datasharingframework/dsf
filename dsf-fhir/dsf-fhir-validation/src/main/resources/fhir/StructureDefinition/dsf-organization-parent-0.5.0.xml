@@ -33,18 +33,18 @@
       </slicing>
       <min value="1" />
     </element>
-    <element id="Organization.identifier:highmedIdentifier">
+    <element id="Organization.identifier:dsfIdentifier">
       <path value="Organization.identifier" />
-      <sliceName value="highmedIdentifier" />
+      <sliceName value="dsfIdentifier" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Organization.identifier:highmedIdentifier.system">
+    <element id="Organization.identifier:dsfIdentifier.system">
       <path value="Organization.identifier.system" />
       <min value="1" />
       <fixedUri value="http://dsf.dev/sid/organization-identifier" />
     </element>
-    <element id="Organization.identifier:highmedIdentifier.value">
+    <element id="Organization.identifier:dsfIdentifier.value">
       <path value="Organization.identifier.value" />
       <min value="1" />
     </element>

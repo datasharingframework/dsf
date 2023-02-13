@@ -7,13 +7,13 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/CodeSystem/query-type"/>
 	<version value="0.5.0"/>
-	<name value="HiGHmed_Query_Type"/>
-	<title value="HiGHmed Query Type"/>
+	<name value="DSF_Query_Type"/>
+	<title value="DSF Query Type"/>
 	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
-	<description value="CodeSystem with HiGHmed query types for medical data stored in the data lake repositories"/>
+	<publisher value="DSF"/>
+	<description value="CodeSystem with DSF query types for medical data stored in the data lake repositories"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>

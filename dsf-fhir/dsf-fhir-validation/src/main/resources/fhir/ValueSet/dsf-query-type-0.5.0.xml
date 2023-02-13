@@ -7,14 +7,14 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/ValueSet/query-type"/>
 	<version value="0.5.0" />
-	<name value="HiGHmed_Query_Type"/>
-	<title value="HiGHmed Query Type"/>
+	<name value="DSF_Query_Type"/>
+	<title value="DSF Query Type"/>
 	<status value="active" />
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
+	<publisher value="DSF"/>
 	<description
-			value="ValueSet with HiGHmed query types used in Group resources query extension of the expression datatype"/>
+			value="ValueSet with DSF query types used in Group resources query extension of the expression datatype"/>
 	<immutable value="true"/>
 	<compose>
 		<include>

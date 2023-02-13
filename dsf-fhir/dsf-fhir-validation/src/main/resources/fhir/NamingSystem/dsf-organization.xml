@@ -5,15 +5,14 @@
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<name value="HiGHmed_Organization_Identifier"/>
+	<name value="DSF_Organization_Identifier"/>
 	<status value="active"/>
 	<kind value="identifier"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
-	<responsible value="HiGHmed, TTP Heilbronn"/>
+	<publisher value="DSF"/>
 	<description
-			value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, klinikum.uni-heidelberg.de, uksh.de"/>
-	<usage value="Used withing HiGHmed to identify organizations"/>
+			value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, ukhd.de, uksh.de"/>
+	<usage value="Used withing the DSF to identify organizations"/>
 	<uniqueId>
 		<modifierExtension url="http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference" >
 			<valueBoolean value="true"/>

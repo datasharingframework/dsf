@@ -58,18 +58,18 @@
       </slicing>
       <min value="1" />
     </element>
-    <element id="ResearchStudy.identifier:highmedIdentifier">
+    <element id="ResearchStudy.identifier:dsfIdentifier">
       <path value="ResearchStudy.identifier" />
-      <sliceName value="highmedIdentifier" />
+      <sliceName value="dsfIdentifier" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="ResearchStudy.identifier:highmedIdentifier.system">
+    <element id="ResearchStudy.identifier:dsfIdentifier.system">
       <path value="ResearchStudy.identifier.system" />
       <min value="1" />
       <fixedUri value="http://dsf.dev/sid/research-study-identifier" />
     </element>
-    <element id="ResearchStudy.identifier:highmedIdentifier.value">
+    <element id="ResearchStudy.identifier:dsfIdentifier.value">
       <path value="ResearchStudy.identifier.value" />
       <min value="1" />
     </element>

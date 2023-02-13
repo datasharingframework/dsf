@@ -33,18 +33,18 @@
       </slicing>
       <min value="1" />
     </element>
-    <element id="Endpoint.identifier:highmedIdentifier">
+    <element id="Endpoint.identifier:dsfIdentifier">
       <path value="Endpoint.identifier" />
-      <sliceName value="highmedIdentifier" />
+      <sliceName value="dsfIdentifier" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Endpoint.identifier:highmedIdentifier.system">
+    <element id="Endpoint.identifier:dsfIdentifier.system">
       <path value="Endpoint.identifier.system" />
       <min value="1" />
       <fixedUri value="http://dsf.dev/sid/endpoint-identifier" />
     </element>
-    <element id="Endpoint.identifier:highmedIdentifier.value">
+    <element id="Endpoint.identifier:dsfIdentifier.value">
       <path value="Endpoint.identifier.value" />
       <min value="1" />
     </element>

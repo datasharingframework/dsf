@@ -7,12 +7,12 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/ValueSet/process-authorization-requester"/>
 	<version value="0.5.0"/>
-	<name value="Process_Authorization_Requester"/>
-	<title value="Process Authorization Requester"/>
+	<name value="DSF_Process_Authorization_Requester"/>
+	<title value="DSF Process Authorization Requester"/>
 	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
+	<publisher value="DSF"/>
 	<description
 			value="ValueSet with proces authorization codes for requesters"/>
 	<immutable value="true"/>

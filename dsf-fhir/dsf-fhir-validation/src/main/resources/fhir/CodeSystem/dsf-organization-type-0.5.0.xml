@@ -7,13 +7,13 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/CodeSystem/organization-type"/>
 	<version value="0.5.0"/>
-	<name value="HiGHmed_Organization_Type"/>
-	<title value="HiGHmed Organization Type"/>
+	<name value="DSF_Organization_Type"/>
+	<title value="DSF Organization Type"/>
 	<status value="retired"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
-	<description value="CodeSystem with HiGHmed organization roles used in Organization resources"/>
+	<publisher value="DSF"/>
+	<description value="CodeSystem with DSF organization roles used in Organization resources"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>

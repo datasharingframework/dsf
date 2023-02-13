@@ -7,12 +7,12 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/ValueSet/read-access-tag"/>
 	<version value="0.5.0"/>
-	<name value="Read_Access_Tag"/>
-	<title value="Read Access Tag"/>
+	<name value="DSF_Read_Access_Tag"/>
+	<title value="DSF Read Access Tag"/>
 	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
-	<publisher value="HiGHmed"/>
+	<publisher value="DSF"/>
 	<description value="ValueSet with read access tags"/>
 	<immutable value="true"/>
 	<compose>
