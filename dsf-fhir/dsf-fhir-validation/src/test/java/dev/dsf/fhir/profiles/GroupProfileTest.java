@@ -25,9 +25,9 @@ public class GroupProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-extension-query-0.5.0.xml", "highmed-group-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-query-type-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-query-type-0.5.0.xml"));
+			Arrays.asList("dsf-extension-query-0.5.0.xml", "dsf-group-0.5.0.xml"),
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-query-type-0.5.0.xml"),
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-query-type-0.5.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

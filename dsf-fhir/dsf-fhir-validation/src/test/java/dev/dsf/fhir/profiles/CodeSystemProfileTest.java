@@ -29,10 +29,10 @@ public class CodeSystemProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-code-system-0.5.0.xml", "highmed-extension-read-access-organization-0.5.0.xml",
-					"highmed-extension-read-access-consortium-role-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml"));
+			Arrays.asList("dsf-code-system-0.5.0.xml", "dsf-extension-read-access-organization-0.5.0.xml",
+					"dsf-extension-read-access-consortium-role-0.5.0.xml"),
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml"),
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

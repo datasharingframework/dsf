@@ -25,7 +25,7 @@ public class QuestionnaireProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-questionnaire-0.9.0.xml"), Collections.emptyList(), Collections.emptyList());
+			Arrays.asList("dsf-questionnaire-0.9.0.xml"), Collections.emptyList(), Collections.emptyList());
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

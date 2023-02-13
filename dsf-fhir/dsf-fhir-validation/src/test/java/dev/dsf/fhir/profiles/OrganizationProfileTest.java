@@ -26,11 +26,11 @@ public class OrganizationProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-organization-0.5.0.xml", "highmed-organization-parent-0.5.0.xml",
-					"highmed-extension-certificate-thumbprint-0.5.0.xml", "highmed-endpoint-0.5.0.xml",
-					"highmed-extension-read-access-consortium-role-0.5.0.xml",
-					"highmed-extension-read-access-organization-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml"), Arrays.asList("highmed-read-access-tag-0.5.0.xml"));
+			Arrays.asList("dsf-organization-0.5.0.xml", "dsf-organization-parent-0.5.0.xml",
+					"dsf-extension-certificate-thumbprint-0.5.0.xml", "dsf-endpoint-0.5.0.xml",
+					"dsf-extension-read-access-consortium-role-0.5.0.xml",
+					"dsf-extension-read-access-organization-0.5.0.xml"),
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml"), Arrays.asList("dsf-read-access-tag-0.5.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
