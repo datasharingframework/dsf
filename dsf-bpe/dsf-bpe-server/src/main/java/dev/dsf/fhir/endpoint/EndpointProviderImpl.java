@@ -68,7 +68,7 @@ public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 				.map(r -> (Organization) r).filter(Organization::getActive)
 				.collect(Collectors.toMap(o -> o.getIdElement().toUnqualifiedVersionless().toString(), o -> o
 						.getIdentifier().stream()
-						.filter(i -> ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER.equals(i.getSystem()))
+						.filter(i -> ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER.equals(i.getSystem()))
 						.filter(Identifier::hasValue).map(Identifier::getValue).findFirst().get()));
 
 		return b.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
@@ -86,7 +86,7 @@ public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 	{
 		Bundle b = getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "identifier",
-						Collections.singletonList(ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER + "|"
+						Collections.singletonList(ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER + "|"
 								+ organizationIdentifierValue),
 						"_include", Collections.singletonList("Organization:endpoint")));
 
@@ -100,7 +100,7 @@ public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 	{
 		Bundle b = getLocalWebserviceClient().searchWithStrictHandling(OrganizationAffiliation.class,
 				Map.of("active", Collections.singletonList("true"), "primary-organization:identifier",
-						Collections.singletonList(ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER + "|"
+						Collections.singletonList(ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER + "|"
 								+ consortiumIdentifierValue),
 						"_include", Arrays.asList("OrganizationAffiliation:endpoint",
 								"OrganizationAffiliation:participating-organization")));
@@ -114,7 +114,7 @@ public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 	{
 		Bundle b = getLocalWebserviceClient().searchWithStrictHandling(OrganizationAffiliation.class,
 				Map.of("active", Collections.singletonList("true"), "primary-organization:identifier",
-						Collections.singletonList(ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER + "|"
+						Collections.singletonList(ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER + "|"
 								+ consortiumIdentifierValue),
 						"role", Collections.singletonList(roleSystem + "|" + roleCode), "_include",
 						Arrays.asList("OrganizationAffiliation:endpoint",
@@ -130,10 +130,10 @@ public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 		Bundle b = getLocalWebserviceClient().searchWithStrictHandling(OrganizationAffiliation.class, Map.of("active",
 				Collections.singletonList("true"), "primary-organization:identifier",
 				Collections.singletonList(
-						ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER + "|" + consortiumIdentifierValue),
+						ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER + "|" + consortiumIdentifierValue),
 				"participating-organization:identifier",
 				Collections.singletonList(
-						ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER + "|" + organizationIdentifierValue),
+						ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER + "|" + organizationIdentifierValue),
 				"role", Collections.singletonList(roleSystem + "|" + roleCode), "_include",
 				Collections.singletonList("OrganizationAffiliation:endpoint")));
 
@@ -147,7 +147,7 @@ public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 	{
 		Bundle resultSet = getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", Collections.singletonList("active"), "identifier", Collections.singletonList(
-						ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER + "|" + endpointIdentifierValue)));
+						ConstantsBase.NAMINGSYSTEM_DSF_ENDPOINT_IDENTIFIER + "|" + endpointIdentifierValue)));
 
 		return resultSet.getEntry().stream().map(bundleEntry -> bundleEntry.getResource())
 				.filter(resource -> resource instanceof Endpoint).map(endpoint -> (Endpoint) endpoint).findFirst();

@@ -34,23 +34,23 @@ services:
         target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
-      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_user_camunda.password
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/bpe
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
+      DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
+      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_user_camunda.password
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/bpe
+      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2/fhir
+      DEV_DSF_BPE_PROCESS_EXCLUDED: |
         highmedorg_computeFeasibility/0.7.0
         highmedorg_computeDataSharing/0.7.0
         highmedorg_requestUpdateResources/0.7.0
         highmedorg_updateAllowList/0.7.0
-      # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
-      ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
+      # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
+      DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
       backend:
         ipv4_address: 172.28.3.130

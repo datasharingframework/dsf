@@ -26,8 +26,8 @@ public class ConfigGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigGenerator.class);
 
-	private static final String P_KEY_SERVER_USER_THUMBPRINTS = "org.highmed.dsf.fhir.server.user.thumbprints";
-	private static final String P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE = "org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete";
+	private static final String P_KEY_SERVER_USER_THUMBPRINTS = "dev.dsf.fhir.server.user.thumbprints";
+	private static final String P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE = "dev.dsf.fhir.server.user.thumbprints.permanent.delete";
 
 	private Properties javaTestFhirConfigProperties;
 

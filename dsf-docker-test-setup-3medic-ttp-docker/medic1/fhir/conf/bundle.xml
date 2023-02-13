@@ -11,7 +11,7 @@
                </tag>
             </meta>
             <extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="${org.highmed.dsf.fhir.server.organization.thumbprint.ttp}"/>
+               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.ttp}"/>
             </extension>
             <identifier>
                <system value="http://dsf.dev/sid/organization-identifier"/>
@@ -38,20 +38,20 @@
                </tag>
             </meta>
             <extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="${org.highmed.dsf.fhir.server.organization.thumbprint}"/>
+               <valueString value="${dev.dsf.fhir.server.organization.thumbprint}"/>
             </extension>
             <identifier>
                <system value="http://dsf.dev/sid/organization-identifier"/>
-               <value value="${org.highmed.dsf.fhir.server.organization.identifier.value}"/>
+               <value value="${dev.dsf.fhir.server.organization.identifier.value}"/>
             </identifier>
             <active value="true"/>
-            <name value="${org.highmed.dsf.fhir.server.organization.name}"/>
+            <name value="${dev.dsf.fhir.server.organization.name}"/>
          </Organization>
       </resource>
       <request>
          <method value="POST"/>
          <url value="Organization"/>
-         <ifNoneExist value="identifier=http://dsf.dev/sid/organization-identifier|${org.highmed.dsf.fhir.server.organization.identifier.value}"/>
+         <ifNoneExist value="identifier=http://dsf.dev/sid/organization-identifier|${dev.dsf.fhir.server.organization.identifier.value}"/>
       </request>
    </entry>
 </Bundle>

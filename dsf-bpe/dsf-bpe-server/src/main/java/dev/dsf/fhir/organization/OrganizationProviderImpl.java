@@ -1,8 +1,8 @@
 package dev.dsf.fhir.organization;
 
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
-import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_ORGANIZATION_ROLE;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_ORGANIZATION_TYPE;
+import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,19 +55,19 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Deprecated
 	public String getDefaultTypeSystem()
 	{
-		return CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
+		return CODESYSTEM_DSF_ORGANIZATION_TYPE;
 	}
 
 	@Override
 	public String getDefaultRoleSystem()
 	{
-		return CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
+		return CODESYSTEM_DSF_ORGANIZATION_ROLE;
 	}
 
 	@Override
 	public String getDefaultIdentifierSystem()
 	{
-		return NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
+		return NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER;
 	}
 
 	@Override

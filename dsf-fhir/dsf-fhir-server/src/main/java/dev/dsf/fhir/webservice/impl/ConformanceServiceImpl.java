@@ -282,10 +282,10 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
 		statement.setDate(buildInfoReader.getBuildDateAsDate());
-		statement.setPublisher("HiGHmed");
+		statement.setPublisher("DSF Developers");
 		statement.setKind(CapabilityStatementKind.INSTANCE);
 		statement.setSoftware(new CapabilityStatementSoftwareComponent());
-		statement.getSoftware().setName("HiGHmed DataSharing Framework");
+		statement.getSoftware().setName("Data Sharing Framework");
 		statement.getSoftware().setVersion(getVersion(buildInfoReader));
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
 		// statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO

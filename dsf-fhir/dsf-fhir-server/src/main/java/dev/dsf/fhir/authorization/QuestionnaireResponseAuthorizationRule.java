@@ -102,7 +102,7 @@ public class QuestionnaireResponseAuthorizationRule
 			errors.add("QuestionnaireResponse.status missing");
 		}
 
-		getItemAndValidate(newResource, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, errors);
+		getItemAndValidate(newResource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, errors);
 
 		if (errors.isEmpty())
 			return Optional.empty();
@@ -227,9 +227,9 @@ public class QuestionnaireResponseAuthorizationRule
 					QuestionnaireResponseStatus.COMPLETED + "|" + QuestionnaireResponseStatus.STOPPED,
 					oldResource.getStatus(), newResource.getStatus());
 
-		String oldUserTaskId = getItemAndValidate(oldResource, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
+		String oldUserTaskId = getItemAndValidate(oldResource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID,
 				new ArrayList<>()).orElse(null);
-		String newUserTaskId = getItemAndValidate(newResource, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
+		String newUserTaskId = getItemAndValidate(newResource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID,
 				new ArrayList<>()).orElse(null);
 
 		boolean userTaskIdOk = Objects.equals(oldUserTaskId, newUserTaskId);
@@ -237,11 +237,11 @@ public class QuestionnaireResponseAuthorizationRule
 		if (!userTaskIdOk)
 			logger.warn(
 					"Modifications only allowed if item.answer with linkId '{}' not changed, change from '{}' to '{}' not allowed",
-					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, oldUserTaskId, newUserTaskId);
+					CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, oldUserTaskId, newUserTaskId);
 
-		String oldBusinessKey = getItemAndValidate(oldResource, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
+		String oldBusinessKey = getItemAndValidate(oldResource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
 				new ArrayList<>()).orElse(null);
-		String newBusinessKey = getItemAndValidate(newResource, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
+		String newBusinessKey = getItemAndValidate(newResource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
 				new ArrayList<>()).orElse(null);
 
 		boolean businesssKeyOk = Objects.equals(oldBusinessKey, newBusinessKey);
@@ -249,7 +249,7 @@ public class QuestionnaireResponseAuthorizationRule
 		if (!userTaskIdOk)
 			logger.warn(
 					"Modifications only allowed if item.answer with linkId '{}' not changed, change from '{}' to '{}' not allowed",
-					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, oldUserTaskId, newUserTaskId);
+					CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY, oldUserTaskId, newUserTaskId);
 
 		return statusModificationOk && userTaskIdOk && businesssKeyOk;
 	}

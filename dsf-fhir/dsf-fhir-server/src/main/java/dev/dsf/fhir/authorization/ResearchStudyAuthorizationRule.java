@@ -37,7 +37,7 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyAuthorizationRule.class);
 
-	private static final String HIGHMED_RESEARCH_STUDY = "http://dsf.dev/fhir/StructureDefinition/research-study";
+	private static final String DSF_RESEARCH_STUDY = "http://dsf.dev/fhir/StructureDefinition/research-study";
 	private static final String RESEARCH_STUDY_IDENTIFIER = "http://dsf.dev/sid/research-study-identifier";
 	private static final String RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 	private static final Pattern RESEARCH_STUDY_IDENTIFIER_PATTERN = Pattern
@@ -69,7 +69,7 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 	{
 		List<String> errors = new ArrayList<String>();
 
-		if (newResource.getMeta().hasProfile(HIGHMED_RESEARCH_STUDY))
+		if (newResource.getMeta().hasProfile(DSF_RESEARCH_STUDY))
 		{
 			if (newResource.hasIdentifier())
 			{
@@ -238,7 +238,7 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 	@Override
 	protected boolean resourceExists(Connection connection, ResearchStudy newResource)
 	{
-		if (newResource.getMeta().hasProfile(HIGHMED_RESEARCH_STUDY))
+		if (newResource.getMeta().hasProfile(DSF_RESEARCH_STUDY))
 		{
 			String identifierValue = newResource.getIdentifier().stream()
 					.filter(i -> i.hasSystem() && i.hasValue() && RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem()))
@@ -247,7 +247,7 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 			return researchStudyWithIdentifierExists(connection, identifierValue);
 		}
 		else
-			// no unique criteria if not a HiGHmed ResearchStudy
+			// no unique criteria if not a DSF ResearchStudy
 			return false;
 	}
 

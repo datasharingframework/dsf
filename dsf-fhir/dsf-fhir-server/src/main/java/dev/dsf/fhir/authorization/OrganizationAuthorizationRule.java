@@ -29,7 +29,7 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationAuthorizationRule.class);
 
-	private static final String HIGHMED_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/organization";
+	private static final String DSF_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/organization";
 	private static final String EXTENSION_THUMBPRINT_URL = "http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint";
 	private static final String EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING = "[a-f0-9]{128}";
 	private static final Pattern EXTENSION_THUMBPRINT_VALUE_PATTERN = Pattern
@@ -106,7 +106,7 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 				.filter(i -> i.hasSystem() && i.hasValue() && ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem()))
 				.findFirst().orElseThrow();
 
-		return (newResource.getMeta().hasProfile(HIGHMED_ORGANIZATION)
+		return (newResource.getMeta().hasProfile(DSF_ORGANIZATION)
 				&& resourceExistsWithThumbprint(connection, newResource, Collections.emptyList()))
 				|| organizationWithIdentifierExists(connection, organizationIdentifier);
 	}

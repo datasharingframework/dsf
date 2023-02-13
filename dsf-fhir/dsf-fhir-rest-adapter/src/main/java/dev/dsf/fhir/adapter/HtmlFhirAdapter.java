@@ -137,7 +137,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<script src=\"/fhir/static/help.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/form.js\"></script>\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
-		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
+		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/dsf.css\">\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/form.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");

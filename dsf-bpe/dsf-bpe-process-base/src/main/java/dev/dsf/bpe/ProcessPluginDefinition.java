@@ -21,9 +21,9 @@ import dev.dsf.fhir.resources.StructureDefinitionResource;
 import dev.dsf.fhir.resources.ValueSetResource;
 
 /**
- * A provider configuration file named "org.highmed.dsf.DsfProcessPluginDefinition" containing the canonical name of the
- * class implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details
- * on the content of the provider configuration file, see {@link ServiceLoader}.
+ * A provider configuration file named "dev.dsf.DsfProcessPluginDefinition" containing the canonical name of the class
+ * implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details on the
+ * content of the provider configuration file, see {@link ServiceLoader}.
  *
  * Additional {@link TypedValueSerializer}s to be registered inside the camunda process engine need be defined as beans
  * in the process plugins spring context.

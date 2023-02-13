@@ -6,12 +6,12 @@ import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_MESSAGE_NAME;
 import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_PROFILE;
 import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
 import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
-import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_ERROR;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME;
+import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER;
 
 import java.util.Date;
 import java.util.Objects;
@@ -115,8 +115,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 	protected void addErrorMessage(Task task, String errorMessage)
 	{
-		task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
-				errorMessage));
+		task.addOutput(
+				getTaskHelper().createOutput(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_ERROR, errorMessage));
 	}
 
 	protected void handleIntermediateThrowEventError(DelegateExecution execution, Exception exception,
@@ -312,14 +312,12 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		task.setInstantiatesUri(instantiatesUri);
 
 		ParameterComponent messageNameInput = new ParameterComponent(
-				new CodeableConcept(
-						new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
+				new CodeableConcept(new Coding(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME, null)),
 				new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
 		ParameterComponent businessKeyInput = new ParameterComponent(
-				new CodeableConcept(
-						new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
+				new CodeableConcept(new Coding(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY, null)),
 				new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
@@ -328,7 +326,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		{
 			ParameterComponent correlationKeyInput = new ParameterComponent(
 					new CodeableConcept(
-							new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
+							new Coding(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
 		}
@@ -370,15 +368,14 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 	protected Reference getRecipient(Target target)
 	{
-		return new Reference().setType("Organization")
-				.setIdentifier(new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
-						.setValue(target.getOrganizationIdentifierValue()));
+		return new Reference().setType("Organization").setIdentifier(new Identifier()
+				.setSystem(NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER).setValue(target.getOrganizationIdentifierValue()));
 	}
 
 	protected Reference getRequester()
 	{
 		return new Reference().setType("Organization")
-				.setIdentifier(new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
+				.setIdentifier(new Identifier().setSystem(NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER)
 						.setValue(getOrganizationProvider().getLocalIdentifierValue()));
 	}
 

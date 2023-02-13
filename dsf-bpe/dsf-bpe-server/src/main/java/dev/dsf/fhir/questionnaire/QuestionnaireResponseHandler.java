@@ -1,8 +1,8 @@
 package dev.dsf.fhir.questionnaire;
 
 import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID;
 
 import java.util.List;
 import java.util.Map;
@@ -47,11 +47,11 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 			String questionnaire = questionnaireResponse.getQuestionnaire();
 			String user = questionnaireResponse.getAuthor().getIdentifier().getValue();
 			String userType = questionnaireResponse.getAuthor().getType();
-			String businessKey = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
+			String businessKey = getStringValueFromItems(items, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
 					questionnaireResponseId).orElse("?");
 
 			Optional<String> userTaskIdOpt = getStringValueFromItems(items,
-					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, questionnaireResponseId);
+					CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, questionnaireResponseId);
 
 			userTaskIdOpt.ifPresentOrElse(userTaskId ->
 			{
@@ -66,7 +66,7 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 			{
 				logger.warn(
 						"QuestionnaireResponse '{}' for Questionnaire '{}' has no answer with item.linkId '{}' [businessKey: {}, user: {}], ignoring QuestionnaireResponse",
-						questionnaireResponseId, questionnaire, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
+						questionnaireResponseId, questionnaire, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID,
 						businessKey, user + "|" + userType);
 			});
 		}

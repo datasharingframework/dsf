@@ -1,10 +1,10 @@
 package dev.dsf.bpe.listener;
 
 import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_ERROR;
 
 import java.util.Collections;
 import java.util.List;
@@ -113,8 +113,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
 					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
-					errorMessage));
+			task.addOutput(taskHelper.createOutput(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_ERROR, errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
 			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
@@ -157,12 +156,12 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		if (addBusinessKeyToQuestionnaireResponse())
 		{
 			questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
-					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
+					CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
 					new StringType(businessKey));
 		}
 
 		questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
-				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
+				CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
 
 		return questionnaireResponse;
@@ -172,8 +171,8 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			Questionnaire questionnaire)
 	{
 		questionnaire.getItem().stream()
-				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId()))
-				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId()))
+				.filter(i -> !CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId()))
+				.filter(i -> !CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId()))
 				.forEach(i -> transformItem(questionnaireResponse, i));
 	}
 
@@ -198,16 +197,16 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		if (addBusinessKeyToQuestionnaireResponse())
 		{
 			questionnaireResponse.getItem().stream()
-					.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId())).findFirst()
+					.filter(i -> CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId())).findFirst()
 					.orElseThrow(
 							() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
-									+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY + "'"));
+									+ CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY + "'"));
 		}
 
 		questionnaireResponse.getItem().stream()
-				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId())).findFirst()
+				.filter(i -> CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId())).findFirst()
 				.orElseThrow(() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
-						+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID + "'"));
+						+ CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID + "'"));
 
 		if (!QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(questionnaireResponse.getStatus()))
 			throw new RuntimeException("QuestionnaireResponse must be in status 'in-progress'");
@@ -216,7 +215,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	/**
 	 * <i>Override this method to decided if you want to add the Business-Key to the {@link QuestionnaireResponse}
 	 * resource as an item with {@link QuestionnaireResponseItemComponent#getLinkId()} equal to
-	 * {@link ConstantsBase#CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY}</i>
+	 * {@link ConstantsBase#CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY}</i>
 	 *
 	 * @return <code>false</code>
 	 */

@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<QuestionnaireResponse>
 {
-	private static final String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
-	private static final String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
+	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
+	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -106,7 +106,7 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 	private String getProcessInstanceId(QuestionnaireResponse questionnaireResponse)
 	{
 		return questionnaireResponse.getItem().stream()
-				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId()))
+				.filter(i -> CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId()))
 				.flatMap(i -> i.getAnswer().stream()).map(a -> ((StringType) a.getValue()).getValue()).findFirst()
 				.orElse("unknown");
 	}
@@ -152,8 +152,8 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 
 	private boolean display(String linkId)
 	{
-		return !(CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(linkId)
-				|| CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(linkId));
+		return !(CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(linkId)
+				|| CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(linkId));
 	}
 
 	private void writeFormInput(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent answerPlaceholder,

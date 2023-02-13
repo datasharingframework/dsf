@@ -1,7 +1,7 @@
 package dev.dsf.bpe.delegate;
 
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_ERROR;
 
 import java.util.Objects;
 
@@ -78,8 +78,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
 					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
-					errorMessage));
+			task.addOutput(taskHelper.createOutput(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_ERROR, errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
 			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);

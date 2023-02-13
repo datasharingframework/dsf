@@ -157,7 +157,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 		created.setStatus(QuestionnaireResponseStatus.STOPPED);
 		created.getItem().clear();
-		addItem(created, ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
+		addItem(created, ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
 				new StringType(UUID.randomUUID().toString()));
 
 		try
@@ -511,8 +511,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 				+ organizationProvider.getLocalOrganization().get().getIdElement().getIdPart();
 		questionnaireResponse.setSubject(new Reference(organizationReference));
 
-		addItem(questionnaireResponse, ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
-				"UserTask ID", new StringType(UUID.randomUUID().toString()));
+		addItem(questionnaireResponse, ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
+				new StringType(UUID.randomUUID().toString()));
 
 		return questionnaireResponse;
 	}

@@ -2,11 +2,11 @@ package dev.dsf.fhir.task;
 
 import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY;
 import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_ERROR;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,12 +76,15 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		String processDefinitionKey = matcher.group("processDefinitionKey");
 		String processVersion = matcher.group("processVersion");
 
-		String messageName = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
-				CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
-		String businessKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
-				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
-		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
-				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+		String messageName = taskHelper
+				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME)
+				.orElse(null);
+		String businessKey = taskHelper
+				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY)
+				.orElse(null);
+		String correlationKey = taskHelper
+				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY)
+				.orElse(null);
 
 		Map<String, Object> variables = Map.of(BPMN_EXECUTION_VARIABLE_TASK, FhirResourceValues.create(task));
 
@@ -94,9 +97,8 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		{
 			logger.error("Error while handling Task", exception);
 
-			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN,
-					CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
-					exception.getClass().getName() + ": " + exception.getMessage());
+			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(CODESYSTEM_DSF_BPMN,
+					CODESYSTEM_DSF_BPMN_VALUE_ERROR, exception.getClass().getName() + ": " + exception.getMessage());
 			task.addOutput(errorOutput);
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);

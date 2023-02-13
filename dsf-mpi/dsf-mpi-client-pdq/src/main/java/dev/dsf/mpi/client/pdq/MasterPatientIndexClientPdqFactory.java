@@ -21,27 +21,26 @@ public class MasterPatientIndexClientPdqFactory implements MasterPatientIndexCli
 	@Override
 	public MasterPatientIndexClient createClient(BiFunction<String, String, String> propertyResolver)
 	{
-		String host = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.host", null);
-		int port = Integer.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.port", "-1"));
+		String host = propertyResolver.apply("dev.dsf.bpe.mpi.pdq.host", null);
+		int port = Integer.parseInt(propertyResolver.apply("dev.dsf.bpe.mpi.pdq.port", "-1"));
 
-		String trustCertificatesFile = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.trust.certificates", null);
-		String clientCertificateFile = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.client.certificate", null);
+		String trustCertificatesFile = propertyResolver.apply("dev.dsf.bpe.mpi.pdq.trust.certificates", null);
+		String clientCertificateFile = propertyResolver.apply("dev.dsf.bpe.mpi.pdq.client.certificate", null);
 		String clientCertificatePrivateKeyFile = propertyResolver
-				.apply("org.highmed.dsf.bpe.mpi.pdq.client.certificate.private.key", null);
+				.apply("dev.dsf.bpe.mpi.pdq.client.certificate.private.key", null);
 		char[] clientCertificatePrivateKeyPassword = Optional
-				.ofNullable(propertyResolver
-						.apply("org.highmed.dsf.bpe.mpi.pdq.client.certificate.private.key.password", null))
+				.ofNullable(propertyResolver.apply("dev.dsf.bpe.mpi.pdq.client.certificate.private.key.password", null))
 				.map(String::toCharArray).orElse(null);
 
-		String senderApplication = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.sender.application", null);
-		String senderFacility = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.sender.facility", null);
-		String receiverApplication = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.receiver.application", null);
-		String receiverFacility = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.receiver.facility", null);
+		String senderApplication = propertyResolver.apply("dev.dsf.bpe.mpi.pdq.sender.application", null);
+		String senderFacility = propertyResolver.apply("dev.dsf.bpe.mpi.pdq.sender.facility", null);
+		String receiverApplication = propertyResolver.apply("dev.dsf.bpe.mpi.pdq.receiver.application", null);
+		String receiverFacility = propertyResolver.apply("dev.dsf.bpe.mpi.pdq.receiver.facility", null);
 
 		String pidAssigningAuthorityNamespaceId = propertyResolver
-				.apply("org.highmed.dsf.bpe.mpi.pdq.assigning.authority.id.namespace", null);
+				.apply("dev.dsf.bpe.mpi.pdq.assigning.authority.id.namespace", null);
 		String pidAssigningAuthorityUniversalId = propertyResolver
-				.apply("org.highmed.dsf.bpe.mpi.pdq.assigning.authority.id.universal", null);
+				.apply("dev.dsf.bpe.mpi.pdq.assigning.authority.id.universal", null);
 
 		MessageHelper messageHelper = new MessageHelper();
 		HapiContext context = new DefaultHapiContext();

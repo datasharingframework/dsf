@@ -1,7 +1,7 @@
 package dev.dsf.fhir.group;
 
 import static dev.dsf.bpe.ConstantsBase.CODE_TYPE_AQL_QUERY;
-import static dev.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
+import static dev.dsf.bpe.ConstantsBase.EXTENSION_DSF_QUERY;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ public class GroupHelperImpl implements GroupHelper
 	public String extractAqlQuery(Group group)
 	{
 		List<Extension> queries = group.getExtension().stream()
-				.filter(extension -> extension.getUrl().equals(EXTENSION_HIGHMED_QUERY))
+				.filter(extension -> extension.getUrl().equals(EXTENSION_DSF_QUERY))
 				.filter(extension -> CODE_TYPE_AQL_QUERY
 						.compareTo(((Expression) extension.getValue()).getLanguageElement()) == 0)
 				.collect(Collectors.toList());

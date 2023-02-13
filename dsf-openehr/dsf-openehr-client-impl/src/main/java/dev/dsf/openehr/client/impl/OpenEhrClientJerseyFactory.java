@@ -20,19 +20,15 @@ public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 	{
 		ObjectMapper objectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
-		String baseUrl = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.base.url", null);
-		String basicAuthUsername = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.basicauth.username",
-				null);
-		String basicAuthPassword = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.basicauth.password",
-				null);
+		String baseUrl = propertyResolver.apply("dev.dsf.bpe.openehr.jersey.base.url", null);
+		String basicAuthUsername = propertyResolver.apply("dev.dsf.bpe.openehr.jersey.basicauth.username", null);
+		String basicAuthPassword = propertyResolver.apply("dev.dsf.bpe.openehr.jersey.basicauth.password", null);
 
-		String trustCertificatesFile = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.trust.certificates",
-				null);
+		String trustCertificatesFile = propertyResolver.apply("dev.dsf.bpe.openehr.jersey.trust.certificates", null);
 
 		int connectTimeout = Integer
-				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.timeout.connect", "2000"));
-		int readTimeout = Integer
-				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.timeout.read", "10000"));
+				.parseInt(propertyResolver.apply("dev.dsf.bpe.openehr.jersey.timeout.connect", "2000"));
+		int readTimeout = Integer.parseInt(propertyResolver.apply("dev.dsf.bpe.openehr.jersey.timeout.read", "10000"));
 
 		try
 		{

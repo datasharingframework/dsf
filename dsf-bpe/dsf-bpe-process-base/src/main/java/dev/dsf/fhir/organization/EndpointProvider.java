@@ -1,6 +1,6 @@
 package dev.dsf.fhir.organization;
 
-import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
+import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_DSF_ENDPOINT_IDENTIFIER;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +22,7 @@ public interface EndpointProvider
 	default Identifier getLocalEndpointIdentifier()
 	{
 		return getLocalEndpoint().getIdentifier().stream()
-				.filter(i -> NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER.equals(i.getSystem())).findFirst().get();
+				.filter(i -> NAMINGSYSTEM_DSF_ENDPOINT_IDENTIFIER.equals(i.getSystem())).findFirst().get();
 	}
 
 	Map<String, Endpoint> getDefaultEndpointsByOrganizationIdentifier();
