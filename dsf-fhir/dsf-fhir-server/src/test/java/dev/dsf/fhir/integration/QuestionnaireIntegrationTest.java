@@ -21,16 +21,16 @@ import dev.dsf.fhir.dao.QuestionnaireDao;
 public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
 {
 	private static final Date DATE = Date.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
-	private static final String IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/user-task";
+	private static final String IDENTIFIER_SYSTEM = "http://dsf.dev/fhir/CodeSystem/user-task";
 	private static final String IDENTIFIER_VALUE = "foo";
-	private static final String URL = "http://highmed.org/fhir/Questionnaire/userTask/foo";
+	private static final String URL = "http://dsf.dev/fhir/Questionnaire/userTask/foo";
 	private static final String VERSION = "1.0.0";
 	private static final Enumerations.PublicationStatus STATUS = Enumerations.PublicationStatus.ACTIVE;
 
 	private Questionnaire createQuestionnaire()
 	{
 		Questionnaire questionnaire = new Questionnaire();
-		questionnaire.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		questionnaire.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
 		questionnaire.addIdentifier().setSystem(IDENTIFIER_SYSTEM).setValue(IDENTIFIER_VALUE);
 

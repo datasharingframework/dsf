@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-organization" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization" />
   <version value="0.5.0" />
   <name value="ProcessAuthorizationLocalOrganization" />
   <status value="active" />
@@ -35,13 +35,13 @@
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization" />
       </type>
     </element>
     <element id="Coding.system">
       <path value="Coding.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+      <fixedUri value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
     </element>
     <element id="Coding.code">
       <path value="Coding.code" />

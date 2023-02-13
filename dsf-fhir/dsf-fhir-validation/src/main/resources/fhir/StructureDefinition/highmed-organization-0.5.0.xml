@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/organization" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/organization" />
   <version value="0.5.0" />
   <name value="Organization" />
   <status value="active" />
@@ -34,7 +34,7 @@
       <min value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint" />
       </type>
     </element>
     <element id="Organization.identifier">
@@ -61,7 +61,7 @@
     <element id="Organization.identifier:highmedIdentifier.system">
       <path value="Organization.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/sid/organization-identifier" />
+      <fixedUri value="http://dsf.dev/sid/organization-identifier" />
     </element>
     <element id="Organization.identifier:highmedIdentifier.value">
       <path value="Organization.identifier.value" />
@@ -76,7 +76,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/endpoint" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/endpoint" />
       </type>
     </element>
     <element id="Organization.endpoint.reference">

@@ -36,14 +36,13 @@ public class GroupProfileTest
 	public void testGroupProfileValid() throws Exception
 	{
 		Group group = new Group();
-		group.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/group");
+		group.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/group");
 		group.setType(GroupType.PERSON);
 		group.setActual(false);
-		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-query")
-				.setValue(new Expression()
-						.setLanguageElement(new CodeType("application/x-aql-query")
-								.setSystem("http://highmed.org/fhir/CodeSystem/query-type"))
-						.setExpression("SELECT COUNT(e) FROM EHR e"));
+		group.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-query").setValue(new Expression()
+				.setLanguageElement(
+						new CodeType("application/x-aql-query").setSystem("http://dsf.dev/fhir/CodeSystem/query-type"))
+				.setExpression("SELECT COUNT(e) FROM EHR e"));
 
 		ValidationResult result = resourceValidator.validate(group);
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"

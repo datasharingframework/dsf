@@ -24,23 +24,23 @@ public interface ConstantsBase
 	 */
 	String BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS = "inCalledProcess";
 
-	String PROCESS_HIGHMED_URI_BASE = "http://highmed.org/bpe/Process/";
+	String PROCESS_HIGHMED_URI_BASE = "http://dsf.dev/bpe/Process/";
 
-	String EXTENSION_HIGHMED_PARTICIPATING_MEDIC = "http://highmed.org/fhir/StructureDefinition/extension-participating-medic";
-	String EXTENSION_HIGHMED_PARTICIPATING_TTP = "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp";
-	String EXTENSION_HIGHMED_GROUP_ID = "http://highmed.org/fhir/StructureDefinition/extension-group-id";
-	String EXTENSION_HIGHMED_QUERY = "http://highmed.org/fhir/StructureDefinition/extension-query";
+	String EXTENSION_HIGHMED_PARTICIPATING_MEDIC = "http://dsf.dev/fhir/StructureDefinition/extension-participating-medic";
+	String EXTENSION_HIGHMED_PARTICIPATING_TTP = "http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp";
+	String EXTENSION_HIGHMED_GROUP_ID = "http://dsf.dev/fhir/StructureDefinition/extension-group-id";
+	String EXTENSION_HIGHMED_QUERY = "http://dsf.dev/fhir/StructureDefinition/extension-query";
 
-	String PROFILE_HIGHMED_GROUP = "http://highmed.org/fhir/StructureDefinition/group";
-	String PROFILE_HIGHEMD_RESEARCH_STUDY = "http://highmed.org/fhir/StructureDefinition/research-study";
+	String PROFILE_HIGHMED_GROUP = "http://dsf.dev/fhir/StructureDefinition/group";
+	String PROFILE_HIGHEMD_RESEARCH_STUDY = "http://dsf.dev/fhir/StructureDefinition/research-study";
 
-	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
+	String CODESYSTEM_HIGHMED_BPMN = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY = "business-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR = "error";
 
-	String CODESYSTEM_HIGHMED_BPMN_USER_TASK = "http://highmed.org/fhir/CodeSystem/bpmn-user-task";
+	String CODESYSTEM_HIGHMED_BPMN_USER_TASK = "http://dsf.dev/fhir/CodeSystem/bpmn-user-task";
 	String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
 	String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
 
@@ -48,7 +48,7 @@ public interface ConstantsBase
 	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE} instead
 	 */
 	@Deprecated
-	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE = "http://highmed.org/fhir/CodeSystem/organization-type";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE = "http://dsf.dev/fhir/CodeSystem/organization-type";
 	/**
 	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_TTP} instead
 	 */
@@ -80,7 +80,7 @@ public interface ConstantsBase
 	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_HRP = "HRP";
 
-	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE = "http://highmed.org/fhir/CodeSystem/organization-role";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE = "http://dsf.dev/fhir/CodeSystem/organization-role";
 	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_TTP = "TTP";
 	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_MEDIC = "MeDIC";
 	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_DTS = "DTS";
@@ -88,12 +88,12 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR = "CRR";
 	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_HRP = "HRP";
 
-	String CODESYSTEM_HIGHMED_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
+	String CODESYSTEM_HIGHMED_QUERY_TYPE = "http://dsf.dev/fhir/CodeSystem/query-type";
 	String CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL = "application/x-aql-query";
 
-	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://highmed.org/sid/organization-identifier";
-	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://highmed.org/sid/endpoint-identifier";
-	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/sid/research-study-identifier";
+	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://dsf.dev/sid/organization-identifier";
+	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://dsf.dev/sid/endpoint-identifier";
+	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://dsf.dev/sid/research-study-identifier";
 
 	CodeType CODE_TYPE_AQL_QUERY = new CodeType(CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL)
 			.setSystem(CODESYSTEM_HIGHMED_QUERY_TYPE);

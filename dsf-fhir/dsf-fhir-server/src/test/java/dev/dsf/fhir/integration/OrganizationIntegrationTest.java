@@ -115,8 +115,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationWithNewThumbprint() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
-				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
+				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -129,7 +129,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
 		List<Extension> thumbprints = org
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
@@ -142,7 +142,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	public void testUpdateOrganizationWithExistingThumbprint() throws Exception
 	{
 		Bundle bundle1 = getWebserviceClient().search(Organization.class, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/sid/organization-identifier|Test_Organization")));
+				Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		assertNotNull(bundle1);
 		assertEquals(1, bundle1.getTotal());
 		assertNotNull(bundle1.getEntry());
@@ -155,14 +155,14 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org1 = (Organization) bundle1.getEntryFirstRep().getResource();
 		List<Extension> thumbprints1 = org1
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints1);
 		assertEquals(1, thumbprints1.size());
 
 		String existingThumbprint = ((StringType) thumbprints1.get(0).getValue()).getValue();
 
-		Bundle bundle2 = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
-				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle2 = getWebserviceClient().search(Organization.class, Map.of("identifier",
+				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle2);
 		assertEquals(1, bundle2.getTotal());
 		assertNotNull(bundle2.getEntry());
@@ -175,7 +175,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org2 = (Organization) bundle2.getEntryFirstRep().getResource();
 		List<Extension> thumbprints2 = org2
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints2);
 		assertEquals(1, thumbprints2.size());
 
@@ -195,8 +195,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = WebApplicationException.class)
 	public void testUpdateOrganizationWithExistingIdentifier() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
-				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
+				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -224,8 +224,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationAddNewThumbprint() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
-				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
+				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -238,13 +238,13 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
 		List<Extension> thumbprints = org
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
 		Extension oldThumbprint = thumbprints.get(0);
 		Extension newThumbprint = new Extension(
-				"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint", new StringType(
+				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint", new StringType(
 						"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
 		org.setExtension(List.of(newThumbprint, oldThumbprint));

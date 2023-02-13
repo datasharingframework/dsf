@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
   <version value="0.5.0" />
   <name value="ProcessAuthorizationConsortiumRole" />
   <status value="active" />
@@ -57,7 +57,7 @@
     <element id="Extension.extension:consortium.value[x].system">
       <path value="Extension.extension.value[x].system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/sid/organization-identifier" />
+      <fixedUri value="http://dsf.dev/sid/organization-identifier" />
     </element>
     <element id="Extension.extension:consortium.value[x].value">
       <path value="Extension.extension.value[x].value" />
@@ -90,7 +90,7 @@
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
+      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />

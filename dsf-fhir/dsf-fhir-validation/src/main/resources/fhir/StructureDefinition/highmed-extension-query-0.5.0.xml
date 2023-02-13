@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>		
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/extension-query" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/extension-query" />
   <version value="0.5.0" />
   <name value="Query" />
   <status value="active" />
@@ -24,7 +24,7 @@
   <differential>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-query" />
+      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-query" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />
@@ -38,7 +38,7 @@
       <short value="application/x-fhir-query | application/x-aql-query" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/query-type" />
+        <valueSet value="http://dsf.dev/fhir/ValueSet/query-type" />
       </binding>
     </element>
     <element id="Extension.value[x].expression">

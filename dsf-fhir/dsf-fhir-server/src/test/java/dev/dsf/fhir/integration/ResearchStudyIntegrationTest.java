@@ -498,17 +498,17 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudy researchStudy = new ResearchStudy();
 		researchStudy.setStatus(ResearchStudyStatus.ACTIVE);
-		researchStudy.addIdentifier().setSystem("http://highmed.org/sid/research-study-identifier")
+		researchStudy.addIdentifier().setSystem("http://dsf.dev/sid/research-study-identifier")
 				.setValue(UUID.randomUUID().toString());
-		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp")
+		researchStudy.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/sid/organization-identifier").setValue("Test_Organization")));
+						.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization")));
 		if (!StringUtils.isBlank(url))
 			researchStudy.addRelatedArtifact().setType(RelatedArtifactType.DOCUMENTATION).setUrl(url);
 
-		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
+		researchStudy.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/sid/organization-identifier").setValue("Test_Organization")));
+						.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization")));
 		readAccessHelper.addLocal(researchStudy);
 
 		return researchStudy;

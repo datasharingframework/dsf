@@ -292,14 +292,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(certificate);
 		thumbprintExtension.setValue(new StringType(clientCertHashHex));
 
 		Organization externalOrganization = (Organization) testBundle.getEntry().get(2).getResource();
 		Extension externalThumbprintExtension = externalOrganization
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 
 		String externalClientCertHashHex = calculateSha512CertificateThumbprintHex(externalCertificate);
 		externalThumbprintExtension.setValue(new StringType(externalClientCertHashHex));

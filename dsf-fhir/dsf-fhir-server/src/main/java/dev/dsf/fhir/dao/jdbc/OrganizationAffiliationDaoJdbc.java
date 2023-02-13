@@ -58,13 +58,13 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 
 		try (PreparedStatement statement = connection.prepareStatement("SELECT organization_affiliation"
 				+ ",(SELECT identifiers->>'value' FROM current_organizations, jsonb_array_elements(organization->'identifier') AS identifiers "
-				+ "WHERE identifiers->>'system' = 'http://highmed.org/sid/organization-identifier' "
+				+ "WHERE identifiers->>'system' = 'http://dsf.dev/sid/organization-identifier' "
 				+ "AND concat('Organization/', organization->>'id') = organization_affiliation->'organization'->>'reference' LIMIT 1) AS organization_identifier "
 				+ "FROM current_organization_affiliations WHERE organization_affiliation->>'active' = 'true' AND "
 				+ "(SELECT organization->'identifier' FROM current_organizations WHERE organization->>'active' = 'true' AND "
 				+ "concat('Organization/', organization->>'id') = organization_affiliation->'participatingOrganization'->>'reference') @> ?::jsonb"))
 		{
-			statement.setString(1, "[{\"system\": \"http://highmed.org/sid/organization-identifier\", \"value\": \""
+			statement.setString(1, "[{\"system\": \"http://dsf.dev/sid/organization-identifier\", \"value\": \""
 					+ identifierValue + "\"}]");
 
 			logger.trace("Executing query '{}'", statement);
@@ -78,8 +78,8 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 					String organizationIdentifier = result.getString(2);
 
 					oA.getParticipatingOrganization().getIdentifier()
-							.setSystem("http://highmed.org/sid/organization-identifier").setValue(identifierValue);
-					oA.getOrganization().getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+							.setSystem("http://dsf.dev/sid/organization-identifier").setValue(identifierValue);
+					oA.getOrganization().getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 							.setValue(organizationIdentifier);
 					affiliations.add(oA);
 				}

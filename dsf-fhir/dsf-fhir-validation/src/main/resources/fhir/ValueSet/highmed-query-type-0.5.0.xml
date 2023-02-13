@@ -1,11 +1,11 @@
 <ValueSet xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<url value="http://highmed.org/fhir/ValueSet/query-type"/>
+	<url value="http://dsf.dev/fhir/ValueSet/query-type"/>
 	<version value="0.5.0" />
 	<name value="HiGHmed_Query_Type"/>
 	<title value="HiGHmed Query Type"/>
@@ -25,7 +25,7 @@
 			</concept>
 		</include>
 		<include>
-			<system value="http://highmed.org/fhir/CodeSystem/query-type"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/query-type"/>
 			<concept>
 				<code value="application/x-aql-query"/>
 				<display value="AQL Query"/>

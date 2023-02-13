@@ -114,7 +114,7 @@ public class ReadAccessHelperTest
 	public void testHasOrganizationViaResource() throws Exception
 	{
 		Organization org = new Organization();
-		org.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("organization.com");
+		org.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("organization.com");
 
 		var r = new CodeSystem();
 		assertFalse(helper.hasLocal(r));
@@ -149,7 +149,7 @@ public class ReadAccessHelperTest
 	public void testHasRoleViaResource() throws Exception
 	{
 		OrganizationAffiliation affiliation = new OrganizationAffiliation();
-		affiliation.getOrganization().getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		affiliation.getOrganization().getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("consortium.com");
 		affiliation.addCode().addCoding().setSystem("role-system").setCode("role-code");
 
@@ -168,7 +168,7 @@ public class ReadAccessHelperTest
 	public void testHasRoleViaFile() throws Exception
 	{
 		final String consortiumIdentifier = "consortium.com";
-		final String roleSystem = "http://highmed.org/fhir/CodeSystem/organization-role";
+		final String roleSystem = "http://dsf.dev/fhir/CodeSystem/organization-role";
 		final String roleCode = "MeDIC";
 
 		try (InputStream in = Files

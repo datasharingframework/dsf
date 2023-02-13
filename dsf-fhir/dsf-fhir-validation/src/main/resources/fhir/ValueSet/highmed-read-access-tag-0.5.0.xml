@@ -1,11 +1,11 @@
 <ValueSet xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<url value="http://highmed.org/fhir/ValueSet/read-access-tag"/>
+	<url value="http://dsf.dev/fhir/ValueSet/read-access-tag"/>
 	<version value="0.5.0"/>
 	<name value="Read_Access_Tag"/>
 	<title value="Read Access Tag"/>
@@ -17,7 +17,7 @@
 	<immutable value="true"/>
 	<compose>
 		<include>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 		</include>
 	</compose>
 </ValueSet> 

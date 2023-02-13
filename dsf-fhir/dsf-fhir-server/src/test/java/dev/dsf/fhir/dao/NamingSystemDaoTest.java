@@ -70,7 +70,7 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
 		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(true));
 		dao.create(newResource);
 
@@ -86,7 +86,7 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
 		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(true));
 		newResource.addUniqueId().setValue(uniqueIdValue + "foo").setType(NamingSystemIdentifierType.URI);
 		dao.create(newResource);
@@ -112,7 +112,7 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
 		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(true));
 		dao.create(newResource);
 
@@ -128,11 +128,11 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
 		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(true));
 		newResource.addUniqueId().setValue(uniqueIdValue + "foo").setType(NamingSystemIdentifierType.URI)
 				.addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(false));
 		dao.create(newResource);
 
@@ -148,7 +148,7 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
 		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(true));
 		newResource.addUniqueId().setValue(uniqueIdValue + "foo").setType(NamingSystemIdentifierType.URI);
 		dao.create(newResource);
@@ -192,7 +192,7 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
 		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(false));
 		dao.create(newResource);
 

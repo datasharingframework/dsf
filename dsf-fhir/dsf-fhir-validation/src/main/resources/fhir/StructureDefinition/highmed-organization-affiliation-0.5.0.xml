@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/organization-affiliation" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/organization-affiliation" />
   <version value="0.5.0" />
   <name value="OrganizationAffiliation" />
   <status value="active" />
@@ -27,7 +27,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization-parent" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization-parent" />
       </type>
     </element>
     <element id="OrganizationAffiliation.organization.reference">
@@ -39,7 +39,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="OrganizationAffiliation.participatingOrganization.reference">
@@ -67,7 +67,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/endpoint" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/endpoint" />
       </type>
     </element>
     <element id="OrganizationAffiliation.endpoint.reference">

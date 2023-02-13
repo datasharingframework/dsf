@@ -38,20 +38,20 @@ public class ResearchStudyProfileTest
 	public void testResearchStudyProfileValid() throws Exception
 	{
 		ResearchStudy res = new ResearchStudy();
-		res.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/research-study");
-		res.getIdentifierFirstRep().setSystem("http://highmed.org/sid/research-study-identifier")
+		res.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/research-study");
+		res.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/research-study-identifier")
 				.setValue(UUID.randomUUID().toString());
 		res.setStatus(ResearchStudyStatus.ACTIVE);
 		res.addEnrollment().setReference("Group/" + UUID.randomUUID().toString());
 		Reference medicRef1 = new Reference().setType(ResourceType.Organization.name());
-		medicRef1.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("MeDIC 1");
-		res.addExtension("http://highmed.org/fhir/StructureDefinition/extension-participating-medic", medicRef1);
+		medicRef1.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("MeDIC 1");
+		res.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-participating-medic", medicRef1);
 		Reference medicRef2 = new Reference().setType(ResourceType.Organization.name());
-		medicRef2.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("MeDIC 2");
-		res.addExtension("http://highmed.org/fhir/StructureDefinition/extension-participating-medic", medicRef2);
+		medicRef2.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("MeDIC 2");
+		res.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-participating-medic", medicRef2);
 		Reference ttpRef = new Reference().setType(ResourceType.Organization.name());
-		ttpRef.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("TTP");
-		res.addExtension("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp", ttpRef);
+		ttpRef.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("TTP");
+		res.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp", ttpRef);
 
 		ValidationResult result = resourceValidator.validate(res);
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"

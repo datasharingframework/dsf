@@ -35,11 +35,11 @@ public class OrganizationAffiliationProfileTest
 	public void testOrganizationAffiliationProfileValid() throws Exception
 	{
 		OrganizationAffiliation a = new OrganizationAffiliation();
-		a.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/organization-affiliation");
+		a.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization-affiliation");
 		a.setActive(true);
 		a.getOrganization().setReference("Organization/" + UUID.randomUUID().toString());
 		a.getParticipatingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
-		a.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
+		a.getCodeFirstRep().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		a.getEndpointFirstRep().setReference("Endpoint/" + UUID.randomUUID().toString());
 

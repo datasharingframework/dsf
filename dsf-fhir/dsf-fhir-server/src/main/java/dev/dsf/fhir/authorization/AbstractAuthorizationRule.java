@@ -43,7 +43,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractAuthorizationRule.class);
 
-	protected static final String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/sid/organization-identifier";
+	protected static final String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
 
 	protected final Class<R> resourceType;
 	protected final DaoProvider daoProvider;

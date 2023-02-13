@@ -25,7 +25,7 @@ public class OrganizationAffiliationDaoTest
 		extends AbstractResourceDaoTest<OrganizationAffiliation, OrganizationAffiliationDao>
 		implements ReadAccessDaoTest<OrganizationAffiliation>
 {
-	private static final String identifierSystem = "http://highmed.org/sid/organization-identifier";
+	private static final String identifierSystem = "http://dsf.dev/sid/organization-identifier";
 	private static final String identifierValue = "identifier.test";
 	private static final boolean active = true;
 

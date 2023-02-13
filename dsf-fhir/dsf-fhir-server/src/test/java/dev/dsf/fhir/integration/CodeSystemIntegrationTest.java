@@ -97,7 +97,7 @@ public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedForLocalUserWithRoleTag() throws Exception
 	{
 		CodeSystem cs = new CodeSystem();
-		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
@@ -110,8 +110,7 @@ public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedForRemoteUserWithRoleTag() throws Exception
 	{
 		CodeSystem cs = new CodeSystem();
-		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
-				"TTP");
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role", "TTP");
 
 		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
 		CodeSystem createdCs = codeSystemDao.create(cs);
@@ -123,8 +122,7 @@ public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedForRemoteUserWithRoleTag2() throws Exception
 	{
 		CodeSystem cs = new CodeSystem();
-		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
-				"DTS");
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role", "DTS");
 
 		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
 		CodeSystem createdCs = codeSystemDao.create(cs);
@@ -136,10 +134,8 @@ public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedForRemoteUserWithRoleTag3() throws Exception
 	{
 		CodeSystem cs = new CodeSystem();
-		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
-				"TTP");
-		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
-				"DTS");
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role", "TTP");
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role", "DTS");
 
 		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
 		CodeSystem createdCs = codeSystemDao.create(cs);
@@ -151,7 +147,7 @@ public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 	public void testReadNotAllowedForRemoteUserWithRoleTag() throws Exception
 	{
 		CodeSystem cs = new CodeSystem();
-		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);

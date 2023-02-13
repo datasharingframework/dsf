@@ -26,7 +26,7 @@ public class NamingSystemIntegrationTest extends AbstractIntegrationTest
 		s.setDate(new Date());
 		s.setStatus(ACTIVE);
 		s.addUniqueId().setValue(uniqueId).setType(NamingSystemIdentifierType.URI).addModifierExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(true));
 		getReadAccessHelper().addAll(s);
 

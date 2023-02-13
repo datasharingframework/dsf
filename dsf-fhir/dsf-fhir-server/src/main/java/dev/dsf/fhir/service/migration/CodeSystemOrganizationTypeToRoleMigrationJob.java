@@ -17,8 +17,8 @@ public class CodeSystemOrganizationTypeToRoleMigrationJob implements MigrationJo
 {
 	private static final Logger logger = LoggerFactory.getLogger(CodeSystemOrganizationTypeToRoleMigrationJob.class);
 
-	private static final String CODESYSTEM_ORGANIZATION_TYPE_URL = "http://highmed.org/fhir/CodeSystem/organization-type";
-	private static final String CODESYSTEM_ORGANIZATION_ROLE_URL = "http://highmed.org/fhir/CodeSystem/organization-role";
+	private static final String CODESYSTEM_ORGANIZATION_TYPE_URL = "http://dsf.dev/fhir/CodeSystem/organization-type";
+	private static final String CODESYSTEM_ORGANIZATION_ROLE_URL = "http://dsf.dev/fhir/CodeSystem/organization-role";
 
 	private final OrganizationAffiliationDao affiliationDao;
 

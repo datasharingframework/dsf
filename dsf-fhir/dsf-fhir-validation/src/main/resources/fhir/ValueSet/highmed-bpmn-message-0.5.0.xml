@@ -1,11 +1,11 @@
 <ValueSet xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<url value="http://highmed.org/fhir/ValueSet/bpmn-message"/>
+	<url value="http://dsf.dev/fhir/ValueSet/bpmn-message"/>
 	<version value="0.5.0"/>
 	<name value="HiGHmed_Bpmn_Message_Values"/>
 	<title value="HiGHmed BPMN message values"/>
@@ -18,7 +18,7 @@
 	<immutable value="true"/>
 	<compose>
 		<include>
-			<system value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/bpmn-message"/>
 		</include>
 	</compose>
 </ValueSet> 

@@ -21,7 +21,7 @@ BEGIN
 	RAISE NOTICE 'Rows deleted from read_access based on Binary.securityContext: %', binary_delete_count;
 
 	-- add entry for ALL if tag exists
-	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"ALL"}]'::jsonb) THEN
+	IF (new_resource->'meta'->'tag' @> '[{"system":"http://dsf.dev/fhir/CodeSystem/read-access-tag","code":"ALL"}]'::jsonb) THEN
 		INSERT INTO read_access
 		VALUES(new_resource_id, new_resource_version, 'ALL', NULL, NULL);
 		
@@ -29,7 +29,7 @@ BEGIN
 	END IF;
 	
 	-- add entry for LOCAL if tag exists
-	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"LOCAL"}]'::jsonb) THEN
+	IF (new_resource->'meta'->'tag' @> '[{"system":"http://dsf.dev/fhir/CodeSystem/read-access-tag","code":"LOCAL"}]'::jsonb) THEN
 		INSERT INTO read_access
 		VALUES(new_resource_id, new_resource_version, 'LOCAL', NULL, NULL);
 
@@ -37,23 +37,23 @@ BEGIN
 	END IF;
 	
 	-- add entries for ORGANIZATION if tag(s) exists
-	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"ORGANIZATION"}]'::jsonb) THEN
+	IF (new_resource->'meta'->'tag' @> '[{"system":"http://dsf.dev/fhir/CodeSystem/read-access-tag","code":"ORGANIZATION"}]'::jsonb) THEN
 		INSERT INTO read_access 			
 		SELECT new_resource_id, new_resource_version,'ORGANIZATION', organization_id, NULL FROM (
-			SELECT organization_id, jsonb_path_query(organization, '$.identifier[*] ? (@.system == "http://highmed.org/sid/organization-identifier")')->>'value' AS organization_identifier
+			SELECT organization_id, jsonb_path_query(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier")')->>'value' AS organization_identifier
 			FROM current_organizations WHERE organization->>'active' = 'true'
 		) AS organizations 
 		WHERE organization_identifier IN (
-			SELECT jsonb_path_query(new_resource,'$.meta.tag[*] ? (@.code == "ORGANIZATION" && @.system == "http://highmed.org/fhir/CodeSystem/read-access-tag")
-				.extension[*]?(@.url == "http://highmed.org/fhir/StructureDefinition/extension-read-access-organization")
-				.valueIdentifier[*]?(@.system == "http://highmed.org/sid/organization-identifier")')->>'value'
+			SELECT jsonb_path_query(new_resource,'$.meta.tag[*] ? (@.code == "ORGANIZATION" && @.system == "http://dsf.dev/fhir/CodeSystem/read-access-tag")
+				.extension[*]?(@.url == "http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization")
+				.valueIdentifier[*]?(@.system == "http://dsf.dev/sid/organization-identifier")')->>'value'
 		);
 
 		GET DIAGNOSTICS organization_insert_count = ROW_COUNT;
 	END IF;
 	
 	-- add entries for ROLE if tag(s) exists
-	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"ROLE"}]'::jsonb) THEN
+	IF (new_resource->'meta'->'tag' @> '[{"system":"http://dsf.dev/fhir/CodeSystem/read-access-tag","code":"ROLE"}]'::jsonb) THEN
 		INSERT INTO read_access 			
 		SELECT new_resource_id, new_resource_version, 'ROLE', member_organization_id, organization_affiliation_id FROM (
 			SELECT DISTINCT member_organization_id, organization_affiliation_id FROM (
@@ -61,7 +61,7 @@ BEGIN
 					organization_affiliation_id
 					, (regexp_match(organization_affiliation->'participatingOrganization'->>'reference', reference_regex))[5]::uuid AS member_organization_id
 					, (
-						SELECT jsonb_path_query(organization, '$.identifier[*]?(@.system == "http://highmed.org/sid/organization-identifier")')->>'value' AS parent_organization_identifier
+						SELECT jsonb_path_query(organization, '$.identifier[*]?(@.system == "http://dsf.dev/sid/organization-identifier")')->>'value' AS parent_organization_identifier
 						FROM current_organizations WHERE organization->>'active' = 'true' AND organization->>'id' = (regexp_match(organization_affiliation->'organization'->>'reference', reference_regex))[5] 
 					)
 					, codes AS role
@@ -71,11 +71,11 @@ BEGIN
 			LEFT JOIN (
 				SELECT 
 					jsonb_path_query(consortium_role, '$.extension[*] ? (@.url == "consortium")
-						.valueIdentifier[*]?(@.system == "http://highmed.org/sid/organization-identifier")')->>'value' AS consortium_identifier
+						.valueIdentifier[*]?(@.system == "http://dsf.dev/sid/organization-identifier")')->>'value' AS consortium_identifier
 					, jsonb_path_query(consortium_role, '$.extension[*] ? (@.url == "role").valueCoding') AS role
 				FROM (
-					SELECT jsonb_path_query(new_resource,'$.meta.tag[*] ? (@.code == "ROLE" && @.system == "http://highmed.org/fhir/CodeSystem/read-access-tag")
-						.extension[*] ? (@.url == "http://highmed.org/fhir/StructureDefinition/extension-read-access-consortium-role")') AS consortium_role
+					SELECT jsonb_path_query(new_resource,'$.meta.tag[*] ? (@.code == "ROLE" && @.system == "http://dsf.dev/fhir/CodeSystem/read-access-tag")
+						.extension[*] ? (@.url == "http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role")') AS consortium_role
 				) AS cr
 			) AS t
 			ON oa.parent_organization_identifier = t.consortium_identifier AND oa.role->>'system' = t.role->>'system' AND oa.role->>'code' = t.role->>'code'

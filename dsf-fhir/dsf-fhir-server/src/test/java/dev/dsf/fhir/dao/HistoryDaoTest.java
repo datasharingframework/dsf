@@ -63,9 +63,9 @@ public class HistoryDaoTest extends AbstractDbTest
 	public void testReadHistory() throws Exception
 	{
 		Organization organization = new Organization();
-		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/read-access-tag", "ALL", null);
+		organization.getMeta().addTag("http://dsf.dev/fhir/CodeSystem/read-access-tag", "ALL", null);
 		organization.setName("Test Organization");
-		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
+		organization.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(filterFactory.getUserFilters(User.local(createdOrganization)),
@@ -80,9 +80,9 @@ public class HistoryDaoTest extends AbstractDbTest
 	public void testReadHistoryOrganization() throws Exception
 	{
 		Organization organization = new Organization();
-		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/read-access-tag", "ALL", null);
+		organization.getMeta().addTag("http://dsf.dev/fhir/CodeSystem/read-access-tag", "ALL", null);
 		organization.setName("Test Organization");
-		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
+		organization.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(
@@ -98,9 +98,9 @@ public class HistoryDaoTest extends AbstractDbTest
 	public void testReadHistoryOrganizationWithId() throws Exception
 	{
 		Organization organization = new Organization();
-		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/read-access-tag", "ALL", null);
+		organization.getMeta().addTag("http://dsf.dev/fhir/CodeSystem/read-access-tag", "ALL", null);
 		organization.setName("Test Organization");
-		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
+		organization.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(

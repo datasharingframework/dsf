@@ -1,5 +1,5 @@
 <ActivityDefinition xmlns="http://hl7.org/fhir">
-	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
+	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
 			<valueString value="foo" />
 		</extension>
@@ -8,18 +8,18 @@
 		</extension>
 		<extension url="requester">
 			<valueCoding>
-				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
 				<code value="REMOTE_ALL" />
 			</valueCoding>
 		</extension>
 		<extension url="recipient">
 			<valueCoding>
-				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
 				<code value="LOCAL_ALL" />
 			</valueCoding>
 		</extension>
 	</extension>
-	<url value="http://highmed.org/bpe/Process/test" />
+	<url value="http://dsf.dev/bpe/Process/test" />
 	<version value="0.5.0" />
 	<status value="active" />
 	<kind value="Task" />

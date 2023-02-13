@@ -11,7 +11,7 @@ public interface OrganizationDao extends ResourceDao<Organization>
 	Optional<Organization> readActiveNotDeletedByThumbprint(String thumbprintHex) throws SQLException;
 
 	/**
-	 * Uses <i>http://highmed.org/sid/organization-identifier</i> as identifier system
+	 * Uses <i>http://dsf.dev/sid/organization-identifier</i> as identifier system
 	 *
 	 * @param identifierValue
 	 *            may be <code>null</code>

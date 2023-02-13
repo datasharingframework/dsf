@@ -39,17 +39,16 @@ public class OrganizationProfileTest
 	public void testOrganizationProfileValid() throws Exception
 	{
 		Organization org = new Organization();
-		org.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/organization");
-		Coding tag = org.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag")
+		org.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization");
+		Coding tag = org.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag")
 				.setCode("ORGANIZATION");
-		tag.addExtension("http://highmed.org/fhir/StructureDefinition/extension-read-access-organization",
-				new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue("organization.com"));
-		org.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
+		tag.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("organization.com"));
+		org.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
 		org.setActive(true);
 		org.addEndpoint().setReference("Endpoint/" + UUID.randomUUID().toString());
 		org.addEndpoint().setReference("Endpoint/" + UUID.randomUUID().toString());
-		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(
 						"6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a82a117824a4c430eb"));
 
@@ -65,9 +64,9 @@ public class OrganizationProfileTest
 	public void testOrganizationParentProfileValid() throws Exception
 	{
 		Organization org = new Organization();
-		org.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/organization-parent");
-		org.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		org.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("parent.org");
+		org.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization-parent");
+		org.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		org.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("parent.org");
 		org.setActive(true);
 
 		ValidationResult result = resourceValidator.validate(org);
@@ -82,15 +81,14 @@ public class OrganizationProfileTest
 	public void testOrganizationProfileNotValidMissingEndpoint() throws Exception
 	{
 		Organization org = new Organization();
-		org.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/organization");
-		Coding tag = org.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag")
+		org.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization");
+		Coding tag = org.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag")
 				.setCode("ORGANIZATION");
-		tag.addExtension("http://highmed.org/fhir/StructureDefinition/extension-read-access-organization",
-				new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue("organization.com"));
-		org.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
+		tag.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("organization.com"));
+		org.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
 		org.setActive(true);
-		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(
 						"6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a82a117824a4c430eb"));
 
@@ -106,11 +104,11 @@ public class OrganizationProfileTest
 	public void testOrganizationProfileNotValidMissingIdentifier() throws Exception
 	{
 		Organization org = new Organization();
-		org.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/organization");
-		org.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		org.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization");
+		org.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		org.setActive(true);
 		org.addEndpoint().setReference("Endpoint/" + UUID.randomUUID().toString());
-		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(
 						"6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a82a117824a4c430eb"));
 
@@ -126,11 +124,11 @@ public class OrganizationProfileTest
 	public void testOrganizationProfileNotValidMissingActive() throws Exception
 	{
 		Organization org = new Organization();
-		org.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/organization");
-		org.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		org.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
+		org.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization");
+		org.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		org.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
 		org.addEndpoint().setReference("Endpoint/" + UUID.randomUUID().toString());
-		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(
 						"6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a82a117824a4c430eb"));
 
@@ -146,9 +144,9 @@ public class OrganizationProfileTest
 	public void testOrganizationProfileNotValidMissingThumbprint() throws Exception
 	{
 		Organization org = new Organization();
-		org.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/organization");
-		org.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		org.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
+		org.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization");
+		org.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		org.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
 		org.setActive(true);
 		org.addEndpoint().setReference("Endpoint/" + UUID.randomUUID().toString());
 

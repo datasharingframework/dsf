@@ -52,9 +52,9 @@ public class ActivityDefinitionProfileTest
 	private ActivityDefinition createActivityDefinition()
 	{
 		var ad = new ActivityDefinition();
-		ad.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/activity-definition");
-		ad.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		ad.setUrl("http://highmed.org/bpe/Process/test");
+		ad.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
+		ad.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		ad.setUrl("http://dsf.dev/bpe/Process/test");
 		ad.setVersion("0.5.0");
 		ad.setStatus(PublicationStatus.ACTIVE);
 		ad.setKind(ActivityDefinitionKind.TASK);
@@ -80,14 +80,14 @@ public class ActivityDefinitionProfileTest
 	{
 		ActivityDefinition ad = createActivityDefinition();
 		Extension processAuthorization = ad.addExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
 				new CanonicalType("http://bar.org/fhir/StructureDefinition/baz"));
 		processAuthorization.addExtension("requester",
-				new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "REMOTE_ALL", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "REMOTE_ALL", null));
 		processAuthorization.addExtension("recipient",
-				new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 
 		logResource(ad);
 
@@ -104,28 +104,26 @@ public class ActivityDefinitionProfileTest
 	{
 		ActivityDefinition ad = createActivityDefinition();
 		Extension processAuthorization = ad.addExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
 				new CanonicalType("http://bar.org/fhir/StructureDefinition/baz"));
 
-		Coding requesterCoding = new Coding("http://highmed.org/fhir/CodeSystem/process-authorization",
+		Coding requesterCoding = new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization",
 				"REMOTE_ORGANIZATION", null);
 		requesterCoding.addExtension(
-				"http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization",
-				new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue("organization.com"));
+				"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("organization.com"));
 		processAuthorization.addExtension("requester", requesterCoding);
 
-		Coding recipientCoding = new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "LOCAL_ROLE",
-				null);
+		Coding recipientCoding = new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ROLE", null);
 		Extension consortiumRole = recipientCoding.addExtension();
 		consortiumRole
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role");
-		consortiumRole.addExtension("consortium", new Identifier()
-				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.org"));
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role");
+		consortiumRole.addExtension("consortium",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.org"));
 		consortiumRole.addExtension("role",
-				new Coding("http://highmed.org/fhir/CodeSystem/organization-role", "MeDIC", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "MeDIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
 		logResource(ad);
@@ -143,27 +141,27 @@ public class ActivityDefinitionProfileTest
 	{
 		ActivityDefinition ad = createActivityDefinition();
 		Extension processAuthorization = ad.addExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
 				new CanonicalType("http://bar.org/fhir/StructureDefinition/baz"));
 
-		Coding requesterCoding = new Coding("http://highmed.org/fhir/CodeSystem/process-authorization",
+		Coding requesterCoding = new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization",
 				"REMOTE_ORGANIZATION", null);
 		requesterCoding.addExtension(
-				"http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization",
-				new Identifier().setSystem("http://highmed.org/sid/does-not-exists").setValue("organization.com"));
+				"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization",
+				new Identifier().setSystem("http://dsf.dev/sid/does-not-exists").setValue("organization.com"));
 		processAuthorization.addExtension("requester", requesterCoding);
 
-		Coding recipientCoding = new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "REMOTE_ROLE",
+		Coding recipientCoding = new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "REMOTE_ROLE",
 				null);
 		Extension consortiumRole = recipientCoding.addExtension();
 		consortiumRole
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role");
-		consortiumRole.addExtension("consortium", new Identifier()
-				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.org"));
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role");
+		consortiumRole.addExtension("consortium",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.org"));
 		consortiumRole.addExtension("role",
-				new Coding("http://highmed.org/fhir/CodeSystem/organization-role", "MeDIC", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "MeDIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
 		logResource(ad);

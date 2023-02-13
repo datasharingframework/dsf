@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-	<url value="http://highmed.org/fhir/StructureDefinition/highmed-task"/>
+	<url value="http://dsf.dev/fhir/StructureDefinition/highmed-task"/>
 	<version value="0.5.0"/>
 	<name value="Task"/>
 	<status value="draft"/>
@@ -44,7 +44,7 @@
 			<min value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://highmed.org/fhir/StructureDefinition/organization"/>
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization"/>
 			</type>
 		</element>
 		<element id="Task.restriction">
@@ -57,7 +57,7 @@
 			<max value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://highmed.org/fhir/StructureDefinition/organization"/>
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization"/>
 			</type>
 		</element>
 		<element id="Task.input">
@@ -84,7 +84,7 @@
 		</element>
 		<element id="Task.input:message-name.type.coding.system">
 			<path value="Task.input.type.coding.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/bpmn-message"/>
 		</element>
 		<element id="Task.input:message-name.type.coding.code">
 			<path value="Task.input.type.coding.code"/>
@@ -103,7 +103,7 @@
 		</element>
 		<element id="Task.input:business-key.type.coding.system">
 			<path value="Task.input.type.coding.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/bpmn-message"/>
 		</element>
 		<element id="Task.input:business-key.type.coding.code">
 			<path value="Task.input.type.coding.code"/>
@@ -122,7 +122,7 @@
 		</element>
 		<element id="Task.input:correlation-key.type.coding.system">
 			<path value="Task.input.type.coding.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/bpmn-message"/>
 		</element>
 		<element id="Task.input:correlation-key.type.coding.code">
 			<path value="Task.input.type.coding.code"/>

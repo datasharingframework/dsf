@@ -36,10 +36,9 @@ public class EndpointProfileTest
 	public void testEndpointProfileValid() throws Exception
 	{
 		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/endpoint");
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		endpoint.getIdentifierFirstRep().setSystem("http://highmed.org/sid/endpoint-identifier")
-				.setValue("fhir.test.com");
+		endpoint.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/endpoint");
+		endpoint.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		endpoint.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue("fhir.test.com");
 		endpoint.setStatus(EndpointStatus.ACTIVE);
 		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
 				.setCode("hl7-fhir-rest");

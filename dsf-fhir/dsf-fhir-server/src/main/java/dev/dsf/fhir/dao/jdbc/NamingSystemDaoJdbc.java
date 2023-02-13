@@ -103,7 +103,7 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 		if (uniqueIdValue == null || uniqueIdValue.isBlank())
 			return false;
 
-		final String namingSystem = "{\"uniqueId\":[{\"modifierExtension\":[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}],"
+		final String namingSystem = "{\"uniqueId\":[{\"modifierExtension\":[{\"url\":\"http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}],"
 				+ "\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
 
 		try (PreparedStatement statement = connection.prepareStatement(

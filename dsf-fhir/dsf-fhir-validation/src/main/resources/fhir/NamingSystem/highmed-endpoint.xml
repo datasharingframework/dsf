@@ -1,7 +1,7 @@
 <NamingSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
 		</tag>		
 	</meta>
@@ -14,10 +14,10 @@
 	<description value="Shortest DNS that resolves the endpoint typically the DNS used in endpoint.address"/>
 	<usage value="Used withing HiGHmed to identify endpoints"/>
 	<uniqueId>
-		<modifierExtension url="http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference" >
+		<modifierExtension url="http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference" >
 			<valueBoolean value="true"/>
 		</modifierExtension>
 		<type value="uri"/>
-		<value value="http://highmed.org/sid/endpoint-identifier"/>
+		<value value="http://dsf.dev/sid/endpoint-identifier"/>
 	</uniqueId>
 </NamingSystem> 

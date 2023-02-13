@@ -1,11 +1,11 @@
 <CodeSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<url value="http://highmed.org/fhir/CodeSystem/process-authorization"/>
+	<url value="http://dsf.dev/fhir/CodeSystem/process-authorization"/>
 	<version value="0.5.0"/>
 	<name value="Process_Authorization"/>
 	<title value="Process Authorization"/>
@@ -22,22 +22,22 @@
 	<concept>
 		<code value="LOCAL_ORGANIZATION"/>
 		<display value="LOCAL_ORGANIZATION"/>
-		<definition value="Process authorization for a local organization specified via extension http://highmed.org/fhir/StructureDefinition/extension"/>
+		<definition value="Process authorization for a local organization specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
 	</concept>
 	<concept>
 		<code value="REMOTE_ORGANIZATION"/>
 		<display value="REMOTE_ORGANIZATION"/>
-		<definition value="Process authorization for a remote organization specified via extension http://highmed.org/fhir/StructureDefinition/extension"/>
+		<definition value="Process authorization for a remote organization specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
 	</concept>
 	<concept>
 		<code value="LOCAL_ROLE"/>
 		<display value="LOCAL_ROLE"/>
-		<definition value="Process authorization for a local consortium member with role specified via extension http://highmed.org/fhir/StructureDefinition/extension"/>
+		<definition value="Process authorization for a local consortium member with role specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
 	</concept>
 	<concept>
 		<code value="REMOTE_ROLE"/>
 		<display value="REMOTE_ROLE"/>
-		<definition value="Process authorization for a remote consortium member with role specified via extension http://highmed.org/fhir/StructureDefinition/extension"/>
+		<definition value="Process authorization for a remote consortium member with role specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
 	</concept>
 	<concept>
 		<code value="LOCAL_ALL"/>

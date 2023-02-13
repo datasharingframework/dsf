@@ -35,9 +35,9 @@ public class ProcessAuthorizationHelperTest
 	private ActivityDefinition createActivityDefinition()
 	{
 		var ad = new ActivityDefinition();
-		ad.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/activity-definition");
-		ad.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		ad.setUrl("http://highmed.org/bpe/Process/test");
+		ad.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
+		ad.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		ad.setUrl("http://dsf.dev/bpe/Process/test");
 		ad.setVersion("0.5.0");
 		ad.setStatus(PublicationStatus.ACTIVE);
 		ad.setKind(ActivityDefinitionKind.TASK);
@@ -51,21 +51,21 @@ public class ProcessAuthorizationHelperTest
 		var ad = createActivityDefinition();
 
 		Extension pa1 = ad.addExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		pa1.addExtension("message-name", new StringType("foo"));
 		pa1.addExtension("task-profile", new CanonicalType("http://bar.org/fhir/StructureDefinition/baz"));
 		pa1.addExtension("requester",
-				new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "REMOTE_ALL", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "REMOTE_ALL", null));
 		pa1.addExtension("recipient",
-				new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 		Extension pa2 = ad.addExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		pa2.addExtension("message-name", new StringType("foo"));
 		pa2.addExtension("task-profile", new CanonicalType("http://bar.org/fhir/StructureDefinition/baz"));
 		pa2.addExtension("requester",
-				new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "REMOTE_ALL", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "REMOTE_ALL", null));
 		pa2.addExtension("recipient",
-				new Coding("http://highmed.org/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 
 		assertFalse(helper.isValid(ad, p -> true, o -> true, c -> true));
 	}
@@ -103,8 +103,8 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			Stream<Requester> requesters = helper.getRequesters(ad, "http://highmed.org/bpe/Process/test", "0.5.0",
-					"foo", "http://bar.org/fhir/StructureDefinition/baz");
+			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(requesters);
 			List<Requester> requestersList = requesters.collect(Collectors.toList());
 			assertEquals(1, requestersList.size());
@@ -114,8 +114,8 @@ public class ProcessAuthorizationHelperTest
 			assertTrue(requestersList.get(0).isRequesterAuthorized(
 					User.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)), Collections.emptyList()));
 
-			Stream<Recipient> recipients = helper.getRecipients(ad, "http://highmed.org/bpe/Process/test", "0.5.0",
-					"foo", "http://bar.org/fhir/StructureDefinition/baz");
+			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(recipients);
 			List<Recipient> recipientsList = recipients.collect(Collectors.toList());
 			assertEquals(1, recipientsList.size());
@@ -135,8 +135,8 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			Stream<Requester> requesters = helper.getRequesters(ad, "http://highmed.org/bpe/Process/test", "0.5.0",
-					"foo", "http://bar.org/fhir/StructureDefinition/baz");
+			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(requesters);
 			List<Requester> requestersList = requesters.collect(Collectors.toList());
 			assertEquals(1, requestersList.size());
@@ -148,8 +148,8 @@ public class ProcessAuthorizationHelperTest
 							.setValue("organization.com")));
 			assertTrue(requestersList.get(0).isRequesterAuthorized(remoteUser, Collections.emptyList()));
 
-			Stream<Recipient> recipients = helper.getRecipients(ad, "http://highmed.org/bpe/Process/test", "0.5.0",
-					"foo", "http://bar.org/fhir/StructureDefinition/baz");
+			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(recipients);
 			List<Recipient> recipientsList = recipients.collect(Collectors.toList());
 			assertEquals(1, recipientsList.size());
@@ -166,7 +166,7 @@ public class ProcessAuthorizationHelperTest
 			affiliation.getParticipatingOrganization().getIdentifier()
 					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 			affiliation.getCodeFirstRep().getCodingFirstRep()
-					.setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("MeDIC");
+					.setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("MeDIC");
 			assertTrue(recipientsList.get(0).isRecipientAuthorized(localUser, Collections.singleton(affiliation)));
 		}
 	}

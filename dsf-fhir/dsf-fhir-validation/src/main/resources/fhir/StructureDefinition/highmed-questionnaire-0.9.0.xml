@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
 		</tag>
 	</meta>
-	<url value="http://highmed.org/fhir/StructureDefinition/questionnaire"/>
+	<url value="http://dsf.dev/fhir/StructureDefinition/questionnaire"/>
 	<version value="0.9.0"/>
 	<name value="Questionnaire"/>
 	<status value="active"/>

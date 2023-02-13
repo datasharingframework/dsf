@@ -50,7 +50,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
+				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 
 		assertNotNull(updatedBundle);
 	}
@@ -64,7 +64,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
+				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 
 		assertNotNull(id);
 	}
@@ -79,7 +79,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(allowList,
 				Map.of("identifier", Collections
-						.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
+						.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 
 		assertNotNull(outcome);
 	}
@@ -87,11 +87,11 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testDeleteTaskProfileViaBundleTestSupportedProfilesInConformanceStatement() throws Exception
 	{
-		final String taskProfileUrl = "http://highmed.org/fhir/StructureDefinition/highmed-task-test";
+		final String taskProfileUrl = "http://dsf.dev/fhir/StructureDefinition/highmed-task-test";
 		final String taskProfileVersion = "1.2.3";
 
 		StructureDefinition newS = new StructureDefinition();
-		newS.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		newS.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		newS.setUrl(taskProfileUrl);
 		newS.setVersion(taskProfileVersion);
 		newS.setName("TaskTest");
@@ -100,12 +100,12 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		newS.setKind(StructureDefinitionKind.RESOURCE);
 		newS.setAbstract(false);
 		newS.setType("Task");
-		newS.setBaseDefinition("http://highmed.org/fhir/StructureDefinition/task-base");
+		newS.setBaseDefinition("http://dsf.dev/fhir/StructureDefinition/task-base");
 		newS.setDerivation(TypeDerivationRule.CONSTRAINT);
 		ElementDefinition diff = newS.getDifferential().addElement();
 		diff.setId("Task.instantiatesUri");
 		diff.setPath("Task.instantiatesUri");
-		diff.setFixed(new UriType("http://highmed.org/bpe/Process/taskTest/1.2.3"));
+		diff.setFixed(new UriType("http://dsf.dev/bpe/Process/taskTest/1.2.3"));
 
 		assertFalse(testProfileSupported(taskProfileUrl));
 

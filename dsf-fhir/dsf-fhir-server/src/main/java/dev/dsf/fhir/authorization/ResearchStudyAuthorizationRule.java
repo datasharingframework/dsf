@@ -37,13 +37,13 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyAuthorizationRule.class);
 
-	private static final String HIGHMED_RESEARCH_STUDY = "http://highmed.org/fhir/StructureDefinition/research-study";
-	private static final String RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/sid/research-study-identifier";
+	private static final String HIGHMED_RESEARCH_STUDY = "http://dsf.dev/fhir/StructureDefinition/research-study";
+	private static final String RESEARCH_STUDY_IDENTIFIER = "http://dsf.dev/sid/research-study-identifier";
 	private static final String RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 	private static final Pattern RESEARCH_STUDY_IDENTIFIER_PATTERN = Pattern
 			.compile(RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING);
-	private static final String PARTICIPATING_MEDIC_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/extension-participating-medic";
-	private static final String PARTICIPATING_TTP_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp";
+	private static final String PARTICIPATING_MEDIC_EXTENSION_URL = "http://dsf.dev/fhir/StructureDefinition/extension-participating-medic";
+	private static final String PARTICIPATING_TTP_EXTENSION_URL = "http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp";
 
 	public ResearchStudyAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
@@ -91,34 +91,34 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 			if (getParticipatingMedicReferences(newResource).count() >= 0)
 			{
 				if (!organizationsResolvable(connection, user,
-						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic)",
+						"ResearchStudy.extension(url:http://dsf.dev/fhir/StructureDefinition/extension-participating-medic)",
 						getParticipatingMedicReferences(newResource)).allMatch(t -> t))
 				{
 					errors.add(
-							"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organizations not resolved");
+							"ResearchStudy.extension(url:http://dsf.dev/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organizations not resolved");
 				}
 			}
 			else
 			{
 				errors.add(
-						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organization references missing");
+						"ResearchStudy.extension(url:http://dsf.dev/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organization references missing");
 			}
 
 			Optional<Reference> participatingTtpReference = getParticipatingTtpReference(newResource);
 			if (participatingTtpReference.isPresent())
 			{
 				if (!organizationResolvable(connection, user,
-						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp)",
+						"ResearchStudy.extension(url:http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp)",
 						participatingTtpReference.get()))
 				{
 					errors.add(
-							"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization not resolved");
+							"ResearchStudy.extension(url:http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization not resolved");
 				}
 			}
 			else
 			{
 				errors.add(
-						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization reference missing");
+						"ResearchStudy.extension(url:http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization reference missing");
 			}
 
 			if (newResource.getEnrollment().size() >= 0)

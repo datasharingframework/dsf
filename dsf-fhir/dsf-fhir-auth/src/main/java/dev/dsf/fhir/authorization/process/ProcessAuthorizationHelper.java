@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Identifier;
 
 public interface ProcessAuthorizationHelper
 {
-	String PROCESS_AUTHORIZATION_SYSTEM = "http://highmed.org/fhir/CodeSystem/process-authorization";
+	String PROCESS_AUTHORIZATION_SYSTEM = "http://dsf.dev/fhir/CodeSystem/process-authorization";
 	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION = "LOCAL_ORGANIZATION";
 	String PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION = "REMOTE_ORGANIZATION";
 	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE = "LOCAL_ROLE";
@@ -20,17 +20,17 @@ public interface ProcessAuthorizationHelper
 	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL = "LOCAL_ALL";
 	String PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL = "REMOTE_ALL";
 
-	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/sid/organization-identifier";
+	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
 
-	String EXTENSION_PROCESS_AUTHORIZATION = "http://highmed.org/fhir/StructureDefinition/extension-process-authorization";
+	String EXTENSION_PROCESS_AUTHORIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization";
 	String EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME = "message-name";
 	String EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE = "task-profile";
 	String EXTENSION_PROCESS_AUTHORIZATION_REQUESTER = "requester";
 	String EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT = "recipient";
 
-	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION = "http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization";
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization";
 
-	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE = "http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role";
+	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role";
 	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM = "consortium";
 	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE = "role";
 

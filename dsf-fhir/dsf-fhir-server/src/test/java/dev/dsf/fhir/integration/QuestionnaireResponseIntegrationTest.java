@@ -39,7 +39,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 {
 	private static final Date AUTHORED = Date
 			.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
-	private static final String QUESTIONNAIRE_URL = "http://highmed.org/fhir/Questionnaire/userTask/foo";
+	private static final String QUESTIONNAIRE_URL = "http://dsf.dev/fhir/Questionnaire/userTask/foo";
 	private static final String QUESTIONNAIRE_VERSION = "1.0.0";
 	private static final String QUESTIONNAIRE = QUESTIONNAIRE_URL + "|" + QUESTIONNAIRE_VERSION;
 	private static final QuestionnaireResponse.QuestionnaireResponseStatus STATUS = QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS;
@@ -481,7 +481,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	private Questionnaire createQuestionnaire()
 	{
 		Questionnaire questionnaire = new Questionnaire();
-		questionnaire.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		questionnaire.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
 		questionnaire.setUrl(QUESTIONNAIRE_URL);
 		questionnaire.setVersion(QUESTIONNAIRE_VERSION);

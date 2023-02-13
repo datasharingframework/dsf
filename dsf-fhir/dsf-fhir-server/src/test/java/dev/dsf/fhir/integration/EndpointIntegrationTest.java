@@ -41,7 +41,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	private Endpoint createEndpoint()
 	{
 		Endpoint endpoint = new Endpoint();
-		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
+		endpoint.addIdentifier().setSystem("http://dsf.dev/sid/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
 		endpoint.setStatus(EndpointStatus.ACTIVE);
 		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
@@ -206,8 +206,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 		Organization organization = new Organization();
 		getReadAccessHelper().addAll(organization);
-		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
-		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
+		organization.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("bla-bla.de");
+		organization.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint",
 				new StringType(
 						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
 
@@ -218,7 +218,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		Endpoint endpoint = createEndpoint();
 		getReadAccessHelper().addAll(endpoint);
 		endpoint.getManagingOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("bla-bla.de");
 
 		logger.debug("endpoint: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(endpoint));
 
@@ -271,15 +271,15 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 		Organization organization = new Organization();
 		getReadAccessHelper().addAll(organization);
-		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
-		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
+		organization.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("bla-bla.de");
+		organization.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint",
 				new StringType(
 						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
 		organization.addEndpoint().setReference(endTempId);
 
 		Endpoint endpoint = createEndpoint();
 		getReadAccessHelper().addAll(endpoint);
-		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/endpoint");
+		endpoint.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/endpoint");
 		endpoint.getManagingOrganization().setReference(orgTempId);
 
 		Bundle bundle = new Bundle();
@@ -289,7 +289,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		bundle.addEntry().setFullUrl(endTempId).setResource(endpoint).getRequest().setMethod(HTTPVerb.POST)
 				.setUrl("Endpoint");
 		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
-				.setUrl("Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
+				.setUrl("Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
 
 		logger.debug("bundle: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle postBundle = getWebserviceClient().postBundle(bundle);
@@ -341,7 +341,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("identifier",
-						Collections.singletonList("http://highmed.org/sid/organization-identifier|Test_Organization")));
+						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
 		assertEquals(1, organizationResult.getTotal());
@@ -369,7 +369,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("identifier",
-						Collections.singletonList("http://highmed.org/sid/organization-identifier|Test_Organization")));
+						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
 		assertEquals(1, organizationResult.getTotal());

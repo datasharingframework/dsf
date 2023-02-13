@@ -24,8 +24,8 @@ public class ActivityDefinitionWithExtension
 	public void test() throws Exception
 	{
 		ActivityDefinition a = new ActivityDefinition();
-		a.getMeta().addTag("http://highmed.org/fhir/CodeSystem/authorization-role", "REMOTE", null);
-		a.setUrl("http://highmed.org/bpe/Process/ping");
+		a.getMeta().addTag("http://dsf.dev/fhir/CodeSystem/authorization-role", "REMOTE", null);
+		a.setUrl("http://dsf.dev/bpe/Process/ping");
 		a.setVersion("1.0.0");
 		a.setName("PingProcess");
 		a.setTitle("PING process");
@@ -41,31 +41,31 @@ public class ActivityDefinitionWithExtension
 		a.setKind(ActivityDefinitionKind.TASK);
 
 		Extension e1 = a.addExtension();
-		e1.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
+		e1.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		e1.addExtension("message-name", new StringType("startPingProcessMessage"));
 		e1.addExtension("authorization-role",
-				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "LOCAL", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "LOCAL", null));
 		Extension ot12 = e1.addExtension();
 		ot12.setUrl("organization-types");
 		ot12.addExtension("organization-type",
-				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "TTP", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "TTP", null));
 		ot12.addExtension("organization-type",
-				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "MeDIC", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "MeDIC", null));
 		e1.addExtension("task-profile",
-				new CanonicalType("http://highmed.org/fhir/StructureDefinition/task-start-ping-process"));
+				new CanonicalType("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process"));
 
 		Extension e2 = a.addExtension();
-		e2.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
+		e2.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		e2.addExtension("message-name", new StringType("pongMessage"));
 		e2.addExtension("authorization-role",
-				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "REMOTE", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "REMOTE", null));
 		Extension ot22 = e2.addExtension();
 		ot22.setUrl("organization-types");
 		ot22.addExtension("organization-type",
-				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "TTP", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "TTP", null));
 		ot22.addExtension("organization-type",
-				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "MeDIC", null));
-		e2.addExtension("task-profile", new CanonicalType("http://highmed.org/fhir/StructureDefinition/task-pong"));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "MeDIC", null));
+		e2.addExtension("task-profile", new CanonicalType("http://dsf.dev/fhir/StructureDefinition/task-pong"));
 
 		String xml = FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(a);
 		logger.debug(xml);

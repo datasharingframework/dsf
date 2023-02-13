@@ -149,7 +149,7 @@ public class QuestionnaireResponseProfileTest
 		res.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
 		res.setAuthored(new Date());
 		res.setAuthor(new Reference().setIdentifier(
-				new Identifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("foo.de")));
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("foo.de")));
 
 		ValidationResult result = resourceValidator.validate(res);
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
@@ -211,8 +211,8 @@ public class QuestionnaireResponseProfileTest
 	private QuestionnaireResponse createQuestionnaireResponse(Type type)
 	{
 		QuestionnaireResponse res = new QuestionnaireResponse();
-		res.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/questionnaire-response");
-		res.setQuestionnaire("http://highmed.org/fhir/Questionnaire/hello-world|0.1.0");
+		res.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire-response");
+		res.setQuestionnaire("http://dsf.dev/fhir/Questionnaire/hello-world|0.1.0");
 		res.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
 		res.addItem().setLinkId("user-task-id").setText("The user-task-id of the process execution").addAnswer()
 				.setValue(new StringType("1"));

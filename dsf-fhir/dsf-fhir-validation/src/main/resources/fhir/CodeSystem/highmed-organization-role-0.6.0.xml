@@ -1,11 +1,11 @@
 <CodeSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<url value="http://highmed.org/fhir/CodeSystem/organization-role"/>
+	<url value="http://dsf.dev/fhir/CodeSystem/organization-role"/>
 	<version value="0.6.0"/>
 	<name value="HiGHmed_Organization_Role"/>
 	<title value="HiGHmed Organization Role"/>

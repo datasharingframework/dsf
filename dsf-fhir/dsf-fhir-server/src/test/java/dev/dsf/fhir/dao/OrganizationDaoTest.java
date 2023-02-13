@@ -69,7 +69,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		Organization org = new Organization();
 		org.setActive(true);
 		org.setName("Test");
-		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(certHex));
 
 		Organization created = dao.create(org);
@@ -79,14 +79,13 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		assertNotNull(read);
 		assertTrue(read.isPresent());
 		assertNotNull(read.get()
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint"));
-		assertEquals(StringType.class, read.get()
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
-				.getValue().getClass());
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint"));
+		assertEquals(StringType.class,
+				read.get().getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+						.getValue().getClass());
 		assertEquals(certHex,
 				((StringType) read.get()
-						.getExtensionByUrl(
-								"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+						.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 						.getValue()).asStringValue());
 	}
 
@@ -98,7 +97,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		Organization org = new Organization();
 		org.setActive(false);
 		org.setName("Test");
-		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(certHex));
 
 		Organization created = dao.create(org);
@@ -121,7 +120,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		Organization org = new Organization();
 		org.setActive(false);
 		org.setName("Test");
-		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(certHex));
 
 		Organization created = dao.create(org);
@@ -165,7 +164,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		final String identifierValue = "foo";
 
 		Organization createResource = createResource();
-		createResource.getIdentifierFirstRep().setSystem("http://highmed.org/sid/organization-identifier")
+		createResource.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue(identifierValue);
 		dao.create(createResource);
 

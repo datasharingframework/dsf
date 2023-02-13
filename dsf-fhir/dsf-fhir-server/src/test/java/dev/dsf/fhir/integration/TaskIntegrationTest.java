@@ -62,19 +62,19 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-start-ping-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/ping/0.3.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
 
 		Reference requester = new Reference().setType("Organization");
-		requester.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 
 		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
@@ -101,14 +101,14 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				TaskStatus.FAILED, TaskStatus.COMPLETED, TaskStatus.ENTEREDINERROR, TaskStatus.NULL);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-start-ping-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/ping/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
@@ -134,16 +134,16 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				TaskStatus.FAILED, TaskStatus.COMPLETED, TaskStatus.ENTEREDINERROR, TaskStatus.NULL);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-ping");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/pong/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
 		Reference requester = new Reference().setType("Organization");
-		requester.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
@@ -178,14 +178,14 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-start-ping-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/ping/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.getRestriction().addRecipient(localOrg);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
@@ -196,7 +196,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		Reference requester1 = new Reference().setType("Organization");
-		requester1.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester1.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester1);
 		testCreateExpectForbidden(getWebserviceClient(), t);
@@ -215,13 +215,13 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-ping");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/pong/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
@@ -250,14 +250,14 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-start-ping-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/ping/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.setRequester(localOrg);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
@@ -273,7 +273,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		Reference requester1 = new Reference().setType("Organization");
-		requester1.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester1.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester1);
@@ -303,16 +303,16 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-ping");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/pong/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference requester = new Reference().setType("Organization");
-		requester.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
@@ -328,7 +328,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
 
 		Reference requester1 = new Reference().setType("Organization");
-		requester1.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester1.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester1);
@@ -358,15 +358,15 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-start-ping-process");
-		// t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process");
+		// t.setInstantiatesUri("http://dsf.dev/bpe/Process/ping/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
@@ -385,18 +385,18 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-ping");
-		// t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-ping");
+		// t.setInstantiatesUri("http://dsf.dev/bpe/Process/pong/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference requester = new Reference().setType("Organization");
-		requester.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.getRestriction().addRecipient(localOrg);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
@@ -415,15 +415,15 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-start-ping-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/ping/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
-		// t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		// t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 		// .setCode("message-name");
 		// t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
@@ -437,34 +437,34 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		t.setInput(null);
 		ParameterComponent in1 = t.addInput();
-		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		in1.getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		in1.setValue(new StringType("startPingProcessMessage"));
 		ParameterComponent in2 = t.addInput();
-		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		in2.getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		in2.setValue(new StringType("startPingProcessMessage"));
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType(""));
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new Coding().setSystem("system").setCode("code"));
 		testCreateExpectForbidden(getWebserviceClient(), t);
@@ -478,18 +478,18 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-ping");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/pong/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference requester = new Reference().setType("Organization");
-		requester.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.getRestriction().addRecipient(localOrg);
-		// t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		// t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 		// .setCode("message-name");
 		// t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
@@ -503,34 +503,34 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		t.setInput(null);
 		ParameterComponent in1 = t.addInput();
-		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		in1.getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		in1.setValue(new StringType("startPingProcessMessage"));
 		ParameterComponent in2 = t.addInput();
-		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		in2.getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		in2.setValue(new StringType("startPingProcessMessage"));
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("");
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType(""));
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
 
 		t.setInput(null);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new Coding().setSystem("system").setCode("code"));
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
@@ -544,15 +544,15 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-start-ping-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/ping/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
@@ -569,18 +569,18 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
+		t.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-ping");
+		t.setInstantiatesUri("http://dsf.dev/bpe/Process/pong/0.3.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
 		Reference requester = new Reference().setType("Organization");
-		requester.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier")
+		requester.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
 		t.getRestriction().addRecipient(localOrg);
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
@@ -645,9 +645,9 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 			Task task = fhirContext.newXmlParser().parseResource(Task.class, in);
 			task.setAuthoredOn(new Date());
 			task.getRequester().setType("Organization").getIdentifier()
-					.setSystem("http://highmed.org/sid/organization-identifier").setValue(requester);
+					.setSystem("http://dsf.dev/sid/organization-identifier").setValue(requester);
 			task.getRestriction().getRecipientFirstRep().setType("Organization").getIdentifier()
-					.setSystem("http://highmed.org/sid/organization-identifier").setValue(recipient);
+					.setSystem("http://dsf.dev/sid/organization-identifier").setValue(recipient);
 			return task;
 		}
 	}
@@ -806,11 +806,11 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	{
 		ActivityDefinition ad3 = readActivityDefinition("highmed-test-activity-definition3-0.5.0.xml");
 		Coding recipient = (Coding) ad3
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization")
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization")
 				.getExtensionByUrl("recipient").getValue();
 		Coding role = (Coding) recipient
 				.getExtensionByUrl(
-						"http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role")
+						"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role")
 				.getExtensionByUrl("role").getValue();
 		role.setCode("TTP");
 
@@ -856,7 +856,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle().setType(BundleType.TRANSACTION);
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/test-task");
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/test-task");
 		BundleEntryComponent entry = bundle.addEntry();
 		entry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
 		entry.setResource(task);

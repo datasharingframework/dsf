@@ -17,7 +17,7 @@ public class MeasureReportIntegrationTest extends AbstractIntegrationTest
 	private static Measure createMeasure()
 	{
 		Measure measure = new Measure();
-		measure.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		measure.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		measure.setUrl("https://foo.bar/fhir/Measure/8cc30173-8b85-4418-882a-a3b8a9652fc6");
 		measure.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		measure.getScoring().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
@@ -39,7 +39,7 @@ public class MeasureReportIntegrationTest extends AbstractIntegrationTest
 		assertEquals("https://foo.bar/fhir/Measure/8cc30173-8b85-4418-882a-a3b8a9652fc6", measure.getUrl());
 
 		MeasureReport measureReport = new MeasureReport();
-		measureReport.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		measureReport.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		measureReport.setStatus(MeasureReport.MeasureReportStatus.COMPLETE);
 		measureReport.setType(MeasureReport.MeasureReportType.SUMMARY);
 		measureReport.setMeasure("https://foo.bar/fhir/Measure/8cc30173-8b85-4418-882a-a3b8a9652fc6");

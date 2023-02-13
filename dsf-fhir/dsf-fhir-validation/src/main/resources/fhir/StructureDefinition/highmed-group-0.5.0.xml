@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>		
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/group" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/group" />
   <version value="0.5.0" />
   <name value="Group" />
   <status value="active" />
@@ -35,7 +35,7 @@
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/extension-query" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-query" />
       </type>
     </element>
     <element id="Group.type">

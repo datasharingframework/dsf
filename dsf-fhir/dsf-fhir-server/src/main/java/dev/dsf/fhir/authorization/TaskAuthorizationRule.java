@@ -38,7 +38,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskAuthorizationRule.class);
 
-	private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";
+	private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
 
 	private static final String INSTANTIATES_URI_PATTERN_STRING = "(?<processUrl>http://(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*(?:[A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])/bpe/Process/[-\\w]+)/(?<processVersion>\\d+\\.\\d+\\.\\d+)";

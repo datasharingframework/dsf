@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>		
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/research-study" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/research-study" />
   <version value="0.5.0" />
   <name value="ResearchStudy" />
   <status value="active" />
@@ -35,7 +35,7 @@
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/extension-participating-ttp" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp" />
       </type>
     </element>
     <element id="ResearchStudy.extension:participating-medic">
@@ -44,7 +44,7 @@
       <min value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/extension-participating-medic" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-participating-medic" />
       </type>
     </element>
     <element id="ResearchStudy.identifier">
@@ -67,7 +67,7 @@
     <element id="ResearchStudy.identifier:highmedIdentifier.system">
       <path value="ResearchStudy.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/sid/research-study-identifier" />
+      <fixedUri value="http://dsf.dev/sid/research-study-identifier" />
     </element>
     <element id="ResearchStudy.identifier:highmedIdentifier.value">
       <path value="ResearchStudy.identifier.value" />
@@ -78,7 +78,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/group" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/group" />
       </type>
     </element>
     <element id="ResearchStudy.enrollment.reference">

@@ -24,7 +24,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 
 @IncludeParameterDefinition(resourceType = ResearchStudy.class, parameterName = ResearchStudyEnrollment.PARAMETER_NAME, targetResourceTypes = Group.class)
-@SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://highmed.org/fhir/SearchParameter/ResearchStudy-enrollment", type = SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
+@SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://dsf.dev/fhir/SearchParameter/ResearchStudy-enrollment", type = SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
 	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";

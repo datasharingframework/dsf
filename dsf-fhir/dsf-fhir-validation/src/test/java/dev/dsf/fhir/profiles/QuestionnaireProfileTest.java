@@ -164,8 +164,8 @@ public class QuestionnaireProfileTest
 	private Questionnaire createQuestionnaire(Questionnaire.QuestionnaireItemType type)
 	{
 		Questionnaire res = new Questionnaire();
-		res.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/questionnaire");
-		res.setUrl("http://highmed.org/fhir/Questionnaire/hello-world");
+		res.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire");
+		res.setUrl("http://dsf.dev/fhir/Questionnaire/hello-world");
 		res.setVersion("0.1.0");
 		res.setDate(new Date());
 		res.setStatus(Enumerations.PublicationStatus.ACTIVE);

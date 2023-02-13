@@ -14,17 +14,17 @@ import org.hl7.fhir.r4.model.Resource;
  */
 public interface ReadAccessHelper
 {
-	String READ_ACCESS_TAG_SYSTEM = "http://highmed.org/fhir/CodeSystem/read-access-tag";
+	String READ_ACCESS_TAG_SYSTEM = "http://dsf.dev/fhir/CodeSystem/read-access-tag";
 	String READ_ACCESS_TAG_VALUE_LOCAL = "LOCAL";
 	String READ_ACCESS_TAG_VALUE_ORGANIZATION = "ORGANIZATION";
 	String READ_ACCESS_TAG_VALUE_ROLE = "ROLE";
 	String READ_ACCESS_TAG_VALUE_ALL = "ALL";
 
-	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/sid/organization-identifier";
+	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
 
-	String EXTENSION_READ_ACCESS_ORGANIZATION = "http://highmed.org/fhir/StructureDefinition/extension-read-access-organization";
+	String EXTENSION_READ_ACCESS_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization";
 
-	String EXTENSION_READ_ACCESS_CONSORTIUM_ROLE = "http://highmed.org/fhir/StructureDefinition/extension-read-access-consortium-role";
+	String EXTENSION_READ_ACCESS_CONSORTIUM_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role";
 	String EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_CONSORTIUM = "consortium";
 	String EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_ROLE = "role";
 

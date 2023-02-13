@@ -1,17 +1,17 @@
 <CodeSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="LOCAL" />
 		</tag>
 		<tag>
-			<extension url="http://highmed.org/fhir/StructureDefinition/extension-read-access-organization">
+			<extension url="http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization">
 				<valueIdentifier>
-					<system value="http://highmed.org/sid/organization-identifier" />
+					<system value="http://dsf.dev/sid/organization-identifier" />
 					<value value="organization.com" />
 				</valueIdentifier>
 			</extension>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="ORGANIZATION" />
 		</tag>
 	</meta>

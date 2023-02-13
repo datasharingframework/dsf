@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/activity-definition" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/activity-definition" />
   <version value="0.5.0" />
   <name value="ActivityDefinition" />
   <status value="active" />
@@ -35,7 +35,7 @@
       <max value="*" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization" />
       </type>
     </element>
     <element id="ActivityDefinition.url">

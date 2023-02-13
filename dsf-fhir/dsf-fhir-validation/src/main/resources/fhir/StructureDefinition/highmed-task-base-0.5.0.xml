@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>		
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/task-base" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/task-base" />
   <version value="0.5.0" />
   <name value="TaskBase" />
   <status value="active" />
@@ -35,7 +35,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="Task.requester.reference">
@@ -49,7 +49,7 @@
     <element id="Task.requester.identifier.system">
       <path value="Task.requester.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/sid/organization-identifier" />
+      <fixedUri value="http://dsf.dev/sid/organization-identifier" />
     </element>
     <element id="Task.requester.identifier.value">
       <path value="Task.requester.identifier.value" />
@@ -65,7 +65,7 @@
       <max value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="Task.restriction.recipient.reference">
@@ -79,7 +79,7 @@
     <element id="Task.restriction.recipient.identifier.system">
       <path value="Task.restriction.recipient.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/sid/organization-identifier" />
+      <fixedUri value="http://dsf.dev/sid/organization-identifier" />
     </element>
     <element id="Task.restriction.recipient.identifier.value">
       <path value="Task.restriction.recipient.identifier.value" />
@@ -119,7 +119,7 @@
           <valueString value="TaskInputParameterType" />
         </extension>
         <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+        <valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message" />
       </binding>
     </element>
     <element id="Task.input:message-name.type.coding">
@@ -130,7 +130,7 @@
     <element id="Task.input:message-name.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+      <fixedUri value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.input:message-name.type.coding.code">
       <path value="Task.input.type.coding.code" />
@@ -158,7 +158,7 @@
           <valueString value="TaskInputParameterType" />
         </extension>
         <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+        <valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message" />
       </binding>
     </element>
     <element id="Task.input:business-key.type.coding">
@@ -169,7 +169,7 @@
     <element id="Task.input:business-key.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+      <fixedUri value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.input:business-key.type.coding.code">
       <path value="Task.input.type.coding.code" />
@@ -197,7 +197,7 @@
           <valueString value="TaskInputParameterType" />
         </extension>
         <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+        <valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message" />
       </binding>
     </element>
     <element id="Task.input:correlation-key.type.coding">
@@ -208,7 +208,7 @@
     <element id="Task.input:correlation-key.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+      <fixedUri value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.input:correlation-key.type.coding.code">
       <path value="Task.input.type.coding.code" />
@@ -246,7 +246,7 @@
           <valueString value="TaskOutputParameterType" />
         </extension>
         <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+        <valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message" />
       </binding>
     </element>
     <element id="Task.output:error.type.coding">
@@ -257,7 +257,7 @@
     <element id="Task.output:error.type.coding.system">
       <path value="Task.output.type.coding.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+      <fixedUri value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.output:error.type.coding.code">
       <path value="Task.output.type.coding.code" />

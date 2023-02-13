@@ -81,7 +81,7 @@ public class BundleGenerator
 
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("test-client").getCertificateSha512ThumbprintHex()));
 

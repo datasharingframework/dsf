@@ -40,7 +40,7 @@ public class CodeSystemProfileTest
 	private CodeSystem createCodeSystem()
 	{
 		var cs = new CodeSystem();
-		cs.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/code-system");
+		cs.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/code-system");
 		cs.setUrl("http://test.com/fhir/test");
 		cs.setVersion("0.1.0");
 		cs.setName("Test");
@@ -68,7 +68,7 @@ public class CodeSystemProfileTest
 	public void testCodeSystemWithAllReadAccessValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
 		logResource(cs);
 
@@ -83,7 +83,7 @@ public class CodeSystemProfileTest
 	public void testCodeSystemWithLocalReadAccessValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
 
 		logResource(cs);
 
@@ -98,7 +98,7 @@ public class CodeSystemProfileTest
 	public void testCodeSystemWithFooReadAccessNotValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("FOO");
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("FOO");
 
 		logResource(cs);
 
@@ -114,11 +114,10 @@ public class CodeSystemProfileTest
 	public void testCodeSystemWithOrganizationReadAccessValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ORGANIZATION")
-				.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-read-access-organization")
-				.setValue(new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue("foo.com"));
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ORGANIZATION")
+				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization")
+				.setValue(new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("foo.com"));
 
 		logResource(cs);
 
@@ -133,15 +132,13 @@ public class CodeSystemProfileTest
 	public void testCodeSystemWithTwoOrganizationsReadAccessValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ORGANIZATION")
-				.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-read-access-organization")
-				.setValue(new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue("foo.com"));
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ORGANIZATION")
-				.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-read-access-organization")
-				.setValue(new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue("bar.com"));
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ORGANIZATION")
+				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization")
+				.setValue(new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("foo.com"));
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ORGANIZATION")
+				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization")
+				.setValue(new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("bar.com"));
 
 		logResource(cs);
 
@@ -156,14 +153,13 @@ public class CodeSystemProfileTest
 	public void testCodeSystemWithConsortiumMemberReadAccessValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
-		Extension ex = cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag")
-				.setCode("ROLE").addExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-read-access-consortium-role");
-		ex.addExtension().setUrl("consortium").setValue(new Identifier()
-				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.com"));
-		ex.addExtension().setUrl("role").setValue(
-				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("TTP"));
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
+		Extension ex = cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ROLE")
+				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role");
+		ex.addExtension().setUrl("consortium").setValue(
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.com"));
+		ex.addExtension().setUrl("role")
+				.setValue(new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("TTP"));
 
 		logResource(cs);
 
@@ -178,14 +174,13 @@ public class CodeSystemProfileTest
 	public void testCodeSystemWithConsortiumMemberReadAccessNotValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
-		cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
-		Extension ex = cs.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag")
-				.setCode("ROLE").addExtension()
-				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-read-access-consortium-role");
-		ex.addExtension().setUrl("consortium").setValue(new Identifier()
-				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.com"));
-		ex.addExtension().setUrl("role").setValue(
-				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("FOO"));
+		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
+		Extension ex = cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ROLE")
+				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role");
+		ex.addExtension().setUrl("consortium").setValue(
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.com"));
+		ex.addExtension().setUrl("role")
+				.setValue(new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("FOO"));
 
 		logResource(cs);
 

@@ -7,7 +7,7 @@
 			"resource": {
 				"resourceType": "Group",
 				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/group"
+					"profile": "http://dsf.dev/fhir/StructureDefinition/group"
 				},
 				"text": {
 					"div": "This is the description",
@@ -17,7 +17,7 @@
 				"actual": false,
 				"extension": [
 					{
-						"url": "http://highmed.org/fhir/StructureDefinition/extension-query",
+						"url": "http://dsf.dev/fhir/StructureDefinition/extension-query",
 						"valueExpression": [
 							{
 								"language": "application/x-aql-query",
@@ -37,7 +37,7 @@
 			"resource": {
 				"resourceType": "Group",
 				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/group"
+					"profile": "http://dsf.dev/fhir/StructureDefinition/group"
 				},
 				"text": {
 					"div": "This is the description",
@@ -47,7 +47,7 @@
 				"actual": false,
 				"extension": [
 					{
-						"url": "http://highmed.org/fhir/StructureDefinition/extension-query",
+						"url": "http://dsf.dev/fhir/StructureDefinition/extension-query",
 						"valueExpression": [
 							{
 								"language": "application/x-aql-query",
@@ -67,29 +67,29 @@
 			"resource": {
 				"resourceType": "ResearchStudy",
 				"meta": {
-					"profile": [ "http://highmed.org/fhir/StructureDefinition/research-study" ]
+					"profile": [ "http://dsf.dev/fhir/StructureDefinition/research-study" ]
 				},
 				"extension": [ {
-					"url": "http://highmed.org/fhir/StructureDefinition/extension-participating-medic",
+					"url": "http://dsf.dev/fhir/StructureDefinition/extension-participating-medic",
 					"valueReference": {
 						"type": "Organization",
 						"identifier": {
-							"system": "http://highmed.org/sid/organization-identifier",
+							"system": "http://dsf.dev/sid/organization-identifier",
 							"value": "Test_Organization"
 						}
 					}
 				}, {
-					"url": "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp",
+					"url": "http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp",
 					"valueReference": {
 						"type": "Organization",
 						"identifier": {
-							"system": "http://highmed.org/sid/organization-identifier",
+							"system": "http://dsf.dev/sid/organization-identifier",
 							"value": "External_Test_Organization"
 						}
 					}
 				} ],
 				"identifier": [ {
-					"system": "http://highmed.org/sid/research-study-identifier",
+					"system": "http://dsf.dev/sid/research-study-identifier",
 					"value": "886ec806-9bbb-4217-84d0-42f149c6767e"
 				} ],
 				"status": "active",
@@ -108,12 +108,12 @@
 			"fullUrl": "urn:uuid:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
 			"resource": {
 				"resourceType": "Task",
-				"instantiatesUri": "http://highmed.org/bpe/Process/requestFeasibility/0.3.0",
+				"instantiatesUri": "http://dsf.dev/bpe/Process/requestFeasibility/0.3.0",
 				"status": "requested",
 				"intent": "order",
 				"requester": {
 					"identifier": {
-						"system": "http://highmed.org/sid/organization-identifier",
+						"system": "http://dsf.dev/sid/organization-identifier",
 						"value": "Test_Organization"
 					},
 					"type": "Organization"
@@ -122,7 +122,7 @@
 					"recipient": [
 						{
 							"identifier": {
-								"system": "http://highmed.org/sid/organization-identifier",
+								"system": "http://dsf.dev/sid/organization-identifier",
 								"value": "Test_Organization"
 							},
 							"type": "Organization"
@@ -134,7 +134,7 @@
 						"type": {
 							"coding": [
 								{
-									"system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+									"system": "http://dsf.dev/fhir/CodeSystem/bpmn-message",
 									"code": "message-name"
 								}
 							]
@@ -145,7 +145,7 @@
 						"type": {
 							"coding": [
 								{
-									"system": "http://highmed.org/fhir/CodeSystem/feasibility",
+									"system": "http://dsf.dev/fhir/CodeSystem/feasibility",
 									"code": "research-study-reference"
 								}
 							]
@@ -158,7 +158,7 @@
 						"type": {
 							"coding": [
 								{
-									"system": "http://highmed.org/fhir/CodeSystem/feasibility",
+									"system": "http://dsf.dev/fhir/CodeSystem/feasibility",
 									"code": "needs-record-linkage"
 								}
 							]
@@ -169,7 +169,7 @@
 						"type": {
 							"coding": [
 								{
-									"system": "http://highmed.org/fhir/CodeSystem/feasibility",
+									"system": "http://dsf.dev/fhir/CodeSystem/feasibility",
 									"code": "needs-consent-check"
 								}
 							]

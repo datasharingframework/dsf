@@ -1,11 +1,11 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/endpoint" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/endpoint" />
   <version value="0.5.0" />
   <name value="Endpoint" />
   <status value="active" />
@@ -42,7 +42,7 @@
     <element id="Endpoint.identifier:highmedIdentifier.system">
       <path value="Endpoint.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/sid/endpoint-identifier" />
+      <fixedUri value="http://dsf.dev/sid/endpoint-identifier" />
     </element>
     <element id="Endpoint.identifier:highmedIdentifier.value">
       <path value="Endpoint.identifier.value" />
@@ -63,7 +63,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
+        <targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="Endpoint.managingOrganization.reference">
