@@ -9,12 +9,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -48,6 +42,11 @@ import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
 
 public class StructureDefinitionServiceImpl extends
 		AbstractResourceServiceImpl<StructureDefinitionDao, StructureDefinition> implements StructureDefinitionService
@@ -222,7 +221,7 @@ public class StructureDefinitionServiceImpl extends
 
 	private Response getSnapshot(String url, UriInfo uri, HttpHeaders headers)
 	{
-		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentUser(), 1, 1);
+		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentIdentity(), 1, 1);
 		Map<String, List<String>> searchParameters = new HashMap<>();
 		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, Collections.singletonList(url));
 		searchParameters.put(SearchQuery.PARAMETER_SORT,

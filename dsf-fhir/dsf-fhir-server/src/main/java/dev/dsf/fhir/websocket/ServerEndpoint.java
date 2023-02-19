@@ -2,6 +2,7 @@ package dev.dsf.fhir.websocket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -10,23 +11,22 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler.Whole;
-import javax.websocket.PongMessage;
-import javax.websocket.Session;
-
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.MessageHandler.Whole;
+import jakarta.websocket.PongMessage;
+import jakarta.websocket.Session;
 
 public class ServerEndpoint extends Endpoint implements InitializingBean, DisposableBean
 {
@@ -57,14 +57,17 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	{
 		logger.debug("onOpen session: {}", session.getId());
 
-		User user = getUser(session);
-		if (user == null || !UserRole.userHasOneOfRoles(user, UserRole.LOCAL))
+		Principal principal = session.getUserPrincipal();
+
+
+		if (principal == null || !(principal instanceof Identity)
+				|| !((Identity) principal).hasRole(FhirServerRole.WEBSOCKET))
 		{
-			logger.warn("No user in session or user is missing role {}, closing websocket: {}", UserRole.LOCAL,
-					session.getId());
+			logger.warn("No user in session or user is missing role {}, closing websocket: {}",
+					FhirServerRole.WEBSOCKET, session.getId());
 			try
 			{
-				session.close(new CloseReason(CloseCodes.VIOLATED_POLICY, user == null ? "No user" : "Forbidden"));
+				session.close(new CloseReason(CloseCodes.VIOLATED_POLICY, "Forbidden"));
 			}
 			catch (IOException e)
 			{
@@ -84,12 +87,13 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 				if (message != null && !message.isBlank() && message.startsWith(BIND_MESSAGE_START))
 				{
 					logger.debug("Websocket bind message received: {}", message);
-					subscriptionManager.bind(user, session, message.substring(BIND_MESSAGE_START.length()));
+					subscriptionManager.bind((Identity) principal, session,
+							message.substring(BIND_MESSAGE_START.length()));
 				}
 			}
 		});
 
-		ScheduledFuture<?> pinger = scheduler.scheduleWithFixedDelay(() -> ping(session), 2, 2, TimeUnit.MINUTES);
+		ScheduledFuture<?> pinger = scheduler.scheduleWithFixedDelay(() -> ping(session), 28, 28, TimeUnit.SECONDS);
 		session.getUserProperties().put(PINGER_PROPERTY, pinger);
 	}
 
@@ -123,18 +127,6 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 		catch (IllegalArgumentException | IOException e)
 		{
 			logger.warn("Error while sending ping to session with id " + session.getId(), e);
-		}
-	}
-
-	private User getUser(Session session)
-	{
-		Object object = session.getUserProperties().get(USER_PROPERTY);
-		if (object != null && object instanceof User)
-			return (User) object;
-		else
-		{
-			logger.warn("User property {} not a {}", USER_PROPERTY, User.class.getName());
-			return null;
 		}
 	}
 

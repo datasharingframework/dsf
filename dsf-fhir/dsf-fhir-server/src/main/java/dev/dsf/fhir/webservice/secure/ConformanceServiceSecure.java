@@ -1,20 +1,14 @@
 package dev.dsf.fhir.webservice.secure;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.webservice.specification.ConformanceService;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 public class ConformanceServiceSecure extends AbstractServiceSecure<ConformanceService> implements ConformanceService
 {
-	private static final Logger logger = LoggerFactory.getLogger(ConformanceServiceSecure.class);
-
 	public ConformanceServiceSecure(ConformanceService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver)
 	{
@@ -24,7 +18,7 @@ public class ConformanceServiceSecure extends AbstractServiceSecure<ConformanceS
 	@Override
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}', role '{}'", getCurrentUser().getName(), getCurrentUser().getRole());
+		logCurrentIdentity();
 
 		// get metadata allowed for all authenticated users
 

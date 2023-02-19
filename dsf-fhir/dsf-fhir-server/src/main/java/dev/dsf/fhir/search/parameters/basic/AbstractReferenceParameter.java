@@ -12,8 +12,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
@@ -24,6 +22,7 @@ import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryIncludeParameter;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import jakarta.ws.rs.core.UriBuilder;
 
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {

@@ -17,8 +17,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.SubscriptionDao;
@@ -42,18 +42,20 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Subscription newResource)
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
+			Subscription newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Subscription newResource)
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
+			Subscription newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, Subscription newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity, Subscription newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

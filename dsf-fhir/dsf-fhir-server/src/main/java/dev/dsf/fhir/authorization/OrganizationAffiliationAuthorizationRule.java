@@ -13,8 +13,8 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.OrganizationAffiliationDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
@@ -37,20 +37,21 @@ public class OrganizationAffiliationAuthorizationRule
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user,
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			OrganizationAffiliation newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user,
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			OrganizationAffiliation newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, OrganizationAffiliation newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity,
+			OrganizationAffiliation newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

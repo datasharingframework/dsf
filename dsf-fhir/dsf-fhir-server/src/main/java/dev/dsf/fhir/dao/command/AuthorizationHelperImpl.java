@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
@@ -14,11 +12,11 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.help.ResponseGenerator;
+import jakarta.ws.rs.WebApplicationException;
 
 public class AuthorizationHelperImpl implements AuthorizationHelper
 {
@@ -49,116 +47,142 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 				.map(rule -> (AuthorizationRule<Resource>) rule);
 	}
 
-	private WebApplicationException forbidden(String operation, User user) throws WebApplicationException
+	private WebApplicationException forbidden(String operation, Identity identity) throws WebApplicationException
 	{
-		return new WebApplicationException(responseGenerator.forbiddenNotAllowed(operation, user));
+		return new WebApplicationException(responseGenerator.forbiddenNotAllowed(operation, identity));
 	}
 
 	@Override
-	public void checkCreateAllowed(Connection connection, User user, Resource newResource)
+	public void checkCreateAllowed(int index, Connection connection, Identity identity, Resource newResource)
 	{
+		final String resourceTypeName = getResourceTypeName(newResource);
+
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(newResource.getClass());
-		optRule.flatMap(rule -> rule.reasonCreateAllowed(connection, user, newResource)).ifPresentOrElse(reason ->
+		optRule.flatMap(rule -> rule.reasonCreateAllowed(connection, identity, newResource)).ifPresentOrElse(reason ->
 		{
-			audit.info("Create of resource {} allowed for user '{}' ({}) via bundle, reason: {}",
-					newResource.getResourceType().name(), user.getName(), user.getSubjectDn(), reason);
+			audit.info("Create of {} allowed for identity '{}' via bundle at index {}, reason: {}", resourceTypeName,
+					identity.getName(), index, reason);
 		}, () ->
 		{
-			audit.info("Create of resource {} denied for user '{}' ({}) via bundle",
-					newResource.getResourceType().name(), user.getName(), user.getSubjectDn());
-			throw forbidden("create", user);
+			audit.info("Create of {} denied for identity '{}' via bundle at index {}", resourceTypeName,
+					identity.getName(), index);
+			throw forbidden("create", identity);
 		});
 	}
 
-	@Override
-	public void checkReadAllowed(Connection connection, User user, Resource existingResource)
+	private String getResourceTypeName(Resource resource)
 	{
+		return resource.getResourceType().name();
+	}
+
+	@Override
+	public void checkReadAllowed(int index, Connection connection, Identity identity, Resource existingResource)
+	{
+		final String resourceTypeName = getResourceTypeName(existingResource);
+		final String resourceId = existingResource.getIdElement().getIdPart();
+		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
+
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(existingResource.getClass());
-		optRule.flatMap(rule -> rule.reasonReadAllowed(connection, user, existingResource)).ifPresentOrElse(reason ->
-		{
-			audit.info("Read of resource {} allowed for user '{}' ({}) via bundle, reason: {}",
-					existingResource.getIdElement().getValue(), user.getName(), user.getSubjectDn(), reason);
-		}, () ->
-		{
-			audit.info("Read of resource {} denied for user '{}' ({}) via bundle",
-					existingResource.getIdElement().getValue(), user.getName(), user.getSubjectDn());
-			throw forbidden("read", user);
-		});
-	}
-
-	@Override
-	public void checkUpdateAllowed(Connection connection, User user, Resource oldResource, Resource newResource)
-	{
-		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(oldResource.getClass());
-		optRule.flatMap(rule -> rule.reasonUpdateAllowed(connection, user, oldResource, newResource))
+		optRule.flatMap(rule -> rule.reasonReadAllowed(connection, identity, existingResource))
 				.ifPresentOrElse(reason ->
 				{
-					audit.info("Update of resource {} allowed for user '{}' ({}), reason: {}",
-							oldResource.getIdElement().getValue(), user.getName(), user.getSubjectDn(), reason);
+					audit.info("Read of {}/{}/_history/{} allowed for identity '{}' via bundle at index {}, reason: {}",
+							resourceTypeName, resourceId, resourceVersion, identity.getName(), index, reason);
 				}, () ->
 				{
-					audit.info("Update of resource {} denied for user '{}' ({})", oldResource.getIdElement().getValue(),
-							user.getName(), user.getSubjectDn());
-					throw forbidden("update", user);
+					audit.info("Read of {}/{}/_history/{} denied for identity '{}' via bundle at index {}",
+							resourceTypeName, resourceId, resourceVersion, identity.getName(), index);
+					throw forbidden("read", identity);
 				});
 	}
 
 	@Override
-	public void checkDeleteAllowed(Connection connection, User user, Resource oldResource)
+	public void checkUpdateAllowed(int index, Connection connection, Identity identity, Resource oldResource,
+			Resource newResource)
 	{
+		final String resourceTypeName = getResourceTypeName(oldResource);
+		final String resourceId = oldResource.getIdElement().getIdPart();
+		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(oldResource.getClass());
-		optRule.flatMap(rule -> rule.reasonDeleteAllowed(user, oldResource)).ifPresentOrElse(reason ->
+		optRule.flatMap(rule -> rule.reasonUpdateAllowed(connection, identity, oldResource, newResource))
+				.ifPresentOrElse(reason ->
+				{
+					audit.info(
+							"Update of {}/{}/_history/{} allowed for identity '{}' via bundle at index {}, reason: {}",
+							resourceTypeName, resourceId, resourceVersion, identity.getName(), index, reason);
+				}, () ->
+				{
+					audit.info("Update of {}/{}/_history/{} denied for identity '{}' via bundle at index {}",
+							resourceTypeName, resourceId, resourceVersion, identity.getName(), index);
+					throw forbidden("update", identity);
+				});
+	}
+
+	@Override
+	public void checkDeleteAllowed(int index, Connection connection, Identity identity, Resource oldResource)
+	{
+		final String resourceTypeName = getResourceTypeName(oldResource);
+		final String resourceId = oldResource.getIdElement().getIdPart();
+		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+
+		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(oldResource.getClass());
+		optRule.flatMap(rule -> rule.reasonDeleteAllowed(identity, oldResource)).ifPresentOrElse(reason ->
 		{
-			audit.info("Delete of resource {} allowed for user '{}' ({}), reason: {}",
-					oldResource.getIdElement().getValue(), user.getName(), user.getSubjectDn(), reason);
+			audit.info("Delete of {}/{}/_history/{} allowed for identity '{}' via bundle at index {}, reason: {}",
+					resourceTypeName, resourceId, resourceVersion, identity.getName(), index, reason);
 		}, () ->
 		{
-			audit.info("Delete of resource {} denied for user '{}' ({})", oldResource.getIdElement().getValue(),
-					user.getName(), user.getSubjectDn());
-			throw forbidden("delete", user);
+			audit.info("Delete of {}/{}/_history/{} denied for identity '{}' via bundle at index {}", resourceTypeName,
+					resourceId, resourceVersion, identity.getName(), index);
+			throw forbidden("delete", identity);
 		});
 	}
 
 	@Override
-	public void checkSearchAllowed(User user, String resourceTypeName)
+	public void checkSearchAllowed(int index, Identity identity, String resourceTypeName)
 	{
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(resourceTypeName);
-		optRule.flatMap(rule -> rule.reasonSearchAllowed(user)).ifPresentOrElse(reason ->
+		optRule.flatMap(rule -> rule.reasonSearchAllowed(identity)).ifPresentOrElse(reason ->
 		{
-			audit.info("Search of resource {} allowed for user '{}' ({}), reason: {}", resourceTypeName, user.getName(),
-					user.getSubjectDn(), reason);
+			audit.info("Search of {} allowed for identity '{}' via bundle at index {}, reason: {}", resourceTypeName,
+					identity.getName(), index, reason);
 		}, () ->
 		{
-			audit.info("Search of resource {} denied for user '{}' ({})", resourceTypeName, user.getName(),
-					user.getSubjectDn());
-			throw forbidden("search", user);
+			audit.info("Search of {} denied for identity '{}' via bundle at index {}", resourceTypeName,
+					identity.getName(), index);
+			throw forbidden("search", identity);
 		});
 	}
 
 	@Override
-	public void filterIncludeResults(Connection connection, User user, Bundle multipleResult)
+	public void filterIncludeResults(int index, Connection connection, Identity identity, Bundle multipleResult)
 	{
 		List<BundleEntryComponent> filteredEntries = multipleResult.getEntry().stream()
 				.filter(c -> SearchEntryMode.MATCH.equals(c.getSearch().getMode())
 						|| (SearchEntryMode.INCLUDE.equals(c.getSearch().getMode())
-								&& filterIncludeResource(user, c.getResource())))
+								&& filterIncludeResource(index, identity, c.getResource())))
 				.collect(Collectors.toList());
 		multipleResult.setEntry(filteredEntries);
 	}
 
-	private boolean filterIncludeResource(User user, Resource include)
+	private boolean filterIncludeResource(int index, Identity identity, Resource include)
 	{
+		final String resourceTypeName = getResourceTypeName(include);
+		final String resourceId = include.getIdElement().getIdPart();
+		final long resourceVersion = include.getIdElement().getVersionIdPartAsLong();
+
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(include.getClass());
-		return optRule.flatMap(rule -> rule.reasonReadAllowed(user, include)).map(reason ->
+		return optRule.flatMap(rule -> rule.reasonReadAllowed(identity, include)).map(reason ->
 		{
-			logger.debug("Include resource of type {} with id {}, allowed - {}",
-					include.getClass().getAnnotation(ResourceDef.class).name(), include.getIdElement().getValue(),
-					reason);
+			logger.debug("Inclusion of {}/{}/_history/{} allowed for identity '{}' via bundle at index {}: {}",
+					resourceTypeName, resourceId, resourceVersion, identity.getName(), index, reason);
 			return true;
 		}).orElseGet(() ->
 		{
-			logger.debug("Include resource of type {} with id {}, filtered (read not allowed)",
-					include.getClass().getAnnotation(ResourceDef.class).name(), include.getIdElement().getValue());
+			logger.debug(
+					"Inclusion of {}/{}/_history/{} denied for identity '{} via bundle at index {}: read not allowed",
+					resourceTypeName, resourceId, resourceVersion, index, identity.getName(), index);
 			return false;
 		});
 	}

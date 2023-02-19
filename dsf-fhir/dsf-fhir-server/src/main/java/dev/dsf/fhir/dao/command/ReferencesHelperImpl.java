@@ -9,10 +9,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -20,29 +16,32 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 public final class ReferencesHelperImpl<R extends Resource> implements ReferencesHelper<R>
 {
 	private final int index;
-	private final User user;
+	private final Identity identity;
 	private final R resource;
 	private final String serverBase;
 	private final ReferenceExtractor referenceExtractor;
 	private final ReferenceResolver referenceResolver;
 	private final ResponseGenerator responseGenerator;
 
-	public ReferencesHelperImpl(int index, User user, R resource, String serverBase,
+	public ReferencesHelperImpl(int index, Identity identity, R resource, String serverBase,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ResponseGenerator responseGenerator)
 	{
 		this.index = index;
-		this.user = user;
+		this.identity = identity;
 		this.resource = resource;
 		this.serverBase = serverBase;
 		this.referenceExtractor = referenceExtractor;
@@ -145,7 +144,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	private Optional<OperationOutcome> resolveConditional(ResourceReference reference, Connection connection,
 			Consumer<Resource> targetConsumer)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(user, reference, connection);
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(identity, reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
@@ -190,7 +189,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 
 	private Optional<OperationOutcome> resolveLogicalReference(ResourceReference reference, Connection connection)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(user, reference, connection);
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(identity, reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
@@ -235,7 +234,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 			case ATTACHMENT_LITERAL_EXTERNAL_URL:
 				return referenceResolver.checkLiteralExternalReference(resource, reference, index);
 			case LOGICAL:
-				return referenceResolver.checkLogicalReference(user, resource, reference, connection, index);
+				return referenceResolver.checkLogicalReference(identity, resource, reference, connection, index);
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL:
 			case ATTACHMENT_UNKNOWN_URL:

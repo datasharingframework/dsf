@@ -1,8 +1,8 @@
 package dev.dsf.fhir.webservice.base;
 
-import dev.dsf.fhir.authentication.UserProvider;
+import dev.dsf.fhir.authentication.CurrentIdentityProvider;
 
 public interface BasicService
 {
-	void setUserProvider(UserProvider provider);
+	void setCurrentIdentityProvider(CurrentIdentityProvider currentIdentityProvider);
 }

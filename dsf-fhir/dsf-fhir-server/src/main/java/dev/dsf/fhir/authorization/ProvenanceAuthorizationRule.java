@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Provenance;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.ProvenanceDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
@@ -27,18 +27,18 @@ public class ProvenanceAuthorizationRule extends AbstractMetaTagAuthorizationRul
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Provenance newResource)
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Provenance newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Provenance newResource)
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Provenance newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, Provenance newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity, Provenance newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

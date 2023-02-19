@@ -1,10 +1,9 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
-import javax.ws.rs.Path;
-
 import org.hl7.fhir.r4.model.Questionnaire;
 
 import dev.dsf.fhir.webservice.specification.QuestionnaireService;
+import jakarta.ws.rs.Path;
 
 @Path(QuestionnaireServiceJaxrs.PATH)
 public class QuestionnaireServiceJaxrs extends AbstractResourceServiceJaxrs<Questionnaire, QuestionnaireService>

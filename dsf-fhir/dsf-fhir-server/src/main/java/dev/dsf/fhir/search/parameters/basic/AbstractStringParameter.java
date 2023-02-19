@@ -6,12 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.DomainResource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import jakarta.ws.rs.core.UriBuilder;
 
 public abstract class AbstractStringParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {

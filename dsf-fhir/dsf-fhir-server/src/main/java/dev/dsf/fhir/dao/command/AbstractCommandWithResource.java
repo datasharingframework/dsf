@@ -4,7 +4,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
@@ -22,28 +22,34 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 	protected final ParameterConverter parameterConverter;
 	protected final ReferencesHelper<R> referencesHelper;
 
-	public AbstractCommandWithResource(int transactionPriority, int index, User user, PreferReturnType returnType,
-			Bundle bundle, BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
-			R resource, D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public AbstractCommandWithResource(int transactionPriority, int index, Identity identity,
+			PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(transactionPriority, index, user, returnType, bundle, entry, serverBase, authorizationHelper);
+		super(transactionPriority, index, identity, returnType, bundle, entry, serverBase, authorizationHelper);
 
 		this.resource = resource;
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
 
-		referencesHelper = createReferencesHelper(index, user, serverBase, resource, responseGenerator,
+		referencesHelper = createReferencesHelper(index, identity, serverBase, resource, responseGenerator,
 				referenceExtractor, referenceResolver);
 	}
 
-	protected ReferencesHelper<R> createReferencesHelper(int index, User user, String serverBase, R resource,
+	protected ReferencesHelper<R> createReferencesHelper(int index, Identity identity, String serverBase, R resource,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver)
 	{
-		return new ReferencesHelperImpl<R>(index, user, resource, serverBase, referenceExtractor, referenceResolver,
+		return new ReferencesHelperImpl<R>(index, identity, resource, serverBase, referenceExtractor, referenceResolver,
 				responseGenerator);
+	}
+
+	@Override
+	public String getResourceTypeName()
+	{
+		return resource.getResourceType().name();
 	}
 }

@@ -14,8 +14,8 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
@@ -50,18 +50,20 @@ public class ActivityDefinitionAuthorizationRule
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user, ActivityDefinition newResource)
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity user,
+			ActivityDefinition newResource)
 	{
 		return newResourceOk(connection, user, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, ActivityDefinition newResource)
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity user,
+			ActivityDefinition newResource)
 	{
 		return newResourceOk(connection, user, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, ActivityDefinition newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity, ActivityDefinition newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

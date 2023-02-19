@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
@@ -15,7 +13,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -27,6 +25,7 @@ import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import jakarta.ws.rs.WebApplicationException;
 
 public class CreateStructureDefinitionCommand extends CreateCommand<StructureDefinition, StructureDefinitionDao>
 {
@@ -36,16 +35,16 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 
 	private StructureDefinition resourceWithSnapshot;
 
-	public CreateStructureDefinitionCommand(int index, User user, PreferReturnType returnType, Bundle bundle,
+	public CreateStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator, StructureDefinitionDao snapshotDao)
 	{
-		super(index, user, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
-				parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-				eventGenerator);
+		super(index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
+				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
+				referenceCleaner, eventGenerator);
 
 		this.snapshotDao = snapshotDao;
 	}

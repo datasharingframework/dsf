@@ -19,9 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
@@ -42,15 +39,17 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.Test;
 
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.TaskDao;
+import dev.dsf.fhir.dao.TestOrganizationIdentity;
 import dev.dsf.fhir.dao.command.ReferencesHelperImpl;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {
@@ -877,6 +876,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	public void testDeletePermanentlyByLocalDeletionUser() throws Exception
 	{
 		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		task.setStatus(TaskStatus.DRAFT);
+
 		readAccessHelper.addLocal(task);
 		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
 		String taskId = taskDao.create(task).getIdElement().getIdPart();
@@ -892,6 +893,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	public void testDeletePermanentlyByLocalDeletionUserNotMarkedAsDeleted() throws Exception
 	{
 		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		task.setStatus(TaskStatus.DRAFT);
+
 		readAccessHelper.addLocal(task);
 		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
 		String taskId = taskDao.create(task).getIdElement().getIdPart();
@@ -1129,8 +1132,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		BasicDataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", BasicDataSource.class);
 
 		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0,
-				User.local(organizationProvider.getLocalOrganization().get()), task, BASE_URL, referenceExtractor,
-				referenceResolver, responseGenerator);
+				TestOrganizationIdentity.local(organizationProvider.getLocalOrganization().get()), task, BASE_URL,
+				referenceExtractor, referenceResolver, responseGenerator);
 		try (Connection connection = dataSource.getConnection())
 		{
 			System.out.println(fhirContext.newJsonParser().encodeResourceToString(task));

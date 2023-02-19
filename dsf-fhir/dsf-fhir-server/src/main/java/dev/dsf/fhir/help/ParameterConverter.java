@@ -12,13 +12,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +19,13 @@ import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.adapter.AbstractFhirAdapter;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 
 public class ParameterConverter
 {
@@ -221,7 +221,7 @@ public class ParameterConverter
 
 		try
 		{
-			EntityTag eTag = EntityTag.valueOf(eTagValue);
+			EntityTag eTag = RuntimeDelegate.getInstance().createHeaderDelegate(EntityTag.class).fromString(eTagValue);
 			if (eTag.isWeak())
 				return Optional.of(eTag);
 			else

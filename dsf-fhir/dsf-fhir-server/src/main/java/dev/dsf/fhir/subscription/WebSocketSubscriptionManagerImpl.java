@@ -16,11 +16,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.RemoteEndpoint.Async;
-import javax.websocket.Session;
-
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
@@ -33,7 +28,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.dao.SubscriptionDao;
@@ -42,6 +37,10 @@ import dev.dsf.fhir.event.Event;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.search.Matcher;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.RemoteEndpoint.Async;
+import jakarta.websocket.Session;
 
 public class WebSocketSubscriptionManagerImpl
 		implements WebSocketSubscriptionManager, EventHandler, InitializingBean, DisposableBean
@@ -76,13 +75,13 @@ public class WebSocketSubscriptionManagerImpl
 
 	private static class SessionIdAndRemoteAsync
 	{
-		final User user;
+		final Identity identity;
 		final String sessionId;
 		final Async remoteAsync;
 
-		SessionIdAndRemoteAsync(User user, String sessionId, Async remoteAsync)
+		SessionIdAndRemoteAsync(Identity identity, String sessionId, Async remoteAsync)
 		{
-			this.user = user;
+			this.identity = identity;
 			this.sessionId = sessionId;
 			this.remoteAsync = remoteAsync;
 		}
@@ -319,25 +318,25 @@ public class WebSocketSubscriptionManagerImpl
 		{
 			@SuppressWarnings("unchecked")
 			AuthorizationRule<Resource> rule = (AuthorizationRule<Resource>) optRule.get();
-			Optional<String> optReason = rule.reasonReadAllowed(sessionAndRemote.user, event.getResource());
+			Optional<String> optReason = rule.reasonReadAllowed(sessionAndRemote.identity, event.getResource());
 
 			if (optReason.isPresent())
 			{
 				logger.info("Sending event {} to user {}, read of {} allowed {}", event.getClass().getSimpleName(),
-						sessionAndRemote.user.getName(), event.getResourceType().getSimpleName(), optReason.get());
+						sessionAndRemote.identity.getName(), event.getResourceType().getSimpleName(), optReason.get());
 				return true;
 			}
 			else
 			{
 				logger.warn("Skipping event {} for user {}, read of {} not allowed", event.getClass().getSimpleName(),
-						sessionAndRemote.user.getName(), event.getResourceType().getSimpleName());
+						sessionAndRemote.identity.getName(), event.getResourceType().getSimpleName());
 				return false;
 			}
 		}
 		else
 		{
 			logger.warn("Skipping event {} for user {}, no authorization rule for resource of type {} found",
-					event.getClass().getSimpleName(), sessionAndRemote.user.getName(),
+					event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
 					event.getResourceType().getSimpleName());
 			return false;
 		}
@@ -356,7 +355,7 @@ public class WebSocketSubscriptionManagerImpl
 	}
 
 	@Override
-	public void bind(User user, Session session, String subscriptionIdPart)
+	public void bind(Identity identity, Session session, String subscriptionIdPart)
 	{
 		if (firstCall.get())
 			refreshMatchers();
@@ -369,12 +368,12 @@ public class WebSocketSubscriptionManagerImpl
 				if (list == null)
 				{
 					List<SessionIdAndRemoteAsync> newList = new ArrayList<>();
-					newList.add(new SessionIdAndRemoteAsync(user, session.getId(), session.getAsyncRemote()));
+					newList.add(new SessionIdAndRemoteAsync(identity, session.getId(), session.getAsyncRemote()));
 					return newList;
 				}
 				else
 				{
-					list.add(new SessionIdAndRemoteAsync(user, session.getId(), session.getAsyncRemote()));
+					list.add(new SessionIdAndRemoteAsync(identity, session.getId(), session.getAsyncRemote()));
 					return list;
 				}
 			});
@@ -385,11 +384,11 @@ public class WebSocketSubscriptionManagerImpl
 			logger.warn("Could not bind websocket session {} to subscription {}, subscription not found",
 					session.getId(), subscriptionIdPart);
 			logger.debug("Current active subscription-ids: {}", subscriptionsByIdPart.getAllKeys());
-			closeNotFound(user, session, subscriptionIdPart);
+			closeNotFound(identity, session, subscriptionIdPart);
 		}
 	}
 
-	private void closeNotFound(User user, Session session, String subscriptionIdPart)
+	private void closeNotFound(Identity identity, Session session, String subscriptionIdPart)
 	{
 		try
 		{
@@ -398,8 +397,8 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error while closing websocket with user {}, session {}, {}", user.getName(), session.getId(),
-					e.getMessage());
+			logger.warn("Error while closing websocket with user {}, session {}, {}", identity.getName(),
+					session.getId(), e.getMessage());
 			logger.debug("Error while closing websocket", e);
 		}
 	}

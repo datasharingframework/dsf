@@ -2,17 +2,16 @@ package dev.dsf.fhir.dao.command;
 
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.ResourceValidator;
+import jakarta.ws.rs.WebApplicationException;
 
 public class ValidationHelperImpl implements ValidationHelper
 {
@@ -28,18 +27,18 @@ public class ValidationHelperImpl implements ValidationHelper
 	}
 
 	@Override
-	public ValidationResult checkResourceValidForCreate(User user, Resource resource)
+	public ValidationResult checkResourceValidForCreate(Identity identity, Resource resource)
 	{
-		return checkResourceValid(user, resource, "Create");
+		return checkResourceValid(identity, resource, "Create");
 	}
 
 	@Override
-	public ValidationResult checkResourceValidForUpdate(User user, Resource resource)
+	public ValidationResult checkResourceValidForUpdate(Identity identity, Resource resource)
 	{
-		return checkResourceValid(user, resource, "Update");
+		return checkResourceValid(identity, resource, "Update");
 	}
 
-	private ValidationResult checkResourceValid(User user, Resource resource, String method)
+	private ValidationResult checkResourceValid(Identity identity, Resource resource, String method)
 	{
 		ValidationResult validationResult = resourceValidator.validate(resource);
 
@@ -50,7 +49,7 @@ public class ValidationHelperImpl implements ValidationHelper
 					toValidationLogMessage(validationResult));
 
 			throw new WebApplicationException(
-					responseGenerator.forbiddenNotValid(method, user, resource.fhirType(), validationResult));
+					responseGenerator.forbiddenNotValid(method, identity, resource.fhirType(), validationResult));
 		}
 		else if (!validationResult.getMessages().isEmpty())
 			logger.info("Resource {} validated with messages: {}", resource.fhirType(),

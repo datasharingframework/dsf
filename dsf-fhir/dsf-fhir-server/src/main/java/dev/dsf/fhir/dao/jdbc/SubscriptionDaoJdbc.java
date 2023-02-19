@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.SubscriptionDao;
+import dev.dsf.fhir.search.filter.SubscriptionIdentityFilter;
 import dev.dsf.fhir.search.parameters.SubscriptionCriteria;
 import dev.dsf.fhir.search.parameters.SubscriptionPayload;
 import dev.dsf.fhir.search.parameters.SubscriptionStatus;
 import dev.dsf.fhir.search.parameters.SubscriptionType;
-import dev.dsf.fhir.search.parameters.user.SubscriptionUserFilter;
 
 public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> implements SubscriptionDao
 {
@@ -29,7 +29,7 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 	public SubscriptionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Subscription.class, "subscriptions", "subscription",
-				"subscription_id", SubscriptionUserFilter::new, with(SubscriptionCriteria::new,
+				"subscription_id", SubscriptionIdentityFilter::new, with(SubscriptionCriteria::new,
 						SubscriptionPayload::new, SubscriptionStatus::new, SubscriptionType::new),
 				with());
 	}

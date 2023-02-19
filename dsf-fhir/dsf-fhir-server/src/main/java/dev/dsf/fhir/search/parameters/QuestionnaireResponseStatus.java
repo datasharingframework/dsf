@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -20,6 +18,7 @@ import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
+import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = QuestionnaireResponseStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/QuestionnaireResponse-status", type = SearchParamType.TOKEN, documentation = "The status of the questionnaire response")
 public class QuestionnaireResponseStatus extends AbstractTokenParameter<QuestionnaireResponse>

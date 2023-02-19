@@ -13,42 +13,40 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Reference;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 
 public class Organization implements Recipient, Requester
 {
 	private final String organizationIdentifier;
-	private final UserRole role;
+	private final boolean localIdentity;
 
-	public Organization(UserRole role, String organizationIdentifier)
+	public Organization(boolean localIdentity, String organizationIdentifier)
 	{
-		Objects.requireNonNull(role, "role");
 		Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
 		if (organizationIdentifier.isBlank())
 			throw new IllegalArgumentException("organizationIdentifier blank");
 
-		this.role = role;
+		this.localIdentity = localIdentity;
 		this.organizationIdentifier = organizationIdentifier;
 	}
 
 	@Override
-	public boolean isRequesterAuthorized(User requesterUser, Stream<OrganizationAffiliation> requesterAffiliations)
+	public boolean isRequesterAuthorized(Identity requesterUser, Stream<OrganizationAffiliation> requesterAffiliations)
 	{
 		return isAuthorized(requesterUser);
 	}
 
 	@Override
-	public boolean isRecipientAuthorized(User recipientUser, Stream<OrganizationAffiliation> recipientAffiliations)
+	public boolean isRecipientAuthorized(Identity recipientUser, Stream<OrganizationAffiliation> recipientAffiliations)
 	{
 		return isAuthorized(recipientUser);
 	}
 
-	private boolean isAuthorized(User user)
+	private boolean isAuthorized(Identity identity)
 	{
-		return user != null && role.equals(user.getRole()) && user.getOrganization() != null
-				&& user.getOrganization().getActive() && hasOrganizationIdentifier(user.getOrganization());
+		return identity != null && identity.getOrganization() != null && identity.getOrganization().getActive()
+				&& identity.isLocalIdentity() == localIdentity && hasOrganizationIdentifier(identity.getOrganization());
 	}
 
 	private boolean hasOrganizationIdentifier(org.hl7.fhir.r4.model.Organization organization)
@@ -125,39 +123,29 @@ public class Organization implements Recipient, Requester
 	@Override
 	public Coding getProcessAuthorizationCode()
 	{
-		switch (role)
-		{
-			case LOCAL:
-				return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
-						ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION, null);
-			case REMOTE:
-				return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
-						ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION, null);
-			default:
-				throw new IllegalStateException(UserRole.class.getName() + " " + role + " not supported");
-		}
+		if (localIdentity)
+			return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
+					ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION, null);
+		else
+			return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
+					ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION, null);
 	}
 
 	@Override
 	public boolean matches(Coding processAuthorizationCode)
 	{
-		switch (role)
-		{
-			case LOCAL:
-				return processAuthorizationCode != null
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
-								.equals(processAuthorizationCode.getSystem())
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION
-								.equals(processAuthorizationCode.getCode());
-			case REMOTE:
-				return processAuthorizationCode != null
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
-								.equals(processAuthorizationCode.getSystem())
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION
-								.equals(processAuthorizationCode.getCode());
-			default:
-				throw new IllegalStateException(UserRole.class.getName() + " " + role + " not supported");
-		}
+		if (localIdentity)
+			return processAuthorizationCode != null
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
+							.equals(processAuthorizationCode.getSystem())
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION
+							.equals(processAuthorizationCode.getCode());
+		else
+			return processAuthorizationCode != null
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
+							.equals(processAuthorizationCode.getSystem())
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION
+							.equals(processAuthorizationCode.getCode());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -182,16 +170,16 @@ public class Organization implements Recipient, Requester
 				&& coding.hasCode())
 		{
 			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION.equals(coding.getCode()))
-				return from(UserRole.LOCAL, coding, organizationWithIdentifierExists);
+				return from(true, coding, organizationWithIdentifierExists);
 			else if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION
 					.equals(coding.getCode()))
-				return from(UserRole.REMOTE, coding, organizationWithIdentifierExists);
+				return from(false, coding, organizationWithIdentifierExists);
 		}
 
 		return Optional.empty();
 	}
 
-	private static Optional<? super Organization> from(UserRole userRole, Coding coding,
+	private static Optional<? super Organization> from(boolean localIdentity, Coding coding,
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
 		if (coding != null && coding.hasExtension())
@@ -207,7 +195,7 @@ public class Organization implements Recipient, Requester
 					Identifier identifier = (Identifier) organization.getValue();
 					if (ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM.equals(identifier.getSystem())
 							&& organizationWithIdentifierExists.test(identifier))
-						return Optional.of(new Organization(userRole, identifier.getValue()));
+						return Optional.of(new Organization(localIdentity, identifier.getValue()));
 				}
 			}
 		}

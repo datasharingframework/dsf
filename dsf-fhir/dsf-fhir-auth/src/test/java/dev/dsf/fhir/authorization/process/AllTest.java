@@ -8,20 +8,19 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.Test;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 
 public class AllTest
 {
-	private static final User REMOTE_NO_ORG = User.remote((Organization) null);
-	private static final User REMOTE_ORG_NOT_ACTIVE = User.remote(new Organization().setActive(false));
-	private static final User REMOTE_ORG_ACTIVE = User.remote(new Organization().setActive(true));
-	private static final User LOCAL_NO_ORG = User.local(null);
-	private static final User LOCAL_ORG_NOT_ACTIVE = User.local(new Organization().setActive(false));
-	private static final User LOCAL_ORG_ACTIVE = User.local(new Organization().setActive(true));
+	private static final Identity REMOTE_NO_ORG = TestIdentity.remote(null);
+	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestIdentity.remote(new Organization().setActive(false));
+	private static final Identity REMOTE_ORG_ACTIVE = TestIdentity.remote(new Organization().setActive(true));
+	private static final Identity LOCAL_NO_ORG = TestIdentity.local(null);
+	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestIdentity.local(new Organization().setActive(false));
+	private static final Identity LOCAL_ORG_ACTIVE = TestIdentity.local(new Organization().setActive(true));
 
-	private static final All local = new All(UserRole.LOCAL);
-	private static final All remote = new All(UserRole.REMOTE);
+	private static final All local = new All(true);
+	private static final All remote = new All(false);
 
 	@Test
 	public void testLocalAllRecipientOk() throws Exception

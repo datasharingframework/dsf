@@ -3,10 +3,6 @@ package dev.dsf.fhir.webservice.secure;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Resource;
@@ -17,6 +13,9 @@ import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.webservice.specification.RootService;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 public class RootServiceSecure extends AbstractServiceSecure<RootService> implements RootService
 {
@@ -43,8 +42,7 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 	@Override
 	public Response root(UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
-				userProvider.getCurrentUser().getRole());
+		logCurrentIdentity();
 
 		// get root allowed for all authenticated users
 
@@ -54,20 +52,20 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
-				userProvider.getCurrentUser().getRole());
+		logCurrentIdentity();
 
 		Optional<String> reasonHandleBundleAllowed = reasonHandleBundleAllowed(bundle);
 
 		if (reasonHandleBundleAllowed.isEmpty())
 		{
-			audit.info("Handling of transaction and batch bundles denied for user '{}'", getCurrentUser().getName());
+			audit.info("Handling of transaction and batch bundles denied for identity '{}'",
+					getCurrentIdentity().getName());
 			return forbidden("bundle");
 		}
 		else
 		{
-			audit.info("Handling of transaction or batch bundle allowed for user '{}': {}", getCurrentUser().getName(),
-					reasonHandleBundleAllowed.get());
+			audit.info("Handling of transaction or batch bundle allowed for identity '{}': {}",
+					getCurrentIdentity().getName(), reasonHandleBundleAllowed.get());
 			return delegate.handleBundle(bundle, uri, headers);
 		}
 	}
@@ -90,18 +88,17 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 	@Override
 	public Response history(UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
-				userProvider.getCurrentUser().getRole());
+		logCurrentIdentity();
 
-		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentUser());
+		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{
-			audit.info("Root History denied for user '{}'", getCurrentUser().getName());
+			audit.info("Root History denied for user '{}'", getCurrentIdentity().getName());
 			return forbidden("search");
 		}
 		else
 		{
-			audit.info("Root History allowed for user '{}': {}", getCurrentUser().getName(),
+			audit.info("Root History allowed for user '{}': {}", getCurrentIdentity().getName(),
 					reasonHistoryAllowed.get());
 			return delegate.history(uri, headers);
 		}

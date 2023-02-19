@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.NamingSystemDao;
+import dev.dsf.fhir.search.filter.NamingSystemIdentityFilter;
 import dev.dsf.fhir.search.parameters.NamingSystemDate;
 import dev.dsf.fhir.search.parameters.NamingSystemName;
 import dev.dsf.fhir.search.parameters.NamingSystemStatus;
-import dev.dsf.fhir.search.parameters.user.NamingSystemUserFilter;
 
 public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> implements NamingSystemDao
 {
@@ -27,7 +27,7 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 	public NamingSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system",
-				"naming_system_id", NamingSystemUserFilter::new,
+				"naming_system_id", NamingSystemIdentityFilter::new,
 				with(NamingSystemDate::new, NamingSystemName::new, NamingSystemStatus::new), with());
 	}
 

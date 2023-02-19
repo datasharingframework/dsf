@@ -29,7 +29,7 @@ import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
@@ -925,7 +925,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 	}
 
 	default void testSearchWithUserFilterAfterReadAccessTrigger(String accessType, Consumer<D> readAccessModifier,
-			Function<Organization, User> userCreator, int expectedCount) throws Exception
+			Function<Organization, Identity> userCreator, int expectedCount) throws Exception
 	{
 		OrganizationDao organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
 				getPermanentDeleteDataSource(), getFhirContext());
@@ -951,27 +951,27 @@ public interface ReadAccessDaoTest<D extends Resource>
 	default void testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser() throws Exception
 	{
 		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
-				User::local, 1);
+				TestOrganizationIdentity::local, 1);
 	}
 
 	@Test
 	default void testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser() throws Exception
 	{
 		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_LOCAL,
-				new ReadAccessHelperImpl()::addLocal, User::local, 1);
+				new ReadAccessHelperImpl()::addLocal, TestOrganizationIdentity::local, 1);
 	}
 
 	@Test
 	default void testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser() throws Exception
 	{
 		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
-				User::remote, 1);
+				TestOrganizationIdentity::remote, 1);
 	}
 
 	@Test
 	default void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
 	{
 		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_LOCAL,
-				new ReadAccessHelperImpl()::addLocal, User::remote, 0);
+				new ReadAccessHelperImpl()::addLocal, TestOrganizationIdentity::remote, 0);
 	}
 }

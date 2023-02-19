@@ -6,31 +6,31 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 
 public interface Recipient extends WithAuthorization
 {
 	static Recipient localAll()
 	{
-		return new All(UserRole.LOCAL);
+		return new All(true);
 	}
 
 	static Recipient localOrganization(String organizationIdentifier)
 	{
-		return new Organization(UserRole.LOCAL, organizationIdentifier);
+		return new Organization(true, organizationIdentifier);
 	}
 
 	static Recipient localRole(String consortiumIdentifier, String roleSystem, String roleCode)
 	{
-		return new Role(UserRole.LOCAL, consortiumIdentifier, roleSystem, roleCode);
+		return new Role(true, consortiumIdentifier, roleSystem, roleCode);
 	}
 
 	boolean recipientMatches(Extension recipientExtension);
 
-	boolean isRecipientAuthorized(User recipientUser, Stream<OrganizationAffiliation> recipientAffiliations);
+	boolean isRecipientAuthorized(Identity recipientUser, Stream<OrganizationAffiliation> recipientAffiliations);
 
-	default boolean isRecipientAuthorized(User recipientUser, Collection<OrganizationAffiliation> recipientAffiliations)
+	default boolean isRecipientAuthorized(Identity recipientUser,
+			Collection<OrganizationAffiliation> recipientAffiliations)
 	{
 		return isRecipientAuthorized(recipientUser,
 				recipientAffiliations == null ? null : recipientAffiliations.stream());

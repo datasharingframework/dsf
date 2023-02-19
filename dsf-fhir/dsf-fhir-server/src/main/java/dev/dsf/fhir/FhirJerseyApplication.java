@@ -1,16 +1,16 @@
 package dev.dsf.fhir;
 
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Path;
-import javax.ws.rs.ext.Provider;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import jakarta.inject.Inject;
+import jakarta.servlet.ServletContext;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.ext.Provider;
 
 @ApplicationPath("/")
 public final class FhirJerseyApplication extends ResourceConfig
@@ -22,14 +22,12 @@ public final class FhirJerseyApplication extends ResourceConfig
 	{
 		WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 
-		context.getBeansWithAnnotation(Path.class).forEach((n, bean) ->
+		context.getBeansWithAnnotation(Path.class).forEach((n, b) ->
 		{
-			Path path = bean.getClass().getAnnotation(Path.class);
-
 			logger.debug("Registering bean '{}' as singleton resource with path '{}'", n,
-					servletContext.getContextPath() + "/" + path.value());
+					servletContext.getContextPath() + "/" + b.getClass().getAnnotation(Path.class).value());
 
-			register(bean);
+			register(b);
 		});
 
 		context.getBeansWithAnnotation(Provider.class).forEach((n, b) ->

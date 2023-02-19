@@ -2,7 +2,7 @@ package dev.dsf.fhir.dao.command;
 
 import org.hl7.fhir.r4.model.Bundle;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.exception.BadBundleException;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
@@ -12,7 +12,7 @@ public interface CommandFactory
 	/**
 	 * @param bundle
 	 *            not <code>null</code>
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param returnType
 	 *            not <code>null</code>
@@ -23,6 +23,6 @@ public interface CommandFactory
 	 * @throws BadBundleException
 	 *             if the bundle could not be processed because of wrong bundle type or other errors
 	 */
-	CommandList createCommands(Bundle bundle, User user, PreferReturnType returnType, PreferHandlingType handlingType)
-			throws BadBundleException;
+	CommandList createCommands(Bundle bundle, Identity identity, PreferReturnType returnType,
+			PreferHandlingType handlingType) throws BadBundleException;
 }

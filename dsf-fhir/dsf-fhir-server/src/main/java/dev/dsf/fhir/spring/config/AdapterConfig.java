@@ -2,8 +2,6 @@ package dev.dsf.fhir.spring.config;
 
 import java.util.Set;
 
-import javax.ws.rs.ext.Provider;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -12,6 +10,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+
+import jakarta.ws.rs.ext.Provider;
 
 @Configuration
 public class AdapterConfig implements BeanDefinitionRegistryPostProcessor

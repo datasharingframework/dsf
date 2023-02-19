@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.VariableSerializerFactory;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
@@ -158,6 +159,18 @@ public class CamundaConfig
 		var f = new ProcessEngineFactoryBean();
 		f.setProcessEngineConfiguration(processEngineConfiguration());
 		return f;
+	}
+
+	public ProcessEngine processEngine()
+	{
+		try
+		{
+			return processEngineFactory().getObject();
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Bean

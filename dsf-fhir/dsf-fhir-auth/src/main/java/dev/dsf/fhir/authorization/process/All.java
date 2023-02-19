@@ -1,6 +1,5 @@
 package dev.dsf.fhir.authorization.process;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -8,36 +7,33 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 
 public class All implements Recipient, Requester
 {
-	private final UserRole role;
+	private final boolean localIdentity;
 
-	public All(UserRole role)
+	public All(boolean localIdentity)
 	{
-		Objects.requireNonNull(role, "role");
-
-		this.role = role;
+		this.localIdentity = localIdentity;
 	}
 
 	@Override
-	public boolean isRequesterAuthorized(User requesterUser, Stream<OrganizationAffiliation> requesterAffiliations)
+	public boolean isRequesterAuthorized(Identity requesterUser, Stream<OrganizationAffiliation> requesterAffiliations)
 	{
 		return isAuthorized(requesterUser);
 	}
 
 	@Override
-	public boolean isRecipientAuthorized(User recipientUser, Stream<OrganizationAffiliation> recipientAffiliations)
+	public boolean isRecipientAuthorized(Identity recipientUser, Stream<OrganizationAffiliation> recipientAffiliations)
 	{
 		return isAuthorized(recipientUser);
 	}
 
-	private boolean isAuthorized(User user)
+	private boolean isAuthorized(Identity identity)
 	{
-		return user != null && user.getOrganization() != null && user.getOrganization().getActive()
-				&& role.equals(user.getRole());
+		return identity != null && identity.getOrganization() != null && identity.getOrganization().getActive()
+				&& identity.isLocalIdentity() == localIdentity;
 	}
 
 	@Override
@@ -61,39 +57,29 @@ public class All implements Recipient, Requester
 	@Override
 	public Coding getProcessAuthorizationCode()
 	{
-		switch (role)
-		{
-			case LOCAL:
-				return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
-						ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL, null);
-			case REMOTE:
-				return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
-						ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL, null);
-			default:
-				throw new IllegalStateException(UserRole.class.getName() + " " + role + " not supported");
-		}
+		if (localIdentity)
+			return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
+					ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL, null);
+		else
+			return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
+					ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL, null);
 	}
 
 	@Override
 	public boolean matches(Coding processAuthorizationCode)
 	{
-		switch (role)
-		{
-			case LOCAL:
-				return processAuthorizationCode != null
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
-								.equals(processAuthorizationCode.getSystem())
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL
-								.equals(processAuthorizationCode.getCode());
-			case REMOTE:
-				return processAuthorizationCode != null
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
-								.equals(processAuthorizationCode.getSystem())
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL
-								.equals(processAuthorizationCode.getCode());
-			default:
-				throw new IllegalStateException(UserRole.class.getName() + " " + role + " not supported");
-		}
+		if (localIdentity)
+			return processAuthorizationCode != null
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
+							.equals(processAuthorizationCode.getSystem())
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL
+							.equals(processAuthorizationCode.getCode());
+		else
+			return processAuthorizationCode != null
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
+							.equals(processAuthorizationCode.getSystem())
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL
+							.equals(processAuthorizationCode.getCode());
 	}
 
 	public static Optional<Requester> fromRequester(Coding coding)
@@ -103,9 +89,9 @@ public class All implements Recipient, Requester
 				&& coding.hasCode())
 		{
 			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL.equals(coding.getCode()))
-				return Optional.of(new All(UserRole.LOCAL));
+				return Optional.of(new All(true));
 			else if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL.equals(coding.getCode()))
-				return Optional.of(new All(UserRole.REMOTE));
+				return Optional.of(new All(false));
 		}
 
 		return Optional.empty();
@@ -118,7 +104,7 @@ public class All implements Recipient, Requester
 				&& coding.hasCode())
 		{
 			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL.equals(coding.getCode()))
-				return Optional.of(new All(UserRole.LOCAL));
+				return Optional.of(new All(true));
 			// remote not allowed for recipient
 		}
 

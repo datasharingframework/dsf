@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: nginx:1.21
+    image: nginx:1.23
     restart: "no"
     ports:
       - 127.0.0.1:443:443
@@ -74,15 +74,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5001:5001
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic1_fhir_user.password
       - db_medic1_fhir_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_medic1_client_certificate.pem
       - app_medic1_client_certificate_private_key.pem
@@ -98,6 +94,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic1_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic1_fhir_user_permanent_delete.password
@@ -115,8 +112,12 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 1
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC1_CONF_USER_THUMBPRINTS}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC1_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            role:
+              - ORGANIZATION_LOCAL
+              - PERMANENT_DELETE
     networks:
       medic1-fhir-frontend:
         ipv4_address: 172.20.0.3
@@ -131,15 +132,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5002:5002
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic2_fhir_user.password
       - db_medic2_fhir_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_medic2_client_certificate.pem
       - app_medic2_client_certificate_private_key.pem
@@ -155,6 +152,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic2_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic2_fhir_user_permanent_delete.password
@@ -172,8 +170,12 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 2
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC2_CONF_USER_THUMBPRINTS}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC2_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            role:
+              - ORGANIZATION_LOCAL
+              - PERMANENT_DELETE
     networks:
       medic2-fhir-frontend:
         ipv4_address: 172.20.0.19
@@ -188,15 +190,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5003:5003
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic3_fhir_user.password
       - db_medic3_fhir_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_medic3_client_certificate.pem
       - app_medic3_client_certificate_private_key.pem
@@ -212,6 +210,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic3_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic3_fhir_user_permanent_delete.password
@@ -229,8 +228,12 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 3
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC3_CONF_USER_THUMBPRINTS}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC3_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            role:
+              - ORGANIZATION_LOCAL
+              - PERMANENT_DELETE
     networks:
       medic3-fhir-frontend:
         ipv4_address: 172.20.0.35
@@ -245,15 +248,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5004:5004
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_ttp_fhir_user.password
       - db_ttp_fhir_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_ttp_client_certificate.pem
       - app_ttp_client_certificate_private_key.pem
@@ -269,6 +268,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user_permanent_delete.password
@@ -288,8 +288,12 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC1: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC2: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC3: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${TTP_CONF_USER_THUMBPRINTS}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${TTP_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            role:
+              - ORGANIZATION_LOCAL
+              - PERMANENT_DELETE
     networks:
       ttp-fhir-frontend:
         ipv4_address: 172.20.0.51
@@ -304,15 +308,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5011:5011
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic1_bpe_user.password
       - db_medic1_bpe_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_medic1_client_certificate.pem
       - app_medic1_client_certificate_private_key.pem
@@ -335,6 +335,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic1_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic1_bpe_user_camunda.password
@@ -370,15 +371,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5012:5012
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic2_bpe_user.password
       - db_medic2_bpe_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_medic2_client_certificate.pem
       - app_medic2_client_certificate_private_key.pem
@@ -401,6 +398,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic2_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic2_bpe_user_camunda.password
@@ -436,15 +434,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5014:5014
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic3_bpe_user.password
       - db_medic3_bpe_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_medic3_client_certificate.pem
       - app_medic3_client_certificate_private_key.pem
@@ -467,6 +461,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic3_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic3_bpe_user_camunda.password
@@ -507,15 +502,11 @@ services:
     restart: "no"
     ports:
      - 127.0.0.1:5013:5013
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_ttp_bpe_user.password
       - db_ttp_bpe_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_ttp_client_certificate.pem
       - app_ttp_client_certificate_private_key.pem
@@ -538,6 +529,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user_camunda.password
@@ -635,6 +627,8 @@ secrets:
   db_ttp_fhir_user_permanent_delete.password:
     file: ./secrets/db_ttp_fhir_user_permanent_delete.password
 
+  app_server_trust_certificates.pem:
+    file: ./secrets/app_testca_certificate.pem
   app_client_trust_certificates.pem:
     file: ./secrets/app_testca_certificate.pem
 

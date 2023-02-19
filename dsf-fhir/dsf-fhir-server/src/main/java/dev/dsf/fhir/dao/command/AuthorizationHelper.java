@@ -5,19 +5,20 @@ import java.sql.Connection;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 
 public interface AuthorizationHelper
 {
-	void checkCreateAllowed(Connection connection, User user, Resource newResource);
+	void checkCreateAllowed(int index, Connection connection, Identity identity, Resource newResource);
 
-	void checkReadAllowed(Connection connection, User user, Resource existingResource);
+	void checkReadAllowed(int index, Connection connection, Identity identity, Resource existingResource);
 
-	void checkUpdateAllowed(Connection connection, User user, Resource oldResource, Resource newResource);
+	void checkUpdateAllowed(int index, Connection connection, Identity identity, Resource oldResource,
+			Resource newResource);
 
-	void checkDeleteAllowed(Connection connection, User user, Resource oldResource);
+	void checkDeleteAllowed(int index, Connection connection, Identity identity, Resource oldResource);
 
-	void checkSearchAllowed(User user, String resourceTypeName);
+	void checkSearchAllowed(int index, Identity identity, String resourceTypeName);
 
-	void filterIncludeResults(Connection connection, User user, Bundle multipleResult);
+	void filterIncludeResults(int index, Connection connection, Identity identity, Bundle multipleResult);
 }

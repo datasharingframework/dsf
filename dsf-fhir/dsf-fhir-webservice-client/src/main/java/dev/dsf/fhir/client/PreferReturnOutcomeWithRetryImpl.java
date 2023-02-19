@@ -4,13 +4,12 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.prefer.PreferReturnType;
+import jakarta.ws.rs.core.MediaType;
 
 class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 {

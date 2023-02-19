@@ -6,14 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -28,7 +23,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -45,6 +39,13 @@ import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.webservice.specification.BasicResourceService;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.Response.StatusType;
+import jakarta.ws.rs.core.UriInfo;
 
 public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R extends Resource, S extends BasicResourceService<R>>
 		extends AbstractServiceSecure<S> implements BasicResourceService<R>, InitializingBean
@@ -139,26 +140,31 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		resolveLiteralInternalRelatedArtifactOrAttachmentUrls(resource);
 
-		Optional<String> reasonCreateAllowed = authorizationRule.reasonCreateAllowed(getCurrentUser(), resource);
+		Optional<String> reasonCreateAllowed = authorizationRule.reasonCreateAllowed(getCurrentIdentity(), resource);
 
 		if (reasonCreateAllowed.isEmpty())
 		{
-			audit.info("Create of resource {} denied for user '{}' ({})", resourceTypeName, getCurrentUser().getName(),
-					getCurrentUser().getSubjectDn());
+			audit.info("Create of resource {} denied for user '{}'", resourceTypeName, getCurrentIdentity().getName());
 			return forbidden("create");
 		}
 		else
 		{
 			return withResourceValidation(resource, uri, headers, "Create", () ->
 			{
-				audit.info("Create of resource {} allowed for user '{}' ({}): {}", resourceTypeName,
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn(), reasonCreateAllowed.get());
+				audit.info("Create of resource {} allowed for user '{}', reason: {}", resourceTypeName,
+						getCurrentIdentity().getName(), reasonCreateAllowed.get());
 
-				Response created = delegate.create(resource, uri, headers);
+				Response created = logResultStatus(() -> delegate.create(resource, uri, headers),
+						status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
+								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
+								status.getReasonPhrase()),
+						status -> audit.info("Create of resource {} for user '{}' failed, status: {} {}",
+								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
+								status.getReasonPhrase()));
 
 				if (created.hasEntity() && !resourceType.isInstance(created.getEntity())
 						&& !(created.getEntity() instanceof OperationOutcome))
@@ -200,71 +206,67 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		Response read = delegate.read(id, uri, headers);
 
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
 		{
-			R entity = resourceType.cast(read.getEntity());
-			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(), entity);
+			final R entity = resourceType.cast(read.getEntity());
+			final String entityId = entity.getIdElement().getIdPart();
+			final long entityVersion = entity.getIdElement().getVersionIdPartAsLong();
+			final Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentIdentity(),
+					entity);
 
 			if (reasonReadAllowed.isEmpty())
 			{
-				audit.info("Read of resource {} denied for user '{}' ({})", entity.getIdElement().getValue(),
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+				audit.info("Read of {}/{}/_history/{} denied for identity '{}'", resourceTypeName, entityId,
+						entityVersion, getCurrentIdentity().getName());
 				return forbidden("read");
 			}
 			else
 			{
-				audit.info("Read of resource {} allowed for user '{}' ({}): {}", entity.getIdElement().getValue(),
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn(), reasonReadAllowed.get());
-				return read;
+				audit.info("Read of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
+						entityId, entityVersion, getCurrentIdentity().getName(), reasonReadAllowed.get());
+				return logResultStatus(() ->
+				{
+					// if not modified remove entity
+					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
+						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
+								.build();
+					else
+						return read;
+				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
+						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
+						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
+								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
+								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
 			}
 		}
 		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)
 		{
-			audit.info("Read of resource {} for user '{}' ({}) returned with OperationOutcome, status {}",
-					resourceTypeName + "/" + id, getCurrentUser().getName(), getCurrentUser().getSubjectDn(),
-					read.getStatus());
+			audit.info("Read of {} for identity '{}' returned with OperationOutcome, status {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with OperationOutcome, status {}", read.getStatus());
+			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
 		else if (read.hasEntity())
 		{
-			audit.info("Read of resource {} denied for user '{}' ({}), not a {}", resourceTypeName + "/" + id,
-					getCurrentUser().getName(), getCurrentUser().getSubjectDn(), resourceTypeName);
+			audit.info("Read of {} denied for identity '{}', not a {}", resourceTypeName,
+					getCurrentIdentity().getName(), resourceTypeName);
 			return forbidden("read");
-		}
-		else if (!read.hasEntity() && Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
-		{
-			Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-					() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
-			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(),
-					dbResource.get());
-
-			if (reasonReadAllowed.isEmpty())
-			{
-				audit.info("Read of resource {} denied for user '{}' ({})", dbResource.get().getIdElement().getValue(),
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn());
-				return forbidden("read");
-			}
-			else
-			{
-				audit.info("Read of resource {} allowed for user '{}' ({}): {}",
-						dbResource.get().getIdElement().getValue(), getCurrentUser().getName(),
-						getCurrentUser().getSubjectDn(), reasonReadAllowed.get());
-				return read;
-			}
 		}
 		else
 		{
-			audit.info("Read of resource {} for user '{}' ({}) returned without entity, status {}",
-					resourceTypeName + "/" + id, getCurrentUser().getName(), getCurrentUser().getSubjectDn(),
-					read.getStatus());
+			audit.info("Read of {} for identity '{}' returned without entity, status {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), read.getStatus());
 
-			logger.info("Returning with status {}, but no entity", read.getStatus());
+			logger.info("Returning with status {}, but no entity", read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
 	}
@@ -272,72 +274,68 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		Response read = delegate.vread(id, version, uri, headers);
 
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
 		{
-			R entity = resourceType.cast(read.getEntity());
-			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(), entity);
+			final R entity = resourceType.cast(read.getEntity());
+			final String entityId = entity.getIdElement().getIdPart();
+			final long entityVersion = entity.getIdElement().getVersionIdPartAsLong();
+			final Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentIdentity(),
+					entity);
 
 			if (reasonReadAllowed.isEmpty())
 			{
-				audit.info("Read of resource {} denied for user '{}' ({})", entity.getIdElement().getValue(),
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+				audit.info("Read of {}/{}/_history/{} denied for identity '{}'", resourceTypeName, entityId,
+						entityVersion, getCurrentIdentity().getName());
 				return forbidden("read");
 			}
 			else
 			{
-				audit.info("Read of resource {} allowed for user '{}' ({}): {}", entity.getIdElement().getValue(),
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn(), reasonReadAllowed.get());
-				return read;
+				audit.info("Read of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
+						entityId, entityVersion, getCurrentIdentity().getName(), reasonReadAllowed.get());
+				return logResultStatus(() ->
+				{
+					// if not modified remove entity
+					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
+						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
+								.build();
+					else
+						return read;
+				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
+						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
+						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
+								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
+								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
 			}
 		}
 		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)
 		{
-			audit.info("Read of resource {} for user '{}' ({}) returned with OperationOutcome, status {}",
-					resourceTypeName + "/" + id + "/_history/" + version, getCurrentUser().getName(),
-					getCurrentUser().getSubjectDn(), read.getStatus());
+			audit.info("Read of {} for identity '{}' returned with OperationOutcome, status: {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with OperationOutcome, status {}", read.getStatus());
+			logger.info("Returning with OperationOutcome, status {}", read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
 		else if (read.hasEntity())
 		{
-			audit.info("Read of resource {} denied for user '{}' ({}), not a {}",
-					resourceTypeName + "/" + id + "/_history/" + version, getCurrentUser().getName(),
-					getCurrentUser().getSubjectDn(), resourceTypeName);
+			audit.info("Read of {} denied for identity '{}', not a {}", resourceTypeName,
+					getCurrentIdentity().getName(), resourceTypeName);
 			return forbidden("read");
-		}
-		else if (!read.hasEntity() && Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
-		{
-			Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-					() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
-			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(),
-					dbResource.get());
-
-			if (reasonReadAllowed.isEmpty())
-			{
-				audit.info("Read of resource {} denied for user '{}' ({})", dbResource.get().getIdElement().getValue(),
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn());
-				return forbidden("read");
-			}
-			else
-			{
-				audit.info("Read of resource {} allowed for user '{}' ({}): {}",
-						dbResource.get().getIdElement().getValue(), getCurrentUser().getName(),
-						getCurrentUser().getSubjectDn(), reasonReadAllowed.get());
-				return read;
-			}
 		}
 		else
 		{
-			audit.info("Read of resource {} for user '{}' ({}) returned without entity, status {}",
-					resourceTypeName + "/" + id + "/_history/" + version, getCurrentUser().getName(),
-					getCurrentUser().getSubjectDn(), read.getStatus());
+			audit.info("Read of {} for identity '{}' returned without entity, status: {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with status {}, but no entity", read.getStatus());
+			logger.info("Returning with status {} {}, but no entity", read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
 	}
@@ -345,61 +343,67 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response history(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
-		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentUser());
+		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{
-			audit.info("History of resource {} denied for user '{}' ({})", resourceTypeName, getCurrentUser().getName(),
-					getCurrentUser().getSubjectDn());
+			audit.info("History of {} denied for identity '{}'", resourceTypeName, getCurrentIdentity().getName());
 			return forbidden("search");
 		}
 		else
 		{
-			audit.info("History of resource {} allowed for user '{}' ({}): {}", resourceTypeName,
-					getCurrentUser().getName(), getCurrentUser().getSubjectDn(), reasonHistoryAllowed.get());
-			return delegate.history(uri, headers);
+			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
+					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
+			return logResultStatus(() -> delegate.history(uri, headers),
+					status -> audit.info("History of {} for identity '{}' successful: {}", resourceTypeName,
+							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+					status -> audit.info("History of {} for identity '{}' failed: {}", resourceTypeName,
+							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
 	}
 
 	@Override
 	public Response history(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
-		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentUser());
+		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{
-			audit.info("History of resource {}/{} denied for user '{}' ({})", resourceTypeName, id,
-					getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+			audit.info("History of {} denied for identity '{}'", resourceTypeName, getCurrentIdentity().getName());
 			return forbidden("search");
 		}
 		else
 		{
-			audit.info("History of resource {}/{} allowed for user '{}' ({}): {}", resourceTypeName, id,
-					getCurrentUser().getName(), getCurrentUser().getSubjectDn(), reasonHistoryAllowed.get());
-			return delegate.history(id, uri, headers);
+			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
+					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
+			return logResultStatus(() -> delegate.history(id, uri, headers),
+					status -> audit.info("History of {} for identity '{}' successful: {}", resourceTypeName,
+							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+					status -> audit.info("History of {} for identity '{}' failed: {}", resourceTypeName,
+							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
 	}
 
 	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		if (dbResource.isEmpty())
 		{
-			audit.info("Create as Update of non existing resource {} denied for user '{}' ({})",
-					resourceTypeName + "/" + id, getCurrentUser().getName(), getCurrentUser().getSubjectDn());
-			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resourceTypeName + "/" + id);
+			audit.info("Create as update of non existing {} denied for identity '{}'", resourceTypeName,
+					getCurrentIdentity().getName());
+			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
 		}
 		else
 		{
-			R cleanedResource = referenceCleaner.cleanLiteralReferences(dbResource.get());
-			return update(id, resource, uri, headers, cleanedResource);
+			R cleanedDbResource = referenceCleaner.cleanLiteralReferences(dbResource.get());
+			return update(id, resource, uri, headers, cleanedDbResource);
 		}
 	}
 
@@ -407,24 +411,30 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		resolveLiteralInternalRelatedArtifactOrAttachmentUrls(newResource);
 
-		Optional<String> reasonUpdateAllowed = authorizationRule.reasonUpdateAllowed(getCurrentUser(), oldResource,
-				newResource);
+		final String resourceId = oldResource.getIdElement().getIdPart();
+		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+		final Optional<String> reasonUpdateAllowed = authorizationRule.reasonUpdateAllowed(getCurrentIdentity(),
+				oldResource, newResource);
 
 		if (reasonUpdateAllowed.isEmpty())
 		{
-			audit.info("Update of resource {} denied for user '{}' ({})", oldResource.getIdElement().getValue(),
-					getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+			audit.info("Update of {}/{}/_history/{} denied for identity '{}'", resourceTypeName, resourceId,
+					resourceVersion, getCurrentIdentity().getName());
 			return forbidden("update");
 		}
 		else
 		{
 			return withResourceValidation(newResource, uri, headers, "Update", () ->
 			{
-				audit.info("Update of resource {} allowed for user '{}' ({}): {}",
-						oldResource.getIdElement().getValue(), getCurrentUser().getName(),
-						getCurrentUser().getSubjectDn(), reasonUpdateAllowed.get());
-
-				Response updated = delegate.update(id, newResource, uri, headers);
+				audit.info("Update of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
+						resourceId, resourceVersion, getCurrentIdentity().getName(), reasonUpdateAllowed.get());
+				Response updated = logResultStatus(() -> delegate.update(id, newResource, uri, headers),
+						status -> audit.info("Update of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()),
+						status -> audit.info("Update of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()));
 
 				if (updated.hasEntity() && !resourceType.isInstance(updated.getEntity())
 						&& !(updated.getEntity() instanceof OperationOutcome))
@@ -441,7 +451,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		Map<String, List<String>> queryParameters = uri.getQueryParameters();
 		PartialResult<R> result = getExisting(queryParameters);
@@ -457,9 +467,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		// if it does not support Update as Create) -> reject
 		else if (result.getTotal() <= 0 && resource.hasId())
 		{
-			audit.info("Create as Update of non existing resource {} denied for user '{}' ({})",
-					resource.getIdElement().getValue(), getCurrentUser().getName(), getCurrentUser().getSubjectDn());
-			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getIdElement().getValue());
+			audit.info("Create as update of non existing {} denied for identity '{}'", resourceTypeName,
+					getCurrentIdentity().getName());
+			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
 		}
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
@@ -492,7 +502,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			// update resource has different id -> 400 Bad Request
 			else
 			{
-				// TODO audit log
+				audit.info("Update of {}/{}/_history/{} denied for identity '{}', new resource has different id",
+						resourceTypeName, dbResourceId.getValue(), dbResourceId.getVersionIdPart(),
+						getCurrentIdentity().getName());
 				return responseGenerator.badRequestIdsNotMatching(
 						dbResourceId.withServerBase(serverBase, resourceTypeName),
 						resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
@@ -505,7 +517,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		// not selective enough preferably with an OperationOutcome
 		else // if (result.getOverallCount() > 1)
 		{
-			// TODO audit log
+			audit.info(
+					"Update of {} denied for identity '{}', conditional update criteria not selective enough, multiple matches",
+					resourceTypeName, getCurrentIdentity().getName());
 			return responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder.newInstance()
 					.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
 		}
@@ -533,7 +547,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 				.getUnsupportedQueryParameters(queryParameters);
 		if (!unsupportedQueryParameters.isEmpty())
 		{
-			// TODO audit log
+			audit.info(
+					"Update of resource {} denied for identity '{}', conditional update criteria contains unsupported parameters",
+					resourceTypeName, getCurrentIdentity().getName());
 			throw new WebApplicationException(responseGenerator.badRequest(
 					UriComponentsBuilder.newInstance()
 							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
@@ -546,7 +562,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		Optional<R> dbResource = exceptionHandler
 				.handleSqlException(() -> dao.readIncludingDeleted(parameterConverter.toUuid(resourceTypeName, id)));
@@ -555,25 +571,34 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			R oldResource = dbResource.get();
 
-			Optional<String> reasonDeleteAllowed = authorizationRule.reasonDeleteAllowed(getCurrentUser(), oldResource);
+			final String resourceId = oldResource.getIdElement().getIdPart();
+			final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+			final Optional<String> reasonDeleteAllowed = authorizationRule.reasonDeleteAllowed(getCurrentIdentity(),
+					oldResource);
+
 			if (reasonDeleteAllowed.isEmpty())
 			{
-				audit.info("Delete of resource {} denied for user '{}' ({})", oldResource.getIdElement().getValue(),
-						getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+				audit.info("Delete of {}/{}/_history/{} denied for identity '{}'", resourceTypeName, resourceId,
+						resourceVersion, getCurrentIdentity().getName());
 				return forbidden("delete");
 			}
 			else
 			{
-				audit.info("Delete of resource {} allowed for user '{}' ({}): {}",
-						oldResource.getIdElement().getValue(), getCurrentUser().getName(),
-						getCurrentUser().getSubjectDn(), reasonDeleteAllowed.get());
-				return delegate.delete(id, uri, headers);
+				audit.info("Delete of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
+						resourceId, resourceVersion, getCurrentIdentity().getName(), reasonDeleteAllowed.get());
+				return logResultStatus(() -> delegate.delete(id, uri, headers),
+						status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()),
+						status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()));
 			}
 		}
 		else
 		{
-			audit.info("Resource to delete {} not found for user '{}' ({})", resourceTypeName + "/" + id,
-					getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+			audit.info("{} to delete not found for user '{}'", resourceTypeName, getCurrentIdentity().getName(),
+					getCurrentIdentity().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}
 	}
@@ -581,7 +606,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response delete(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		Map<String, List<String>> queryParameters = uri.getQueryParameters();
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
@@ -597,14 +622,16 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), 1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
 				.getUnsupportedQueryParameters(queryParameters);
 		if (!unsupportedQueryParameters.isEmpty())
 		{
-			// TODO audit log
+			audit.info(
+					"Delete of {} denied for identity '{}', conditional delete criteria contains unsupported parameters",
+					resourceTypeName, getCurrentIdentity().getName());
 			return responseGenerator.badRequest(
 					UriComponentsBuilder.newInstance()
 							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
@@ -616,7 +643,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		// No matches
 		if (result.getTotal() <= 0)
 		{
-			// TODO audit log
+			audit.info("No {} resource deleted for identity '{}', conditional delete criteria produced no matches",
+					resourceTypeName, getCurrentIdentity().getName());
 			return Response.noContent().build(); // TODO return OperationOutcome
 		}
 
@@ -633,7 +661,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		// Precondition Failed error indicating the client's criteria were not selective enough.
 		else
 		{
-			// TODO audit log
+			audit.info(
+					"Delete of {} denied for identity '{}', conditional delete criteria not selective enough, multiple matches",
+					resourceTypeName, getCurrentIdentity().getName());
 			return responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder.newInstance()
 					.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
 		}
@@ -642,27 +672,30 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response search(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
-		Optional<String> reasonSearchAllowed = authorizationRule.reasonSearchAllowed(getCurrentUser());
+		Optional<String> reasonSearchAllowed = authorizationRule.reasonSearchAllowed(getCurrentIdentity());
 		if (reasonSearchAllowed.isEmpty())
 		{
-			audit.info("Search of resource {} denied for user '{}' ({})", resourceTypeName, getCurrentUser().getName(),
-					getCurrentUser().getSubjectDn());
+			audit.info("Search of {} denied for identity '{}'", resourceTypeName, getCurrentIdentity().getName());
 			return forbidden("search");
 		}
 		else
 		{
-			audit.info("Search of resource {} allowed for user '{}' ({}): {}", resourceTypeName,
-					getCurrentUser().getName(), getCurrentUser().getSubjectDn(), reasonSearchAllowed.get());
-			return delegate.search(uri, headers);
+			audit.info("Search of {} allowed for identity '{}', reason: {}", resourceTypeName,
+					getCurrentIdentity().getName(), reasonSearchAllowed.get());
+			return logResultStatus(() -> delegate.search(uri, headers),
+					status -> audit.info("Search of {} for identity '{} successful, status: {} {}'", resourceTypeName,
+							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+					status -> audit.info("Search of {} for identity '{}' failed, status: {} {}", resourceTypeName,
+							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
 	}
 
 	@Override
 	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		return delegate.postValidateNew(validate, parameters, uri, headers);
 	}
@@ -670,7 +703,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		return delegate.getValidateNew(validate, uri, headers);
 	}
@@ -679,7 +712,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	public Response postValidateExisting(String validate, String id, Parameters parameters, UriInfo uri,
 			HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		return delegate.postValidateExisting(validate, id, parameters, uri, headers);
 	}
@@ -687,49 +720,81 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response getValidateExisting(String validate, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		return delegate.getValidateExisting(validate, id, uri, headers);
-	}
-
-	private void logCurrentUser()
-	{
-		User user = getCurrentUser();
-		logger.debug("Current user '{}' ({}), role '{}'", user.getName(), user.getSubjectDn(), user.getRole());
 	}
 
 	@Override
 	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentUser();
+		logCurrentIdentity();
 
 		Optional<R> dbResource = exceptionHandler
 				.handleSqlException(() -> dao.readIncludingDeleted(parameterConverter.toUuid(resourceTypeName, id)));
 
 		if (dbResource.isPresent())
 		{
-			R oldResource = dbResource.get();
-
-			Optional<String> reasonDeleteAllowed = authorizationRule.reasonPermanentDeleteAllowed(getCurrentUser(),
-					oldResource);
+			final R oldResource = dbResource.get();
+			final String resourceId = oldResource.getIdElement().getIdPart();
+			final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+			final Optional<String> reasonDeleteAllowed = authorizationRule
+					.reasonPermanentDeleteAllowed(getCurrentIdentity(), oldResource);
 			if (reasonDeleteAllowed.isEmpty())
 			{
-				audit.info("Permanent delete of resource {} denied for user '{}'",
-						oldResource.getIdElement().getValue(), getCurrentUser().getName());
+				audit.info("Permanent delete of {}/{}/_history/{} denied for identity '{}'", resourceTypeName,
+						resourceId, resourceVersion, getCurrentIdentity().getName());
 				return forbidden("delete");
 			}
 			else
 			{
-				audit.info("Permanent delete of resource {} allowed for user '{}': {}",
-						oldResource.getIdElement().getValue(), getCurrentUser().getName(), reasonDeleteAllowed.get());
-				return delegate.deletePermanently(deletePath, id, uri, headers);
+				audit.info("Permanent delete of {}/{}/_history/{} allowed for identity '{}', reason: {}",
+						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+						reasonDeleteAllowed.get());
+
+				return logResultStatus(() -> delegate.deletePermanently(deletePath, id, uri, headers),
+						status -> audit.info(
+								"Permanent delete of {}/{}/_history/{} by identity '{}' successful, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()),
+						status -> audit.info(
+								"Permanent delete of {}/{}/_history/{} by identity '{}' failed, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()));
 			}
 		}
 		else
 		{
-			audit.info("Resource to permanently delete {} not found for user '{}'", resourceTypeName + "/" + id,
-					getCurrentUser().getName());
+			audit.info("{} to permanently delete not found for user '{}'", resourceTypeName,
+					getCurrentIdentity().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
+		}
+	}
+
+	private Response logResultStatus(Supplier<Response> responseSupplier, Consumer<StatusType> logSuccessForStatusCode,
+			Consumer<StatusType> logErrorForStatusCode)
+	{
+		try
+		{
+			Response response = responseSupplier.get();
+
+			if (Family.SUCCESSFUL.equals(response.getStatusInfo().getFamily()))
+				logSuccessForStatusCode.accept(response.getStatusInfo());
+			else
+				logErrorForStatusCode.accept(response.getStatusInfo());
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			StatusType status = e instanceof WebApplicationException
+					&& ((WebApplicationException) e).getResponse() != null
+							? ((WebApplicationException) e).getResponse().getStatusInfo()
+							: Status.INTERNAL_SERVER_ERROR;
+
+			logErrorForStatusCode.accept(status);
+
+			throw e;
 		}
 	}
 }

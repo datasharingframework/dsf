@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -17,6 +15,7 @@ import org.hl7.fhir.r4.model.Resource;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class AbstractStatusParameter<R extends MetadataResource> extends AbstractTokenParameter<R>
 {

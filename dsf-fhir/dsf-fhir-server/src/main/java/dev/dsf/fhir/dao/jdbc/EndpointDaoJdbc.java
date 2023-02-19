@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.EndpointDao;
+import dev.dsf.fhir.search.filter.EndpointIdentityFilter;
 import dev.dsf.fhir.search.parameters.EndpointAddress;
 import dev.dsf.fhir.search.parameters.EndpointIdentifier;
 import dev.dsf.fhir.search.parameters.EndpointName;
 import dev.dsf.fhir.search.parameters.EndpointOrganization;
 import dev.dsf.fhir.search.parameters.EndpointStatus;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
-import dev.dsf.fhir.search.parameters.user.EndpointUserFilter;
 
 public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implements EndpointDao
 {
@@ -28,7 +28,7 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 	public EndpointDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint",
-				"endpoint_id", EndpointUserFilter::new, with(EndpointAddress::new, EndpointIdentifier::new,
+				"endpoint_id", EndpointIdentityFilter::new, with(EndpointAddress::new, EndpointIdentifier::new,
 						EndpointName::new, EndpointOrganization::new, EndpointStatus::new),
 				with(OrganizationEndpointRevInclude::new));
 	}

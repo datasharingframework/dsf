@@ -23,16 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -82,6 +72,15 @@ import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.BasicResourceService;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R extends Resource>
 		extends AbstractBasicService implements BasicResourceService<R>, InitializingBean
@@ -240,7 +239,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private Optional<OperationOutcome> resolveLogicalReference(Resource resource, ResourceReference reference,
 			Connection connection)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(getCurrentUser(), reference,
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(getCurrentIdentity(), reference,
 				connection);
 		if (resolvedResource.isPresent())
 		{
@@ -284,7 +283,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			case ATTACHMENT_LITERAL_EXTERNAL_URL:
 				return referenceResolver.checkLiteralExternalReference(resource, reference);
 			case LOGICAL:
-				return referenceResolver.checkLogicalReference(getCurrentUser(), resource, reference, connection);
+				return referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
 			// unknown urls to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL:
 			case ATTACHMENT_UNKNOWN_URL:
@@ -386,14 +385,22 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
-				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
-
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.notModified(resourceTag).entity(resource)
+						.lastModified(resource.getMeta().getLastUpdated()).build();
+			}
 			// If-Modified-Since is ignored, when used in combination with If-None-Match
 			else if (ifNoneMatch.isEmpty() && ifModifiedSince
 					.map(d -> !afterWithSecondsPrecision(resource.getMeta().getLastUpdated(), d)).orElse(false))
-				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.notModified(resourceTag).entity(resource)
+						.lastModified(resource.getMeta().getLastUpdated()).build();
+			}
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
+
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
 	}
 
@@ -453,12 +460,19 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
-				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
-
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.notModified(resourceTag).entity(resource)
+						.lastModified(resource.getMeta().getLastUpdated()).build();
+			}
 			// If-Modified-Since is ignored, when used in combination with If-None-Match
 			else if (ifNoneMatch.isEmpty() && ifModifiedSince
 					.map(d -> !afterWithSecondsPrecision(resource.getMeta().getLastUpdated(), d)).orElse(false))
-				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.notModified(resourceTag).entity(resource)
+						.lastModified(resource.getMeta().getLastUpdated()).build();
+			}
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
@@ -472,7 +486,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response history(UriInfo uri, HttpHeaders headers)
 	{
-		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers, resourceType);
+		Bundle history = historyService.getHistory(getCurrentIdentity(), uri, headers, resourceType);
 
 		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(history),
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
@@ -481,7 +495,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response history(String id, UriInfo uri, HttpHeaders headers)
 	{
-		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers, resourceType, id);
+		Bundle history = historyService.getHistory(getCurrentIdentity(), uri, headers, resourceType, id);
 
 		return responseGenerator
 				.response(Status.OK, history, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
@@ -635,7 +649,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), effectivePage, effectiveCount);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), effectivePage, effectiveCount);
 		query.configureParameters(queryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(queryParameters);
 
@@ -681,7 +695,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				.getAuthorizationRule(include.getClass());
 
 		return optRule.map(rule -> (AuthorizationRule<Resource>) rule)
-				.flatMap(rule -> rule.reasonReadAllowed(getCurrentUser(), include)).map(reason ->
+				.flatMap(rule -> rule.reasonReadAllowed(getCurrentIdentity(), include)).map(reason ->
 				{
 					logger.debug("Include resource of type {} with id {}, allowed - {}",
 							include.getClass().getAnnotation(ResourceDef.class).name(),

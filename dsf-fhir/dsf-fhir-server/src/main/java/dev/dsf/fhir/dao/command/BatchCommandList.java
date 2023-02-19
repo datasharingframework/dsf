@@ -2,7 +2,6 @@ package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -12,50 +11,35 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.sql.DataSource;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
 
-public class BatchCommandList implements CommandList
+public class BatchCommandList extends AbstractCommandList implements CommandList
 {
 	private static final Logger logger = LoggerFactory.getLogger(BatchCommandList.class);
 
-	private final DataSource dataSource;
-	private final ExceptionHandler exceptionHandler;
 	private final ValidationHelper validationHelper;
 	private final SnapshotGenerator snapshotGenerator;
 	private final EventHandler eventHandler;
 
-	private final List<Command> commands = new ArrayList<>();
-
-	public BatchCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, ValidationHelper validationHelper,
-			SnapshotGenerator snapshotGenerator, EventHandler eventHandler, List<Command> commands)
+	public BatchCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<? extends Command> commands,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator, EventHandler eventHandler)
 	{
-		this.dataSource = dataSource;
-		this.exceptionHandler = exceptionHandler;
+		super(dataSource, exceptionHandler, commands);
+
 		this.validationHelper = validationHelper;
 		this.snapshotGenerator = snapshotGenerator;
 		this.eventHandler = eventHandler;
-
-		if (commands != null)
-			this.commands.addAll(commands);
-	}
-
-	private boolean hasModifyingCommands()
-	{
-		return commands.stream()
-				.anyMatch(c -> c instanceof CreateCommand || c instanceof UpdateCommand || c instanceof DeleteCommand);
 	}
 
 	@Override
@@ -75,7 +59,7 @@ public class BatchCommandList implements CommandList
 					(int) (commands.size() / 0.75) + 1);
 			Map<String, IdType> idTranslationTable = new HashMap<>();
 
-			if (hasModifyingCommands())
+			if (hasModifyingCommands)
 			{
 				logger.debug(
 						"Elevating DB connection setting to: read-only {}, auto-commit {}, transaction-isolation-level {}",
@@ -90,7 +74,7 @@ public class BatchCommandList implements CommandList
 
 			commands.forEach(execute(idTranslationTable, connection, caughtExceptions));
 
-			if (hasModifyingCommands())
+			if (hasModifyingCommands)
 			{
 				logger.debug(
 						"Reseting DB connection setting to: read-only {}, auto-commit {}, transaction-isolation-level {}",
@@ -105,11 +89,17 @@ public class BatchCommandList implements CommandList
 			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 
 			commands.forEach(postExecute(connection, caughtExceptions, results));
+			caughtExceptions.forEach((k, v) -> results.put(k, toEntry(v)));
+
+			results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).forEach(e ->
+			{
+				Command command = commands.get(e.getKey());
+				BundleEntryComponent result = e.getValue();
+				auditLogResult(command, result);
+			});
 
 			Bundle result = new Bundle();
 			result.setType(BundleType.BATCHRESPONSE);
-
-			caughtExceptions.forEach((k, v) -> results.put(k, toEntry(v)));
 			results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).map(Entry::getValue)
 					.forEach(result::addEntry);
 
@@ -139,25 +129,6 @@ public class BatchCommandList implements CommandList
 			default:
 				return "?";
 		}
-	}
-
-	private BundleEntryComponent toEntry(Exception exception)
-	{
-		var entry = new BundleEntryComponent();
-		var response = entry.getResponse();
-
-		if (!(exception instanceof WebApplicationException)
-				|| !(((WebApplicationException) exception).getResponse().getEntity() instanceof OperationOutcome))
-		{
-			exception = exceptionHandler.internalServerErrorBundleBatch(exception);
-		}
-
-		Response httpResponse = ((WebApplicationException) exception).getResponse();
-		response.setStatus(
-				httpResponse.getStatusInfo().getStatusCode() + " " + httpResponse.getStatusInfo().getReasonPhrase());
-		response.setOutcome((OperationOutcome) httpResponse.getEntity());
-
-		return entry;
 	}
 
 	private Consumer<Command> preExecute(Map<String, IdType> idTranslationTable, Connection connection,

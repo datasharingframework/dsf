@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
@@ -26,13 +26,13 @@ public class DeleteStructureDefinitionCommand extends DeleteCommand
 
 	private StructureDefinitionDao snapshotDao;
 
-	public DeleteStructureDefinitionCommand(int index, User user, PreferReturnType returnType, Bundle bundle,
+	public DeleteStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			ResponseGenerator responseGenerator, DaoProvider daoProvider, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, EventGenerator eventGenerator)
 	{
-		super(index, user, returnType, bundle, entry, serverBase, authorizationHelper, responseGenerator, daoProvider,
-				exceptionHandler, parameterConverter, eventGenerator);
+		super(index, identity, returnType, bundle, entry, serverBase, authorizationHelper, responseGenerator,
+				daoProvider, exceptionHandler, parameterConverter, eventGenerator);
 
 		snapshotDao = daoProvider.getStructureDefinitionSnapshotDao();
 	}

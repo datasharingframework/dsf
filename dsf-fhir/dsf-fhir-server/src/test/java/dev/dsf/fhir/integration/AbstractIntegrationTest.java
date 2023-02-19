@@ -1,11 +1,5 @@
 package dev.dsf.fhir.integration;
 
-import static de.rwh.utils.jetty.JettyServer.httpConfiguration;
-import static de.rwh.utils.jetty.JettyServer.httpsConnector;
-import static de.rwh.utils.jetty.JettyServer.secureRequestCustomizer;
-import static de.rwh.utils.jetty.JettyServer.statusCodeOnlyErrorHandler;
-import static de.rwh.utils.jetty.JettyServer.webInfClassesDirs;
-import static de.rwh.utils.jetty.JettyServer.webInfJars;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -16,37 +10,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
+import org.eclipse.jetty.websocket.jakarta.client.JakartaWebSocketShutdownContainer;
+import org.eclipse.jetty.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
@@ -61,15 +39,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.SpringServletContainerInitializer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import de.rwh.utils.jetty.JettyServer;
-import de.rwh.utils.jetty.PropertiesReader;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
 import de.rwh.utils.test.LiquibaseTemplateTestRule;
-import dev.dsf.fhir.FhirContextLoaderListener;
-import dev.dsf.fhir.authentication.AuthenticationFilter;
+import dev.dsf.common.jetty.JettyConfig;
+import dev.dsf.common.jetty.JettyServer;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.client.FhirWebserviceClient;
@@ -77,10 +54,12 @@ import dev.dsf.fhir.client.FhirWebserviceClientJersey;
 import dev.dsf.fhir.client.WebsocketClient;
 import dev.dsf.fhir.client.WebsocketClientTyrus;
 import dev.dsf.fhir.dao.AbstractDbTest;
+import dev.dsf.fhir.integration.X509Certificates.ClientCertificate;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceCleanerImpl;
 import dev.dsf.fhir.service.ReferenceExtractorImpl;
-import dev.dsf.fhir.test.X509Certificates;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 public abstract class AbstractIntegrationTest extends AbstractDbTest
 {
@@ -104,13 +83,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-	protected static final String[] ALL_TABLES = { "activity_definitions", "binaries", "bundles", "code_systems",
-			"endpoints", "groups", "healthcare_services", "locations", "naming_systems", "organizations", "patients",
-			"practitioner_roles", "practitioners", "provenances", "research_studies", "structure_definition_snapshots",
-			"structure_definitions", "subscriptions", "tasks", "value_sets" };
-
-	protected static final String BASE_URL = "https://localhost:8001/fhir";
-	protected static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
+	protected static final String CONTEXT_PATH = "/fhir";
+	protected static final String BASE_URL = "https://localhost:8001" + CONTEXT_PATH;
+	protected static final String WEBSOCKET_URL = "wss://localhost:8001" + CONTEXT_PATH + "/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
 	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
@@ -132,8 +107,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		adminDataSource.start();
 
 		logger.info("Creating Bundle ...");
-		createTestBundle(certificates.getClientCertificate().getCertificate(),
-				certificates.getExternalClientCertificate().getCertificate());
+		createTestBundle(certificates.getClientCertificate(), certificates.getExternalClientCertificate());
 
 		logger.info("Creating webservice client ...");
 		webserviceClient = createWebserviceClient(certificates.getClientCertificate().getTrustStore(),
@@ -171,74 +145,20 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	private static JettyServer startFhirServer() throws Exception
 	{
-		Properties properties = PropertiesReader.read(Paths.get("src/test/resources/integration/jetty.properties"),
-				StandardCharsets.UTF_8);
-		overrideJettyPropertiesForTesting(properties);
+		JettyConfig jettyConfig = new TestJettyConfig(10001, 8001, CONTEXT_PATH, certificates.getCaCertificateFile(),
+				certificates.getCaCertificateFile(), certificates.getServerCertificateFile(), X509Certificates.PASSWORD,
+				Paths.get("log4j2.xml"), DATABASE_URL, DATABASE_USER, DATABASE_USER_PASSWORD, DATABASE_DELETE_USER,
+				DATABASE_DELETE_USER_PASSWORD, BASE_URL, certificates.getClientCertificate(), "Test_Organization",
+				FHIR_BUNDLE_FILE, certificates.getCaCertificateFile(), certificates.getClientCertificateFile(),
+				certificates.getClientCertificatePrivateKeyFile(), X509Certificates.PASSWORD);
 
-		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer(properties));
-		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);
-
-		Properties initParameter = PropertiesReader.read(Paths.get("src/test/resources/integration/config.properties"),
-				StandardCharsets.UTF_8);
-		overrideConfigPropertiesForTesting(initParameter);
-
-		Predicate<String> filter = s -> s.contains("fhir-server");
-		Stream<String> webInfClassesDirs = webInfClassesDirs(filter);
-		Stream<String> webInfJars = webInfJars(filter);
-
-		List<Class<?>> initializers = Arrays.asList(SpringServletContainerInitializer.class,
-				JerseyServletContainerInitializer.class);
-
-		ErrorHandler errorHandler = statusCodeOnlyErrorHandler();
-
-		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, initParameter,
-				webInfClassesDirs, webInfJars, AuthenticationFilter.class);
-
-		WebSocketServerContainerInitializer.initialize(server.getWebAppContext());
+		JettyServer server = new JettyServer("fhir-server", jettyConfig,
+				Stream.of(JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
+						JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class));
 
 		server.start();
 
 		return server;
-	}
-
-	private static void overrideJettyPropertiesForTesting(Properties properties)
-	{
-		properties.put("jetty.truststore.pem", certificates.getCaCertificateFile().toString());
-		properties.put("jetty.keystore.p12", certificates.getServerCertificateFile().toString());
-	}
-
-	private static void overrideConfigPropertiesForTesting(Properties properties)
-	{
-		properties.put("dev.dsf.fhir.db.url", DATABASE_URL);
-		properties.put("dev.dsf.fhir.db.user.username", DATABASE_USER);
-		properties.put("dev.dsf.fhir.db.user.password", DATABASE_USER_PASSWORD);
-		properties.put("dev.dsf.fhir.db.user.permanent.delete.username", DATABASE_DELETE_USER);
-		properties.put("dev.dsf.fhir.db.user.permanent.delete.password", DATABASE_DELETE_USER_PASSWORD);
-
-		String clientCertHashHex = calculateSha512CertificateThumbprintHex(
-				certificates.getClientCertificate().getCertificate());
-		properties.put("dev.dsf.fhir.server.user.thumbprints", clientCertHashHex);
-		properties.put("dev.dsf.fhir.server.user.thumbprints.permanent.delete", clientCertHashHex);
-
-		properties.put("dev.dsf.fhir.server.init.bundle", FHIR_BUNDLE_FILE.toString());
-
-		properties.put("dev.dsf.fhir.client.trust.certificates", certificates.getCaCertificateFile().toString());
-		properties.put("dev.dsf.fhir.client.certificate", certificates.getClientCertificateFile().toString());
-		properties.put("dev.dsf.fhir.client.certificate.private.key",
-				certificates.getClientCertificatePrivateKeyFile().toString());
-	}
-
-	private static String calculateSha512CertificateThumbprintHex(X509Certificate certificate)
-	{
-		try
-		{
-			return Hex.encodeHexString(MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded()));
-		}
-		catch (CertificateEncodingException | NoSuchAlgorithmException e)
-		{
-			logger.error("Error while calculating SHA-512 certificate thumbprint", e);
-			throw new RuntimeException(e);
-		}
 	}
 
 	protected static Bundle readBundle(Path bundleTemplateFile, IParser parser)
@@ -287,7 +207,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return parser;
 	}
 
-	private static void createTestBundle(X509Certificate certificate, X509Certificate externalCertificate)
+	private static void createTestBundle(ClientCertificate clientCertificate,
+			ClientCertificate externalClientCertificate)
 	{
 		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
 
@@ -297,15 +218,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		Extension thumbprintExtension = organization
 				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 
-		String clientCertHashHex = calculateSha512CertificateThumbprintHex(certificate);
-		thumbprintExtension.setValue(new StringType(clientCertHashHex));
+		thumbprintExtension.setValue(new StringType(clientCertificate.getCertificateSha512ThumbprintHex()));
 
 		Organization externalOrganization = (Organization) testBundle.getEntry().get(2).getResource();
 		Extension externalThumbprintExtension = externalOrganization
 				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 
-		String externalClientCertHashHex = calculateSha512CertificateThumbprintHex(externalCertificate);
-		externalThumbprintExtension.setValue(new StringType(externalClientCertHashHex));
+		externalThumbprintExtension
+				.setValue(new StringType(externalClientCertificate.getCertificateSha512ThumbprintHex()));
 
 		// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
 		new ReferenceCleanerImpl(new ReferenceExtractorImpl()).cleanReferenceResourcesIfBundle(testBundle);
@@ -351,19 +271,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	protected AnnotationConfigWebApplicationContext getSpringWebApplicationContext()
 	{
-		WebAppContext webAppContext = fhirServer.getWebAppContext();
-
-		assertNotNull(webAppContext);
-		assertNotNull(webAppContext.getEventListeners().length);
-		assertTrue(webAppContext.getEventListeners().length >= 1);
-		assertTrue(webAppContext.getEventListeners()[0] instanceof FhirContextLoaderListener);
-
-		FhirContextLoaderListener listener = (FhirContextLoaderListener) webAppContext.getEventListeners()[0];
-		AnnotationConfigWebApplicationContext contex = listener.getContex();
-
-		assertNotNull(contex);
-
-		return contex;
+		return (AnnotationConfigWebApplicationContext) WebApplicationContextUtils
+				.getWebApplicationContext(fhirServer.getServletContext());
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()

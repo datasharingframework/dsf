@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Patient;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.PatientDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
@@ -27,18 +27,18 @@ public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<P
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Patient newResource)
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Patient newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Patient newResource)
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Patient newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, Patient newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity, Patient newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

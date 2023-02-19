@@ -1,10 +1,9 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
-import javax.ws.rs.Path;
-
 import org.hl7.fhir.r4.model.CodeSystem;
 
 import dev.dsf.fhir.webservice.specification.CodeSystemService;
+import jakarta.ws.rs.Path;
 
 @Path(CodeSystemServiceJaxrs.PATH)
 public class CodeSystemServiceJaxrs extends AbstractResourceServiceJaxrs<CodeSystem, CodeSystemService>

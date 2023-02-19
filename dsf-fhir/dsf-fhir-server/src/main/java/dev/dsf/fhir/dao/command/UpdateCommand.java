@@ -11,10 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response.Status;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -28,7 +24,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.validation.ValidationResult;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
@@ -46,9 +42,14 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 
+//TODO rework log and audit messages
 public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
-		implements Command
+		implements ModifyingCommand
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);
 
@@ -56,17 +57,16 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected final ReferenceCleaner referenceCleaner;
 	protected final EventGenerator eventGenerator;
 
-	protected Boolean foundByCondition;
 	protected R updatedResource;
 	protected ValidationResult validationResult;
 
-	public UpdateCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
+	public UpdateCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
+			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator)
 	{
-		super(3, index, user, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
+		super(3, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
 
 		this.responseGenerator = responseGenerator;
@@ -121,7 +121,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 						entry.getFullUrl(), resource.getIdElement().getValue()));
 
 			// add new or existing id to the id translation table
-			addToIdTranslationTable(idTranslationTable, connection);
+			addMissingIdToTranslationTableAndCheckConditionFindsResource(idTranslationTable, connection);
 		}
 
 		// all other request urls
@@ -130,7 +130,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
 	}
 
-	private void addToIdTranslationTable(Map<String, IdType> idTranslationTable, Connection connection)
+	private boolean addMissingIdToTranslationTableAndCheckConditionFindsResource(Map<String, IdType> idTranslationTable,
+			Connection connection)
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 		String resourceTypeName = componentes.getPathSegments().get(0);
@@ -165,19 +166,21 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (result.getTotal() <= 0
 				&& (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX)))
 		{
-			UUID id = UUID.randomUUID();
-			idTranslationTable.put(entry.getFullUrl(),
-					new IdType(resource.getResourceType().toString(), id.toString()));
+			if (!idTranslationTable.containsKey(entry.getFullUrl()))
+			{
+				UUID id = UUID.randomUUID();
+				idTranslationTable.put(entry.getFullUrl(),
+						new IdType(resource.getResourceType().toString(), id.toString()));
+			}
 
-			foundByCondition = false;
+			return false;
 		}
 
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
 		// if it does not support Update as Create) -> reject
 		else if (result.getTotal() <= 0 && resource.hasId())
 			// TODO bundle specific error
-			throw new WebApplicationException(
-					responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getId()));
+			throw new WebApplicationException(responseGenerator.updateAsCreateNotAllowed(resourceTypeName));
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
 		// The server performs the update against the matching resource
@@ -192,7 +195,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				idTranslationTable.put(entry.getFullUrl(),
 						new IdType(resource.getResourceType().toString(), dbResource.getIdElement().getIdPart()));
 
-				foundByCondition = true;
+				return true;
 			}
 			// update: resource has same id
 			else if (resource.hasId()
@@ -205,7 +208,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				idTranslationTable.put(entry.getFullUrl(),
 						new IdType(resource.getResourceType().toString(), dbResource.getIdElement().getIdPart()));
 
-				foundByCondition = true;
+				return true;
 			}
 			else
 				// TODO bundle specific error
@@ -258,7 +261,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		@SuppressWarnings("unchecked")
 		R copy = (R) resource.copy();
-		checkUpdateAllowed(idTranslationTable, connection, validationHelper, user, copy);
+		checkUpdateAllowed(idTranslationTable, connection, validationHelper, identity, copy);
 
 		Optional<Long> ifMatch = Optional.ofNullable(entry.getRequest().getIfMatch())
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
@@ -274,7 +277,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	private void checkUpdateAllowed(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, User user, R newResource)
+			ValidationHelper validationHelper, Identity identity, R newResource)
 	{
 		String resourceTypeName = newResource.getResourceType().name();
 		String id = newResource.getIdElement().getIdPart();
@@ -284,21 +287,20 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		if (dbResource.isEmpty())
 		{
-			audit.info("Create as Update of non existing resource {} denied for user '{}'", resourceTypeName + "/" + id,
-					user.getName());
-			throw new WebApplicationException(
-					responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resourceTypeName + "/" + id));
+			audit.info("Update as create of non existing {} denied for identity '{}'", resourceTypeName,
+					identity.getName());
+			throw new WebApplicationException(responseGenerator.updateAsCreateNotAllowed(resourceTypeName));
 		}
 		else
 		{
 			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 					idTranslationTable, connection);
 
-			validationResult = validationHelper.checkResourceValidForUpdate(user, resource);
+			validationResult = validationHelper.checkResourceValidForUpdate(identity, resource);
 
 			referencesHelper.resolveLogicalReferences(connection);
 
-			authorizationHelper.checkUpdateAllowed(connection, user, dbResource.get(), resource);
+			authorizationHelper.checkUpdateAllowed(index, connection, identity, dbResource.get(), resource);
 		}
 	}
 
@@ -306,27 +308,33 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			ValidationHelper validationHelper, String resourceTypeName, Map<String, List<String>> queryParameters)
 			throws SQLException
 	{
-		if (Boolean.FALSE.equals(foundByCondition))
-		{
-			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
-					idTranslationTable, connection);
 
-			validationResult = validationHelper.checkResourceValidForCreate(user, resource);
+		boolean foundByCondition = addMissingIdToTranslationTableAndCheckConditionFindsResource(idTranslationTable,
+				connection);
 
-			referencesHelper.resolveLogicalReferences(connection);
-
-			authorizationHelper.checkCreateAllowed(connection, user, resource);
-
-			updatedResource = createWithTransactionAndId(connection, resource, getUuid(idTranslationTable));
-		}
-		else if (Boolean.TRUE.equals(foundByCondition))
+		// update
+		if (foundByCondition)
 		{
 			resource.setIdElement(getId(idTranslationTable));
 
 			updateById(idTranslationTable, connection, validationHelper, resourceTypeName,
 					resource.getIdElement().getIdPart());
 		}
-		// else errors thrown by preExecute
+
+		// update as create
+		else
+		{
+			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
+					idTranslationTable, connection);
+
+			validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+
+			referencesHelper.resolveLogicalReferences(connection);
+
+			authorizationHelper.checkCreateAllowed(index, connection, identity, resource);
+
+			updatedResource = createWithTransactionAndId(connection, resource, getUuid(idTranslationTable));
+		}
 	}
 
 	protected R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
@@ -388,8 +396,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		BundleEntryResponseComponent response = resultEntry.getResponse();
 		response.setStatus(Status.OK.getStatusCode() + " " + Status.OK.getReasonPhrase());
 		response.setLocation(location.getValue());
-		response.setEtag(
-				new EntityTag(updatedResourceWithResolvedReferences.getMeta().getVersionId(), true).toString());
+		response.setEtag(RuntimeDelegate.getInstance().createHeaderDelegate(EntityTag.class)
+				.toString(new EntityTag(updatedResourceWithResolvedReferences.getMeta().getVersionId(), true)));
 		response.setLastModified(updatedResourceWithResolvedReferences.getMeta().getLastUpdated());
 
 		return Optional.of(resultEntry);

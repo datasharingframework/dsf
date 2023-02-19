@@ -6,8 +6,8 @@ import org.hl7.fhir.r4.model.DocumentReference;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.DocumentReferenceDao;
+import dev.dsf.fhir.search.filter.DocumentReferenceIdentityFilter;
 import dev.dsf.fhir.search.parameters.DocumentReferenceIdentifier;
-import dev.dsf.fhir.search.parameters.user.DocumentReferenceUserFilter;
 
 public class DocumentReferenceDaoJdbc extends AbstractResourceDaoJdbc<DocumentReference> implements DocumentReferenceDao
 {
@@ -15,7 +15,7 @@ public class DocumentReferenceDaoJdbc extends AbstractResourceDaoJdbc<DocumentRe
 			FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, DocumentReference.class, "document_references",
-				"document_reference", "document_reference_id", DocumentReferenceUserFilter::new,
+				"document_reference", "document_reference_id", DocumentReferenceIdentityFilter::new,
 				with(DocumentReferenceIdentifier::new), with());
 	}
 

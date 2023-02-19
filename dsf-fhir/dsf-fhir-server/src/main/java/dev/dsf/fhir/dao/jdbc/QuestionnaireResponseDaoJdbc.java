@@ -6,12 +6,12 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
+import dev.dsf.fhir.search.filter.QuestionnaireResponseIdentityFilter;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseAuthored;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseIdentifier;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseQuestionnaire;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseStatus;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseSubject;
-import dev.dsf.fhir.search.parameters.user.QuestionnaireResponseUserFilter;
 
 public class QuestionnaireResponseDaoJdbc extends AbstractResourceDaoJdbc<QuestionnaireResponse>
 		implements QuestionnaireResponseDao
@@ -21,7 +21,7 @@ public class QuestionnaireResponseDaoJdbc extends AbstractResourceDaoJdbc<Questi
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, QuestionnaireResponse.class,
 				"questionnaire_responses", "questionnaire_response", "questionnaire_response_id",
-				QuestionnaireResponseUserFilter::new,
+				QuestionnaireResponseIdentityFilter::new,
 				with(QuestionnaireResponseAuthored::new, QuestionnaireResponseIdentifier::new,
 						QuestionnaireResponseQuestionnaire::new, QuestionnaireResponseStatus::new,
 						QuestionnaireResponseSubject::new),

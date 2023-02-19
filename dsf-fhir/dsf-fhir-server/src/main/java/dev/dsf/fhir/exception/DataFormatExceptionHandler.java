@@ -2,11 +2,6 @@ package dev.dsf.fhir.exception;
 
 import java.util.Objects;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -16,6 +11,10 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import dev.dsf.fhir.help.ResponseGenerator;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class DataFormatExceptionHandler implements ExceptionMapper<DataFormatException>, InitializingBean

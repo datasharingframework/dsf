@@ -4,11 +4,11 @@ WORKDIR /opt/bpe
 COPY --chown=root:java ./ ./
 RUN chown root:java ./ && \
     chmod 750 ./ ./conf ./lib ./plugin ./process ./dsf_bpe_start.sh && \
-	chmod 440 ./conf/jetty.properties ./conf/log4j2.xml ./dsf_bpe.jar ./lib/*.jar && \
+	chmod 440 ./conf/log4j2.xml ./dsf_bpe.jar ./dsf_status_client.jar ./lib/*.jar && \
 	chmod 1775 ./log ./last_event
 
 
-FROM openjdk:11-jre-slim
+FROM azul/zulu-openjdk:17-jre-headless
 LABEL maintainer="hauke.hund@hs-heilbronn.de"
 
 EXPOSE 8080
@@ -21,3 +21,8 @@ COPY --from=builder /opt/bpe ./
 
 USER java
 ENTRYPOINT ["./dsf_bpe_start.sh"]
+ENV JETTY_HOST="0.0.0.0"
+ENV JETTY_PORT="8080"
+ENV JETTY_STATUS_PORT="10000"
+ENV JETTY_CONTEXT_PATH="/bpe"
+HEALTHCHECK --interval=10s --timeout=15s --start-period=10s --retries=5 CMD [ "java", "-cp", "dsf_status_client.jar", "dev.dsf.common.status.client.StatusClient" ]

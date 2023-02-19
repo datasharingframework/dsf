@@ -10,12 +10,12 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.ValueSetDao;
+import dev.dsf.fhir.search.filter.ValueSetIdentityFilter;
 import dev.dsf.fhir.search.parameters.ValueSetDate;
 import dev.dsf.fhir.search.parameters.ValueSetIdentifier;
 import dev.dsf.fhir.search.parameters.ValueSetStatus;
 import dev.dsf.fhir.search.parameters.ValueSetUrl;
 import dev.dsf.fhir.search.parameters.ValueSetVersion;
-import dev.dsf.fhir.search.parameters.user.ValueSetUserFilter;
 
 public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implements ValueSetDao
 {
@@ -24,7 +24,7 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	public ValueSetDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, ValueSet.class, "value_sets", "value_set",
-				"value_set_id", ValueSetUserFilter::new, with(ValueSetDate::new, ValueSetIdentifier::new,
+				"value_set_id", ValueSetIdentityFilter::new, with(ValueSetDate::new, ValueSetIdentifier::new,
 						ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new),
 				with());
 

@@ -1,7 +1,6 @@
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,9 +11,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import javax.sql.DataSource;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -25,31 +21,25 @@ import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
-public class TransactionCommandList implements CommandList
+public class TransactionCommandList extends AbstractCommandList implements CommandList
 {
 	private static final Logger logger = LoggerFactory.getLogger(TransactionCommandList.class);
 
-	private final DataSource dataSource;
-	private final ExceptionHandler exceptionHandler;
 	private final Function<Connection, TransactionResources> transactionResourceFactory;
 
-	private final List<Command> commands = new ArrayList<>();
-	private final boolean hasModifyingCommand;
-
 	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler,
-			Function<Connection, TransactionResources> transactionResourceFactory, List<Command> commands)
+			List<? extends Command> commands, Function<Connection, TransactionResources> transactionResourceFactory)
 	{
-		this.dataSource = dataSource;
-		this.exceptionHandler = exceptionHandler;
+		super(dataSource, exceptionHandler, commands);
+
 		this.transactionResourceFactory = transactionResourceFactory;
 
-		if (commands != null)
-			this.commands.addAll(commands);
 		Collections.sort(this.commands,
 				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
-		hasModifyingCommand = commands.stream()
-				.anyMatch(c -> c instanceof CreateCommand || c instanceof UpdateCommand || c instanceof DeleteCommand);
 	}
 
 	@Override
@@ -61,7 +51,7 @@ public class TransactionCommandList implements CommandList
 			TransactionEventHandler transactionEventHandler;
 			try (Connection connection = dataSource.getConnection())
 			{
-				if (hasModifyingCommand)
+				if (hasModifyingCommands)
 				{
 					connection.setReadOnly(false);
 					connection.setAutoCommit(false);
@@ -87,6 +77,16 @@ public class TransactionCommandList implements CommandList
 						logger.warn("Error while running pre-execute of command " + c.getClass().getSimpleName()
 								+ " for entry at index " + c.getIndex() + ", abborting transaction", e);
 
+						try
+						{
+							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
+							auditLogResult(c, toEntry(e));
+						}
+						catch (Exception e1)
+						{
+							logger.warn("Error while writing to audit log", e1);
+						}
+
 						throw e;
 					}
 				}
@@ -105,10 +105,20 @@ public class TransactionCommandList implements CommandList
 								+ " for entry at index " + c.getIndex() + ", rolling back transaction: {}",
 								e.getMessage());
 
-						if (hasModifyingCommand)
+						if (hasModifyingCommands)
 						{
 							logger.debug("Rolling back DB transaction");
 							connection.rollback();
+						}
+
+						try
+						{
+							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
+							auditLogResult(c, toEntry(e));
+						}
+						catch (Exception e1)
+						{
+							logger.warn("Error while writing to audit log", e1);
 						}
 
 						throw e;
@@ -129,31 +139,55 @@ public class TransactionCommandList implements CommandList
 						logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
 								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
-						if (hasModifyingCommand)
+						if (hasModifyingCommands)
 						{
 							logger.debug("Rolling back DB transaction");
 							connection.rollback();
+						}
+
+						try
+						{
+							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
+							auditLogResult(c, toEntry(e));
+						}
+						catch (Exception e1)
+						{
+							logger.warn("Error while writing to audit log", e1);
 						}
 
 						throw e;
 					}
 				}
 
-				if (hasModifyingCommand)
+				if (hasModifyingCommands)
 				{
-					logger.debug("Commiting DB transaction");
+					logger.debug("Committing DB transaction");
 					connection.commit();
 				}
 			}
 
 			try
 			{
-				logger.debug("Commiting events");
+				logger.debug("Committing events");
 				transactionEventHandler.commitEvents();
 			}
 			catch (Exception e)
 			{
 				logger.warn("Error while handling events", e);
+			}
+
+			try
+			{
+				results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).forEach(e ->
+				{
+					Command command = commands.get(e.getKey());
+					BundleEntryComponent result = e.getValue();
+					auditLogResult(command, result);
+				});
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while writing to audit log", e);
 			}
 
 			Bundle result = new Bundle();

@@ -19,9 +19,6 @@
 	
 	<properties>
 		<main.basedir>${project.basedir}/../..</main.basedir>
-
-		<!-- if upgrading, copy version specific camunda sql scripts to dsf-bpe-server/src/main/resource/db/camunda and create a corresponding liquibase migration script -->
-		<camunda.version>7.18.0</camunda.version>
 	</properties>
 
 	<repositories>
@@ -188,11 +185,19 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.camunda.bpm</groupId>
-				<artifactId>camunda-bom</artifactId>
-				<version>${camunda.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-status</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>

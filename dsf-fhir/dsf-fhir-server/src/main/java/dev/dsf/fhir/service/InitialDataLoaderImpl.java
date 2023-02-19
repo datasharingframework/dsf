@@ -1,5 +1,6 @@
 package dev.dsf.fhir.service;
 
+import java.util.EnumSet;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -10,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.OrganizationIdentityImpl;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.command.CommandFactory;
 import dev.dsf.fhir.dao.command.CommandList;
@@ -19,13 +22,14 @@ import dev.dsf.fhir.prefer.PreferReturnType;
 
 public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBean
 {
-	private static final User INITIAL_DATA_LOADER;
+	private static final Identity INITIAL_DATA_LOADER;
 	static
 	{
 		Organization org = new Organization().setName("Initial Data Loader");
 		org.addIdentifier().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("initial.data.loader");
 
-		INITIAL_DATA_LOADER = User.local(org);
+		INITIAL_DATA_LOADER = new OrganizationIdentityImpl(true, org,
+				EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE, FhirServerRole.UPDATE));
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoaderImpl.class);

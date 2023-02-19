@@ -1,20 +1,20 @@
 package dev.dsf.fhir.webservice.base;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserProvider;
+import dev.dsf.common.auth.Identity;
+import dev.dsf.fhir.authentication.CurrentIdentityProvider;
 
 public class AbstractBasicService implements BasicService
 {
-	protected UserProvider userProvider;
+	protected CurrentIdentityProvider currentIdentityProvider;
 
 	@Override
-	public final void setUserProvider(UserProvider userProvider)
+	public void setCurrentIdentityProvider(CurrentIdentityProvider currentIdentityProvider)
 	{
-		this.userProvider = userProvider;
+		this.currentIdentityProvider = currentIdentityProvider;
 	}
 
-	protected final User getCurrentUser()
+	protected final Identity getCurrentIdentity()
 	{
-		return userProvider.getCurrentUser();
+		return currentIdentityProvider.getCurrentIdentity();
 	}
 }

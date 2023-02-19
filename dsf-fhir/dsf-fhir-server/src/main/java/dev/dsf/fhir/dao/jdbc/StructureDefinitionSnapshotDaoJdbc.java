@@ -5,7 +5,7 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.fhir.search.parameters.user.StructureDefinitionSnapshotUserFilter;
+import dev.dsf.fhir.search.filter.StructureDefinitionSnapshotIdentityFilter;
 
 public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
@@ -14,7 +14,7 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, "structure_definition_snapshots",
 				"structure_definition_snapshot", "structure_definition_snapshot_id",
-				StructureDefinitionSnapshotUserFilter::new);
+				StructureDefinitionSnapshotIdentityFilter::new);
 	}
 
 	@Override

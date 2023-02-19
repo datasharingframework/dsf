@@ -3,17 +3,13 @@ services:
   app:
     image: datasharingframework/bpe
     restart: "no"
-#    ports:
-#      - 127.0.0.1:5002:5002
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "dev.dsf.bpe.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
+    ports:
+      - 127.0.0.1:5002:5002
     secrets:
       - db_liquibase.password
       - db_user.password
       - db_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_client_certificate.pem
       - app_client_certificate_private_key.pem
@@ -36,6 +32,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_user_camunda.password
@@ -83,6 +80,8 @@ secrets:
   db_user_camunda.password:
     file: ./secrets/db_user_camunda.password
 
+  app_server_trust_certificates.pem:
+    file: ./secrets/testca_certificate.pem
   app_client_trust_certificates.pem:
     file: ./secrets/testca_certificate.pem
   app_client_certificate.pem:

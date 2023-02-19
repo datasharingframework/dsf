@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.search.filter.OrganizationIdentityFilter;
 import dev.dsf.fhir.search.parameters.OrganizationActive;
 import dev.dsf.fhir.search.parameters.OrganizationEndpoint;
 import dev.dsf.fhir.search.parameters.OrganizationIdentifier;
@@ -22,7 +23,6 @@ import dev.dsf.fhir.search.parameters.OrganizationType;
 import dev.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationParticipatingOrganizationRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationPrimaryOrganizationRevInclude;
-import dev.dsf.fhir.search.parameters.user.OrganizationUserFilter;
 
 public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> implements OrganizationDao
 {
@@ -31,7 +31,7 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 	public OrganizationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Organization.class, "organizations", "organization",
-				"organization_id", OrganizationUserFilter::new,
+				"organization_id", OrganizationIdentityFilter::new,
 				with(OrganizationActive::new, OrganizationEndpoint::new, OrganizationIdentifier::new,
 						OrganizationName::new, OrganizationType::new),
 				with(EndpointOrganizationRevInclude::new, OrganizationAffiliationPrimaryOrganizationRevInclude::new,
@@ -80,7 +80,7 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 				}
 				else
 				{
-					logger.warn("Organization with thumprint {} not found", thumbprintHex);
+					logger.debug("Organization with thumprint {} not found", thumbprintHex);
 					return Optional.empty();
 				}
 			}

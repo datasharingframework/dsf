@@ -9,8 +9,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.Test;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 
 public class RoleTest
 {
@@ -19,10 +18,8 @@ public class RoleTest
 	private static final String MEMBER_ROLE_SYSTEM = "roleSystem";
 	private static final String MEMBER_ROLE_CODE = "roleCode";
 
-	private static final Role local = new Role(UserRole.LOCAL, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM,
-			MEMBER_ROLE_CODE);
-	private static final Role remote = new Role(UserRole.REMOTE, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM,
-			MEMBER_ROLE_CODE);
+	private static final Role local = new Role(true, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
+	private static final Role remote = new Role(false, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
 
 	private static org.hl7.fhir.r4.model.Organization createFhirOrganization(String identifierValue)
 	{
@@ -38,19 +35,21 @@ public class RoleTest
 		return o;
 	}
 
-	private static final User LOCAL_ORG_ACTIVE = User.local(createFhirOrganization(MEMBER_IDENTIFIER));
-	private static final User LOCAL_ORG_NOT_ACTIVE = User
+	private static final Identity LOCAL_ORG_ACTIVE = TestIdentity.local(createFhirOrganization(MEMBER_IDENTIFIER));
+	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestIdentity
 			.local(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false));
-	private static final User LOCAL_NO_ORG = User.local(null);
-	private static final User LOCAL_ORG_BAD_IDENTIFIER = User.local(createFhirOrganization("wrong.identifier"));
-	private static final User LOCAL_ORG_BAD_IDENTIFIER_SYSTEM = User
+	private static final Identity LOCAL_NO_ORG = TestIdentity.local(null);
+	private static final Identity LOCAL_ORG_BAD_IDENTIFIER = TestIdentity
+			.local(createFhirOrganization("wrong.identifier"));
+	private static final Identity LOCAL_ORG_BAD_IDENTIFIER_SYSTEM = TestIdentity
 			.local(createFhirOrganization(MEMBER_IDENTIFIER, "bad.system"));
-	private static final User REMOTE_ORG_ACTIVE = User.remote(createFhirOrganization(MEMBER_IDENTIFIER));
-	private static final User REMOTE_ORG_NOT_ACTIVE = User
+	private static final Identity REMOTE_ORG_ACTIVE = TestIdentity.remote(createFhirOrganization(MEMBER_IDENTIFIER));
+	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestIdentity
 			.remote(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false));
-	private static final User REMOTE_NO_ORG = User.remote((Organization) null);
-	private static final User REMOTE_ORG_BAD_IDENTIFIER = User.remote(createFhirOrganization("wrong.identifier"));
-	private static final User REMOTE_ORG_BAD_IDENTIFIER_SYSTEM = User
+	private static final Identity REMOTE_NO_ORG = TestIdentity.remote((Organization) null);
+	private static final Identity REMOTE_ORG_BAD_IDENTIFIER = TestIdentity
+			.remote(createFhirOrganization("wrong.identifier"));
+	private static final Identity REMOTE_ORG_BAD_IDENTIFIER_SYSTEM = TestIdentity
 			.remote(createFhirOrganization(MEMBER_IDENTIFIER, "bad.system"));
 
 	private static OrganizationAffiliation createOrganizationAffiliation(String consortiumIdentifier,
