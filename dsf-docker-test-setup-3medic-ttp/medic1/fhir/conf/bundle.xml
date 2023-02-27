@@ -6,15 +6,15 @@
          <Organization xmlns="http://hl7.org/fhir">
             <meta>
                <tag>
-                  <system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+                  <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
                   <code value="ALL"/>
                </tag>
             </meta>
-            <extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="${org.highmed.dsf.fhir.server.organization.thumbprint.ttp}"/>
+            <extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
+               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.ttp}"/>
             </extension>
             <identifier>
-               <system value="http://highmed.org/sid/organization-identifier"/>
+               <system value="http://dsf.dev/sid/organization-identifier"/>
                <value value="Test_TTP"/>
             </identifier>
             <active value="true"/>
@@ -24,7 +24,7 @@
       <request>
          <method value="POST"/>
          <url value="Organization"/>
-         <ifNoneExist value="identifier=http://highmed.org/sid/organization-identifier|Test_TTP"/>
+         <ifNoneExist value="identifier=http://dsf.dev/sid/organization-identifier|Test_TTP"/>
       </request>
    </entry>
    <entry>
@@ -33,25 +33,25 @@
          <Organization xmlns="http://hl7.org/fhir">
             <meta>
                <tag>
-                  <system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+                  <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
                   <code value="ALL"/>
                </tag>
             </meta>
-            <extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="${org.highmed.dsf.fhir.server.organization.thumbprint}"/>
+            <extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
+               <valueString value="${dev.dsf.fhir.server.organization.thumbprint}"/>
             </extension>
             <identifier>
-               <system value="http://highmed.org/sid/organization-identifier"/>
-               <value value="${org.highmed.dsf.fhir.server.organization.identifier.value}"/>
+               <system value="http://dsf.dev/sid/organization-identifier"/>
+               <value value="${dev.dsf.fhir.server.organization.identifier.value}"/>
             </identifier>
             <active value="true"/>
-            <name value="${org.highmed.dsf.fhir.server.organization.name}"/>
+            <name value="${dev.dsf.fhir.server.organization.name}"/>
          </Organization>
       </resource>
       <request>
          <method value="POST"/>
          <url value="Organization"/>
-         <ifNoneExist value="identifier=http://highmed.org/sid/organization-identifier|${org.highmed.dsf.fhir.server.organization.identifier.value}"/>
+         <ifNoneExist value="identifier=http://dsf.dev/sid/organization-identifier|${dev.dsf.fhir.server.organization.identifier.value}"/>
       </request>
    </entry>
 </Bundle>

@@ -1,14 +1,13 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-pom</artifactId>
 	<packaging>pom</packaging>
 
 	<parent>
-		<groupId>org.highmed.dsf</groupId>
+		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.9.0</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<modules>
@@ -56,134 +55,134 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-base</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-validation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-validation</artifactId>
 				<classifier>tests</classifier>
 				<type>test-jar</type>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-auth</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-tools-db-migration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-tools-build-info-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-tools-documentation-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-pseudonymization-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-pseudonymization-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-pseudonymization-medic</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-pseudonymization-ttp</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-mpi-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-mpi-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-consent-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-consent-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-openehr-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-openehr-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-openehr-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -197,7 +196,7 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.highmed.dsf</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-base</artifactId>
 				<version>${project.version}</version>
 				<scope>test</scope>

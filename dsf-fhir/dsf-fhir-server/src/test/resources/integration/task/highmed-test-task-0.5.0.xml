@@ -1,15 +1,15 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://highmed.org/fhir/StructureDefinition/test-task"></profile>
+      <profile value="http://dsf.dev/fhir/StructureDefinition/test-task"></profile>
    </meta>
-   <instantiatesUri value="http://highmed.org/bpe/Process/test/0.5.0"></instantiatesUri>
+   <instantiatesUri value="http://dsf.dev/bpe/Process/test/0.5.0"></instantiatesUri>
    <status value="requested"></status>
    <intent value="order"></intent>
    <!--<authoredOn value="2021-05-17T15:18:09+02:00"></authoredOn>-->
    <requester>
       <type value="Organization"></type>
       <identifier>
-         <system value="http://highmed.org/sid/organization-identifier"></system>
+         <system value="http://dsf.dev/sid/organization-identifier"></system>
          <value value="External_Test_Organization"></value>
       </identifier>
    </requester>
@@ -17,7 +17,7 @@
       <recipient>
          <type value="Organization"></type>
          <identifier>
-            <system value="http://highmed.org/sid/organization-identifier"></system>
+            <system value="http://dsf.dev/sid/organization-identifier"></system>
             <value value="Test_Organization"></value>
          </identifier>
       </recipient>
@@ -25,7 +25,7 @@
    <input>
       <type>
          <coding>
-            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"></system>
+            <system value="http://dsf.dev/fhir/CodeSystem/bpmn-message"></system>
             <code value="message-name"></code>
          </coding>
       </type>

@@ -5,17 +5,17 @@
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
 				<meta>
-					<profile value="http://highmed.org/fhir/StructureDefinition/organization"/>
+					<profile value="http://dsf.dev/fhir/StructureDefinition/organization"/>
 					<tag>
-						<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+						<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 						<code value="ALL"/>
 					</tag>		
 				</meta>
-				<extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/sid/organization-identifier"/>
+					<system value="http://dsf.dev/sid/organization-identifier"/>
 					<value value="Test_Organization"/>
 				</identifier>
 				<active value="true"/>
@@ -29,7 +29,7 @@
 		<request>
 			<method value="POST"/>
 			<url value="Organization"/>
-			<ifNoneExist value="identifier=http://highmed.org/sid/organization-identifier|Test_Organization"/>
+			<ifNoneExist value="identifier=http://dsf.dev/sid/organization-identifier|Test_Organization"/>
 		</request>
 	</entry>
 	<entry>
@@ -37,14 +37,14 @@
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
 				<meta>
-					<profile value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
+					<profile value="http://dsf.dev/fhir/StructureDefinition/endpoint"/>
 					<tag>
-						<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+						<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 						<code value="ALL"/>
 					</tag>		
 				</meta>
 				<identifier>
-					<system value="http://highmed.org/sid/endpoint-identifier"/>
+					<system value="http://dsf.dev/sid/endpoint-identifier"/>
 					<value value="Test_Endpoint"/>
 				</identifier>
 				<status value="active"/>
@@ -71,7 +71,7 @@
 		<request>
 			<method value="POST"/>
 			<url value="Endpoint"/>
-			<ifNoneExist value="identifier=http://highmed.org/sid/endpoint-identifier|Test_Endpoint"/>
+			<ifNoneExist value="identifier=http://dsf.dev/sid/endpoint-identifier|Test_Endpoint"/>
 		</request>
 	</entry>
 	<entry>
@@ -79,14 +79,14 @@
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
 				<meta>
-					<profile value="http://highmed.org/fhir/StructureDefinition/organization-parent"/>
+					<profile value="http://dsf.dev/fhir/StructureDefinition/organization-parent"/>
 					<tag>
-						<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+						<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 						<code value="ALL"/>
 					</tag>		
 				</meta>
 				<identifier>
-					<system value="http://highmed.org/sid/organization-identifier"/>
+					<system value="http://dsf.dev/sid/organization-identifier"/>
 					<value value="Parent_Organization"/>
 				</identifier>
 				<active value="true"/>
@@ -96,7 +96,7 @@
 		<request>
 			<method value="POST"/>
 			<url value="Organization"/>
-			<ifNoneExist value="identifier=http://highmed.org/sid/organization-identifier|Parent_Organization"/>
+			<ifNoneExist value="identifier=http://dsf.dev/sid/organization-identifier|Parent_Organization"/>
 		</request>
 	</entry>
 	<entry>
@@ -104,9 +104,9 @@
 		<resource>
 			<OrganizationAffiliation xmlns="http://hl7.org/fhir">
 				<meta>
-					<profile value="http://highmed.org/fhir/StructureDefinition/organization-affiliation"/>
+					<profile value="http://dsf.dev/fhir/StructureDefinition/organization-affiliation"/>
 					<tag>
-						<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+						<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 						<code value="ALL"/>
 					</tag>	
 				</meta>
@@ -123,11 +123,11 @@
 				</participatingOrganization>
 				<code>
 					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
+						<system value="http://dsf.dev/fhir/CodeSystem/organization-role"/>
 						<code value="MeDIC"/>
 					</coding>
 					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
+						<system value="http://dsf.dev/fhir/CodeSystem/organization-role"/>
 						<code value="COS"/>
 					</coding>
 				</code>
@@ -140,7 +140,7 @@
 		<request>
 			<method value="POST"/>
 			<url value="OrganizationAffiliation"/>
-			<ifNoneExist value="primary-organization:identifier=http://highmed.org/sid/organization-identifier|Parent_Organization&amp;participating-organization:identifier=http://highmed.org/sid/organization-identifier|Test_Organization"/>
+			<ifNoneExist value="primary-organization:identifier=http://dsf.dev/sid/organization-identifier|Parent_Organization&amp;participating-organization:identifier=http://dsf.dev/sid/organization-identifier|Test_Organization"/>
 		</request>
 	</entry>
 </Bundle>

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO" monitorInterval="30" verbose="false">
 
 	<Appenders>
@@ -16,7 +15,7 @@
 		</Logger>
 		
 		<Logger name="de.rwh" level="TRACE"/>
-		<Logger name="org.highmed" level="TRACE"/>
+		<Logger name="dev.dsf" level="TRACE"/>
 		<Logger name="org.apache" level="WARN"/>
 		<Logger name="org.springframework" level="WARN"/>
 		<Logger name="jndi" level="WARN"/>

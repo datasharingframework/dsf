@@ -18,7 +18,7 @@ BEGIN
 	
 	RAISE NOTICE 'NEW.organization_affiliation->>''active'' = ''%''', NEW.organization_affiliation->>'active';
 	IF (NEW.organization_affiliation->>'active' = 'true') THEN
-		consortium_identifier := jsonb_path_query(organization, '$.identifier[*] ? (@.system == "http://highmed.org/sid/organization-identifier")')->>'value'
+		consortium_identifier := jsonb_path_query(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier")')->>'value'
 			FROM current_organizations
 			WHERE organization_id = (regexp_match(NEW.organization_affiliation->'organization'->>'reference', reference_regex))[5]::uuid
 			AND organization->>'active' = 'true';
@@ -46,10 +46,10 @@ BEGIN
 					FROM all_resources
 				) AS r
 				ON r.resource->'meta'->'tag' @> 
-					('[{"extension":[{"url":"http://highmed.org/fhir/StructureDefinition/extension-read-access-consortium-role","extension":[{"url":"consortium","valueIdentifier":{"system":"http://highmed.org/sid/organization-identifier","value":"'
+					('[{"extension":[{"url":"http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role","extension":[{"url":"consortium","valueIdentifier":{"system":"http://dsf.dev/sid/organization-identifier","value":"'
 					|| consortium_identifier || '"}},{"url":"role","valueCoding":{"system":"'
 					|| c.system || '","code":"'
-					|| c.code || '"}}]}],"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"ROLE"}]')::jsonb
+					|| c.code || '"}}]}],"system":"http://dsf.dev/fhir/CodeSystem/read-access-tag","code":"ROLE"}]')::jsonb
 				WHERE r.resource IS NOT NULL;
 
 			GET DIAGNOSTICS insert_count = ROW_COUNT;

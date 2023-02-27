@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: registry:5000/highmed/fhir_proxy
+    image: registry:5000/datasharingframework/fhir_proxy
     restart: "no"
     ports:
       - 80:80
@@ -28,10 +28,10 @@ services:
       - app
 
   app:
-    image: registry:5000/highmed/fhir
+    image: registry:5000/datasharingframework/fhir
     restart: "no"
     healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
       interval: 10s
       timeout: 15s
       retries: 5
@@ -54,21 +54,21 @@ services:
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
-      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_user_permanent_delete.password
-      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
-      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://medic3/fhir
-      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
-      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 3
-      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
-      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC3_CONF_USER_THUMBPRINTS}
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC3_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_user_permanent_delete.password
+      DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic3/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 3
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC3_CONF_USER_THUMBPRINTS}
+      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC3_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
       frontend:
         ipv4_address: 172.28.1.3

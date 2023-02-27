@@ -1,0 +1,24 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
+		</tag>		
+	</meta>
+	<url value="http://dsf.dev/fhir/ValueSet/organization-type"/>
+	<version value="0.5.0"/>
+	<name value="DSF_Organization_Type"/>
+	<title value="DSF Organization Type"/>
+	<status value="retired"/>
+	<experimental value="false"/>
+	<date value="2021-08-24"/>
+	<publisher value="DSF"/>
+	<description
+			value="ValueSet with DSF organization types used in Organization resources"/>
+	<immutable value="true"/>
+	<compose>
+		<include>
+			<system value="http://dsf.dev/fhir/CodeSystem/organization-type"/>
+		</include>
+	</compose>
+</ValueSet> 

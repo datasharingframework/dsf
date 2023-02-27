@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO" monitorInterval="30" verbose="false">
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
@@ -29,7 +28,7 @@
 			<AppenderRef ref="AUDIT" />
 		</Logger>
 
-		<Logger name="org.highmed" level="DEBUG" />
+		<Logger name="dev.dsf" level="DEBUG" />
 		<Logger name="org.eclipse.jetty" level="INFO" />
 
 		<Root level="WARN">

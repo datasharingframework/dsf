@@ -1,13 +1,12 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-fhir-server-jetty</artifactId>
 
 	<parent>
-		<groupId>org.highmed.dsf</groupId>
+		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>0.9.0</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<properties>
@@ -16,23 +15,23 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-server</artifactId>
 			<!-- Workaround for exec maven plugin issue in dsf-fhir-server module -->
 			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
 			<exclusions>
 				<exclusion>
-					<groupId>org.highmed.dsf</groupId>
+					<groupId>dev.dsf</groupId>
 					<artifactId>dsf-tools-bundle-generator</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-db-migration</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-documentation-generator</artifactId>
 		</dependency>
 
@@ -84,7 +83,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.dsf.fhir.FhirJettyServer</mainClass>
+							<mainClass>dev.dsf.fhir.FhirJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -157,10 +156,10 @@
 						<argument>-classpath</argument>
 						<classpath/>
 						<argument>
-							org.highmed.dsf.tools.generator.DocumentationGenerator
+							dev.dsf.tools.generator.DocumentationGenerator
 						</argument>
 						<argument>
-							org.highmed.dsf.fhir
+							dev.dsf.fhir
 						</argument>
 					</arguments>
 					<includeProjectDependencies>true</includeProjectDependencies>
