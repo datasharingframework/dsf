@@ -113,7 +113,6 @@ public class JettyServer
 		};
 	}
 
-
 	public final void start()
 	{
 		try
