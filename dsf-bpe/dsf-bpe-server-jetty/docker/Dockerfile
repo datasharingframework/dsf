@@ -5,7 +5,7 @@ COPY --chown=root:java ./ ./
 RUN chown root:java ./ && \
     chmod 750 ./ ./conf ./lib ./plugin ./process ./dsf_bpe_start.sh && \
 	chmod 440 ./conf/log4j2.xml ./dsf_bpe.jar ./dsf_status_client.jar ./lib/*.jar && \
-	chmod 1775 ./log ./last_event
+	chmod 1775 ./log
 
 
 FROM azul/zulu-openjdk:17-jre-headless
