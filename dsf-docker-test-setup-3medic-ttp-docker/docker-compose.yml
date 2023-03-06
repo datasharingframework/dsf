@@ -116,7 +116,12 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             role:
-              - ORGANIZATION_LOCAL
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
               - PERMANENT_DELETE
     networks:
       medic1-fhir-frontend:
@@ -174,7 +179,12 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             role:
-              - ORGANIZATION_LOCAL
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
               - PERMANENT_DELETE
     networks:
       medic2-fhir-frontend:
@@ -232,7 +242,12 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             role:
-              - ORGANIZATION_LOCAL
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
               - PERMANENT_DELETE
     networks:
       medic3-fhir-frontend:
@@ -292,7 +307,12 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             role:
-              - ORGANIZATION_LOCAL
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
               - PERMANENT_DELETE
     networks:
       ttp-fhir-frontend:
