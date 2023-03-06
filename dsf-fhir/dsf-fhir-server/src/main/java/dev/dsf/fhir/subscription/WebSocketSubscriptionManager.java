@@ -1,12 +1,11 @@
 package dev.dsf.fhir.subscription;
 
-import javax.websocket.Session;
-
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
+import jakarta.websocket.Session;
 
 public interface WebSocketSubscriptionManager
 {
-	void bind(User user, Session session, String subscriptionIdPart);
+	void bind(Identity identity, Session session, String subscriptionIdPart);
 
 	void close(String sessionId);
 }

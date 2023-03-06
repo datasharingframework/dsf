@@ -1,10 +1,9 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
-import javax.ws.rs.Path;
-
 import org.hl7.fhir.r4.model.ResearchStudy;
 
 import dev.dsf.fhir.webservice.specification.ResearchStudyService;
+import jakarta.ws.rs.Path;
 
 @Path(ResearchStudyServiceJaxrs.PATH)
 public class ResearchStudyServiceJaxrs extends AbstractResourceServiceJaxrs<ResearchStudy, ResearchStudyService>

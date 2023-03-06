@@ -2,11 +2,6 @@ package dev.dsf.fhir.webservice.impl;
 
 import java.util.Objects;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -22,6 +17,10 @@ import dev.dsf.fhir.history.HistoryService;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.RootService;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
 
 public class RootServiceImpl extends AbstractBasicService implements RootService, InitializingBean
 {
@@ -71,7 +70,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
 
 		CommandList commands = exceptionHandler
-				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentUser(),
+				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentIdentity(),
 						parameterConverter.getPreferReturn(headers), parameterConverter.getPreferHandling(headers)));
 
 		Bundle result = commands.execute(); // throws WebApplicationException
@@ -83,7 +82,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	@Override
 	public Response history(UriInfo uri, HttpHeaders headers)
 	{
-		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers);
+		Bundle history = historyService.getHistory(getCurrentIdentity(), uri, headers);
 
 		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(history),
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();

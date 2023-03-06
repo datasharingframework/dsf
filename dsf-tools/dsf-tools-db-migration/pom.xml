@@ -9,10 +9,6 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<main.basedir>${project.basedir}/../..</main.basedir>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -36,10 +32,6 @@
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>log4j2-utils</artifactId>
 		</dependency>
 	</dependencies>
 </project>

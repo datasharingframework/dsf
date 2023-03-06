@@ -20,8 +20,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.MediaType;
-
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -33,6 +31,7 @@ import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
@@ -41,9 +40,11 @@ import org.junit.Test;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.DocumentReferenceDao;
 import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.dao.PatientDao;
 import dev.dsf.fhir.dao.ResearchStudyDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.search.PartialResult;
+import jakarta.ws.rs.core.MediaType;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {
@@ -2833,5 +2834,33 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary read4 = getWebserviceClient().read(createdWithoutVersion);
 		assertFalse(createdWithoutVersion == read4);
 		assertEquals(updated.getMeta().getVersionId(), read4.getMeta().getVersionId());
+	}
+
+	@Test
+	public void testCreateLargeBinaryFhirResource() throws Exception
+	{
+		byte[] data = new byte[1204 * 1024 * 8]; // 8 MiB
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.TEXT_PLAIN);
+		binary.setData(data);
+		getReadAccessHelper().addAll(binary);
+
+		getWebserviceClient().create(binary);
+	}
+
+	@Test
+	public void testCreateLargeBinaryDirect() throws Exception
+	{
+		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		Patient p = new Patient();
+		getReadAccessHelper().addAll(p);
+		Patient created = dao.create(p);
+
+		byte[] data = new byte[1204 * 1024 * 8]; // 8 MiB
+		String securityContext = "Patient/" + created.getIdElement().getIdPart();
+
+		getWebserviceClient().createBinary(new ByteArrayInputStream(data), MediaType.APPLICATION_OCTET_STREAM_TYPE,
+				securityContext);
 	}
 }

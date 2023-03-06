@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 
 public interface ReferenceResolver
 {
@@ -20,7 +20,7 @@ public interface ReferenceResolver
 	boolean referenceCanBeResolved(ResourceReference reference, Connection connection);
 
 	/**
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param reference
 	 *            not <code>null</code>
@@ -33,7 +33,7 @@ public interface ReferenceResolver
 	 *             {@link ResourceReference.ReferenceType#CONDITIONAL} or
 	 *             {@link ResourceReference.ReferenceType#LOGICAL}
 	 */
-	Optional<Resource> resolveReference(User user, ResourceReference reference, Connection connection);
+	Optional<Resource> resolveReference(Identity identity, ResourceReference reference, Connection connection);
 
 	/**
 	 * @param reference
@@ -105,7 +105,7 @@ public interface ReferenceResolver
 			Integer bundleIndex) throws IllegalArgumentException;
 
 	/**
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param resource
 	 *            not <code>null</code>
@@ -120,12 +120,12 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#CONDITIONAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	Optional<OperationOutcome> checkConditionalReference(User user, Resource resource,
+	Optional<OperationOutcome> checkConditionalReference(Identity identity, Resource resource,
 			ResourceReference resourceReference, Connection connection, Integer bundleIndex)
 			throws IllegalArgumentException;
 
 	/**
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param resource
 	 *            not <code>null</code>
@@ -138,11 +138,11 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	Optional<OperationOutcome> checkLogicalReference(User user, Resource resource, ResourceReference resourceReference,
-			Connection connection) throws IllegalArgumentException;
+	Optional<OperationOutcome> checkLogicalReference(Identity identity, Resource resource,
+			ResourceReference resourceReference, Connection connection) throws IllegalArgumentException;
 
 	/**
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param resource
 	 *            not <code>null</code>
@@ -157,6 +157,7 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	Optional<OperationOutcome> checkLogicalReference(User user, Resource resource, ResourceReference resourceReference,
-			Connection connection, Integer bundleIndex) throws IllegalArgumentException;
+	Optional<OperationOutcome> checkLogicalReference(Identity identity, Resource resource,
+			ResourceReference resourceReference, Connection connection, Integer bundleIndex)
+			throws IllegalArgumentException;
 }

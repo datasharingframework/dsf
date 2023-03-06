@@ -6,14 +6,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import jakarta.ws.rs.core.UriBuilder;
 
 public abstract class AbstractTokenParameter<R extends Resource> extends AbstractSearchParameter<R>
 {

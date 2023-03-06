@@ -4,14 +4,12 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserProvider;
+import dev.dsf.fhir.authentication.CurrentIdentityProvider;
 
-public class AbstractDelegatingBasicService<S extends BasicService> implements BasicService, InitializingBean
+public class AbstractDelegatingBasicService<S extends BasicService> extends AbstractBasicService
+		implements BasicService, InitializingBean
 {
 	protected final S delegate;
-
-	protected UserProvider userProvider;
 
 	public AbstractDelegatingBasicService(S delegate)
 	{
@@ -25,15 +23,9 @@ public class AbstractDelegatingBasicService<S extends BasicService> implements B
 	}
 
 	@Override
-	public final void setUserProvider(UserProvider userProvider)
+	public void setCurrentIdentityProvider(CurrentIdentityProvider currentIdentityProvider)
 	{
-		delegate.setUserProvider(userProvider);
-
-		this.userProvider = userProvider;
-	}
-
-	protected final User getCurrentUser()
-	{
-		return userProvider.getCurrentUser();
+		super.setCurrentIdentityProvider(currentIdentityProvider);
+		delegate.setCurrentIdentityProvider(currentIdentityProvider);
 	}
 }

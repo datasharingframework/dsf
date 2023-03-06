@@ -30,15 +30,11 @@ services:
   app:
     image: registry:5000/datasharingframework/fhir
     restart: "no"
-    healthcheck:
-      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "dev.dsf.fhir.StatusClient"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
     secrets:
       - db_liquibase.password
       - db_user.password
       - db_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_client_certificate.pem
       - app_client_certificate_private_key.pem
@@ -54,6 +50,7 @@ services:
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
+      JETTY_CLIENT_TRUSTSTORE_PEM: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_user_permanent_delete.password
@@ -69,8 +66,17 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC1: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC2: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC3: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${TTP_CONF_USER_THUMBPRINTS}
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${TTP_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            role:
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
+              - PERMANENT_DELETE
     networks:
       frontend:
         ipv4_address: 172.28.1.3
@@ -118,6 +124,8 @@ secrets:
   db_user_permanent_delete.password:
     file: ./secrets/db_user_permanent_delete.password
     
+  app_server_trust_certificates.pem:
+    file: ./secrets/testca_certificate.pem
   app_client_trust_certificates.pem:
     file: ./secrets/testca_certificate.pem
   app_client_certificate.pem:

@@ -7,7 +7,8 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
 
 public class RootAuthorizationRule implements AuthorizationRule<Resource>
 {
@@ -20,76 +21,84 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, Resource newResource)
+	public Optional<String> reasonCreateAllowed(Identity identity, Resource newResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, Resource newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, Identity identity, Resource newResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, Resource existingResource)
+	public Optional<String> reasonReadAllowed(Identity identity, Resource existingResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, Resource existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, Identity identity, Resource existingResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, Resource oldResource, Resource newResource)
+	public Optional<String> reasonUpdateAllowed(Identity identity, Resource oldResource, Resource newResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Resource oldResource,
+	public Optional<String> reasonUpdateAllowed(Connection connection, Identity identity, Resource oldResource,
 			Resource newResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, Resource oldResource)
+	public Optional<String> reasonDeleteAllowed(Identity identity, Resource oldResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Resource oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, Identity identity, Resource oldResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Identity identity)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
+	public Optional<String> reasonHistoryAllowed(Identity identity)
 	{
-		logger.info("Root History authorized for {} user '{}', will be filtered by user role or users organization {}",
-				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
-		return Optional.of("Allowed for all, filtered by user role or users organization");
+		if (identity.hasRole(FhirServerRole.HISTORY))
+		{
+			logger.info("History of root authorized for identity '{}'", identity.getName());
+			return Optional.of("Identity has role " + FhirServerRole.HISTORY);
+		}
+		else
+		{
+			logger.warn("History of root unauthorized for identity '{}', no role {}", identity.getName(),
+					FhirServerRole.HISTORY);
+			return Optional.empty();
+		}
 	}
 
 	@Override
-	public Optional<String> reasonPermanentDeleteAllowed(User user, Resource oldResource)
+	public Optional<String> reasonPermanentDeleteAllowed(Identity identity, Resource oldResource)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, Resource oldResource)
+	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, Identity identity, Resource oldResource)
 	{
 		throw new UnsupportedOperationException();
 	}

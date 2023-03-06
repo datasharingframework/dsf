@@ -9,13 +9,6 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -35,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.ValidationResult;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.history.History;
 import dev.dsf.fhir.history.HistoryEntry;
 import dev.dsf.fhir.prefer.PreferReturnType;
@@ -43,6 +36,13 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ResourceReference;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 
 public class ResponseGenerator
 {
@@ -217,7 +217,8 @@ public class ResponseGenerator
 		response.setStatus(toStatus(historyEntry.getMethod()));
 		response.setLocation(
 				toLocation(historyEntry.getResourceType(), historyEntry.getId().toString(), historyEntry.getVersion()));
-		response.setEtag(new EntityTag(historyEntry.getVersion(), true).toString());
+		response.setEtag(RuntimeDelegate.getInstance().createHeaderDelegate(EntityTag.class)
+				.toString(new EntityTag(historyEntry.getVersion(), true)));
 		response.setLastModified(Date.from(historyEntry.getLastUpdated().atZone(ZoneId.systemDefault()).toInstant()));
 
 		return entry;
@@ -344,12 +345,12 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response updateAsCreateNotAllowed(String resourceTypeName, String id)
+	public Response updateAsCreateNotAllowed(String resourceTypeName)
 	{
-		logger.warn("{} with id {} not found", resourceTypeName, id);
+		logger.warn("Update as create of resource with type {} not allowed", resourceTypeName);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Resource with id " + id + " not found");
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.FORBIDDEN,
+				"Update as create not allowed");
 		return Response.status(Status.METHOD_NOT_ALLOWED).entity(outcome).build();
 	}
 
@@ -862,9 +863,9 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(out).build();
 	}
 
-	public Response forbiddenNotAllowed(String operation, User user)
+	public Response forbiddenNotAllowed(String operation, Identity identity)
 	{
-		logger.warn("Operation {} forbidden for user '{}'", operation, user.getName());
+		logger.warn("Operation {} forbidden for identity '{}'", operation, identity.getName());
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.FORBIDDEN,
 				"Operation " + operation + " forbidden");
@@ -880,14 +881,14 @@ public class ResponseGenerator
 		return Response.status(Status.NOT_FOUND).entity(outcome).build();
 	}
 
-	public Response forbiddenNotValid(String operation, User user, String resourceType,
+	public Response forbiddenNotValid(String operation, Identity identity, String resourceType,
 			ValidationResult validationResult)
 	{
 		OperationOutcome outcome = new OperationOutcome();
 		validationResult.populateOperationOutcome(outcome);
 
 		logger.warn("Operation {} forbidden, {} resource not valid for user '{}'", operation, resourceType,
-				user.getName());
+				identity.getName());
 
 		return Response.status(Status.FORBIDDEN).entity(outcome).build();
 	}

@@ -14,20 +14,18 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Reference;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 
 public class Role implements Recipient, Requester
 {
-	private final UserRole role;
+	private final boolean localIdentity;
 	private final String consortiumIdentifier;
 	private final String roleSystem;
 	private final String roleCode;
 
-	public Role(UserRole role, String consortiumIdentifier, String roleSystem, String roleCode)
+	public Role(boolean localIdentity, String consortiumIdentifier, String roleSystem, String roleCode)
 	{
-		Objects.requireNonNull(role, "role");
 		Objects.requireNonNull(consortiumIdentifier, "consortiumIdentifier");
 		if (consortiumIdentifier.isBlank())
 			throw new IllegalArgumentException("consortiumIdentifier blank");
@@ -38,29 +36,29 @@ public class Role implements Recipient, Requester
 		if (roleCode.isBlank())
 			throw new IllegalArgumentException("roleCode blank");
 
-		this.role = role;
+		this.localIdentity = localIdentity;
 		this.consortiumIdentifier = consortiumIdentifier;
 		this.roleSystem = roleSystem;
 		this.roleCode = roleCode;
 	}
 
 	@Override
-	public boolean isRequesterAuthorized(User requesterUser, Stream<OrganizationAffiliation> requesterAffiliations)
+	public boolean isRequesterAuthorized(Identity requesterUser, Stream<OrganizationAffiliation> requesterAffiliations)
 	{
 		return isAuthorized(requesterUser, requesterAffiliations);
 	}
 
 	@Override
-	public boolean isRecipientAuthorized(User recipientUser, Stream<OrganizationAffiliation> recipientAffiliations)
+	public boolean isRecipientAuthorized(Identity recipientUser, Stream<OrganizationAffiliation> recipientAffiliations)
 	{
 		return isAuthorized(recipientUser, recipientAffiliations);
 	}
 
-	private boolean isAuthorized(User user, Stream<OrganizationAffiliation> affiliations)
+	private boolean isAuthorized(Identity identity, Stream<OrganizationAffiliation> affiliations)
 	{
-		return user != null && role.equals(user.getRole()) && user.getOrganization() != null
-				&& user.getOrganization().getActive() && affiliations != null
-				&& hasConsortiumMemberRole(user.getOrganization(), affiliations);
+		return identity != null && identity.getOrganization() != null && identity.getOrganization().getActive()
+				&& identity.isLocalIdentity() == localIdentity && affiliations != null
+				&& hasConsortiumMemberRole(identity.getOrganization(), affiliations);
 	}
 
 	private boolean hasConsortiumMemberRole(org.hl7.fhir.r4.model.Organization recipientOrganization,
@@ -205,39 +203,29 @@ public class Role implements Recipient, Requester
 	@Override
 	public Coding getProcessAuthorizationCode()
 	{
-		switch (role)
-		{
-			case LOCAL:
-				return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
-						ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE, null);
-			case REMOTE:
-				return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
-						ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ROLE, null);
-			default:
-				throw new IllegalStateException(UserRole.class.getName() + " " + role + " not supported");
-		}
+		if (localIdentity)
+			return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
+					ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE, null);
+		else
+			return new Coding(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM,
+					ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ROLE, null);
 	}
 
 	@Override
 	public boolean matches(Coding processAuthorizationCode)
 	{
-		switch (role)
-		{
-			case LOCAL:
-				return processAuthorizationCode != null
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
-								.equals(processAuthorizationCode.getSystem())
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE
-								.equals(processAuthorizationCode.getCode());
-			case REMOTE:
-				return processAuthorizationCode != null
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
-								.equals(processAuthorizationCode.getSystem())
-						&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ROLE
-								.equals(processAuthorizationCode.getCode());
-			default:
-				throw new IllegalStateException(UserRole.class.getName() + " " + role + " not supported");
-		}
+		if (localIdentity)
+			return processAuthorizationCode != null
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
+							.equals(processAuthorizationCode.getSystem())
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE
+							.equals(processAuthorizationCode.getCode());
+		else
+			return processAuthorizationCode != null
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM
+							.equals(processAuthorizationCode.getSystem())
+					&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ROLE
+							.equals(processAuthorizationCode.getCode());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -262,15 +250,15 @@ public class Role implements Recipient, Requester
 				&& coding.hasCode())
 		{
 			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE.equals(coding.getCode()))
-				return from(UserRole.LOCAL, coding, organizationWithIdentifierExists, roleExists);
+				return from(true, coding, organizationWithIdentifierExists, roleExists);
 			else if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ROLE.equals(coding.getCode()))
-				return from(UserRole.REMOTE, coding, organizationWithIdentifierExists, roleExists);
+				return from(false, coding, organizationWithIdentifierExists, roleExists);
 		}
 
 		return Optional.empty();
 	}
 
-	private static Optional<? super Role> from(UserRole userRole, Coding coding,
+	private static Optional<? super Role> from(boolean localIdentity, Coding coding,
 			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> roleExists)
 	{
 		if (coding != null && coding.hasExtension())
@@ -305,7 +293,7 @@ public class Role implements Recipient, Requester
 								&& organizationWithIdentifierExists.test(consortiumIdentifier)
 								&& roleExists.test(roleCoding))
 						{
-							return Optional.of(new Role(userRole, consortiumIdentifier.getValue(),
+							return Optional.of(new Role(localIdentity, consortiumIdentifier.getValue(),
 									roleCoding.getSystem(), roleCoding.getCode()));
 						}
 					}

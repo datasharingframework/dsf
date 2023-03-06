@@ -5,7 +5,7 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.fhir.search.parameters.user.StructureDefinitionUserFilter;
+import dev.dsf.fhir.search.filter.StructureDefinitionIdentityFilter;
 
 public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
@@ -13,7 +13,7 @@ public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJd
 			FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, "structure_definitions", "structure_definition",
-				"structure_definition_id", StructureDefinitionUserFilter::new);
+				"structure_definition_id", StructureDefinitionIdentityFilter::new);
 	}
 
 	@Override

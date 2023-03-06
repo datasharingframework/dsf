@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 
 public interface AuthorizationRule<R extends Resource>
 {
@@ -14,55 +14,55 @@ public interface AuthorizationRule<R extends Resource>
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param newResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if create allowed
 	 */
-	Optional<String> reasonCreateAllowed(User user, R newResource);
+	Optional<String> reasonCreateAllowed(Identity identity, R newResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
 	 * @param connection
 	 *            not <code>null</code>
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param newResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if create allowed
 	 */
-	Optional<String> reasonCreateAllowed(Connection connection, User user, R newResource);
+	Optional<String> reasonCreateAllowed(Connection connection, Identity identity, R newResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param existingResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if read allowed
 	 */
-	Optional<String> reasonReadAllowed(User user, R existingResource);
+	Optional<String> reasonReadAllowed(Identity identity, R existingResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
 	 * @param connection
 	 *            not <code>null</code>
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param existingResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if read allowed
 	 */
-	Optional<String> reasonReadAllowed(Connection connection, User user, R existingResource);
+	Optional<String> reasonReadAllowed(Connection connection, Identity identity, R existingResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
@@ -70,14 +70,14 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if update allowed
 	 */
-	Optional<String> reasonUpdateAllowed(User user, R oldResource, R newResource);
+	Optional<String> reasonUpdateAllowed(Identity identity, R oldResource, R newResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
 	 * @param connection
 	 *            not <code>null</code>
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
@@ -85,71 +85,72 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if update allowed
 	 */
-	Optional<String> reasonUpdateAllowed(Connection connection, User user, R oldResource, R newResource);
+	Optional<String> reasonUpdateAllowed(Connection connection, Identity identity, R oldResource, R newResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
 	 */
-	Optional<String> reasonDeleteAllowed(User user, R oldResource);
+	Optional<String> reasonDeleteAllowed(Identity identity, R oldResource);
+
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
 	 * @param connection
 	 *            not <code>null</code>
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
 	 */
-	Optional<String> reasonDeleteAllowed(Connection connection, User user, R oldResource);
+	Optional<String> reasonDeleteAllowed(Connection connection, Identity identity, R oldResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
 	 */
-	Optional<String> reasonSearchAllowed(User user);
+	Optional<String> reasonSearchAllowed(Identity identity);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
 	 */
-	Optional<String> reasonHistoryAllowed(User user);
+	Optional<String> reasonHistoryAllowed(Identity identity);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if permanent delete allowed
 	 */
-	Optional<String> reasonPermanentDeleteAllowed(User user, R oldResource);
+	Optional<String> reasonPermanentDeleteAllowed(Identity identity, R oldResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *
 	 * @param connection
 	 *            not <code>null</code>
-	 * @param user
+	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if permanent delete allowed
 	 */
-	Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, R oldResource);
+	Optional<String> reasonPermanentDeleteAllowed(Connection connection, Identity identity, R oldResource);
 }

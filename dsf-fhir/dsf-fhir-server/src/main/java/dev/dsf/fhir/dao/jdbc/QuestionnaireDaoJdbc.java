@@ -10,12 +10,12 @@ import org.hl7.fhir.r4.model.Questionnaire;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.QuestionnaireDao;
+import dev.dsf.fhir.search.filter.QuestionnaireIdentityFilter;
 import dev.dsf.fhir.search.parameters.QuestionnaireDate;
 import dev.dsf.fhir.search.parameters.QuestionnaireIdentifier;
 import dev.dsf.fhir.search.parameters.QuestionnaireStatus;
 import dev.dsf.fhir.search.parameters.QuestionnaireUrl;
 import dev.dsf.fhir.search.parameters.QuestionnaireVersion;
-import dev.dsf.fhir.search.parameters.user.QuestionnaireUserFilter;
 
 public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire> implements QuestionnaireDao
 {
@@ -24,7 +24,7 @@ public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire>
 	public QuestionnaireDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Questionnaire.class, "questionnaires",
-				"questionnaire", "questionnaire_id", QuestionnaireUserFilter::new,
+				"questionnaire", "questionnaire_id", QuestionnaireIdentityFilter::new,
 				with(QuestionnaireDate::new, QuestionnaireIdentifier::new, QuestionnaireStatus::new,
 						QuestionnaireUrl::new, QuestionnaireVersion::new),
 				with());

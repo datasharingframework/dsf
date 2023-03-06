@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.fhir.history.HistoryService;
 import dev.dsf.fhir.history.HistoryServiceImpl;
-import dev.dsf.fhir.history.user.HistoryUserFilterFactory;
-import dev.dsf.fhir.history.user.HistoryUserFilterFactoryImpl;
+import dev.dsf.fhir.history.filter.HistoryIdentityFilterFactory;
+import dev.dsf.fhir.history.filter.HistoryIdentityFilterFactoryImpl;
 
 @Configuration
 public class HistoryConfig
@@ -25,9 +25,9 @@ public class HistoryConfig
 	private DaoConfig daoConfig;
 
 	@Bean
-	public HistoryUserFilterFactory historyUserFilterFactory()
+	public HistoryIdentityFilterFactory historyUserFilterFactory()
 	{
-		return new HistoryUserFilterFactoryImpl();
+		return new HistoryIdentityFilterFactoryImpl();
 	}
 
 	@Bean

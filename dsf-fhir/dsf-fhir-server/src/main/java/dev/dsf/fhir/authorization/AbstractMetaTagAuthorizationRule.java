@@ -3,7 +3,6 @@ package dev.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -13,10 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.common.auth.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.ReadAccessDao;
 import dev.dsf.fhir.dao.ResourceDao;
@@ -29,28 +27,16 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMetaTagAuthorizationRule.class);
 
-	private final ParameterConverter parameterConverter;
 	private final ReadAccessDao readAccessDao;
-	private final String resourceTypeName;
 
 	public AbstractMetaTagAuthorizationRule(Class<R> resourceType, DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
-		super(resourceType, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
-
-		this.parameterConverter = parameterConverter;
+		super(resourceType, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 
 		readAccessDao = daoProvider.getReadAccessDao();
-		resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 
 	protected final boolean hasValidReadAccessTag(Connection connection, Resource resource)
@@ -61,115 +47,138 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	}
 
 	@Override
-	public final Optional<String> reasonCreateAllowed(Connection connection, User user, R newResource)
+	public final Optional<String> reasonCreateAllowed(Connection connection, Identity identity, R newResource)
 	{
-		if (isLocalUser(user))
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.CREATE))
 		{
-			Optional<String> errors = newResourceOkForCreate(connection, user, newResource);
+			Optional<String> errors = newResourceOkForCreate(connection, identity, newResource);
 			if (errors.isEmpty())
 			{
 				if (!resourceExists(connection, newResource))
 				{
-					logger.info("Create of {} authorized for local user '{}', {} does not exist", resourceTypeName,
-							user.getName(), resourceTypeName);
-					return Optional.of("local user, " + resourceTypeName + " does not exist yet");
+					logger.info("Create of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
+					return Optional.of("Identity is local identity and has role " + FhirServerRole.CREATE);
 				}
 				else
 				{
-					logger.warn("Create of {} unauthorized, {} already exists", resourceTypeName, resourceTypeName);
+					logger.warn("Create of {} unauthorized, unique resource already exists", getResourceTypeName());
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Create of {} unauthorized, {}", resourceTypeName, errors.get());
+				logger.warn("Create of {} unauthorized, {}", getResourceTypeName(), errors.get());
 				return Optional.empty();
 			}
 		}
 		else
 		{
-			logger.warn("Create of {} unauthorized, not a local user", resourceTypeName);
+			logger.warn("Create of {} unauthorized for identity '{}', not a local identity or no role {}",
+					getResourceTypeName(), FhirServerRole.CREATE);
 			return Optional.empty();
 		}
 	}
 
 	protected abstract boolean resourceExists(Connection connection, R newResource);
 
-	protected abstract Optional<String> newResourceOkForCreate(Connection connection, User user, R newResource);
+	protected abstract Optional<String> newResourceOkForCreate(Connection connection, Identity identity, R newResource);
 
 	@Override
-	public final Optional<String> reasonReadAllowed(Connection connection, User user, R existingResource)
+	public final Optional<String> reasonReadAllowed(Connection connection, Identity identity, R existingResource)
 	{
-		UserRole userRole = user.getRole();
-		UUID resourceId = parameterConverter.toUuid(resourceTypeName, existingResource.getIdElement().getIdPart());
-		long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
-		UUID organizationId = parameterConverter.toUuid("Organization",
-				user.getOrganization().getIdElement().getIdPart());
+		final UUID resourceId = parameterConverter.toUuid(getResourceTypeName(),
+				existingResource.getIdElement().getIdPart());
+		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 
-		try
+		if (identity.hasRole(FhirServerRole.READ))
 		{
-			List<String> accessTypes = readAccessDao.getAccessTypes(connection, resourceId, resourceVersion, userRole,
-					organizationId);
+			try
+			{
+				UUID organizationId = parameterConverter.toUuid("Organization",
+						identity.getOrganization().getIdElement().getIdPart());
 
-			if (accessTypes.isEmpty())
-			{
-				logger.warn("Read of {}/{} unauthorized", resourceTypeName, resourceId.toString());
-				return Optional.empty();
+				List<String> accessTypes = readAccessDao.getAccessTypes(connection, resourceId, resourceVersion,
+						identity.isLocalIdentity(), organizationId);
+
+				if (accessTypes.isEmpty())
+				{
+					logger.warn("Read of {}/{}/_history/{} unauthorized for identity '{}', no matching access tags",
+							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
+							FhirServerRole.READ);
+					return Optional.empty();
+				}
+				else
+				{
+					String tags = accessTypes.stream().collect(Collectors.joining(", ", "{", "}"));
+
+					logger.info("Read of {}/{}/_history/{} authorized for identity '{}', matching access {} {}",
+							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
+							accessTypes.size() == 1 ? "tag" : "tags", tags);
+					return Optional.of("Identity has role " + FhirServerRole.READ + ", matching access "
+							+ (accessTypes.size() == 1 ? "tag" : "tags") + " " + tags);
+				}
 			}
-			else
+			catch (SQLException e)
 			{
-				logger.info("Read of {}/{} authorized for {} user '{}': {}", resourceTypeName, resourceId, userRole,
-						user.getName(), accessTypes);
-				return Optional.of(userRole + " user, " + (accessTypes.size() > 1 ? "{" : "")
-						+ accessTypes.stream().collect(Collectors.joining(", "))
-						+ (accessTypes.size() > 1 ? "} tags" : " tag") + " on resource");
+				logger.warn("Error while checking read access", e);
+				throw new RuntimeException(e);
 			}
 		}
-		catch (SQLException e)
+		else
 		{
-			logger.warn("Error while checking read access", e);
-			throw new RuntimeException(e);
+			logger.warn("Read of {}/{}/_history/{} unauthorized for identity '{}', no role {}", getResourceTypeName(),
+					resourceId.toString(), resourceVersion, identity.getName(), FhirServerRole.READ);
+			return Optional.empty();
 		}
 	}
 
-	protected abstract Optional<String> newResourceOkForUpdate(Connection connection, User user, R newResource);
+	protected abstract Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, R newResource);
 
 	@Override
-	public final Optional<String> reasonUpdateAllowed(Connection connection, User user, R oldResource, R newResource)
+	public final Optional<String> reasonUpdateAllowed(Connection connection, Identity identity, R oldResource,
+			R newResource)
 	{
-		if (isLocalUser(user))
+		final String resourceId = oldResource.getIdElement().getIdPart();
+		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.UPDATE))
 		{
-			Optional<String> errors = newResourceOkForUpdate(connection, user, newResource);
+			Optional<String> errors = newResourceOkForUpdate(connection, identity, newResource);
 			if (errors.isEmpty())
 			{
 				if (modificationsOk(connection, oldResource, newResource))
 				{
-					logger.info("Update of {} authorized for local user '{}', modification allowed", resourceTypeName,
-							user.getName());
-					return Optional.of("local user; modification allowed");
+					logger.info("Update of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),
+							resourceId.toString(), resourceVersion, identity.getName());
+					return Optional.of("Identity is local identity and has role " + FhirServerRole.UPDATE);
 				}
 				else
 				{
-					logger.warn("Update of {} unauthorized, modification not allowed", resourceTypeName);
+					logger.warn("Update of {}/{}/_history/{} unauthorized, modification not allowed",
+							getResourceTypeName(), resourceId.toString(), resourceVersion);
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Update of {} unauthorized, {}", resourceTypeName, errors.get());
+				logger.warn("Update of {}/{}/_history/{} unauthorized, {}", getResourceTypeName(),
+						resourceId.toString(), resourceVersion, errors.get());
 				return Optional.empty();
 			}
 		}
 		else
 		{
-			logger.warn("Update of {} unauthorized, not a local user", resourceTypeName);
+			logger.warn(
+					"Update of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
+					getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
+					FhirServerRole.DELETE);
 			return Optional.empty();
 		}
 	}
 
 	/**
 	 * No need to check if the new resource is valid, will be checked by
-	 * {@link #newResourceOkForUpdate(Connection, User, Resource)}
+	 * {@link #newResourceOkForUpdate(Connection, Identity, Resource)}
 	 *
 	 * @param connection
 	 *            not <code>null</code>
@@ -182,47 +191,22 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	protected abstract boolean modificationsOk(Connection connection, R oldResource, R newResource);
 
 	@Override
-	public final Optional<String> reasonDeleteAllowed(Connection connection, User user, R oldResource)
+	public final Optional<String> reasonDeleteAllowed(Connection connection, Identity identity, R oldResource)
 	{
-		if (isLocalUser(user))
+		final String resourceId = oldResource.getIdElement().getIdPart();
+		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.DELETE))
 		{
-			logger.info("Delete of {} authorized for local user '{}'", resourceTypeName, user.getName());
-			return Optional.of("local user");
+			logger.info("Delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(), resourceId,
+					resourceVersion, identity.getName());
+			return Optional.of("Identity is local identity and has role " + FhirServerRole.DELETE);
 		}
 		else
 		{
-			logger.warn("Delete of {} unauthorized, not a local user", resourceTypeName);
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public final Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of {} authorized for {} user '{}', will be filtered by users organization and roles",
-				resourceTypeName, user.getRole(), user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public final Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of {} authorized for {} user '{}', will be filtered by users organization and roles",
-				resourceTypeName, user.getRole(), user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, R oldResource)
-	{
-		if (isLocalPermanentDeleteUser(user))
-		{
-			logger.info("Permanent delete of {} authorized for local delete user '{}'", resourceType, user.getName());
-			return Optional.of("local delete user");
-		}
-		else
-		{
-			logger.warn("Permanent delete of {} unauthorized, not a local delete user", resourceTypeName);
+			logger.warn(
+					"Delete of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), FhirServerRole.DELETE);
 			return Optional.empty();
 		}
 	}

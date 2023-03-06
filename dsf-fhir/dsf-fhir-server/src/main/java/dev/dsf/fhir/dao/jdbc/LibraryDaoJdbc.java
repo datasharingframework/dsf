@@ -10,12 +10,12 @@ import org.hl7.fhir.r4.model.Library;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.LibraryDao;
+import dev.dsf.fhir.search.filter.LibraryIdentityFilter;
 import dev.dsf.fhir.search.parameters.LibraryDate;
 import dev.dsf.fhir.search.parameters.LibraryIdentifier;
 import dev.dsf.fhir.search.parameters.LibraryStatus;
 import dev.dsf.fhir.search.parameters.LibraryUrl;
 import dev.dsf.fhir.search.parameters.LibraryVersion;
-import dev.dsf.fhir.search.parameters.user.LibraryUserFilter;
 
 public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements LibraryDao
 {
@@ -24,7 +24,7 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 	public LibraryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
-				LibraryUserFilter::new, with(LibraryDate::new, LibraryIdentifier::new, LibraryStatus::new,
+				LibraryIdentityFilter::new, with(LibraryDate::new, LibraryIdentifier::new, LibraryStatus::new,
 						LibraryUrl::new, LibraryVersion::new),
 				with());
 

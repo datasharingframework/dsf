@@ -6,8 +6,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
@@ -17,6 +15,7 @@ import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
+import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = BinaryContentType.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Binary-contentType", type = SearchParamType.TOKEN, documentation = "The MIME type of the actual binary content")
 public class BinaryContentType extends AbstractTokenParameter<Binary>

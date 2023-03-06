@@ -1,6 +1,7 @@
 package dev.dsf.fhir.authorization;
 
-import static dev.dsf.bpe.ConstantsBase.*;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
+import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -18,44 +19,36 @@ import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.auth.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.service.ReferenceResolver;
 
+//TODO rework log messages and authorization reason texts
 public class QuestionnaireResponseAuthorizationRule
 		extends AbstractAuthorizationRule<QuestionnaireResponse, QuestionnaireResponseDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseAuthorizationRule.class);
-
-	private final ParameterConverter parameterConverter;
 
 	public QuestionnaireResponseAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
 		super(QuestionnaireResponse.class, daoProvider, serverBase, referenceResolver, organizationProvider,
-				readAccessHelper);
-		this.parameterConverter = parameterConverter;
+				readAccessHelper, parameterConverter);
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
+	public Optional<String> reasonCreateAllowed(Connection connection, Identity identity,
+			QuestionnaireResponse newResource)
 	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(parameterConverter, "parameterConverter");
-	}
-
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, QuestionnaireResponse newResource)
-	{
-		if (isLocalUser(user))
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.CREATE))
 		{
-			Optional<String> errors = newResourceOk(connection, user, newResource,
+			Optional<String> errors = newResourceOk(connection, identity, newResource,
 					EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
 			if (errors.isEmpty())
 			{
@@ -63,7 +56,7 @@ public class QuestionnaireResponseAuthorizationRule
 				{
 					logger.info(
 							"Create of QuestionnaireResponse authorized for local user '{}', QuestionnaireResponse does not exist",
-							user.getName());
+							identity.getName());
 					return Optional.of("local user, QuestionnaireResponse does not exist yet");
 				}
 				else
@@ -85,7 +78,7 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, QuestionnaireResponse newResource,
+	private Optional<String> newResourceOk(Connection connection, Identity identity, QuestionnaireResponse newResource,
 			EnumSet<QuestionnaireResponseStatus> allowedStatus)
 	{
 		List<String> errors = new ArrayList<String>();
@@ -164,34 +157,35 @@ public class QuestionnaireResponseAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, QuestionnaireResponse existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, Identity identity,
+			QuestionnaireResponse existingResource)
 	{
-		if (isLocalUser(user))
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.READ))
 		{
-			logger.info("Read of QuestionnaireResponse authorized for local user '{}'", user.getName());
+			logger.info("Read of QuestionnaireResponse authorized for local user '{}'", identity.getName());
 			return Optional.of("task.restriction.recipient resolved and local user part of referenced organization");
 		}
 		else
 		{
-			logger.warn("Read of QuestionnaireResponse unauthorized, not a local user", user.getName());
+			logger.warn("Read of QuestionnaireResponse unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, QuestionnaireResponse oldResource,
-			QuestionnaireResponse newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, Identity identity,
+			QuestionnaireResponse oldResource, QuestionnaireResponse newResource)
 	{
-		if (isLocalUser(user))
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.UPDATE))
 		{
-			Optional<String> errors = newResourceOk(connection, user, newResource,
+			Optional<String> errors = newResourceOk(connection, identity, newResource,
 					EnumSet.of(QuestionnaireResponseStatus.COMPLETED, QuestionnaireResponseStatus.STOPPED));
 			if (errors.isEmpty())
 			{
 				if (modificationsOk(connection, oldResource, newResource))
 				{
 					logger.info("Update of QuestionnaireResponse authorized for local user '{}', modification allowed",
-							user.getName());
+							identity.getName());
 					return Optional.of("local user; modification allowed");
 				}
 				else
@@ -255,49 +249,17 @@ public class QuestionnaireResponseAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, QuestionnaireResponse oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, Identity identity,
+			QuestionnaireResponse oldResource)
 	{
-		if (isLocalUser(user))
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.DELETE))
 		{
-			logger.info("Delete of QuestionnaireResponse authorized for local user '{}'", user.getName());
+			logger.info("Delete of QuestionnaireResponse authorized for local user '{}'", identity.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
 			logger.warn("Delete of QuestionnaireResponse unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public final Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of QuestionnaireResponse authorized for {} user '{}', will be filtered by user role",
-				user.getRole(), user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public final Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of {} authorized for {} user '{}', will be filtered by user role", user.getRole(),
-				user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user,
-			QuestionnaireResponse oldResource)
-	{
-		if (isLocalPermanentDeleteUser(user))
-		{
-			logger.info("Permanent delete of QuestionnaireResponse authorized for local delete user '{}'", resourceType,
-					user.getName());
-			return Optional.of("local delete user");
-		}
-		else
-		{
-			logger.warn("Permanent delete of QuestionnaireResponse unauthorized, not a local delete user");
 			return Optional.empty();
 		}
 	}

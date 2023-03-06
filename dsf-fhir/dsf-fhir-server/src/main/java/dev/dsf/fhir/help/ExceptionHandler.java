@@ -7,11 +7,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -32,6 +27,10 @@ import dev.dsf.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException;
 import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import dev.dsf.fhir.function.SupplierWithSqlException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 public class ExceptionHandler
 {
@@ -122,7 +121,7 @@ public class ExceptionHandler
 		}
 		catch (ResourceNotFoundException e)
 		{
-			throw new WebApplicationException(responseGenerator.updateAsCreateNotAllowed(resourceTypeName, e.getId()));
+			throw new WebApplicationException(responseGenerator.notFound(e.getId(), resourceTypeName));
 		}
 		catch (ResourceVersionNoMatchException e)
 		{

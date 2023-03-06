@@ -5,7 +5,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.prefer.PreferReturnType;
 
 public abstract class AbstractCommand implements Command
@@ -16,7 +16,7 @@ public abstract class AbstractCommand implements Command
 
 	protected final int index;
 
-	protected final User user;
+	protected final Identity identity;
 	protected final PreferReturnType returnType;
 	protected final Bundle bundle;
 	protected final BundleEntryComponent entry;
@@ -25,14 +25,14 @@ public abstract class AbstractCommand implements Command
 
 	protected final AuthorizationHelper authorizationHelper;
 
-	public AbstractCommand(int transactionPriority, int index, User user, PreferReturnType returnType, Bundle bundle,
-			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper)
+	public AbstractCommand(int transactionPriority, int index, Identity identity, PreferReturnType returnType,
+			Bundle bundle, BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper)
 	{
 		this.transactionPriority = transactionPriority;
 
 		this.index = index;
 
-		this.user = user;
+		this.identity = identity;
 		this.returnType = returnType;
 		this.bundle = bundle;
 		this.entry = entry;
@@ -51,5 +51,11 @@ public abstract class AbstractCommand implements Command
 	public final int getTransactionPriority()
 	{
 		return transactionPriority;
+	}
+
+	@Override
+	public Identity getIdentity()
+	{
+		return identity;
 	}
 }

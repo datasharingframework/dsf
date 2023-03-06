@@ -2,20 +2,21 @@ package dev.dsf.fhir.webservice.secure;
 
 import java.util.Objects;
 
-import javax.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
 import dev.dsf.fhir.webservice.base.BasicService;
+import jakarta.ws.rs.core.Response;
 
 public abstract class AbstractServiceSecure<S extends BasicService> extends AbstractDelegatingBasicService<S>
-		implements BasicService, InitializingBean
+		implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceSecure.class);
 	protected static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 
 	protected final String serverBase;
@@ -44,6 +45,12 @@ public abstract class AbstractServiceSecure<S extends BasicService> extends Abst
 
 	protected final Response forbidden(String operation)
 	{
-		return responseGenerator.forbiddenNotAllowed(operation, userProvider.getCurrentUser());
+		return responseGenerator.forbiddenNotAllowed(operation, currentIdentityProvider.getCurrentIdentity());
+	}
+
+	protected void logCurrentIdentity()
+	{
+		Identity identity = getCurrentIdentity();
+		logger.debug("Current identity '{}', roles '{}'", identity.getName(), identity.getRoles());
 	}
 }

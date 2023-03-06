@@ -5,13 +5,13 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
 
 public interface Command
 {
@@ -34,4 +34,8 @@ public interface Command
 	{
 		return Optional.empty();
 	}
+
+	Identity getIdentity();
+
+	String getResourceTypeName();
 }

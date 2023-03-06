@@ -10,9 +10,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -24,7 +21,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.provider.DaoProvider;
@@ -38,8 +35,10 @@ import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
-public class DeleteCommand extends AbstractCommand implements Command
+public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteCommand.class);
 
@@ -54,24 +53,18 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private Class<? extends Resource> resourceType;
 	private String id;
 
-	public DeleteCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationHelper authorizationHelper, ResponseGenerator responseGenerator,
-			DaoProvider daoProvider, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			EventGenerator eventGenerator)
+	public DeleteCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
+			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
+			ResponseGenerator responseGenerator, DaoProvider daoProvider, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, EventGenerator eventGenerator)
 	{
-		super(1, index, user, returnType, bundle, entry, serverBase, authorizationHelper);
+		super(1, index, identity, returnType, bundle, entry, serverBase, authorizationHelper);
 
 		this.responseGenerator = responseGenerator;
 		this.daoProvider = daoProvider;
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
 		this.eventGenerator = eventGenerator;
-	}
-
-	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-	{
 	}
 
 	@Override
@@ -110,7 +103,8 @@ public class DeleteCommand extends AbstractCommand implements Command
 			Optional<Resource> dbResource = exceptionHandler
 					.handleSqlException(() -> dao.readIncludingDeletedWithTransaction(connection, uuid));
 
-			dbResource.ifPresent(oldResource -> authorizationHelper.checkDeleteAllowed(connection, user, oldResource));
+			dbResource.ifPresent(
+					oldResource -> authorizationHelper.checkDeleteAllowed(index, connection, identity, oldResource));
 
 			deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
 					() -> deleteWithTransaction(dao, connection, uuid));
@@ -135,7 +129,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 			Optional<Resource> resourceToDelete = search(connection, dao.get(), queryParameters);
 			if (resourceToDelete.isPresent())
 			{
-				authorizationHelper.checkDeleteAllowed(connection, user, resourceToDelete.get());
+				authorizationHelper.checkDeleteAllowed(index, connection, identity, resourceToDelete.get());
 
 				deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
 						() -> deleteWithTransaction(dao.get(), connection, parameterConverter.toUuid(resourceTypeName,
@@ -232,5 +226,11 @@ public class DeleteCommand extends AbstractCommand implements Command
 			response.setStatus(Status.NO_CONTENT.getStatusCode() + " " + Status.NO_CONTENT.getReasonPhrase());
 
 		return Optional.of(resultEntry);
+	}
+
+	@Override
+	public String getResourceTypeName()
+	{
+		return resourceTypeName;
 	}
 }

@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.OrganizationAffiliationDao;
+import dev.dsf.fhir.search.filter.OrganizationAffiliationIdentityFilter;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationActive;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationEndpoint;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationIdentifier;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationParticipatingOrganization;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationPrimaryOrganization;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationRole;
-import dev.dsf.fhir.search.parameters.user.OrganizationAffiliationUserFilter;
 
 public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<OrganizationAffiliation>
 		implements OrganizationAffiliationDao
@@ -35,7 +35,7 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, OrganizationAffiliation.class,
 				"organization_affiliations", "organization_affiliation", "organization_affiliation_id",
-				OrganizationAffiliationUserFilter::new,
+				OrganizationAffiliationIdentityFilter::new,
 				with(OrganizationAffiliationActive::new, OrganizationAffiliationEndpoint::new,
 						OrganizationAffiliationIdentifier::new, OrganizationAffiliationParticipatingOrganization::new,
 						OrganizationAffiliationPrimaryOrganization::new, OrganizationAffiliationRole::new),

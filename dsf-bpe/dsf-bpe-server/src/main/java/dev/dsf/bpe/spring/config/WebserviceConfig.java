@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.webservice.ProcessService;
-import dev.dsf.bpe.webservice.StatusService;
+import dev.dsf.common.status.webservice.StatusService;
 
 @Configuration
 public class WebserviceConfig
@@ -17,6 +17,9 @@ public class WebserviceConfig
 	@Autowired
 	private DaoConfig daoConfig;
 
+	@Autowired
+	private PropertiesConfig propertiesConfig;
+
 	@Bean
 	public ProcessService processService()
 	{
@@ -26,6 +29,6 @@ public class WebserviceConfig
 	@Bean
 	public StatusService statusService()
 	{
-		return new StatusService(daoConfig.dataSource());
+		return new StatusService(daoConfig.dataSource(), propertiesConfig.getJettyStatusConnectorPort());
 	}
 }

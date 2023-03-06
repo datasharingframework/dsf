@@ -10,13 +10,13 @@ import org.hl7.fhir.r4.model.Measure;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.MeasureDao;
+import dev.dsf.fhir.search.filter.MeasureIdentityFilter;
 import dev.dsf.fhir.search.parameters.MeasureDate;
 import dev.dsf.fhir.search.parameters.MeasureDependsOn;
 import dev.dsf.fhir.search.parameters.MeasureIdentifier;
 import dev.dsf.fhir.search.parameters.MeasureStatus;
 import dev.dsf.fhir.search.parameters.MeasureUrl;
 import dev.dsf.fhir.search.parameters.MeasureVersion;
-import dev.dsf.fhir.search.parameters.user.MeasureUserFilter;
 
 public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements MeasureDao
 {
@@ -25,7 +25,7 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 	public MeasureDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Measure.class, "measures", "measure", "measure_id",
-				MeasureUserFilter::new, with(MeasureDate::new, MeasureDependsOn::new, MeasureIdentifier::new,
+				MeasureIdentityFilter::new, with(MeasureDate::new, MeasureDependsOn::new, MeasureIdentifier::new,
 						MeasureStatus::new, MeasureUrl::new, MeasureVersion::new),
 				with());
 

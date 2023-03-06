@@ -7,8 +7,7 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 
 public class OrganizationTest
 {
@@ -23,17 +22,21 @@ public class OrganizationTest
 		return o;
 	}
 
-	private static final User LOCAL_ORG_ACTIVE = User.local(createFhirOrganization(IDENTIFIER));
-	private static final User LOCAL_ORG_NOT_ACTIVE = User.local(createFhirOrganization(IDENTIFIER).setActive(false));
-	private static final User LOCAL_NO_ORG = User.local(null);
-	private static final User LOCAL_ORG_BAD_IDENTIFIER_ACTIVE = User.local(createFhirOrganization("bad.identifier"));
-	private static final User REMOTE_ORG_ACTIVE = User.remote(createFhirOrganization(IDENTIFIER));
-	private static final User REMOTE_ORG_NOT_ACTIVE = User.remote(createFhirOrganization(IDENTIFIER).setActive(false));
-	private static final User REMOTE_NO_ORG = User.remote((org.hl7.fhir.r4.model.Organization) null);
-	private static final User REMOTE_ORG_BAD_IDENTIFIER_ACTIVE = User.remote(createFhirOrganization("bad.identifier"));
+	private static final Identity LOCAL_ORG_ACTIVE = TestIdentity.local(createFhirOrganization(IDENTIFIER));
+	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestIdentity
+			.local(createFhirOrganization(IDENTIFIER).setActive(false));
+	private static final Identity LOCAL_NO_ORG = TestIdentity.local(null);
+	private static final Identity LOCAL_ORG_BAD_IDENTIFIER_ACTIVE = TestIdentity
+			.local(createFhirOrganization("bad.identifier"));
+	private static final Identity REMOTE_ORG_ACTIVE = TestIdentity.remote(createFhirOrganization(IDENTIFIER));
+	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestIdentity
+			.remote(createFhirOrganization(IDENTIFIER).setActive(false));
+	private static final Identity REMOTE_NO_ORG = TestIdentity.remote((org.hl7.fhir.r4.model.Organization) null);
+	private static final Identity REMOTE_ORG_BAD_IDENTIFIER_ACTIVE = TestIdentity
+			.remote(createFhirOrganization("bad.identifier"));
 
-	private static final Organization local = new Organization(UserRole.LOCAL, IDENTIFIER);
-	private static final Organization remote = new Organization(UserRole.REMOTE, IDENTIFIER);
+	private static final Organization local = new Organization(true, IDENTIFIER);
+	private static final Organization remote = new Organization(false, IDENTIFIER);
 
 	@Test
 	public void testLocalOrganizationRecipientOk() throws Exception

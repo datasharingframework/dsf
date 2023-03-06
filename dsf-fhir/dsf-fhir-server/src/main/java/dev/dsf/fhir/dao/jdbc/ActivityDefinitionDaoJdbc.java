@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
+import dev.dsf.fhir.search.filter.ActivityDefinitionIdentityFilter;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionDate;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionName;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionStatus;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionUrl;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionVersion;
-import dev.dsf.fhir.search.parameters.user.ActivityDefinitionUserFilter;
 
 public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityDefinition>
 		implements ActivityDefinitionDao
@@ -36,7 +36,7 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 			FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, ActivityDefinition.class, "activity_definitions",
-				"activity_definition", "activity_definition_id", ActivityDefinitionUserFilter::new,
+				"activity_definition", "activity_definition_id", ActivityDefinitionIdentityFilter::new,
 				with(ActivityDefinitionDate::new, ActivityDefinitionIdentifier::new, ActivityDefinitionName::new,
 						ActivityDefinitionStatus::new, ActivityDefinitionUrl::new, ActivityDefinitionVersion::new),
 				with());

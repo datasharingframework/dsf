@@ -35,7 +35,7 @@ import com.google.gson.JsonParser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
@@ -45,9 +45,9 @@ import dev.dsf.fhir.search.DbSearchQuery;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
+import dev.dsf.fhir.search.SearchQueryIdentityFilter;
 import dev.dsf.fhir.search.SearchQueryParameter;
 import dev.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
-import dev.dsf.fhir.search.SearchQueryUserFilter;
 import dev.dsf.fhir.search.parameters.ResourceId;
 import dev.dsf.fhir.search.parameters.ResourceLastUpdated;
 import dev.dsf.fhir.search.parameters.ResourceProfile;
@@ -112,7 +112,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	private final String resourceIdColumn;
 
 	private final PreparedStatementFactory<R> preparedStatementFactory;
-	private final Function<User, SearchQueryUserFilter> userFilter;
+	private final Function<Identity, SearchQueryIdentityFilter> userFilter;
 	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories = new ArrayList<>();
 	private final List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories = new ArrayList<>();
 
@@ -128,7 +128,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
-			Function<User, SearchQueryUserFilter> userFilter,
+			Function<Identity, SearchQueryIdentityFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
@@ -144,7 +144,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
-			PreparedStatementFactory<R> preparedStatementFactory, Function<User, SearchQueryUserFilter> userFilter,
+			PreparedStatementFactory<R> preparedStatementFactory,
+			Function<Identity, SearchQueryIdentityFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
@@ -865,10 +866,9 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
-	public final SearchQuery<R> createSearchQuery(User user, int page, int count)
+	public final SearchQuery<R> createSearchQuery(Identity identity, int page, int count)
 	{
-		Objects.requireNonNull(user, "user");
-		return doCreateSearchQuery(user, page, count);
+		return doCreateSearchQuery(identity, page, count);
 	}
 
 	@Override
@@ -878,12 +878,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private SearchQuery<R> doCreateSearchQuery(User user, int page, int count)
+	private SearchQuery<R> doCreateSearchQuery(Identity identity, int page, int count)
 	{
 		var builder = SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count);
 
-		if (user != null)
-			builder = builder.with(userFilter.apply(user));
+		if (identity != null)
+			builder = builder.with(userFilter.apply(identity));
 
 		return builder
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()),

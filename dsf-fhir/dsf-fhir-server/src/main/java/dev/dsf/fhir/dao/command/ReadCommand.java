@@ -8,13 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -28,7 +21,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.event.EventHandler;
@@ -42,6 +35,13 @@ import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 
 public class ReadCommand extends AbstractCommand implements Command
 {
@@ -56,17 +56,20 @@ public class ReadCommand extends AbstractCommand implements Command
 	private final ReferenceCleaner referenceCleaner;
 	private final PreferHandlingType handlingType;
 
+	private String resourceTypeName;
 	private Bundle multipleResult;
 	private Resource singleResult;
 	private OperationOutcome singleResultSearchWarning;
 	private Response responseResult;
+	private boolean search;
 
-	public ReadCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
-			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner, PreferHandlingType handlingType)
+	public ReadCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
+			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
+			int defaultPageCount, DaoProvider daoProvider, ParameterConverter parameterConverter,
+			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner,
+			PreferHandlingType handlingType)
 	{
-		super(5, index, user, returnType, bundle, entry, serverBase, authorizationHelper);
+		super(5, index, identity, returnType, bundle, entry, serverBase, authorizationHelper);
 
 		this.defaultPageCount = defaultPageCount;
 
@@ -97,16 +100,17 @@ public class ReadCommand extends AbstractCommand implements Command
 			requestUrl = idTranslationTable.getOrDefault(requestUrl, new IdType(requestUrl)).getValue();
 
 		UriComponents componentes = UriComponentsBuilder.fromUriString(requestUrl).build();
+		resourceTypeName = componentes.getPathSegments().get(0);
 
 		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
-			readById(connection, componentes.getPathSegments().get(0), componentes.getPathSegments().get(1));
+			readById(connection, resourceTypeName, componentes.getPathSegments().get(1));
 		else if (componentes.getPathSegments().size() == 4
 				&& Constants.PARAM_HISTORY.equals(componentes.getPathSegments().get(2))
 				&& componentes.getQueryParams().isEmpty())
-			readByIdAndVersion(connection, componentes.getPathSegments().get(0), componentes.getPathSegments().get(1),
+			readByIdAndVersion(connection, resourceTypeName, componentes.getPathSegments().get(1),
 					componentes.getPathSegments().get(3));
 		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
-			readByCondition(connection, componentes.getPathSegments().get(0),
+			readByCondition(connection, resourceTypeName,
 					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
 			throw new WebApplicationException(responseGenerator.badReadRequestUrl(index, requestUrl));
@@ -141,7 +145,7 @@ public class ReadCommand extends AbstractCommand implements Command
 				else
 					singleResult = r;
 
-				authorizationHelper.checkReadAllowed(connection, user, r);
+				authorizationHelper.checkReadAllowed(index, connection, identity, r);
 			}
 		}
 	}
@@ -176,7 +180,7 @@ public class ReadCommand extends AbstractCommand implements Command
 				else
 					singleResult = r;
 
-				authorizationHelper.checkReadAllowed(connection, user, r);
+				authorizationHelper.checkReadAllowed(index, connection, identity, r);
 			}
 		}
 	}
@@ -195,7 +199,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			Integer count = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_COUNT);
 			int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-			SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(user, effectivePage, effectiveCount);
+			SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(identity, effectivePage,
+					effectiveCount);
 			query.configureParameters(cleanQueryParameters);
 			List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
 
@@ -216,7 +221,7 @@ public class ReadCommand extends AbstractCommand implements Command
 				singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
 				multipleResult = null;
 
-				authorizationHelper.checkReadAllowed(connection, user, singleResult);
+				authorizationHelper.checkReadAllowed(index, connection, identity, singleResult);
 			}
 			else if (multipleResult != null && multipleResult.getEntry().size() == 2
 					&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(0).getSearch().getMode())
@@ -226,7 +231,7 @@ public class ReadCommand extends AbstractCommand implements Command
 				singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(1).getResource();
 				multipleResult = null;
 
-				authorizationHelper.checkReadAllowed(connection, user, singleResult);
+				authorizationHelper.checkReadAllowed(index, connection, identity, singleResult);
 			}
 			else if (multipleResult != null && multipleResult.getEntry().size() == 2
 					&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(1).getSearch().getMode())
@@ -236,12 +241,14 @@ public class ReadCommand extends AbstractCommand implements Command
 				singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(0).getResource();
 				multipleResult = null;
 
-				authorizationHelper.checkReadAllowed(connection, user, singleResult);
+				authorizationHelper.checkReadAllowed(index, connection, identity, singleResult);
 			}
 			else
 			{
-				authorizationHelper.checkSearchAllowed(user, resourceTypeName);
-				authorizationHelper.filterIncludeResults(connection, user, multipleResult);
+				authorizationHelper.checkSearchAllowed(index, identity, resourceTypeName);
+				authorizationHelper.filterIncludeResults(index, connection, identity, multipleResult);
+
+				search = true;
 			}
 		}
 	}
@@ -260,7 +267,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			response.setStatus(Status.OK.getStatusCode() + " " + Status.OK.getReasonPhrase());
 			response.setLocation(singleResult.getIdElement()
 					.withServerBase(serverBase, singleResult.getResourceType().name()).getValue());
-			response.setEtag(new EntityTag(singleResult.getMeta().getVersionId(), true).toString());
+			response.setEtag(RuntimeDelegate.getInstance().createHeaderDelegate(EntityTag.class)
+					.toString(new EntityTag(singleResult.getMeta().getVersionId(), true)));
 			response.setLastModified(singleResult.getMeta().getLastUpdated());
 
 			setSingleResult(resultEntry, singleResult);
@@ -309,5 +317,16 @@ public class ReadCommand extends AbstractCommand implements Command
 	protected void setSingleResult(BundleEntryComponent resultEntry, Resource singleResult)
 	{
 		resultEntry.setResource(singleResult);
+	}
+
+	@Override
+	public String getResourceTypeName()
+	{
+		return resourceTypeName;
+	}
+
+	public boolean isSearch()
+	{
+		return search;
 	}
 }

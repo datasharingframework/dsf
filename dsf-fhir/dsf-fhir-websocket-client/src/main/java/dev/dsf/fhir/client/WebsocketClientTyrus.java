@@ -11,9 +11,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.net.ssl.SSLContext;
-import javax.websocket.CloseReason;
-import javax.websocket.DeploymentException;
-import javax.websocket.Session;
 
 import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -25,6 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.IParser;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Session;
 
 public class WebsocketClientTyrus implements WebsocketClient
 {

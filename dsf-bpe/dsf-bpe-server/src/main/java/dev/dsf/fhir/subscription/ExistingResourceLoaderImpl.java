@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
@@ -22,6 +20,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.bpe.dao.LastEventTimeDao;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.websocket.ResourceHandler;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingResourceLoader<R>
 {

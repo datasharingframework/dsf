@@ -13,12 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
+import jakarta.ws.rs.core.UriBuilder;
 
 public interface SearchQueryParameter<R extends Resource> extends MatcherParameter
 {

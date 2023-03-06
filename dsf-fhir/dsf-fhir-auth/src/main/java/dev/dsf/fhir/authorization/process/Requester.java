@@ -6,61 +6,61 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
+import dev.dsf.common.auth.Identity;
 
 public interface Requester extends WithAuthorization
 {
 	static Requester localAll()
 	{
-		return new All(UserRole.LOCAL);
+		return all(true);
 	}
 
 	static Requester remoteAll()
 	{
-		return new All(UserRole.REMOTE);
+		return all(false);
 	}
 
-	static Requester all(UserRole role)
+	static Requester all(boolean localIdentity)
 	{
-		return new All(role);
+		return new All(localIdentity);
 	}
 
 	static Requester localOrganization(String organizationIdentifier)
 	{
-		return new Organization(UserRole.LOCAL, organizationIdentifier);
+		return organization(true, organizationIdentifier);
 	}
 
 	static Requester remoteOrganization(String organizationIdentifier)
 	{
-		return new Organization(UserRole.REMOTE, organizationIdentifier);
+		return organization(false, organizationIdentifier);
 	}
 
-	static Requester organization(UserRole role, String organizationIdentifier)
+	static Requester organization(boolean localIdentity, String organizationIdentifier)
 	{
-		return new Organization(role, organizationIdentifier);
+		return new Organization(localIdentity, organizationIdentifier);
 	}
 
 	static Requester localRole(String consortiumIdentifier, String roleSystem, String roleCode)
 	{
-		return role(UserRole.LOCAL, consortiumIdentifier, roleSystem, roleCode);
+		return role(true, consortiumIdentifier, roleSystem, roleCode);
 	}
 
 	static Requester remoteRole(String consortiumIdentifier, String roleSystem, String roleCode)
 	{
-		return role(UserRole.REMOTE, consortiumIdentifier, roleSystem, roleCode);
+		return role(false, consortiumIdentifier, roleSystem, roleCode);
 	}
 
-	static Requester role(UserRole role, String consortiumIdentifier, String roleSystem, String roleCode)
+	static Requester role(boolean localIdentity, String consortiumIdentifier, String roleSystem, String roleCode)
 	{
-		return new Role(role, consortiumIdentifier, roleSystem, roleCode);
+		return new Role(localIdentity, consortiumIdentifier, roleSystem, roleCode);
 	}
 
 	boolean requesterMatches(Extension requesterExtension);
 
-	boolean isRequesterAuthorized(User requesterUser, Stream<OrganizationAffiliation> requesterAffiliations);
+	boolean isRequesterAuthorized(Identity requesterUser, Stream<OrganizationAffiliation> requesterAffiliations);
 
-	default boolean isRequesterAuthorized(User requesterUser, Collection<OrganizationAffiliation> requesterAffiliations)
+	default boolean isRequesterAuthorized(Identity requesterUser,
+			Collection<OrganizationAffiliation> requesterAffiliations)
 	{
 		return isRequesterAuthorized(requesterUser,
 				requesterAffiliations == null ? null : requesterAffiliations.stream());

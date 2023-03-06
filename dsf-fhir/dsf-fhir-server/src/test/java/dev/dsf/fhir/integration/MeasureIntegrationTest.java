@@ -8,8 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -21,6 +19,7 @@ import org.junit.Test;
 
 import dev.dsf.fhir.dao.LibraryDao;
 import dev.dsf.fhir.dao.MeasureDao;
+import jakarta.ws.rs.WebApplicationException;
 
 public class MeasureIntegrationTest extends AbstractIntegrationTest
 {

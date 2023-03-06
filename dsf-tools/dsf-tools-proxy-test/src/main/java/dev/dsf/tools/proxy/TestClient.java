@@ -3,12 +3,11 @@ package dev.dsf.tools.proxy;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.client.AbstractJerseyClient;
+import jakarta.ws.rs.core.Response;
 
 public class TestClient extends AbstractJerseyClient
 {

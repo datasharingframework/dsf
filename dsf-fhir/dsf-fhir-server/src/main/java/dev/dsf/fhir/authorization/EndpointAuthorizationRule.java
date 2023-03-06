@@ -14,8 +14,8 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
@@ -41,18 +41,18 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Endpoint newResource)
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Endpoint newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Endpoint newResource)
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Endpoint newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, Endpoint newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity, Endpoint newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

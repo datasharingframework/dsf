@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
@@ -20,6 +18,7 @@ import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
+import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.STRING, documentation = "Logical id of this resource")
 public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>

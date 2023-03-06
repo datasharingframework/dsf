@@ -23,14 +23,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.common.auth.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
-import dev.dsf.fhir.authentication.UserRole;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.CodeSystemDao;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
+import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -51,10 +53,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	protected final ReferenceResolver referenceResolver;
 	protected final OrganizationProvider organizationProvider;
 	protected final ReadAccessHelper readAccessHelper;
+	protected final ParameterConverter parameterConverter;
 
 	public AbstractAuthorizationRule(Class<R> resourceType, DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper)
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
 		this.resourceType = resourceType;
 		this.daoProvider = daoProvider;
@@ -62,18 +65,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		this.referenceResolver = referenceResolver;
 		this.organizationProvider = organizationProvider;
 		this.readAccessHelper = readAccessHelper;
-	}
-
-	@Override
-	public Class<R> getResourceType()
-	{
-		return resourceType;
-	}
-
-	@SuppressWarnings("unchecked")
-	protected final D getDao()
-	{
-		return (D) daoProvider.getDao(resourceType).orElseThrow();
+		this.parameterConverter = parameterConverter;
 	}
 
 	@Override
@@ -85,14 +77,32 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
+		Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 
 	@Override
-	public final Optional<String> reasonCreateAllowed(User user, R newResource)
+	public Class<R> getResourceType()
+	{
+		return resourceType;
+	}
+
+	protected String getResourceTypeName()
+	{
+		return getResourceType().getAnnotation(ResourceDef.class).name();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected final D getDao()
+	{
+		return (D) daoProvider.getDao(resourceType).orElseThrow();
+	}
+
+	@Override
+	public final Optional<String> reasonCreateAllowed(Identity identity, R newResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
-			return reasonCreateAllowed(connection, user, newResource);
+			return reasonCreateAllowed(connection, identity, newResource);
 		}
 		catch (SQLException e)
 		{
@@ -102,11 +112,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	}
 
 	@Override
-	public final Optional<String> reasonReadAllowed(User user, R existingResource)
+	public final Optional<String> reasonReadAllowed(Identity identity, R existingResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
-			return reasonReadAllowed(connection, user, existingResource);
+			return reasonReadAllowed(connection, identity, existingResource);
 		}
 		catch (SQLException e)
 		{
@@ -115,23 +125,16 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 	}
 
-	protected List<OrganizationAffiliation> getAffiliations(Connection connection, User user)
+	protected List<OrganizationAffiliation> getAffiliations(Connection connection, String organizationIdentifierValue)
 	{
-		if (user == null)
-			return Collections.emptyList();
-
-		Optional<String> identifierValue = user.getOrganization().getIdentifier().stream().filter(i -> i != null)
-				.filter(Identifier::hasSystem).filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem()))
-				.filter(Identifier::hasValue).findFirst().map(Identifier::getValue);
-
-		if (identifierValue.isEmpty())
+		if (organizationIdentifierValue == null)
 			return Collections.emptyList();
 
 		try
 		{
 			return daoProvider.getOrganizationAffiliationDao()
 					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-							connection, identifierValue.get());
+							connection, organizationIdentifierValue);
 		}
 		catch (SQLException e)
 		{
@@ -141,11 +144,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	}
 
 	@Override
-	public final Optional<String> reasonUpdateAllowed(User user, R oldResource, R newResource)
+	public final Optional<String> reasonUpdateAllowed(Identity identity, R oldResource, R newResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
-			return reasonUpdateAllowed(connection, user, oldResource, newResource);
+			return reasonUpdateAllowed(connection, identity, oldResource, newResource);
 		}
 		catch (SQLException e)
 		{
@@ -155,32 +158,17 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	}
 
 	@Override
-	public final Optional<String> reasonDeleteAllowed(User user, R oldResource)
+	public final Optional<String> reasonDeleteAllowed(Identity identity, R oldResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
-			return reasonDeleteAllowed(connection, user, oldResource);
+			return reasonDeleteAllowed(connection, identity, oldResource);
 		}
 		catch (SQLException e)
 		{
 			logger.warn("Error while accessing database", e);
 			throw new RuntimeException(e);
 		}
-	}
-
-	protected final boolean isLocalUser(User user)
-	{
-		return user != null && UserRole.LOCAL.equals(user.getRole());
-	}
-
-	protected final boolean isLocalPermanentDeleteUser(User user)
-	{
-		return isLocalUser(user) && user.isPermanentDeleteAllowed();
-	}
-
-	protected final boolean isRemoteUser(User user)
-	{
-		return user != null && UserRole.REMOTE.equals(user.getRole());
 	}
 
 	protected final boolean organizationWithIdentifierExists(Connection connection, Identifier organizationIdentifier)
@@ -250,20 +238,21 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				.map(ConceptDefinitionComponent::getCode).anyMatch(c -> c.equals(cCode));
 	}
 
-	protected final boolean isCurrentUserPartOfReferencedOrganizations(Connection connection, User user,
+	protected final boolean isCurrentIdentityPartOfReferencedOrganizations(Connection connection, Identity identity,
 			String referenceLocation, Collection<? extends Reference> references)
 	{
-		return isCurrentUserPartOfReferencedOrganizations(connection, user, referenceLocation, references.stream());
+		return isCurrentIdentityPartOfReferencedOrganizations(connection, identity, referenceLocation,
+				references.stream());
 	}
 
-	protected final boolean isCurrentUserPartOfReferencedOrganizations(Connection connection, User user,
+	protected final boolean isCurrentIdentityPartOfReferencedOrganizations(Connection connection, Identity identity,
 			String referenceLocation, Stream<? extends Reference> references)
 	{
-		return references
-				.anyMatch(r -> isCurrentUserPartOfReferencedOrganization(connection, user, referenceLocation, r));
+		return references.anyMatch(
+				r -> isCurrentIdentityPartOfReferencedOrganization(connection, identity, referenceLocation, r));
 	}
 
-	protected final boolean isCurrentUserPartOfReferencedOrganization(Connection connection, User user,
+	protected final boolean isCurrentIdentityPartOfReferencedOrganization(Connection connection, Identity identity,
 			String referenceLocation, Reference reference)
 	{
 		if (reference == null)
@@ -283,11 +272,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				return false;
 			}
 
-			Optional<Resource> resource = referenceResolver.resolveReference(user, resReference, connection);
+			Optional<Resource> resource = referenceResolver.resolveReference(identity, resReference, connection);
 			if (resource.isPresent() && resource.get() instanceof Organization)
 			{
 				// ignoring updates (version changes) to the organization id
-				boolean sameOrganization = user.getOrganization().getIdElement().getIdPart()
+				boolean sameOrganization = identity.getOrganization().getIdElement().getIdPart()
 						.equals(resource.get().getIdElement().getIdPart());
 				if (!sameOrganization)
 					logger.warn(
@@ -328,23 +317,78 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			return Optional.empty();
 	}
 
-	protected final Optional<Resource> resolveReference(Connection connection, User user,
+	protected final Optional<Resource> resolveReference(Connection connection, Identity identity,
 			Optional<ResourceReference> reference)
 	{
-		return reference.flatMap(ref -> referenceResolver.resolveReference(user, ref, connection));
+		return reference.flatMap(ref -> referenceResolver.resolveReference(identity, ref, connection));
 	}
 
 	@Override
-	public Optional<String> reasonPermanentDeleteAllowed(User user, R oldResource)
+	public Optional<String> reasonPermanentDeleteAllowed(Identity identity, R oldResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
-			return reasonPermanentDeleteAllowed(connection, user, oldResource);
+			return reasonPermanentDeleteAllowed(connection, identity, oldResource);
 		}
 		catch (SQLException e)
 		{
 			logger.warn("Error while accessing database", e);
 			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public final Optional<String> reasonSearchAllowed(Identity identity)
+	{
+		if (identity.hasRole(FhirServerRole.SEARCH))
+		{
+			logger.info("Search of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
+			return Optional.of("Identity has role " + FhirServerRole.SEARCH);
+		}
+		else
+		{
+			logger.warn("Search of {} unauthorized for identity '{}', no role {}", getResourceTypeName(),
+					identity.getName(), FhirServerRole.SEARCH);
+			return Optional.empty();
+		}
+	}
+
+	@Override
+	public final Optional<String> reasonHistoryAllowed(Identity identity)
+	{
+		if (identity.hasRole(FhirServerRole.HISTORY))
+		{
+			logger.info("History of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
+			return Optional.of("Identity has role " + FhirServerRole.HISTORY);
+		}
+		else
+		{
+			logger.warn("History of {} unauthorized for identity '{}', no role {}", getResourceTypeName(),
+					identity.getName(), FhirServerRole.HISTORY);
+			return Optional.empty();
+		}
+	}
+
+	@Override
+	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, Identity identity, R oldResource)
+	{
+		final String resourceId = oldResource.getIdElement().getIdPart();
+		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
+
+		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.PERMANENT_DELETE)
+				&& reasonDeleteAllowed(connection, identity, oldResource).isPresent())
+		{
+			logger.info("Permanent delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),
+					resourceId, resourceVersion, identity.getName());
+			return Optional.of("Identity is local identity and has role " + FhirServerRole.PERMANENT_DELETE);
+		}
+		else
+		{
+			logger.warn(
+					"Permanent delete of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(),
+					FhirServerRole.PERMANENT_DELETE);
+			return Optional.empty();
 		}
 	}
 }

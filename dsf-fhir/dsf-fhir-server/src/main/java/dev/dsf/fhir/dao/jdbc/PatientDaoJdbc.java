@@ -6,16 +6,16 @@ import org.hl7.fhir.r4.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.PatientDao;
+import dev.dsf.fhir.search.filter.PatientIdentityFilter;
 import dev.dsf.fhir.search.parameters.PatientActive;
 import dev.dsf.fhir.search.parameters.PatientIdentifier;
-import dev.dsf.fhir.search.parameters.user.PatientUserFilter;
 
 public class PatientDaoJdbc extends AbstractResourceDaoJdbc<Patient> implements PatientDao
 {
 	public PatientDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Patient.class, "patients", "patient", "patient_id",
-				PatientUserFilter::new, with(PatientActive::new, PatientIdentifier::new), with());
+				PatientIdentityFilter::new, with(PatientActive::new, PatientIdentifier::new), with());
 	}
 
 	@Override

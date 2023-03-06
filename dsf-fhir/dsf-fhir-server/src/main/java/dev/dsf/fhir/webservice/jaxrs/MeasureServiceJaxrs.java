@@ -1,10 +1,9 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
-import javax.ws.rs.Path;
-
 import org.hl7.fhir.r4.model.Measure;
 
 import dev.dsf.fhir.webservice.specification.MeasureService;
+import jakarta.ws.rs.Path;
 
 @Path(MeasureServiceJaxrs.PATH)
 public class MeasureServiceJaxrs extends AbstractResourceServiceJaxrs<Measure, MeasureService> implements MeasureService

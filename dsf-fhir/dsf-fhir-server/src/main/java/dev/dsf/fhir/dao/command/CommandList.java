@@ -1,8 +1,8 @@
 package dev.dsf.fhir.dao.command;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.Bundle;
+
+import jakarta.ws.rs.WebApplicationException;
 
 public interface CommandList
 {

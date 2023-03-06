@@ -31,8 +31,9 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
@@ -43,6 +44,8 @@ import dev.dsf.fhir.search.SearchQuery;
 
 public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> implements ReadAccessDaoTest<Binary>
 {
+	private static final Logger logger = LoggerFactory.getLogger(BinaryDaoTest.class);
+
 	private static final String CONTENT_TYPE = "text/plain";
 	private static final byte[] DATA1 = "1234567890".getBytes();
 	private static final byte[] DATA2 = "VBERi0xLjUNJeLjz9MNCjEwIDAgb2JqDTw8L0xpbmVhcml6ZWQgMS9MIDEzMDA2OC9PIDEyL0UgMTI1NzM1L04gMS9UIDEyOTc2NC9IIFsgNTQ2IDIwNF"
@@ -142,7 +145,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(User.local(org), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -169,7 +172,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(User.local(org), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -207,7 +210,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(User.local(createdOrg), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdOrg), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -265,7 +268,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(User.local(createdMemberOrg), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdMemberOrg), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -1166,7 +1169,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
 		Binary createdB = dao.create(b);
-		System.out.println(fhirContext.newJsonParser().encodeResourceToString(createdB));
+		logger.debug("Created Binary {}", fhirContext.newJsonParser().encodeResourceToString(createdB));
 
 		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
 		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);

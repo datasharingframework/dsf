@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -34,6 +31,8 @@ import dev.dsf.bpe.ConstantsBase;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest
 {

@@ -3,11 +3,6 @@ package dev.dsf.fhir.webservice.impl;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.hl7.fhir.r4.model.Binary;
 
 import ca.uhn.fhir.rest.api.Constants;
@@ -24,6 +19,10 @@ import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.webservice.specification.BinaryService;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Binary> implements BinaryService
 {

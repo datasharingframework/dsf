@@ -3,7 +3,7 @@ package dev.dsf.bpe.client;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 public interface WebserviceClient
 {

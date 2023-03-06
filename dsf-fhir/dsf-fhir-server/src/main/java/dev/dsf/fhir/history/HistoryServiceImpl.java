@@ -4,30 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.HistoryDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
-import dev.dsf.fhir.history.user.HistoryUserFilterFactory;
+import dev.dsf.fhir.history.filter.HistoryIdentityFilterFactory;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceCleaner;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 public class HistoryServiceImpl implements HistoryService, InitializingBean
 {
@@ -38,11 +37,11 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	private final ResponseGenerator responseGenerator;
 	private final ReferenceCleaner referenceCleaner;
 	private final HistoryDao historyDao;
-	private final HistoryUserFilterFactory historyUserFilterFactory;
+	private final HistoryIdentityFilterFactory historyUserFilterFactory;
 
 	public HistoryServiceImpl(String serverBase, int defaultPageCount, ParameterConverter parameterConverter,
 			ExceptionHandler exceptionHandler, ResponseGenerator responseGenerator, ReferenceCleaner referenceCleaner,
-			HistoryDao historyDao, HistoryUserFilterFactory historyUserFilterFactory)
+			HistoryDao historyDao, HistoryIdentityFilterFactory historyUserFilterFactory)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
@@ -67,19 +66,20 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	}
 
 	@Override
-	public Bundle getHistory(User user, UriInfo uri, HttpHeaders headers)
+	public Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers)
 	{
-		return getHistory(user, uri, headers, null, null);
+		return getHistory(identity, uri, headers, null, null);
 	}
 
 	@Override
-	public Bundle getHistory(User user, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resource)
+	public Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resource)
 	{
-		return getHistory(user, uri, headers, resource, null);
+		return getHistory(identity, uri, headers, resource, null);
 	}
 
 	@Override
-	public Bundle getHistory(User user, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resource, String id)
+	public Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resource,
+			String id)
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
@@ -99,21 +99,20 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		String path = null;
 		History history;
 		if (resource == null && id == null)
-			history = exceptionHandler
-					.handleSqlException(() -> historyDao.readHistory(historyUserFilterFactory.getUserFilters(user),
-							pageAndCount, atParameter, sinceParameter));
+			history = exceptionHandler.handleSqlException(() -> historyDao.readHistory(
+					historyUserFilterFactory.getIdentityFilters(identity), pageAndCount, atParameter, sinceParameter));
 		else if (resource != null && id != null)
 		{
 			history = exceptionHandler.handleSqlException(() -> historyDao.readHistory(
-					historyUserFilterFactory.getUserFilter(user, resource), pageAndCount, atParameter, sinceParameter,
-					resource, parameterConverter.toUuid(getResourceTypeName(resource), id)));
+					historyUserFilterFactory.getIdentityFilter(identity, resource), pageAndCount, atParameter,
+					sinceParameter, resource, parameterConverter.toUuid(getResourceTypeName(resource), id)));
 			path = resource.getAnnotation(ResourceDef.class).name();
 		}
 		else if (resource != null)
 		{
 			history = exceptionHandler.handleSqlException(
-					() -> historyDao.readHistory(historyUserFilterFactory.getUserFilter(user, resource), pageAndCount,
-							atParameter, sinceParameter, resource));
+					() -> historyDao.readHistory(historyUserFilterFactory.getIdentityFilter(identity, resource),
+							pageAndCount, atParameter, sinceParameter, resource));
 			path = resource.getAnnotation(ResourceDef.class).name();
 		}
 		else

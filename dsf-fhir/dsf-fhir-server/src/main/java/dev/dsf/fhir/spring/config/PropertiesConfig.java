@@ -45,13 +45,9 @@ public class PropertiesConfig
 	@Value("${dev.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
 
-	@Documentation(required = true, description = "List of SHA512 thumbprints as hex from local client certificates that can be used to access the DSF FHIR server; comma or space separated list, YAML block scalars supported", recommendation = "Besides the DSF BPE client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
-	@Value("#{'${dev.dsf.fhir.server.user.thumbprints}'.trim().split('(,[ ]?)|(\\n)')}")
-	private List<String> userThumbprints;
-
-	@Documentation(required = true, description = "List of SHA512 thumbprints as hex from local client certificates that can be used to access the DSF FHIR server for permanent deletes; comma or space separated list, YAML block scalars supported", recommendation = "Besides the DSF BPE client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
-	@Value("#{'${dev.dsf.fhir.server.user.thumbprints.permanent.delete}'.trim().split('(,[ ]?)|(\\n)')}")
-	private List<String> userPermanentDeleteThumbprints;
+	@Documentation(required = true, description = "Role config YAML")
+	@Value("${dev.dsf.fhir.server.roleConfig}")
+	private String roleConfig;
 
 	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
 	@Value("${dev.dsf.fhir.server.organization.identifier.value}")
@@ -105,6 +101,9 @@ public class PropertiesConfig
 	@Value("#{'${dev.dsf.fhir.server.cors.origins:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> allowedOrigins;
 
+	@Value("${jetty.status.port}")
+	private int jettyStatusConnectorPort;
+
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
@@ -149,14 +148,9 @@ public class PropertiesConfig
 		return defaultPageCount;
 	}
 
-	public List<String> getUserThumbprints()
+	public String getRoleConfig()
 	{
-		return Collections.unmodifiableList(userThumbprints);
-	}
-
-	public List<String> getUserPermanentDeleteThumbprints()
-	{
-		return Collections.unmodifiableList(userPermanentDeleteThumbprints);
+		return roleConfig;
 	}
 
 	public String getOrganizationIdentifierValue()
@@ -222,5 +216,10 @@ public class PropertiesConfig
 	public List<String> getAllowedOrigins()
 	{
 		return Collections.unmodifiableList(allowedOrigins);
+	}
+
+	public int getJettyStatusConnectorPort()
+	{
+		return jettyStatusConnectorPort;
 	}
 }

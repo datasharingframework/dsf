@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -17,7 +15,7 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
@@ -28,6 +26,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
 
 public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>>
 		extends AbstractCommandWithResource<R, D> implements Command
@@ -36,13 +35,13 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 
 	private final HTTPVerb verb;
 
-	public CheckReferencesCommand(int index, User user, PreferReturnType returnType, Bundle bundle,
+	public CheckReferencesCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource,
 			HTTPVerb verb, D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver)
 	{
-		super(4, index, user, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
+		super(4, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
 
 		this.verb = verb;
@@ -79,5 +78,11 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 		}
 
 		return true;
+	}
+
+	@Override
+	public String getResourceTypeName()
+	{
+		throw new UnsupportedOperationException();
 	}
 }

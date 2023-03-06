@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
@@ -17,6 +15,7 @@ import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
+import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = SubscriptionPayload.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription-payload", type = SearchParamType.TOKEN, documentation = "The mime-type of the notification payload")
 public class SubscriptionPayload extends AbstractTokenParameter<Subscription>

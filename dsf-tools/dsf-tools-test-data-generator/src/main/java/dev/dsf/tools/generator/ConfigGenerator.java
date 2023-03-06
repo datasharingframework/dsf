@@ -26,8 +26,7 @@ public class ConfigGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigGenerator.class);
 
-	private static final String P_KEY_SERVER_USER_THUMBPRINTS = "dev.dsf.fhir.server.user.thumbprints";
-	private static final String P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE = "dev.dsf.fhir.server.user.thumbprints.permanent.delete";
+	private static final String P_KEY_ROLE_CONFIG = "dev.dsf.fhir.server.roleConfig";
 
 	private Properties javaTestFhirConfigProperties;
 
@@ -74,19 +73,18 @@ public class ConfigGenerator
 
 	public void modifyJavaTestFhirConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
 		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
 
 		Path javaTestFhirConfigTemplateFile = Paths
 				.get("src/main/resources/config-templates/java-test-fhir-config.properties");
 		javaTestFhirConfigProperties = readProperties(javaTestFhirConfigTemplateFile);
-		javaTestFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS,
-				testClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		javaTestFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE,
-				testClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+		javaTestFhirConfigProperties.setProperty(P_KEY_ROLE_CONFIG, String.format("""
+				- webbrowser_test_user:
+				    thumbprint: %s
+				    role:
+				      - ORGANIZATION_LOCAL
+				      - PERMANENT_DELETE
+				""", webbrowserTestUser.getCertificateSha512ThumbprintHex()));
 
 		writeProperties(Paths.get("config/java-test-fhir-config.properties"), javaTestFhirConfigProperties);
 	}

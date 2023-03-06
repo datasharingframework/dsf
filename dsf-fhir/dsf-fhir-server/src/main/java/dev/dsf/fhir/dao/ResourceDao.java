@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
@@ -355,7 +355,7 @@ public interface ResourceDao<R extends Resource>
 	 */
 	PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException;
 
-	SearchQuery<R> createSearchQuery(User user, int page, int count);
+	SearchQuery<R> createSearchQuery(Identity identity, int page, int count);
 
 	SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count);
 

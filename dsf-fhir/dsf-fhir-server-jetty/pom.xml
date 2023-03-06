@@ -9,22 +9,10 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<main.basedir>${project.basedir}/../..</main.basedir>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-server</artifactId>
-			<!-- Workaround for exec maven plugin issue in dsf-fhir-server module -->
-			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
-			<exclusions>
-				<exclusion>
-					<groupId>dev.dsf</groupId>
-					<artifactId>dsf-tools-bundle-generator</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -34,25 +22,33 @@
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-documentation-generator</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>jetty-utils</artifactId>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-jetty</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-server-impl</artifactId>
+			<artifactId>websocket-jakarta-server</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.jetty.toolchain</groupId>
+					<artifactId>jetty-jakarta-websocket-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -101,6 +97,7 @@
 						<configuration>
 							<outputDirectory>docker/lib</outputDirectory>
 							<includeScope>compile</includeScope>
+							<excludeArtifactIds>camunda-bpmn-model,camunda-xml-model</excludeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
@@ -121,6 +118,24 @@
 							<outputDirectory>docker</outputDirectory>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-status-client-to-docker</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>dev.dsf</groupId>
+									<artifactId>dsf-common-status</artifactId>
+									<version>${project.version}</version>
+									<destFileName>dsf_status_client.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>docker</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -132,6 +147,7 @@
 							<directory>docker</directory>
 							<includes>
 								<include>dsf_fhir.jar</include>
+								<include>dsf_status_client.jar</include>
 								<include>lib/*.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>

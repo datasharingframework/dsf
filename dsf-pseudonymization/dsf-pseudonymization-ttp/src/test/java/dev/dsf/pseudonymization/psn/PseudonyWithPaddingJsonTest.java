@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
@@ -14,6 +16,8 @@ import dev.dsf.pseudonymization.recordlinkage.TestMedicId;
 
 public class PseudonyWithPaddingJsonTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(PseudonyWithPaddingJsonTest.class);
+
 	@Test
 	public void testWriteRead() throws Exception
 	{
@@ -25,7 +29,7 @@ public class PseudonyWithPaddingJsonTest
 		o.registerSubtypes(new NamedType(TestMedicId.class, "TestMedicId"));
 
 		String string = o.writeValueAsString(p);
-		System.out.println(string);
+		logger.debug(string);
 
 		PseudonymWithPadding read = o.readValue(string, PseudonymWithPadding.class);
 		assertNotNull(read);

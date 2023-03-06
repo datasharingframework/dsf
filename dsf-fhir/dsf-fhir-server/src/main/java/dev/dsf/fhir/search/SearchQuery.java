@@ -15,8 +15,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 {
@@ -56,7 +55,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<SearchQueryParameter<R>>();
 		private final List<SearchQueryRevIncludeParameterFactory> revIncludeParameters = new ArrayList<>();
 
-		private SearchQueryUserFilter userFilter; // may be null
+		private SearchQueryIdentityFilter userFilter; // may be null
 
 		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceColumn, int page,
 				int count)
@@ -69,7 +68,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			this.count = count;
 		}
 
-		public SearchQueryBuilder<R> with(SearchQueryUserFilter userFilter)
+		public SearchQueryBuilder<R> with(SearchQueryIdentityFilter userFilter)
 		{
 			this.userFilter = userFilter;
 			return this;
@@ -122,7 +121,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private final String resourceColumn;
 	private final String resourceTable;
 
-	private final SearchQueryUserFilter userFilter;
+	private final SearchQueryIdentityFilter userFilter;
 
 	private final PageAndCount pageAndCount;
 
@@ -137,8 +136,9 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private List<SearchQueryIncludeParameter> includeParameters = Collections.emptyList();
 	private List<SearchQueryIncludeParameter> revIncludeParameters = Collections.emptyList();
 
-	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn, SearchQueryUserFilter userFilter,
-			int page, int count, List<? extends SearchQueryParameter<R>> searchParameters,
+	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn,
+			SearchQueryIdentityFilter userFilter, int page, int count,
+			List<? extends SearchQueryParameter<R>> searchParameters,
 			List<? extends SearchQueryRevIncludeParameterFactory> revIncludeParameters)
 	{
 		this.resourceType = resourceType;

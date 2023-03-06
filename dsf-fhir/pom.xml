@@ -21,7 +21,7 @@
 	</modules>
 	
 	<properties>
-		<main.basedir>${project.basedir}/..</main.basedir>
+		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
 
 	<dependencies>
@@ -105,6 +105,22 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-status</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

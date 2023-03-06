@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.parser.DataFormatException;
-import dev.dsf.fhir.authentication.UserRole;
 import dev.dsf.fhir.dao.ReadAccessDao;
 
 public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
@@ -38,17 +37,16 @@ public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
 	}
 
 	@Override
-	public List<String> getAccessTypes(Connection connection, UUID resourceId, long version, UserRole role,
+	public List<String> getAccessTypes(Connection connection, UUID resourceId, long version, boolean localIdentity,
 			UUID organizationId) throws SQLException
 	{
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resourceId, "resourceId");
 		if (version <= 0)
 			throw new IllegalArgumentException("version <= 0");
-		Objects.requireNonNull(role, "role");
 		Objects.requireNonNull(organizationId, "organizationId");
 
-		try (PreparedStatement statement = connection.prepareStatement(getReadAllowedQuery(role)))
+		try (PreparedStatement statement = connection.prepareStatement(getReadAllowedQuery(localIdentity)))
 		{
 			statement.setObject(1, uuidToPgObject(resourceId));
 			statement.setLong(2, version);
@@ -65,17 +63,12 @@ public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
 		}
 	}
 
-	private String getReadAllowedQuery(UserRole role)
+	private String getReadAllowedQuery(boolean localIdentity)
 	{
-		switch (role)
-		{
-			case LOCAL:
-				return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND resource_version = ? AND (access_type = 'ALL' OR access_type = 'LOCAL' OR organization_id = ?) ORDER BY access_type";
-			case REMOTE:
-				return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND resource_version = ? AND (access_type = 'ALL' OR organization_id = ?) ORDER BY access_type";
-			default:
-				throw new IllegalArgumentException(UserRole.class.getName() + " " + role + " not supported");
-		}
+		if (localIdentity)
+			return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND resource_version = ? AND (access_type = 'ALL' OR access_type = 'LOCAL' OR organization_id = ?) ORDER BY access_type";
+		else
+			return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND resource_version = ? AND (access_type = 'ALL' OR organization_id = ?) ORDER BY access_type";
 	}
 
 	private PGobject uuidToPgObject(UUID uuid)

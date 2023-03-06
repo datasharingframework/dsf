@@ -13,16 +13,16 @@ import org.postgresql.util.PGobject;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.BinaryDao;
+import dev.dsf.fhir.search.filter.BinaryIdentityFilter;
 import dev.dsf.fhir.search.parameters.BinaryContentType;
-import dev.dsf.fhir.search.parameters.user.BinaryUserFilter;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
 	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
-				new PreparedStatementFactoryBinary(fhirContext), BinaryUserFilter::new, with(BinaryContentType::new),
-				with());
+				new PreparedStatementFactoryBinary(fhirContext), BinaryIdentityFilter::new,
+				with(BinaryContentType::new), with());
 	}
 
 	@Override

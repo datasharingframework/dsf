@@ -10,18 +10,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponents;
@@ -29,7 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.ValidationResult;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
@@ -46,9 +40,14 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 
 public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
-		implements Command
+		implements ModifyingCommand
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
@@ -60,13 +59,13 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected Response responseResult;
 	protected ValidationResult validationResult;
 
-	public CreateCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
+	public CreateCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
+			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator)
 	{
-		super(2, index, user, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
+		super(2, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
 
 		this.responseGenerator = responseGenerator;
@@ -88,8 +87,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				throw new WebApplicationException(
 						responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
 			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(responseGenerator.bundleEntryBadResourceId(index,
-						resource.getResourceType().name(), URL_UUID_PREFIX));
+				throw new WebApplicationException(
+						responseGenerator.bundleEntryBadResourceId(index, getResourceTypeName(), URL_UUID_PREFIX));
 			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
 				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
 						entry.getFullUrl(), resource.getIdElement().getValue()));
@@ -107,12 +106,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	private void addToIdTranslationTable(Map<String, IdType> idTranslationTable, Connection connection)
 	{
 		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
-				resource.getResourceType());
+				getResourceTypeName());
 		if (exists.isEmpty())
 		{
 			UUID id = UUID.randomUUID();
-			idTranslationTable.put(entry.getFullUrl(),
-					new IdType(resource.getResourceType().toString(), id.toString()));
+			idTranslationTable.put(entry.getFullUrl(), new IdType(getResourceTypeName(), id.toString()));
 		}
 		else
 		{
@@ -134,18 +132,22 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		// checking again if resource exists, could be that a previous command created, or deleted it
 		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
-				resource.getResourceType());
+				getResourceTypeName());
 		if (exists.isEmpty())
 		{
 			responseResult = null;
 
-			validationResult = validationHelper.checkResourceValidForCreate(user, resource);
+			validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
 
 			referencesHelper.resolveLogicalReferences(connection);
 
-			authorizationHelper.checkCreateAllowed(connection, user, resource);
+			authorizationHelper.checkCreateAllowed(index, connection, identity, resource);
 
 			createdResource = createWithTransactionAndId(connection, resource, getId(idTranslationTable));
+		}
+		else if (responseResult == null)
+		{
+			responseResult = responseGenerator.oneExists(exists.get(), entry.getRequest().getIfNoneExist());
 		}
 	}
 
@@ -167,7 +169,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		throw new RuntimeException("Error while retrieving id from id translation table");
 	}
 
-	private Optional<Resource> checkAlreadyExists(Connection connection, String ifNoneExist, ResourceType resourceType)
+	private Optional<Resource> checkAlreadyExists(Connection connection, String ifNoneExist, String resourceTypeName)
 			throws WebApplicationException
 	{
 		if (ifNoneExist == null)
@@ -211,7 +213,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (result.getTotal() == 1)
 			return Optional.of(result.getPartialResult().get(0));
 		else if (result.getTotal() > 1)
-			throw new WebApplicationException(responseGenerator.multipleExists(resourceType.name(), ifNoneExist));
+			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, ifNoneExist));
 
 		return Optional.empty();
 	}
@@ -253,8 +255,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			BundleEntryResponseComponent response = resultEntry.getResponse();
 			response.setStatus(Status.CREATED.getStatusCode() + " " + Status.CREATED.getReasonPhrase());
 			response.setLocation(location.getValue());
-			response.setEtag(
-					new EntityTag(createdResourceWithResolvedReferences.getMeta().getVersionId(), true).toString());
+			response.setEtag(RuntimeDelegate.getInstance().createHeaderDelegate(EntityTag.class)
+					.toString(new EntityTag(createdResourceWithResolvedReferences.getMeta().getVersionId(), true)));
 			response.setLastModified(createdResourceWithResolvedReferences.getMeta().getLastUpdated());
 
 			return Optional.of(resultEntry);

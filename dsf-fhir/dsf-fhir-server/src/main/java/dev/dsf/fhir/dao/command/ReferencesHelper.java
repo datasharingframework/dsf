@@ -4,12 +4,11 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.service.ResourceReference;
+import jakarta.ws.rs.WebApplicationException;
 
 public interface ReferencesHelper<R extends Resource>
 {

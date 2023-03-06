@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Measure;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.MeasureDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
@@ -27,18 +27,18 @@ public class MeasureAuthorizationRule extends AbstractMetaTagAuthorizationRule<M
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Measure newResource)
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Measure newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Measure newResource)
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Measure newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, Measure newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity, Measure newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

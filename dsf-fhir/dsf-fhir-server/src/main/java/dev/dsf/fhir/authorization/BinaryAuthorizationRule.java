@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
 
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.authentication.User;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
@@ -36,24 +36,25 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 				.collect(Collectors.toMap(AuthorizationRule::getResourceType, Function.identity()));
 	}
 
+
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Binary newResource)
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Binary newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Binary newResource)
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Binary newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, identity, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, User user, Binary newResource)
+	private Optional<String> newResourceOk(Connection connection, Identity identity, Binary newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
 		boolean hasValidReadAccessTag = hasValidReadAccessTag(connection, newResource);
-		boolean hasValidSecurityContext = hasValidSecurityContext(connection, user, newResource);
+		boolean hasValidSecurityContext = hasValidSecurityContext(connection, identity, newResource);
 
 		if (!hasValidReadAccessTag && !hasValidSecurityContext)
 		{
@@ -71,14 +72,14 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
-	private boolean hasValidSecurityContext(Connection connection, User user, Binary newResource)
+	private boolean hasValidSecurityContext(Connection connection, Identity identity, Binary newResource)
 	{
 		if (newResource != null && newResource.hasSecurityContext())
 		{
 			Optional<ResourceReference> ref = createIfLiteralInternalOrLogicalReference("Binary.securityContext",
 					newResource.getSecurityContext());
 			Optional<Resource> securityContextOpt = ref
-					.flatMap(r -> referenceResolver.resolveReference(user, r, connection));
+					.flatMap(r -> referenceResolver.resolveReference(identity, r, connection));
 
 			return securityContextOpt.isPresent() && rules.containsKey(securityContextOpt.get().getClass());
 		}

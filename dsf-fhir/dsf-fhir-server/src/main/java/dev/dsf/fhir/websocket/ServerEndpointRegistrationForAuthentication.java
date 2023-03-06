@@ -1,30 +1,33 @@
 package dev.dsf.fhir.websocket;
 
-import javax.servlet.http.HttpSession;
-import javax.websocket.Endpoint;
-import javax.websocket.HandshakeResponse;
-import javax.websocket.server.HandshakeRequest;
-import javax.websocket.server.ServerEndpointConfig;
+import java.util.Objects;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.socket.server.standard.ServerEndpointRegistration;
 
-import dev.dsf.fhir.authentication.AuthenticationFilter;
-import dev.dsf.fhir.authentication.User;
+import jakarta.websocket.Endpoint;
 
-public class ServerEndpointRegistrationForAuthentication extends ServerEndpointRegistration
+public class ServerEndpointRegistrationForAuthentication extends ServerEndpointRegistration implements InitializingBean
 {
-	public ServerEndpointRegistrationForAuthentication(String path, Endpoint endpoint)
+	private final Configurator containerDefaultConfigurator;
+
+	public ServerEndpointRegistrationForAuthentication(Configurator containerDefaultConfigurator, String path,
+			Endpoint endpoint)
 	{
 		super(path, endpoint);
+
+		this.containerDefaultConfigurator = containerDefaultConfigurator;
 	}
 
 	@Override
-	public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response)
+	public void afterPropertiesSet() throws Exception
 	{
-		HttpSession httpSession = (HttpSession) request.getHttpSession();
-		User user = (User) httpSession.getAttribute(AuthenticationFilter.USER_PROPERTY);
+		Objects.requireNonNull(containerDefaultConfigurator, "containerDefaultConfigurator");
+	}
 
-		// don't use ServerEndpointRegistration#getUserProperties()
-		sec.getUserProperties().put(ServerEndpoint.USER_PROPERTY, user);
+	@Override
+	public Configurator getContainerDefaultConfigurator()
+	{
+		return containerDefaultConfigurator;
 	}
 }

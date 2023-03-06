@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.ws.rs.core.MultivaluedMap;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.openehr.client.OpenEhrClient;
@@ -17,6 +15,7 @@ import dev.dsf.openehr.model.datatypes.StringRowElement;
 import dev.dsf.openehr.model.structure.Column;
 import dev.dsf.openehr.model.structure.ResultSet;
 import dev.dsf.openehr.model.structure.RowElement;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 public class OpenEhrClientStub implements OpenEhrClient
 {

@@ -4,13 +4,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.hl7.fhir.r4.model.DomainResource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractCanonicalUrlParameter.UriSearchType;
+import jakarta.ws.rs.core.UriBuilder;
 
 public abstract class AbstractBooleanParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {

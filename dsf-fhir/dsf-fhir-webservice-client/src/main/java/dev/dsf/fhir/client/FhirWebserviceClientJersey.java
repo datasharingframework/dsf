@@ -14,17 +14,6 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -106,6 +95,17 @@ import dev.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import dev.dsf.fhir.service.ReferenceCleaner;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 
 public class FhirWebserviceClientJersey extends AbstractJerseyClient implements FhirWebserviceClient
 {
@@ -537,9 +537,10 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		{
 			if (oldValue.getMeta().hasVersionId())
 			{
-				String eTag = new EntityTag(oldValue.getMeta().getVersionIdElement().getValue(), true).toString();
-				request.header(HttpHeaders.IF_NONE_MATCH, eTag);
-				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_NONE_MATCH, eTag.toString());
+				EntityTag eTag = new EntityTag(oldValue.getMeta().getVersionIdElement().getValue(), true);
+				String eTagValue = RuntimeDelegate.getInstance().createHeaderDelegate(EntityTag.class).toString(eTag);
+				request.header(HttpHeaders.IF_NONE_MATCH, eTagValue);
+				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_NONE_MATCH, eTagValue);
 			}
 
 			if (oldValue.getMeta().hasLastUpdated())

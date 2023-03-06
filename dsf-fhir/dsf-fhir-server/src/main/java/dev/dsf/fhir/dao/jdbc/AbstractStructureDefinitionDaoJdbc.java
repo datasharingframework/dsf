@@ -10,9 +10,9 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.fhir.authentication.User;
+import dev.dsf.common.auth.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
-import dev.dsf.fhir.search.SearchQueryUserFilter;
+import dev.dsf.fhir.search.SearchQueryIdentityFilter;
 import dev.dsf.fhir.search.parameters.StructureDefinitionDate;
 import dev.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import dev.dsf.fhir.search.parameters.StructureDefinitionStatus;
@@ -26,7 +26,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 
 	public AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
 			FhirContext fhirContext, String resourceTable, String resourceColumn, String resourceIdColumn,
-			Function<User, SearchQueryUserFilter> userFilter)
+			Function<Identity, SearchQueryIdentityFilter> userFilter)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, StructureDefinition.class, resourceTable,
 				resourceColumn, resourceIdColumn, userFilter,

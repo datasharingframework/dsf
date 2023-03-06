@@ -263,6 +263,9 @@ public class PropertiesConfig
 	@Value("${dev.dsf.bpe.debug.log.message.variables:false}")
 	private boolean debugLogMessageVariables;
 
+	@Value("${jetty.status.port}")
+	private int jettyStatusConnectorPort;
+
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
@@ -575,5 +578,10 @@ public class PropertiesConfig
 	public boolean getDebugLogMessageVariables()
 	{
 		return debugLogMessageVariables;
+	}
+
+	public int getJettyStatusConnectorPort()
+	{
+		return jettyStatusConnectorPort;
 	}
 }

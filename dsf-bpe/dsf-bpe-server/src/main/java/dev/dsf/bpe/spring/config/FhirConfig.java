@@ -15,7 +15,6 @@ import java.util.UUID;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
-import org.camunda.bpm.engine.ProcessEngine;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
@@ -73,8 +71,7 @@ public class FhirConfig implements InitializingBean
 	private DaoConfig daoConfig;
 
 	@Autowired
-	@Lazy
-	private ProcessEngine processEngine;
+	private CamundaConfig camundaConfig;
 
 	@Bean
 	public FhirContext fhirContext()
@@ -187,8 +184,9 @@ public class FhirConfig implements InitializingBean
 	@Bean
 	public ResourceHandler<Task> taskHandler()
 	{
-		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(),
-				clientProvider().getLocalWebserviceClient(), taskHelper());
+		return new TaskHandler(camundaConfig.processEngine().getRuntimeService(),
+				camundaConfig.processEngine().getRepositoryService(), clientProvider().getLocalWebserviceClient(),
+				taskHelper());
 	}
 
 	@Bean
@@ -208,7 +206,7 @@ public class FhirConfig implements InitializingBean
 	@Bean
 	public ResourceHandler<QuestionnaireResponse> questionnaireResponseHandler()
 	{
-		return new QuestionnaireResponseHandler(processEngine.getTaskService());
+		return new QuestionnaireResponseHandler(camundaConfig.processEngine().getTaskService());
 	}
 
 	@Bean
