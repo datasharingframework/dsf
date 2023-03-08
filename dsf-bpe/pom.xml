@@ -14,7 +14,6 @@
 		<module>dsf-bpe-process-base</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
-		<module>dsf-bpe-webservice-client</module>
 	</modules>
 	
 	<properties>
@@ -64,11 +63,6 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-base</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
