@@ -24,10 +24,6 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-consent-client-stub</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-openehr-client-stub</artifactId>
 		</dependency>
 		<dependency>

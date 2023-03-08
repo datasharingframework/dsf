@@ -30,11 +30,6 @@
 
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-consent-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-openehr-model</artifactId>
 		</dependency>
 		<dependency>
