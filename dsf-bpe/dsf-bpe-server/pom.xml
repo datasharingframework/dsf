@@ -24,14 +24,6 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-openehr-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-openehr-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-mpi-client</artifactId>
 		</dependency>
 		<dependency>
