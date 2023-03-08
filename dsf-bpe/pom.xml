@@ -127,27 +127,6 @@
 
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-client-stub</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-medic</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-ttp</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-mpi-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>

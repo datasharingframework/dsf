@@ -13,7 +13,6 @@
 		<module>dsf-fhir</module>
 		<module>dsf-mpi</module>
 		<module>dsf-openehr</module>
-		<module>dsf-pseudonymization</module>
 		<module>dsf-tools</module>
 	</modules>
 

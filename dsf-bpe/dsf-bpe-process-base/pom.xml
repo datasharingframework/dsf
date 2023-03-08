@@ -25,19 +25,6 @@
 
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-pseudonymization-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-pseudonymization-medic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-pseudonymization-ttp</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-mpi-client</artifactId>
 		</dependency>
 

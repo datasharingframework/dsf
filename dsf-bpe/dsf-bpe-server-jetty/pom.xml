@@ -36,10 +36,6 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-pseudonymization-client-stub</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-jetty</artifactId>
 		</dependency>
 
