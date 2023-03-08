@@ -24,10 +24,6 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-mpi-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-build-info-reader</artifactId>
 		</dependency>
 		<dependency>
