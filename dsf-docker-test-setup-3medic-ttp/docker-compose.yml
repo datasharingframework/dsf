@@ -29,10 +29,10 @@ services:
         ipv4_address: 172.20.0.50
       internet:
         aliases:
-          - medic1-docker
-          - medic2-docker
-          - medic3-docker
-          - ttp-docker
+          - medic1
+          - medic2
+          - medic3
+          - ttp
     environment:
       TZ: Europe/Berlin
 
@@ -107,7 +107,7 @@ services:
       DEV_DSF_FHIR_DB_USER_USERNAME: medic1_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic1_fhir_permanent_delete_users
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic1_fhir_server_permanent_delete_user
-      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic1-docker/fhir
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic1/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
       DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 1
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
@@ -170,7 +170,7 @@ services:
       DEV_DSF_FHIR_DB_USER_USERNAME: medic2_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic2_fhir_permanent_delete_users
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic2_fhir_server_permanent_delete_user
-      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic2-docker/fhir
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic2/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
       DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 2
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
@@ -233,7 +233,7 @@ services:
       DEV_DSF_FHIR_DB_USER_USERNAME: medic3_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic3_fhir_permanent_delete_users
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic3_fhir_server_permanent_delete_user
-      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic3-docker/fhir
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic3/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
       DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 3
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
@@ -296,7 +296,7 @@ services:
       DEV_DSF_FHIR_DB_USER_USERNAME: ttp_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: ttp_fhir_permanent_delete_users
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: ttp_fhir_server_permanent_delete_user
-      DEV_DSF_FHIR_SERVER_BASE_URL: https://ttp-docker/fhir
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://ttp/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
       DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test TTP
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${TTP_BUNDLE_USER_THUMBPRINT}
@@ -369,11 +369,11 @@ services:
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic1_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic1_camunda_server_user
       DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
-      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic1-docker/fhir
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic1/fhir
       DEV_DSF_BPE_MAIL_HOST: mailhog
       DEV_DSF_BPE_MAIL_PORT: 1025
-      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic1-docker
-      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic1-docker
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic1
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic1
       #DEV_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       DEV_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.7.0,highmedorg_computeDataSharing/0.7.0,highmedorg_requestUpdateResources/0.7.0,highmedorg_updateAllowList/0.7.0
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
@@ -432,11 +432,11 @@ services:
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic2_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic2_camunda_server_user
       DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
-      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2-docker/fhir
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2/fhir
       DEV_DSF_BPE_MAIL_HOST: mailhog
       DEV_DSF_BPE_MAIL_PORT: 1025
-      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic2-docker
-      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic2-docker
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic2
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic2
       #DEV_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       DEV_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.7.0, highmedorg_computeDataSharing/0.7.0, highmedorg_requestUpdateResources/0.7.0, highmedorg_updateAllowList/0.7.0
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
@@ -495,11 +495,11 @@ services:
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic3_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic3_camunda_server_user
       DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
-      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic3-docker/fhir
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic3/fhir
       DEV_DSF_BPE_MAIL_HOST: mailhog
       DEV_DSF_BPE_MAIL_PORT: 1025
-      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic3-docker
-      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic3-docker
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic3
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic3
       #DEV_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       DEV_DSF_BPE_PROCESS_EXCLUDED: >
         highmedorg_computeFeasibility/0.7.0,
@@ -563,11 +563,11 @@ services:
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: ttp_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
       DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
-      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp-docker/fhir
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp/fhir
       DEV_DSF_BPE_MAIL_HOST: mailhog
       DEV_DSF_BPE_MAIL_PORT: 1025
-      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@ttp-docker
-      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@ttp-docker
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@ttp
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@ttp
       DEV_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'true'
       DEV_DSF_BPE_MAIL_SENDMAILONERRORLOGEVENT: 'true'
       DEV_DSF_BPE_PROCESS_EXCLUDED: |
