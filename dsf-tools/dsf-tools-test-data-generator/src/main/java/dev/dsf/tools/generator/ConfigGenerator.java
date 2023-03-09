@@ -82,7 +82,12 @@ public class ConfigGenerator
 				- webbrowser_test_user:
 				    thumbprint: %s
 				    role:
-				      - ORGANIZATION_LOCAL
+				      - CREATE
+				      - READ
+				      - UPDATE
+				      - DELETE
+				      - SEARCH
+				      - HISTORY
 				      - PERMANENT_DELETE
 				""", webbrowserTestUser.getCertificateSha512ThumbprintHex()));
 

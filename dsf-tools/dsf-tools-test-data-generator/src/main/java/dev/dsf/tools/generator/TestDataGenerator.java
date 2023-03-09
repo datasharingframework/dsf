@@ -30,7 +30,6 @@ public class TestDataGenerator
 		certificateGenerator.copyJavaTestCertificates();
 		certificateGenerator.copyDockerTestCertificates();
 		certificateGenerator.copyDockerTest3MedicTtpCertificates();
-		certificateGenerator.copyDockerTest3MedicTtpDockerCertificates();
 
 		Map<String, CertificateFiles> clientCertificateFilesByCommonName = certificateGenerator
 				.getClientCertificateFilesByCommonName();
@@ -51,7 +50,6 @@ public class TestDataGenerator
 
 		// fhir .env
 		envGenerator.generateAndWriteDockerTestFhirEnvFile(clientCertificateFilesByCommonName);
-		envGenerator.generateAndWriteDockerTest3MedicTtpFhirEnvFiles(clientCertificateFilesByCommonName);
 		envGenerator.generateAndWriteDockerTest3MedicTtpDockerFhirEnvFiles(clientCertificateFilesByCommonName);
 	}
 }
