@@ -47,29 +47,19 @@ dsf-docker-test-setup/fhir/.env
 ###
 # dsf-docker-test-setup-3medic-ttp ignores
 ###
+dsf-docker-test-setup-3medic-ttp/**/bpe/log/*.log
+dsf-docker-test-setup-3medic-ttp/**/bpe/log/*.log.gz
 dsf-docker-test-setup-3medic-ttp/**/bpe/plugin/*.jar
 dsf-docker-test-setup-3medic-ttp/**/bpe/process/*.jar
-dsf-docker-test-setup-3medic-ttp/**/bpe/secrets/*.pem
+dsf-docker-test-setup-3medic-ttp/**/bpe/psn/*.jceks
+dsf-docker-test-setup-3medic-ttp/**/bpe/psn/*.p12
 
-dsf-docker-test-setup-3medic-ttp/**/fhir/secrets/*.pem
-dsf-docker-test-setup-3medic-ttp/**/fhir/.env
+dsf-docker-test-setup-3medic-ttp/**/fhir/log/*.log
+dsf-docker-test-setup-3medic-ttp/**/fhir/log/*.log.gz
 
-###
-# dsf-docker-test-setup-3medic-ttp-docker ignores
-###
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log.gz
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/plugin/*.jar
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/process/*.jar
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/psn/*.jceks
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/psn/*.p12
-
-dsf-docker-test-setup-3medic-ttp-docker/**/fhir/log/*.log
-dsf-docker-test-setup-3medic-ttp-docker/**/fhir/log/*.log.gz
-
-dsf-docker-test-setup-3medic-ttp-docker/secrets/*.pem
-dsf-docker-test-setup-3medic-ttp-docker/.env
-dsf-docker-test-setup-3medic-ttp-docker/docker-compose.override.yml
+dsf-docker-test-setup-3medic-ttp/secrets/*.pem
+dsf-docker-test-setup-3medic-ttp/.env
+dsf-docker-test-setup-3medic-ttp/docker-compose.override.yml
 
 ###
 # dsf-tools ignores
