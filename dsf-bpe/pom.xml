@@ -14,7 +14,6 @@
 		<module>dsf-bpe-process-base</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
-		<module>dsf-bpe-webservice-client</module>
 	</modules>
 	
 	<properties>
@@ -68,11 +67,6 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-webservice-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -122,65 +116,6 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-tools-documentation-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-client-stub</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-medic</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-pseudonymization-ttp</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-mpi-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-mpi-client-stub</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-consent-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-consent-client-stub</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-openehr-model</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-openehr-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-openehr-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

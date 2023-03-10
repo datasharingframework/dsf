@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.variables.FhirResourceJacksonDeserializer;
 import dev.dsf.fhir.variables.FhirResourceJacksonSerializer;
-import dev.dsf.openehr.json.OpenEhrObjectMapperFactory;
 
 public class ObjectMapperFactory
 {
@@ -22,8 +21,8 @@ public class ObjectMapperFactory
 	public static ObjectMapper createObjectMapper(FhirContext fhirContext)
 	{
 		return JsonMapper.builder().serializationInclusion(Include.NON_NULL).serializationInclusion(Include.NON_EMPTY)
-				.addModule(fhirModule(fhirContext)).addModule(OpenEhrObjectMapperFactory.openEhrModule())
-				.disable(MapperFeature.AUTO_DETECT_CREATORS).disable(MapperFeature.AUTO_DETECT_FIELDS)
+				.addModule(fhirModule(fhirContext)).disable(MapperFeature.AUTO_DETECT_CREATORS)
+				.disable(MapperFeature.AUTO_DETECT_FIELDS)
 				// .disable(MapperFeature.AUTO_DETECT_GETTERS).disable(MapperFeature.AUTO_DETECT_IS_GETTERS)
 				.disable(MapperFeature.AUTO_DETECT_SETTERS).build();
 	}
