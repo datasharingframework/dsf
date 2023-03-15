@@ -13,8 +13,6 @@ public interface ConstantsBase
 	String BPMN_EXECUTION_VARIABLE_LEADING_TASK = "leadingTask";
 	String BPMN_EXECUTION_VARIABLE_BUNDLE_ID = "bundleId";
 	String BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS = "queryParameters";
-	String BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER = "ttpIdentifier";
-	String BPMN_EXECUTION_VARIABLE_LEADING_MEDIC_IDENTIFIER = "leadingMedicIdentifier";
 	String BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
 	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID = "questionnaireResponseId";
 	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED = "questionnaireResponseCompleted";
@@ -25,14 +23,6 @@ public interface ConstantsBase
 	String BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS = "inCalledProcess";
 
 	String PROCESS_DSF_URI_BASE = "http://dsf.dev/bpe/Process/";
-
-	String EXTENSION_DSF_PARTICIPATING_MEDIC = "http://dsf.dev/fhir/StructureDefinition/extension-participating-medic";
-	String EXTENSION_DSF_PARTICIPATING_TTP = "http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp";
-	String EXTENSION_DSF_GROUP_ID = "http://dsf.dev/fhir/StructureDefinition/extension-group-id";
-	String EXTENSION_DSF_QUERY = "http://dsf.dev/fhir/StructureDefinition/extension-query";
-
-	String PROFILE_DSF_GROUP = "http://dsf.dev/fhir/StructureDefinition/group";
-	String PROFILE_DSF_RESEARCH_STUDY = "http://dsf.dev/fhir/StructureDefinition/research-study";
 
 	String CODESYSTEM_DSF_BPMN = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME = "message-name";
@@ -88,16 +78,8 @@ public interface ConstantsBase
 	String CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_CRR = "CRR";
 	String CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_HRP = "HRP";
 
-	String CODESYSTEM_DSF_QUERY_TYPE = "http://dsf.dev/fhir/CodeSystem/query-type";
-	String CODESYSTEM_DSF_QUERY_TYPE_VALUE_AQL = "application/x-aql-query";
-
 	String NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER = "http://dsf.dev/sid/organization-identifier";
 	String NAMINGSYSTEM_DSF_ENDPOINT_IDENTIFIER = "http://dsf.dev/sid/endpoint-identifier";
-	String NAMINGSYSTEM_DSF_RESEARCH_STUDY_IDENTIFIER = "http://dsf.dev/sid/research-study-identifier";
-
-	CodeType CODE_TYPE_AQL_QUERY = new CodeType(CODESYSTEM_DSF_QUERY_TYPE_VALUE_AQL)
-			.setSystem(CODESYSTEM_DSF_QUERY_TYPE);
-	String OPENEHR_MIMETYPE_JSON = "application/json";
 
 	String NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER_HIGHMED_CONSORTIUM = "highmed.org";
 	String NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM = "netzwerk-universitaetsmedizin.de";

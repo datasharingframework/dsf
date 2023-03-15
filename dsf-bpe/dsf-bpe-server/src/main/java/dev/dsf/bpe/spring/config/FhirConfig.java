@@ -35,8 +35,6 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.client.FhirClientProviderImpl;
 import dev.dsf.fhir.client.FhirWebsocketClientProvider;
 import dev.dsf.fhir.endpoint.EndpointProviderImpl;
-import dev.dsf.fhir.group.GroupHelper;
-import dev.dsf.fhir.group.GroupHelperImpl;
 import dev.dsf.fhir.organization.EndpointProvider;
 import dev.dsf.fhir.organization.OrganizationProvider;
 import dev.dsf.fhir.organization.OrganizationProviderImpl;
@@ -236,12 +234,6 @@ public class FhirConfig implements InitializingBean
 	public TaskHelper taskHelper()
 	{
 		return new TaskHelperImpl();
-	}
-
-	@Bean
-	public GroupHelper groupHelper()
-	{
-		return new GroupHelperImpl();
 	}
 
 	@Bean
