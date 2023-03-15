@@ -15,13 +15,6 @@ public interface OrganizationProvider
 	String getDefaultIdentifierSystem();
 
 	/**
-	 * @deprecated as of release 0.6.0, use {@link #getDefaultRoleSystem()} instead
-	 * @return url of the default organization type CodeSystem
-	 */
-	@Deprecated
-	String getDefaultTypeSystem();
-
-	/**
 	 * @return url of the default organization role CodeSystem
 	 */
 	String getDefaultRoleSystem();
@@ -45,16 +38,6 @@ public interface OrganizationProvider
 	 *         {@link #getLocalIdentifierValue()}
 	 */
 	List<Organization> getRemoteOrganizations();
-
-	/**
-	 * @param type
-	 *            not <code>null</code>
-	 * @return active {@link Organization}s with {@link #getDefaultTypeSystem()} and given type
-	 * @deprecated as of release 0.6.0, the organization type has moved into the OrganizationAffiliation resource, use
-	 *             {@link #getOrganizationsByRole(String)} instead
-	 */
-	@Deprecated
-	Stream<Organization> getOrganizationsByType(String type);
 
 	/**
 	 * @param roleSystem

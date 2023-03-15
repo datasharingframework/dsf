@@ -34,42 +34,6 @@ public interface ConstantsBase
 	String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
 	String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
 
-	/**
-	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_DSF_ORGANIZATION_ROLE} instead
-	 */
-	@Deprecated
-	String CODESYSTEM_DSF_ORGANIZATION_TYPE = "http://dsf.dev/fhir/CodeSystem/organization-type";
-	/**
-	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_TTP} instead
-	 */
-	@Deprecated
-	String CODESYSTEM_DSF_ORGANIZATION_TYPE_VALUE_TTP = "TTP";
-	/**
-	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_MEDIC} instead
-	 */
-	@Deprecated
-	String CODESYSTEM_DSF_ORGANIZATION_TYPE_VALUE_MEDIC = "MeDIC";
-	/**
-	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_DTS} instead
-	 */
-	@Deprecated
-	String CODESYSTEM_DSF_ORGANIZATION_TYPE_VALUE_DTS = "DTS";
-	/**
-	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_COS} instead
-	 */
-	@Deprecated
-	String CODESYSTEM_DSF_ORGANIZATION_TYPE_VALUE_COS = "COS";
-	/**
-	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_CRR} instead
-	 */
-	@Deprecated
-	String CODESYSTEM_DSF_ORGANIZATION_TYPE_VALUE_CRR = "CRR";
-	/**
-	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_HRP} instead
-	 */
-	@Deprecated
-	String CODESYSTEM_DSF_ORGANIZATION_TYPE_VALUE_HRP = "HRP";
-
 	String CODESYSTEM_DSF_ORGANIZATION_ROLE = "http://dsf.dev/fhir/CodeSystem/organization-role";
 	String CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_TTP = "TTP";
 	String CODESYSTEM_DSF_ORGANIZATION_ROLE_VALUE_MEDIC = "MeDIC";
