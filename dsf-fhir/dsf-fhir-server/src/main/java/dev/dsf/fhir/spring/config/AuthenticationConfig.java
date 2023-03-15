@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import dev.dsf.common.auth.IdentityProvider;
-import dev.dsf.common.auth.RoleConfig;
-import dev.dsf.common.auth.RoleConfigReader;
+import dev.dsf.common.auth.conf.IdentityProvider;
+import dev.dsf.common.auth.conf.RoleConfig;
+import dev.dsf.common.auth.conf.RoleConfigReader;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.IdentityProviderImpl;
 import dev.dsf.fhir.authentication.OrganizationProvider;

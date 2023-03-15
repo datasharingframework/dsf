@@ -19,7 +19,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;

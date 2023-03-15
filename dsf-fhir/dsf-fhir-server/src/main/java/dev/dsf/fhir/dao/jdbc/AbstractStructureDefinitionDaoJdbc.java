@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.search.SearchQueryIdentityFilter;
 import dev.dsf.fhir.search.parameters.StructureDefinitionDate;

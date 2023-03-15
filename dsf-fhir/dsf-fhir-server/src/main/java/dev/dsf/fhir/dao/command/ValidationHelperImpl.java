@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.ResourceValidator;
 import jakarta.ws.rs.WebApplicationException;

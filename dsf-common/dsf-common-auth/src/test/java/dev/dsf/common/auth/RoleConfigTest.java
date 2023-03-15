@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import dev.dsf.common.auth.RoleConfig.Mapping;
+import dev.dsf.common.auth.conf.Role;
+import dev.dsf.common.auth.conf.RoleConfig;
+import dev.dsf.common.auth.conf.RoleConfig.Mapping;
 
 public class RoleConfigTest
 {
@@ -57,7 +59,7 @@ public class RoleConfigTest
 				      - bar
 				      - invalid
 				- test2:
-				    claim:
+				    token-role:
 				      - claim_a
 				      - claim_b
 				    role: foo
@@ -92,7 +94,7 @@ public class RoleConfigTest
 		assertEquals(expectedName, actual.getName());
 		assertEquals(expectedThumbprints, actual.getThumbprints());
 		assertEquals(expectedEmails, actual.getEmails());
-		assertEquals(expectedClaims, actual.getClaims());
+		assertEquals(expectedClaims, actual.getTokenRoles());
 		assertEquals(expectedRoles, actual.getRoles());
 	}
 }

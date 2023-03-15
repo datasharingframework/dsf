@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public class All implements Recipient, Requester
 {

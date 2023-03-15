@@ -8,13 +8,15 @@ import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.security.RoleInfo;
 import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.UserIdentity;
 
 public class DsfSecurityHandler extends SecurityHandler
 {
-	public DsfSecurityHandler(LoginService loginService, Authenticator authenticator)
+	public DsfSecurityHandler(LoginService loginService, Authenticator authenticator,
+			OpenIdConfiguration openIdConfiguration)
 	{
 		setIdentityService(new DefaultIdentityService());
 
@@ -23,6 +25,9 @@ public class DsfSecurityHandler extends SecurityHandler
 
 		Objects.requireNonNull(authenticator, "authenticator");
 		setAuthenticator(authenticator);
+
+		if (openIdConfiguration != null)
+			addBean(openIdConfiguration);
 	}
 
 	// 1.
@@ -56,5 +61,4 @@ public class DsfSecurityHandler extends SecurityHandler
 	{
 		return true; // nothing to check
 	}
-
 }

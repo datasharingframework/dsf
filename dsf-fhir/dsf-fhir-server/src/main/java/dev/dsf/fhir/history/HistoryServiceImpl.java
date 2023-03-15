@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.HistoryDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;

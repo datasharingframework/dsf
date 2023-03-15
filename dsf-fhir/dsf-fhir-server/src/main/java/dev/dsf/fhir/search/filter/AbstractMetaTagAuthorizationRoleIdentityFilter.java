@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.postgresql.util.PGobject;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 
 abstract class AbstractMetaTagAuthorizationRoleIdentityFilter extends AbstractIdentityFilter

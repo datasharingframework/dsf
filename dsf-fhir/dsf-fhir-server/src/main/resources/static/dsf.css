@@ -1,5 +1,6 @@
 body {
 	margin: 2em;
+	font-family: sans-serif;
 }
 
 table#header {
@@ -71,6 +72,15 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	position: absolute;
 	top: 2em;
 	right: 2em;
+	display: flex;
+	column-gap: 0.25em;
+}
+
+#hello-user {
+	margin-right: 0.5em;
+	color: #aaa;
+	padding-top: 0.2em;
+	font-size: 0.9em;
 }
 
 .icon {

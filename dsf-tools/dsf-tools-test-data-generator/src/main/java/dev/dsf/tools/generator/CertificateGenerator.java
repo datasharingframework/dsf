@@ -1,6 +1,7 @@
 package dev.dsf.tools.generator;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +33,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCSException;
@@ -45,7 +49,6 @@ import de.rwh.utils.crypto.CertificateAuthority;
 import de.rwh.utils.crypto.CertificateAuthority.CertificateAuthorityBuilder;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.CertificationRequestBuilder;
-import de.rwh.utils.crypto.io.CertificateWriter;
 import de.rwh.utils.crypto.io.CsrIo;
 import de.rwh.utils.crypto.io.PemIo;
 
@@ -55,12 +58,12 @@ public class CertificateGenerator
 
 	private static final char[] CERT_PASSWORD = "password".toCharArray();
 
-	private static final String[] SERVER_COMMON_NAMES = { "ttp", "medic1", "medic2", "medic3", "localhost" };
+	private static final String[] SERVER_COMMON_NAMES = { "localhost", "keycloak" };
 	private static final String[] CLIENT_COMMON_NAMES = { "ttp-client", "medic1-client", "medic2-client",
 			"medic3-client", "test-client", "Webbrowser Test User" };
 
 	private static final Map<String, List<String>> DNS_NAMES = Map.of("localhost",
-			Arrays.asList("localhost", "fhir", "ttp", "medic1", "medic2", "medic3"));
+			Arrays.asList("localhost", "host.docker.internal", "fhir", "ttp", "medic1", "medic2", "medic3"));
 
 	private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
 
@@ -514,18 +517,22 @@ public class CertificateGenerator
 		writeCertificate(fhirCacertFile, testCaCertificate);
 
 		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
-		KeyStore p12KeyStore = createP12KeyStore(localhost.keyPair.getPrivate(), localhost.commonName,
-				localhost.certificate);
 
-		Path bpeP12File = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/target/localhost_certificate.p12");
-		logger.info("Saving localhost certificate p12 file to {}, password '{}' [{}]", bpeP12File.toString(),
-				String.valueOf(CERT_PASSWORD), localhost.commonName);
-		writeP12File(bpeP12File, p12KeyStore);
+		Path bpeCertificateFile = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/target/localhost_certificate.pem");
+		logger.info("Copying localhost certificate file to {}", bpeCertificateFile.toString());
+		writeCertificate(bpeCertificateFile, localhost.certificate);
+		Path bpeCertificatePrivateKeyFile = Paths
+				.get("../../dsf-bpe/dsf-bpe-server-jetty/target/localhost_private-key.pem");
+		logger.info("Copying localhost certificate private-key file to {}", bpeCertificateFile.toString());
+		writePrivateKeyEncrypted(bpeCertificatePrivateKeyFile, localhost.keyPair.getPrivate());
 
-		Path fhirP12File = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/localhost_certificate.p12");
-		logger.info("Saving localhost certificate p12 file to {}, password '{}' [{}]", fhirP12File.toString(),
-				String.valueOf(CERT_PASSWORD), localhost.commonName);
-		writeP12File(fhirP12File, p12KeyStore);
+		Path fhirCertificateFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/localhost_certificate.pem");
+		logger.info("Copying localhost certificate file to {}", fhirCertificateFile.toString());
+		writeCertificate(fhirCertificateFile, localhost.certificate);
+		Path fhirCertificatePrivateKeyFile = Paths
+				.get("../../dsf-fhir/dsf-fhir-server-jetty/target/localhost_private-key.pem");
+		logger.info("Copying localhost certificate private-key file to {}", fhirCertificateFile.toString());
+		writePrivateKeyEncrypted(fhirCertificatePrivateKeyFile, localhost.keyPair.getPrivate());
 
 		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
 
@@ -533,20 +540,18 @@ public class CertificateGenerator
 				.get("../../dsf-bpe/dsf-bpe-server-jetty/target/test-client_certificate.pem");
 		logger.info("Copying test-client certificate file to {}", bpeClientCertificateFile);
 		writeCertificate(bpeClientCertificateFile, testClient.certificate);
-
 		Path bpeClientPrivateKeyFile = Paths
 				.get("../../dsf-bpe/dsf-bpe-server-jetty/target/test-client_private-key.pem");
-		logger.info("Copying test-client certificate file to {}", bpeClientPrivateKeyFile);
+		logger.info("Copying test-client certificate private-key file to {}", bpeClientPrivateKeyFile);
 		writePrivateKeyEncrypted(bpeClientPrivateKeyFile, testClient.keyPair.getPrivate());
 
 		Path fhirClientCertificateFile = Paths
 				.get("../../dsf-fhir/dsf-fhir-server-jetty/target/test-client_certificate.pem");
 		logger.info("Copying test-client certificate file to {}", fhirClientCertificateFile);
 		writeCertificate(fhirClientCertificateFile, testClient.certificate);
-
 		Path fhirClientPrivateKeyFile = Paths
 				.get("../../dsf-fhir/dsf-fhir-server-jetty/target/test-client_private-key.pem");
-		logger.info("Copying test-client certificate file to {}", fhirClientPrivateKeyFile);
+		logger.info("Copying test-client certificate private-key file to {}", fhirClientPrivateKeyFile);
 		writePrivateKeyEncrypted(fhirClientPrivateKeyFile, testClient.keyPair.getPrivate());
 	}
 
@@ -604,21 +609,21 @@ public class CertificateGenerator
 
 	public void copyDockerTest3MedicTtpCertificates()
 	{
-		Path baseFolder = Paths.get("../../dsf-docker-test-setup-3medic-ttp");
+		Path baseFolder = Paths.get("../../dsf-docker-test-setup-3medic-ttp/secrets/");
 
 		final X509Certificate testCaCertificate = ca.getCertificate();
 
-		Path testCaCertificateFile = baseFolder.resolve("secrets/proxy_trusted_client_cas.pem");
+		Path testCaCertificateFile = baseFolder.resolve("proxy_trusted_client_cas.pem");
 		logger.info("Copying Test CA certificate file to {}", testCaCertificateFile.toString());
 		writeCertificate(testCaCertificateFile, testCaCertificate);
 
 		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
 
-		Path localhostCertificateAndCa = baseFolder.resolve("secrets/proxy_certificate_and_int_cas.pem");
+		Path localhostCertificateAndCa = baseFolder.resolve("proxy_certificate_and_int_cas.pem");
 		logger.info("Writing localhost certificate and CA certificate to {}", testCaCertificateFile.toString());
-		writeCertificates(localhostCertificateAndCa, localhost.getCertificate(), testCaCertificate);
+		writeCertificates(localhostCertificateAndCa, localhost.getCertificate()); // no intermediate CAs
 
-		Path localhostCertificatePrivateKey = baseFolder.resolve("secrets/proxy_certificate_private_key.pem");
+		Path localhostCertificatePrivateKey = baseFolder.resolve("proxy_certificate_private_key.pem");
 		logger.info("Copying localhost private-key file to {}", localhostCertificatePrivateKey);
 		writePrivateKeyNotEncrypted(localhostCertificatePrivateKey, localhost.keyPair.getPrivate());
 
@@ -627,9 +632,38 @@ public class CertificateGenerator
 				.forEach(cn -> copyDockerTest3MedicTtpClientCertFiles("../../dsf-docker-test-setup-3medic-ttp/secrets/",
 						cn + "-client"));
 
-		Path fhirCacertFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/secrets/app_testca_certificate.pem");
+		Path fhirCacertFile = baseFolder.resolve("app_testca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
 		writeCertificate(fhirCacertFile, testCaCertificate);
+
+		CertificateFiles keycloak = serverCertificateFilesByCommonName.get("keycloak");
+
+		Path keycloakCertificateAndCa = baseFolder.resolve("keycloak_certificate_and_int_cas.pem");
+		logger.info("Writing keycloak certificate and CA certificate to {}", testCaCertificateFile.toString());
+		writeCertificates(keycloakCertificateAndCa, keycloak.getCertificate()); // no intermediate CAs
+
+		Path keycloakCertificatePrivateKey = baseFolder.resolve("keycloak_certificate_private_key.pem");
+		logger.info("Copying keycloak private-key file to {}", keycloakCertificatePrivateKey);
+		writePrivateKeyNotEncrypted(keycloakCertificatePrivateKey, keycloak.keyPair.getPrivate());
+
+		Path keycloakTrustStoreFile = baseFolder.resolve("keycloak_trust_store.jks");
+		logger.info("Copying Test CA certificate as trust store file to {}", keycloakTrustStoreFile.toString());
+		KeyStore trustStore = createJksKeyStore(getCommonName(ca.getCertificate()), testCaCertificate);
+		writeKeyStore(keycloakTrustStoreFile, trustStore);
+	}
+
+	private String getCommonName(X509Certificate certificate)
+	{
+		try
+		{
+			return IETFUtils.valueToString(new JcaX509CertificateHolder(certificate).getSubject().getRDNs(BCStyle.CN)[0]
+					.getFirst().getValue());
+		}
+		catch (CertificateEncodingException e)
+		{
+			logger.error("Error unable to extract common-name from certificate", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void copyDockerTest3MedicTtpClientCertFiles(String folder, String commonName)
@@ -668,6 +702,22 @@ public class CertificateGenerator
 		}
 	}
 
+	private KeyStore createJksKeyStore(String commonName, X509Certificate certificate)
+	{
+		try
+		{
+			KeyStore keyStore = KeyStore.getInstance("jks");
+			keyStore.load(null, null);
+			keyStore.setCertificateEntry(commonName, certificate);
+			return keyStore;
+		}
+		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
+		{
+			logger.error("Error while creating jks key-store", e);
+			throw new RuntimeException(e);
+		}
+	}
+
 	private KeyStore createP12KeyStore(PrivateKey privateKey, String commonName, X509Certificate certificate)
 	{
 		try
@@ -683,15 +733,15 @@ public class CertificateGenerator
 		}
 	}
 
-	private void writeP12File(Path p12File, KeyStore p12KeyStore)
+	private void writeKeyStore(Path file, KeyStore keyStore)
 	{
-		try
+		try (OutputStream stream = Files.newOutputStream(file))
 		{
-			CertificateWriter.toPkcs12(p12File, p12KeyStore, CERT_PASSWORD);
+			keyStore.store(stream, CERT_PASSWORD);
 		}
 		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
 		{
-			logger.error("Error while writing certificate P12 file to " + p12File.toString(), e);
+			logger.error("Error while writing keystore file to " + file.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -703,7 +753,7 @@ public class CertificateGenerator
 		logger.info("Saving certificate (p21) to {}, password '{}' [{}]", certP12Path.toString(),
 				String.valueOf(CERT_PASSWORD), files.commonName);
 		KeyStore p12KeyStore = createP12KeyStore(files.keyPair.getPrivate(), files.commonName, files.certificate);
-		writeP12File(certP12Path, p12KeyStore);
+		writeKeyStore(certP12Path, p12KeyStore);
 
 		return certP12Path;
 	}

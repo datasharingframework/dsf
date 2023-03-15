@@ -34,14 +34,10 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ClientCertificateAuthenticator.class);
 
-	private final String contextPath;
-	private final int statusPort;
 	private final X509TrustManager x509TrustManager;
 
-	public ClientCertificateAuthenticator(String contextPath, int statusPort, KeyStore clientTrustStore)
+	public ClientCertificateAuthenticator(KeyStore clientTrustStore)
 	{
-		this.contextPath = Objects.requireNonNull(contextPath, "contextPath");
-		this.statusPort = statusPort;
 		x509TrustManager = createX509TrustManager(Objects.requireNonNull(clientTrustStore, "clientTrustStore"));
 	}
 
@@ -56,12 +52,6 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 			throws ServerAuthException
 	{
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-
-		// special status connector case
-		if (httpRequest != null && statusPort == httpRequest.getLocalPort()
-				&& (contextPath + "/status").equals(httpRequest.getRequestURI()))
-			return new UserAuthentication(getAuthMethod(), null);
-
 		X509Certificate[] certificates = (X509Certificate[]) httpRequest
 				.getAttribute("jakarta.servlet.request.X509Certificate");
 
@@ -82,7 +72,7 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 			return Authentication.UNAUTHENTICATED;
 		}
 
-		UserIdentity user = login(getAuthMethod(), certificates, httpRequest);
+		UserIdentity user = login(null, certificates, httpRequest);
 		if (user == null)
 		{
 			logger.warn("User '{}' not found, sending unauthorized", getSubjectDn(certificates));

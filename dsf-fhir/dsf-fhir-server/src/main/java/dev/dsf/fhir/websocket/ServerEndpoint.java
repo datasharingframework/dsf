@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
 import jakarta.websocket.CloseReason;

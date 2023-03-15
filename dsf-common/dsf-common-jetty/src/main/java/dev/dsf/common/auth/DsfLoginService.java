@@ -9,10 +9,12 @@ import javax.security.auth.Subject;
 
 import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.security.openid.OpenIdCredentials;
 import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import dev.dsf.common.auth.conf.IdentityProvider;
 import jakarta.servlet.ServletRequest;
 
 public class DsfLoginService implements LoginService
@@ -70,10 +72,10 @@ public class DsfLoginService implements LoginService
 			return null;
 
 		Principal principal = null;
-		if (credentials instanceof X509Certificate[])
+		if (username == null && credentials instanceof X509Certificate[])
 			principal = identityProvider.getIdentity((X509Certificate[]) credentials);
-		else if (credentials instanceof String)
-			principal = identityProvider.getIdentity((String) credentials);
+		else if (username != null && credentials instanceof OpenIdCredentials)
+			principal = identityProvider.getIdentity((OpenIdCredentials) credentials);
 
 		if (principal == null)
 			return null;

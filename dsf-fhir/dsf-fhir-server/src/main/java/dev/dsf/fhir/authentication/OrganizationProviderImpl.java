@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 
@@ -66,6 +66,6 @@ public class OrganizationProviderImpl extends AbstractProvider implements Organi
 	@Override
 	public Optional<Identity> getLocalOrganizationAsIdentity()
 	{
-		return getLocalOrganization().map(o -> new OrganizationIdentityImpl(true, o, Collections.emptySet()));
+		return getLocalOrganization().map(o -> new OrganizationIdentityImpl(true, o, Collections.emptySet(), null));
 	}
 }

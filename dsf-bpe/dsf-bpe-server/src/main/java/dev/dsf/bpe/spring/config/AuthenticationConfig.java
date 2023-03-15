@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.authentication.IdentityProviderImpl;
-import dev.dsf.common.auth.IdentityProvider;
+import dev.dsf.common.auth.conf.IdentityProvider;
 
 @Configuration
 public class AuthenticationConfig

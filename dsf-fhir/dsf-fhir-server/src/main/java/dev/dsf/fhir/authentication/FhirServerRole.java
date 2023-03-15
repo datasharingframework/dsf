@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import dev.dsf.common.auth.Role;
+import dev.dsf.common.auth.conf.Role;
 
 public enum FhirServerRole implements Role
 {

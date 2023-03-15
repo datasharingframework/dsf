@@ -28,7 +28,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.dao.SubscriptionDao;

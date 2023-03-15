@@ -3,7 +3,7 @@ package dev.dsf.fhir.search.filter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 
 public class TaskIdentityFilter extends AbstractIdentityFilter

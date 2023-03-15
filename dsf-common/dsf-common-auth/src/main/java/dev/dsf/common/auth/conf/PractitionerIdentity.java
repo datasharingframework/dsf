@@ -1,5 +1,8 @@
-package dev.dsf.common.auth;
+package dev.dsf.common.auth.conf;
 
+import java.util.Optional;
+
+import org.eclipse.jetty.security.openid.OpenIdCredentials;
 import org.hl7.fhir.r4.model.Practitioner;
 
 public interface PractitionerIdentity extends Identity
@@ -10,4 +13,9 @@ public interface PractitionerIdentity extends Identity
 	 * @return never <code>null</code>
 	 */
 	Practitioner getPractitioner();
+
+	/**
+	 * @return {@link Optional#empty()} if login via client certificate
+	 */
+	Optional<OpenIdCredentials> getCredentials();
 }

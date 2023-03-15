@@ -98,6 +98,7 @@ public class X509Certificates extends ExternalResource
 
 	private Path caCertificateFile;
 	private Path serverCertificateFile;
+	private Path serverCertificatePrivateKeyFile;
 	private Path clientCertificateFile;
 	private Path clientCertificatePrivateKeyFile;
 	private Path externalClientCertificateFile;
@@ -172,6 +173,14 @@ public class X509Certificates extends ExternalResource
 		return serverCertificateFile;
 	}
 
+	public Path getServerCertificatePrivateKeyFile()
+	{
+		if (parentBeforeRan())
+			return parent.getServerCertificatePrivateKeyFile();
+
+		return serverCertificatePrivateKeyFile;
+	}
+
 	public Path getClientCertificateFile()
 	{
 		if (parentBeforeRan())
@@ -210,7 +219,8 @@ public class X509Certificates extends ExternalResource
 		logger.info("Creating certificates ...");
 
 		Path caCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
-		Path serverCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
+		Path serverCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path serverCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path clientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path clientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path externalClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
@@ -234,6 +244,11 @@ public class X509Certificates extends ExternalResource
 
 		CertificateWriter.toPkcs12(serverCertificateFile, serverRsaKeyPair.getPrivate(), PASSWORD, serverCertificate,
 				caCertificate, "test-server");
+
+		PemIo.writeX509CertificateToPem(serverCertificate, serverCertificateFile);
+		PemIo.writeAes128EncryptedPrivateKeyToPkcs8(provider, serverCertificatePrivateKeyFile,
+				serverRsaKeyPair.getPrivate(), PASSWORD);
+
 		// server --
 
 		// -- client
@@ -279,13 +294,14 @@ public class X509Certificates extends ExternalResource
 
 		this.caCertificateFile = caCertificateFile;
 		this.serverCertificateFile = serverCertificateFile;
+		this.serverCertificatePrivateKeyFile = serverCertificatePrivateKeyFile;
 		this.clientCertificateFile = clientCertificateFile;
 		this.clientCertificatePrivateKeyFile = clientCertificatePrivateKeyFile;
 		this.externalClientCertificateFile = externalClientCertificateFile;
 		this.externalClientCertificatePrivateKeyFile = externalClientCertificatePrivateKeyFile;
 
-		this.filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, clientCertificateFile,
-				clientCertificatePrivateKeyFile, externalClientCertificateFile,
+		this.filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, serverCertificatePrivateKeyFile,
+				clientCertificateFile, clientCertificatePrivateKeyFile, externalClientCertificateFile,
 				externalClientCertificatePrivateKeyFile);
 	}
 

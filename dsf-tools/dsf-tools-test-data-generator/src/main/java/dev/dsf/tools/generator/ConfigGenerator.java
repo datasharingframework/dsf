@@ -81,6 +81,7 @@ public class ConfigGenerator
 		javaTestFhirConfigProperties.setProperty(P_KEY_ROLE_CONFIG, String.format("""
 				- webbrowser_test_user:
 				    thumbprint: %s
+				    token-role: admin
 				    role:
 				      - CREATE
 				      - READ

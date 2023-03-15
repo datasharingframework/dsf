@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.r4.model.Organization;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public interface OrganizationProvider
 {

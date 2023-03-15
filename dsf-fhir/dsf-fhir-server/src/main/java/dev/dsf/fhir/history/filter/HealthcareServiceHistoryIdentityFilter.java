@@ -3,7 +3,7 @@ package dev.dsf.fhir.history.filter;
 import org.hl7.fhir.r4.model.HealthcareService;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.search.filter.HealthcareServiceIdentityFilter;
 
 public class HealthcareServiceHistoryIdentityFilter extends HealthcareServiceIdentityFilter

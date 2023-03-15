@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.webservice.specification.BinaryService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -190,6 +191,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 			// Not setting header for logical references
 			b.header(Constants.HEADER_X_SECURITY_CONTEXT, binary.getSecurityContext().getReference());
 		}
+
+		b = b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
 
 		return b.build();
 	}

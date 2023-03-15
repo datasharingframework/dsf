@@ -1,11 +1,13 @@
 package dev.dsf.fhir.authorization.process;
 
+import java.security.cert.X509Certificate;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.Organization;
 
-import dev.dsf.common.auth.Identity;
-import dev.dsf.common.auth.Role;
+import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.Role;
 
 public class TestIdentity implements Identity
 {
@@ -31,6 +33,12 @@ public class TestIdentity implements Identity
 
 	@Override
 	public String getName()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getDisplayName()
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -67,6 +75,12 @@ public class TestIdentity implements Identity
 
 	@Override
 	public boolean hasRole(String role)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Optional<X509Certificate> getCertificate()
 	{
 		throw new UnsupportedOperationException();
 	}

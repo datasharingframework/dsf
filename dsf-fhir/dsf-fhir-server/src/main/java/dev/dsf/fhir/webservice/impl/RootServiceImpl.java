@@ -17,6 +17,7 @@ import dev.dsf.fhir.history.HistoryService;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.RootService;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -58,9 +59,11 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	public Response root(UriInfo uri, HttpHeaders headers)
 	{
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"This is the base URL of the FHIR server. GET method not allowed");
-		return responseGenerator.response(Status.METHOD_NOT_ALLOWED, outcome,
-				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+				"This is the base URL of the FHIR server. GET method not allowed, use POST to execute batch and transaction Bundle resources");
+		return responseGenerator
+				.response(Status.METHOD_NOT_ALLOWED, outcome,
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
+				.allow(HttpMethod.POST).build();
 	}
 
 	@Override

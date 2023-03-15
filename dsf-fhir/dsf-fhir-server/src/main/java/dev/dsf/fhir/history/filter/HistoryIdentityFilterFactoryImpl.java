@@ -34,7 +34,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public class HistoryIdentityFilterFactoryImpl implements HistoryIdentityFilterFactory
 {

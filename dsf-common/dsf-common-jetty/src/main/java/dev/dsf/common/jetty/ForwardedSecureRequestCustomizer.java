@@ -48,12 +48,12 @@ public class ForwardedSecureRequestCustomizer implements Customizer
 
 		if (clientCertString == null)
 		{
-			logger.warn("No {} header found", clientCertHeaderName);
+			logger.debug("No {} header found", clientCertHeaderName);
 			return null;
 		}
 		if (clientCertString.isEmpty())
 		{
-			logger.warn("{} header empty", clientCertHeaderName);
+			logger.debug("{} header empty", clientCertHeaderName);
 			return null;
 		}
 

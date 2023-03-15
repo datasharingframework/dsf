@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.StaticResourcesService;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -27,6 +28,14 @@ import jakarta.ws.rs.core.UriInfo;
 
 public class StaticResourcesServiceImpl extends AbstractBasicService implements StaticResourcesService
 {
+	private static CacheControl NO_TRANSFORM = new CacheControl();
+	private static CacheControl NO_CACHE_NO_TRANSFORM = new CacheControl();
+	static
+	{
+		// no-transform set by default
+		NO_CACHE_NO_TRANSFORM.setNoCache(true);
+	}
+
 	private static final class CacheEntry
 	{
 		private final byte[] data;
@@ -56,40 +65,17 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 		}
 	}
 
-	private static final class Cache
+	private static abstract class AbstractCache
 	{
-		private final Map<String, SoftReference<CacheEntry>> entries = new HashMap<>();
+		abstract Optional<CacheEntry> get(String fileName);
 
-		Optional<CacheEntry> get(String fileName)
+		protected CacheEntry read(InputStream stream, String fileName) throws IOException
 		{
-			SoftReference<CacheEntry> entry = entries.get(fileName);
-			if (entry == null || entry.get() == null)
-				return read(fileName);
-			else
-				return Optional.of(entry.get());
-		}
+			byte[] data = stream.readAllBytes();
+			byte[] hash = hash(data);
+			String mimeType = mimeType(fileName);
 
-		private Optional<CacheEntry> read(String fileName)
-		{
-			try (InputStream stream = StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName))
-			{
-				if (stream == null)
-					return Optional.empty();
-				else
-				{
-					byte[] data = stream.readAllBytes();
-					byte[] hash = hash(data);
-					String mimeType = mimeType(fileName);
-
-					CacheEntry entry = new CacheEntry(data, hash, mimeType);
-					entries.put(fileName, new SoftReference<>(entry));
-					return Optional.of(entry);
-				}
-			}
-			catch (IOException e)
-			{
-				throw new WebApplicationException(e);
-			}
+			return new CacheEntry(data, hash, mimeType);
 		}
 
 		private byte[] hash(byte[] data)
@@ -112,11 +98,71 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 		}
 	}
 
+	private static final class Cache extends AbstractCache
+	{
+		private final Map<String, SoftReference<CacheEntry>> entries = new HashMap<>();
+
+		@Override
+		Optional<CacheEntry> get(String fileName)
+		{
+			SoftReference<CacheEntry> entry = entries.get(fileName);
+			if (entry == null || entry.get() == null)
+				return read(fileName);
+			else
+				return Optional.of(entry.get());
+		}
+
+		Optional<CacheEntry> read(String fileName)
+		{
+			try (InputStream stream = StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName))
+			{
+				if (stream == null)
+					return Optional.empty();
+				else
+				{
+					CacheEntry entry = read(stream, fileName);
+					entries.put(fileName, new SoftReference<>(entry));
+					return Optional.of(entry);
+				}
+			}
+			catch (IOException e)
+			{
+				throw new WebApplicationException(e);
+			}
+		}
+	}
+
+	private static final class NoCache extends AbstractCache
+	{
+		@Override
+		Optional<CacheEntry> get(String fileName)
+		{
+			try (InputStream stream = StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName))
+			{
+				if (stream == null)
+					return Optional.empty();
+				else
+					return Optional.of(read(stream, fileName));
+			}
+			catch (IOException e)
+			{
+				throw new WebApplicationException(e);
+			}
+		}
+	}
+
 	private static final Map<String, String> MIME_TYPE_BY_SUFFIX = Map.of("css", "text/css", "js", "text/javascript",
 			"html", "text/html", "pdf", "application/pdf", "png", "image/png", "svg", "image/svg+xml", "jpg",
 			"image/jpeg");
 
-	private final Cache cache = new Cache();
+	private final AbstractCache cache;
+	private final CacheControl cacheControl;
+
+	public StaticResourcesServiceImpl(boolean cacheEnabled)
+	{
+		cache = cacheEnabled ? new Cache() : new NoCache();
+		cacheControl = cacheEnabled ? NO_TRANSFORM : NO_CACHE_NO_TRANSFORM;
+	}
 
 	@Override
 	public Response getFile(String fileName, UriInfo uri, HttpHeaders headers)
@@ -143,7 +189,8 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 			if (entry.getTag().getValue().equals(matchTag.replace("\"", "")))
 				return Response.status(Status.NOT_MODIFIED);
 			else
-				return Response.ok(entry.getData(), MediaType.valueOf(entry.getMimeType())).tag(entry.getTag());
+				return Response.ok(entry.getData(), MediaType.valueOf(entry.getMimeType())).tag(entry.getTag())
+						.cacheControl(cacheControl);
 		};
 	}
 }

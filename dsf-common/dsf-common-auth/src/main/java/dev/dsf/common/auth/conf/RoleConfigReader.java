@@ -1,4 +1,4 @@
-package dev.dsf.common.auth;
+package dev.dsf.common.auth.conf;
 
 import java.io.InputStream;
 import java.util.function.Function;

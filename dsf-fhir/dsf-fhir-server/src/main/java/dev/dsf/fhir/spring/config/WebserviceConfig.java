@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.dsf.common.auth.logout.LogoutService;
 import dev.dsf.common.status.webservice.StatusService;
 import dev.dsf.fhir.adapter.HtmlFhirAdapter.ServerBaseProvider;
 import dev.dsf.fhir.exception.DataFormatExceptionHandler;
@@ -430,6 +431,12 @@ public class WebserviceConfig
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
 				historyConfig.historyService());
+	}
+
+	@Bean
+	public LogoutService logoutService()
+	{
+		return new LogoutService();
 	}
 
 	@Bean
@@ -906,7 +913,7 @@ public class WebserviceConfig
 
 	private StaticResourcesServiceImpl staticResourcesServiceImpl()
 	{
-		return new StaticResourcesServiceImpl();
+		return new StaticResourcesServiceImpl(propertiesConfig.getStaticResourceCacheEnabled());
 	}
 
 	@Bean

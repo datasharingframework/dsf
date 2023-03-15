@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public interface HistoryIdentityFilterFactory
 {

@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public interface Requester extends WithAuthorization
 {

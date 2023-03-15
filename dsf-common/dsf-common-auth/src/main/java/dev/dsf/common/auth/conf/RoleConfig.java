@@ -1,4 +1,4 @@
-package dev.dsf.common.auth;
+package dev.dsf.common.auth.conf;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,19 +15,22 @@ public class RoleConfig
 		private final String name;
 		private final List<String> thumbprints = new ArrayList<>();
 		private final List<String> emails = new ArrayList<>();
-		private final List<String> claims = new ArrayList<>();
+		private final List<String> tokenRoles = new ArrayList<>();
+		private final List<String> tokenGroups = new ArrayList<>();
 		private final List<Role> roles = new ArrayList<>();
 
-		private Mapping(String name, List<String> thumbprints, List<String> emails, List<String> claims,
-				List<Role> roles)
+		private Mapping(String name, List<String> thumbprints, List<String> emails, List<String> tokenRoles,
+				List<String> tokenGroups, List<Role> roles)
 		{
 			this.name = name;
 			if (thumbprints != null)
 				this.thumbprints.addAll(thumbprints);
 			if (emails != null)
 				this.emails.addAll(emails);
-			if (claims != null)
-				this.claims.addAll(claims);
+			if (tokenRoles != null)
+				this.tokenRoles.addAll(tokenRoles);
+			if (tokenGroups != null)
+				this.tokenGroups.addAll(tokenGroups);
 			if (roles != null)
 				this.roles.addAll(roles);
 		}
@@ -47,9 +50,14 @@ public class RoleConfig
 			return Collections.unmodifiableList(emails);
 		}
 
-		public List<String> getClaims()
+		public List<String> getTokenRoles()
 		{
-			return Collections.unmodifiableList(claims);
+			return Collections.unmodifiableList(tokenRoles);
+		}
+
+		public List<String> getTokenGroups()
+		{
+			return Collections.unmodifiableList(tokenGroups);
 		}
 
 		public List<Role> getRoles()
@@ -60,8 +68,8 @@ public class RoleConfig
 		@Override
 		public String toString()
 		{
-			return "[name=" + name + ", thumbprints=" + thumbprints + ", emails=" + emails + ", claims=" + claims
-					+ ", roles=" + roles + "]";
+			return "[name=" + name + ", thumbprints=" + thumbprints + ", emails=" + emails + ", jwtRoles=" + tokenRoles
+					+ ", jwtGroups=" + tokenGroups + ", dsfRoles=" + roles + "]";
 		}
 	}
 
@@ -94,7 +102,7 @@ public class RoleConfig
 							Map<Object, Object> properties = (Map<Object, Object>) mappingValues;
 
 							// Map<String, Object>
-							List<String> thumbprints = null, emails = null, claims = null;
+							List<String> thumbprints = null, emails = null, tokenRoles = null, tokenGroups = null;
 							List<Role> roles = null;
 							for (Entry<Object, Object> p : properties.entrySet())
 							{
@@ -108,8 +116,11 @@ public class RoleConfig
 										case "email":
 											emails = getValues(p.getValue());
 											break;
-										case "claim":
-											claims = getValues(p.getValue());
+										case "token-role":
+											tokenRoles = getValues(p.getValue());
+											break;
+										case "token-group":
+											tokenGroups = getValues(p.getValue());
 											break;
 										case "role":
 											roles = getValues(p.getValue()).stream().map(roleFactory)
@@ -118,7 +129,8 @@ public class RoleConfig
 									}
 								}
 							}
-							entries.add(new Mapping((String) mappingKey, thumbprints, emails, claims, roles));
+							entries.add(new Mapping((String) mappingKey, thumbprints, emails, tokenRoles, tokenGroups,
+									roles));
 						}
 					});
 				}
@@ -152,9 +164,14 @@ public class RoleConfig
 		return getRoleFor(Mapping::getEmails, email);
 	}
 
-	public List<Role> getRolesForClaim(String claim)
+	public List<Role> getRolesForTokenRole(String tokenRole)
 	{
-		return getRoleFor(Mapping::getClaims, claim);
+		return getRoleFor(Mapping::getTokenRoles, tokenRole);
+	}
+
+	public List<Role> getRolesForTokenGroup(String tokenGroup)
+	{
+		return getRoleFor(Mapping::getTokenGroups, tokenGroup);
 	}
 
 	private List<Role> getRoleFor(Function<Mapping, List<String>> values, String value)
