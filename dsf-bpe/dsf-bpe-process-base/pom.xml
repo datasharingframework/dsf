@@ -24,38 +24,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-pseudonymization-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-pseudonymization-medic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-pseudonymization-ttp</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-mpi-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-consent-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-openehr-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-openehr-client</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 		</dependency>

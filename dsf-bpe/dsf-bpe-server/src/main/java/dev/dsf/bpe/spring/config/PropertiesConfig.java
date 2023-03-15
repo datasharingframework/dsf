@@ -75,7 +75,7 @@ public class PropertiesConfig
 	@Value("${dev.dsf.bpe.fhir.client.remote.proxy.username:#{null}}")
 	private String webserviceClientRemoteProxyUsername;
 
-	@Documentation(description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
+	@Documentation(description = "Proxy password, set if the the DSF BPE server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${dev.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
 	private char[] webserviceClientRemoteProxyPassword;
 
@@ -87,7 +87,7 @@ public class PropertiesConfig
 	@Value("${dev.dsf.bpe.fhir.server.base.url}")
 	private String serverBaseUrl;
 
-	@Documentation(description = "The timeout in milliseconds until a reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "The timeout in milliseconds until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:60000}")
 	private int webserviceClientLocalReadTimeout;
 
@@ -119,7 +119,7 @@ public class PropertiesConfig
 	@Value("${dev.dsf.bpe.fhir.client.local.websocket.proxy.username:#{null}}")
 	private String websocketClientProxyUsername;
 
-	@Documentation(description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the getSub server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
+	@Documentation(description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${dev.dsf.bpe.fhir.client.local.websocket.proxy.password:#{null}}")
 	private char[] websocketClientProxyPassword;
 
@@ -138,22 +138,6 @@ public class PropertiesConfig
 	@Documentation(description = "Milliseconds between two retries to establish a websocket connection with the DSF FHIR server")
 	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.sleep:5000}")
 	private long websocketRetrySleepMillis;
-
-	@Documentation(description = "Factory for client implementations used to connect to a Master Patient Index (MPI) server in order to read patient demographic data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your MPI")
-	@Value("${dev.dsf.bpe.mpi.webservice.factory.class:dev.dsf.mpi.client.stub.MasterPatientIndexClientStubFactory}")
-	private String masterPatientIndexClientFactoryClass;
-
-	@Documentation(description = "Factory for client implementations used to connect to a consent server in order to check permissions to access patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your Consent server")
-	@Value("${dev.dsf.bpe.consent.webservice.factory.class:dev.dsf.consent.client.stub.ConsentClientStubFactory}")
-	private String consentClientFactoryClass;
-
-	@Documentation(description = "Factory for client implementations used to connect to an openEHR repository in order to read patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your openEHR repository")
-	@Value("${dev.dsf.bpe.openehr.webservice.factory.class:dev.dsf.openehr.client.stub.OpenEhrClientStubFactory}")
-	private String openEhrClientFactoryClass;
-
-	@Documentation(description = "Factory for client implementations used to connect to a pseudonymization service in order to pseudonymize patient demographic and medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your pseudonymization service")
-	@Value("${dev.dsf.bpe.pseudonymization.webservice.factory.class:dev.dsf.pseudonymization.client.stub.PseudonymizationClientStubFactory}")
-	private String pseudonymizationClientFactoryClass;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
 	@Value("${dev.dsf.bpe.process.plugin.directroy:process}")
@@ -423,26 +407,6 @@ public class PropertiesConfig
 	public int getWebsocketMaxRetries()
 	{
 		return websocketMaxRetries;
-	}
-
-	public String getMasterPatientIndexClientFactoryClass()
-	{
-		return masterPatientIndexClientFactoryClass;
-	}
-
-	public String getConsentClientFactoryClass()
-	{
-		return consentClientFactoryClass;
-	}
-
-	public String getOpenEhrClientFactoryClass()
-	{
-		return openEhrClientFactoryClass;
-	}
-
-	public String getPseudonymizationClientFactoryClass()
-	{
-		return pseudonymizationClientFactoryClass;
 	}
 
 	public Path getProcessPluginDirectory()
