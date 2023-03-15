@@ -16,19 +16,12 @@ services:
       - app_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./plugin
-        target: /opt/bpe/plugin
-        read_only: true
-      - type: bind
         source: ./process
         target: /opt/bpe/process
         read_only: true
       - type: bind
         source: ./log
         target: /opt/bpe/log
-      - type: bind
-        source: ./psn
-        target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002

@@ -15,7 +15,7 @@
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_bpe.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_status_client.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/lib/*.jar
-dsf-bpe/dsf-bpe-server-jetty/docker/plugin/*.jar
+dsf-bpe/dsf-bpe-server-jetty/docker/lib_external/*.jar
 dsf-bpe/dsf-bpe-server-jetty/process/*.jar
 
 ###
@@ -33,10 +33,8 @@ dsf-fhir/dsf-fhir-validation/src/main/resources/fhir/bundle.xml
 ###
 dsf-docker-test-setup/bpe/log/*.log
 dsf-docker-test-setup/bpe/log/*.log.gz
-dsf-docker-test-setup/bpe/plugin/*.jar
+dsf-docker-test-setup/bpe/lib_external/*.jar
 dsf-docker-test-setup/bpe/process/*.jar
-dsf-docker-test-setup/bpe/psn/*.jceks
-dsf-docker-test-setup/bpe/psn/*.p12
 dsf-docker-test-setup/bpe/secrets/*.pem
 
 dsf-docker-test-setup/fhir/log/*.log
@@ -49,10 +47,8 @@ dsf-docker-test-setup/fhir/.env
 ###
 dsf-docker-test-setup-3medic-ttp/**/bpe/log/*.log
 dsf-docker-test-setup-3medic-ttp/**/bpe/log/*.log.gz
-dsf-docker-test-setup-3medic-ttp/**/bpe/plugin/*.jar
+dsf-docker-test-setup-3medic-ttp/**/bpe/lib_external/*.jar
 dsf-docker-test-setup-3medic-ttp/**/bpe/process/*.jar
-dsf-docker-test-setup-3medic-ttp/**/bpe/psn/*.jceks
-dsf-docker-test-setup-3medic-ttp/**/bpe/psn/*.p12
 
 dsf-docker-test-setup-3medic-ttp/**/fhir/log/*.log
 dsf-docker-test-setup-3medic-ttp/**/fhir/log/*.log.gz
