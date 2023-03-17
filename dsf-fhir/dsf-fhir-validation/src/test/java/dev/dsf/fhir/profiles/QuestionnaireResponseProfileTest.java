@@ -32,7 +32,7 @@ import dev.dsf.fhir.validation.ValidationSupportRule;
 
 public class QuestionnaireResponseProfileTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyProfileTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseProfileTest.class);
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(

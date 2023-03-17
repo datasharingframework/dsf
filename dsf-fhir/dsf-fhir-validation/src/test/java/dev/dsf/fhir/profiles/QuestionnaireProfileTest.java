@@ -21,7 +21,7 @@ import dev.dsf.fhir.validation.ValidationSupportRule;
 
 public class QuestionnaireProfileTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyProfileTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProfileTest.class);
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
