@@ -1,0 +1,1 @@
+empty lib_external directory for docker build

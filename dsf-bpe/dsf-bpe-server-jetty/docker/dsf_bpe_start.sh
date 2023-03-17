@@ -4,7 +4,7 @@ echo "Executing DSF BPE with"
 java --version
 
 trap 'kill -TERM $PID' TERM INT
-java $EXTRA_JVM_ARGS -Djdk.tls.acknowledgeCloseNotify=true -cp lib/*:plugin/*:dsf_bpe.jar dev.dsf.bpe.BpeJettyServer &
+java $EXTRA_JVM_ARGS -Djdk.tls.acknowledgeCloseNotify=true -cp lib/*:lib_external/*:dsf_bpe.jar dev.dsf.bpe.BpeJettyServer &
 PID=$!
 wait $PID
 trap - TERM INT
