@@ -1,7 +1,6 @@
 package dev.dsf.fhir.organization;
 
 import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_ORGANIZATION_ROLE;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_ORGANIZATION_TYPE;
 import static dev.dsf.bpe.ConstantsBase.NAMINGSYSTEM_DSF_ORGANIZATION_IDENTIFIER;
 
 import java.util.Arrays;
@@ -49,13 +48,6 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	{
 		Objects.requireNonNull(clientProvider, "clientProvider");
 		Objects.requireNonNull(organizationIdentifierLocalValue, "organizationIdentifierLocalValue");
-	}
-
-	@Override
-	@Deprecated
-	public String getDefaultTypeSystem()
-	{
-		return CODESYSTEM_DSF_ORGANIZATION_TYPE;
 	}
 
 	@Override
@@ -121,17 +113,6 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 		return searchForOrganizations(getDefaultIdentifierSystem(), "")
 				.filter(noIdentifierMatches(getDefaultIdentifierSystem(), organizationIdentifierLocalValue))
 				.collect(Collectors.toList());
-	}
-
-	@Override
-	public Stream<Organization> getOrganizationsByType(String type)
-	{
-		Bundle resultSet = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
-				Map.of("active", Collections.singletonList("true"), "type",
-						Collections.singletonList(getDefaultTypeSystem() + "|" + type)));
-
-		return resultSet.getEntry().stream().map(Bundle.BundleEntryComponent::getResource)
-				.filter(resource -> resource instanceof Organization).map(organization -> (Organization) organization);
 	}
 
 	@Override
