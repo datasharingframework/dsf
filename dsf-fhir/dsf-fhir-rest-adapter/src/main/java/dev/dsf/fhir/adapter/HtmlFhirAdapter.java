@@ -414,7 +414,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 	/**
 	 * Override this method to return <code>true</code> if the HTML tab should be shown. This implies overriding
-	 * {@link #doWriteHtml(BaseResource, OutputStreamWriter)} as well.
+	 * {@link #doWriteHtml(String, BaseResource, OutputStreamWriter)} as well.
 	 *
 	 * @return <code>true</code> if the html tab should be shown, <code>false</code> otherwise (default
 	 *         <code>false</code>)
