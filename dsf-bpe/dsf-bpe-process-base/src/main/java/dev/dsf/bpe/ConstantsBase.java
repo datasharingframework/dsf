@@ -1,7 +1,5 @@
 package dev.dsf.bpe;
 
-import org.hl7.fhir.r4.model.CodeType;
-
 public interface ConstantsBase
 {
 	String BPMN_EXECUTION_VARIABLE_INSTANTIATES_URI = "instantiatesUri";
