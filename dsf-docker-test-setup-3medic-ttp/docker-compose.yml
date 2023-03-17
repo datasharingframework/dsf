@@ -339,19 +339,12 @@ services:
       - app_medic1_client_certificate_private_key.pem.password
     volumes:
     - type: bind
-      source: ./medic1/bpe/plugin
-      target: /opt/bpe/plugin
-      read_only: true
-    - type: bind
       source: ./medic1/bpe/process
       target: /opt/bpe/process
       read_only: true
     - type: bind
       source: ./medic1/bpe/log
       target: /opt/bpe/log
-    - type: bind
-      source: ./medic1/bpe/psn
-      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
@@ -402,19 +395,12 @@ services:
       - app_medic2_client_certificate_private_key.pem.password
     volumes:
     - type: bind
-      source: ./medic2/bpe/plugin
-      target: /opt/bpe/plugin
-      read_only: true
-    - type: bind
       source: ./medic2/bpe/process
       target: /opt/bpe/process
       read_only: true
     - type: bind
       source: ./medic2/bpe/log
       target: /opt/bpe/log
-    - type: bind
-      source: ./medic2/bpe/psn
-      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
@@ -465,19 +451,12 @@ services:
       - app_medic3_client_certificate_private_key.pem.password
     volumes:
     - type: bind
-      source: ./medic3/bpe/plugin
-      target: /opt/bpe/plugin
-      read_only: true
-    - type: bind
       source: ./medic3/bpe/process
       target: /opt/bpe/process
       read_only: true
     - type: bind
       source: ./medic3/bpe/log
       target: /opt/bpe/log
-    - type: bind
-      source: ./medic3/bpe/psn
-      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
@@ -529,19 +508,12 @@ services:
       - app_ttp_client_certificate_private_key.pem.password
     volumes:
     - type: bind
-      source: ./ttp/bpe/plugin
-      target: /opt/bpe/plugin
-      read_only: true
-    - type: bind
       source: ./ttp/bpe/process
       target: /opt/bpe/process
       read_only: true
     - type: bind
       source: ./ttp/bpe/log
       target: /opt/bpe/log
-    - type: bind
-      source: ./ttp/bpe/psn
-      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013

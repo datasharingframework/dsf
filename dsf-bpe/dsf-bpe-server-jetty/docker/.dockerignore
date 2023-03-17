@@ -1,7 +1,6 @@
 .dockerignore
 Dockerfile
-last_event/README.md
 lib/README.md
+lib_external/README.md
 log/README.md
-plugin/README.md
 process/README.md
