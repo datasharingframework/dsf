@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.hl7.fhir.r4.model.Organization;
 
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.common.auth.conf.Role;
 
 public class TestIdentity implements Identity
 {
@@ -62,19 +62,13 @@ public class TestIdentity implements Identity
 	}
 
 	@Override
-	public Set<Role> getRoles()
+	public Set<DsfRole> getDsfRoles()
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean hasRole(Role role)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean hasRole(String role)
+	public boolean hasDsfRole(DsfRole role)
 	{
 		throw new UnsupportedOperationException();
 	}

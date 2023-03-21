@@ -51,6 +51,6 @@ public abstract class AbstractServiceSecure<S extends BasicService> extends Abst
 	protected void logCurrentIdentity()
 	{
 		Identity identity = getCurrentIdentity();
-		logger.debug("Current identity '{}', roles '{}'", identity.getName(), identity.getRoles());
+		logger.debug("Current identity '{}', roles '{}'", identity.getName(), identity.getDsfRoles());
 	}
 }

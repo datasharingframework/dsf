@@ -1,6 +1,7 @@
 package dev.dsf.fhir.authentication;
 
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -12,14 +13,14 @@ import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.common.auth.conf.Role;
 
 public abstract class AbstractIdentity implements Identity
 {
 	private final boolean localIdentity;
 	private final Organization organization;
-	private final Set<Role> roles = new HashSet<>();
+	private final Set<DsfRole> dsfRoles = new HashSet<>();
 	private final X509Certificate certificate;
 
 	/**
@@ -27,19 +28,19 @@ public abstract class AbstractIdentity implements Identity
 	 *            <code>true</code> if this is a local identity
 	 * @param organization
 	 *            not <code>null</code>
-	 * @param roles
+	 * @param dsfRoles
 	 *            may be <code>null</code>
 	 * @param certificate
 	 *            may be <code>null</code>
 	 */
-	public AbstractIdentity(boolean localIdentity, Organization organization, Set<? extends Role> roles,
+	public AbstractIdentity(boolean localIdentity, Organization organization, Collection<? extends DsfRole> dsfRoles,
 			X509Certificate certificate)
 	{
 		this.localIdentity = localIdentity;
 		this.organization = Objects.requireNonNull(organization, "organization");
 
-		if (roles != null)
-			this.roles.addAll(roles);
+		if (dsfRoles != null)
+			this.dsfRoles.addAll(dsfRoles);
 
 		this.certificate = certificate;
 	}
@@ -76,21 +77,15 @@ public abstract class AbstractIdentity implements Identity
 	}
 
 	@Override
-	public Set<Role> getRoles()
+	public Set<DsfRole> getDsfRoles()
 	{
-		return Collections.unmodifiableSet(roles);
+		return Collections.unmodifiableSet(dsfRoles);
 	}
 
 	@Override
-	public boolean hasRole(Role role)
+	public boolean hasDsfRole(DsfRole dsfRole)
 	{
-		return roles.contains(role);
-	}
-
-	@Override
-	public boolean hasRole(String role)
-	{
-		return FhirServerRole.isValid(role) && hasRole(FhirServerRole.valueOf(role));
+		return dsfRoles.contains(dsfRole);
 	}
 
 	@Override

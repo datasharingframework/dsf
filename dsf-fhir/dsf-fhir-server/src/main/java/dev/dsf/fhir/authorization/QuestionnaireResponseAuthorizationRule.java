@@ -46,7 +46,7 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonCreateAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse newResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.CREATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.CREATE))
 		{
 			Optional<String> errors = newResourceOk(connection, identity, newResource,
 					EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
@@ -160,7 +160,7 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonReadAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse existingResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.READ))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.READ))
 		{
 			logger.info("Read of QuestionnaireResponse authorized for local user '{}'", identity.getName());
 			return Optional.of("task.restriction.recipient resolved and local user part of referenced organization");
@@ -176,7 +176,7 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonUpdateAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse oldResource, QuestionnaireResponse newResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.UPDATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.UPDATE))
 		{
 			Optional<String> errors = newResourceOk(connection, identity, newResource,
 					EnumSet.of(QuestionnaireResponseStatus.COMPLETED, QuestionnaireResponseStatus.STOPPED));
@@ -252,7 +252,7 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonDeleteAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse oldResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.DELETE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.DELETE))
 		{
 			logger.info("Delete of QuestionnaireResponse authorized for local user '{}'", identity.getName());
 			return Optional.of("local user");

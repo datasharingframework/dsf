@@ -25,6 +25,16 @@ public final class DbMigrator
 {
 	private static final Logger logger = LoggerFactory.getLogger(DbMigrator.class);
 
+	private static final class DbMigratorExceptions extends RuntimeException
+	{
+		private static final long serialVersionUID = 1L;
+
+		DbMigratorExceptions(Throwable cause)
+		{
+			super(cause);
+		}
+	}
+
 	private final DbMigratorConfig config;
 
 	public DbMigrator(DbMigratorConfig config)
@@ -63,24 +73,28 @@ public final class DbMigrator
 				}
 				catch (SQLException e)
 				{
-					logger.error("Error while accessing db: {}", e.getMessage());
-					throw new RuntimeException(e);
+					logger.warn("Error while accessing db: {}", e.getMessage());
+					throw new DbMigratorExceptions(e);
 				}
 				catch (LiquibaseException e)
 				{
-					logger.error("Error while running liquibase: {}", e.getMessage());
-					throw new RuntimeException(e);
+					logger.warn("Error while running liquibase: {}", e.getMessage());
+					throw new DbMigratorExceptions(e);
 				}
 				catch (Exception e)
 				{
-					logger.error("Error while running liquibase: {}", e.getMessage());
-					throw new RuntimeException(e);
+					logger.warn("Error while running liquibase: {}", e.getMessage());
+					throw new DbMigratorExceptions(e);
 				}
 			});
 		}
+		catch (DbMigratorExceptions e)
+		{
+			throw e;
+		}
 		catch (Exception e)
 		{
-			logger.error("Error while running liquibase: {}", e.getMessage());
+			logger.warn("Error while running liquibase: {}", e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
@@ -107,10 +121,10 @@ public final class DbMigrator
 
 			if (cause instanceof ConnectException && times > 1)
 			{
-				logger.warn("ConnectException: trying again in 1s");
+				logger.warn("ConnectException: trying again in 2s");
 				try
 				{
-					Thread.sleep(1000);
+					Thread.sleep(2000);
 				}
 				catch (InterruptedException e1)
 				{
@@ -130,7 +144,10 @@ public final class DbMigrator
 				retryOnConnectException(--times, run);
 			}
 			else
+			{
+				logger.error("Error while running liquibase: {}", e.getMessage());
 				throw e;
+			}
 		}
 	}
 }

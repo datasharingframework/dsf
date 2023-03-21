@@ -18,12 +18,13 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.eclipse.jetty.security.openid.OpenIdCredentials;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.common.auth.DsfOpenIdCredentials;
 
 public class PractitionerProviderImpl extends AbstractProvider implements PractitionerProvider
 {
@@ -38,7 +39,7 @@ public class PractitionerProviderImpl extends AbstractProvider implements Practi
 	}
 
 	@Override
-	public Optional<Practitioner> getPractitioner(OpenIdCredentials credentials)
+	public Optional<Practitioner> getPractitioner(DsfOpenIdCredentials credentials)
 	{
 		if (credentials == null)
 			return Optional.empty();
@@ -93,11 +94,11 @@ public class PractitionerProviderImpl extends AbstractProvider implements Practi
 				emails);
 	}
 
-	private Practitioner toPractitioner(OpenIdCredentials credentials)
+	private Practitioner toPractitioner(DsfOpenIdCredentials credentials)
 	{
-		Stream<String> surname = Stream.of((String) credentials.getClaims().getOrDefault("family_name", ""));
-		Stream<String> givenNames = Stream.of((String) credentials.getClaims().getOrDefault("given_name", ""));
-		Stream<String> emails = Stream.of((String) credentials.getClaims().getOrDefault("email", ""));
+		Stream<String> surname = Stream.of((String) credentials.getStringClaimOrDefault("family_name", ""));
+		Stream<String> givenNames = Stream.of((String) credentials.getStringClaimOrDefault("given_name", ""));
+		Stream<String> emails = Stream.of((String) credentials.getStringClaimOrDefault("email", ""));
 
 		return toPractitioner(surname, givenNames, emails);
 	}

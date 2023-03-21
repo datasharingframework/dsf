@@ -1,9 +1,12 @@
 package dev.dsf.common.auth.conf;
 
 import java.util.Optional;
+import java.util.Set;
 
-import org.eclipse.jetty.security.openid.OpenIdCredentials;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Practitioner;
+
+import dev.dsf.common.auth.DsfOpenIdCredentials;
 
 public interface PractitionerIdentity extends Identity
 {
@@ -15,7 +18,12 @@ public interface PractitionerIdentity extends Identity
 	Practitioner getPractitioner();
 
 	/**
+	 * @return never <code>null</code>
+	 */
+	Set<Coding> getPractionerRoles();
+
+	/**
 	 * @return {@link Optional#empty()} if login via client certificate
 	 */
-	Optional<OpenIdCredentials> getCredentials();
+	Optional<DsfOpenIdCredentials> getCredentials();
 }

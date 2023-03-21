@@ -7,20 +7,21 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.eclipse.jetty.security.openid.OpenIdCredentials;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 
+import dev.dsf.common.auth.DsfOpenIdCredentials;
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
 import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
-import dev.dsf.common.auth.conf.Role;
 
 public class IdentityProviderImpl implements IdentityProvider
 {
 	@Override
-	public Identity getIdentity(OpenIdCredentials credentials)
+	public Identity getIdentity(DsfOpenIdCredentials credentials)
 	{
 		return new PractitionerIdentity()
 		{
@@ -43,20 +44,13 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public boolean hasRole(String role)
-			{
-				return BpeServerRole.ORGANIZATION.name().equals(role);
-			}
-
-
-			@Override
-			public boolean hasRole(Role role)
+			public boolean hasDsfRole(DsfRole role)
 			{
 				return BpeServerRole.ORGANIZATION.equals(role);
 			}
 
 			@Override
-			public Set<Role> getRoles()
+			public Set<DsfRole> getDsfRoles()
 			{
 				return Collections.singleton(BpeServerRole.ORGANIZATION);
 			}
@@ -80,7 +74,13 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public Optional<OpenIdCredentials> getCredentials()
+			public Set<Coding> getPractionerRoles()
+			{
+				return Collections.emptySet();
+			}
+
+			@Override
+			public Optional<DsfOpenIdCredentials> getCredentials()
 			{
 				return Optional.of(credentials);
 			}
@@ -111,7 +111,7 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public Set<Role> getRoles()
+			public Set<DsfRole> getDsfRoles()
 			{
 				return Collections.singleton(BpeServerRole.ORGANIZATION);
 			}
@@ -135,15 +135,9 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public boolean hasRole(Role role)
+			public boolean hasDsfRole(DsfRole role)
 			{
 				return BpeServerRole.ORGANIZATION.equals(role);
-			}
-
-			@Override
-			public boolean hasRole(String role)
-			{
-				return BpeServerRole.ORGANIZATION.name().equals(role);
 			}
 
 			@Override

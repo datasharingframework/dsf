@@ -123,7 +123,7 @@ public class JettyServer
 		if (oidcConfig.clientConnectTimeout() != null)
 			connector.setConnectTimeout(oidcConfig.clientConnectTimeout());
 
-		HttpClient httpClient = new HttpClient(new HttpClientTransportOverHTTP(connector));
+		HttpClient httpClient = new HttpClientWithGetRetry(new HttpClientTransportOverHTTP(connector), 5);
 		if (oidcConfig.clientProxy() != null)
 			httpClient.getProxyConfiguration().addProxy(oidcConfig.clientProxy());
 

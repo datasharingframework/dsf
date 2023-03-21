@@ -20,11 +20,9 @@ public interface Identity extends Principal
 
 	String getOrganizationIdentifierValue();
 
-	Set<Role> getRoles();
+	Set<DsfRole> getDsfRoles();
 
-	boolean hasRole(Role role);
-
-	boolean hasRole(String role);
+	boolean hasDsfRole(DsfRole role);
 
 	/**
 	 * @return {@link Optional#empty()} if login via OIDC

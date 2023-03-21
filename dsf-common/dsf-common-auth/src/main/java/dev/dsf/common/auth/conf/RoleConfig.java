@@ -8,21 +8,27 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.r4.model.Coding;
+
 public class RoleConfig
 {
 	public class Mapping
 	{
 		private final String name;
+
 		private final List<String> thumbprints = new ArrayList<>();
 		private final List<String> emails = new ArrayList<>();
 		private final List<String> tokenRoles = new ArrayList<>();
 		private final List<String> tokenGroups = new ArrayList<>();
-		private final List<Role> roles = new ArrayList<>();
+
+		private final List<DsfRole> dsfRoles = new ArrayList<>();
+		private final List<Coding> practitionerRoles = new ArrayList<>();
 
 		private Mapping(String name, List<String> thumbprints, List<String> emails, List<String> tokenRoles,
-				List<String> tokenGroups, List<Role> roles)
+				List<String> tokenGroups, List<DsfRole> dsfRoles, List<Coding> practitionerRoles)
 		{
 			this.name = name;
+
 			if (thumbprints != null)
 				this.thumbprints.addAll(thumbprints);
 			if (emails != null)
@@ -31,8 +37,11 @@ public class RoleConfig
 				this.tokenRoles.addAll(tokenRoles);
 			if (tokenGroups != null)
 				this.tokenGroups.addAll(tokenGroups);
-			if (roles != null)
-				this.roles.addAll(roles);
+
+			if (dsfRoles != null)
+				this.dsfRoles.addAll(dsfRoles);
+			if (practitionerRoles != null)
+				this.practitionerRoles.addAll(practitionerRoles);
 		}
 
 		public String getName()
@@ -60,16 +69,24 @@ public class RoleConfig
 			return Collections.unmodifiableList(tokenGroups);
 		}
 
-		public List<Role> getRoles()
+		public List<DsfRole> getDsfRoles()
 		{
-			return Collections.unmodifiableList(roles);
+			return Collections.unmodifiableList(dsfRoles);
+		}
+
+		public List<Coding> getPractitionerRoles()
+		{
+			return Collections.unmodifiableList(practitionerRoles);
 		}
 
 		@Override
 		public String toString()
 		{
-			return "[name=" + name + ", thumbprints=" + thumbprints + ", emails=" + emails + ", jwtRoles=" + tokenRoles
-					+ ", jwtGroups=" + tokenGroups + ", dsfRoles=" + roles + "]";
+			return "[name=" + name + ", thumbprints=" + thumbprints + ", emails=" + emails + ", tokenRoles="
+					+ tokenRoles + ", tokenGroups=" + tokenGroups + ", dsfRoles=" + dsfRoles + ", practitionerRoles="
+					+ practitionerRoles.stream().map(c -> c.getSystem() + "|" + c.getCode())
+							.collect(Collectors.joining(", ", "[", "]"))
+					+ "]";
 		}
 	}
 
@@ -78,10 +95,15 @@ public class RoleConfig
 	/**
 	 * @param config
 	 *            parsed yaml
-	 * @param roleFactory
-	 *            factory should return <code>null</code> if the given string does not represent a valid role
+	 * @param dsfRoleFactory
+	 *            factory should return <code>null</code> if the given string does not represent a valid role, the role
+	 *            needs to exists
+	 * @param practitionerRoleFactory
+	 *            factory should return <code>null</code> if the given string does not represent a valid code, the code
+	 *            or CodeSystem does not need to exist
 	 */
-	public RoleConfig(Object config, Function<String, Role> roleFactory)
+	public RoleConfig(Object config, Function<String, DsfRole> dsfRoleFactory,
+			Function<String, Coding> practitionerRoleFactory)
 	{
 		if (config != null && config instanceof List)
 		{
@@ -103,7 +125,8 @@ public class RoleConfig
 
 							// Map<String, Object>
 							List<String> thumbprints = null, emails = null, tokenRoles = null, tokenGroups = null;
-							List<Role> roles = null;
+							List<DsfRole> dsfRoles = null;
+							List<Coding> practitionerRoles = null;
 							for (Entry<Object, Object> p : properties.entrySet())
 							{
 								if (p.getKey() != null && p.getKey() instanceof String)
@@ -122,15 +145,19 @@ public class RoleConfig
 										case "token-group":
 											tokenGroups = getValues(p.getValue());
 											break;
-										case "role":
-											roles = getValues(p.getValue()).stream().map(roleFactory)
+										case "dsf-role":
+											dsfRoles = getValues(p.getValue()).stream().map(dsfRoleFactory)
 													.filter(r -> r != null).toList();
+											break;
+										case "practitioner-role":
+											practitionerRoles = getValues(p.getValue()).stream()
+													.map(practitionerRoleFactory).filter(r -> r != null).toList();
 											break;
 									}
 								}
 							}
 							entries.add(new Mapping((String) mappingKey, thumbprints, emails, tokenRoles, tokenGroups,
-									roles));
+									dsfRoles, practitionerRoles));
 						}
 					});
 				}
@@ -154,30 +181,56 @@ public class RoleConfig
 		return Collections.unmodifiableList(entries);
 	}
 
-	public List<Role> getRolesForThumbprint(String thumbprint)
+	public List<DsfRole> getDsfRolesForThumbprint(String thumbprint)
 	{
-		return getRoleFor(Mapping::getThumbprints, thumbprint);
+		return getDsfRoleFor(Mapping::getThumbprints, thumbprint);
 	}
 
-	public List<Role> getRolesForEmail(String email)
+	public List<DsfRole> getDsfRolesForEmail(String email)
 	{
-		return getRoleFor(Mapping::getEmails, email);
+		return getDsfRoleFor(Mapping::getEmails, email);
 	}
 
-	public List<Role> getRolesForTokenRole(String tokenRole)
+	public List<DsfRole> getDsfRolesForTokenRole(String tokenRole)
 	{
-		return getRoleFor(Mapping::getTokenRoles, tokenRole);
+		return getDsfRoleFor(Mapping::getTokenRoles, tokenRole);
 	}
 
-	public List<Role> getRolesForTokenGroup(String tokenGroup)
+	public List<DsfRole> getDsfRolesForTokenGroup(String tokenGroup)
 	{
-		return getRoleFor(Mapping::getTokenGroups, tokenGroup);
+		return getDsfRoleFor(Mapping::getTokenGroups, tokenGroup);
 	}
 
-	private List<Role> getRoleFor(Function<Mapping, List<String>> values, String value)
+	private List<DsfRole> getDsfRoleFor(Function<Mapping, List<String>> values, String value)
 	{
-		return getEntries().stream().filter(m -> values.apply(m).contains(value)).flatMap(m -> m.getRoles().stream())
+		return getEntries().stream().filter(m -> values.apply(m).contains(value)).flatMap(m -> m.getDsfRoles().stream())
 				.toList();
+	}
+
+	public List<Coding> getPractitionerRolesForThumbprint(String thumbprint)
+	{
+		return getPractitionerRoleFor(Mapping::getThumbprints, thumbprint);
+	}
+
+	public List<Coding> getPractitionerRolesForEmail(String email)
+	{
+		return getPractitionerRoleFor(Mapping::getEmails, email);
+	}
+
+	public List<Coding> getPractitionerRolesForTokenRole(String tokenRole)
+	{
+		return getPractitionerRoleFor(Mapping::getTokenRoles, tokenRole);
+	}
+
+	public List<Coding> getPractitionerRolesForTokenGroup(String tokenGroup)
+	{
+		return getPractitionerRoleFor(Mapping::getTokenGroups, tokenGroup);
+	}
+
+	private List<Coding> getPractitionerRoleFor(Function<Mapping, List<String>> values, String value)
+	{
+		return getEntries().stream().filter(m -> values.apply(m).contains(value))
+				.flatMap(m -> m.getPractitionerRoles().stream()).toList();
 	}
 
 	@Override

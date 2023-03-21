@@ -78,7 +78,7 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 	@Override
 	public Optional<String> reasonHistoryAllowed(Identity identity)
 	{
-		if (identity.hasRole(FhirServerRole.HISTORY))
+		if (identity.hasDsfRole(FhirServerRole.HISTORY))
 		{
 			logger.info("History of root authorized for identity '{}'", identity.getName());
 			return Optional.of("Identity has role " + FhirServerRole.HISTORY);

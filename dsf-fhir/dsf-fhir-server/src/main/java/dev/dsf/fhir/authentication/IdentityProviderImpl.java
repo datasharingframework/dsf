@@ -12,8 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jetty.security.openid.JwtDecoder;
-import org.eclipse.jetty.security.openid.OpenIdCredentials;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -21,17 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.common.auth.DsfOpenIdCredentials;
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
-import dev.dsf.common.auth.conf.Role;
 import dev.dsf.common.auth.conf.RoleConfig;
 
 public class IdentityProviderImpl extends AbstractProvider implements IdentityProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(IdentityProviderImpl.class);
-
-	private static final String ACCESS_TOKEN = "access_token";
-	private static final String ID_TOKEN = "id_token";
 
 	private final OrganizationProvider organizationProvider;
 	private final PractitionerProvider practitionerProvider;
@@ -57,59 +54,54 @@ public class IdentityProviderImpl extends AbstractProvider implements IdentityPr
 	}
 
 	@Override
-	public Identity getIdentity(OpenIdCredentials credentials)
+	public Identity getIdentity(DsfOpenIdCredentials credentials)
 	{
-		Optional<Organization> localOrganization = organizationProvider.getLocalOrganization();
+		if (credentials == null)
+			return null;
+
 		Optional<Practitioner> practitioner = practitionerProvider.getPractitioner(credentials);
+		Optional<Organization> localOrganization = organizationProvider.getLocalOrganization();
 
 		if (practitioner.isPresent() && localOrganization.isPresent())
 		{
-			Map<String, Object> parsedIdToken = getToken(credentials, ID_TOKEN);
-			Map<String, Object> parsedAccessToken = getToken(credentials, ACCESS_TOKEN);
+			Map<String, Object> parsedIdToken = credentials.getIdToken();
+			Map<String, Object> parsedAccessToken = credentials.getAccessToken();
 
-			return new PractitionerIdentityImpl(localOrganization.get(),
-					getRolesFor(practitioner.get(), null, getRolesFromTokens(parsedIdToken, parsedAccessToken),
-							getGroupsFromTokens(parsedIdToken, parsedAccessToken)),
-					practitioner.get(), null, credentials);
+			List<String> rolesFromTokens = getRolesFromTokens(parsedIdToken, parsedAccessToken);
+			List<String> groupsFromTokens = getGroupsFromTokens(parsedIdToken, parsedAccessToken);
+
+			Set<DsfRole> dsfRoles = getDsfRolesFor(practitioner.get(), null, rolesFromTokens, groupsFromTokens);
+			Set<Coding> practitionerRoles = getPractitionerRolesFor(practitioner.get(), null, rolesFromTokens,
+					groupsFromTokens);
+
+			return new PractitionerIdentityImpl(localOrganization.get(), dsfRoles, null, practitioner.get(),
+					practitionerRoles, credentials);
+		}
+		else
+		{
+			logger.warn(
+					"User from OpenID Connect token '{}' not configured as local user or local organization unknown",
+					credentials.getUserId());
+			return null;
+		}
+	}
+
+	private List<String> getGroupsFromTokens(Map<String, Object> parsedIdToken, Map<String, Object> parsedAccessToken)
+	{
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("id_token: groups: {}", getPropertyArray(parsedIdToken, "groups"));
+			logger.debug("access_token: groups: {}", getPropertyArray(parsedAccessToken, "groups"));
 		}
 
-		logger.warn("User from OpenID Connect token '{}' not configured as local user or local organization unknown",
-				credentials.getUserId());
-		return null;
+		return Stream.concat(getPropertyArray(parsedIdToken, "groups").stream(),
+				getPropertyArray(parsedAccessToken, "groups").stream()).toList();
 	}
 
-	private Map<String, Object> getToken(OpenIdCredentials credentials, String tokenName)
+	private List<String> getRolesFromTokens(Map<String, Object> idToken, Map<String, Object> accessToken)
 	{
-		String token = (String) credentials.getResponse().get(tokenName);
-
-		logger.debug("{}: {}", tokenName, token);
-
-		return JwtDecoder.decode(token);
-	}
-
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> getPropertyMap(Map<String, Object> map, String property)
-	{
-		Object propertyValue = map.get(property);
-		if (propertyValue != null && propertyValue instanceof Map)
-			return (Map<String, Object>) propertyValue;
-		else
-			return Collections.emptyMap();
-	}
-
-	private List<String> getPropertyArray(Map<String, Object> map, String property)
-	{
-		Object propertyValue = map.get(property);
-		if (propertyValue != null && propertyValue instanceof Object[])
-			return Arrays.stream((Object[]) propertyValue).filter(v -> v instanceof String).map(v -> (String) v)
-					.toList();
-		else
-			return Collections.emptyList();
-	}
-
-	private Stream<String> getRolesFromTokens(Map<String, Object> idToken, Map<String, Object> accessToken)
-	{
-		return Stream.concat(getRolesFromToken(ID_TOKEN, idToken), getRolesFromToken(ACCESS_TOKEN, accessToken));
+		return Stream.concat(getRolesFromToken("id_token", idToken), getRolesFromToken("access_token", accessToken))
+				.toList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,16 +124,24 @@ public class IdentityProviderImpl extends AbstractProvider implements IdentityPr
 								.map(r -> e.getKey() + "." + r)));
 	}
 
-	private Stream<String> getGroupsFromTokens(Map<String, Object> parsedIdToken, Map<String, Object> parsedAccessToken)
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> getPropertyMap(Map<String, Object> map, String property)
 	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("{}: groups: {}", ID_TOKEN, getPropertyArray(parsedIdToken, "groups"));
-			logger.debug("{}: groups: {}", ACCESS_TOKEN, getPropertyArray(parsedAccessToken, "groups"));
-		}
+		Object propertyValue = map.get(property);
+		if (propertyValue != null && propertyValue instanceof Map)
+			return (Map<String, Object>) propertyValue;
+		else
+			return Collections.emptyMap();
+	}
 
-		return Stream.concat(getPropertyArray(parsedIdToken, "groups").stream(),
-				getPropertyArray(parsedAccessToken, "groups").stream());
+	private List<String> getPropertyArray(Map<String, Object> map, String property)
+	{
+		Object propertyValue = map.get(property);
+		if (propertyValue != null && propertyValue instanceof Object[])
+			return Arrays.stream((Object[]) propertyValue).filter(v -> v instanceof String).map(v -> (String) v)
+					.toList();
+		else
+			return Collections.emptyList();
 	}
 
 	@Override
@@ -168,36 +168,63 @@ public class IdentityProviderImpl extends AbstractProvider implements IdentityPr
 		Optional<Practitioner> practitioner = practitionerProvider.getPractitioner(certificates[0]);
 		Optional<Organization> localOrganization = organizationProvider.getLocalOrganization();
 		if (practitioner.isPresent() && localOrganization.isPresent())
-			return new PractitionerIdentityImpl(localOrganization.get(),
-					getRolesFor(practitioner.get(), thumbprint, null, null), practitioner.get(), certificates[0], null);
+		{
+			Practitioner p = practitioner.get();
+			Organization o = localOrganization.get();
 
-		logger.warn(
-				"Certificate with thumbprint '{}' for '{}' not part of allowlist and not configured as local user or local organization unknown",
-				thumbprint, getDn(certificates[0]));
-		return null;
+			return new PractitionerIdentityImpl(o, getDsfRolesFor(p, thumbprint, null, null), certificates[0], p,
+					getPractitionerRolesFor(p, thumbprint, null, null), null);
+		}
+		else
+		{
+			logger.warn(
+					"Certificate with thumbprint '{}' for '{}' not part of allowlist and not configured as local user or local organization unknown",
+					thumbprint, getDn(certificates[0]));
+			return null;
+		}
 	}
 
 	private boolean isLocalOrganization(Organization organization)
 	{
-		return organization != null && organization.getIdentifier().stream()
-				.anyMatch(i -> i != null && OrganizationProvider.ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())
-						&& localOrganizationIdentifierValue.equals(i.getValue()));
+		return organization != null && organization.getIdentifier().stream().filter(i -> i != null)
+				.filter(i -> OrganizationProvider.ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem()))
+				.anyMatch(i -> localOrganizationIdentifierValue.equals(i.getValue()));
 	}
 
 	// thumbprint from certificate, token roles and groups from jwt
-	private Set<Role> getRolesFor(Practitioner practitioner, String thumbprint, Stream<String> tokenRoles,
-			Stream<String> tokenGroups)
+	private Set<DsfRole> getDsfRolesFor(Practitioner practitioner, String thumbprint, List<String> tokenRoles,
+			List<String> tokenGroups)
 	{
 		Stream<String> emailAddresses = practitioner.getIdentifier().stream()
 				.filter(i -> PractitionerProvider.PRACTITIONER_IDENTIFIER_SYSTEM.equals(i.getSystem()) && i.hasValue())
 				.map(Identifier::getValue);
 
-		Stream<Role> r1 = emailAddresses.flatMap(e -> roleConfig.getRolesForEmail(e).stream());
-		Stream<Role> r2 = thumbprint == null ? Stream.empty() : roleConfig.getRolesForThumbprint(thumbprint).stream();
-		Stream<Role> r3 = tokenRoles == null ? Stream.empty()
-				: tokenRoles.flatMap(c -> roleConfig.getRolesForTokenRole(c).stream());
-		Stream<Role> r4 = tokenGroups == null ? Stream.empty()
-				: tokenGroups.flatMap(c -> roleConfig.getRolesForTokenGroup(c).stream());
+		Stream<DsfRole> r1 = emailAddresses.map(roleConfig::getDsfRolesForEmail).flatMap(List::stream);
+		Stream<DsfRole> r2 = thumbprint == null ? Stream.empty()
+				: roleConfig.getDsfRolesForThumbprint(thumbprint).stream();
+		Stream<DsfRole> r3 = tokenRoles == null ? Stream.empty()
+				: tokenRoles.stream().map(roleConfig::getDsfRolesForTokenRole).flatMap(List::stream);
+		Stream<DsfRole> r4 = tokenGroups == null ? Stream.empty()
+				: tokenGroups.stream().map(roleConfig::getDsfRolesForTokenGroup).flatMap(List::stream);
+
+		return Stream.of(r1, r2, r3, r4).flatMap(Function.identity()).distinct().collect(Collectors.toSet());
+	}
+
+	// thumbprint from certificate, token roles and groups from jwt
+	private Set<Coding> getPractitionerRolesFor(Practitioner practitioner, String thumbprint, List<String> tokenRoles,
+			List<String> tokenGroups)
+	{
+		Stream<String> emailAddresses = practitioner.getIdentifier().stream()
+				.filter(i -> PractitionerProvider.PRACTITIONER_IDENTIFIER_SYSTEM.equals(i.getSystem()) && i.hasValue())
+				.map(Identifier::getValue);
+
+		Stream<Coding> r1 = emailAddresses.map(roleConfig::getPractitionerRolesForEmail).flatMap(List::stream);
+		Stream<Coding> r2 = thumbprint == null ? Stream.empty()
+				: roleConfig.getPractitionerRolesForThumbprint(thumbprint).stream();
+		Stream<Coding> r3 = tokenRoles == null ? Stream.empty()
+				: tokenRoles.stream().map(roleConfig::getPractitionerRolesForTokenRole).flatMap(List::stream);
+		Stream<Coding> r4 = tokenGroups == null ? Stream.empty()
+				: tokenGroups.stream().map(roleConfig::getPractitionerRolesForTokenGroup).flatMap(List::stream);
 
 		return Stream.of(r1, r2, r3, r4).flatMap(Function.identity()).distinct().collect(Collectors.toSet());
 	}

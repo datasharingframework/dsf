@@ -152,7 +152,7 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             token-role: admin
-            role:
+            dsf-role:
               - CREATE
               - READ
               - UPDATE
@@ -222,7 +222,7 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             token-role: admin
-            role:
+            dsf-role:
               - CREATE
               - READ
               - UPDATE
@@ -292,7 +292,7 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             token-role: admin
-            role:
+            dsf-role:
               - CREATE
               - READ
               - UPDATE
@@ -364,7 +364,7 @@ services:
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             token-role: admin
-            role:
+            dsf-role:
               - CREATE
               - READ
               - UPDATE

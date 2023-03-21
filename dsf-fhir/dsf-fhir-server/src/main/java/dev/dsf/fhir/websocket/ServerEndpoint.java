@@ -61,7 +61,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 
 
 		if (principal == null || !(principal instanceof Identity)
-				|| !((Identity) principal).hasRole(FhirServerRole.WEBSOCKET))
+				|| !((Identity) principal).hasDsfRole(FhirServerRole.WEBSOCKET))
 		{
 			logger.warn("No user in session or user is missing role {}, closing websocket: {}",
 					FhirServerRole.WEBSOCKET, session.getId());

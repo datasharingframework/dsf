@@ -18,10 +18,6 @@
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-openid</artifactId>
-		</dependency>
 		
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

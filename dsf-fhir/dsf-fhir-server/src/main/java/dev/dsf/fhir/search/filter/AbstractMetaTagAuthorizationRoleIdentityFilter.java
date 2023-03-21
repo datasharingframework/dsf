@@ -19,11 +19,11 @@ abstract class AbstractMetaTagAuthorizationRoleIdentityFilter extends AbstractId
 	@Override
 	public String getFilterQuery()
 	{
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.READ))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.READ))
 			return "(SELECT count(*) FROM read_access WHERE read_access.resource_id = " + resourceTable + "."
 					+ resourceIdColumn + " AND read_access.resource_version = " + resourceTable + ".version"
 					+ " AND (read_access.organization_id = ? OR read_access.access_type = 'ALL' OR read_access.access_type = 'LOCAL')) > 0";
-		else if (identity.hasRole(FhirServerRole.READ))
+		else if (identity.hasDsfRole(FhirServerRole.READ))
 			return "(SELECT count(*) FROM read_access WHERE read_access.resource_id = " + resourceTable + "."
 					+ resourceIdColumn + " AND read_access.resource_version = " + resourceTable + ".version"
 					+ " AND (read_access.organization_id = ? OR read_access.access_type = 'ALL')) > 0";
@@ -34,14 +34,14 @@ abstract class AbstractMetaTagAuthorizationRoleIdentityFilter extends AbstractId
 	@Override
 	public int getSqlParameterCount()
 	{
-		return identity.hasRole(FhirServerRole.READ) ? 1 : 0;
+		return identity.hasDsfRole(FhirServerRole.READ) ? 1 : 0;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException
 	{
-		if (identity.hasRole(FhirServerRole.READ))
+		if (identity.hasDsfRole(FhirServerRole.READ))
 		{
 			String usersOrganizationId = identity.getOrganization().getIdElement().getIdPart();
 			statement.setObject(parameterIndex, toUuidObject(usersOrganizationId));

@@ -82,7 +82,7 @@ public class ConfigGenerator
 				- webbrowser_test_user:
 				    thumbprint: %s
 				    token-role: admin
-				    role:
+				    dsf-role:
 				      - CREATE
 				      - READ
 				      - UPDATE

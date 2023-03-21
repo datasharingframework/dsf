@@ -57,7 +57,7 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			return false;
 		}
 
-		long expiry = (Long) identity.getCredentials().get().getClaims().get("exp");
+		long expiry = (Long) identity.getCredentials().get().getLongClaim("exp");
 		long currentTimeSeconds = (long) (System.currentTimeMillis() / 1000F);
 		if (currentTimeSeconds > expiry)
 		{

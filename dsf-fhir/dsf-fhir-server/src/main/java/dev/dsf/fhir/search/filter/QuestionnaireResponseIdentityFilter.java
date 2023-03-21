@@ -17,7 +17,7 @@ public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 	public String getFilterQuery()
 	{
 		// read allowed for local users
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.READ))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.READ))
 			return "";
 
 		// read not allowed for non local users

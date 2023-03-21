@@ -1,6 +1,6 @@
 package dev.dsf.common.auth.conf;
 
-public interface Role
+public interface DsfRole
 {
 	String name();
 }

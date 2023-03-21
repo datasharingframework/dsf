@@ -2,6 +2,7 @@ package dev.dsf.fhir.spring.config;
 
 import java.util.List;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,12 +62,26 @@ public class AuthenticationConfig
 		if (roleConfig != null)
 		{
 			RoleConfig config = new RoleConfigReader().read(roleConfig,
-					role -> FhirServerRole.isValid(role) ? FhirServerRole.valueOf(role) : null);
+					role -> FhirServerRole.isValid(role) ? FhirServerRole.valueOf(role) : null,
+					this::practionerRoleFactory);
 
 			logger.info("Role config: {}", config.toString());
 			return config;
 		}
 		else
 			throw new RuntimeException("Roles not configured");
+	}
+
+	// TODO implement practitioner role factory that logs non existing codes as warning
+	private Coding practionerRoleFactory(String role)
+	{
+		if (role != null)
+		{
+			String[] roleParts = role.split("\\|");
+			if (roleParts.length == 2)
+				return new Coding().setSystem(roleParts[0]).setCode(roleParts[1]);
+		}
+
+		return null;
 	}
 }

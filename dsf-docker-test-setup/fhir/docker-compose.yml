@@ -68,7 +68,7 @@ services:
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
-            role:
+            dsf-role:
               - CREATE
               - READ
               - UPDATE
