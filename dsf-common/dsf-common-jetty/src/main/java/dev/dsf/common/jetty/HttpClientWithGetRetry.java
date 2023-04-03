@@ -53,10 +53,10 @@ public class HttpClientWithGetRetry extends HttpClient
 			if (cause instanceof ConnectException && times > 1)
 			{
 				logger.warn("Error while accessing {}: {}", uri == null ? "null" : uri.toString(), e.getMessage());
-				logger.warn("ConnectException: trying again in 2s");
+				logger.warn("ConnectException: trying again in 5s");
 				try
 				{
-					Thread.sleep(2000);
+					Thread.sleep(5000);
 				}
 				catch (InterruptedException e1)
 				{

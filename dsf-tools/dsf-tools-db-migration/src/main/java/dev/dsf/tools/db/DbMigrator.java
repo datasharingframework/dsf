@@ -121,10 +121,10 @@ public final class DbMigrator
 
 			if (cause instanceof ConnectException && times > 1)
 			{
-				logger.warn("ConnectException: trying again in 2s");
+				logger.warn("ConnectException: trying again in 5s");
 				try
 				{
-					Thread.sleep(2000);
+					Thread.sleep(5000);
 				}
 				catch (InterruptedException e1)
 				{
