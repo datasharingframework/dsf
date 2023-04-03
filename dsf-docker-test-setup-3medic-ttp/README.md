@@ -15,6 +15,7 @@
     127.0.0.1	medic2
     127.0.0.1	medic3
     127.0.0.1	ttp
+    127.0.0.1	keycloak
     ```
 
 * Build the docker images in the sub-folder `dsf/dsf-docker-test-setup-3medic-ttp` by executing:
