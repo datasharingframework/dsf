@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.webservice.ProcessService;
+import dev.dsf.bpe.webservice.RootService;
+import dev.dsf.common.auth.logout.LogoutService;
 import dev.dsf.common.status.webservice.StatusService;
 
 @Configuration
@@ -21,9 +23,21 @@ public class WebserviceConfig
 	private PropertiesConfig propertiesConfig;
 
 	@Bean
+	public LogoutService logoutService()
+	{
+		return new LogoutService();
+	}
+
+	@Bean
 	public ProcessService processService()
 	{
 		return new ProcessService(processEngine.getRuntimeService(), processEngine.getRepositoryService());
+	}
+
+	@Bean
+	public RootService rootService()
+	{
+		return new RootService();
 	}
 
 	@Bean

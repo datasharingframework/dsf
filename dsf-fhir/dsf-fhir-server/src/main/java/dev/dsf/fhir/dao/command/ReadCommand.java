@@ -21,7 +21,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.event.EventHandler;
@@ -141,7 +141,7 @@ public class ReadCommand extends AbstractCommand implements Command
 				if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false)
 						|| ifModifiedSince.map(d -> r.getMeta().getLastUpdated().after(d)).orElse(false))
 					responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated())
-							.build();
+							.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM).build();
 				else
 					singleResult = r;
 
@@ -176,7 +176,7 @@ public class ReadCommand extends AbstractCommand implements Command
 				if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false)
 						|| ifModifiedSince.map(d -> r.getMeta().getLastUpdated().after(d)).orElse(false))
 					responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated())
-							.build();
+							.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM).build();
 				else
 					singleResult = r;
 

@@ -349,7 +349,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (reasonHistoryAllowed.isEmpty())
 		{
 			audit.info("History of {} denied for identity '{}'", resourceTypeName, getCurrentIdentity().getName());
-			return forbidden("search");
+			return forbidden("history");
 		}
 		else
 		{
@@ -372,7 +372,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (reasonHistoryAllowed.isEmpty())
 		{
 			audit.info("History of {} denied for identity '{}'", resourceTypeName, getCurrentIdentity().getName());
-			return forbidden("search");
+			return forbidden("history");
 		}
 		else
 		{

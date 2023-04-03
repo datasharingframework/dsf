@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Principal;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -33,11 +34,13 @@ import com.google.common.base.Objects;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
+import dev.dsf.common.auth.conf.Identity;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 
@@ -88,7 +91,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private final Class<T> resourceType;
 
 	@Context
-	private UriInfo uriInfo;
+	private volatile UriInfo uriInfo;
+
+	@Context
+	private volatile SecurityContext securityContext;
 
 	protected HtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider, Class<T> resourceType)
 	{
@@ -124,94 +130,129 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
+		final String basePath = uriInfo.getBaseUri().getRawPath();
+
 		OutputStreamWriter out = new OutputStreamWriter(entityStream);
-		out.write("<!DOCTYPE html>\n");
-		out.write("<html>\n<head>\n");
-		out.write("<link rel=\"icon\" type=\"image/svg+xml\" href=\"/fhir/static/favicon.svg\">\n");
-		out.write("<link rel=\"icon\" type=\"image/png\" href=\"/fhir/static/favicon_32x32.png\" sizes=\"32x32\">\n");
-		out.write("<link rel=\"icon\" type=\"image/png\" href=\"/fhir/static/favicon_96x96.png\" sizes=\"96x96\">\n");
-		out.write("<meta name=\"theme-color\" content=\"#29235c\">\n");
-		out.write("<script src=\"/fhir/static/prettify.js\"></script>\n");
-		out.write("<script src=\"/fhir/static/tabs.js\"></script>\n");
-		out.write("<script src=\"/fhir/static/bookmarks.js\"></script>\n");
-		out.write("<script src=\"/fhir/static/help.js\"></script>\n");
-		out.write("<script src=\"/fhir/static/form.js\"></script>\n");
-		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
-		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/dsf.css\">\n");
-		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/form.css\">\n");
+
+		out.write("""
+				<!DOCTYPE html>
+				<html>
+				<head>
+				<link rel="icon" type="image/svg+xml" href="${basePath}static/favicon.svg">
+				<link rel="icon" type="image/png" href="${basePath}static/favicon_32x32.png" sizes="32x32">
+				<link rel="icon" type="image/png" href="${basePath}static/favicon_96x96.png" sizes="96x96">
+				<meta name="theme-color" content="#29235c">
+				<script src="${basePath}static/prettify.js"></script>
+				<script src="${basePath}static/tabs.js"></script>
+				<script src="${basePath}static/bookmarks.js"></script>
+				<script src="${basePath}static/help.js"></script>
+				<script src="${basePath}static/form.js"></script>
+				<link rel="stylesheet" type="text/css" href="${basePath}static/prettify.css">
+				<link rel="stylesheet" type="text/css" href="${basePath}static/dsf.css">
+				<link rel="stylesheet" type="text/css" href="${basePath}static/form.css">
+				""".replace("${basePath}", basePath));
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
-				+ uriInfo.getPath() + "</title>\n</head>\n");
+				+ uriInfo.getPath() + "</title>\n");
+		out.write("</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled())
 				+ ");checkBookmarked();\">\n");
+
 		out.write("<div id=\"icons\">\n");
-		out.write("<svg class=\"icon\" id=\"help-icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
-		out.write("<title>Show Help</title>\n");
+
+		Principal userPrincipal = securityContext.getUserPrincipal();
+		if (userPrincipal instanceof Identity)
+		{
+			Identity identity = (Identity) userPrincipal;
+			out.write("<span id=\"hello-user\">");
+			out.write("Hello, ");
+			out.write(identity.getDisplayName());
+			out.write("</span>\n");
+		}
+
+		if ("OPENID".equals(securityContext.getAuthenticationScheme()))
+		{
+			out.write(
+					"""
+							<a href="${basePath}logout">
+							<svg class="icon" id="logout-icon" viewBox="0 0 24 24">
+							<title>Logout</title>
+							<path d="M5 21q-.825 0-1.413-.587Q3 19.825 3 19V5q0-.825.587-1.413Q4.175 3 5 3h7v2H5v14h7v2Zm11-4-1.375-1.45 2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5Z"/>
+							</svg></a>
+							"""
+							.replace("${basePath}", basePath));
+		}
+
 		out.write(
-				"<path d=\"M11.07,12.85c0.77-1.39,2.25-2.21,3.11-3.44c0.91-1.29,0.4-3.7-2.18-3.7c-1.69,0-2.52,1.28-2.87,2.34L6.54,6.96 C7.25,4.83,9.18,3,11.99,3c2.35,0,3.96,1.07,4.78,2.41c0.7,1.15,1.11,3.3,0.03,4.9c-1.2,1.77-2.35,2.31-2.97,3.45 c-0.25,0.46-0.35,0.76-0.35,2.24h-2.89C10.58,15.22,10.46,13.95,11.07,12.85z M14,20c0,1.1-0.9,2-2,2s-2-0.9-2-2c0-1.1,0.9-2,2-2 S14,18.9,14,20z\"/>\n");
-		out.write("</svg>\n");
-		out.write(
-				"<a href=\"\" download=\"\" id=\"download-link\" title=\"\"><svg class=\"icon\" id=\"download\" viewBox=\"0 0 24 24\">\n");
-		out.write(
-				"<path d=\"M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z\"/>\n");
-		out.write("</svg></a>\n");
-		out.write("<svg class=\"icon\" id=\"bookmark-add\" viewBox=\"0 0 24 24\" onclick=\"addCurrentBookmark();\">\n");
-		out.write("<title>Add Bookmark</title>\n");
-		out.write(
-				"<path d=\"M17,11v6.97l-5-2.14l-5,2.14V5h6V3H7C5.9,3,5,3.9,5,5v16l7-3l7,3V11H17z M21,7h-2v2h-2V7h-2V5h2V3h2v2h2V7z\"/>\n");
-		out.write("</svg>\n");
-		out.write(
-				"<svg class=\"icon\" id=\"bookmark-remove\" viewBox=\"0 0 24 24\" onclick=\"removeCurrentBookmark();\" style=\"display:none;\">\n");
-		out.write("<title>Remove Bookmark</title>\n");
-		out.write(
-				"<path d=\"M17,11v6.97l-5-2.14l-5,2.14V5h6V3H7C5.9,3,5,3.9,5,5v16l7-3l7,3V11H17z M21,7h-6V5h6V7z\"/>\n");
-		out.write("</svg>\n");
-		out.write("<svg class=\"icon\" id=\"bookmark-list\" viewBox=\"0 0 24 24\" onclick=\"showBookmarks();\">\n");
-		out.write("<title>Show Bookmarks</title>\n");
-		out.write(
-				"<path d=\"M9,1H19A2,2 0 0,1 21,3V19L19,18.13V3H7A2,2 0 0,1 9,1M15,20V7H5V20L10,17.82L15,20M15,5C16.11,5 17,5.9 17,7V23L10,20L3,23V7A2,2 0 0,1 5,5H15Z\"/>\n");
-		out.write("</svg>\n");
-		out.write("</div>\n");
-		out.write("<div id=\"help\" style=\"display:none;\">\n");
-		out.write("<h3 id=\"help-title\">Query Parameters</h3>\n");
-		out.write("<svg class=\"icon\" id=\"help-close\" viewBox=\"0 0 24 24\" onclick=\"closeHelp();\">\n");
-		out.write("<title>Close Help</title>\n");
-		out.write(
-				"<path fill=\"currentColor\" d=\"M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z\"/>\n");
-		out.write("</svg>\n");
-		out.write("<div id=\"help-list\">\n");
-		out.write("</div>\n");
-		out.write("</div>\n");
-		out.write("<div id=\"bookmarks\" style=\"display:none;\">\n");
-		out.write("<h3 id=\"bookmarks-title\">Bookmarks</h3>\n");
-		out.write(
-				"<svg class=\"icon\" id=\"bookmark-list-close\" viewBox=\"0 0 24 24\" onclick=\"closeBookmarks();\">\n");
-		out.write("<title>Close Bookmarks</title>\n");
-		out.write(
-				"<path fill=\"currentColor\" d=\"M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z\"/>\n");
-		out.write("</svg>\n");
-		out.write("<div id=\"bookmarks-list\">\n");
-		out.write("</div>\n");
-		out.write("</div>\n");
-		out.write("<table id=\"header\"><tr>\n");
-		out.write("<td><image src=\"/fhir/static/highmed.svg\"></td>\n");
-		out.write("<td id=\"url\"><h1>");
+				"""
+						<svg class="icon" id="help-icon" viewBox="0 0 24 24" onclick="showHelp();">
+						<title>Show Help</title>
+						<path d="M11.07,12.85c0.77-1.39,2.25-2.21,3.11-3.44c0.91-1.29,0.4-3.7-2.18-3.7c-1.69,0-2.52,1.28-2.87,2.34L6.54,6.96 C7.25,4.83,9.18,3,11.99,3c2.35,0,3.96,1.07,4.78,2.41c0.7,1.15,1.11,3.3,0.03,4.9c-1.2,1.77-2.35,2.31-2.97,3.45 c-0.25,0.46-0.35,0.76-0.35,2.24h-2.89C10.58,15.22,10.46,13.95,11.07,12.85z M14,20c0,1.1-0.9,2-2,2s-2-0.9-2-2c0-1.1,0.9-2,2-2 S14,18.9,14,20z"/>
+						</svg>
+						<a href="" download="" id="download-link" title="">
+						<svg class="icon" id="download" viewBox="0 0 24 24">
+						<path d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/>
+						</svg></a>
+						<svg class="icon" id="bookmark-add" viewBox="0 0 24 24" onclick="addCurrentBookmark();">
+						<title>Add Bookmark</title>
+						<path d="M17,11v6.97l-5-2.14l-5,2.14V5h6V3H7C5.9,3,5,3.9,5,5v16l7-3l7,3V11H17z M21,7h-2v2h-2V7h-2V5h2V3h2v2h2V7z"/>
+						</svg>
+						<svg class="icon" id="bookmark-remove" viewBox="0 0 24 24" onclick="removeCurrentBookmark();" style="display:none;">
+						<title>Remove Bookmark</title>
+						<path d="M17,11v6.97l-5-2.14l-5,2.14V5h6V3H7C5.9,3,5,3.9,5,5v16l7-3l7,3V11H17z M21,7h-6V5h6V7z"/>
+						</svg>
+						<svg class="icon" id="bookmark-list" viewBox="0 0 24 24" onclick="showBookmarks();">
+						<title>Show Bookmarks</title>
+						<path d="M9,1H19A2,2 0 0,1 21,3V19L19,18.13V3H7A2,2 0 0,1 9,1M15,20V7H5V20L10,17.82L15,20M15,5C16.11,5 17,5.9 17,7V23L10,20L3,23V7A2,2 0 0,1 5,5H15Z"/>
+						</svg>
+						</div>
+						<div id="help" style="display:none;">
+						<h3 id="help-title">Query Parameters</h3>
+						<svg class="icon" id="help-close" viewBox="0 0 24 24" onclick="closeHelp();">
+						<title>Close Help</title>
+						<path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+						</svg>
+						<div id="help-list"></div>
+						</div>
+						<div id="bookmarks" style="display:none;">
+						<h3 id="bookmarks-title">Bookmarks</h3>
+						<svg class="icon" id="bookmark-list-close" viewBox="0 0 24 24" onclick="closeBookmarks();">
+						<title>Close Bookmarks</title>
+						<path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+						</svg>
+						<div id="bookmarks-list"></div>
+						</div>
+						<table id="header">
+						<tr>
+						<td>
+						<image src="${basePath}static/highmed.svg">
+						</td>
+						<td id="url">
+						<h1>
+						"""
+						.replace("${basePath}", basePath));
 		out.write(getUrlHeading(t));
-		out.write("</h1></td>\n");
-		out.write("</tr></table>\n");
-		out.write("<div class=\"tab\">\n");
+		out.write("""
+				</h1>
+				</td>
+				</tr>
+				</table>
+				<div class="tab">
+				""");
 
 		if (isHtmlEnabled())
 			out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
 
-		out.write("<button id=\"json-button\" class=\"tablinks\" onclick=\"openTab('json')\">json</button>\n");
-		out.write("<button id=\"xml-button\" class=\"tablinks\" onclick=\"openTab('xml')\">xml</button>\n");
-		out.write("</div>\n");
+		out.write("""
+				<button id="json-button" class="tablinks" onclick="openTab('json')">json</button>
+				<button id="xml-button" class="tablinks" onclick="openTab('xml')">xml</button>
+				</div>
+				""");
 
-		writeXml(t, out);
-		writeJson(t, out);
+		writeXml(basePath, t, out);
+		writeJson(basePath, t, out);
 
 		if (isHtmlEnabled())
-			writeHtml(t, out);
+			writeHtml(basePath, t, out);
 
 		out.write("</html>");
 		out.flush();
@@ -223,21 +264,23 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		String[] pathSegments = uri.getPath().split("/");
 
 		String u = serverBaseProvider.getServerBase();
-		String heading = "<a href=\"" + u + "\" title=\"Open " + u + "\">" + u + "</a>";
+		StringBuilder heading = new StringBuilder("<a href=\"" + u + "/\" title=\"Open " + u + "\">" + u + "</a>");
 
 		for (int i = 2; i < pathSegments.length; i++)
 		{
 			u += "/" + pathSegments[i];
-			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegments[i] + "</a>";
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegments[i] + "</a>");
 		}
 
 		if (uri.getQuery() != null)
 		{
 			u += "?" + uri.getQuery();
-			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">?" + uri.getQuery() + "</a>";
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + uri.getQuery() + "</a>");
 		}
 
-		return heading;
+		heading.append('\n');
+
+		return heading.toString();
 	}
 
 	private URI toURI(String str)
@@ -271,7 +314,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 			return Optional.empty();
 	}
 
-	private void writeXml(T t, OutputStreamWriter out) throws IOException
+	private void writeXml(String basePath, T t, OutputStreamWriter out) throws IOException
 	{
 		IParser parser = getParser(fhirContext::newXmlParser);
 
@@ -287,10 +330,12 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		content = versionMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(t, result.group(1));
-			return resourceName.map(rN -> "&lt;id value=\"<a href=\"/fhir/" + rN + "/" + result.group(1) + "\">"
-					+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
-					+ "&lt;versionId value=\"" + "<a href=\"/fhir/" + rN + "/" + result.group(1) + "/_history/"
-					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\"/&gt;").orElse(result.group(0));
+			return resourceName
+					.map(rN -> "&lt;id value=\"<a href=\"" + basePath + rN + "/" + result.group(1) + "\">"
+							+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
+							+ "&lt;versionId value=\"" + "<a href=\"" + basePath + rN + "/" + result.group(1)
+							+ "/_history/" + result.group(4) + "\">" + result.group(4) + "</a>" + "\"/&gt;")
+					.orElse(result.group(0));
 		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
@@ -332,7 +377,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		}
 	}
 
-	private void writeJson(T t, OutputStreamWriter out) throws IOException
+	private void writeJson(String basePath, T t, OutputStreamWriter out) throws IOException
 	{
 		IParser parser = getParser(fhirContext::newJsonParser);
 
@@ -343,16 +388,16 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = JSON_REFERENCE_UUID_PATTERN.matcher(content);
-		content = referenceUuidMatcher.replaceAll(
-				result -> "\"reference\": \"<a href=\"/fhir/" + result.group(1) + "\">" + result.group(1) + "</a>\",");
+		content = referenceUuidMatcher.replaceAll(result -> "\"reference\": \"<a href=\"" + basePath + result.group(1)
+				+ "\">" + result.group(1) + "</a>\",");
 
 		Matcher idUuidMatcher = JSON_ID_UUID_AND_VERSION_PATTERN.matcher(content);
 		content = idUuidMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(t, result.group(1));
-			return resourceName.map(rN -> "\"id\": \"<a href=\"/fhir/" + rN + "/" + result.group(1) + "\">"
+			return resourceName.map(rN -> "\"id\": \"<a href=\"" + basePath + rN + "/" + result.group(1) + "\">"
 					+ result.group(1) + "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3)
-					+ "\"versionId\": \"" + "<a href=\"/fhir/" + rN + "/" + result.group(1) + "/_history/"
+					+ "\"versionId\": \"" + "<a href=\"" + basePath + rN + "/" + result.group(1) + "/_history/"
 					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\",").orElse(result.group(0));
 		});
 
@@ -360,16 +405,16 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</pre>\n");
 	}
 
-	private void writeHtml(T t, OutputStreamWriter out) throws IOException
+	private void writeHtml(String basePath, T t, OutputStreamWriter out) throws IOException
 	{
 		out.write("<div id=\"html\" class=\"prettyprint lang-html\" style=\"display:none;\">\n");
-		doWriteHtml(t, out);
+		doWriteHtml(basePath, t, out);
 		out.write("</div>\n");
 	}
 
 	/**
 	 * Override this method to return <code>true</code> if the HTML tab should be shown. This implies overriding
-	 * {@link #doWriteHtml(BaseResource, OutputStreamWriter)} as well.
+	 * {@link #doWriteHtml(String, BaseResource, OutputStreamWriter)} as well.
 	 *
 	 * @return <code>true</code> if the html tab should be shown, <code>false</code> otherwise (default
 	 *         <code>false</code>)
@@ -382,13 +427,15 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	/**
 	 * Use this method to write output to the html tab. This implies overriding {@link #isHtmlEnabled()} as well.
 	 *
+	 * @param basePath
+	 *            the applications base base, e.g. /fhir/
 	 * @param t
 	 *            the resource, not <code>null</code>
 	 * @param out
 	 *            the outputStreamWriter, not <code>null</code>
 	 * @throws IOException
 	 */
-	protected void doWriteHtml(T t, OutputStreamWriter out) throws IOException
+	protected void doWriteHtml(String basePath, T t, OutputStreamWriter out) throws IOException
 	{
 	}
 

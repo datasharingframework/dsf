@@ -23,7 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.client.ClientProvider;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.dao.NamingSystemDao;

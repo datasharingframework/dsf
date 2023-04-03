@@ -94,7 +94,7 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		if (reasonHistoryAllowed.isEmpty())
 		{
 			audit.info("Root History denied for user '{}'", getCurrentIdentity().getName());
-			return forbidden("search");
+			return forbidden("history");
 		}
 		else
 		{

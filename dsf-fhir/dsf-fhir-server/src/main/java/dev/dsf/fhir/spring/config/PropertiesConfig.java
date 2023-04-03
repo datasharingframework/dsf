@@ -1,8 +1,5 @@
 package dev.dsf.fhir.spring.config;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -97,9 +94,9 @@ public class PropertiesConfig
 	@Value("${dev.dsf.fhir.client.verbose:false}")
 	private boolean webserviceClientVerbose;
 
-	@Documentation(description = "List of allowed CORS origins, used to set the *Access-Control-Allow-Origin* HTTP response header, which indicates whether the response can be shared with requesting code from the given origin; comma or space separated list, YAML block scalars supported")
-	@Value("#{'${dev.dsf.fhir.server.cors.origins:}'.trim().split('(,[ ]?)|(\\n)')}")
-	private List<String> allowedOrigins;
+	@Documentation(description = "To disable static resource caching, set to `false`", recommendation = "Only set to `false` for development")
+	@Value("${dev.dsf.fhir.server.static.resource.cache:true}")
+	private boolean staticResourceCacheEnabled;
 
 	@Value("${jetty.status.port}")
 	private int jettyStatusConnectorPort;
@@ -213,9 +210,9 @@ public class PropertiesConfig
 		return webserviceClientVerbose;
 	}
 
-	public List<String> getAllowedOrigins()
+	public boolean getStaticResourceCacheEnabled()
 	{
-		return Collections.unmodifiableList(allowedOrigins);
+		return staticResourceCacheEnabled;
 	}
 
 	public int getJettyStatusConnectorPort()

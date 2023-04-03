@@ -4,15 +4,15 @@ import java.util.Set;
 
 import org.hl7.fhir.r4.model.Organization;
 
-import dev.dsf.common.auth.Role;
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationIdentityImpl;
 
 public class TestOrganizationIdentity extends OrganizationIdentityImpl
 {
-	private TestOrganizationIdentity(boolean localIdentity, Organization organization, Set<? extends Role> roles)
+	private TestOrganizationIdentity(boolean localIdentity, Organization organization, Set<? extends DsfRole> roles)
 	{
-		super(localIdentity, organization, roles);
+		super(localIdentity, organization, roles, null);
 	}
 
 	public static TestOrganizationIdentity local(Organization organization)

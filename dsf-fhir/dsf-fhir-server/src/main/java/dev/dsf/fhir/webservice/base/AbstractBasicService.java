@@ -1,6 +1,6 @@
 package dev.dsf.fhir.webservice.base;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.CurrentIdentityProvider;
 
 public class AbstractBasicService implements BasicService

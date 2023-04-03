@@ -2,7 +2,7 @@ package dev.dsf.fhir.dao.command;
 
 import org.hl7.fhir.r4.model.Bundle;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.exception.BadBundleException;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;

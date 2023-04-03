@@ -195,8 +195,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		return responseGenerator.response(Status.CREATED, createdResource,
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
 				parameterConverter.getPreferReturn(headers), () -> responseGenerator.created(location, createdResource))
-				.location(location).lastModified(createdResource.getMeta().getLastUpdated())
-				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
+				.location(location).build();
 	}
 
 	/**
@@ -550,12 +549,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		URI location = toLocation(updatedResource);
 
-		return responseGenerator
-				.response(Status.OK, updatedResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
-						parameterConverter.getPreferReturn(headers),
-						() -> responseGenerator.updated(location, updatedResource))
-				.location(location).lastModified(updatedResource.getMeta().getLastUpdated())
-				.tag(new EntityTag(updatedResource.getMeta().getVersionId(), true)).build();
+		return responseGenerator.response(Status.OK, updatedResource,
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
+				parameterConverter.getPreferReturn(headers), () -> responseGenerator.updated(location, updatedResource))
+				.location(location).build();
 	}
 
 	/**

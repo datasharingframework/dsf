@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -49,7 +49,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	@Override
 	public final Optional<String> reasonCreateAllowed(Connection connection, Identity identity, R newResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.CREATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.CREATE))
 		{
 			Optional<String> errors = newResourceOkForCreate(connection, identity, newResource);
 			if (errors.isEmpty())
@@ -90,7 +90,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				existingResource.getIdElement().getIdPart());
 		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasRole(FhirServerRole.READ))
+		if (identity.hasDsfRole(FhirServerRole.READ))
 		{
 			try
 			{
@@ -141,7 +141,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.UPDATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.UPDATE))
 		{
 			Optional<String> errors = newResourceOkForUpdate(connection, identity, newResource);
 			if (errors.isEmpty())
@@ -196,7 +196,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.DELETE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.DELETE))
 		{
 			logger.info("Delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(), resourceId,
 					resourceVersion, identity.getName());

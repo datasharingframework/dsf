@@ -1,6 +1,6 @@
 package dev.dsf.fhir.search.filter;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public class PractitionerIdentityFilter extends AbstractMetaTagAuthorizationRoleIdentityFilter
 {

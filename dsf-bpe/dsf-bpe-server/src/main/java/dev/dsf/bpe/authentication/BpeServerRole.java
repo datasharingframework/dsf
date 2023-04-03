@@ -1,8 +1,8 @@
 package dev.dsf.bpe.authentication;
 
-import dev.dsf.common.auth.Role;
+import dev.dsf.common.auth.conf.DsfRole;
 
-public enum BpeServerRole implements Role
+public enum BpeServerRole implements DsfRole
 {
 	ORGANIZATION
 }

@@ -1,6 +1,6 @@
 package dev.dsf.fhir.subscription;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import jakarta.websocket.Session;
 
 public interface WebSocketSubscriptionManager

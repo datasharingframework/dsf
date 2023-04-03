@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
 import jakarta.websocket.CloseReason;
@@ -61,7 +61,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 
 
 		if (principal == null || !(principal instanceof Identity)
-				|| !((Identity) principal).hasRole(FhirServerRole.WEBSOCKET))
+				|| !((Identity) principal).hasDsfRole(FhirServerRole.WEBSOCKET))
 		{
 			logger.warn("No user in session or user is missing role {}, closing websocket: {}",
 					FhirServerRole.WEBSOCKET, session.getId());

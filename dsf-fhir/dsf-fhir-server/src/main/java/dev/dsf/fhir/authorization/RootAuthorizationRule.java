@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 
 public class RootAuthorizationRule implements AuthorizationRule<Resource>
@@ -78,7 +78,7 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 	@Override
 	public Optional<String> reasonHistoryAllowed(Identity identity)
 	{
-		if (identity.hasRole(FhirServerRole.HISTORY))
+		if (identity.hasDsfRole(FhirServerRole.HISTORY))
 		{
 			logger.info("History of root authorized for identity '{}'", identity.getName());
 			return Optional.of("Identity has role " + FhirServerRole.HISTORY);

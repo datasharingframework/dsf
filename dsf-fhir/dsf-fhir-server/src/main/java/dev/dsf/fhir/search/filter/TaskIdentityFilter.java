@@ -3,7 +3,7 @@ package dev.dsf.fhir.search.filter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 
 public class TaskIdentityFilter extends AbstractIdentityFilter
@@ -29,7 +29,7 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 	@Override
 	public String getFilterQuery()
 	{
-		if (identity.hasRole(FhirServerRole.READ))
+		if (identity.hasDsfRole(FhirServerRole.READ))
 		{
 			// TODO modify for requester = Practitioner or PractitionerRole
 			return "(" + resourceColumn + "->'requester'->>'reference' = ? OR " + resourceColumn
@@ -44,14 +44,14 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 	@Override
 	public int getSqlParameterCount()
 	{
-		return identity.hasRole(FhirServerRole.READ) ? 4 : 0;
+		return identity.hasDsfRole(FhirServerRole.READ) ? 4 : 0;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException
 	{
-		if (identity.hasRole(FhirServerRole.READ))
+		if (identity.hasDsfRole(FhirServerRole.READ))
 		{
 			if (subqueryParameterIndex == 1)
 				statement.setString(parameterIndex, identity.getOrganization().getIdElement().getValue());

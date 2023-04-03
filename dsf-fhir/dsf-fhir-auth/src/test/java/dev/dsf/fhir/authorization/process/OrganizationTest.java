@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public class OrganizationTest
 {

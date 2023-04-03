@@ -2,28 +2,95 @@ package dev.dsf.bpe.authentication;
 
 import java.security.cert.X509Certificate;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hl7.fhir.r4.model.Practitioner;
 
-import dev.dsf.common.auth.Identity;
-import dev.dsf.common.auth.IdentityProvider;
-import dev.dsf.common.auth.OrganizationIdentity;
-import dev.dsf.common.auth.Role;
+import dev.dsf.common.auth.DsfOpenIdCredentials;
+import dev.dsf.common.auth.conf.DsfRole;
+import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.IdentityProvider;
+import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 
 public class IdentityProviderImpl implements IdentityProvider
 {
-	private static final Logger logger = LoggerFactory.getLogger(IdentityProviderImpl.class);
-
 	@Override
-	public Identity getIdentity(String jwtToken)
+	public Identity getIdentity(DsfOpenIdCredentials credentials)
 	{
-		logger.warn("JWT token based login not implemented");
-		return null;
+		return new PractitionerIdentity()
+		{
+			@Override
+			public String getName()
+			{
+				return credentials.getUserId();
+			}
+
+			@Override
+			public String getDisplayName()
+			{
+				return getName();
+			}
+
+			@Override
+			public boolean isLocalIdentity()
+			{
+				return true;
+			}
+
+			@Override
+			public boolean hasDsfRole(DsfRole role)
+			{
+				return BpeServerRole.ORGANIZATION.equals(role);
+			}
+
+			@Override
+			public Set<DsfRole> getDsfRoles()
+			{
+				return Collections.singleton(BpeServerRole.ORGANIZATION);
+			}
+
+			@Override
+			public String getOrganizationIdentifierValue()
+			{
+				return "";
+			}
+
+			@Override
+			public Organization getOrganization()
+			{
+				return null;
+			}
+
+			@Override
+			public Practitioner getPractitioner()
+			{
+				return null;
+			}
+
+			@Override
+			public Set<Coding> getPractionerRoles()
+			{
+				return Collections.emptySet();
+			}
+
+			@Override
+			public Optional<DsfOpenIdCredentials> getCredentials()
+			{
+				return Optional.of(credentials);
+			}
+
+			@Override
+			public Optional<X509Certificate> getCertificate()
+			{
+				return Optional.empty();
+			}
+		};
 	}
 
 	@Override
@@ -38,7 +105,13 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public Set<Role> getRoles()
+			public String getDisplayName()
+			{
+				return getName();
+			}
+
+			@Override
+			public Set<DsfRole> getDsfRoles()
 			{
 				return Collections.singleton(BpeServerRole.ORGANIZATION);
 			}
@@ -62,15 +135,15 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public boolean hasRole(Role role)
+			public boolean hasDsfRole(DsfRole role)
 			{
 				return BpeServerRole.ORGANIZATION.equals(role);
 			}
 
 			@Override
-			public boolean hasRole(String role)
+			public Optional<X509Certificate> getCertificate()
 			{
-				return BpeServerRole.ORGANIZATION.name().equals(role);
+				return Optional.of(certificates[0]);
 			}
 		};
 	}

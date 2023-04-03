@@ -4,9 +4,9 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import dev.dsf.common.auth.Role;
+import dev.dsf.common.auth.conf.DsfRole;
 
-public enum FhirServerRole implements Role
+public enum FhirServerRole implements DsfRole
 {
 	CREATE, READ, UPDATE, DELETE, SEARCH, HISTORY, PERMANENT_DELETE, WEBSOCKET;
 

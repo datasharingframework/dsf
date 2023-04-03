@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.ValidationResult;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.history.History;
 import dev.dsf.fhir.history.HistoryEntry;
 import dev.dsf.fhir.prefer.PreferReturnType;
@@ -36,7 +36,9 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ResourceReference;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
@@ -47,6 +49,14 @@ import jakarta.ws.rs.ext.RuntimeDelegate;
 public class ResponseGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResponseGenerator.class);
+
+	public static final CacheControl PRIVATE_NO_CACHE_NO_TRANSFORM = new CacheControl();
+	static
+	{
+		// no-transform set by default
+		PRIVATE_NO_CACHE_NO_TRANSFORM.setPrivate(true); // only user specific caching
+		PRIVATE_NO_CACHE_NO_TRANSFORM.setNoCache(true); // always reevaluate with server
+	}
 
 	private final String serverBase;
 
@@ -113,6 +123,8 @@ public class ResponseGenerator
 			b = b.lastModified(resource.getMeta().getLastUpdated());
 			b = b.tag(new EntityTag(resource.getMeta().getVersionId(), true));
 		}
+
+		b = b.cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM);
 
 		return b;
 	}
@@ -400,7 +412,8 @@ public class ResponseGenerator
 
 		return Response.status(Status.OK).entity(outcome).location(location)
 				.lastModified(resource.getMeta().getLastUpdated())
-				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).build();
+				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM)
+				.header(HttpHeaders.VARY, HttpHeaders.COOKIE).build();
 	}
 
 	public OperationOutcome unknownReference(Resource resource, ResourceReference resourceReference)

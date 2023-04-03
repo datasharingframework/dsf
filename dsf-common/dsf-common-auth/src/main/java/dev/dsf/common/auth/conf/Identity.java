@@ -1,6 +1,8 @@
-package dev.dsf.common.auth;
+package dev.dsf.common.auth.conf;
 
 import java.security.Principal;
+import java.security.cert.X509Certificate;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.Organization;
@@ -18,9 +20,14 @@ public interface Identity extends Principal
 
 	String getOrganizationIdentifierValue();
 
-	Set<Role> getRoles();
+	Set<DsfRole> getDsfRoles();
 
-	boolean hasRole(Role role);
+	boolean hasDsfRole(DsfRole role);
 
-	boolean hasRole(String role);
+	/**
+	 * @return {@link Optional#empty()} if login via OIDC
+	 */
+	Optional<X509Certificate> getCertificate();
+
+	String getDisplayName();
 }

@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
 import dev.dsf.fhir.webservice.base.BasicService;
 import jakarta.servlet.http.HttpServletRequest;

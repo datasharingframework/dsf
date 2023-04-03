@@ -146,11 +146,12 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static JettyServer startFhirServer() throws Exception
 	{
 		JettyConfig jettyConfig = new TestJettyConfig(10001, 8001, CONTEXT_PATH, certificates.getCaCertificateFile(),
-				certificates.getCaCertificateFile(), certificates.getServerCertificateFile(), X509Certificates.PASSWORD,
-				Paths.get("log4j2.xml"), DATABASE_URL, DATABASE_USER, DATABASE_USER_PASSWORD, DATABASE_DELETE_USER,
-				DATABASE_DELETE_USER_PASSWORD, BASE_URL, certificates.getClientCertificate(), "Test_Organization",
-				FHIR_BUNDLE_FILE, certificates.getCaCertificateFile(), certificates.getClientCertificateFile(),
-				certificates.getClientCertificatePrivateKeyFile(), X509Certificates.PASSWORD);
+				certificates.getServerCertificateFile(), certificates.getServerCertificatePrivateKeyFile(),
+				X509Certificates.PASSWORD, Paths.get("log4j2.xml"), DATABASE_URL, DATABASE_USER, DATABASE_USER_PASSWORD,
+				DATABASE_DELETE_USER, DATABASE_DELETE_USER_PASSWORD, BASE_URL, certificates.getClientCertificate(),
+				"Test_Organization", FHIR_BUNDLE_FILE, certificates.getCaCertificateFile(),
+				certificates.getClientCertificateFile(), certificates.getClientCertificatePrivateKeyFile(),
+				X509Certificates.PASSWORD);
 
 		JettyServer server = new JettyServer("fhir-server", jettyConfig,
 				Stream.of(JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,

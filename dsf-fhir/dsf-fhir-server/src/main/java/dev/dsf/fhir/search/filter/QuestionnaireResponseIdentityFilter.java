@@ -3,7 +3,7 @@ package dev.dsf.fhir.search.filter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 
 public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
@@ -17,7 +17,7 @@ public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 	public String getFilterQuery()
 	{
 		// read allowed for local users
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.READ))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.READ))
 			return "";
 
 		// read not allowed for non local users

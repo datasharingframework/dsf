@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -340,7 +340,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	@Override
 	public final Optional<String> reasonSearchAllowed(Identity identity)
 	{
-		if (identity.hasRole(FhirServerRole.SEARCH))
+		if (identity.hasDsfRole(FhirServerRole.SEARCH))
 		{
 			logger.info("Search of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
 			return Optional.of("Identity has role " + FhirServerRole.SEARCH);
@@ -356,7 +356,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	@Override
 	public final Optional<String> reasonHistoryAllowed(Identity identity)
 	{
-		if (identity.hasRole(FhirServerRole.HISTORY))
+		if (identity.hasDsfRole(FhirServerRole.HISTORY))
 		{
 			logger.info("History of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
 			return Optional.of("Identity has role " + FhirServerRole.HISTORY);
@@ -375,7 +375,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.isLocalIdentity() && identity.hasRole(FhirServerRole.PERMANENT_DELETE)
+		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.PERMANENT_DELETE)
 				&& reasonDeleteAllowed(connection, identity, oldResource).isPresent())
 		{
 			logger.info("Permanent delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),

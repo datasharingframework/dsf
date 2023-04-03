@@ -24,6 +24,8 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.auth.DsfOpenIdCredentials;
+
 public class PractitionerProviderImpl extends AbstractProvider implements PractitionerProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(PractitionerProviderImpl.class);
@@ -37,10 +39,12 @@ public class PractitionerProviderImpl extends AbstractProvider implements Practi
 	}
 
 	@Override
-	public Optional<Practitioner> getPractitioner(String jwtToken)
+	public Optional<Practitioner> getPractitioner(DsfOpenIdCredentials credentials)
 	{
-		logger.warn("Method not implemented");
-		return Optional.empty();
+		if (credentials == null)
+			return Optional.empty();
+
+		return Optional.of(toPractitioner(credentials));
 	}
 
 	@Override
@@ -84,21 +88,31 @@ public class PractitionerProviderImpl extends AbstractProvider implements Practi
 						.filter(n -> n.getTagNo() == GeneralName.rfc822Name).map(GeneralName::getName)
 						.map(IETFUtils::valueToString).toList();
 
+		Stream<String> emails = Stream.concat(Stream.concat(email1.stream(), email2.stream()), rfc822Names.stream())
+				.filter(e -> e != null).filter(e -> e.contains("@"));
+		return toPractitioner(!surnames.isEmpty() ? surnames.stream() : commonName.stream(), givennames.stream(),
+				emails);
+	}
+
+	private Practitioner toPractitioner(DsfOpenIdCredentials credentials)
+	{
+		Stream<String> surname = Stream.of((String) credentials.getStringClaimOrDefault("family_name", ""));
+		Stream<String> givenNames = Stream.of((String) credentials.getStringClaimOrDefault("given_name", ""));
+		Stream<String> emails = Stream.of((String) credentials.getStringClaimOrDefault("email", ""));
+
+		return toPractitioner(surname, givenNames, emails);
+	}
+
+	private Practitioner toPractitioner(Stream<String> surname, Stream<String> givenNames, Stream<String> emails)
+	{
 		Practitioner practitioner = new Practitioner();
 
-		Stream.concat(Stream.concat(email1.stream(), email2.stream()), rfc822Names.stream()).filter(e -> e != null)
-				.filter(e -> e.contains("@"))
-				.map(e -> new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(e))
+		emails.map(e -> new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(e))
 				.forEach(practitioner::addIdentifier);
 
 		HumanName name = new HumanName();
-		if (!givennames.isEmpty() || !surnames.isEmpty())
-		{
-			name.setFamily(surnames.stream().collect(Collectors.joining(" ")));
-			givennames.forEach(name::addGiven);
-		}
-		else
-			name.setFamily(commonName.stream().collect(Collectors.joining(" ")));
+		name.setFamily(surname.collect(Collectors.joining(" ")));
+		givenNames.forEach(name::addGiven);
 		practitioner.addName(name);
 
 		return practitioner;

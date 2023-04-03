@@ -42,7 +42,8 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 	}
 
 	@Override
-	protected void doWriteHtml(QuestionnaireResponse questionnaireResponse, OutputStreamWriter out) throws IOException
+	protected void doWriteHtml(String basePath, QuestionnaireResponse questionnaireResponse, OutputStreamWriter out)
+			throws IOException
 	{
 		boolean isCompleted = QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED
 				.equals(questionnaireResponse.getStatus());
@@ -61,7 +62,7 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 
 		String urlVersion = questionnaireResponse.getQuestionnaire();
 		String[] urlVersionSplit = urlVersion.split("\\|");
-		String href = "/fhir/Questionnaire?url=" + urlVersionSplit[0] + "&version=" + urlVersionSplit[1];
+		String href = basePath + "Questionnaire?url=" + urlVersionSplit[0] + "&version=" + urlVersionSplit[1];
 
 		out.write("<div>");
 		out.write("<p>\n");

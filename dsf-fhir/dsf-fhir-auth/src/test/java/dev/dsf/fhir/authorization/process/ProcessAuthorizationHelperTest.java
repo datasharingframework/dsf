@@ -26,7 +26,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 
 public class ProcessAuthorizationHelperTest
 {

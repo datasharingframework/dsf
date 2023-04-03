@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
@@ -51,6 +51,6 @@ public abstract class AbstractServiceSecure<S extends BasicService> extends Abst
 	protected void logCurrentIdentity()
 	{
 		Identity identity = getCurrentIdentity();
-		logger.debug("Current identity '{}', roles '{}'", identity.getName(), identity.getRoles());
+		logger.debug("Current identity '{}', roles '{}'", identity.getName(), identity.getDsfRoles());
 	}
 }

@@ -3,6 +3,8 @@ package dev.dsf.common.jetty;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,12 +79,6 @@ public final class PropertyJettyConfig extends AbstractJettyConfig implements Je
 		return Optional.ofNullable(properties.getProperty(propertyName, defaultValue));
 	}
 
-	@Override
-	public Optional<String> getStatusHost()
-	{
-		return getString(PROPERTY_JETTY_STATUS_HOST, PROPERTY_JETTY_STATUS_HOST_DEFAULT);
-	}
-
 	private Optional<Integer> getPort(String propertyName)
 	{
 		return getString(propertyName).map(value ->
@@ -102,6 +98,68 @@ public final class PropertyJettyConfig extends AbstractJettyConfig implements Je
 						JETTY_PROPERTIES_FILE + ": Property " + propertyName + ", value " + value + " not a number");
 			}
 		});
+	}
+
+	private Optional<Long> getTimeout(String propertyName)
+	{
+		return getString(propertyName).map(value ->
+		{
+			try
+			{
+				return Long.parseLong(value);
+			}
+			catch (NumberFormatException e)
+			{
+				throw new RuntimeException(
+						JETTY_PROPERTIES_FILE + ": Property " + propertyName + ", value " + value + " not a number");
+			}
+		});
+	}
+
+	private Optional<Path> getPath(String propertyName)
+	{
+		return getPath(propertyName, null);
+	}
+
+	private Optional<Path> getPath(String propertyName, String defaultValue)
+	{
+		return getString(propertyName, defaultValue).map(value ->
+		{
+			Path pathValue = Paths.get(value);
+
+			if (!Files.isReadable(pathValue))
+				throw new RuntimeException(JETTY_PROPERTIES_FILE + ": Property " + propertyName + ", value " + value
+						+ " file not readable");
+
+			return pathValue;
+		});
+	}
+
+	private Optional<URL> getUrl(String propertyName)
+	{
+		return getString(propertyName).map(value ->
+		{
+			try
+			{
+				return new URL(value);
+			}
+			catch (MalformedURLException e)
+			{
+				throw new RuntimeException(
+						JETTY_PROPERTIES_FILE + ": Property " + propertyName + ", value " + value + " not a valid URL");
+			}
+		});
+	}
+
+	private boolean getBoolean(String propertyName)
+	{
+		return getString(propertyName).map(Boolean::parseBoolean).orElse(Boolean.FALSE);
+	}
+
+	@Override
+	public Optional<String> getStatusHost()
+	{
+		return getString(PROPERTY_JETTY_STATUS_HOST, PROPERTY_JETTY_STATUS_HOST_DEFAULT);
 	}
 
 	@Override
@@ -128,53 +186,115 @@ public final class PropertyJettyConfig extends AbstractJettyConfig implements Je
 		return getString(PROPERTY_JETTY_CONTEXT_PATH);
 	}
 
-	private Optional<Path> getPath(String propertyName)
+	@Override
+	public Optional<Path> getServerCertificatePath()
 	{
-		return getPath(propertyName, null);
-	}
-
-	private Optional<Path> getPath(String propertyName, String defaultValue)
-	{
-		return getString(propertyName, defaultValue).map(value ->
-		{
-			Path pathValue = Paths.get(value);
-
-			if (!Files.isReadable(pathValue))
-				throw new RuntimeException(JETTY_PROPERTIES_FILE + ": Property " + propertyName + ", value " + value
-						+ " file not readable");
-
-			return pathValue;
-		});
+		return getPath(PROPERTY_JETTY_SERVER_CERTIFICATE);
 	}
 
 	@Override
-	public Optional<Path> getClientTrustStorePath()
+	public Optional<Path> getServerCertificateChainPath()
 	{
-		return getPath(PROPERTY_JETTY_CLIENT_TRUSTSTORE_PEM);
+		return getPath(PROPERTY_JETTY_SERVER_CERTIFICATE_CHAIN);
 	}
 
 	@Override
-	public Optional<Path> getServerTrustStorePath()
+	public Optional<Path> getServerCertificatePrivateKeyPath()
 	{
-		return getPath(PROPERTY_JETTY_SERVER_TRUSTSTORE_PEM);
+		return getPath(PROPERTY_JETTY_SERVER_CERTIFICATE_PRIVATE_KEY);
 	}
 
 	@Override
-	public Optional<Path> getServerKeyStorePath()
+	public Optional<char[]> getServerCertificatePrivateKeyPassword()
 	{
-		return getPath(PROPERTY_JETTY_SERVER_KEYSTORE_P12);
+		return getString(PROPERTY_JETTY_SERVER_CERTIFICATE_PRIVATE_KEY_PASSWORD).map(String::toCharArray);
 	}
 
 	@Override
-	public Optional<char[]> getServerKeyStorePassword()
+	public Optional<Path> getClientTrustCertificatesPath()
 	{
-		return getString(PROPERTY_JETTY_SERVER_KEYSTORE_PASSWORD).map(String::toCharArray);
+		return getPath(PROPERTY_JETTY_AUTH_CLIENT_TRUST_CERTIFICATES);
 	}
 
 	@Override
-	public Optional<String> getClientCertHeaderName()
+	public Optional<String> getClientCertificateHeaderName()
 	{
-		return getString(PROPERTY_JETTY_CLIENT_CERT_HEADER, PROPERTY_JETTY_CLIENT_CERT_HEADER_DEFAULT);
+		return getString(PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME,
+				PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME_DEFAULT);
+	}
+
+	@Override
+	public Optional<String> getOidcProviderBaseUrl()
+	{
+		return getString(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL);
+	}
+
+	@Override
+	public Optional<Long> getOidcProviderClientConnectTimeout()
+	{
+		return getTimeout(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CONNECT_TIMEOUT);
+	}
+
+	@Override
+	public Optional<Long> getOidcProviderClientIdleTimeout()
+	{
+		return getTimeout(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_IDLE_TIMEOUT);
+	}
+
+	@Override
+	public Optional<Path> getOidcProviderClientTrustCertificatesPath()
+	{
+		return getPath(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES);
+	}
+
+	@Override
+	public Optional<Path> getOidcProviderClientCertificatePath()
+	{
+		return getPath(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CERTIFICATE);
+	}
+
+	@Override
+	public Optional<Path> getOidcProviderClientCertificatePrivateKeyPath()
+	{
+		return getPath(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CERTIFICATE_PRIVATE_KEY);
+	}
+
+	@Override
+	public Optional<char[]> getOidcProviderClientCertificatePrivateKeyPassword()
+	{
+		return getString(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD)
+				.map(String::toCharArray);
+	}
+
+	@Override
+	public Optional<URL> getOidcProviderClientProxyUrl()
+	{
+		return getUrl(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_PROXY_URL);
+	}
+
+	@Override
+	public Optional<String> getOidcClientId()
+	{
+		return getString(PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID);
+	}
+
+	@Override
+	public Optional<String> getOidcClientSecret()
+	{
+		return getString(PROPERTY_JETTY_AUTH_OIDC_CLIENT_SECRET);
+	}
+
+	@Override
+	public boolean getOidcSsoBackChannelLogoutEnabled()
+	{
+		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT);
+	}
+
+	@Override
+	public Optional<String> getOidcSsoBackChannelPath()
+	{
+		return getString(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH,
+				PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH_DEFAULT);
 	}
 
 	@Override

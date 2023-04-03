@@ -1,18 +1,31 @@
 package dev.dsf.common.jetty;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiFunction;
 
+import org.bouncycastle.pkcs.PKCSException;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -27,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
+import de.rwh.utils.crypto.io.PemIo;
 
 public abstract class AbstractJettyConfig implements JettyConfig
 {
@@ -47,7 +61,7 @@ public abstract class AbstractJettyConfig implements JettyConfig
 	@Override
 	public final Connector createStatusConnector(Server server)
 	{
-		ServerConnector connector = new ServerConnector(server, httpConnectionFactory(null));
+		ServerConnector connector = new ServerConnector(server, httpConnectionFactory());
 		connector.setHost(getStatusHost().orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_STATUS_HOST)));
 		connector.setPort(getStatusPort().orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_STATUS_PORT)));
 
@@ -63,46 +77,53 @@ public abstract class AbstractJettyConfig implements JettyConfig
 		properties.put(PROPERTY_JETTY_HOST, getHost().orElse(null));
 		properties.put(PROPERTY_JETTY_PORT, getPort().map(String::valueOf).orElse(null));
 		properties.put(PROPERTY_JETTY_CONTEXT_PATH, getContextPath().orElse(null));
-		properties.put(PROPERTY_JETTY_CLIENT_TRUSTSTORE_PEM,
-				getClientTrustStorePath().map(Path::toString).orElse(null));
-		properties.put(PROPERTY_JETTY_SERVER_TRUSTSTORE_PEM,
-				getServerTrustStorePath().map(Path::toString).orElse(null));
-		properties.put(PROPERTY_JETTY_SERVER_KEYSTORE_P12, getServerKeyStorePath().map(Path::toString).orElse(null));
-		properties.put(PROPERTY_JETTY_SERVER_KEYSTORE_PASSWORD,
-				getServerKeyStorePassword().map(String::valueOf).orElse(null));
-		properties.put(PROPERTY_JETTY_CLIENT_CERT_HEADER, getClientCertHeaderName().orElse(null));
+
+		properties.put(PROPERTY_JETTY_SERVER_CERTIFICATE, getServerCertificatePath().map(Path::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_SERVER_CERTIFICATE_CHAIN,
+				getServerCertificateChainPath().map(Path::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_SERVER_CERTIFICATE_PRIVATE_KEY,
+				getServerCertificatePrivateKeyPath().map(Path::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_SERVER_CERTIFICATE_PRIVATE_KEY_PASSWORD,
+				getServerCertificatePrivateKeyPassword().map(String::valueOf).orElse(null));
+
+		properties.put(PROPERTY_JETTY_AUTH_CLIENT_TRUST_CERTIFICATES,
+				getClientTrustCertificatesPath().map(Path::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME,
+				getClientCertificateHeaderName().orElse(null));
+
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL, getOidcProviderBaseUrl().orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CONNECT_TIMEOUT,
+				getOidcProviderClientConnectTimeout().map(String::valueOf).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_IDLE_TIMEOUT,
+				getOidcProviderClientIdleTimeout().map(String::valueOf).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES,
+				getOidcProviderClientTrustCertificatesPath().map(Path::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CERTIFICATE,
+				getOidcProviderClientCertificatePath().map(Path::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CERTIFICATE_PRIVATE_KEY,
+				getOidcProviderClientCertificatePrivateKeyPath().map(Path::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD,
+				getOidcProviderClientCertificatePrivateKeyPassword().map(String::valueOf).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_PROXY_URL,
+				getOidcProviderClientProxyUrl().map(URL::toString).orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID, getOidcClientId().orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_CLIENT_SECRET, getOidcClientSecret().orElse(null));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT,
+				String.valueOf(getOidcSsoBackChannelLogoutEnabled()));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH, getOidcSsoBackChannelPath().orElse(null));
+
 		properties.put(PROPERTY_JETTY_LOG4J_CONFIG, getLog4JConfigPath().map(Path::toString).orElse(null));
 		return properties;
-	}
-
-	@Override
-	public Optional<KeyStore> getClientTrustStore()
-	{
-		return getClientTrustStorePath().map(AbstractJettyConfig::readTrustStore);
-	}
-
-	@Override
-	public Optional<KeyStore> getServerTrustStore()
-	{
-		return getServerTrustStorePath().map(AbstractJettyConfig::readTrustStore);
-	}
-
-	@Override
-	public Optional<KeyStore> getServerKeyStore()
-	{
-		if (getServerKeyStorePath().isEmpty() || getServerKeyStorePassword().isEmpty())
-			return Optional.empty();
-
-		return Optional.of(readKeyStore(getServerKeyStorePath().get(), getServerKeyStorePassword().get()));
 	}
 
 	public static final BiFunction<JettyConfig, Server, Connector> httpConnector()
 	{
 		return (config, server) ->
 		{
-			ServerConnector connector = new ServerConnector(server,
-					httpConnectionFactory(new ForwardedSecureRequestCustomizer(config.getClientCertHeaderName()
-							.orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_CLIENT_CERT_HEADER)))));
+			ServerConnector connector = new ServerConnector(server, httpConnectionFactory(
+					new ForwardedRequestCustomizer(),
+					new ForwardedSecureRequestCustomizer(config.getClientCertificateHeaderName().orElseThrow(
+							JettyConfig.propertyNotDefined(PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME)))));
 			connector.setHost(config.getHost().orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_HOST)));
 			connector.setPort(config.getPort().orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_PORT)));
 
@@ -110,31 +131,32 @@ public abstract class AbstractJettyConfig implements JettyConfig
 		};
 	}
 
-	private static HttpConnectionFactory httpConnectionFactory(Customizer customizer)
+	private static HttpConnectionFactory httpConnectionFactory(Customizer... customizers)
 	{
 		HttpConfiguration httpConfiguration = new HttpConfiguration();
 		httpConfiguration.setSendServerVersion(false);
 		httpConfiguration.setSendXPoweredBy(false);
 		httpConfiguration.setSendDateHeader(false);
 
-		if (customizer != null)
-			httpConfiguration.addCustomizer(customizer);
+		Arrays.stream(customizers).forEach(httpConfiguration::addCustomizer);
 
 		return new HttpConnectionFactory(httpConfiguration);
 	}
 
 	public static final BiFunction<JettyConfig, Server, Connector> httpsConnector()
 	{
+		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+
 		return (config, server) ->
 		{
 			ServerConnector connector = new ServerConnector(server,
 					sslConnectionFactory(
-							config.getServerTrustStore()
-									.orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_SERVER_TRUSTSTORE_PEM)),
-							config.getServerKeyStore()
-									.orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_SERVER_KEYSTORE_P12)),
-							config.getServerKeyStorePassword().orElseThrow(
-									JettyConfig.propertyNotDefined(PROPERTY_JETTY_SERVER_KEYSTORE_PASSWORD))),
+							config.getClientTrustStore().orElseThrow(
+									JettyConfig.propertyNotDefined(PROPERTY_JETTY_AUTH_CLIENT_TRUST_CERTIFICATES)),
+							config.getServerKeyStore(keyStorePassword)
+									.orElseThrow(JettyConfig.propertiesNotDefined(PROPERTY_JETTY_SERVER_CERTIFICATE,
+											PROPERTY_JETTY_SERVER_CERTIFICATE_PRIVATE_KEY)),
+							keyStorePassword, config.getOidcConfig() == null),
 					httpConnectionFactory(new SecureRequestCustomizer()));
 			connector.setHost(config.getHost().orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_HOST)));
 			connector.setPort(config.getPort().orElseThrow(JettyConfig.propertyNotDefined(PROPERTY_JETTY_PORT)));
@@ -143,7 +165,33 @@ public abstract class AbstractJettyConfig implements JettyConfig
 		};
 	}
 
-	private static KeyStore readTrustStore(Path trustStorePath)
+	private static SslConnectionFactory sslConnectionFactory(KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, boolean needClientAuth)
+	{
+		logCertificateConfig(trustStore, keyStore);
+
+		SslContextFactory.Server sslContextFactory = new SslContextFactory.Server()
+		{
+			@Override
+			protected KeyStore loadTrustStore(Resource resource) throws Exception
+			{
+				return getTrustStore();
+			}
+		};
+
+		sslContextFactory.setKeyStore(keyStore);
+		sslContextFactory.setKeyStorePassword(String.valueOf(keyStorePassword));
+
+		sslContextFactory.setTrustStore(trustStore);
+		if (needClientAuth)
+			sslContextFactory.setNeedClientAuth(true);
+		else
+			sslContextFactory.setWantClientAuth(true);
+
+		return new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString());
+	}
+
+	private KeyStore readTrustStore(Path trustStorePath)
 	{
 		try
 		{
@@ -157,39 +205,68 @@ public abstract class AbstractJettyConfig implements JettyConfig
 		}
 	}
 
-	private static KeyStore readKeyStore(Path keyStorePath, char[] keyStorePassword)
+	private KeyStore readKeyStore(Path certificatePath, Path certificateChainPath, Path keyPath, char[] keyPassword,
+			char[] keyStorePassword)
 	{
 		try
 		{
-			return CertificateReader.fromPkcs12(keyStorePath, keyStorePassword);
+			PrivateKey privateKey = PemIo.readPrivateKeyFromPem(keyPath, keyPassword);
+			X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
+
+			List<Certificate> certificateChain = new ArrayList<>();
+			certificateChain.add(certificate);
+
+			if (certificateChainPath != null)
+			{
+				try (InputStream chainStream = Files.newInputStream(certificateChainPath))
+				{
+					CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
+					certificateChain.addAll(certificateFactory.generateCertificates(chainStream));
+				}
+			}
+
+			return CertificateHelper.toJksKeyStore(privateKey, certificateChain.toArray(Certificate[]::new),
+					UUID.randomUUID().toString(), keyStorePassword);
 		}
-		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
+		catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | PKCSException e)
 		{
-			logger.warn("Error while reading key store from {} with password {}: {} - {}", keyStorePath.toString(),
-					keyStorePassword == null ? "null" : "***", e.getClass().getName(), e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
 
-	private static SslConnectionFactory sslConnectionFactory(KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword)
+	@Override
+	public Optional<KeyStore> getClientTrustStore()
 	{
-		logCertificateConfig(trustStore, keyStore);
+		return getClientTrustCertificatesPath().map(this::readTrustStore);
+	}
 
-		SslContextFactory.Server sslContextFactory = new SslContextFactory.Server()
-		{
-			@Override
-			protected KeyStore loadTrustStore(Resource resource) throws Exception
-			{
-				return getTrustStore();
-			}
-		};
-		sslContextFactory.setTrustStore(trustStore);
-		sslContextFactory.setKeyStore(keyStore);
-		sslContextFactory.setKeyStorePassword(String.valueOf(keyStorePassword));
-		sslContextFactory.setNeedClientAuth(true);
+	@Override
+	public Optional<KeyStore> getServerKeyStore(char[] keyStorePassword)
+	{
+		if (getServerCertificatePath().isEmpty() || getServerCertificatePrivateKeyPath().isEmpty())
+			return Optional.empty();
 
-		return new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString());
+		return Optional.of(readKeyStore(getServerCertificatePath().get(), getServerCertificateChainPath().orElse(null),
+				getServerCertificatePrivateKeyPath().get(), getServerCertificatePrivateKeyPassword().orElse(null),
+				keyStorePassword));
+	}
+
+	@Override
+	public Optional<KeyStore> getOidcProviderClientTrustStore()
+	{
+		return getOidcProviderClientTrustCertificatesPath().map(this::readTrustStore);
+	}
+
+	@Override
+	public Optional<KeyStore> getOidcProviderClientKeyStore(char[] keyStorePassword)
+	{
+		if (getOidcProviderClientCertificatePath().isEmpty()
+				|| getOidcProviderClientCertificatePrivateKeyPath().isEmpty())
+			return Optional.empty();
+
+		return Optional.of(readKeyStore(getOidcProviderClientCertificatePath().get(),
+				getServerCertificateChainPath().orElse(null), getOidcProviderClientCertificatePrivateKeyPath().get(),
+				getOidcProviderClientCertificatePrivateKeyPassword().orElse(null), keyStorePassword));
 	}
 
 	private static void logCertificateConfig(KeyStore trustStore, KeyStore keyStore)

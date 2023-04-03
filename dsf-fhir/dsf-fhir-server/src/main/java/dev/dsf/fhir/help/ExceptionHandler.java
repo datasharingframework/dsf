@@ -234,8 +234,9 @@ public class ExceptionHandler
 		EntityTag tag = new EntityTag(e.getId().getVersionIdPart(), true);
 		URI location = toUri(serverBase, resourceTypeName, e.getId());
 		Date lastModified = Date.from(e.getDeleted().atZone(ZoneId.systemDefault()).toInstant());
-		return new WebApplicationException(Response.status(Status.GONE).tag(tag).location(location)
-				.lastModified(lastModified).entity(outcome).build());
+		return new WebApplicationException(
+				Response.status(Status.GONE).tag(tag).cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM)
+						.location(location).lastModified(lastModified).entity(outcome).build());
 	}
 
 	private URI toUri(String serverBase, String resourceTypeName, IdType id)

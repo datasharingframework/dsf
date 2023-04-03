@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.common.auth.Identity;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
@@ -70,7 +70,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonCreateAllowed(Connection connection, Identity identity, Task newResource)
 	{
-		if (identity.hasRole(FhirServerRole.CREATE))
+		if (identity.hasDsfRole(FhirServerRole.CREATE))
 		{
 			Optional<String> errors = newResourceOk(connection, identity, newResource);
 			if (errors.isEmpty())
@@ -286,7 +286,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		final String resourceId = existingResource.getIdElement().getIdPart();
 		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasRole(FhirServerRole.READ))
+		if (identity.hasDsfRole(FhirServerRole.READ))
 		{
 			if (isCurrentIdentityPartOfReferencedOrganization(connection, identity, "task.requester",
 					existingResource.getRequester()))
@@ -328,7 +328,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasRole(FhirServerRole.UPDATE))
+		if (identity.hasDsfRole(FhirServerRole.UPDATE))
 		{
 			if (TaskStatus.DRAFT.equals(oldResource.getStatus()) && isCurrentIdentityPartOfReferencedOrganization(
 					connection, identity, "task.requester", oldResource.getRequester()))
@@ -462,7 +462,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasRole(FhirServerRole.DELETE))
+		if (identity.hasDsfRole(FhirServerRole.DELETE))
 		{
 			if (TaskStatus.DRAFT.equals(oldResource.getStatus()) && isCurrentIdentityPartOfReferencedOrganization(
 					connection, identity, "task.requester", oldResource.getRequester()))

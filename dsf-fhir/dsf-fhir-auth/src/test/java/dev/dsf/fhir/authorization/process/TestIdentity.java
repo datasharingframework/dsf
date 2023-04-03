@@ -1,11 +1,13 @@
 package dev.dsf.fhir.authorization.process;
 
+import java.security.cert.X509Certificate;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.Organization;
 
-import dev.dsf.common.auth.Identity;
-import dev.dsf.common.auth.Role;
+import dev.dsf.common.auth.conf.DsfRole;
+import dev.dsf.common.auth.conf.Identity;
 
 public class TestIdentity implements Identity
 {
@@ -36,6 +38,12 @@ public class TestIdentity implements Identity
 	}
 
 	@Override
+	public String getDisplayName()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public boolean isLocalIdentity()
 	{
 		return localIdentity;
@@ -54,19 +62,19 @@ public class TestIdentity implements Identity
 	}
 
 	@Override
-	public Set<Role> getRoles()
+	public Set<DsfRole> getDsfRoles()
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean hasRole(Role role)
+	public boolean hasDsfRole(DsfRole role)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean hasRole(String role)
+	public Optional<X509Certificate> getCertificate()
 	{
 		throw new UnsupportedOperationException();
 	}
