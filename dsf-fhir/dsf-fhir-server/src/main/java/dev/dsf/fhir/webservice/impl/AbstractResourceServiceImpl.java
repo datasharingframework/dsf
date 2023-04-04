@@ -59,6 +59,7 @@ import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.help.SummaryMode;
 import dev.dsf.fhir.history.HistoryService;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.search.PartialResult;
@@ -663,7 +664,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);
-		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
+		SummaryMode summary = SummaryMode.fromString(queryParameters.getFirst(SearchQuery.PARAMETER_SUMMARY));
+		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty, summary);
 
 		// clean literal references from bundle entries
 		searchSet.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)

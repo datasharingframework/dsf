@@ -45,7 +45,7 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 
 @Produces({ MediaType.TEXT_HTML })
-public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWriter<T>
+public class HtmlFhirAdapter<T extends BaseResource> extends AbstractAdapter implements MessageBodyWriter<T>
 {
 	@FunctionalInterface
 	public static interface ServerBaseProvider
@@ -108,14 +108,11 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		return fhirContext;
 	}
 
-	/* Parsers are not guaranteed to be thread safe */
-	private IParser getParser(Supplier<IParser> parser)
+	@Override
+	protected IParser getParser(MediaType mediaType, Supplier<IParser> parser)
 	{
-		IParser p = parser.get();
-		p.setStripVersionsFromReferences(false);
-		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		IParser p = super.getParser(mediaType, parser);
 		p.setPrettyPrint(true);
-
 		return p;
 	}
 
@@ -248,8 +245,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 				</div>
 				""");
 
-		writeXml(basePath, t, out);
-		writeJson(basePath, t, out);
+		writeXml(mediaType, basePath, t, out);
+		writeJson(mediaType, basePath, t, out);
 
 		if (isHtmlEnabled())
 			writeHtml(basePath, t, out);
@@ -276,6 +273,12 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		{
 			u += "?" + uri.getQuery();
 			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + uri.getQuery() + "</a>");
+		}
+		else if (uriInfo.getQueryParameters().containsKey("_summary"))
+		{
+			u += "?_summary=" + uriInfo.getQueryParameters().getFirst("_summary");
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?_summary="
+					+ uriInfo.getQueryParameters().getFirst("_summary") + "</a>");
 		}
 
 		heading.append('\n');
@@ -314,9 +317,9 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 			return Optional.empty();
 	}
 
-	private void writeXml(String basePath, T t, OutputStreamWriter out) throws IOException
+	private void writeXml(MediaType mediaType, String basePath, T t, OutputStreamWriter out) throws IOException
 	{
-		IParser parser = getParser(fhirContext::newXmlParser);
+		IParser parser = getParser(mediaType, fhirContext::newXmlParser);
 
 		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
 		String content = parser.encodeResourceToString(t);
@@ -377,9 +380,9 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		}
 	}
 
-	private void writeJson(String basePath, T t, OutputStreamWriter out) throws IOException
+	private void writeJson(MediaType mediaType, String basePath, T t, OutputStreamWriter out) throws IOException
 	{
-		IParser parser = getParser(fhirContext::newJsonParser);
+		IParser parser = getParser(mediaType, fhirContext::newJsonParser);
 
 		out.write("<pre id=\"json\" class=\"prettyprint linenums lang-json\" style=\"display:none;\">");
 		String content = parser.encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");

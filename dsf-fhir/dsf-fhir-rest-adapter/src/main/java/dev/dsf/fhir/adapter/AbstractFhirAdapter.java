@@ -19,17 +19,16 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 
-public abstract class AbstractFhirAdapter<T extends BaseResource> implements MessageBodyReader<T>, MessageBodyWriter<T>
+public abstract class AbstractFhirAdapter<T extends BaseResource> extends AbstractAdapter
+		implements MessageBodyReader<T>, MessageBodyWriter<T>
 {
-	public static final String PRETTY = "pretty";
-
 	private final Class<T> resourceType;
-	private final Supplier<IParser> parser;
+	private final Supplier<IParser> parserFactor;
 
-	protected AbstractFhirAdapter(Class<T> resourceType, Supplier<IParser> parser)
+	protected AbstractFhirAdapter(Class<T> resourceType, Supplier<IParser> parserFactory)
 	{
 		this.resourceType = resourceType;
-		this.parser = parser;
+		this.parserFactor = parserFactory;
 	}
 
 	public final Class<? extends BaseResource> getResourceType()
@@ -44,15 +43,7 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 
 	private IParser getParser(MediaType mediaType)
 	{
-		/* Parsers are not guaranteed to be thread safe */
-		IParser p = parser.get();
-		p.setStripVersionsFromReferences(false);
-		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
-
-		if (mediaType != null && "true".equals(mediaType.getParameters().getOrDefault(PRETTY, "false")))
-			p.setPrettyPrint(true);
-
-		return p;
+		return getParser(mediaType, parserFactor);
 	}
 
 	@Override
