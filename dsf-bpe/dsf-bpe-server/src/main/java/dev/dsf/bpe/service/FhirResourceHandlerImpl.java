@@ -57,11 +57,11 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private final int fhirServerRequestMaxRetries;
 	private final long fhirServerRetryDelayMillis;
 
-	private final Map<String, ResourceProvider> resouceProvidersByDpendencyNameAndVersion = new HashMap<>();
+	private final Map<String, ResourceProvider> resourceProvidersByDependencyNameAndVersion = new HashMap<>();
 
 	public FhirResourceHandlerImpl(FhirWebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
 			FhirContext fhirContext, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis,
-			Map<String, ResourceProvider> resouceProvidersByDpendencyNameAndVersion)
+			Map<String, ResourceProvider> resourceProvidersByDependencyNameAndVersion)
 	{
 		this.localWebserviceClient = localWebserviceClient;
 		this.dao = dao;
@@ -69,8 +69,8 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
 		this.fhirServerRetryDelayMillis = fhirServerRetryDelayMillis;
 
-		if (resouceProvidersByDpendencyNameAndVersion != null)
-			this.resouceProvidersByDpendencyNameAndVersion.putAll(resouceProvidersByDpendencyNameAndVersion);
+		if (resourceProvidersByDependencyNameAndVersion != null)
+			this.resourceProvidersByDependencyNameAndVersion.putAll(resourceProvidersByDependencyNameAndVersion);
 	}
 
 	@Override
@@ -115,10 +115,10 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		Map<ResourceInfo, ProcessesResource> resources = new HashMap<>();
 		for (ProcessStateChangeOutcome change : changes)
 		{
-			Stream<ProcessesResource> currentOrOldProccessResources = getCurrentOrOldResources(
+			Stream<ProcessesResource> currentOrOldProcessResources = getCurrentOrOldResources(
 					definitionByProcessKeyAndVersion, dbResourcesByProcess, change.getProcessKeyAndVersion());
 
-			currentOrOldProccessResources.forEach(res ->
+			currentOrOldProcessResources.forEach(res ->
 			{
 				resources.computeIfPresent(res.getResourceInfo(), (processInfo, processResource) ->
 				{
@@ -199,7 +199,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		{
 			logger.warn("Error while executing process plugins resource bundle: {}", e.getMessage());
 			logger.warn(
-					"Resources in FHIR server may not be consitent, please check resources and execute the following bundle if necessary: {}",
+					"Resources in FHIR server may not be consistent, please check resources and execute the following bundle if necessary: {}",
 					fhirContext.newJsonParser().encodeResourceToString(batchBundle));
 			throw e;
 		}
@@ -250,7 +250,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		Bundle returnBundle = retryClient().postBundle(batchBundle);
 
 		if (resourceValues.size() != returnBundle.getEntry().size())
-			throw new RuntimeException("Return bundle size unexpeced, expected " + resourceValues.size() + " got "
+			throw new RuntimeException("Return bundle size unexpected, expected " + resourceValues.size() + " got "
 					+ returnBundle.getEntry().size());
 
 		for (int i = 0; i < resourceValues.size(); i++)
@@ -287,7 +287,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private List<UUID> addIdsAndReturnDeleted(List<ProcessesResource> resourceValues, Bundle returnBundle)
 	{
 		if (resourceValues.size() != returnBundle.getEntry().size())
-			throw new RuntimeException("Return bundle size unexpeced, expected " + resourceValues.size() + " got "
+			throw new RuntimeException("Return bundle size unexpected, expected " + resourceValues.size() + " got "
 					+ returnBundle.getEntry().size());
 
 		List<UUID> deletedIds = new ArrayList<>();
@@ -367,10 +367,10 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	{
 		Function<String, ResourceProvider> providerByNameAndVersion = nameAndVersion ->
 		{
-			if (resouceProvidersByDpendencyNameAndVersion.containsKey(nameAndVersion))
+			if (resourceProvidersByDependencyNameAndVersion.containsKey(nameAndVersion))
 			{
 				logger.trace("Resource provider for dependency {} found", nameAndVersion);
-				return resouceProvidersByDpendencyNameAndVersion.get(nameAndVersion);
+				return resourceProvidersByDependencyNameAndVersion.get(nameAndVersion);
 			}
 			else
 			{
