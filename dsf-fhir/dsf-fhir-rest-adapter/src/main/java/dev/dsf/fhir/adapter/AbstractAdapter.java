@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import ca.uhn.fhir.parser.IParser;
 import jakarta.ws.rs.core.MediaType;
 
-public class AbstractAdapter
+public abstract class AbstractAdapter
 {
 	public static final String PRETTY = "pretty";
 	public static final String SUMMARY = "summary";

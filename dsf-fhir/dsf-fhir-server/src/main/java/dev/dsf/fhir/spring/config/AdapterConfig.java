@@ -1,33 +1,35 @@
 package dev.dsf.fhir.spring.config;
 
-import java.util.Set;
+import java.util.Collections;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import jakarta.ws.rs.ext.Provider;
+import dev.dsf.fhir.adapter.FhirAdapter;
+import dev.dsf.fhir.adapter.HtmlFhirAdapter;
+import dev.dsf.fhir.adapter.QuestionnaireResponseHtmlGenerator;
 
 @Configuration
-public class AdapterConfig implements BeanDefinitionRegistryPostProcessor
+public class AdapterConfig
 {
-	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException
+	@Autowired
+	private FhirConfig fhirConfig;
+
+	@Autowired
+	private PropertiesConfig propertiesConfig;
+
+
+	@Bean
+	public FhirAdapter fhirAdapter()
 	{
-		// nothing to do
+		return new FhirAdapter(fhirConfig.fhirContext());
 	}
 
-	@Override
-	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException
+	@Bean
+	public HtmlFhirAdapter htmlFhirAdapter()
 	{
-		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
-		scanner.addIncludeFilter(new AnnotationTypeFilter(Provider.class));
-		Set<BeanDefinition> adapters = scanner.findCandidateComponents("dev.dsf.fhir.adapter");
-		adapters.forEach(def -> registry.registerBeanDefinition(def.getBeanClassName(), def));
+		return new HtmlFhirAdapter(fhirConfig.fhirContext(), () -> propertiesConfig.getServerBaseUrl(),
+				Collections.singleton(new QuestionnaireResponseHtmlGenerator()));
 	}
 }

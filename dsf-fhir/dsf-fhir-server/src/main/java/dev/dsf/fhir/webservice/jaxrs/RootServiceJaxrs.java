@@ -18,10 +18,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path(RootServiceJaxrs.PATH)
-@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-		Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+		Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 public class RootServiceJaxrs extends AbstractServiceJaxrs<RootService> implements RootService
 {
 	public static final String PATH = "";
@@ -53,6 +51,8 @@ public class RootServiceJaxrs extends AbstractServiceJaxrs<RootService> implemen
 	}
 
 	@POST
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
 	@Override
 	public Response handleBundle(Bundle bundle, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
