@@ -33,8 +33,6 @@ public interface ResourceProvider
 
 	Optional<ValueSet> getValueSet(String url, String version);
 
-	Optional<MetadataResource> getMetadataResouce(AbstractResource resource);
-
 	Stream<MetadataResource> getResources(String processKeyAndVersion,
 			Function<String, ResourceProvider> providerByJarName);
 
@@ -79,12 +77,6 @@ public interface ResourceProvider
 			}
 
 			@Override
-			public Optional<MetadataResource> getMetadataResouce(AbstractResource resource)
-			{
-				return Optional.empty();
-			}
-
-			@Override
 			public Stream<MetadataResource> getResources(String processKeyAndVersion,
 					Function<String, ResourceProvider> providerByJarName)
 			{
@@ -96,12 +88,6 @@ public interface ResourceProvider
 	static ResourceProvider of(Map<String, List<MetadataResource>> resourcesByProcessKeyAndVersion)
 	{
 		return ResourceProviderImpl.of(resourcesByProcessKeyAndVersion);
-	}
-
-	static ResourceProvider of(Map<String, List<MetadataResource>> resourcesByProcessKeyAndVersion,
-			Map<String, List<AbstractResource>> dependencyResourcesByProcessKeyAndVersion)
-	{
-		return ResourceProviderImpl.of(resourcesByProcessKeyAndVersion, dependencyResourcesByProcessKeyAndVersion);
 	}
 
 	/**

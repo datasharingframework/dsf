@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +18,7 @@ import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.Set;
 import java.util.function.BinaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +47,8 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		}
 	}
 
-	public static final String FILE_DRAFT_SUFIX = "-SNAPSHOT.jar";
-	public static final String FOLDER_DRAFT_SUFIX = "-SNAPSHOT";
-
-	public static final String RC_AND_M_PATTERN_STRING = "^(.+)((-RC[0-9]+)|(-M[0-9]+))\\.jar$";
-	private static final Pattern RC_AND_M_PATTERN = Pattern.compile(RC_AND_M_PATTERN_STRING);
+	public static final String FILE_DRAFT_SUFFIX = "-SNAPSHOT.jar";
+	public static final String FOLDER_DRAFT_SUFFIX = "-SNAPSHOT";
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginProviderImpl.class);
 
@@ -64,7 +57,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	private final ApplicationContext mainApplicationContext;
 	private final PropertyResolver resolver;
 
-	private List<ProcessPluginDefinitionAndClassLoader> definitions;
+	private volatile List<ProcessPluginDefinitionAndClassLoader> definitions;
 
 	public ProcessPluginProviderImpl(FhirContext fhirContext, Path pluginDirectory,
 			ApplicationContext mainApplicationContext, PropertyResolver resolver)
@@ -91,7 +84,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 			synchronized (this)
 			{
 				if (definitions == null)
-					definitions = handleDependencies(loadDefinitions());
+					definitions = loadDefinitions();
 			}
 		}
 
@@ -166,8 +159,8 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 			return null;
 		}
 
-		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFIX)
-				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
+		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFFIX)
+				: folder.toString().endsWith(FOLDER_DRAFT_SUFFIX);
 
 		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definitions.get(0).get(), classLoader,
 				draft, resolver);
@@ -207,126 +200,16 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		}
 	}
 
-	private List<ProcessPluginDefinitionAndClassLoader> handleDependencies(
-			List<ProcessPluginDefinitionAndClassLoader> definitions)
-	{
-		Map<String, ProcessPluginDefinitionAndClassLoader> definitionsByJar = new HashMap<>();
-		definitions.stream()
-				.forEach(def -> def.getJars().forEach(p -> definitionsByJar.put(p.getFileName().toString(), def)));
-
-		return definitions.stream().map(def -> withDependencies(def, definitionsByJar)).collect(Collectors.toList());
-	}
-
-	private ProcessPluginDefinitionAndClassLoader withDependencies(ProcessPluginDefinitionAndClassLoader definition,
-			Map<String, ProcessPluginDefinitionAndClassLoader> definitionsByJar)
-	{
-		if (definition.getDefinition().getDependencyNamesAndVersions().isEmpty())
-			return definition;
-		else
-		{
-			if (definition.getClassLoader() instanceof URLClassLoader)
-			{
-				try
-				{
-					((URLClassLoader) definition.getClassLoader()).close();
-				}
-				catch (IOException e)
-				{
-					logger.warn("Error while closing not needed, initial url class loader {}",
-							definition.getClassLoader().getName());
-				}
-			}
-
-			String definitionClassName = definition.getDefinition().getClass().getName();
-			List<Path> dependencyJars = definition.getDefinition().getDependencyNamesAndVersions().stream()
-					.flatMap(dependency -> findDefinition(definitionsByJar, dependency)).collect(Collectors.toList());
-
-			if (definition.getJars().size() == 1)
-				return toJarDefinitionWithDependencies(definitionClassName, definition.getJars().get(0),
-						dependencyJars);
-			else
-				return toFolderDefinitionWithDependencies(definitionClassName, definition.getJars().get(0).getParent(),
-						dependencyJars);
-		}
-	}
-
-	private Stream<Path> findDefinition(Map<String, ProcessPluginDefinitionAndClassLoader> definitionsByJar,
-			String dependency)
-	{
-		ProcessPluginDefinitionAndClassLoader byJar = definitionsByJar.get(dependency + ".jar");
-		if (byJar != null)
-			return byJar.getJars().stream();
-
-		// -M#.jar or -RC#.jar where # is one or more numeric characters
-		List<String> fileNames = definitionsByJar.keySet().stream()
-				.filter(filename -> matchesReleaseCandidateMilestonePatternAndIsDependency(filename, dependency))
-				.collect(Collectors.toList());
-		if (fileNames.size() == 1)
-			return definitionsByJar.get(fileNames.get(0)).getJars().stream();
-
-		ProcessPluginDefinitionAndClassLoader bySnapshotJar = definitionsByJar.get(dependency + "-SNAPSHOT.jar");
-		if (bySnapshotJar != null)
-			return bySnapshotJar.getJars().stream();
-
-		throw new RuntimeException("Dependency " + dependency + " not found");
-	}
-
-	private boolean matchesReleaseCandidateMilestonePatternAndIsDependency(String filename, String dependency)
-	{
-		Matcher matcher = RC_AND_M_PATTERN.matcher(filename);
-		if (matcher.matches())
-			return matcher.group(1).equals(dependency);
-		else
-			return false;
-	}
-
-	private ProcessPluginDefinitionAndClassLoader toJarDefinitionWithDependencies(String definitionClassName,
-			Path jarFile, List<Path> dependencyJars)
-	{
-		URLClassLoader classLoader = new URLClassLoader(jarFile.getFileName().toString(),
-				Stream.concat(Stream.of(jarFile), dependencyJars.stream()).map(this::toUrl).toArray(URL[]::new),
-				ClassLoader.getSystemClassLoader());
-
-		return toDefinitionWithDependency(definitionClassName, classLoader, null, Collections.singletonList(jarFile));
-	}
-
-	private ProcessPluginDefinitionAndClassLoader toFolderDefinitionWithDependencies(String definitionClassName,
-			Path folder, List<Path> dependencyJars)
-	{
-		List<Path> jars = getJars(folder);
-		URLClassLoader classLoader = new URLClassLoader(folder.getFileName().toString(),
-				Stream.concat(jars.stream(), dependencyJars.stream()).map(this::toUrl).toArray(URL[]::new),
-				ClassLoader.getSystemClassLoader());
-
-		return toDefinitionWithDependency(definitionClassName, classLoader, folder, jars);
-	}
-
-	private ProcessPluginDefinitionAndClassLoader toDefinitionWithDependency(String definitionClassName,
-			ClassLoader classLoader, Path folder, List<Path> jars)
-	{
-		List<Provider<ProcessPluginDefinition>> definitions = ServiceLoader
-				.load(ProcessPluginDefinition.class, classLoader).stream().collect(Collectors.toList());
-
-		ProcessPluginDefinition definition = definitions.stream().map(provider -> provider.get())
-				.filter(def -> def.getClass().getName().equals(definitionClassName)).findFirst().orElseThrow(
-						() -> new RuntimeException("ProcessPluginDefinition " + definitionClassName + " not found"));
-
-		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFIX)
-				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
-
-		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definition, classLoader, draft, resolver);
-	}
-
 	@Override
 	public Map<ProcessKeyAndVersion, ClassLoader> getClassLoadersByProcessDefinitionKeyAndVersion()
 	{
 		return getDefinitions().stream()
 				.flatMap(def -> def.getProcessKeysAndVersions().stream()
 						.map(keyAndVersion -> new Pair<>(keyAndVersion, def.getClassLoader())))
-				.collect(Collectors.toMap(p -> p.k, p -> p.v, dupplicatedProcessKeyVersion()));
+				.collect(Collectors.toMap(p -> p.k, p -> p.v, duplicatedProcessKeyVersion()));
 	}
 
-	private <T> BinaryOperator<T> dupplicatedProcessKeyVersion()
+	private <T> BinaryOperator<T> duplicatedProcessKeyVersion()
 	{
 		return (v1, v2) ->
 		{
@@ -339,7 +222,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	{
 		return getDefinitions().stream().flatMap(def -> def.getProcessKeysAndVersions().stream().map(
 				keyAndVersion -> new Pair<>(keyAndVersion, def.getPluginApplicationContext(mainApplicationContext))))
-				.collect(Collectors.toMap(p -> p.k, p -> p.v, dupplicatedProcessKeyVersion()));
+				.collect(Collectors.toMap(p -> p.k, p -> p.v, duplicatedProcessKeyVersion()));
 	}
 
 	@Override
@@ -347,7 +230,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	{
 		return getDefinitions().stream().flatMap(
 				def -> def.getProcessKeysAndVersions().stream().map(keyAndVersion -> new Pair<>(keyAndVersion, def)))
-				.collect(Collectors.toMap(p -> p.k, p -> p.v, dupplicatedProcessKeyVersion()));
+				.collect(Collectors.toMap(p -> p.k, p -> p.v, duplicatedProcessKeyVersion()));
 	}
 
 	@Override
