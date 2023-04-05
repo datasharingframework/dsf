@@ -1,6 +1,5 @@
 package dev.dsf.bpe.service;
 
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -384,8 +383,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 				.getResources(process.toString(), providerByNameAndVersion).collect(Collectors.toList());
 		if (resources.isEmpty())
 		{
-			logger.warn("No FHIR resources found in {} for process {}",
-					definition.getJars().stream().map(Path::toString).collect(Collectors.joining(",")),
+			logger.warn("No FHIR resources found in {} for process {}", definition.getJar().toString(),
 					process.toString());
 			return Stream.empty();
 		}
@@ -394,8 +392,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			if (!hasActivityDefinition(resources, process.getKey(), process.getVersion()))
 			{
 				logger.warn("None or more than one ActivityDefinition found in {} matching process {}",
-						definition.getJars().stream().map(Path::toString).collect(Collectors.joining(",")),
-						process.toString());
+						definition.getJar().toString(), process.toString());
 			}
 
 			return resources.stream();

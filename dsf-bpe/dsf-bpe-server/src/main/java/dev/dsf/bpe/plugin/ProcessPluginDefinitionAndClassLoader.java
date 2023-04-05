@@ -7,9 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,7 +54,7 @@ public class ProcessPluginDefinitionAndClassLoader
 	private static final Pattern PLACEHOLDER_PREFIX_PATTERN = Pattern.compile(Pattern.quote(PLACEHOLDER_PREFIX));
 
 	private final FhirContext fhirContext;
-	private final List<Path> jars = new ArrayList<>();
+	private final Path jar;
 	private final ProcessPluginDefinition definition;
 	private final ClassLoader classLoader;
 	private final boolean draft;
@@ -67,13 +65,12 @@ public class ProcessPluginDefinitionAndClassLoader
 	private AnnotationConfigApplicationContext context;
 	private ResourceProvider resourceProvider;
 
-	public ProcessPluginDefinitionAndClassLoader(FhirContext fhirContext, List<Path> jars,
-			ProcessPluginDefinition definition, ClassLoader classLoader, boolean draft, PropertyResolver resolver)
+	public ProcessPluginDefinitionAndClassLoader(FhirContext fhirContext, Path jar, ProcessPluginDefinition definition,
+			ClassLoader classLoader, boolean draft, PropertyResolver resolver)
 	{
 		this.fhirContext = fhirContext;
 
-		if (jars != null)
-			this.jars.addAll(jars);
+		this.jar = jar;
 
 		this.definition = definition;
 		this.classLoader = classLoader;
@@ -81,9 +78,9 @@ public class ProcessPluginDefinitionAndClassLoader
 		this.resolver = resolver;
 	}
 
-	public List<Path> getJars()
+	public Path getJar()
 	{
-		return Collections.unmodifiableList(jars);
+		return jar;
 	}
 
 	public ProcessPluginDefinition getDefinition()
@@ -145,23 +142,23 @@ public class ProcessPluginDefinitionAndClassLoader
 
 	public List<BpmnFileAndModel> getAndValidateModels()
 	{
-		return getAndValidateModels(jars, getDefinition().getBpmnFiles(), getDefinition().getVersion(),
+		return getAndValidateModels(jar, getDefinition().getBpmnFiles(), getDefinition().getVersion(),
 				getDefinition().getReleaseDate(), getClassLoader());
 	}
 
-	private List<BpmnFileAndModel> getAndValidateModels(List<Path> jars, Stream<String> bpmnFiles,
-			String processPluginVersion, LocalDate processPluginDate, ClassLoader classLoader)
+	private List<BpmnFileAndModel> getAndValidateModels(Path jar, Stream<String> bpmnFiles, String processPluginVersion,
+			LocalDate processPluginDate, ClassLoader classLoader)
 	{
 		if (models == null)
 			models = bpmnFiles
-					.map(file -> loadAndValidateModel(file, processPluginVersion, processPluginDate, classLoader, jars))
+					.map(file -> loadAndValidateModel(file, processPluginVersion, processPluginDate, classLoader, jar))
 					.collect(Collectors.toList());
 
 		return models;
 	}
 
 	private BpmnFileAndModel loadAndValidateModel(String bpmnFile, String processPluginVersion,
-			LocalDate processPluginDate, ClassLoader classLoader, List<Path> jars)
+			LocalDate processPluginDate, ClassLoader classLoader, Path jar)
 	{
 		logger.debug("Reading BPMN from {} and replacing all occurrences of {} with {}", bpmnFile,
 				VERSION_PATTERN_STRING, processPluginVersion);
@@ -198,7 +195,7 @@ public class ProcessPluginDefinitionAndClassLoader
 			Bpmn.validateModel(model);
 			validateModelVersionTagsAndProcessCount(bpmnFile, model);
 
-			return new BpmnFileAndModel(bpmnFile, model, jars);
+			return new BpmnFileAndModel(bpmnFile, model, jar);
 		}
 		catch (IOException e)
 		{

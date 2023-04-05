@@ -8,7 +8,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +47,6 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	}
 
 	public static final String FILE_DRAFT_SUFFIX = "-SNAPSHOT.jar";
-	public static final String FOLDER_DRAFT_SUFFIX = "-SNAPSHOT";
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginProviderImpl.class);
 
@@ -105,12 +103,6 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 					if (def != null)
 						definitions.add(def);
 				}
-				else if (Files.isDirectory(p))
-				{
-					ProcessPluginDefinitionAndClassLoader def = toFolderDefinition(p);
-					if (def != null)
-						definitions.add(def);
-				}
 				else
 					logger.warn("Ignoring file/folder {}", p.toAbsolutePath().toString());
 			});
@@ -129,63 +121,29 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		URLClassLoader classLoader = new URLClassLoader(jarFile.getFileName().toString(), new URL[] { toUrl(jarFile) },
 				ClassLoader.getSystemClassLoader());
 
-		return toDefinition(classLoader, null, Collections.singletonList(jarFile));
+		return toDefinition(classLoader, jarFile);
 	}
 
-	private ProcessPluginDefinitionAndClassLoader toFolderDefinition(Path folder)
-	{
-		List<Path> jars = getJars(folder);
-		URLClassLoader classLoader = new URLClassLoader(folder.getFileName().toString(),
-				jars.stream().map(this::toUrl).toArray(URL[]::new), ClassLoader.getSystemClassLoader());
-
-		return toDefinition(classLoader, folder, jars);
-	}
-
-	private ProcessPluginDefinitionAndClassLoader toDefinition(ClassLoader classLoader, Path folder, List<Path> jars)
+	private ProcessPluginDefinitionAndClassLoader toDefinition(ClassLoader classLoader, Path jar)
 	{
 		List<Provider<ProcessPluginDefinition>> definitions = ServiceLoader
 				.load(ProcessPluginDefinition.class, classLoader).stream().collect(Collectors.toList());
 
 		if (definitions.size() < 1)
 		{
-			logger.warn("Ignoring {} no {} found", jars.size() == 1 ? jars.toString() : folder.toString(),
-					ProcessPluginDefinition.class.getName());
+			logger.warn("Ignoring {}: no {} found", jar.toString(), ProcessPluginDefinition.class.getName());
 			return null;
 		}
 		else if (definitions.size() > 1)
 		{
-			logger.warn("Ignoring {} more than one {} found", folder.toString(),
-					ProcessPluginDefinition.class.getName());
+			logger.warn("Ignoring {}: more than one {} found", jar.toString(), ProcessPluginDefinition.class.getName());
 			return null;
 		}
 
-		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFFIX)
-				: folder.toString().endsWith(FOLDER_DRAFT_SUFFIX);
+		boolean draft = jar.getFileName().toString().endsWith(FILE_DRAFT_SUFFIX);
 
-		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definitions.get(0).get(), classLoader,
-				draft, resolver);
-	}
-
-	private List<Path> getJars(Path folder)
-	{
-		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(folder))
-		{
-			List<Path> jarFiles = new ArrayList<>();
-
-			directoryStream.forEach(p ->
-			{
-				if (Files.isReadable(p) && p.getFileName().toString().endsWith(".jar"))
-					jarFiles.add(p);
-				else
-					logger.warn("Ignoring folder/file {}", p.toAbsolutePath().toString());
-			});
-
-			return jarFiles;
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
+		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jar, definitions.get(0).get(), classLoader, draft,
+				resolver);
 	}
 
 	private URL toUrl(Path p)
