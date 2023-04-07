@@ -18,16 +18,12 @@ public interface ProcessPluginProvider
 	 *
 	 * pluginDirectory/bar_plugin.jar
 	 *
-	 * pluginDirectory/baz_plugin/plugin.jar
-	 * pluginDirectory/baz_plugin/helper.jar
+	 * pluginDirectory/baz_plugin.jar
 	 * </pre>
 	 *
-	 * The folder structure above will result in three separate class loaders being used. The jar files foo_plugin.jar
-	 * and bar_plugin.jar will be loaded in a separate class loader each. All jar files in the baz_plugin directory will
-	 * be loaded within the same class loader.
+	 * The folder/file structure above will result in three separate class loaders being used.
 	 *
-	 * @return Plug in definitions found in jar files within a pluginDirectory or jar files within folders within a
-	 *         pluginDirectory and associated class loaders
+	 * @return plugin definitions found in jar files within a pluginDirectory
 	 */
 	List<ProcessPluginDefinitionAndClassLoader> getDefinitions();
 
