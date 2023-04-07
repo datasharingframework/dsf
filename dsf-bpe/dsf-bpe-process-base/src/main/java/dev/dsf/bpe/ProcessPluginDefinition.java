@@ -37,7 +37,7 @@ public interface ProcessPluginDefinition
 
 	/**
 	 * <i>Placeholder <code>#{version}</code> in FHIR and BPMN files will be replaced with the returned value.</i>
-	 * 
+	 *
 	 * @return version of the process plugin, processes and FHIR resources, e.g. <code>1.2.3</code>
 	 */
 	String getVersion();
