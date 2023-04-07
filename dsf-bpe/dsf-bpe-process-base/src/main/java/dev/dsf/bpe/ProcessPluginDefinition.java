@@ -76,8 +76,7 @@ public interface ProcessPluginDefinition
 	 * @param resolver
 	 *            property resolver used to access config properties and to replace place holders in FHIR resources,
 	 *            never <code>null</code>
-	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes, if not overridden
-	 *         {@link ResourceProvider#empty()}
+	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes
 	 * @see ActivityDefinitionResource#file(String)
 	 * @see CodeSystemResource#file(String)
 	 * @see NamingSystemResource#file(String)
