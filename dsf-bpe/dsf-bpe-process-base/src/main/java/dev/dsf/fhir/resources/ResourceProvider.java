@@ -15,23 +15,6 @@ public interface ResourceProvider
 {
 	Stream<MetadataResource> getResources(String processKeyAndVersion);
 
-	static ResourceProvider empty()
-	{
-		return new ResourceProvider()
-		{
-			@Override
-			public Stream<MetadataResource> getResources(String processKeyAndVersion)
-			{
-				return Stream.empty();
-			}
-		};
-	}
-
-	static ResourceProvider of(Map<String, List<MetadataResource>> resourcesByProcessKeyAndVersion)
-	{
-		return ResourceProviderImpl.of(resourcesByProcessKeyAndVersion);
-	}
-
 	/**
 	 * @param processPluginVersion
 	 *            version of the process plugin, e.g <code>"1.2.3"</code>, used for replacing placeholder #{version},
