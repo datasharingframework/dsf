@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -82,69 +80,8 @@ class ResourceProviderImpl implements ResourceProvider
 	}
 
 	@Override
-	public Optional<ActivityDefinition> getActivityDefinition(String url, String version)
+	public Stream<MetadataResource> getResources(String processKeyAndVersion)
 	{
-		return getMetadataResource(url, version, activityDefinitionsByProcessKeyAndVersion, ActivityDefinition.class);
-	}
-
-	@Override
-	public Optional<CodeSystem> getCodeSystem(String url, String version)
-	{
-		return getMetadataResource(url, version, codeSystemsByProcessKeyAndVersion, CodeSystem.class);
-	}
-
-	@Override
-	public Optional<NamingSystem> getNamingSystem(String name)
-	{
-		Optional<NamingSystem> opt = namingSystemsByProcessKeyAndVersion.values().stream().flatMap(List::stream)
-				.filter(s -> s.hasName() && s.getName().equals(name)).findFirst();
-
-		if (opt.isEmpty())
-			logger.warn("{} name {} not found", NamingSystem.class.getSimpleName(), name);
-		else
-			logger.debug("{} name {} found", NamingSystem.class.getSimpleName(), name);
-
-		return opt;
-	}
-
-	@Override
-	public Optional<Questionnaire> getQuestionnaire(String url, String version)
-	{
-		return getMetadataResource(url, version, questionnairesByProcessKeyAndVersion, Questionnaire.class);
-	}
-
-	@Override
-	public Optional<StructureDefinition> getStructureDefinition(String url, String version)
-	{
-		return getMetadataResource(url, version, structureDefinitionsByProcessKeyAndVersion, StructureDefinition.class);
-	}
-
-	@Override
-	public Optional<ValueSet> getValueSet(String url, String version)
-	{
-		return getMetadataResource(url, version, valueSetsByProcessKeyAndVersion, ValueSet.class);
-	}
-
-	private <T extends MetadataResource> Optional<T> getMetadataResource(String url, String version,
-			Map<String, List<T>> resources, Class<T> type)
-	{
-		Optional<T> opt = resources.values().stream().flatMap(List::stream)
-				.filter(r -> r.hasUrl() && r.getUrl().equals(url) && r.hasVersion() && r.getVersion().equals(version))
-				.findFirst();
-
-		if (opt.isEmpty())
-			logger.warn("{} url {}, version {} not found", type.getSimpleName(), url, version);
-		else
-			logger.debug("{} url {}, version {} found", type.getSimpleName(), url, version);
-
-		return opt;
-	}
-
-	@Override
-	public Stream<MetadataResource> getResources(String processKeyAndVersion,
-			Function<String, ResourceProvider> providerByNameAndVersion)
-	{
-
 		return Stream.of(
 				activityDefinitionsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
 				codeSystemsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),

@@ -31,37 +31,25 @@ import dev.dsf.fhir.resources.ValueSetResource;
 public interface ProcessPluginDefinition
 {
 	/**
-	 * @return process plugin name, same as jar name excluding suffix <code>-&lt;version&gt;.jar</code> used by other
-	 *         processes when defining dependencies, e.g. <code>foo-1.2.3</code> for a jar called
-	 *         <code>foo-1.2.3.jar</code> or <code>foo-1.2.3-SNAPSHOT.jar</code> with processPluginName <code>foo</code>
-	 *         and version <code>1.2.3</code>
+	 * @return process plugin name, same as jar name excluding suffix <code>-&lt;version&gt;.jar</code>
 	 */
 	String getName();
 
 	/**
-	 * @return version of the process plugin, processes and fhir resources, e.g. <code>1.2.3</code>
+	 * <i>Placeholder <code>#{version}</code> in FHIR and BPMN files will be replaced with the returned value.</i>
+	 * 
+	 * @return version of the process plugin, processes and FHIR resources, e.g. <code>1.2.3</code>
 	 */
 	String getVersion();
 
 	/**
-	 * @return <code>name-version</code>
-	 */
-	default String getNameAndVersion()
-	{
-		return getName() + "-" + getVersion();
-	}
-
-	/**
-	 * <i>Override this method to replace <code>#{date}</code> in FHIR and BPMN files with the returned value.</i>
+	 * <i>Placeholder <code>#{date}</code> in FHIR and BPMN files will be replaced with the returned value.</i>
 	 *
-	 * @return the release date of the process plugin, if not overridden {@link LocalDate#MIN}
+	 * @return the release date of the process plugin
 	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
 	 *      java.util.Map)
 	 */
-	default LocalDate getReleaseDate()
-	{
-		return LocalDate.MIN;
-	}
+	LocalDate getReleaseDate();
 
 	/**
 	 * Return <code>Stream.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
@@ -78,15 +66,15 @@ public interface ProcessPluginDefinition
 	Stream<Class<?>> getSpringConfigClasses();
 
 	/**
-	 * <i>Override this method to return a {@link ResourceProvider} with fhir metadata resources (ActivityDefinition,
+	 * <i>Implement this method to return a {@link ResourceProvider} with FHIR metadata resources (ActivityDefinition,
 	 * CodeSystem, NamingSystem, Questionnaire, StructureDefinition, ValueSet) needed by this process plugin.</i>
 	 *
 	 * @param fhirContext
-	 *            applications fhir context, never <code>null</code>
+	 *            applications FHIR context, never <code>null</code>
 	 * @param classLoader
 	 *            class loader that was used to initialize the process plugin, never <code>null</code>
 	 * @param resolver
-	 *            property resolver used to access config properties and to replace place holders in fhir resources,
+	 *            property resolver used to access config properties and to replace place holders in FHIR resources,
 	 *            never <code>null</code>
 	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes, if not overridden
 	 *         {@link ResourceProvider#empty()}
@@ -98,15 +86,10 @@ public interface ProcessPluginDefinition
 	 * @see ValueSetResource#file(String)
 	 * @see FhirContext#newJsonParser()
 	 * @see FhirContext#newXmlParser()
-	 * @see ResourceProvider#read(String, java.util.function.Supplier, ClassLoader, PropertyResolver, java.util.Map)
 	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
 	 *      java.util.Map)
 	 */
-	default ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader,
-			PropertyResolver resolver)
-	{
-		return ResourceProvider.empty();
-	}
+	ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader, PropertyResolver resolver);
 
 	/**
 	 * <i>Override this method to implement custom logic after a process has been deployed and is active, e.g. test the

@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +37,6 @@ import dev.dsf.bpe.process.ResourceInfo;
 import dev.dsf.fhir.client.BasicFhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.client.PreferReturnMinimal;
-import dev.dsf.fhir.resources.ResourceProvider;
 
 public class FhirResourceHandlerImpl implements FhirResourceHandler, InitializingBean
 {
@@ -57,20 +55,14 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private final int fhirServerRequestMaxRetries;
 	private final long fhirServerRetryDelayMillis;
 
-	private final Map<String, ResourceProvider> resourceProvidersByDependencyNameAndVersion = new HashMap<>();
-
 	public FhirResourceHandlerImpl(FhirWebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
-			FhirContext fhirContext, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis,
-			Map<String, ResourceProvider> resourceProvidersByDependencyNameAndVersion)
+			FhirContext fhirContext, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis)
 	{
 		this.localWebserviceClient = localWebserviceClient;
 		this.dao = dao;
 		this.fhirContext = fhirContext;
 		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
 		this.fhirServerRetryDelayMillis = fhirServerRetryDelayMillis;
-
-		if (resourceProvidersByDependencyNameAndVersion != null)
-			this.resourceProvidersByDependencyNameAndVersion.putAll(resourceProvidersByDependencyNameAndVersion);
 	}
 
 	@Override
@@ -365,22 +357,8 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private Stream<MetadataResource> getResources(ProcessKeyAndVersion process,
 			ProcessPluginDefinitionAndClassLoader definition)
 	{
-		Function<String, ResourceProvider> providerByNameAndVersion = nameAndVersion ->
-		{
-			if (resourceProvidersByDependencyNameAndVersion.containsKey(nameAndVersion))
-			{
-				logger.trace("Resource provider for dependency {} found", nameAndVersion);
-				return resourceProvidersByDependencyNameAndVersion.get(nameAndVersion);
-			}
-			else
-			{
-				logger.warn("Resource provider for dependency {} not found", nameAndVersion);
-				return ResourceProvider.empty();
-			}
-		};
-
-		List<MetadataResource> resources = definition.getResourceProvider()
-				.getResources(process.toString(), providerByNameAndVersion).collect(Collectors.toList());
+		List<MetadataResource> resources = definition.getResourceProvider().getResources(process.toString())
+				.collect(Collectors.toList());
 		if (resources.isEmpty())
 		{
 			logger.warn("No FHIR resources found in {} for process {}", definition.getJar().toString(),

@@ -117,10 +117,11 @@ public class ProcessPluginDefinitionAndClassLoader
 		}
 		catch (BeanCreationException e)
 		{
-			logger.error("Unable to create spring application context for plugin {}: {} {}",
-					getDefinition().getNameAndVersion(), e.getClass().getSimpleName(), e.getMessage());
-			logger.debug("Unable to create spring application context for plugin " + getDefinition().getNameAndVersion()
-					+ ", bean with error " + e.getBeanName(), e);
+			logger.error("Unable to create spring application context for plugin {}-{}: {} {}",
+					getDefinition().getName(), getDefinition().getVersion(), e.getClass().getSimpleName(),
+					e.getMessage());
+			logger.debug("Unable to create spring application context for plugin " + getDefinition().getName() + "-"
+					+ getDefinition().getVersion() + ", bean with error " + e.getBeanName(), e);
 
 			// using empty (aka no config classes registered) application context for this failed plugin
 			context = new AnnotationConfigApplicationContext();

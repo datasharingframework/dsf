@@ -79,7 +79,6 @@ public class PostProcessDeployConfig
 	{
 		return new FhirResourceHandlerImpl(fhirConfig.clientProvider().getLocalWebserviceClient(),
 				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
-				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis(),
-				processPluginProvider.getResouceProvidersByDpendencyNameAndVersion());
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
 	}
 }

@@ -30,7 +30,6 @@ import dev.dsf.bpe.ProcessPluginDefinition;
 import dev.dsf.bpe.process.ProcessKeyAndVersion;
 import dev.dsf.bpe.process.ProcessState;
 import dev.dsf.bpe.process.ProcessStateChangeOutcome;
-import dev.dsf.fhir.resources.ResourceProvider;
 
 public class ProcessPluginProviderImpl implements ProcessPluginProvider, InitializingBean
 {
@@ -192,13 +191,6 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	}
 
 	@Override
-	public Map<String, ResourceProvider> getResouceProvidersByDpendencyNameAndVersion()
-	{
-		return getDefinitions().stream().collect(
-				Collectors.toMap(def -> def.getDefinition().getNameAndVersion(), def -> def.getResourceProvider()));
-	}
-
-	@Override
 	public List<ProcessKeyAndVersion> getProcessKeyAndVersions()
 	{
 		return getDefinitions().stream().flatMap(def -> def.getProcessKeysAndVersions().stream())
@@ -235,7 +227,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 			catch (Exception e)
 			{
 				logger.warn("Error while executing onProcessesDeployed for plugin "
-						+ definition.getDefinition().getNameAndVersion(), e);
+						+ definition.getDefinition().getName() + "-" + definition.getDefinition().getVersion(), e);
 			}
 		}
 	}

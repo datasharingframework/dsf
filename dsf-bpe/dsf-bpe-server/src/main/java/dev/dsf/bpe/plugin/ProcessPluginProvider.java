@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationContext;
 
 import dev.dsf.bpe.process.ProcessKeyAndVersion;
 import dev.dsf.bpe.process.ProcessStateChangeOutcome;
-import dev.dsf.fhir.resources.ResourceProvider;
 
 public interface ProcessPluginProvider
 {
@@ -49,8 +48,6 @@ public interface ProcessPluginProvider
 	 * @see #getDefinitions()
 	 */
 	Map<ProcessKeyAndVersion, ApplicationContext> getApplicationContextsByProcessDefinitionKeyAndVersion();
-
-	Map<String, ResourceProvider> getResouceProvidersByDpendencyNameAndVersion();
 
 	List<ProcessKeyAndVersion> getProcessKeyAndVersions();
 
