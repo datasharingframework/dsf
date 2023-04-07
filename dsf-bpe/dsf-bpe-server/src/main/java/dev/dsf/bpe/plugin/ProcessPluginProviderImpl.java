@@ -54,7 +54,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	private final ApplicationContext mainApplicationContext;
 	private final PropertyResolver resolver;
 
-	private volatile List<ProcessPluginDefinitionAndClassLoader> definitions;
+	private final List<ProcessPluginDefinitionAndClassLoader> definitions;
 
 	public ProcessPluginProviderImpl(FhirContext fhirContext, Path pluginDirectory,
 			ApplicationContext mainApplicationContext, PropertyResolver resolver)
@@ -63,6 +63,8 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		this.pluginDirectory = pluginDirectory;
 		this.mainApplicationContext = mainApplicationContext;
 		this.resolver = resolver;
+
+		definitions = loadDefinitions();
 	}
 
 	@Override
@@ -76,15 +78,6 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	@Override
 	public List<ProcessPluginDefinitionAndClassLoader> getDefinitions()
 	{
-		if (definitions == null)
-		{
-			synchronized (this)
-			{
-				if (definitions == null)
-					definitions = loadDefinitions();
-			}
-		}
-
 		return definitions;
 	}
 
@@ -98,7 +91,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 			{
 				if (Files.isReadable(p) && p.getFileName().toString().endsWith(".jar"))
 				{
-					ProcessPluginDefinitionAndClassLoader def = toJarDefinition(p);
+					ProcessPluginDefinitionAndClassLoader def = toDefinition(p);
 					if (def != null)
 						definitions.add(def);
 				}
@@ -115,16 +108,11 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		}
 	}
 
-	private ProcessPluginDefinitionAndClassLoader toJarDefinition(Path jarFile)
+	private ProcessPluginDefinitionAndClassLoader toDefinition(Path jar)
 	{
-		URLClassLoader classLoader = new URLClassLoader(jarFile.getFileName().toString(), new URL[] { toUrl(jarFile) },
+		URLClassLoader classLoader = new URLClassLoader(jar.getFileName().toString(), new URL[] { toUrl(jar) },
 				ClassLoader.getSystemClassLoader());
 
-		return toDefinition(classLoader, jarFile);
-	}
-
-	private ProcessPluginDefinitionAndClassLoader toDefinition(ClassLoader classLoader, Path jar)
-	{
 		List<Provider<ProcessPluginDefinition>> definitions = ServiceLoader
 				.load(ProcessPluginDefinition.class, classLoader).stream().collect(Collectors.toList());
 
