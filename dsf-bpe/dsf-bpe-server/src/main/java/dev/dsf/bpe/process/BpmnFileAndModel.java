@@ -1,10 +1,6 @@
 package dev.dsf.bpe.process;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
@@ -12,15 +8,13 @@ public final class BpmnFileAndModel
 {
 	private final String file;
 	private final BpmnModelInstance model;
-	private final List<Path> jars = new ArrayList<>();
+	private final Path jar;
 
-	public BpmnFileAndModel(String file, BpmnModelInstance model, Collection<? extends Path> jars)
+	public BpmnFileAndModel(String file, BpmnModelInstance model, Path jar)
 	{
 		this.file = file;
 		this.model = model;
-
-		if (jars != null)
-			this.jars.addAll(jars);
+		this.jar = jar;
 	}
 
 	public String getFile()
@@ -33,9 +27,9 @@ public final class BpmnFileAndModel
 		return model;
 	}
 
-	public List<Path> getJars()
+	public Path getJar()
 	{
-		return Collections.unmodifiableList(jars);
+		return jar;
 	}
 
 	public ProcessKeyAndVersion getProcessKeyAndVersion()

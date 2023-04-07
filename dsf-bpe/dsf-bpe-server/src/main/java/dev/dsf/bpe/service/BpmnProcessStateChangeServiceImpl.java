@@ -1,6 +1,5 @@
 package dev.dsf.bpe.service;
 
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -205,8 +204,7 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 		Deployment deployment = builder.deploy();
 
 		logger.debug("Process {} from {}://{} deployed with id {}", processKeyAndVersion.toString(),
-				fileAndModel.getJars().stream().map(Path::toString).collect(Collectors.joining("; ")),
-				fileAndModel.getFile(), deployment.getId());
+				fileAndModel.getJar().toString(), fileAndModel.getFile(), deployment.getId());
 
 		if (draft.contains(processKeyAndVersion))
 		{
