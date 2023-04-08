@@ -14,6 +14,7 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -33,8 +34,6 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-
-import com.google.common.base.Objects;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -439,7 +438,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		if (resource instanceof Bundle)
 		{
 			// if persistent Bundle resource
-			if (Objects.equal(uuid, resource.getIdElement().getIdPart()))
+			if (Objects.equals(uuid, resource.getIdElement().getIdPart()))
 				return Optional.of(resource.getClass().getAnnotation(ResourceDef.class).name());
 			else
 				return ((Bundle) resource).getEntry().stream().filter(c ->
