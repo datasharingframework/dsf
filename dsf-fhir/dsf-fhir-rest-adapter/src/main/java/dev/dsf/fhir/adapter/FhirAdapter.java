@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.ws.rs.Consumes;
@@ -39,18 +38,6 @@ public class FhirAdapter extends AbstractAdapter
 	public FhirAdapter(FhirContext fhirContext)
 	{
 		this.fhirContext = fhirContext;
-	}
-
-	@Deprecated
-	public final Class<? extends BaseResource> getResourceType()
-	{
-		return BaseResource.class;
-	}
-
-	@Deprecated
-	public final String getResourceTypeName()
-	{
-		return getResourceType().getAnnotation(ResourceDef.class).name();
 	}
 
 	private IParser getParser(MediaType mediaType)
