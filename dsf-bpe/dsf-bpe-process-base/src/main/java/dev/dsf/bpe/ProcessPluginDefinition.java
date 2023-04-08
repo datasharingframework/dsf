@@ -1,7 +1,6 @@
 package dev.dsf.bpe;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
@@ -16,6 +15,7 @@ import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.resources.ActivityDefinitionResource;
 import dev.dsf.fhir.resources.CodeSystemResource;
 import dev.dsf.fhir.resources.NamingSystemResource;
+import dev.dsf.fhir.resources.QuestionnaireResource;
 import dev.dsf.fhir.resources.ResourceProvider;
 import dev.dsf.fhir.resources.StructureDefinitionResource;
 import dev.dsf.fhir.resources.ValueSetResource;
@@ -24,51 +24,38 @@ import dev.dsf.fhir.resources.ValueSetResource;
  * A provider configuration file named "dev.dsf.DsfProcessPluginDefinition" containing the canonical name of the class
  * implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details on the
  * content of the provider configuration file, see {@link ServiceLoader}.
- *
+ * <p>
  * Additional {@link TypedValueSerializer}s to be registered inside the camunda process engine need be defined as beans
  * in the process plugins spring context.
  */
 public interface ProcessPluginDefinition
 {
 	/**
-	 * @return process plugin name, same as jar name excluding suffix <code>-&lt;version&gt;.jar</code> used by other
-	 *         processes when defining dependencies, e.g. <code>foo-1.2.3</code> for a jar called
-	 *         <code>foo-1.2.3.jar</code> or <code>foo-1.2.3-SNAPSHOT.jar</code> with processPluginName <code>foo</code>
-	 *         and version <code>1.2.3</code>
+	 * @return process plugin name, same as jar name excluding suffix <code>-&lt;version&gt;.jar</code>
 	 */
 	String getName();
 
 	/**
-	 * @return version of the process plugin, processes and fhir resources, e.g. <code>1.2.3</code>
+	 * <i>Placeholder <code>#{version}</code> in FHIR and BPMN files will be replaced with the returned value.</i>
+	 *
+	 * @return version of the process plugin, processes and FHIR resources, e.g. <code>1.2.3</code>
 	 */
 	String getVersion();
 
 	/**
-	 * @return <code>name-version</code>
-	 */
-	default String getNameAndVersion()
-	{
-		return getName() + "-" + getVersion();
-	}
-
-	/**
-	 * <i>Override this method to replace <code>#{date}</code> in FHIR and BPMN files with the returned value.</i>
+	 * <i>Placeholder <code>#{date}</code> in FHIR and BPMN files will be replaced with the returned value.</i>
 	 *
-	 * @return the release date of the process plugin, if not overridden {@link LocalDate#MIN}
+	 * @return the release date of the process plugin
 	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
 	 *      java.util.Map)
 	 */
-	default LocalDate getReleaseDate()
-	{
-		return LocalDate.MIN;
-	}
+	LocalDate getReleaseDate();
 
 	/**
 	 * Return <code>Stream.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
 	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.
 	 *
 	 * @return *.bpmn files inside process plugin jar
-	 *
 	 * @see ClassLoader#getResourceAsStream(String)
 	 */
 	Stream<String> getBpmnFiles();
@@ -79,46 +66,29 @@ public interface ProcessPluginDefinition
 	Stream<Class<?>> getSpringConfigClasses();
 
 	/**
-	 * <i>Override this method to return a {@link ResourceProvider} with fhir metadata resources (ActivityDefinition,
-	 * CodeSystem, NamingSystem, StructureDefinition, ValueSet) needed by this process plugin.</i>
+	 * <i>Implement this method to return a {@link ResourceProvider} with FHIR metadata resources (ActivityDefinition,
+	 * CodeSystem, NamingSystem, Questionnaire, StructureDefinition, ValueSet) needed by this process plugin.</i>
 	 *
 	 * @param fhirContext
-	 *            applications fhir context, never <code>null</code>
+	 *            applications FHIR context, never <code>null</code>
 	 * @param classLoader
 	 *            class loader that was used to initialize the process plugin, never <code>null</code>
 	 * @param resolver
-	 *            property resolver used to access config properties and to replace place holders in fhir resources,
+	 *            property resolver used to access config properties and to replace place holders in FHIR resources,
 	 *            never <code>null</code>
-	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes, if not overridden
-	 *         {@link ResourceProvider#empty()}
-	 *
+	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes
 	 * @see ActivityDefinitionResource#file(String)
 	 * @see CodeSystemResource#file(String)
 	 * @see NamingSystemResource#file(String)
+	 * @see QuestionnaireResource#file(String)
 	 * @see StructureDefinitionResource#file(String)
 	 * @see ValueSetResource#file(String)
-	 *
 	 * @see FhirContext#newJsonParser()
 	 * @see FhirContext#newXmlParser()
-	 *
-	 * @see ResourceProvider#read(String, java.util.function.Supplier, ClassLoader, PropertyResolver, java.util.Map)
 	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
 	 *      java.util.Map)
 	 */
-	default ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader,
-			PropertyResolver resolver)
-	{
-		return ResourceProvider.empty();
-	}
-
-	/**
-	 * @return dependencies to other processes by jar name (excluding '.jar'). The system will add ".jar" and
-	 *         "-SNAPSHOT.jar" while searching for jars, e.g. "bar-1.2.3"
-	 */
-	default List<String> getDependencyNamesAndVersions()
-	{
-		return Collections.emptyList();
-	}
+	ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader, PropertyResolver resolver);
 
 	/**
 	 * <i>Override this method to implement custom logic after a process has been deployed and is active, e.g. test the
