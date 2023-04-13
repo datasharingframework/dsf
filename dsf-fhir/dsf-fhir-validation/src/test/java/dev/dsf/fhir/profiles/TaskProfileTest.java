@@ -103,7 +103,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-base");
-		task.setInstantiatesUri("http://dsf.dev/bpe/Process/foo|0.1.0");
+		task.setInstantiatesUri("http://dsf.dev/bpe/Process/foo/0.1.0");
 		task.setStatus(status);
 		task.setIntent(Task.TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
