@@ -43,6 +43,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 	private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
+	private static final String CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY = "business-key";
 
 	private static final String INSTANTIATES_URI_PATTERN_STRING = "(?<processUrl>http://(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*(?:[A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])/bpe/Process/[-\\w]+)/(?<processVersion>\\d+\\.\\d+\\.\\d+)";
 	private static final Pattern INSTANTIATES_URI_PATTERN = Pattern.compile(INSTANTIATES_URI_PATTERN_STRING);
@@ -428,15 +429,25 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			errors.add("task.instantiatesUri");
 		}
 
-		if (oldResource.getInput().size() != newResource.getInput().size())
+		List<ParameterComponent> oldResourceInputs = oldResource.getInput();
+		List<ParameterComponent> newResourceInputs = newResource.getInput();
+
+		if (!hasBusinessKey(oldResourceInputs) && hasBusinessKey(newResourceInputs))
+		{
+			logger.debug("Business-key was added when updating between states REQUESTED and IN-PROGRESS, "
+					+ "removing business-key for inputs equality check");
+			newResourceInputs = removeBusinessKey(newResourceInputs);
+		}
+
+		if (oldResourceInputs.size() != newResourceInputs.size())
 		{
 			errors.add("task.input");
 		}
 		else
 		{
-			for (int i = 0; i < oldResource.getInput().size(); i++)
+			for (int i = 0; i < oldResourceInputs.size(); i++)
 			{
-				if (!oldResource.getInput().get(i).equalsDeep(newResource.getInput().get(i)))
+				if (!oldResourceInputs.get(i).equalsDeep(newResourceInputs.get(i)))
 				{
 					errors.add("task.input[" + i + "]");
 					break;
@@ -454,6 +465,27 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					.encodeResourceToString(newResource));
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 		}
+	}
+
+	private boolean hasBusinessKey(List<ParameterComponent> inputs)
+	{
+		return withTypeAndCoding(inputs).anyMatch(
+				i -> i.getType().getCoding().stream().anyMatch(c -> CODE_SYSTEM_BPMN_MESSAGE.equals(c.getSystem())
+						&& CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode())));
+	}
+
+	private List<ParameterComponent> removeBusinessKey(List<ParameterComponent> inputs)
+	{
+		return withTypeAndCoding(inputs)
+				.filter(i -> i.getType().getCoding().stream()
+						.noneMatch(c -> CODE_SYSTEM_BPMN_MESSAGE.equals(c.getSystem())
+								&& CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode())))
+				.collect(Collectors.toList());
+	}
+
+	private Stream<ParameterComponent> withTypeAndCoding(List<ParameterComponent> inputs)
+	{
+		return inputs.stream().filter(i -> i.hasType()).filter(i -> i.getType().hasCoding());
 	}
 
 	@Override

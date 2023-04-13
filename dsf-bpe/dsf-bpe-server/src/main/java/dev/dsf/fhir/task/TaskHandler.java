@@ -71,6 +71,9 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		if (businessKey == null)
 		{
 			businessKey = UUID.randomUUID().toString();
+
+			logger.debug("Adding business-key='{}' to task with id='{}'", businessKey, task.getId());
+
 			task.addInput(
 					taskHelper.createInput(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY, businessKey));
 		}
