@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import dev.dsf.bpe.ProcessPluginDefinition;
+import dev.dsf.bpe.documentation.ProcessDocumentation;
+import dev.dsf.common.documentation.Documentation;
 
 public class DocumentationGenerator
 {

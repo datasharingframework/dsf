@@ -82,6 +82,12 @@
 				<artifactId>dsf-fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-documentation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>

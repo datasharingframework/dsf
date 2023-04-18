@@ -21,6 +21,10 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-documentation</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.camunda.bpm.model</groupId>
 			<artifactId>camunda-bpmn-model</artifactId>
 		</dependency>
