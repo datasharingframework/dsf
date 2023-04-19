@@ -46,8 +46,7 @@ import dev.dsf.bpe.ProcessPluginDefinition;
 import dev.dsf.bpe.documentation.ProcessDocumentation;
 import dev.dsf.common.documentation.Documentation;
 
-@Mojo(name = "documentation-generation", defaultPhase = LifecyclePhase.PREPARE_PACKAGE,
-		requiresDependencyResolution = ResolutionScope.COMPILE)
+@Mojo(name = "documentation-generation", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class DocumentationGenerator extends AbstractMojo
 {
 	private static final Logger logger = LoggerFactory.getLogger(DocumentationGenerator.class);
@@ -82,7 +81,7 @@ public class DocumentationGenerator extends AbstractMojo
 	private String projectBuildDirectory;
 
 	@Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
-	private List<String> compilePath;
+	private List<String> compileClasspathElements;
 
 	@Parameter(property = "workingPackages", required = true)
 	private List<String> workingPackages;
@@ -118,15 +117,15 @@ public class DocumentationGenerator extends AbstractMojo
 	private Reflections createReflections(String workingPackage)
 	{
 		URLClassLoader classLoader = classLoader();
-		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder().setUrls(
-						ClasspathHelper.forPackage(workingPackage, classLoader)).addClassLoaders(classLoader)
+		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
+				.setUrls(ClasspathHelper.forPackage(workingPackage, classLoader)).addClassLoaders(classLoader)
 				.setScanners(Scanners.FieldsAnnotated, Scanners.SubTypes);
 		return new Reflections(configurationBuilder);
 	}
 
 	private URLClassLoader classLoader()
 	{
-		URL[] classpathElements = compilePath.stream().map(toUrl()).filter(Objects::nonNull).toList()
+		URL[] classpathElements = compileClasspathElements.stream().map(toUrl()).filter(Objects::nonNull).toList()
 				.toArray(new URL[0]);
 
 		return new URLClassLoader(classpathElements, Thread.currentThread().getContextClassLoader());
@@ -134,7 +133,8 @@ public class DocumentationGenerator extends AbstractMojo
 
 	private Function<String, URL> toUrl()
 	{
-		return (element) -> {
+		return (element) ->
+		{
 			try
 			{
 				return new File(element).toURI().toURL();
@@ -231,7 +231,8 @@ public class DocumentationGenerator extends AbstractMojo
 
 	private Function<Field, DocumentationEntry> processDocumentationGenerator(List<String> pluginProcessNames)
 	{
-		return field -> {
+		return field ->
+		{
 			ProcessDocumentation documentation = field.getAnnotation(ProcessDocumentation.class);
 			Value value = field.getAnnotation(Value.class);
 
@@ -241,9 +242,9 @@ public class DocumentationGenerator extends AbstractMojo
 			String property = getDocumentationString("Property", initialProperty);
 
 			String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
-			String environment = initialProperty.endsWith(".password") ?
-					String.format("%s or %s_FILE", initialEnvironment, initialEnvironment) :
-					initialEnvironment;
+			String environment = initialProperty.endsWith(".password")
+					? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
+					: initialEnvironment;
 
 			String required = getDocumentationString("Required", documentation.required() ? "Yes" : "No");
 
@@ -255,20 +256,21 @@ public class DocumentationGenerator extends AbstractMojo
 			String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
 			String example = getDocumentationStringMonospace("Example", documentation.example());
 
-			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1])) ?
-					getDocumentationStringMonospace("Default", valueSplit[1]) :
-					"";
+			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
+					? getDocumentationStringMonospace("Default", valueSplit[1])
+					: "";
 
 			return new DocumentationEntry(initialProperty,
 					String.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description,
-									recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
+							recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
 							.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty));
 		};
 	}
 
 	private Function<Field, DocumentationEntry> dsfDocumentationGenerator()
 	{
-		return field -> {
+		return field ->
+		{
 			Documentation documentation = field.getAnnotation(Documentation.class);
 			Value value = field.getAnnotation(Value.class);
 
@@ -278,9 +280,9 @@ public class DocumentationGenerator extends AbstractMojo
 			String property = getDocumentationString("Property", initialProperty);
 
 			String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
-			String environment = initialProperty.endsWith(".password") ?
-					String.format("%s or %s_FILE", initialEnvironment, initialEnvironment) :
-					initialEnvironment;
+			String environment = initialProperty.endsWith(".password")
+					? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
+					: initialEnvironment;
 
 			String required = getDocumentationString("Required", documentation.required() ? "Yes" : "No");
 
@@ -288,13 +290,13 @@ public class DocumentationGenerator extends AbstractMojo
 			String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
 			String example = getDocumentationStringMonospace("Example", documentation.example());
 
-			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1])) ?
-					getDocumentationStringMonospace("Default", valueSplit[1]) :
-					"";
+			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
+					? getDocumentationStringMonospace("Default", valueSplit[1])
+					: "";
 
 			return new DocumentationEntry(initialProperty,
 					String.format("### %s\n%s%s%s%s%s%s\n", environment, property, required, description,
-									recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
+							recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
 							.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty));
 		};
 	}
@@ -339,7 +341,8 @@ public class DocumentationGenerator extends AbstractMojo
 		for (String documentationProcessName : documentationProcessNames)
 		{
 			if (!pluginProcessNames.contains(documentationProcessName))
-				logger.warn("Documentation contains process with name '{}' which"
+				logger.warn(
+						"Documentation contains process with name '{}' which"
 								+ " is not part of the processes {} defined in the ProcessPluginDefinition",
 						documentationProcessName, pluginProcessNames);
 		}
