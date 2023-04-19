@@ -420,6 +420,23 @@
 				<artifactId>snakeyaml</artifactId>
 				<version>2.0</version>
 			</dependency>
+
+			<!-- maven plugin -->
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-core</artifactId>
+				<version>3.9.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>3.9.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugin-tools</groupId>
+				<artifactId>maven-plugin-annotations</artifactId>
+				<version>3.8.1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -524,6 +541,11 @@
 					<groupId>io.fabric8</groupId>
 					<artifactId>docker-maven-plugin</artifactId>
 					<version>0.42.0</version>
+				</plugin>
+				<plugin>
+					<groupId>dev.dsf</groupId>
+					<artifactId>dsf-tools-documentation-generator</artifactId>
+					<version>${project.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
