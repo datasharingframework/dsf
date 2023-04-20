@@ -98,7 +98,8 @@ public class DocumentationGenerator extends AbstractMojo
 
 		moveExistingToBackup(file);
 
-		Reflections reflections = createReflections(workingPackage);
+		URLClassLoader classLoader = classLoader();
+		Reflections reflections = createReflections(classLoader, workingPackage);
 
 		Set<Field> dsfFields = reflections.getFieldsAnnotatedWith(Documentation.class);
 		if (!dsfFields.isEmpty())
@@ -109,14 +110,13 @@ public class DocumentationGenerator extends AbstractMojo
 		Set<Field> processFields = reflections.getFieldsAnnotatedWith(ProcessDocumentation.class);
 		if (!processFields.isEmpty())
 		{
-			List<String> pluginProcessNames = getPluginProcessNames(reflections, workingPackage);
+			List<String> pluginProcessNames = getPluginProcessNames(reflections, classLoader, workingPackage);
 			writeFields(processFields, processDocumentationGenerator(pluginProcessNames), file, workingPackage);
 		}
 	}
 
-	private Reflections createReflections(String workingPackage)
+	private Reflections createReflections(ClassLoader classLoader, String workingPackage)
 	{
-		URLClassLoader classLoader = classLoader();
 		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
 				.setUrls(ClasspathHelper.forPackage(workingPackage, classLoader)).addClassLoaders(classLoader)
 				.setScanners(Scanners.FieldsAnnotated, Scanners.SubTypes);
@@ -148,7 +148,7 @@ public class DocumentationGenerator extends AbstractMojo
 		};
 	}
 
-	private List<String> getPluginProcessNames(Reflections reflections, String workingPackage)
+	private List<String> getPluginProcessNames(Reflections reflections, ClassLoader classLoader, String workingPackage)
 	{
 		List<Class<? extends ProcessPluginDefinition>> pluginDefinitionClasses = new ArrayList<>(
 				reflections.getSubTypesOf(ProcessPluginDefinition.class));
@@ -169,8 +169,8 @@ public class DocumentationGenerator extends AbstractMojo
 			ProcessPluginDefinition processPluginDefinition = pluginDefinitionClasses.get(0).getConstructor()
 					.newInstance();
 
-			return processPluginDefinition.getBpmnFiles().map(this::getProcessName).filter(Optional::isPresent)
-					.map(Optional::get).collect(toList());
+			return processPluginDefinition.getBpmnFiles().map(f -> getProcessName(classLoader, f))
+					.filter(Optional::isPresent).map(Optional::get).collect(toList());
 		}
 		catch (Exception e)
 		{
@@ -181,9 +181,9 @@ public class DocumentationGenerator extends AbstractMojo
 		}
 	}
 
-	private Optional<String> getProcessName(String bpmnFile)
+	private Optional<String> getProcessName(ClassLoader classLoader, String bpmnFile)
 	{
-		try (InputStream resource = getClass().getClassLoader().getResource(bpmnFile).openStream())
+		try (InputStream resource = classLoader.getResourceAsStream(bpmnFile))
 		{
 			return Bpmn.readModelFromStream(resource).getModelElementsByType(Process.class).stream()
 					.map(BaseElement::getId).findFirst();
