@@ -437,11 +437,6 @@
 				<artifactId>maven-plugin-annotations</artifactId>
 				<version>3.8.1</version>
 			</dependency>
-			<dependency>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.8.1</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -546,6 +541,11 @@
 					<groupId>io.fabric8</groupId>
 					<artifactId>docker-maven-plugin</artifactId>
 					<version>0.42.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>3.8.1</version>
 				</plugin>
 				<plugin>
 					<groupId>dev.dsf</groupId>
