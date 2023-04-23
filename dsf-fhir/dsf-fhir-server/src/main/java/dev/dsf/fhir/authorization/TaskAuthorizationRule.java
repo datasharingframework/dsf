@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -432,11 +433,13 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		List<ParameterComponent> oldResourceInputs = oldResource.getInput();
 		List<ParameterComponent> newResourceInputs = newResource.getInput();
 
-		if (!hasBusinessKey(oldResourceInputs) && hasBusinessKey(newResourceInputs))
+		if (TaskStatus.REQUESTED.equals(oldResource.getStatus())
+				&& oldResourceInputs.stream().noneMatch(isBusinessKey())
+				&& TaskStatus.INPROGRESS.equals(newResource.getStatus())
+				&& newResourceInputs.stream().anyMatch(isBusinessKey()))
 		{
-			logger.debug("Business-key was added when updating between states REQUESTED and IN-PROGRESS, "
-					+ "removing business-key for inputs equality check");
-			newResourceInputs = removeBusinessKey(newResourceInputs);
+			// business-key added from requested to in-progress: filtering for equality check
+			newResourceInputs = newResourceInputs.stream().filter(isBusinessKey().negate()).toList();
 		}
 
 		if (oldResourceInputs.size() != newResourceInputs.size())
@@ -467,25 +470,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		}
 	}
 
-	private boolean hasBusinessKey(List<ParameterComponent> inputs)
+	private Predicate<ParameterComponent> isBusinessKey()
 	{
-		return withTypeAndCoding(inputs).anyMatch(
-				i -> i.getType().getCoding().stream().anyMatch(c -> CODE_SYSTEM_BPMN_MESSAGE.equals(c.getSystem())
-						&& CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode())));
-	}
-
-	private List<ParameterComponent> removeBusinessKey(List<ParameterComponent> inputs)
-	{
-		return withTypeAndCoding(inputs)
-				.filter(i -> i.getType().getCoding().stream()
-						.noneMatch(c -> CODE_SYSTEM_BPMN_MESSAGE.equals(c.getSystem())
-								&& CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode())))
-				.collect(Collectors.toList());
-	}
-
-	private Stream<ParameterComponent> withTypeAndCoding(List<ParameterComponent> inputs)
-	{
-		return inputs.stream().filter(i -> i.hasType()).filter(i -> i.getType().hasCoding());
+		return i -> i.getType().getCoding().stream().anyMatch(c -> CODE_SYSTEM_BPMN_MESSAGE.equals(c.getSystem())
+				&& CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode()));
 	}
 
 	@Override

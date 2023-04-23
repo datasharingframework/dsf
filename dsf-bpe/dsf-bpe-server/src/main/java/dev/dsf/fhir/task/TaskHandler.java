@@ -64,20 +64,6 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 	public void onResource(Task task)
 	{
-		String businessKey = taskHelper
-				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY)
-				.orElse(null);
-
-		if (businessKey == null)
-		{
-			businessKey = UUID.randomUUID().toString();
-
-			logger.debug("Adding business-key='{}' to task with id='{}'", businessKey, task.getId());
-
-			task.addInput(
-					taskHelper.createInput(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY, businessKey));
-		}
-
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		task = webserviceClient.update(task);
 
@@ -93,6 +79,16 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		String messageName = taskHelper
 				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME)
 				.orElse(null);
+		String businessKey = taskHelper
+				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY)
+				.orElse(null);
+		if (businessKey == null)
+		{
+			businessKey = UUID.randomUUID().toString();
+			logger.debug("Adding business-key {} to task with id {}", businessKey, task.getId());
+			task.addInput(
+					taskHelper.createInput(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY, businessKey));
+		}
 		String correlationKey = taskHelper
 				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY)
 				.orElse(null);
@@ -135,12 +131,12 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 	protected void onMessage(String businessKey, String correlationKey, String processDomain,
 			String processDefinitionKey, String processVersion, String messageName, Map<String, Object> variables)
 	{
+		Objects.requireNonNull(businessKey, "businessKey");
 		// correlationKey may be null
 		Objects.requireNonNull(processDomain, "processDomain");
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
 		Objects.requireNonNull(processVersion, "processVersion");
 		Objects.requireNonNull(messageName, "messageName");
-		Objects.requireNonNull(businessKey, "businessKey");
 
 		if (variables == null)
 			variables = Collections.emptyMap();
