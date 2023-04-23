@@ -1,8 +1,5 @@
 package dev.dsf.fhir.authorization;
 
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID;
-
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -33,6 +30,9 @@ public class QuestionnaireResponseAuthorizationRule
 		extends AbstractAuthorizationRule<QuestionnaireResponse, QuestionnaireResponseDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseAuthorizationRule.class);
+	
+	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
+	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
 
 	public QuestionnaireResponseAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,

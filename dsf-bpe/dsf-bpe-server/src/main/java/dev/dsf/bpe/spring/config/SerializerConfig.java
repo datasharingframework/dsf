@@ -6,29 +6,28 @@ import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.fhir.json.ObjectMapperFactory;
-import dev.dsf.fhir.variables.FhirResourceSerializer;
-import dev.dsf.fhir.variables.FhirResourcesListSerializer;
-import dev.dsf.fhir.variables.TargetSerializer;
-import dev.dsf.fhir.variables.TargetsSerializer;
+import dev.dsf.bpe.variables.FhirResourceSerializer;
+import dev.dsf.bpe.variables.FhirResourcesListSerializer;
+import dev.dsf.bpe.variables.ObjectMapperFactory;
+import dev.dsf.bpe.variables.TargetSerializer;
+import dev.dsf.bpe.variables.TargetsSerializer;
 
 @Configuration
 public class SerializerConfig
 {
 	@Autowired
-	private FhirContext fhirContext;
+	private FhirConfig fhirConfig;
 
 	@Bean
 	public ObjectMapper objectMapper()
 	{
-		return ObjectMapperFactory.createObjectMapper(fhirContext);
+		return ObjectMapperFactory.createObjectMapper(fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public FhirResourceSerializer fhirResourceSerializer()
 	{
-		return new FhirResourceSerializer(fhirContext);
+		return new FhirResourceSerializer(fhirConfig.fhirContext());
 	}
 
 	@Bean

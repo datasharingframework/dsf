@@ -1,106 +1,113 @@
 package dev.dsf.bpe.listener;
 
-import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS;
-import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK;
-import static dev.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY;
-import static dev.dsf.bpe.ConstantsBase.CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME;
-
+import java.util.List;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.variable.Variables;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.ConstantsBase;
+import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
+import dev.dsf.bpe.variables.VariablesImpl;
 import dev.dsf.fhir.client.FhirWebserviceClient;
-import dev.dsf.fhir.task.TaskHelper;
 
-/**
- * Added to each BPMN EndEvent by the {@link DefaultBpmnParseListener}. Is used to set the FHIR {@link Task} status as
- * {@link Task.TaskStatus#COMPLETED} if the process ends successfully and sets {@link Task}.output values. Sets the
- * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} back to <code>false</code> if a called sub process
- * ends.
- */
-public class EndListener implements ExecutionListener, InitializingBean
+public class EndListener extends AbstractListener implements ExecutionListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndListener.class);
 
 	private final FhirWebserviceClient webserviceClient;
-	private final TaskHelper taskHelper;
 
-	public EndListener(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
+	public EndListener(String serverBaseUrl, FhirWebserviceClient fhirWebserviceClient)
 	{
-		this.webserviceClient = webserviceClient;
-		this.taskHelper = taskHelper;
+		super(serverBaseUrl);
+
+		this.webserviceClient = fhirWebserviceClient;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(webserviceClient, "webserviceClient");
-		Objects.requireNonNull(taskHelper, "taskHelper");
 	}
 
 	@Override
-	public void notify(DelegateExecution execution) throws Exception
+	public void doNotify(DelegateExecution execution, VariablesImpl variables) throws Exception
 	{
-		boolean inCalledProcess = (boolean) execution.getVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS);
+		List<Task> tasks = variables.getCurrentTasks();
 
-		// not in a called process --> process end if it is not a subprocess
-		if (!inCalledProcess)
+		for (int i = tasks.size() - 1; i >= 0; i--)
 		{
-			Task task;
-			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
-			{
-				// not in a subprocess --> end of main process, write process outputs to task
-				task = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
-				log(execution, task);
-			}
-			else
-			{
-				// in a subprocess --> process does not end here, outputs do not have to be written
-				task = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_TASK);
-			}
+			Task task = tasks.get(i);
+			updateIfInprogress(task);
+			boolean subProcess = execution.getParentId() != null
+					&& !execution.getParentId().equals(execution.getProcessInstanceId());
+			logEnd(logger, subProcess, task, subProcess ? variables.getMainTask() : null);
+		}
 
-			if (task.getStatus().equals(Task.TaskStatus.INPROGRESS))
-			{
-				task.setStatus(Task.TaskStatus.COMPLETED);
-			}
+		variables.onEnd();
+	}
 
-			webserviceClient.withMinimalReturn().update(task);
+	private void updateIfInprogress(Task task)
+	{
+		if (TaskStatus.INPROGRESS.equals(task.getStatus()))
+		{
+			task.setStatus(TaskStatus.COMPLETED);
+			updateAndHandleException(task);
 		}
 		else
 		{
-			// in a called process --> process does not end here, don't change the task variable
-			// reset VARIABLE_IS_CALL_ACTIVITY to false, since we leave the called process
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS, Variables.booleanValue(false));
+			logger.debug("Not updating Task {} with status: {}", getLocalVersionlessAbsoluteUrl(task),
+					task.getStatus());
 		}
 	}
 
-	private void log(DelegateExecution execution, Task task)
+	private void updateAndHandleException(Task task)
 	{
-		String processUrl = task.getInstantiatesUri();
-		String messageName = taskHelper
-				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_MESSAGE_NAME)
-				.orElse(null);
-		String businessKey = taskHelper
-				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY)
-				.orElse(null);
-		String correlationKey = taskHelper
-				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY)
-				.orElse(null);
-		String taskUrl = task.getIdElement().toVersionless()
-				.withServerBase(webserviceClient.getBaseUrl(), ResourceType.Task.name()).getValue();
+		try
+		{
+			logger.debug("Updating Task {}, new status: {}", getLocalVersionlessAbsoluteUrl(task),
+					task.getStatus().toCode());
 
-		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, task: {}]", processUrl,
-				messageName, businessKey, correlationKey, taskUrl);
+			webserviceClient.withMinimalReturn().update(task);
+		}
+		catch (Exception e)
+		{
+			logger.error("Unable to update Task " + getLocalVersionlessAbsoluteUrl(task), e);
+		}
+	}
+
+	private void logEnd(Logger logger, boolean subProcess, Task endTask, Task mainTask)
+	{
+		String processUrl = endTask.getInstantiatesCanonical();
+		String businessKey = getFirstInputParameter(endTask, BpmnMessage.businessKey());
+		String correlationKey = getFirstInputParameter(endTask, BpmnMessage.correlationKey());
+		String endTaskUrl = getLocalVersionlessAbsoluteUrl(endTask);
+
+		String mainTaskUrl = getLocalVersionlessAbsoluteUrl(mainTask);
+
+		if (subProcess)
+		{
+			if (correlationKey != null)
+				logger.info(
+						"Subprocess of {} finished [task: {}, business-key: {}, correlation-key: {}, main-task: {}]",
+						processUrl, endTaskUrl, businessKey, correlationKey, mainTaskUrl);
+			else
+				logger.info("Subprocess of {} finished [task: {}, business-key: {}, main-task: {}]", processUrl,
+						endTaskUrl, businessKey, mainTaskUrl);
+		}
+		else
+		{
+			if (correlationKey != null)
+				logger.info("Process {} finished [task: {}, business-key: {}, correlation-key: {}]", processUrl,
+						endTaskUrl, businessKey, correlationKey);
+			else
+				logger.info("Process {} finished [task: {}, business-key: {}]", processUrl, endTaskUrl, businessKey,
+						correlationKey);
+		}
 	}
 }

@@ -3,8 +3,6 @@ package dev.dsf.bpe.camunda;
 import org.camunda.bpm.engine.impl.telemetry.dto.TelemetryDataImpl;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 
-import dev.dsf.bpe.delegate.DelegateProvider;
-
 public class MultiVersionSpringProcessEngineConfiguration extends SpringProcessEngineConfiguration
 {
 	public MultiVersionSpringProcessEngineConfiguration(DelegateProvider delegateProvider)

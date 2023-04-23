@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.junit.Test;
 
-import dev.dsf.bpe.ConstantsBase;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
@@ -36,6 +35,8 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest
 {
+	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
+
 	private static final Date AUTHORED = Date
 			.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
 	private static final String QUESTIONNAIRE_URL = "http://dsf.dev/fhir/Questionnaire/userTask/foo";
@@ -156,7 +157,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 		created.setStatus(QuestionnaireResponseStatus.STOPPED);
 		created.getItem().clear();
-		addItem(created, ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
+		addItem(created, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
 				new StringType(UUID.randomUUID().toString()));
 
 		try
@@ -510,7 +511,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 				+ organizationProvider.getLocalOrganization().get().getIdElement().getIdPart();
 		questionnaireResponse.setSubject(new Reference(organizationReference));
 
-		addItem(questionnaireResponse, ConstantsBase.CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
+		addItem(questionnaireResponse, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
 				new StringType(UUID.randomUUID().toString()));
 
 		return questionnaireResponse;

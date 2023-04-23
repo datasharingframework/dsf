@@ -12,7 +12,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-bpe-process-base</artifactId>
+			<artifactId>dsf-bpe-process-api-v1</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -141,6 +141,11 @@
 			<artifactId>bcmail-jdk15on</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>db-test-utils</artifactId>

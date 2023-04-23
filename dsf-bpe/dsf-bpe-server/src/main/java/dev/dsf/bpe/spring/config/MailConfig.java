@@ -37,9 +37,9 @@ import org.springframework.context.event.EventListener;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
-import dev.dsf.bpe.service.LoggingMailService;
-import dev.dsf.bpe.service.MailService;
-import dev.dsf.bpe.service.SmtpMailService;
+import dev.dsf.bpe.mail.LoggingMailService;
+import dev.dsf.bpe.mail.SmtpMailService;
+import dev.dsf.bpe.v1.service.MailService;
 import dev.dsf.tools.build.BuildInfoReader;
 
 @Configuration

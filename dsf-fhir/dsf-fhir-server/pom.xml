@@ -29,6 +29,13 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-documentation-generator</artifactId>
+			<!-- TODO dsf-tools-documentation-generator should not have a dependency to dsf-bpe-process-base -->
+			<exclusions>
+				<exclusion>
+					<groupId>dev.dsf</groupId>
+					<artifactId>dsf-bpe-process-base</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>

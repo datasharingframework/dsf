@@ -13,8 +13,7 @@ import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 
-import dev.dsf.bpe.delegate.DelegateProvider;
-import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.plugin.ProcessIdAndVersion;
 
 public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExecutionListener
 {
@@ -33,7 +32,7 @@ public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExe
 	{
 		ExecutionEntity e = (ExecutionEntity) execution;
 
-		ProcessKeyAndVersion processKeyAndVersion = new ProcessKeyAndVersion(e.getProcessDefinition().getKey(),
+		ProcessIdAndVersion processKeyAndVersion = new ProcessIdAndVersion(e.getProcessDefinition().getKey(),
 				e.getProcessDefinition().getVersionTag());
 
 		ExecutionListener executionListenerInstance = getExecutionListenerInstance(processKeyAndVersion);
@@ -51,7 +50,7 @@ public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExe
 		}
 	}
 
-	protected ExecutionListener getExecutionListenerInstance(ProcessKeyAndVersion processKeyAndVersion)
+	protected ExecutionListener getExecutionListenerInstance(ProcessIdAndVersion processKeyAndVersion)
 	{
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
@@ -66,7 +65,7 @@ public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExe
 		}
 	}
 
-	private Object instantiateDelegate(ProcessKeyAndVersion processKeyAndVersion, String className,
+	private Object instantiateDelegate(ProcessIdAndVersion processKeyAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations)
 	{
 		try

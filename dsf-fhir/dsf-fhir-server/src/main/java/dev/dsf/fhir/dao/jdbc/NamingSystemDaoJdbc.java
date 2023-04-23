@@ -104,7 +104,7 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 			return false;
 
 		final String namingSystem = "{\"uniqueId\":[{\"modifierExtension\":[{\"url\":\"http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}],"
-				+ "\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
+				+ "\"value\":\"" + uniqueIdValue + "\"}]}";
 
 		try (PreparedStatement statement = connection.prepareStatement(
 				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))

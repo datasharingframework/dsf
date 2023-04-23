@@ -11,7 +11,7 @@
 	</parent>
 
 	<modules>
-		<module>dsf-bpe-process-base</module>
+		<module>dsf-bpe-process-api-v1</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 	</modules>
@@ -62,7 +62,7 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-process-base</artifactId>
+				<artifactId>dsf-bpe-process-api-v1</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

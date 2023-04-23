@@ -1,0 +1,428 @@
+package dev.dsf.bpe.v1.activity;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.camunda.bpm.engine.impl.el.FixedValue;
+import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
+import org.camunda.bpm.model.bpmn.instance.SendTask;
+import org.camunda.bpm.model.cmmn.impl.instance.TargetImpl;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.hl7.fhir.r4.model.Task.TaskIntent;
+import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
+import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
+import dev.dsf.bpe.v1.variables.Target;
+import dev.dsf.bpe.v1.variables.Targets;
+import dev.dsf.bpe.v1.variables.Variables;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+
+public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
+{
+	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
+
+	protected final ProcessPluginApi api;
+
+	// set via field injection
+	private FixedValue instantiatesCanonical;
+	private FixedValue messageName;
+	private FixedValue profile;
+
+	/**
+	 * @param api
+	 *            not <code>null</code>
+	 */
+	public AbstractTaskMessageSend(ProcessPluginApi api)
+	{
+		this.api = api;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(api, "api");
+	}
+
+	/**
+	 * @param instantiatesCanonical
+	 *            not <code>null</code>
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setInstantiatesCanonical(FixedValue instantiatesCanonical)
+	{
+		this.instantiatesCanonical = instantiatesCanonical;
+	}
+
+	public String getInstantiatesCanonical()
+	{
+		return instantiatesCanonical == null ? null : instantiatesCanonical.getExpressionText();
+	}
+
+	/**
+	 * @param messageName
+	 *            not <code>null</code>
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setMessageName(FixedValue messageName)
+	{
+		this.messageName = messageName;
+	}
+
+	public String getMessageName()
+	{
+		return messageName == null ? null : messageName.getExpressionText();
+	}
+
+	/**
+	 * @param profile
+	 *            not <code>null</code>
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setProfile(FixedValue profile)
+	{
+		this.profile = profile;
+	}
+
+	public String getProfile()
+	{
+		return profile == null ? null : profile.getExpressionText();
+	}
+
+	@Override
+	public final void execute(DelegateExecution execution) throws Exception
+	{
+		doExecute(execution, api.getVariables(execution));
+	}
+
+	protected void doExecute(DelegateExecution execution, Variables variables) throws Exception
+	{
+		final String instantiatesCanonical = getInstantiatesCanonical();
+		final String messageName = getMessageName();
+		final String profile = getProfile();
+		final String businessKey = execution.getBusinessKey();
+		final Target target = variables.getTarget();
+
+		try
+		{
+			sendTask(execution, variables, target, instantiatesCanonical, messageName, businessKey, profile,
+					getAdditionalInputParameters(execution, variables));
+		}
+		catch (Exception e)
+		{
+			String errorMessage = "Error while sending Task (process: " + instantiatesCanonical + ", message-name: "
+					+ messageName + ", business-key: " + businessKey + ", correlation-key: "
+					+ target.getCorrelationKey() + ") to organization with identifier "
+					+ target.getOrganizationIdentifierValue() + ", endpoint with identifier "
+					+ target.getEndpointIdentifierValue() + ": " + e.getMessage();
+			logger.warn(errorMessage);
+			logger.debug("Error while sending Task", e);
+
+			if (execution.getBpmnModelElementInstance() instanceof IntermediateThrowEvent)
+				handleIntermediateThrowEventError(execution, variables, e, errorMessage);
+			else if (execution.getBpmnModelElementInstance() instanceof EndEvent)
+				handleEndEventError(execution, variables, e, errorMessage);
+			else if (execution.getBpmnModelElementInstance() instanceof SendTask)
+				handleSendTaskError(execution, variables, e, errorMessage);
+			else
+				logger.warn("Error handling for {} not implemented",
+						execution.getBpmnModelElementInstance().getClass().getName());
+		}
+	}
+
+	protected void handleIntermediateThrowEventError(DelegateExecution execution, Variables variables,
+			Exception exception, String errorMessage)
+	{
+		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+		logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+				exception.getClass().getName(), exception.getMessage());
+
+		updateFailedIfInprogress(variables.getTasks(), errorMessage);
+
+		execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+				exception.getMessage());
+	}
+
+	protected void handleEndEventError(DelegateExecution execution, Variables variables, Exception exception,
+			String errorMessage)
+	{
+		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+		logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+				exception.getClass().getName(), exception.getMessage());
+
+		updateFailedIfInprogress(variables.getTasks(), errorMessage);
+
+		// End event: No need to delete process instance
+	}
+
+	protected void handleSendTaskError(DelegateExecution execution, Variables variables, Exception exception,
+			String errorMessage)
+	{
+		Targets targets = variables.getTargets();
+
+		// if we are a multi instance message send task, remove target
+		if (targets != null && !targets.isEmpty())
+		{
+			Target target = variables.getTarget();
+			targets = targets.removeByEndpointIdentifierValue(target);
+			variables.setTargets(targets);
+
+			addErrorIfInprogress(variables.getTasks(), errorMessage);
+
+			logger.debug("Target organization {}, endpoint {} with error {} removed from target list",
+					target.getOrganizationIdentifierValue(), target.getEndpointIdentifierValue(),
+					exception.getMessage());
+		}
+
+		// if we are not a multi instance message send task or all sends have failed (targets emtpy)
+		else
+		{
+			logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+			logger.error("Process {} has fatal error in step {} for task {}, last reason: {} - ",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+					exception.getClass().getName(), exception.getMessage());
+
+			updateFailedIfInprogress(variables.getTasks(), errorMessage);
+
+			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+					exception.getMessage());
+		}
+	}
+
+	private void addErrorIfInprogress(List<Task> tasks, String errorMessage)
+	{
+		for (int i = tasks.size() - 1; i >= 0; i--)
+		{
+			Task task = tasks.get(i);
+
+			if (TaskStatus.INPROGRESS.equals(task.getStatus()))
+			{
+				addErrorMessage(task, errorMessage);
+			}
+			else
+			{
+				logger.debug("Not adding error to Task {} with status: {}",
+						api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), task.getStatus());
+			}
+		}
+	}
+
+	private void updateFailedIfInprogress(List<Task> tasks, String errorMessage)
+	{
+		for (int i = tasks.size() - 1; i >= 0; i--)
+		{
+			Task task = tasks.get(i);
+
+			if (TaskStatus.INPROGRESS.equals(task.getStatus()))
+			{
+				task.setStatus(Task.TaskStatus.FAILED);
+				addErrorMessage(task, errorMessage);
+				updateAndHandleException(task);
+			}
+			else
+			{
+				logger.debug("Not updating Task {} with status: {}",
+						api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), task.getStatus());
+			}
+		}
+	}
+
+	protected void addErrorMessage(Task task, String errorMessage)
+	{
+		task.addOutput(new TaskOutputComponent(new CodeableConcept(BpmnMessage.error()), new StringType(errorMessage)));
+	}
+
+	private void updateAndHandleException(Task task)
+	{
+		try
+		{
+			logger.debug("Updating Task {}, new status: {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
+					task.getStatus().toCode());
+
+			api.getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+		}
+		catch (Exception e)
+		{
+			logger.error("Unable to update Task " + api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+		}
+	}
+
+	/**
+	 * <i>Override this method to add additional input parameters to the task resource being send.</i>
+	 *
+	 * @param execution
+	 *            the delegate execution of this process instance
+	 * @return {@link Stream} of {@link ParameterComponent}s to be added as input parameters
+	 */
+	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution, Variables variables)
+	{
+		return Stream.empty();
+	}
+
+	/**
+	 * Generates an alternative business-key and stores it as a process variable with name
+	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}<br>
+	 * <br>
+	 * <i>Use this method in combination with overriding
+	 * {@link #sendTask(DelegateExecution, TargetImpl, String, String, String, String, Stream)} to use an alternative
+	 * business-key with the communication target.</i>
+	 *
+	 * <pre>
+	 * &#64;Override
+	 * protected void sendTask(DelegateExecution execution, Target target, String instantiatesUri, String messageName,
+	 * 		String businessKey, String profile, Stream&lt;ParameterComponent&gt; additionalInputParameters)
+	 * {
+	 * 	String alternativeBusinesKey = createAndSaveAlternativeBusinessKey();
+	 * 	super.sendTask(execution, target, instantiatesUri, messageName, alternativeBusinesKey, profile,
+	 * 			additionalInputParameters);
+	 * }
+	 * </pre>
+	 *
+	 * @param execution
+	 *            not <code>null</code>
+	 * @return the alternative business-key stored as variable
+	 *         {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}
+	 */
+	protected final String createAndSaveAlternativeBusinessKey(DelegateExecution execution, Variables variables)
+	{
+		String alternativeBusinessKey = UUID.randomUUID().toString();
+		variables.setAlternativeBusinessKey(alternativeBusinessKey);
+		return alternativeBusinessKey;
+	}
+
+	/**
+	 * @param execution
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @param target
+	 *            not <code>null</code>
+	 * @param instantiatesCanonical
+	 *            not <code>null</code>, not empty
+	 * @param messageName
+	 *            not <code>null</code>, not empty
+	 * @param businessKey
+	 *            not <code>null</code>, not empty
+	 * @param profile
+	 *            not <code>null</code>, not empty
+	 * @param additionalInputParameters
+	 *            may be <code>null</code>
+	 */
+	protected void sendTask(DelegateExecution execution, Variables variables, Target target,
+			String instantiatesCanonical, String messageName, String businessKey, String profile,
+			Stream<ParameterComponent> additionalInputParameters)
+	{
+		Objects.requireNonNull(target, "target");
+		Objects.requireNonNull(instantiatesCanonical, "instantiatesCanonical");
+		if (instantiatesCanonical.isEmpty())
+			throw new IllegalArgumentException("instantiatesCanonical empty");
+		Objects.requireNonNull(messageName, "messageName");
+		if (messageName.isEmpty())
+			throw new IllegalArgumentException("messageName empty");
+		Objects.requireNonNull(businessKey, "businessKey");
+		if (businessKey.isEmpty())
+			throw new IllegalArgumentException("profile empty");
+		Objects.requireNonNull(profile, "profile");
+		if (profile.isEmpty())
+			throw new IllegalArgumentException("profile empty");
+
+		Task task = new Task();
+		task.setMeta(new Meta().addProfile(profile));
+		task.setStatus(TaskStatus.REQUESTED);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.setRequester(getRequester());
+		task.getRestriction().addRecipient(getRecipient(target));
+		task.setInstantiatesCanonical(instantiatesCanonical);
+
+		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(BpmnMessage.messageName()),
+				new StringType(messageName));
+		task.getInput().add(messageNameInput);
+
+		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(BpmnMessage.businessKey()),
+				new StringType(businessKey));
+		task.getInput().add(businessKeyInput);
+
+		String correlationKey = target.getCorrelationKey();
+		if (correlationKey != null)
+		{
+			ParameterComponent correlationKeyInput = new ParameterComponent(
+					new CodeableConcept(BpmnMessage.correlationKey()), new StringType(correlationKey));
+			task.getInput().add(correlationKeyInput);
+		}
+
+		if (additionalInputParameters != null)
+			additionalInputParameters.forEach(task.getInput()::add);
+
+		FhirWebserviceClient client = api.getFhirWebserviceClientProvider()
+				.getWebserviceClient(target.getEndpointUrl());
+
+		logger.info("Sending task {} to {}/{} [message: {}, businessKey: {}, correlationKey: {}, endpoint: {}]",
+				task.getInstantiatesCanonical(), target.getOrganizationIdentifierValue(),
+				target.getEndpointIdentifierValue(), messageName, businessKey, correlationKey, client.getBaseUrl());
+		logger.trace("Task resource to send: {}", api.getFhirContext().newJsonParser().encodeResourceToString(task));
+
+		doSend(client, task);
+	}
+
+	/**
+	 * <i>Override this method to modify the remote task create behavior, e.g. to implement retries</i>
+	 *
+	 * <pre>
+	 * <code>
+	 * &#64;Override
+	 * protected void doSend(FhirWebserviceClient client, Task task)
+	 * {
+	 *     client.withMinimalReturn().withRetry(2).create(task);
+	 * }
+	 * </code>
+	 * </pre>
+	 *
+	 * @param client
+	 *            not <code>null</code>
+	 * @param task
+	 *            not <code>null</code>
+	 */
+	protected void doSend(FhirWebserviceClient client, Task task)
+	{
+		client.withMinimalReturn().create(task);
+	}
+
+	protected Reference getRecipient(Target target)
+	{
+		return new Reference().setType(ResourceType.Organization.name())
+				.setIdentifier(OrganizationIdentifier.withValue(target.getOrganizationIdentifierValue()));
+	}
+
+	protected Reference getRequester()
+	{
+		return new Reference().setType(ResourceType.Organization.name())
+				.setIdentifier(api.getOrganizationProvider().getLocalOrganizationIdentifier()
+						.orElseThrow(() -> new IllegalStateException("Local organization identifier unknown")));
+	}
+}

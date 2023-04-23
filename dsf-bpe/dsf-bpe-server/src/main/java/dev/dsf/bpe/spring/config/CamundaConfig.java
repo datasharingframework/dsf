@@ -1,14 +1,10 @@
 package dev.dsf.bpe.spring.config;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.camunda.bpm.engine.ProcessEngine;
-import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
-import org.camunda.bpm.engine.impl.variable.serializer.VariableSerializerFactory;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.postgresql.Driver;
@@ -16,24 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import dev.dsf.bpe.camunda.DelegateProvider;
+import dev.dsf.bpe.camunda.DelegateProviderImpl;
 import dev.dsf.bpe.camunda.FallbackSerializerFactory;
+import dev.dsf.bpe.camunda.FallbackSerializerFactoryImpl;
 import dev.dsf.bpe.camunda.MultiVersionSpringProcessEngineConfiguration;
-import dev.dsf.bpe.delegate.DelegateProvider;
-import dev.dsf.bpe.delegate.DelegateProviderImpl;
-import dev.dsf.bpe.listener.CallActivityListener;
+import dev.dsf.bpe.listener.ContinueListener;
 import dev.dsf.bpe.listener.DebugLoggingBpmnParseListener;
 import dev.dsf.bpe.listener.DefaultBpmnParseListener;
-import dev.dsf.bpe.listener.DefaultUserTaskListener;
 import dev.dsf.bpe.listener.EndListener;
 import dev.dsf.bpe.listener.StartListener;
-import dev.dsf.bpe.plugin.ProcessPluginProvider;
-import dev.dsf.bpe.plugin.ProcessPluginProviderImpl;
-import dev.dsf.fhir.client.FhirWebserviceClientProvider;
 
 @Configuration
 public class CamundaConfig
@@ -42,20 +34,13 @@ public class CamundaConfig
 	private PropertiesConfig propertiesConfig;
 
 	@Autowired
-	private FhirConfig fhirConfig;
-
-	@Autowired
-	private FhirWebserviceClientProvider clientProvider;
+	private FhirClientConfig fhirClientConfig;
 
 	@Autowired
 	private ApplicationContext applicationContext;
 
 	@Autowired
-	@SuppressWarnings("rawtypes")
-	private List<TypedValueSerializer> baseSerializers;
-
-	@Autowired
-	private Environment environment;
+	private SerializerConfig serializerConfig;
 
 	@Bean
 	public PlatformTransactionManager transactionManager()
@@ -91,25 +76,26 @@ public class CamundaConfig
 	@Bean
 	public StartListener startListener()
 	{
-		return new StartListener(fhirConfig.taskHelper(), clientProvider.getLocalBaseUrl());
+		return new StartListener(propertiesConfig.getServerBaseUrl());
 	}
 
 	@Bean
 	public EndListener endListener()
 	{
-		return new EndListener(clientProvider.getLocalWebserviceClient(), fhirConfig.taskHelper());
+		return new EndListener(propertiesConfig.getServerBaseUrl(),
+				fhirClientConfig.clientProvider().getLocalWebserviceClient());
 	}
 
 	@Bean
-	public CallActivityListener callActivityListener()
+	public ContinueListener continueListener()
 	{
-		return new CallActivityListener();
+		return new ContinueListener(propertiesConfig.getServerBaseUrl());
 	}
 
 	@Bean
 	public DefaultBpmnParseListener defaultBpmnParseListener()
 	{
-		return new DefaultBpmnParseListener(startListener(), endListener(), callActivityListener());
+		return new DefaultBpmnParseListener(startListener(), endListener(), continueListener());
 	}
 
 	@Bean
@@ -120,17 +106,19 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public SpringProcessEngineConfiguration processEngineConfiguration() throws IOException
+	public SpringProcessEngineConfiguration processEngineConfiguration()
 	{
 		var c = new MultiVersionSpringProcessEngineConfiguration(delegateProvider());
 		c.setProcessEngineName("dsf");
 		c.setDataSource(transactionAwareDataSource());
 		c.setTransactionManager(transactionManager());
 		c.setDatabaseSchemaUpdate("false");
-		c.setJobExecutorActivate(true);
+		c.setJobExecutorActivate(false);
 		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener(), debugLoggingBpmnParseListener()));
-		c.setCustomPreVariableSerializers(baseSerializers);
-		c.setFallbackSerializerFactory(getFallbackSerializerFactory());
+		c.setCustomPreVariableSerializers(
+				List.of(serializerConfig.targetSerializer(), serializerConfig.targetsSerializer(),
+						serializerConfig.fhirResourceSerializer(), serializerConfig.fhirResourcesListSerializer()));
+		c.setFallbackSerializerFactory(fallbackSerializerFactory());
 
 		// see also MultiVersionSpringProcessEngineConfiguration
 		c.setInitializeTelemetry(false);
@@ -140,17 +128,15 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public VariableSerializerFactory getFallbackSerializerFactory()
+	public FallbackSerializerFactory fallbackSerializerFactory()
 	{
-		return new FallbackSerializerFactory(delegateProvider().getTypedValueSerializers());
+		return new FallbackSerializerFactoryImpl();
 	}
 
 	@Bean
 	public DelegateProvider delegateProvider()
 	{
-		return new DelegateProviderImpl(processPluginProvider().getClassLoadersByProcessDefinitionKeyAndVersion(),
-				ClassLoader.getSystemClassLoader(),
-				processPluginProvider().getApplicationContextsByProcessDefinitionKeyAndVersion(), applicationContext);
+		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext);
 	}
 
 	@Bean
@@ -171,25 +157,5 @@ public class CamundaConfig
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Bean
-	public ProcessPluginProvider processPluginProvider()
-	{
-		Path processPluginDirectoryPath = propertiesConfig.getProcessPluginDirectory();
-
-		if (!Files.isDirectory(processPluginDirectoryPath))
-			throw new RuntimeException(
-					"Process plug in directory '" + processPluginDirectoryPath.toString() + "' not readable");
-
-		return new ProcessPluginProviderImpl(fhirConfig.fhirContext(), processPluginDirectoryPath, applicationContext,
-				environment);
-	}
-
-	@Bean
-	public DefaultUserTaskListener defaultUserTaskListener()
-	{
-		return new DefaultUserTaskListener(fhirConfig.clientProvider(), fhirConfig.organizationProvider(),
-				fhirConfig.questionnaireResponseHelper(), fhirConfig.taskHelper(), fhirConfig.readAccessHelper());
 	}
 }
