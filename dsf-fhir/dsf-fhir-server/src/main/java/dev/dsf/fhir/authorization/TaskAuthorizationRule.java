@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -43,6 +44,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 	private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
+	private static final String CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY = "business-key";
 
 	private static final String INSTANTIATES_URI_PATTERN_STRING = "(?<processUrl>http://(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*(?:[A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])/bpe/Process/[-\\w]+)/(?<processVersion>\\d+\\.\\d+\\.\\d+)";
 	private static final Pattern INSTANTIATES_URI_PATTERN = Pattern.compile(INSTANTIATES_URI_PATTERN_STRING);
@@ -428,15 +430,27 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			errors.add("task.instantiatesUri");
 		}
 
-		if (oldResource.getInput().size() != newResource.getInput().size())
+		List<ParameterComponent> oldResourceInputs = oldResource.getInput();
+		List<ParameterComponent> newResourceInputs = newResource.getInput();
+
+		if (TaskStatus.REQUESTED.equals(oldResource.getStatus())
+				&& oldResourceInputs.stream().noneMatch(isBusinessKey())
+				&& TaskStatus.INPROGRESS.equals(newResource.getStatus())
+				&& newResourceInputs.stream().anyMatch(isBusinessKey()))
+		{
+			// business-key added from requested to in-progress: filtering for equality check
+			newResourceInputs = newResourceInputs.stream().filter(isBusinessKey().negate()).toList();
+		}
+
+		if (oldResourceInputs.size() != newResourceInputs.size())
 		{
 			errors.add("task.input");
 		}
 		else
 		{
-			for (int i = 0; i < oldResource.getInput().size(); i++)
+			for (int i = 0; i < oldResourceInputs.size(); i++)
 			{
-				if (!oldResource.getInput().get(i).equalsDeep(newResource.getInput().get(i)))
+				if (!oldResourceInputs.get(i).equalsDeep(newResourceInputs.get(i)))
 				{
 					errors.add("task.input[" + i + "]");
 					break;
@@ -454,6 +468,12 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					.encodeResourceToString(newResource));
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 		}
+	}
+
+	private Predicate<ParameterComponent> isBusinessKey()
+	{
+		return i -> i.getType().getCoding().stream().anyMatch(c -> CODE_SYSTEM_BPMN_MESSAGE.equals(c.getSystem())
+				&& CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode()));
 	}
 
 	@Override

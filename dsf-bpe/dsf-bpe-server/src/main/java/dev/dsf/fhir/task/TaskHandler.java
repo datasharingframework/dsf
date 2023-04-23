@@ -82,6 +82,13 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		String businessKey = taskHelper
 				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY)
 				.orElse(null);
+		if (businessKey == null)
+		{
+			businessKey = UUID.randomUUID().toString();
+			logger.debug("Adding business-key {} to task with id {}", businessKey, task.getId());
+			task.addInput(
+					taskHelper.createInput(CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_BUSINESS_KEY, businessKey));
+		}
 		String correlationKey = taskHelper
 				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY)
 				.orElse(null);
@@ -107,7 +114,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 	/**
 	 * @param businessKey
-	 *            may be <code>null</code>
+	 *            not <code>null</code>
 	 * @param correlationKey
 	 *            may be <code>null</code>
 	 * @param processDomain
@@ -124,7 +131,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 	protected void onMessage(String businessKey, String correlationKey, String processDomain,
 			String processDefinitionKey, String processVersion, String messageName, Map<String, Object> variables)
 	{
-		// businessKey may be null
+		Objects.requireNonNull(businessKey, "businessKey");
 		// correlationKey may be null
 		Objects.requireNonNull(processDomain, "processDomain");
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
@@ -156,46 +163,37 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 			}
 		}
 
-		if (businessKey == null)
+		List<ProcessInstance> instances = getProcessInstanceQuery(processDefinition, businessKey).list();
+		List<ProcessInstance> instancesWithAlternativeBusinessKey = getAlternativeProcessInstanceQuery(
+				processDefinition, businessKey).list();
+
+		if (instances.size() + instancesWithAlternativeBusinessKey.size() > 1)
+			logger.warn("instance-ids {}",
+					Stream.concat(instances.stream(), instancesWithAlternativeBusinessKey.stream())
+							.map(ProcessInstance::getId).collect(Collectors.joining(", ", "[", "]")));
+
+		if (instances.size() + instancesWithAlternativeBusinessKey.size() <= 0)
 		{
-			runtimeService.startProcessInstanceByMessageAndProcessDefinitionId(messageName, processDefinition.getId(),
-					UUID.randomUUID().toString(), variables);
+			runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
+					.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
 		}
 		else
 		{
-			List<ProcessInstance> instances = getProcessInstanceQuery(processDefinition, businessKey).list();
-			List<ProcessInstance> instancesWithAlternativeBusinessKey = getAlternativeProcessInstanceQuery(
-					processDefinition, businessKey).list();
+			MessageCorrelationBuilder correlation;
 
-			if (instances.size() + instancesWithAlternativeBusinessKey.size() > 1)
-				logger.warn("instance-ids {}",
-						Stream.concat(instances.stream(), instancesWithAlternativeBusinessKey.stream())
-								.map(ProcessInstance::getId).collect(Collectors.joining(", ", "[", "]")));
-
-			if (instances.size() + instancesWithAlternativeBusinessKey.size() <= 0)
-			{
-				runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
-						.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
-			}
+			if (instances.size() > 0)
+				correlation = runtimeService.createMessageCorrelation(messageName).setVariables(variables)
+						.processInstanceBusinessKey(businessKey);
 			else
-			{
-				MessageCorrelationBuilder correlation;
+				correlation = runtimeService.createMessageCorrelation(messageName).setVariables(variables)
+						.processInstanceVariableEquals(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, businessKey);
 
-				if (instances.size() > 0)
-					correlation = runtimeService.createMessageCorrelation(messageName).setVariables(variables)
-							.processInstanceBusinessKey(businessKey);
-				else
-					correlation = runtimeService.createMessageCorrelation(messageName).setVariables(variables)
-							.processInstanceVariableEquals(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY,
-									businessKey);
+			if (correlationKey != null)
+				correlation = correlation.localVariableEquals("correlationKey", correlationKey);
 
-				if (correlationKey != null)
-					correlation = correlation.localVariableEquals("correlationKey", correlationKey);
-
-				// throws MismatchingMessageCorrelationException - if none or more than one execution or process
-				// definition is matched by the correlation
-				correlation.correlate();
-			}
+			// throws MismatchingMessageCorrelationException - if none or more than one execution or process
+			// definition is matched by the correlation
+			correlation.correlate();
 		}
 	}
 
