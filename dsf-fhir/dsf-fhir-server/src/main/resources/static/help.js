@@ -25,11 +25,11 @@ function createAndShowHelp(httpRequest) {
 			if (resourceType == null) {
 				const searchParam = metadata.rest[0].resource[0].searchParam;
 				if (window.location.pathname.endsWith('/metadata')) {
-					createHelp(searchParam.filter(p => ['_format', '_pretty'].includes(p.name)));
+					createHelp(searchParam.filter(p => ['_format', '_pretty', '_summary'].includes(p.name)));
 				} else if (window.location.pathname.endsWith('/_history')) {
-					createHelp(searchParam.filter(p => ['_count', '_format', '_page', '_pretty'].includes(p.name)));
+					createHelp(searchParam.filter(p => ['_count', '_format', '_page', '_pretty', '_summary'].includes(p.name)));
 				} else {
-					createHelp(searchParam.filter(p => ['_format', '_pretty'].includes(p.name)));
+					createHelp(searchParam.filter(p => ['_format', '_pretty', '_summary'].includes(p.name)));
 				}
 			}
 			else {
@@ -40,19 +40,19 @@ function createAndShowHelp(httpRequest) {
 				}
 				//Resource/_history
 				else if (resourceType[1] !== undefined && resourceType[2] === undefined && resourceType[3] !== undefined && resourceType[4] === undefined) {
-					createHelp(searchParam.filter(p => ['_count', '_format', '_page', '_pretty'].includes(p.name)));
+					createHelp(searchParam.filter(p => ['_count', '_format', '_page', '_pretty', '_summary'].includes(p.name)));
 				}
 				//Resource/id
 				else if (resourceType[1] !== undefined && resourceType[2] !== undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
-					createHelp(searchParam.filter(p => ['_format', '_pretty'].includes(p.name)));
+					createHelp(searchParam.filter(p => ['_format', '_pretty', '_summary'].includes(p.name)));
 				}
 				//Resource/id/_history
 				else if (resourceType[1] !== undefined && resourceType[2] !== undefined && resourceType[3] !== undefined && resourceType[4] === undefined) {
-					createHelp(searchParam.filter(p => ['_count', '_format', '_page', '_pretty'].includes(p.name)));
+					createHelp(searchParam.filter(p => ['_count', '_format', '_page', '_pretty', '_summary'].includes(p.name)));
 				}
 				//Resource/id/_history/version
 				else if (resourceType[1] !== undefined && resourceType[2] !== undefined && resourceType[3] !== undefined && resourceType[4] !== undefined) {
-					createHelp(searchParam.filter(p => ['_format', '_pretty'].includes(p.name)));
+					createHelp(searchParam.filter(p => ['_format', '_pretty', '_summary'].includes(p.name)));
 				}
 			}
 		}

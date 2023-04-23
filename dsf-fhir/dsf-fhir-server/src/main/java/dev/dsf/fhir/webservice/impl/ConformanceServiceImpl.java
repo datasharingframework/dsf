@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,12 +68,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.RestfulSecurityService;
 import org.springframework.beans.factory.InitializingBean;
 
-import com.google.common.collect.Streams;
-
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.help.SummaryMode;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionDate;
@@ -456,6 +456,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addSearchParam(createLastUpdatedParameter());
 			r.addSearchParam(createPageParameter());
 			r.addSearchParam(createPrettyParameter());
+			r.addSearchParam(createSummaryParameter());
 			r.addSearchParam(createProfileParameter());
 
 			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
@@ -471,6 +472,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 			r.addSearchParam(createSortParameter(
 					Stream.concat(standardSortableSearchParameters.stream(), resourceSearchParameters.stream())));
+
+			r.getSearchParam().sort(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName));
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
 			standardOperations.forEach(r::addOperation);
@@ -546,10 +549,10 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 	private CapabilityStatementRestResourceSearchParamComponent createFormatParameter()
 	{
-		String formatValues = Streams
-				.concat(Stream.of(ParameterConverter.JSON_FORMAT), ParameterConverter.JSON_FORMATS.stream(),
+		String formatValues = Stream
+				.of(Stream.of(ParameterConverter.JSON_FORMAT), ParameterConverter.JSON_FORMATS.stream(),
 						Stream.of(ParameterConverter.XML_FORMAT), ParameterConverter.XML_FORMATS.stream())
-				.collect(Collectors.joining(", ", "[", "]"));
+				.flatMap(Function.identity()).collect(Collectors.joining(", ", "[", "]"));
 		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_format", "",
 				SearchParamType.SPECIAL,
 				"Specify the returned format of the payload response, allowed values: " + formatValues);
@@ -565,7 +568,16 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	{
 		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_pretty", "",
 				SearchParamType.SPECIAL,
-				"Ask for a pretty printed response for human convenience, allowed values: [true, false]");
+				"Pretty printed response for human convenience, allowed values: [true, false]");
+		return createFormatParameter;
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createSummaryParameter()
+	{
+		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_summary",
+				"", SearchParamType.SPECIAL,
+				"Predefined short form of the resource, allowed values: " + Arrays.stream(SummaryMode.values())
+						.map(SummaryMode::toString).collect(Collectors.joining(", ", "[", "]")));
 		return createFormatParameter;
 	}
 

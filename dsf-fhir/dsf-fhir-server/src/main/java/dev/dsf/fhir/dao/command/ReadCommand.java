@@ -213,7 +213,7 @@ public class ReadCommand extends AbstractCommand implements Command
 
 			UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase + "/" + resourceTypeName));
 
-			multipleResult = responseGenerator.createSearchSet(result, errors, bundleUri, null, null);
+			multipleResult = responseGenerator.createSearchSet(result, errors, bundleUri, null, null, null);
 
 			// map single search result from multipleResult field to singleResult field
 			if (multipleResult != null && multipleResult.getEntry().size() == 1)

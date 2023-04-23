@@ -17,11 +17,7 @@ import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 
-import ca.uhn.fhir.context.FhirContext;
-import jakarta.ws.rs.ext.Provider;
-
-@Provider
-public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<QuestionnaireResponse>
+public class QuestionnaireResponseHtmlGenerator implements HtmlGenerator<QuestionnaireResponse>
 {
 	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
 	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
@@ -30,19 +26,14 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 	private static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private static final SimpleDateFormat DATE_TIME_DISPLAY_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-	public QuestionnaireResponseHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
+	@Override
+	public Class<QuestionnaireResponse> getResourceType()
 	{
-		super(fhirContext, serverBaseProvider, QuestionnaireResponse.class);
+		return QuestionnaireResponse.class;
 	}
 
 	@Override
-	protected boolean isHtmlEnabled()
-	{
-		return true;
-	}
-
-	@Override
-	protected void doWriteHtml(String basePath, QuestionnaireResponse questionnaireResponse, OutputStreamWriter out)
+	public void writeHtml(String basePath, QuestionnaireResponse questionnaireResponse, OutputStreamWriter out)
 			throws IOException
 	{
 		boolean isCompleted = QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED

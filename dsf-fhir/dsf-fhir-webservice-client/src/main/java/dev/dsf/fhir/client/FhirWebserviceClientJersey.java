@@ -3,9 +3,8 @@ package dev.dsf.fhir.client;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -13,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Binary;
@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
@@ -33,65 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.fhir.adapter.AbstractFhirAdapter;
-import dev.dsf.fhir.adapter.ActivityDefinitionJsonFhirAdapter;
-import dev.dsf.fhir.adapter.ActivityDefinitionXmlFhirAdapter;
-import dev.dsf.fhir.adapter.BinaryJsonFhirAdapter;
-import dev.dsf.fhir.adapter.BinaryXmlFhirAdapter;
-import dev.dsf.fhir.adapter.BundleJsonFhirAdapter;
-import dev.dsf.fhir.adapter.BundleXmlFhirAdapter;
-import dev.dsf.fhir.adapter.CapabilityStatementJsonFhirAdapter;
-import dev.dsf.fhir.adapter.CapabilityStatementXmlFhirAdapter;
-import dev.dsf.fhir.adapter.CodeSystemJsonFhirAdapter;
-import dev.dsf.fhir.adapter.CodeSystemXmlFhirAdapter;
-import dev.dsf.fhir.adapter.DocumentReferenceJsonFhirAdapter;
-import dev.dsf.fhir.adapter.DocumentReferenceXmlFhirAdapter;
-import dev.dsf.fhir.adapter.EndpointJsonFhirAdapter;
-import dev.dsf.fhir.adapter.EndpointXmlFhirAdapter;
-import dev.dsf.fhir.adapter.GroupJsonFhirAdapter;
-import dev.dsf.fhir.adapter.GroupXmlFhirAdapter;
-import dev.dsf.fhir.adapter.HealthcareServiceJsonFhirAdapter;
-import dev.dsf.fhir.adapter.HealthcareServiceXmlFhirAdapter;
-import dev.dsf.fhir.adapter.LibraryJsonFhirAdapter;
-import dev.dsf.fhir.adapter.LibraryXmlFhirAdapter;
-import dev.dsf.fhir.adapter.LocationJsonFhirAdapter;
-import dev.dsf.fhir.adapter.LocationXmlFhirAdapter;
-import dev.dsf.fhir.adapter.MeasureJsonFhirAdapter;
-import dev.dsf.fhir.adapter.MeasureReportJsonFhirAdapter;
-import dev.dsf.fhir.adapter.MeasureReportXmlFhirAdapter;
-import dev.dsf.fhir.adapter.MeasureXmlFhirAdapter;
-import dev.dsf.fhir.adapter.NamingSystemJsonFhirAdapter;
-import dev.dsf.fhir.adapter.NamingSystemXmlFhirAdapter;
-import dev.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
-import dev.dsf.fhir.adapter.OperationOutcomeXmlFhirAdapter;
-import dev.dsf.fhir.adapter.OrganizationAffiliationJsonFhirAdapter;
-import dev.dsf.fhir.adapter.OrganizationAffiliationXmlFhirAdapter;
-import dev.dsf.fhir.adapter.OrganizationJsonFhirAdapter;
-import dev.dsf.fhir.adapter.OrganizationXmlFhirAdapter;
-import dev.dsf.fhir.adapter.ParametersJsonFhirAdapter;
-import dev.dsf.fhir.adapter.ParametersXmlFhirAdapter;
-import dev.dsf.fhir.adapter.PatientJsonFhirAdapter;
-import dev.dsf.fhir.adapter.PatientXmlFhirAdapter;
-import dev.dsf.fhir.adapter.PractitionerJsonFhirAdapter;
-import dev.dsf.fhir.adapter.PractitionerRoleJsonFhirAdapter;
-import dev.dsf.fhir.adapter.PractitionerRoleXmlFhirAdapter;
-import dev.dsf.fhir.adapter.PractitionerXmlFhirAdapter;
-import dev.dsf.fhir.adapter.ProvenanceJsonFhirAdapter;
-import dev.dsf.fhir.adapter.ProvenanceXmlFhirAdapter;
-import dev.dsf.fhir.adapter.QuestionnaireJsonFhirAdapter;
-import dev.dsf.fhir.adapter.QuestionnaireResponseJsonFhirAdapter;
-import dev.dsf.fhir.adapter.QuestionnaireResponseXmlFhirAdapter;
-import dev.dsf.fhir.adapter.QuestionnaireXmlFhirAdapter;
-import dev.dsf.fhir.adapter.ResearchStudyJsonFhirAdapter;
-import dev.dsf.fhir.adapter.ResearchStudyXmlFhirAdapter;
-import dev.dsf.fhir.adapter.StructureDefinitionJsonFhirAdapter;
-import dev.dsf.fhir.adapter.StructureDefinitionXmlFhirAdapter;
-import dev.dsf.fhir.adapter.SubscriptionJsonFhirAdapter;
-import dev.dsf.fhir.adapter.SubscriptionXmlFhirAdapter;
-import dev.dsf.fhir.adapter.TaskJsonFhirAdapter;
-import dev.dsf.fhir.adapter.TaskXmlFhirAdapter;
-import dev.dsf.fhir.adapter.ValueSetJsonFhirAdapter;
-import dev.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
+import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import dev.dsf.fhir.service.ReferenceCleaner;
@@ -109,12 +52,26 @@ import jakarta.ws.rs.ext.RuntimeDelegate;
 
 public class FhirWebserviceClientJersey extends AbstractJerseyClient implements FhirWebserviceClient
 {
-	private static final String RFC_7231_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
-
 	private static final Logger logger = LoggerFactory.getLogger(FhirWebserviceClientJersey.class);
 
+	private static final String RFC_7231_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
+	private static final Map<String, Class<?>> RESOURCE_TYPES_BY_NAME = Stream.of(ResourceType.values())
+			.filter(type -> !ResourceType.List.equals(type))
+			.collect(Collectors.toMap(ResourceType::name, FhirWebserviceClientJersey::getFhirClass));
+
+	private static Class<?> getFhirClass(ResourceType type)
+	{
+		try
+		{
+			return Class.forName("org.hl7.fhir.r4.model." + type.name());
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	private final ReferenceCleaner referenceCleaner;
-	private final Map<String, Class<?>> resourceTypeByNames = new HashMap<>();
 
 	private final PreferReturnMinimalWithRetry preferReturnMinimal;
 	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
@@ -124,49 +81,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			boolean logRequests, ObjectMapper objectMapper, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
-				connectTimeout, readTimeout, objectMapper, components(fhirContext), logRequests);
+				connectTimeout, readTimeout, objectMapper, Collections.singleton(new FhirAdapter(fhirContext)),
+				logRequests);
 
 		this.referenceCleaner = referenceCleaner;
 
-		registeredComponents.stream().filter(e -> e instanceof AbstractFhirAdapter).map(e -> (AbstractFhirAdapter<?>) e)
-				.forEach(a -> resourceTypeByNames.put(a.getResourceTypeName(), a.getResourceType()));
-
 		preferReturnMinimal = new PreferReturnMinimalWithRetryImpl(this);
 		preferReturnOutcome = new PreferReturnOutcomeWithRetryImpl(this);
-	}
-
-	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
-	{
-		return Arrays.asList(new ActivityDefinitionJsonFhirAdapter(fhirContext),
-				new ActivityDefinitionXmlFhirAdapter(fhirContext), new BinaryJsonFhirAdapter(fhirContext),
-				new BinaryXmlFhirAdapter(fhirContext), new BundleJsonFhirAdapter(fhirContext),
-				new BundleXmlFhirAdapter(fhirContext), new CapabilityStatementJsonFhirAdapter(fhirContext),
-				new CapabilityStatementXmlFhirAdapter(fhirContext), new CodeSystemJsonFhirAdapter(fhirContext),
-				new CodeSystemXmlFhirAdapter(fhirContext), new DocumentReferenceJsonFhirAdapter(fhirContext),
-				new DocumentReferenceXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
-				new GroupXmlFhirAdapter(fhirContext), new EndpointJsonFhirAdapter(fhirContext),
-				new EndpointXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
-				new HealthcareServiceXmlFhirAdapter(fhirContext), new LibraryJsonFhirAdapter(fhirContext),
-				new LibraryXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
-				new LocationXmlFhirAdapter(fhirContext), new MeasureJsonFhirAdapter(fhirContext),
-				new MeasureXmlFhirAdapter(fhirContext), new MeasureReportJsonFhirAdapter(fhirContext),
-				new MeasureReportXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
-				new NamingSystemXmlFhirAdapter(fhirContext), new OperationOutcomeJsonFhirAdapter(fhirContext),
-				new OperationOutcomeXmlFhirAdapter(fhirContext), new OrganizationJsonFhirAdapter(fhirContext),
-				new OrganizationXmlFhirAdapter(fhirContext), new OrganizationAffiliationJsonFhirAdapter(fhirContext),
-				new OrganizationAffiliationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),
-				new ParametersXmlFhirAdapter(fhirContext), new PatientJsonFhirAdapter(fhirContext),
-				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
-				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
-				new PractitionerRoleXmlFhirAdapter(fhirContext), new ProvenanceJsonFhirAdapter(fhirContext),
-				new ProvenanceXmlFhirAdapter(fhirContext), new QuestionnaireXmlFhirAdapter(fhirContext),
-				new QuestionnaireJsonFhirAdapter(fhirContext), new QuestionnaireResponseXmlFhirAdapter(fhirContext),
-				new QuestionnaireResponseJsonFhirAdapter(fhirContext), new ResearchStudyJsonFhirAdapter(fhirContext),
-				new ResearchStudyXmlFhirAdapter(fhirContext), new StructureDefinitionJsonFhirAdapter(fhirContext),
-				new StructureDefinitionXmlFhirAdapter(fhirContext), new SubscriptionJsonFhirAdapter(fhirContext),
-				new SubscriptionXmlFhirAdapter(fhirContext), new TaskJsonFhirAdapter(fhirContext),
-				new TaskXmlFhirAdapter(fhirContext), new ValueSetJsonFhirAdapter(fhirContext),
-				new ValueSetXmlFhirAdapter(fhirContext));
 	}
 
 	private WebApplicationException handleError(Response response)
@@ -497,7 +418,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	{
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(id, "id");
-		if (!resourceTypeByNames.containsKey(resourceTypeName))
+		if (!RESOURCE_TYPES_BY_NAME.containsKey(resourceTypeName))
 			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
 
 		Response response = getResource().path(resourceTypeName).path(id).request().accept(Constants.CT_FHIR_JSON_NEW)
@@ -508,7 +429,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
 			return referenceCleaner.cleanReferenceResourcesIfBundle(
-					(Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+					(Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName)));
 		else
 			throw handleError(response);
 	}
@@ -619,7 +540,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(version, "version");
-		if (!resourceTypeByNames.containsKey(resourceTypeName))
+		if (!RESOURCE_TYPES_BY_NAME.containsKey(resourceTypeName))
 			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
 
 		Response response = getResource().path(resourceTypeName).path(id).path("_history").path(version).request()
@@ -630,7 +551,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
 			return referenceCleaner.cleanReferenceResourcesIfBundle(
-					(Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+					(Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName)));
 		else
 			throw handleError(response);
 	}
