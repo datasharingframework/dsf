@@ -64,9 +64,6 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 	public void onResource(Task task)
 	{
-		task.setStatus(Task.TaskStatus.INPROGRESS);
-		task = webserviceClient.update(task);
-
 		Matcher matcher = INSTANTIATES_URI_PATTERN.matcher(task.getInstantiatesUri());
 		if (!matcher.matches())
 			throw new IllegalStateException("InstantiatesUri of Task with id " + task.getIdElement().getIdPart()
@@ -93,6 +90,9 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 				.getFirstInputParameterStringValue(task, CODESYSTEM_DSF_BPMN, CODESYSTEM_DSF_BPMN_VALUE_CORRELATION_KEY)
 				.orElse(null);
 
+		task.setStatus(Task.TaskStatus.INPROGRESS);
+		task = webserviceClient.update(task);
+		
 		Map<String, Object> variables = Map.of(BPMN_EXECUTION_VARIABLE_TASK, FhirResourceValues.create(task));
 
 		try
