@@ -33,10 +33,10 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	}
 
 	@POST
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response create(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -47,8 +47,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 	@GET
 	@Path("/{id}")
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response read(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -59,8 +59,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 	@GET
 	@Path("/{id}/_history/{version}")
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response vread(@PathParam("id") String id, @PathParam("version") long version, @Context UriInfo uri,
 			@Context HttpHeaders headers)
@@ -72,8 +72,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 	@GET
 	@Path("/_history")
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response history(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -84,8 +84,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 	@GET
 	@Path("/{id}/_history")
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response history(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -96,10 +96,10 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 	@PUT
 	@Path("/{id}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -109,10 +109,10 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	}
 
 	@PUT
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response update(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -123,10 +123,10 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 	@DELETE
 	@Path("/{id}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response delete(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -136,10 +136,10 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	}
 
 	@DELETE
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response delete(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -149,8 +149,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	}
 
 	@GET
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response search(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -161,10 +161,10 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 	@POST
 	@Path("/{validate : [$]validate(/)?}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response postValidateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri,
 			@Context HttpHeaders headers)
@@ -178,8 +178,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Path("/{validate : [$]validate(/)?}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response getValidateNew(@PathParam("validate") String validate, @Context UriInfo uri,
 			@Context HttpHeaders headers)
@@ -193,8 +193,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Path("/{id}/{validate : [$]validate(/)?}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response postValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
 			Parameters parameters, @Context UriInfo uri, @Context HttpHeaders headers)
@@ -208,8 +208,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Path("/{id}/{validate : [$]validate(/)?}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response getValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
 			@Context UriInfo uri, @Context HttpHeaders headers)
@@ -223,8 +223,8 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Path("/{id}/{delete : [$]permanent-delete(/)?}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response deletePermanently(@PathParam("delete") String deletePath, @PathParam("id") String id,
 			@Context UriInfo uri, @Context HttpHeaders headers)

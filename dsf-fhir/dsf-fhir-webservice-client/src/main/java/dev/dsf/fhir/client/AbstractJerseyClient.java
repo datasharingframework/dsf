@@ -1,7 +1,7 @@
 package dev.dsf.fhir.client;
 
 import java.security.KeyStore;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -34,10 +34,8 @@ public class AbstractJerseyClient
 	private final Client client;
 	private final String baseUrl;
 
-	protected final List<?> registeredComponents;
-
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			ObjectMapper objectMapper, List<?> componentsToRegister)
+			ObjectMapper objectMapper, Collection<?> componentsToRegister)
 	{
 		this(baseUrl, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper,
 				componentsToRegister, false);
@@ -45,7 +43,7 @@ public class AbstractJerseyClient
 
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
-			ObjectMapper objectMapper, List<?> componentsToRegister, boolean logRequests)
+			ObjectMapper objectMapper, Collection<?> componentsToRegister, boolean logRequests)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
@@ -89,8 +87,6 @@ public class AbstractJerseyClient
 
 		this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 		// making sure the root url works, this might be a workaround for a jersey client bug
-
-		this.registeredComponents = componentsToRegister;
 	}
 
 	protected WebTarget getResource()

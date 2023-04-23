@@ -33,9 +33,10 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	public static final String PARAMETER_COUNT = "_count";
 	public static final String PARAMETER_FORMAT = "_format";
 	public static final String PARAMETER_PRETTY = "_pretty";
+	public static final String PARAMETER_SUMMARY = "_summary";
 
 	public static final String[] STANDARD_PARAMETERS = { PARAMETER_SORT, PARAMETER_INCLUDE, PARAMETER_REVINCLUDE,
-			PARAMETER_PAGE, PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY };
+			PARAMETER_PAGE, PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY, PARAMETER_SUMMARY };
 
 	public static class SearchQueryBuilder<R extends Resource>
 	{

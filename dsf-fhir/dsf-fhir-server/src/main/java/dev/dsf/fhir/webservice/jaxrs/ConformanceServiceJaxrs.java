@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.webservice.specification.ConformanceService;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -17,10 +16,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path(ConformanceServiceJaxrs.PATH)
-@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-		Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+		Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 public class ConformanceServiceJaxrs extends AbstractServiceJaxrs<ConformanceService> implements ConformanceService
 {
 	public static final String PATH = "metadata";
