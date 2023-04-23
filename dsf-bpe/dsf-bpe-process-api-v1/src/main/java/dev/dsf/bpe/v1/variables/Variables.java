@@ -48,7 +48,7 @@ public interface Variables
 	Task getLatestTask();
 
 	List<Task> getTasks();
-	
+
 	List<Task> getCurrentTasks();
 
 	void updateTask(Task task);

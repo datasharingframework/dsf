@@ -126,7 +126,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		return taskHelper;
 	}
 
-	@Override 
+	@Override
 	public Variables getVariables(DelegateExecution execution)
 	{
 		return new VariablesImpl(execution);

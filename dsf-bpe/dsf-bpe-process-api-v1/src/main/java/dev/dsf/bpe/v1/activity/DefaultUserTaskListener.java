@@ -193,7 +193,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	/**
 	 * <i>Override this method to decided if you want to add the Business-Key to the {@link QuestionnaireResponse}
 	 * resource as an item with {@link QuestionnaireResponseItemComponent#getLinkId()} equal to
-	 * {@link ConstantsBase#CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY}</i>
+	 * {@link BpmnUserTask.Codes#BUSINESS_KEY}</i>
 	 *
 	 * @return <code>false</code>
 	 */

@@ -18,6 +18,22 @@
   <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Task" />
   <derivation value="constraint" />
   <differential>
+    <element id="Task">
+      <path value="Task"/>
+      <constraint>
+        <key value="business-key-if-status-inprogress-completed-failed"/>
+        <severity value="error"/>
+        <human value="Business key must be set if Task.status = {in-progress, completed, failed}"/>
+        <expression value="((%resource.status = 'in-progress') or
+                            (%resource.status = 'completed') or
+                            (%resource.status = 'failed'))
+                              implies
+                            input.type.coding.where(
+                              system = 'http://dsf.dev/fhir/CodeSystem/bpmn-message' and
+                              code = 'business-key')
+                            .exists()"/>
+      </constraint>
+    </element>
     <element id="Task.instantiatesCanonical">
       <path value="Task.instantiatesCanonical" />
       <min value="1" />

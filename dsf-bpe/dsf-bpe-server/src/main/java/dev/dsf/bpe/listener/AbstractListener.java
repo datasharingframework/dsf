@@ -1,5 +1,8 @@
 package dev.dsf.bpe.listener;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -55,5 +58,18 @@ public abstract class AbstractListener implements ExecutionListener, Initializin
 				.filter(ParameterComponent::hasValue).map(ParameterComponent::getValue)
 				.filter(v -> v instanceof StringType).map(v -> (StringType) v).map(StringType::getValue).findFirst()
 				.orElse(null);
+	}
+
+	protected final String getCurrentTime()
+	{
+		return ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+	}
+
+	protected final String getRequesterIdentifierValue(Task task)
+	{
+		if (task == null)
+			return null;
+
+		return task.getRequester().getIdentifier().getValue();
 	}
 }

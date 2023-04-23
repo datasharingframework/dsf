@@ -142,6 +142,7 @@ public class PluginConfig
 	{
 		return new ProcessPluginManagerImpl(
 				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory()),
-				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler());
+				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler(),
+				processPluginApiV1().getOrganizationProvider());
 	}
 }

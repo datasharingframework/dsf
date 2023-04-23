@@ -30,7 +30,7 @@ public class QuestionnaireResponseAuthorizationRule
 		extends AbstractAuthorizationRule<QuestionnaireResponse, QuestionnaireResponseDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseAuthorizationRule.class);
-	
+
 	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
 	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
 

@@ -42,6 +42,7 @@ public class ContinueListener extends AbstractListener implements ExecutionListe
 		String businessKey = getFirstInputParameter(continueTask, BpmnMessage.businessKey());
 		String correlationKey = getFirstInputParameter(continueTask, BpmnMessage.correlationKey());
 		String continueTaskUrl = getLocalVersionlessAbsoluteUrl(continueTask);
+		String requester = getRequesterIdentifierValue(continueTask);
 
 		String mainTaskUrl = getLocalVersionlessAbsoluteUrl(mainTask);
 
@@ -49,20 +50,25 @@ public class ContinueListener extends AbstractListener implements ExecutionListe
 		{
 			if (correlationKey != null)
 				logger.info(
-						"Continuing subprocess of {} [task: {}, business-key: {}, correlation-key: {}, message: {}, main-task: {}]",
-						processUrl, continueTaskUrl, businessKey, correlationKey, messageName, mainTaskUrl);
+						"Continuing subprocess of {} at {} [task: {}, requester: {}, business-key: {}, correlation-key: {}, message: {}, main-task: {}]",
+						processUrl, getCurrentTime(), continueTaskUrl, requester, businessKey, correlationKey,
+						messageName, mainTaskUrl);
 			else
-				logger.info("Continuing subprocess of {} [task: {}, business-key: {}, message: {}, main-task: {}]",
-						processUrl, continueTaskUrl, businessKey, messageName, mainTaskUrl);
+				logger.info(
+						"Continuing subprocess of {} at {} [task: {}, requester: {}, business-key: {}, message: {}, main-task: {}]",
+						processUrl, getCurrentTime(), continueTaskUrl, requester, businessKey, messageName,
+						mainTaskUrl);
 		}
 		else
 		{
 			if (correlationKey != null)
-				logger.info("Continuing process {} [task: {}, business-key: {}, correlation-key: {}, message: {}]",
-						processUrl, continueTaskUrl, businessKey, correlationKey, messageName);
+				logger.info(
+						"Continuing process {} at {} [task: {}, requester: {}, business-key: {}, correlation-key: {}, message: {}]",
+						processUrl, getCurrentTime(), continueTaskUrl, requester, businessKey, correlationKey,
+						messageName);
 			else
-				logger.info("Continuing process {} [task: {}, business-key: {}, message: {}]", processUrl,
-						continueTaskUrl, businessKey, messageName);
+				logger.info("Continuing process {} at {} [task: {}, requester: {}, business-key: {}, message: {}]",
+						processUrl, getCurrentTime(), continueTaskUrl, requester, businessKey, messageName);
 		}
 
 	}

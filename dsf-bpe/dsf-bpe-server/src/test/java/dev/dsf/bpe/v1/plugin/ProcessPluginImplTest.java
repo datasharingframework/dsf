@@ -22,8 +22,10 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 
@@ -113,6 +115,7 @@ public class ProcessPluginImplTest
 		private ProcessPluginApi processPluginApi;
 
 		@Bean
+		@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 		public TestService testService()
 		{
 			return new TestService(processPluginApi);
@@ -156,7 +159,7 @@ public class ProcessPluginImplTest
 		var definition = createPluginDefinition(null, null, null, null, null);
 		var plugin = createPlugin(definition, false);
 
-		assertFalse(plugin.initializeAndValidateResources());
+		assertFalse(plugin.initializeAndValidateResources(null));
 		try
 		{
 			plugin.getApplicationContext();
@@ -191,7 +194,7 @@ public class ProcessPluginImplTest
 				Collections.emptyList(), Collections.emptyMap());
 		var plugin = createPlugin(definition, false);
 
-		assertFalse(plugin.initializeAndValidateResources());
+		assertFalse(plugin.initializeAndValidateResources(null));
 		try
 		{
 			plugin.getApplicationContext();
@@ -227,7 +230,7 @@ public class ProcessPluginImplTest
 				Map.of("testorg_test", List.of("test-plugin/does_not_exist.xml")));
 		var plugin = createPlugin(definition, false);
 
-		assertFalse(plugin.initializeAndValidateResources());
+		assertFalse(plugin.initializeAndValidateResources(null));
 		try
 		{
 			plugin.getApplicationContext();
@@ -262,7 +265,7 @@ public class ProcessPluginImplTest
 				List.of("test-plugin/test.bpmn"), Map.of("testorg_test", List.of("test-plugin/does_not_exist.xml")));
 		var plugin = createPlugin(definition, false);
 
-		assertFalse(plugin.initializeAndValidateResources());
+		assertFalse(plugin.initializeAndValidateResources(null));
 		try
 		{
 			plugin.getApplicationContext();
@@ -298,7 +301,7 @@ public class ProcessPluginImplTest
 				Map.of("testorg_test", List.of("test-plugin/ActivityDefinition_test.xml")));
 		var plugin = createPlugin(definition, false);
 
-		assertTrue(plugin.initializeAndValidateResources());
+		assertTrue(plugin.initializeAndValidateResources("test.org"));
 		assertNotNull(plugin.getApplicationContext());
 		assertNotNull(plugin.getProcessModels());
 		assertNotNull(plugin.getFhirResources());

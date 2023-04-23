@@ -59,7 +59,8 @@ public class TargetSerializer extends PrimitiveValueSerializer<TargetValue> impl
 
 		try
 		{
-			TargetImpl target = (bytes == null || bytes.length <= 0) ? null : objectMapper.readValue(bytes, TargetImpl.class);
+			TargetImpl target = (bytes == null || bytes.length <= 0) ? null
+					: objectMapper.readValue(bytes, TargetImpl.class);
 			return TargetValues.create(target);
 		}
 		catch (IOException e)

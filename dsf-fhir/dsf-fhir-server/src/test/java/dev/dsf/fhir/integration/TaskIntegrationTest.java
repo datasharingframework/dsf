@@ -1089,6 +1089,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task task = readTestTask("External_Test_Organization", "Test_Organization");
 		task.setStatus(TaskStatus.INPROGRESS);
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("business-key");
 		task.addInput().setValue(new Reference("https://localhost:80010/fhir/Binary/" + UUID.randomUUID().toString()))
 				.getType().getCodingFirstRep().setSystem("http://test.com/fhir/CodeSystem/test").setCode("binary-ref");
 
@@ -1121,6 +1123,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task task = readTestTask("External_Test_Organization", "Test_Organization");
 		task.setStatus(TaskStatus.INPROGRESS);
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("business-key");
 		task.addInput().setValue(new Reference("https://localhost:80010/fhir/Binary/" + UUID.randomUUID().toString()))
 				.getType().getCodingFirstRep().setSystem("http://test.com/fhir/CodeSystem/test").setCode("binary-ref");
 

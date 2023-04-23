@@ -1,4 +1,4 @@
-package dev.dsf.tools.generator;
+package dev.dsf.common.documentation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,25 +6,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for documenting DSF process plugin properties
- *
- * @see Documentation
+ * Annotation for documenting DSF properties
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ProcessDocumentation
+public @interface Documentation
 {
 	/**
-	 * @return <code>true</code> if this property is required for processes listed in
-	 *         {@link ProcessDocumentation#processNames}
+	 * @return <code>true</code> if this property is required for the DSF
 	 */
 	boolean required() default false;
-
-	/**
-	 * @return an empty array if all processes use this property or an array of length {@literal >= 1} containing only
-	 *         specific processes that use this property, but not all
-	 */
-	String[] processNames() default {};
 
 	/**
 	 * @return description helping to configure this property

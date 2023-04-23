@@ -13,7 +13,7 @@ public interface ProcessPlugin<D, A, L extends TaskListener>
 {
 	String MODEL_ATTRIBUTE_PROCESS_API_VERSION = "dsf.process.api.version";
 
-	boolean initializeAndValidateResources();
+	boolean initializeAndValidateResources(String localOrganizationIdentifierValue);
 
 	D getProcessPluginDefinition();
 
@@ -37,4 +37,5 @@ public interface ProcessPlugin<D, A, L extends TaskListener>
 	Map<ProcessIdAndVersion, List<Resource>> getFhirResources();
 
 	List<BpmnFileAndModel> getProcessModels();
+
 }

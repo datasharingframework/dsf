@@ -2,9 +2,13 @@ package dev.dsf.tools.generator;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,14 +16,21 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.Process;
@@ -31,9 +42,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import dev.dsf.bpe.ProcessPluginDefinition;
+import dev.dsf.bpe.v1.ProcessPluginDefinition;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
+import dev.dsf.common.documentation.Documentation;
 
-public class DocumentationGenerator
+@Mojo(name = "documentation-generation", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
+public class DocumentationGenerator extends AbstractMojo
 {
 	private static final Logger logger = LoggerFactory.getLogger(DocumentationGenerator.class);
 
@@ -63,24 +77,29 @@ public class DocumentationGenerator
 		}
 	}
 
-	public static void main(String[] args)
-	{
-		new DocumentationGenerator().execute(args);
-	}
+	@Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
+	private String projectBuildDirectory;
 
-	public void execute(String[] args)
+	@Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
+	private List<String> compileClasspathElements;
+
+	@Parameter(property = "workingPackages", required = true)
+	private List<String> workingPackages;
+
+	public void execute() throws MojoExecutionException, MojoFailureException
 	{
-		Arrays.asList(args).forEach(this::generateDocumentation);
+		workingPackages.forEach(this::generateDocumentation);
 	}
 
 	private void generateDocumentation(String workingPackage)
 	{
-		Path file = Paths.get("target/Documentation_" + workingPackage + ".md");
+		Path file = Paths.get(projectBuildDirectory, "Documentation_" + workingPackage + ".md");
 		logger.info("Generating documentation for package {} in file {}", workingPackage, file);
 
 		moveExistingToBackup(file);
 
-		Reflections reflections = createReflections(workingPackage);
+		URLClassLoader classLoader = classLoader();
+		Reflections reflections = createReflections(classLoader, workingPackage);
 
 		Set<Field> dsfFields = reflections.getFieldsAnnotatedWith(Documentation.class);
 		if (!dsfFields.isEmpty())
@@ -88,23 +107,49 @@ public class DocumentationGenerator
 			writeFields(dsfFields, dsfDocumentationGenerator(), file, workingPackage);
 		}
 
+		// TODO add process API version abstraction
 		Set<Field> processFields = reflections.getFieldsAnnotatedWith(ProcessDocumentation.class);
 		if (!processFields.isEmpty())
 		{
-			List<String> pluginProcessNames = getPluginProcessNames(reflections, workingPackage);
+			List<String> pluginProcessNames = getPluginProcessNames(reflections, classLoader, workingPackage);
 			writeFields(processFields, processDocumentationGenerator(pluginProcessNames), file, workingPackage);
 		}
 	}
 
-	private Reflections createReflections(String workingPackage)
+	private Reflections createReflections(ClassLoader classLoader, String workingPackage)
 	{
 		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
-				.setUrls(ClasspathHelper.forPackage(workingPackage))
+				.setUrls(ClasspathHelper.forPackage(workingPackage, classLoader)).addClassLoaders(classLoader)
 				.setScanners(Scanners.FieldsAnnotated, Scanners.SubTypes);
 		return new Reflections(configurationBuilder);
 	}
 
-	private List<String> getPluginProcessNames(Reflections reflections, String workingPackage)
+	private URLClassLoader classLoader()
+	{
+		URL[] classpathElements = compileClasspathElements.stream().map(toUrl()).filter(Objects::nonNull).toList()
+				.toArray(new URL[0]);
+
+		return new URLClassLoader(classpathElements, Thread.currentThread().getContextClassLoader());
+	}
+
+	private Function<String, URL> toUrl()
+	{
+		return (element) ->
+		{
+			try
+			{
+				return new File(element).toURI().toURL();
+			}
+			catch (MalformedURLException exception)
+			{
+				logger.warn("Could not transform element '{}' to url, returning null - {}", element,
+						exception.getMessage());
+				return null;
+			}
+		};
+	}
+
+	private List<String> getPluginProcessNames(Reflections reflections, ClassLoader classLoader, String workingPackage)
 	{
 		List<Class<? extends ProcessPluginDefinition>> pluginDefinitionClasses = new ArrayList<>(
 				reflections.getSubTypesOf(ProcessPluginDefinition.class));
@@ -125,8 +170,8 @@ public class DocumentationGenerator
 			ProcessPluginDefinition processPluginDefinition = pluginDefinitionClasses.get(0).getConstructor()
 					.newInstance();
 
-			return processPluginDefinition.getBpmnFiles().map(this::getProcessName).filter(Optional::isPresent)
-					.map(Optional::get).collect(toList());
+			return processPluginDefinition.getProcessModels().stream().map(f -> getProcessName(classLoader, f))
+					.filter(Optional::isPresent).map(Optional::get).collect(toList());
 		}
 		catch (Exception e)
 		{
@@ -137,9 +182,9 @@ public class DocumentationGenerator
 		}
 	}
 
-	private Optional<String> getProcessName(String bpmnFile)
+	private Optional<String> getProcessName(ClassLoader classLoader, String bpmnFile)
 	{
-		try (InputStream resource = getClass().getClassLoader().getResource(bpmnFile).openStream())
+		try (InputStream resource = classLoader.getResourceAsStream(bpmnFile))
 		{
 			return Bpmn.readModelFromStream(resource).getModelElementsByType(Process.class).stream()
 					.map(BaseElement::getId).findFirst();

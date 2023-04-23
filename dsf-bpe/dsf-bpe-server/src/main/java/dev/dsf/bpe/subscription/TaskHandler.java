@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
-import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -64,12 +63,12 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 	public void onResource(Task task)
 	{
-		task.setStatus(Task.TaskStatus.INPROGRESS);
-		task = webserviceClient.update(task);
+		Objects.requireNonNull(task, "task");
+		Objects.requireNonNull(task.getInstantiatesCanonical(), "task.instantiatesCanonical");
 
 		Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(task.getInstantiatesCanonical());
 		if (!matcher.matches())
-			throw new IllegalStateException("InstantiatesUri of Task with id " + task.getIdElement().getIdPart()
+			throw new IllegalStateException("InstantiatesCanonical of Task with id " + task.getIdElement().getIdPart()
 					+ " does not match " + INSTANTIATES_CANONICAL_PATTERN_STRING);
 
 		String processDomain = matcher.group("processDomain").replace(".", "");
@@ -79,6 +78,16 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		String messageName = getFirstInputParameter(task, BpmnMessage.messageName());
 		String businessKey = getFirstInputParameter(task, BpmnMessage.businessKey());
 		String correlationKey = getFirstInputParameter(task, BpmnMessage.correlationKey());
+
+		if (businessKey == null)
+		{
+			businessKey = UUID.randomUUID().toString();
+			logger.debug("Adding business-key {} to task with id {}", businessKey, task.getId());
+			task.addInput().setType(new CodeableConcept(BpmnMessage.businessKey()))
+					.setValue(new StringType(businessKey));
+		}
+		task.setStatus(Task.TaskStatus.INPROGRESS);
+		task = webserviceClient.update(task);
 
 		Map<String, Object> variables = Map.of(TASK_VARIABLE, FhirResourceValues.create(task));
 
@@ -91,10 +100,8 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		{
 			logger.error("Error while handling Task", exception);
 
-			TaskOutputComponent errorOutput = new TaskOutputComponent(new CodeableConcept(BpmnMessage.error()),
-					new StringType(exception.getClass().getName() + ": " + exception.getMessage()));
-
-			task.addOutput(errorOutput);
+			task.addOutput().setType(new CodeableConcept(BpmnMessage.error()))
+					.setValue(new StringType(exception.getClass().getName() + ": " + exception.getMessage()));
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);
 		}

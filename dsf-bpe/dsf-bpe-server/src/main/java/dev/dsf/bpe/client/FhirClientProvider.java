@@ -8,7 +8,7 @@ public interface FhirClientProvider
 	FhirWebserviceClient getLocalWebserviceClient();
 
 	FhirWebserviceClient getWebserviceClient(String webserviceUrl);
-	
+
 	WebsocketClient getLocalWebsocketClient(Runnable reconnector, String subscriptionId);
 
 	void disconnectAll();

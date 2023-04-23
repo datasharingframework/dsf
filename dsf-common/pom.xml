@@ -12,6 +12,7 @@
 	
 	<modules>
 		<module>dsf-common-auth</module>
+		<module>dsf-common-documentation</module>
 		<module>dsf-common-jetty</module>
 		<module>dsf-common-status</module>
 	</modules>
@@ -40,6 +41,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>dsf-common-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>dsf-common-documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

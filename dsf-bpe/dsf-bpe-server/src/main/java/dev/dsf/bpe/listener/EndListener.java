@@ -87,6 +87,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 		String businessKey = getFirstInputParameter(endTask, BpmnMessage.businessKey());
 		String correlationKey = getFirstInputParameter(endTask, BpmnMessage.correlationKey());
 		String endTaskUrl = getLocalVersionlessAbsoluteUrl(endTask);
+		String requester = getRequesterIdentifierValue(endTask);
 
 		String mainTaskUrl = getLocalVersionlessAbsoluteUrl(mainTask);
 
@@ -94,20 +95,22 @@ public class EndListener extends AbstractListener implements ExecutionListener
 		{
 			if (correlationKey != null)
 				logger.info(
-						"Subprocess of {} finished [task: {}, business-key: {}, correlation-key: {}, main-task: {}]",
-						processUrl, endTaskUrl, businessKey, correlationKey, mainTaskUrl);
+						"Subprocess of {} finished at {} [task: {}, requester: {}, business-key: {}, correlation-key: {}, main-task: {}]",
+						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey, mainTaskUrl);
 			else
-				logger.info("Subprocess of {} finished [task: {}, business-key: {}, main-task: {}]", processUrl,
-						endTaskUrl, businessKey, mainTaskUrl);
+				logger.info(
+						"Subprocess of {} finished at {} [task: {}, requester: {}, business-key: {}, main-task: {}]",
+						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, mainTaskUrl);
 		}
 		else
 		{
 			if (correlationKey != null)
-				logger.info("Process {} finished [task: {}, business-key: {}, correlation-key: {}]", processUrl,
-						endTaskUrl, businessKey, correlationKey);
+				logger.info(
+						"Process {} finished at {} [task: {}, requester: {}, business-key: {}, correlation-key: {}]",
+						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey);
 			else
-				logger.info("Process {} finished [task: {}, business-key: {}]", processUrl, endTaskUrl, businessKey,
-						correlationKey);
+				logger.info("Process {} finished at {} [task: {}, requester: {}, business-key: {}]", processUrl,
+						getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey);
 		}
 	}
 }

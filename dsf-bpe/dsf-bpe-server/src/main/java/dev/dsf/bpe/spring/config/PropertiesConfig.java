@@ -12,8 +12,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import dev.dsf.common.documentation.Documentation;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
-import dev.dsf.tools.generator.Documentation;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)

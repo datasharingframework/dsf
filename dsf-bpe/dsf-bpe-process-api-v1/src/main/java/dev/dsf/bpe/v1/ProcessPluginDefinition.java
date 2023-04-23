@@ -28,13 +28,13 @@ public interface ProcessPluginDefinition
 	String getName();
 
 	/**
-	 * @return version of the process plugin, must match {@value #VERSION_PATTERN}
+	 * @return version of the process plugin, must match {@value #PLUGIN_VERSION_PATTERN_STRING}
 	 */
 	String getVersion();
 
 	/**
 	 * <i>Placeholder <code>#{version}</code> in FHIR and BPMN files will be replaced with the returned value.</i>
-	 * 
+	 *
 	 * @return version of FHIR and BPMN resources, must match {@value #RESOURCE_VERSION_PATTERN_STRING}
 	 */
 	default String getResourceVersion()
@@ -56,7 +56,7 @@ public interface ProcessPluginDefinition
 
 	/**
 	 * <i>Placeholder <code>#{date}</code> in FHIR and BPMN files will be replaced with the returned value.</i>
-	 * 
+	 *
 	 * @return the release date of FHIR resources and BPMN files
 	 */
 	default LocalDate getResourceReleaseDate()
@@ -66,7 +66,16 @@ public interface ProcessPluginDefinition
 
 	/**
 	 * <i>Return <code>List.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
-	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.</i>
+	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.
+	 * <p>
+	 * Occurrences of</i> <code>#{version}</code> <i>will be replaced with the value of
+	 * {@link #getResourceVersion()}<br>
+	 * Occurrences of</i> <code>#{date}</code> </i>will be replaced with the value of
+	 * {@link #getResourceReleaseDate()}<br>
+	 * Occurrences of</i> <code>#{organization}</code> </i>will be replaced with the local organization DSF identifier
+	 * value, or</i> <code>"null"</code> <i>if no local organization can be found in the allow list<br>
+	 * Other placeholders of the form</i> <code>#{property.name}</code> <i>will be replaced with values from equivalent
+	 * environment variable, e.g.</i> <code>PROPERTY_NAME</code>
 	 *
 	 * @return *.bpmn files inside the process plugin jar, paths relative to root folder of process plugin
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -79,8 +88,17 @@ public interface ProcessPluginDefinition
 	 * {@link ClassLoader#getResourceAsStream(String)}.
 	 * <p>
 	 * Supported metadata resource types are ActivityDefinition, CodeSystem, Library, Measure, NamingSystem,
-	 * Questionnaire, StructureDefinition, Task and ValueSet.</i>
-	 * 
+	 * Questionnaire, StructureDefinition, Task and ValueSet.
+	 * <p>
+	 * Occurrences of</i> <code>#{version}</code> <i>will be replaced with the value of
+	 * {@link #getResourceVersion()}<br>
+	 * Occurrences of</i> <code>#{date}</code> <i>will be replaced with the value of
+	 * {@link #getResourceReleaseDate()}<br>
+	 * Occurrences of</i> <code>#{organization}</code> <i>will be replaced with the local organization DSF identifier
+	 * value, or</i> <code>"null"</code> <i>if no local organization can be found in the allow list<br>
+	 * Other placeholders of the form</i> <code>#{property.name}</code> <i>will be replaced with values from equivalent
+	 * environment variable, e.g.</i> <code>PROPERTY_NAME</code>
+	 *
 	 * @return *.xml or *.json files inside the process plugin jar per process, paths relative to root folder of process
 	 *         plugin
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -90,7 +108,7 @@ public interface ProcessPluginDefinition
 	/**
 	 * <i>All services defined in {@link ProcessPluginApi} and {@link ProcessPluginApi} itself can be {@link Autowired}
 	 * in {@link Configuration} classes</i>
-	 * 
+	 *
 	 * @return {@link Configuration} annotated classes, defining {@link Bean} annotated factory methods
 	 */
 	List<Class<?>> getSpringConfigurations();

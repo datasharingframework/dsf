@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,14 +25,14 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import com.google.common.base.Objects;
-
 import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
 
 public final class ProcessesResource
 {
 	public static ProcessesResource from(Resource resource)
 	{
+		Objects.requireNonNull(resource, "resource");
+
 		if (resource instanceof ActivityDefinition)
 			return fromMetadataResource((ActivityDefinition) resource);
 		else if (resource instanceof CodeSystem)
@@ -150,7 +151,7 @@ public final class ProcessesResource
 
 	public boolean hasStateChangeOrDraft()
 	{
-		return !Objects.equal(getOldProcessState(), getNewProcessState())
+		return !Objects.equals(getOldProcessState(), getNewProcessState())
 				|| (ProcessState.DRAFT.equals(getOldProcessState()) && ProcessState.DRAFT.equals(getNewProcessState()));
 	}
 

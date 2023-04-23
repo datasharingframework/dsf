@@ -38,9 +38,16 @@ public class StartListener extends AbstractListener implements ExecutionListener
 		String processUrl = task.getInstantiatesCanonical();
 		String messageName = getFirstInputParameter(task, BpmnMessage.messageName());
 		String businessKey = getFirstInputParameter(task, BpmnMessage.businessKey());
+		String correlationKey = getFirstInputParameter(task, BpmnMessage.correlationKey());
 		String taskUrl = getLocalVersionlessAbsoluteUrl(task);
+		String requester = getRequesterIdentifierValue(task);
 
-		logger.info("Starting process {} [task: {}, business-key: {}, message: {}]", processUrl, taskUrl, businessKey,
-				messageName);
+		if (correlationKey != null)
+			logger.info(
+					"Starting process {} at {} [task: {}, requester: {}, business-key: {}, correlation-key: {}, message: {}]",
+					processUrl, getCurrentTime(), taskUrl, requester, businessKey, correlationKey, messageName);
+		else
+			logger.info("Starting process {} at {} [task: {}, requester: {}, business-key: {}, message: {}]",
+					processUrl, getCurrentTime(), taskUrl, requester, businessKey, messageName);
 	}
 }

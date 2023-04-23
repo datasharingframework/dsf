@@ -12,8 +12,8 @@ import org.camunda.bpm.engine.impl.el.FixedValue;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
 import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
 import org.camunda.bpm.model.bpmn.instance.SendTask;
-import org.camunda.bpm.model.cmmn.impl.instance.TargetImpl;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v1.variables.Target;
@@ -130,11 +131,11 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		}
 		catch (Exception e)
 		{
-			String errorMessage = "Error while sending Task (process: " + instantiatesCanonical + ", message-name: "
-					+ messageName + ", business-key: " + businessKey + ", correlation-key: "
-					+ target.getCorrelationKey() + ") to organization with identifier "
-					+ target.getOrganizationIdentifierValue() + ", endpoint with identifier "
-					+ target.getEndpointIdentifierValue() + ": " + e.getMessage();
+			String errorMessage = "Task " + instantiatesCanonical + " send failed [recipient: "
+					+ target.getOrganizationIdentifierValue() + ", endpoint: " + target.getEndpointIdentifierValue()
+					+ ", businessKey: " + businessKey
+					+ (target.getCorrelationKey() == null ? "" : ", correlationKey: " + target.getCorrelationKey())
+					+ ", message: " + messageName + ", error: " + e.getClass().getName() + " - " + e.getMessage() + "]";
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
@@ -286,16 +287,17 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 
 	/**
 	 * Generates an alternative business-key and stores it as a process variable with name
-	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}<br>
-	 * <br>
+	 * {@link BpmnExecutionVariables#ALTERNATIVE_BUSINESS_KEY}
+	 * <p>
 	 * <i>Use this method in combination with overriding
-	 * {@link #sendTask(DelegateExecution, TargetImpl, String, String, String, String, Stream)} to use an alternative
-	 * business-key with the communication target.</i>
+	 * {@link #sendTask(DelegateExecution, Variables, Target, String, String, String, String, Stream)} to use an
+	 * alternative business-key with the communication target.</i>
 	 *
 	 * <pre>
 	 * &#64;Override
-	 * protected void sendTask(DelegateExecution execution, Target target, String instantiatesUri, String messageName,
-	 * 		String businessKey, String profile, Stream&lt;ParameterComponent&gt; additionalInputParameters)
+	 * protected void sendTasksendTask(DelegateExecution execution, Variables variables, Target target,
+	 * 		String instantiatesCanonical, String messageName, String businessKey, String profile,
+	 * 		Stream&lt;ParameterComponent&gt; additionalInputParameters)
 	 * {
 	 * 	String alternativeBusinesKey = createAndSaveAlternativeBusinessKey();
 	 * 	super.sendTask(execution, target, instantiatesUri, messageName, alternativeBusinesKey, profile,
@@ -303,10 +305,14 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	 * }
 	 * </pre>
 	 *
+	 * <i>Return tasks from the target using the alternative business-key will correlate with this process instance.</i>
+	 * <p>
+	 *
+	 *
 	 * @param execution
 	 *            not <code>null</code>
-	 * @return the alternative business-key stored as variable
-	 *         {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}
+	 * @return the alternative business-key stored as variable {@link BpmnExecutionVariables#ALTERNATIVE_BUSINESS_KEY}
+	 * @see Variables#setAlternativeBusinessKey(String)
 	 */
 	protected final String createAndSaveAlternativeBusinessKey(DelegateExecution execution, Variables variables)
 	{
@@ -382,12 +388,21 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		FhirWebserviceClient client = api.getFhirWebserviceClientProvider()
 				.getWebserviceClient(target.getEndpointUrl());
 
-		logger.info("Sending task {} to {}/{} [message: {}, businessKey: {}, correlationKey: {}, endpoint: {}]",
-				task.getInstantiatesCanonical(), target.getOrganizationIdentifierValue(),
-				target.getEndpointIdentifierValue(), messageName, businessKey, correlationKey, client.getBaseUrl());
+		if (correlationKey != null)
+			logger.info(
+					"Sending task {} [recipient: {}, endpoint: {}, businessKey: {}, correlationKey: {}, message: {}] ...",
+					task.getInstantiatesCanonical(), target.getOrganizationIdentifierValue(),
+					target.getEndpointIdentifierValue(), businessKey, correlationKey, messageName);
+		else
+			logger.info("Sending task {} [recipient: {}, endpoint: {}, businessKey: {}, message: {}] ...",
+					task.getInstantiatesCanonical(), target.getOrganizationIdentifierValue(),
+					target.getEndpointIdentifierValue(), businessKey, messageName);
+
 		logger.trace("Task resource to send: {}", api.getFhirContext().newJsonParser().encodeResourceToString(task));
 
-		doSend(client, task);
+		IdType created = doSend(client, task);
+
+		logger.info("Task {} send [task: {}]", task.getInstantiatesCanonical(), created.getValue());
 	}
 
 	/**
@@ -407,10 +422,11 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	 *            not <code>null</code>
 	 * @param task
 	 *            not <code>null</code>
+	 * @return id of created task
 	 */
-	protected void doSend(FhirWebserviceClient client, Task task)
+	protected IdType doSend(FhirWebserviceClient client, Task task)
 	{
-		client.withMinimalReturn().create(task);
+		return client.withMinimalReturn().create(task);
 	}
 
 	protected Reference getRecipient(Target target)

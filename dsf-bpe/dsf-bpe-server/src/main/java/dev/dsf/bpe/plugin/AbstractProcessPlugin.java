@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,6 +84,9 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 
 		FileAndResource(String file, Resource resource)
 		{
+			Objects.requireNonNull(file, "file");
+			Objects.requireNonNull(resource, "resource");
+
 			this.file = file;
 			this.resource = resource;
 		}
@@ -209,10 +212,8 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 
 	protected abstract String getProcessPluginApiVersion();
 
-	protected abstract Optional<String> getLocalOrganizationIdentifierValue();
-
 	@Override
-	public boolean initializeAndValidateResources()
+	public boolean initializeAndValidateResources(String localOrganizationIdentifierValue)
 	{
 		if (initialized)
 			return true;
@@ -221,7 +222,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		if (!pluginDefinitionOk)
 			return false;
 
-		Map<ProcessIdAndVersion, List<FileAndResource>> resources = loadFhirResources();
+		Map<ProcessIdAndVersion, List<FileAndResource>> resources = loadFhirResources(localOrganizationIdentifierValue);
 		if (resources.isEmpty())
 		{
 			logger.warn("Ignoring process plugin {}-{} from {}: No valid FHIR resources", getDefinitionName(),
@@ -229,7 +230,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 			return false;
 		}
 
-		List<BpmnFileAndModel> models = filterNonValidBpmnModels(loadBpmnModels());
+		List<BpmnFileAndModel> models = filterNonValidBpmnModels(loadBpmnModels(localOrganizationIdentifierValue));
 		if (models.isEmpty())
 		{
 			logger.warn("Ignoring process plugin {}-{} from {}: No valid processes", getDefinitionName(),
@@ -604,90 +605,97 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		}
 	}
 
-	private Stream<BpmnFileAndModel> loadBpmnModels()
+	private Stream<BpmnFileAndModel> loadBpmnModels(String localOrganizationIdentifierValue)
 	{
-		return getDefinitionProcessModels().stream().map(file -> loadBpmnModelOrNull(file)).filter(Objects::nonNull);
+		return getDefinitionProcessModels().stream().map(loadBpmnModelOrNull(localOrganizationIdentifierValue))
+				.filter(Objects::nonNull);
 	}
 
-	private BpmnFileAndModel loadBpmnModelOrNull(String file)
+	private Function<String, BpmnFileAndModel> loadBpmnModelOrNull(String localOrganizationIdentifierValue)
 	{
-		if (!file.endsWith(BPMN_SUFFIX))
+		return file ->
 		{
-			logger.warn("Ignoring BPMN model {} from process plugin {}-{}: Filename not ending in '{}'", file,
-					getDefinitionName(), getDefinitionVersion(), BPMN_SUFFIX);
-			return null;
-		}
-
-		String resourceDateValue = getDefinitionResourceReleaseDate().format(DATE_FORMAT);
-		logger.debug(
-				"Reading BPMN model {} from process plugin {}-{} and replacing all occurrences of {} with {} and {} with {}",
-				file, getDefinitionName(), getDefinitionVersion(), VERSION_PLACEHOLDER_PATTERN_STRING,
-				getDefinitionResourceVersion(), DATE_PLACEHOLDER_PATTERN_STRING, resourceDateValue);
-
-		try (InputStream in = getProcessPluginClassLoader().getResourceAsStream(file))
-		{
-			if (in == null)
+			if (!file.endsWith(BPMN_SUFFIX))
 			{
-				logger.warn(
-						"Ignoring BPMN model {} from process plugin {}-{}: File not readable, process plugin class loader getResourceAsStream returned null",
-						file, getDefinitionName(), getDefinitionVersion());
+				logger.warn("Ignoring BPMN model {} from process plugin {}-{}: Filename not ending in '{}'", file,
+						getDefinitionName(), getDefinitionVersion(), BPMN_SUFFIX);
 				return null;
 			}
 
-			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
+			String resourceDateValue = getDefinitionResourceReleaseDate().format(DATE_FORMAT);
+			logger.debug(
+					"Reading BPMN model {} from process plugin {}-{} and replacing all occurrences of {} with {}, {} with {} and {} with {}",
+					file, getDefinitionName(), getDefinitionVersion(), VERSION_PLACEHOLDER_PATTERN_STRING,
+					getDefinitionResourceVersion(), DATE_PLACEHOLDER_PATTERN_STRING, resourceDateValue,
+					ORGANIZATION_PLACEHOLDER_PATTERN_STRING, localOrganizationIdentifierValue);
 
-			read = VERSION_PLACEHOLDER_PATTERN.matcher(read).replaceAll(getDefinitionResourceVersion());
-			read = DATE_PLACEHOLDER_PATTERN.matcher(read).replaceAll(resourceDateValue);
-
-			// escape bpmn placeholders
-			read = PLACEHOLDER_PREFIX_PATTERN_SPRING.matcher(read).replaceAll(PLACEHOLDER_PREFIX_TMP);
-			// make dsf placeholders look like spring placeholders
-			// when calling replaceAll with ${ the $ needs to be escaped using \${
-			read = PLACEHOLDER_PREFIX_PATTERN.matcher(read).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
-			// resolve dsf placeholders
-			read = environment.resolveRequiredPlaceholders(read);
-			// revert bpmn placeholders
-			// when calling replaceAll with ${ the $ needs to be escaped using \${
-			read = PLACEHOLDER_PREFIX_PATTERN_TMP.matcher(read).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
-
-			BpmnModelInstance model = Bpmn
-					.readModelFromStream(new ByteArrayInputStream(read.getBytes(StandardCharsets.UTF_8)));
-
-			// store API version as ExtensionElements property
-			Collection<Process> processes = model.getModelElementsByType(Process.class);
-			processes.forEach(process ->
+			try (InputStream in = getProcessPluginClassLoader().getResourceAsStream(file))
 			{
-				ExtensionElements ext = getOrCreateExtensionElements(process);
+				if (in == null)
+				{
+					logger.warn(
+							"Ignoring BPMN model {} from process plugin {}-{}: File not readable, process plugin class loader getResourceAsStream returned null",
+							file, getDefinitionName(), getDefinitionVersion());
+					return null;
+				}
 
-				CamundaProperties properties = ext.getChildElementsByType(CamundaProperties.class).stream().findFirst()
-						.orElseGet(() ->
-						{
-							CamundaProperties p = ext.getModelInstance().newInstance(CamundaProperties.class);
-							ext.addChildElement(p);
-							return p;
-						});
+				String content = IOUtils.toString(in, StandardCharsets.UTF_8);
 
-				CamundaProperty property = properties.getCamundaProperties().stream()
-						.filter(p -> MODEL_ATTRIBUTE_PROCESS_API_VERSION.equals(p.getCamundaName())).findFirst()
-						.orElseGet(() ->
-						{
-							CamundaProperty p = properties.getModelInstance().newInstance(CamundaProperty.class);
-							properties.addChildElement(p);
-							return p;
-						});
+				content = VERSION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(getDefinitionResourceVersion());
+				content = DATE_PLACEHOLDER_PATTERN.matcher(content).replaceAll(resourceDateValue);
+				content = ORGANIZATION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(
+						localOrganizationIdentifierValue != null ? localOrganizationIdentifierValue : "null");
 
-				property.setCamundaName(MODEL_ATTRIBUTE_PROCESS_API_VERSION);
-				property.setCamundaValue(getProcessPluginApiVersion());
-			});
+				// escape bpmn placeholders
+				content = PLACEHOLDER_PREFIX_PATTERN_SPRING.matcher(content).replaceAll(PLACEHOLDER_PREFIX_TMP);
+				// make dsf placeholders look like spring placeholders
+				// when calling replaceAll with ${ the $ needs to be escaped using \${
+				content = PLACEHOLDER_PREFIX_PATTERN.matcher(content).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
+				// resolve dsf placeholders
+				content = environment.resolveRequiredPlaceholders(content);
+				// revert bpmn placeholders
+				// when calling replaceAll with ${ the $ needs to be escaped using \${
+				content = PLACEHOLDER_PREFIX_PATTERN_TMP.matcher(content).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
 
-			return new BpmnFileAndModel(draft, file, model, getJarFile());
-		}
-		catch (IOException e)
-		{
-			logger.warn("Ignoring BPMN model {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
-					getDefinitionVersion(), e.getClass().getName(), e.getMessage());
-			return null;
-		}
+				BpmnModelInstance model = Bpmn
+						.readModelFromStream(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+
+				// store API version as ExtensionElements property
+				Collection<Process> processes = model.getModelElementsByType(Process.class);
+				processes.forEach(process ->
+				{
+					ExtensionElements ext = getOrCreateExtensionElements(process);
+
+					CamundaProperties properties = ext.getChildElementsByType(CamundaProperties.class).stream()
+							.findFirst().orElseGet(() ->
+							{
+								CamundaProperties p = ext.getModelInstance().newInstance(CamundaProperties.class);
+								ext.addChildElement(p);
+								return p;
+							});
+
+					CamundaProperty property = properties.getCamundaProperties().stream()
+							.filter(p -> MODEL_ATTRIBUTE_PROCESS_API_VERSION.equals(p.getCamundaName())).findFirst()
+							.orElseGet(() ->
+							{
+								CamundaProperty p = properties.getModelInstance().newInstance(CamundaProperty.class);
+								properties.addChildElement(p);
+								return p;
+							});
+
+					property.setCamundaName(MODEL_ATTRIBUTE_PROCESS_API_VERSION);
+					property.setCamundaValue(getProcessPluginApiVersion());
+				});
+
+				return new BpmnFileAndModel(draft, file, model, getJarFile());
+			}
+			catch (IOException e)
+			{
+				logger.warn("Ignoring BPMN model {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
+						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
+				return null;
+			}
+		};
 	}
 
 	private ExtensionElements getOrCreateExtensionElements(Process process)
@@ -945,91 +953,94 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		}
 	}
 
-	private Map<ProcessIdAndVersion, List<FileAndResource>> loadFhirResources()
+	private Map<ProcessIdAndVersion, List<FileAndResource>> loadFhirResources(String localOrganizationIdentifierValue)
 	{
 		Map<String, Resource> resourcesByFilename = getDefinitionFhirResourcesByProcessId().entrySet().stream()
-				.map(Entry::getValue).flatMap(List::stream).distinct().map(this::loadFhirResourceOrNull)
-				.filter(Objects::nonNull)
+				.map(Entry::getValue).flatMap(List::stream).distinct()
+				.map(loadFhirResourceOrNull(localOrganizationIdentifierValue)).filter(Objects::nonNull)
 				.collect(Collectors.toMap(FileAndResource::getFile, FileAndResource::getResource));
 
 		return getDefinitionFhirResourcesByProcessId().entrySet().stream()
 				.collect(Collectors.toMap(e -> new ProcessIdAndVersion(e.getKey(), getDefinitionResourceVersion()),
-						e -> e.getValue().stream().map(file -> FileAndResource.of(file, resourcesByFilename.get(file)))
-								.toList()));
+						e -> e.getValue().stream().filter(resourcesByFilename::containsKey)
+								.map(file -> FileAndResource.of(file, resourcesByFilename.get(file))).toList()));
 	}
 
-	private FileAndResource loadFhirResourceOrNull(String file)
+	private Function<String, FileAndResource> loadFhirResourceOrNull(String localOrganizationIdentifierValue)
 	{
-		if (!file.endsWith(JSON_SUFFIX) && !file.endsWith(XML_SUFFIX))
+		return file ->
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Filename not ending in '{}' or '{}'",
-					file, getDefinitionName(), getDefinitionVersion(), JSON_SUFFIX, XML_SUFFIX);
-			return null;
-		}
-
-		String resourceDateValue = getDefinitionResourceReleaseDate().format(DATE_FORMAT);
-		String localOrganizationIdentifierValue = getLocalOrganizationIdentifierValue().orElse("?");
-
-		logger.debug(
-				"Reading FHIR resource {} from process plugin {}-{} and replacing all occurrences of {} with {}, {} with {} and {} with {}",
-				file, getDefinitionName(), getDefinitionVersion(), VERSION_PLACEHOLDER_PATTERN_STRING,
-				getDefinitionResourceVersion(), DATE_PLACEHOLDER_PATTERN_STRING, resourceDateValue,
-				ORGANIZATION_PLACEHOLDER_PATTERN_STRING, localOrganizationIdentifierValue);
-
-		try (InputStream in = getProcessPluginClassLoader().getResourceAsStream(file))
-		{
-			if (in == null)
+			if (!file.endsWith(JSON_SUFFIX) && !file.endsWith(XML_SUFFIX))
 			{
-				logger.warn(
-						"Ignoring FHIR resource {} from process plugin {}-{}: Not readable, process plugin class loader getResourceAsStream returned null",
-						file, getDefinitionName(), getDefinitionVersion());
+				logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Filename not ending in '{}' or '{}'",
+						file, getDefinitionName(), getDefinitionVersion(), JSON_SUFFIX, XML_SUFFIX);
 				return null;
 			}
 
-			String content = IOUtils.toString(in, StandardCharsets.UTF_8);
+			String resourceDateValue = getDefinitionResourceReleaseDate().format(DATE_FORMAT);
 
-			content = VERSION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(getDefinitionResourceVersion());
-			content = DATE_PLACEHOLDER_PATTERN.matcher(content).replaceAll(resourceDateValue);
-			content = ORGANIZATION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(localOrganizationIdentifierValue);
+			logger.debug(
+					"Reading FHIR resource {} from process plugin {}-{} and replacing all occurrences of {} with {}, {} with {} and {} with {}",
+					file, getDefinitionName(), getDefinitionVersion(), VERSION_PLACEHOLDER_PATTERN_STRING,
+					getDefinitionResourceVersion(), DATE_PLACEHOLDER_PATTERN_STRING, resourceDateValue,
+					ORGANIZATION_PLACEHOLDER_PATTERN_STRING, localOrganizationIdentifierValue);
 
-			// when calling replaceAll with ${ the $ needs to be escaped using \${
-			content = PLACEHOLDER_PREFIX_PATTERN.matcher(content).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
-			content = environment.resolveRequiredPlaceholders(content);
-
-			IBaseResource resource = newParser(file).parseResource(content);
-
-			if (resource instanceof ActivityDefinition && isValid((ActivityDefinition) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof CodeSystem && isValid((CodeSystem) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof Library && isValid((Library) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof Measure && isValid((Measure) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof NamingSystem && isValid((NamingSystem) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof Questionnaire && isValid((Questionnaire) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof StructureDefinition && isValid((StructureDefinition) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof Task && isValid((Task) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else if (resource instanceof ValueSet && isValid((ValueSet) resource, file))
-				return FileAndResource.of(file, (Resource) resource);
-			else
+			try (InputStream in = getProcessPluginClassLoader().getResourceAsStream(file))
 			{
-				logger.warn(
-						"Ignoring FHIR resource {} from process plugin {}-{}: Not a ActivityDefinition, CodeSystem, Library, Measure, NamingSystem, Questionnaire, StructureDefinition, Task or ValueSet",
-						file, getDefinitionName(), getDefinitionVersion());
+				if (in == null)
+				{
+					logger.warn(
+							"Ignoring FHIR resource {} from process plugin {}-{}: Not readable, process plugin class loader getResourceAsStream returned null",
+							file, getDefinitionName(), getDefinitionVersion());
+					return null;
+				}
+
+				String content = IOUtils.toString(in, StandardCharsets.UTF_8);
+
+				content = VERSION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(getDefinitionResourceVersion());
+				content = DATE_PLACEHOLDER_PATTERN.matcher(content).replaceAll(resourceDateValue);
+				content = ORGANIZATION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(
+						localOrganizationIdentifierValue != null ? localOrganizationIdentifierValue : "null");
+
+				// when calling replaceAll with ${ the $ needs to be escaped using \${
+				content = PLACEHOLDER_PREFIX_PATTERN.matcher(content).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
+				content = environment.resolveRequiredPlaceholders(content);
+
+				IBaseResource resource = newParser(file).parseResource(content);
+
+				if (resource instanceof ActivityDefinition && isValid((ActivityDefinition) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof CodeSystem && isValid((CodeSystem) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof Library && isValid((Library) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof Measure && isValid((Measure) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof NamingSystem && isValid((NamingSystem) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof Questionnaire && isValid((Questionnaire) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof StructureDefinition && isValid((StructureDefinition) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof Task && isValid((Task) resource, file, localOrganizationIdentifierValue))
+					return FileAndResource.of(file, (Resource) resource);
+				else if (resource instanceof ValueSet && isValid((ValueSet) resource, file))
+					return FileAndResource.of(file, (Resource) resource);
+				else
+				{
+					logger.warn(
+							"Ignoring FHIR resource {} from process plugin {}-{}: Not a ActivityDefinition, CodeSystem, Library, Measure, NamingSystem, Questionnaire, StructureDefinition, Task or ValueSet",
+							file, getDefinitionName(), getDefinitionVersion());
+					return null;
+				}
+			}
+			catch (IOException e)
+			{
+				logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
+						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 				return null;
 			}
-		}
-		catch (IOException e)
-		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
-					getDefinitionVersion(), e.getClass().getName(), e.getMessage());
-			return null;
-		}
+		};
 	}
 
 	private IParser newParser(String file)
@@ -1139,7 +1150,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		return isValidMetadataResouce(resource, file);
 	}
 
-	private boolean isValid(Task resource, String file)
+	private boolean isValid(Task resource, String file, String localOrganizationIdentifierValue)
 	{
 		boolean identifierOk = TaskIdentifier.findFirst(resource).isPresent();
 		if (!identifierOk)
@@ -1163,7 +1174,8 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		}
 		else
 		{
-			requesterOk = isLocalOrganization(resource.getRequester(), "requester", file);
+			requesterOk = isLocalOrganization(resource.getRequester(), "requester", file,
+					localOrganizationIdentifierValue);
 		}
 
 		boolean recipientOk = false;
@@ -1176,7 +1188,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		else
 		{
 			recipientOk = isLocalOrganization(resource.getRestriction().getRecipientFirstRep(), "restriction.recipient",
-					file);
+					file, localOrganizationIdentifierValue);
 		}
 
 		boolean instantiatesCanonicalOk = INSTANTIATES_CANONICAL_PATTERN.matcher(resource.getInstantiatesCanonical())
@@ -1192,13 +1204,12 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		return identifierOk && statusOk && requesterOk && recipientOk && instantiatesCanonicalOk;
 	}
 
-	private boolean isLocalOrganization(Reference reference, String refLocation, String file)
+	private boolean isLocalOrganization(Reference reference, String refLocation, String file,
+			String localOrganizationIdentifierValue)
 	{
-		Optional<String> localOrganizationIdentifierValue = getLocalOrganizationIdentifierValue();
-		if (localOrganizationIdentifierValue.isEmpty())
+		if (localOrganizationIdentifierValue == null)
 		{
-			logger.warn(
-					"Ignoring FHIR resource {} from process plugin {}-{}: Local organization identifier unknown, check DSF FHIR server allow list",
+			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Local organization identifier unknown",
 					file, getDefinitionName(), getDefinitionVersion());
 			return false;
 		}
@@ -1207,7 +1218,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		boolean identifierSystemOk = reference.hasIdentifier()
 				&& OrganizationIdentifier.SID.equals(reference.getIdentifier().getSystem());
 		boolean identifierValueOk = reference.hasIdentifier()
-				&& localOrganizationIdentifierValue.get().equals(reference.getIdentifier().getValue());
+				&& localOrganizationIdentifierValue.equals(reference.getIdentifier().getValue());
 
 		if (!typeOk)
 		{
@@ -1222,7 +1233,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		if (!identifierValueOk)
 		{
 			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.{}.identifier.value not '{}'", file,
-					getDefinitionName(), getDefinitionVersion(), refLocation, localOrganizationIdentifierValue.get());
+					getDefinitionName(), getDefinitionVersion(), refLocation, localOrganizationIdentifierValue);
 		}
 
 		return typeOk && identifierSystemOk && identifierValueOk;

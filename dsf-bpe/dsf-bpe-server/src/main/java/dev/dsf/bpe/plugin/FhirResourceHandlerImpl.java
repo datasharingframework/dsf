@@ -195,8 +195,8 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			case StructureDefinition -> 3;
 			case Task -> 8;
 			case ValueSet -> 2;
-			default -> throw new IllegalArgumentException(
-					"Unexpected value: " + resource.getResource().getResourceType());
+			default ->
+				throw new IllegalArgumentException("Unexpected value: " + resource.getResource().getResourceType());
 		};
 	}
 

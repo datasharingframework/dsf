@@ -1,0 +1,17 @@
+<Configuration status="INFO" monitorInterval="30" verbose="false">
+
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%p\t%t | %m%n"/>
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<AsyncLogger name="dev.dsf" level="INFO"/>
+		<AsyncLogger name="org.eclipse.jetty" level="INFO"/>
+
+		<AsyncRoot level="WARN">
+			<AppenderRef ref="CONSOLE"/>
+		</AsyncRoot>
+	</Loggers>
+</Configuration>

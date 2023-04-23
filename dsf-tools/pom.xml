@@ -64,7 +64,7 @@
 
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-process-base</artifactId>
+				<artifactId>dsf-bpe-process-api-v1</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -80,6 +80,12 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-webservice-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

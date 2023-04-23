@@ -21,6 +21,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.camunda.ProcessPluginConsumer;
 import dev.dsf.bpe.v1.ProcessPluginDeplyomentStateListener;
+import dev.dsf.bpe.v1.service.OrganizationProvider;
 
 public class ProcessPluginManagerImpl implements ProcessPluginManager, InitializingBean
 {
@@ -31,10 +32,11 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	private final ProcessPluginLoader processPluginLoader;
 	private final BpmnProcessStateChangeService bpmnProcessStateChangeService;
 	private final FhirResourceHandler fhirResourceHandler;
+	private final OrganizationProvider organizationProvider;
 
 	public ProcessPluginManagerImpl(List<ProcessPluginConsumer> processPluginConsumers,
 			ProcessPluginLoader processPluginLoader, BpmnProcessStateChangeService bpmnProcessStateChangeService,
-			FhirResourceHandler fhirResourceHandler)
+			FhirResourceHandler fhirResourceHandler, OrganizationProvider organizationProvider)
 	{
 		if (processPluginConsumers != null)
 			this.processPluginConsumers.addAll(processPluginConsumers);
@@ -42,6 +44,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		this.processPluginLoader = processPluginLoader;
 		this.bpmnProcessStateChangeService = bpmnProcessStateChangeService;
 		this.fhirResourceHandler = fhirResourceHandler;
+		this.organizationProvider = organizationProvider;
 	}
 
 	@Override
@@ -55,8 +58,14 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	@Override
 	public void loadAndDeployPlugins()
 	{
-		List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins = removeDuplicates(
-				processPluginLoader.loadPlugins().stream().filter(ProcessPlugin::initializeAndValidateResources));
+		String localOrganizationIdentifierValue = organizationProvider.getLocalOrganizationIdentifierValue()
+				.orElse(null);
+
+		if (localOrganizationIdentifierValue == null)
+			logger.warn("Local organization identifier unknown, check DSF FHIR server allow list");
+
+		List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins = removeDuplicates(processPluginLoader.loadPlugins()
+				.stream().filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue)));
 
 		if (plugins.isEmpty())
 		{

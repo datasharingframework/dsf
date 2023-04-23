@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,8 +41,6 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Objects;
 
 import dev.dsf.fhir.dao.PatientDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
@@ -165,7 +164,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 			assertTrue(taskResource.getSupportedProfile().size() > 0);
 			List<CanonicalType> profiles = taskResource.getSupportedProfile();
 
-			return profiles.stream().filter(t -> Objects.equal(t.getValue(), taskProfileUrl)).count() == 1;
+			return profiles.stream().filter(t -> Objects.equals(t.getValue(), taskProfileUrl)).count() == 1;
 		}
 		else
 			return false;

@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -94,11 +93,5 @@ public class ProcessPluginImpl
 	protected String getProcessPluginApiVersion()
 	{
 		return "1";
-	}
-
-	@Override
-	protected Optional<String> getLocalOrganizationIdentifierValue()
-	{
-		return getProcessPluginApi().getOrganizationProvider().getLocalOrganizationIdentifierValue();
 	}
 }
