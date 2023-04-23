@@ -162,25 +162,32 @@ public class ResponseGenerator
 	 *            may be <code>null</code>
 	 * @param pretty
 	 *            may be <code>null</code>
+	 * @param summaryMode
+	 *            may be <code>null</code>
 	 * @return {@link Bundle} of type {@link BundleType#SEARCHSET}
 	 */
 	public Bundle createSearchSet(PartialResult<? extends Resource> result, List<SearchQueryParameterError> errors,
-			UriBuilder bundleUri, String format, String pretty)
+			UriBuilder bundleUri, String format, String pretty, SummaryMode summaryMode)
 	{
 		Bundle bundle = new Bundle();
 		bundle.setTimestamp(new Date());
 		bundle.setType(BundleType.SEARCHSET);
-		result.getPartialResult().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.MATCH))
-				.forEach(bundle::addEntry);
-		result.getIncludes().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.INCLUDE))
-				.forEach(bundle::addEntry);
+
+		if (!SummaryMode.COUNT.equals(summaryMode))
+		{
+			result.getPartialResult().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.MATCH))
+					.forEach(bundle::addEntry);
+			result.getIncludes().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.INCLUDE))
+					.forEach(bundle::addEntry);
+		}
+
 		if (!errors.isEmpty())
 			bundle.addEntry(toBundleEntryComponent(toOperationOutcomeWarning(errors), SearchEntryMode.OUTCOME));
 
 		bundle.setTotal(result.getTotal());
 
-		setLinks(result.getPageAndCount(), bundleUri, format, pretty, bundle, result.getPartialResult().isEmpty(),
-				result.getTotal());
+		setLinks(result.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle,
+				result.getPartialResult().isEmpty(), result.getTotal());
 
 		return bundle;
 	}
@@ -196,20 +203,22 @@ public class ResponseGenerator
 	}
 
 	public Bundle createHistoryBundle(History history, List<SearchQueryParameterError> errors, UriBuilder bundleUri,
-			String format, String pretty)
+			String format, String pretty, SummaryMode summaryMode)
 	{
 		Bundle bundle = new Bundle();
 		bundle.setTimestamp(new Date());
 		bundle.setType(BundleType.HISTORY);
-		history.getEntries().stream().map(e -> toBundleEntryComponent(e)).forEach(bundle::addEntry);
+
+		if (!SummaryMode.COUNT.equals(summaryMode))
+			history.getEntries().stream().map(e -> toBundleEntryComponent(e)).forEach(bundle::addEntry);
 
 		if (!errors.isEmpty())
 			bundle.addEntry(toBundleEntryComponent(toOperationOutcomeWarning(errors), SearchEntryMode.OUTCOME));
 
 		bundle.setTotal(history.getTotal());
 
-		setLinks(history.getPageAndCount(), bundleUri, format, pretty, bundle, history.getEntries().isEmpty(),
-				history.getTotal());
+		setLinks(history.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle,
+				history.getEntries().isEmpty(), history.getTotal());
 
 		return bundle;
 	}
@@ -256,13 +265,15 @@ public class ResponseGenerator
 		return new IdType(serverBase, resourceType, id, version).getValue();
 	}
 
-	private void setLinks(PageAndCount pageAndCount, UriBuilder bundleUri, String format, String pretty, Bundle bundle,
-			boolean isEmpty, int total)
+	private void setLinks(PageAndCount pageAndCount, UriBuilder bundleUri, String format, String pretty,
+			SummaryMode summaryMode, Bundle bundle, boolean isEmpty, int total)
 	{
 		if (format != null)
 			bundleUri = bundleUri.replaceQueryParam("_format", format);
 		if (pretty != null)
 			bundleUri = bundleUri.replaceQueryParam("_pretty", pretty);
+		if (summaryMode != null)
+			bundleUri = bundleUri.replaceQueryParam("_summary", summaryMode.toString());
 
 		if (pageAndCount.getCount() > 0)
 		{

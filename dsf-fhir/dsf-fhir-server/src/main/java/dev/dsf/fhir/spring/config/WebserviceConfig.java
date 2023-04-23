@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.common.auth.logout.LogoutService;
 import dev.dsf.common.status.webservice.StatusService;
-import dev.dsf.fhir.adapter.HtmlFhirAdapter.ServerBaseProvider;
 import dev.dsf.fhir.exception.DataFormatExceptionHandler;
 import dev.dsf.fhir.webservice.impl.ActivityDefinitionServiceImpl;
 import dev.dsf.fhir.webservice.impl.BinaryServiceImpl;
@@ -160,12 +159,6 @@ public class WebserviceConfig
 
 	@Autowired
 	private HistoryConfig historyConfig;
-
-	@Bean
-	public ServerBaseProvider serverBaseProvider()
-	{
-		return () -> propertiesConfig.getServerBaseUrl();
-	}
 
 	@Bean
 	public DataFormatExceptionHandler dataFormatExceptionHandler()

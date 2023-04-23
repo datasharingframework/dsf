@@ -15,6 +15,7 @@ import dev.dsf.fhir.dao.HistoryDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.help.SummaryMode;
 import dev.dsf.fhir.history.filter.HistoryIdentityFilterFactory;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.search.PageAndCount;
@@ -129,6 +130,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);
+		SummaryMode summaryMode = SummaryMode.fromString(queryParameters.getFirst(SearchQuery.PARAMETER_SUMMARY));
 
 		UriBuilder bundleUri = UriBuilder.fromPath(serverBase);
 		if (path != null)
@@ -140,7 +142,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		atParameter.modifyBundleUri(bundleUri);
 		sinceParameter.modifyBundleUri(bundleUri);
 
-		Bundle bundle = responseGenerator.createHistoryBundle(history, errors, bundleUri, format, pretty);
+		Bundle bundle = responseGenerator.createHistoryBundle(history, errors, bundleUri, format, pretty, summaryMode);
 		// clean literal references from bundle entries
 		bundle.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
 				.forEach(referenceCleaner::cleanLiteralReferences);

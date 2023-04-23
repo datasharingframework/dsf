@@ -61,8 +61,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	@POST
 	@Consumes
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response create(InputStream in, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
@@ -239,8 +239,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	@PUT
 	@Path("/{id}")
 	@Consumes
-	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	@Override
 	public Response update(@PathParam("id") String id, InputStream in, @Context UriInfo uri,
 			@Context HttpHeaders headers)

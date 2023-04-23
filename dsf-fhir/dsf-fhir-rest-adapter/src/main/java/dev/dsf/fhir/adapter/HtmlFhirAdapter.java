@@ -11,10 +11,16 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -29,8 +35,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
-import com.google.common.base.Objects;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
@@ -43,16 +47,12 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyWriter;
+import jakarta.ws.rs.ext.Provider;
 
-@Produces({ MediaType.TEXT_HTML })
-public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWriter<T>
+@Provider
+@Produces(MediaType.TEXT_HTML)
+public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWriter<BaseResource>
 {
-	@FunctionalInterface
-	public static interface ServerBaseProvider
-	{
-		String getServerBase();
-	}
-
 	private static final String RESOURCE_NAMES = "Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary"
 			+ "|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse"
 			+ "|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition|ConceptMap|Condition|Consent|Contract|Coverage"
@@ -87,8 +87,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
 	private final FhirContext fhirContext;
-	private final ServerBaseProvider serverBaseProvider;
-	private final Class<T> resourceType;
+	private final Supplier<String> serverBaseProvider;
+	private final Map<Class<? extends BaseResource>, HtmlGenerator<? extends BaseResource>> htmlGeneratorsByType;
 
 	@Context
 	private volatile UriInfo uriInfo;
@@ -96,11 +96,17 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	@Context
 	private volatile SecurityContext securityContext;
 
-	protected HtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider, Class<T> resourceType)
+	public HtmlFhirAdapter(FhirContext fhirContext, Supplier<String> serverBaseProvider,
+			Collection<? extends HtmlGenerator<?>> htmlGenerators)
 	{
 		this.fhirContext = fhirContext;
 		this.serverBaseProvider = serverBaseProvider;
-		this.resourceType = resourceType;
+
+		if (htmlGenerators != null)
+			htmlGeneratorsByType = htmlGenerators.stream()
+					.collect(Collectors.toMap(HtmlGenerator::getResourceType, Function.identity()));
+		else
+			htmlGeneratorsByType = Collections.emptyMap();
 	}
 
 	protected FhirContext getFhirContext()
@@ -108,26 +114,23 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		return fhirContext;
 	}
 
-	/* Parsers are not guaranteed to be thread safe */
-	private IParser getParser(Supplier<IParser> parser)
+	@Override
+	protected IParser getParser(MediaType mediaType, Supplier<IParser> parser)
 	{
-		IParser p = parser.get();
-		p.setStripVersionsFromReferences(false);
-		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		IParser p = super.getParser(mediaType, parser);
 		p.setPrettyPrint(true);
-
 		return p;
 	}
 
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
 	{
-		return resourceType.equals(type);
+		return type != null && BaseResource.class.isAssignableFrom(type);
 	}
 
 	@Override
-	public void writeTo(T t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
+	public void writeTo(BaseResource resource, Class<?> type, Type genericType, Annotation[] annotations,
+			MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
 		final String basePath = uriInfo.getBaseUri().getRawPath();
@@ -154,7 +157,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n");
 		out.write("</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled())
+		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled(type))
 				+ ");checkBookmarked();\">\n");
 
 		out.write("<div id=\"icons\">\n");
@@ -230,7 +233,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 						<h1>
 						"""
 						.replace("${basePath}", basePath));
-		out.write(getUrlHeading(t));
+		out.write(getUrlHeading(resource));
 		out.write("""
 				</h1>
 				</td>
@@ -239,7 +242,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 				<div class="tab">
 				""");
 
-		if (isHtmlEnabled())
+		if (isHtmlEnabled(type))
 			out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
 
 		out.write("""
@@ -248,22 +251,22 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 				</div>
 				""");
 
-		writeXml(basePath, t, out);
-		writeJson(basePath, t, out);
+		writeXml(mediaType, basePath, resource, out);
+		writeJson(mediaType, basePath, resource, out);
 
-		if (isHtmlEnabled())
-			writeHtml(basePath, t, out);
+		if (isHtmlEnabled(type))
+			writeHtml(type, basePath, resource, out);
 
 		out.write("</html>");
 		out.flush();
 	}
 
-	private String getUrlHeading(T t) throws MalformedURLException
+	private String getUrlHeading(BaseResource resource) throws MalformedURLException
 	{
-		URI uri = getResourceUrl(t).map(this::toURI).orElse(uriInfo.getRequestUri());
+		URI uri = getResourceUrl(resource).map(this::toURI).orElse(uriInfo.getRequestUri());
 		String[] pathSegments = uri.getPath().split("/");
 
-		String u = serverBaseProvider.getServerBase();
+		String u = serverBaseProvider.get();
 		StringBuilder heading = new StringBuilder("<a href=\"" + u + "/\" title=\"Open " + u + "\">" + u + "</a>");
 
 		for (int i = 2; i < pathSegments.length; i++)
@@ -276,6 +279,12 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		{
 			u += "?" + uri.getQuery();
 			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + uri.getQuery() + "</a>");
+		}
+		else if (uriInfo.getQueryParameters().containsKey("_summary"))
+		{
+			u += "?_summary=" + uriInfo.getQueryParameters().getFirst("_summary");
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?_summary="
+					+ uriInfo.getQueryParameters().getFirst("_summary") + "</a>");
 		}
 
 		heading.append('\n');
@@ -295,31 +304,32 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		}
 	}
 
-	private Optional<String> getResourceUrl(T t) throws MalformedURLException
+	private Optional<String> getResourceUrl(BaseResource resource) throws MalformedURLException
 	{
-		if (t instanceof Resource && t.getIdElement().hasIdPart())
+		if (resource instanceof Resource && resource.getIdElement().hasIdPart())
 		{
 			if (!uriInfo.getPath().contains("_history"))
-				return Optional.of(String.format("%s/%s/%s", serverBaseProvider.getServerBase(),
-						t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
+				return Optional.of(String.format("%s/%s/%s", serverBaseProvider.get(),
+						resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()));
 			else
-				return Optional.of(String.format("%s/%s/%s/_history/%s", serverBaseProvider.getServerBase(),
-						t.getIdElement().getResourceType(), t.getIdElement().getIdPart(),
-						t.getIdElement().getVersionIdPart()));
+				return Optional.of(String.format("%s/%s/%s/_history/%s", serverBaseProvider.get(),
+						resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart(),
+						resource.getIdElement().getVersionIdPart()));
 		}
-		else if (t instanceof Bundle && !t.getIdElement().hasIdPart())
-			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
+		else if (resource instanceof Bundle && !resource.getIdElement().hasIdPart())
+			return ((Bundle) resource).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
 					.map(c -> c.getUrl());
 		else
 			return Optional.empty();
 	}
 
-	private void writeXml(String basePath, T t, OutputStreamWriter out) throws IOException
+	private void writeXml(MediaType mediaType, String basePath, BaseResource resource, OutputStreamWriter out)
+			throws IOException
 	{
-		IParser parser = getParser(fhirContext::newXmlParser);
+		IParser parser = getParser(mediaType, fhirContext::newXmlParser);
 
 		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
-		String content = parser.encodeResourceToString(t);
+		String content = parser.encodeResourceToString(resource);
 
 		content = content.replace("&amp;", "&amp;amp;").replace("&apos;", "&amp;apos;").replace("&gt;", "&amp;gt;")
 				.replace("&lt;", "&amp;lt;").replace("&quot;", "&amp;quot;");
@@ -329,7 +339,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		Matcher versionMatcher = XML_ID_UUID_AND_VERSION_PATTERN.matcher(content);
 		content = versionMatcher.replaceAll(result ->
 		{
-			Optional<String> resourceName = getResourceName(t, result.group(1));
+			Optional<String> resourceName = getResourceName(resource, result.group(1));
 			return resourceName
 					.map(rN -> "&lt;id value=\"<a href=\"" + basePath + rN + "/" + result.group(1) + "\">"
 							+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
@@ -377,12 +387,13 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		}
 	}
 
-	private void writeJson(String basePath, T t, OutputStreamWriter out) throws IOException
+	private void writeJson(MediaType mediaType, String basePath, BaseResource resource, OutputStreamWriter out)
+			throws IOException
 	{
-		IParser parser = getParser(fhirContext::newJsonParser);
+		IParser parser = getParser(mediaType, fhirContext::newJsonParser);
 
 		out.write("<pre id=\"json\" class=\"prettyprint linenums lang-json\" style=\"display:none;\">");
-		String content = parser.encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
+		String content = parser.encodeResourceToString(resource).replace("<", "&lt;").replace(">", "&gt;");
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
 		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
@@ -394,7 +405,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		Matcher idUuidMatcher = JSON_ID_UUID_AND_VERSION_PATTERN.matcher(content);
 		content = idUuidMatcher.replaceAll(result ->
 		{
-			Optional<String> resourceName = getResourceName(t, result.group(1));
+			Optional<String> resourceName = getResourceName(resource, result.group(1));
 			return resourceName.map(rN -> "\"id\": \"<a href=\"" + basePath + rN + "/" + result.group(1) + "\">"
 					+ result.group(1) + "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3)
 					+ "\"versionId\": \"" + "<a href=\"" + basePath + rN + "/" + result.group(1) + "/_history/"
@@ -405,49 +416,32 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</pre>\n");
 	}
 
-	private void writeHtml(String basePath, T t, OutputStreamWriter out) throws IOException
+	@SuppressWarnings("unchecked")
+	private void writeHtml(Class<?> resourceType, String basePath, BaseResource resource, OutputStreamWriter out)
+			throws IOException
 	{
 		out.write("<div id=\"html\" class=\"prettyprint lang-html\" style=\"display:none;\">\n");
-		doWriteHtml(basePath, t, out);
+
+		HtmlGenerator<BaseResource> generator = (HtmlGenerator<BaseResource>) htmlGeneratorsByType.get(resourceType);
+		generator.writeHtml(basePath, resource, out);
+
 		out.write("</div>\n");
 	}
 
-	/**
-	 * Override this method to return <code>true</code> if the HTML tab should be shown. This implies overriding
-	 * {@link #doWriteHtml(String, BaseResource, OutputStreamWriter)} as well.
-	 *
-	 * @return <code>true</code> if the html tab should be shown, <code>false</code> otherwise (default
-	 *         <code>false</code>)
-	 */
-	protected boolean isHtmlEnabled()
+	private boolean isHtmlEnabled(Class<?> resourceType)
 	{
-		return false;
+		return htmlGeneratorsByType.containsKey(resourceType);
 	}
 
-	/**
-	 * Use this method to write output to the html tab. This implies overriding {@link #isHtmlEnabled()} as well.
-	 *
-	 * @param basePath
-	 *            the applications base base, e.g. /fhir/
-	 * @param t
-	 *            the resource, not <code>null</code>
-	 * @param out
-	 *            the outputStreamWriter, not <code>null</code>
-	 * @throws IOException
-	 */
-	protected void doWriteHtml(String basePath, T t, OutputStreamWriter out) throws IOException
+	private Optional<String> getResourceName(BaseResource resource, String uuid)
 	{
-	}
-
-	private Optional<String> getResourceName(T t, String uuid)
-	{
-		if (t instanceof Bundle)
+		if (resource instanceof Bundle)
 		{
 			// if persistent Bundle resource
-			if (Objects.equal(uuid, t.getIdElement().getIdPart()))
-				return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
+			if (Objects.equals(uuid, resource.getIdElement().getIdPart()))
+				return Optional.of(resource.getClass().getAnnotation(ResourceDef.class).name());
 			else
-				return ((Bundle) t).getEntry().stream().filter(c ->
+				return ((Bundle) resource).getEntry().stream().filter(c ->
 				{
 					if (c.hasResource())
 						return uuid.equals(c.getResource().getIdElement().getIdPart());
@@ -461,8 +455,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 						return new IdType(c.getResponse().getLocation()).getResourceType();
 				}).findFirst();
 		}
-		else if (t instanceof Resource)
-			return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
+		else if (resource instanceof Resource)
+			return Optional.of(resource.getClass().getAnnotation(ResourceDef.class).name());
 		else
 			return Optional.empty();
 	}

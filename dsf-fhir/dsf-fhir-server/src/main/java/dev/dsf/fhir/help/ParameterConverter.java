@@ -4,6 +4,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.fhir.adapter.AbstractFhirAdapter;
+import dev.dsf.fhir.adapter.AbstractAdapter;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import jakarta.ws.rs.WebApplicationException;
@@ -96,54 +97,60 @@ public class ParameterConverter
 	{
 		String format = uri.getQueryParameters().getFirst("_format");
 		boolean pretty = "true".equals(uri.getQueryParameters().getFirst("_pretty"));
+		SummaryMode summaryMode = SummaryMode.fromString(uri.getQueryParameters().getFirst("_summary"));
 		String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
 
 		if (format == null || format.isBlank())
-			return getMediaType(accept, pretty);
+			return getMediaType(accept, pretty, summaryMode);
 
 		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format) || MediaType.TEXT_HTML.equals(format))
-			return getMediaType(format, pretty);
+			return getMediaType(format, pretty, summaryMode);
 		else if (XML_FORMAT.equals(format))
-			return Optional.of(mediaType("application", "fhir+xml", pretty));
+			return Optional.of(mediaType("application", "fhir+xml", pretty, summaryMode));
 		else if (JSON_FORMAT.equals(format))
-			return Optional.of(mediaType("application", "fhir+json", pretty));
+			return Optional.of(mediaType("application", "fhir+json", pretty, summaryMode));
 		else if (HTML_FORMAT.equals(format))
-			return Optional.of(mediaType("text", "html", pretty));
+			return Optional.of(mediaType("text", "html", pretty, summaryMode));
 		else
 			return Optional.empty();
 	}
 
-	private Optional<MediaType> getMediaType(String mediaType, boolean pretty)
+	private Optional<MediaType> getMediaType(String mediaType, boolean pretty, SummaryMode summaryMode)
 	{
 		if (mediaType == null || mediaType.isBlank())
 			mediaType = MediaType.WILDCARD;
 
 		if (mediaType.contains(MediaType.TEXT_HTML))
-			return Optional.of(mediaType("text", "html", pretty));
+			return Optional.of(mediaType("text", "html", pretty, summaryMode));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON_NEW))
-			return Optional.of(mediaType("application", "fhir+json", pretty));
+			return Optional.of(mediaType("application", "fhir+json", pretty, summaryMode));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON))
-			return Optional.of(mediaType("application", "json+fhir", pretty));
+			return Optional.of(mediaType("application", "json+fhir", pretty, summaryMode));
 		else if (mediaType.contains(MediaType.APPLICATION_JSON))
-			return Optional.of(mediaType("application", "json", pretty));
+			return Optional.of(mediaType("application", "json", pretty, summaryMode));
 		else if (mediaType.contains(Constants.CT_FHIR_XML_NEW))
-			return Optional.of(mediaType("application", "fhir+xml", pretty));
+			return Optional.of(mediaType("application", "fhir+xml", pretty, summaryMode));
 		else if (mediaType.contains(Constants.CT_FHIR_XML))
-			return Optional.of(mediaType("application", "xml+fhir", pretty));
+			return Optional.of(mediaType("application", "xml+fhir", pretty, summaryMode));
 		else if (mediaType.contains(MediaType.APPLICATION_XML))
-			return Optional.of(mediaType("application", "xml", pretty));
+			return Optional.of(mediaType("application", "xml", pretty, summaryMode));
 		else if (mediaType.contains(MediaType.TEXT_XML))
-			return Optional.of(mediaType("text", "xml", pretty));
+			return Optional.of(mediaType("text", "xml", pretty, summaryMode));
 		else if (mediaType.contains(MediaType.WILDCARD))
-			return Optional.of(mediaType("application", "fhir+xml", pretty));
+			return Optional.of(mediaType("application", "fhir+xml", pretty, summaryMode));
 		else
 			return Optional.empty();
 	}
 
-	private MediaType mediaType(String type, String subtype, boolean pretty)
+	private MediaType mediaType(String type, String subtype, boolean pretty, SummaryMode summaryMode)
 	{
-		return new MediaType(type, subtype,
-				!pretty ? null : Map.of(AbstractFhirAdapter.PRETTY, String.valueOf(pretty)));
+		Map<String, String> parameters = new HashMap<>();
+		if (pretty)
+			parameters.put(AbstractAdapter.PRETTY, "true");
+		if (summaryMode != null)
+			parameters.put(AbstractAdapter.SUMMARY, summaryMode.toString());
+
+		return new MediaType(type, subtype, parameters);
 	}
 
 	public PreferReturnType getPreferReturn(HttpHeaders headers)
