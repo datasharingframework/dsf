@@ -1,4 +1,4 @@
-package dev.dsf.tools.generator;
+package dev.dsf.bpe.documentation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,8 +7,6 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation for documenting DSF process plugin properties
- *
- * @see Documentation
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

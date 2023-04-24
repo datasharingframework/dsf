@@ -40,6 +40,10 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-documentation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-status</artifactId>
 		</dependency>
 		<dependency>
