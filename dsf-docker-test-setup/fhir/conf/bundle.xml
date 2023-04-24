@@ -65,7 +65,7 @@
             </payloadType>
             <payloadMimeType value="application/fhir+json"/>
             <payloadMimeType value="application/fhir+xml"/>
-            <address value="https://localhost/fhir"/>
+            <address value="https://fhir/fhir"/>
          </Endpoint>
       </resource>
       <request>
