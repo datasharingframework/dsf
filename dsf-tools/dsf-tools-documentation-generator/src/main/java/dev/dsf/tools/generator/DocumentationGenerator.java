@@ -46,7 +46,7 @@ import dev.dsf.bpe.v1.ProcessPluginDefinition;
 import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 import dev.dsf.common.documentation.Documentation;
 
-@Mojo(name = "documentation-generation", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class DocumentationGenerator extends AbstractMojo
 {
 	private static final Logger logger = LoggerFactory.getLogger(DocumentationGenerator.class);
@@ -126,27 +126,23 @@ public class DocumentationGenerator extends AbstractMojo
 
 	private URLClassLoader classLoader()
 	{
-		URL[] classpathElements = compileClasspathElements.stream().map(toUrl()).filter(Objects::nonNull).toList()
-				.toArray(new URL[0]);
+		URL[] classpathElements = compileClasspathElements.stream().map(this::toUrl).filter(Objects::nonNull)
+				.toArray(URL[]::new);
 
 		return new URLClassLoader(classpathElements, Thread.currentThread().getContextClassLoader());
 	}
 
-	private Function<String, URL> toUrl()
+	private URL toUrl(String path)
 	{
-		return (element) ->
+		try
 		{
-			try
-			{
-				return new File(element).toURI().toURL();
-			}
-			catch (MalformedURLException exception)
-			{
-				logger.warn("Could not transform element '{}' to url, returning null - {}", element,
-						exception.getMessage());
-				return null;
-			}
-		};
+			return new File(path).toURI().toURL();
+		}
+		catch (MalformedURLException exception)
+		{
+			logger.warn("Could not transform path '{}' to url, returning null - {}", path, exception.getMessage());
+			return null;
+		}
 	}
 
 	private List<String> getPluginProcessNames(Reflections reflections, ClassLoader classLoader, String workingPackage)
