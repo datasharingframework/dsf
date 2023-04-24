@@ -36,7 +36,16 @@ import dev.dsf.bpe.v1.variables.Targets;
 import dev.dsf.bpe.v1.variables.Variables;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 
-public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
+/**
+ * Base class for implementing BPMN message send tasks, intermediate message throw events and message end events using
+ * FHIR Task resources within the DSF. Requires three String fields to be injected via BPMN:
+ * <ul>
+ * <li><b>instantiatesCanonical</b> with the
+ * <li><b>messageName</b> with the
+ * <li><b>profile</b> with the
+ * </ul>
+ */
+public abstract class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
@@ -73,7 +82,21 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		this.instantiatesCanonical = instantiatesCanonical;
 	}
 
-	public String getInstantiatesCanonical()
+	/**
+	 * Retrieves the instantiatesCanonical value used for Task resources send by this class via the injected field
+	 * <b>instantiatesCanonical</b>.
+	 * <p>
+	 * <i>Override this method to use a different mechanism for retrieving the value for instantiatesCanonical. For
+	 * example via a process variable. Note: A non empty value e.g 'disable' still needs to be injected in the BPMN file
+	 * in order to comply with the validation performed during plugin loading.</i>
+	 *
+	 * @param execution
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @return instantiatesCanonical value used for Task resources send by this class
+	 */
+	protected String getInstantiatesCanonical(DelegateExecution execution, Variables variables)
 	{
 		return instantiatesCanonical == null ? null : instantiatesCanonical.getExpressionText();
 	}
@@ -89,7 +112,21 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		this.messageName = messageName;
 	}
 
-	public String getMessageName()
+	/**
+	 * Retrieves the messageName value used for Task resources send by this class via the injected field
+	 * <b>messageName</b>.
+	 * <p>
+	 * <i>Override this method to use a different mechanism for retrieving the value for messageName. For example via a
+	 * process variable. Note: A non empty value e.g 'disable' still needs to be injected in the BPMN file in order to
+	 * comply with the validation performed during plugin loading.</i>
+	 *
+	 * @param execution
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @return messageName value used for Task resources send by this class
+	 */
+	protected String getMessageName(DelegateExecution execution, Variables variables)
 	{
 		return messageName == null ? null : messageName.getExpressionText();
 	}
@@ -105,7 +142,20 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		this.profile = profile;
 	}
 
-	public String getProfile()
+	/**
+	 * Retrieves the profile value used for Task resources send by this class via the injected field <b>profile</b>.
+	 * <p>
+	 * <i>Override this method to use a different mechanism for retrieving the value for profile. For example via a
+	 * process variable. Note: A non empty value e.g 'disable' still needs to be injected in the BPMN file in order to
+	 * comply with the validation performed during plugin loading.</i>
+	 *
+	 * @param execution
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @return profile value used for Task resources send by this class
+	 */
+	protected String getProfile(DelegateExecution execution, Variables variables)
 	{
 		return profile == null ? null : profile.getExpressionText();
 	}
@@ -118,9 +168,9 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 
 	protected void doExecute(DelegateExecution execution, Variables variables) throws Exception
 	{
-		final String instantiatesCanonical = getInstantiatesCanonical();
-		final String messageName = getMessageName();
-		final String profile = getProfile();
+		final String instantiatesCanonical = getInstantiatesCanonical(execution, variables);
+		final String messageName = getMessageName(execution, variables);
+		final String profile = getProfile(execution, variables);
 		final String businessKey = execution.getBusinessKey();
 		final Target target = variables.getTarget();
 

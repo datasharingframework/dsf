@@ -3,10 +3,21 @@ package dev.dsf.bpe.v1.variables;
 import java.util.Collection;
 import java.util.List;
 
-import org.camunda.bpm.model.cmmn.impl.instance.TargetImpl;
+import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
 
+/**
+ * Specifies a list of communication targets for FHIR Task resources.
+ *
+ * @see BpmnExecutionVariables#TARGETS
+ * @see Variables#createTargets(List)
+ * @see Variables#createTargets(Target...)
+ * @see Target
+ */
 public interface Targets
 {
+	/**
+	 * @return not <code>null</code>
+	 */
 	List<Target> getEntries();
 
 	/**
@@ -14,7 +25,7 @@ public interface Targets
 	 *
 	 * @param target
 	 * @return new {@link Targets} object
-	 * @see TargetImpl#getEndpointIdentifierValue()
+	 * @see Target#getEndpointIdentifierValue()
 	 */
 	Targets removeByEndpointIdentifierValue(Target target);
 
@@ -34,5 +45,8 @@ public interface Targets
 	 */
 	Targets removeAllByEndpointIdentifierValue(Collection<String> targetEndpointIdentifierValues);
 
+	/**
+	 * @return <code>true</code> if the entries list is empty
+	 */
 	boolean isEmpty();
 }

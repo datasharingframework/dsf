@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
@@ -14,30 +15,31 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.variables.VariablesImpl;
-
 public abstract class AbstractListener implements ExecutionListener, InitializingBean
 {
 	private final String serverBaseUrl;
+	private final Function<DelegateExecution, ListenerVariables> variablesFactory;
 
-	public AbstractListener(String serverBaseUrl)
+	public AbstractListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory)
 	{
 		this.serverBaseUrl = serverBaseUrl;
+		this.variablesFactory = variablesFactory;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
+		Objects.requireNonNull(variablesFactory, "variablesFactory");
 	}
 
 	@Override
 	public final void notify(DelegateExecution execution) throws Exception
 	{
-		doNotify(execution, new VariablesImpl(execution));
+		doNotify(execution, variablesFactory.apply(execution));
 	}
 
-	protected abstract void doNotify(DelegateExecution execution, VariablesImpl variables) throws Exception;
+	protected abstract void doNotify(DelegateExecution execution, ListenerVariables variables) throws Exception;
 
 	protected final String getLocalVersionlessAbsoluteUrl(Task task)
 	{

@@ -18,9 +18,9 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	private static final class ProcessByIdAndVersion
 	{
 		final ProcessIdAndVersion processIdAndVersion;
-		final ProcessPlugin<?, ?, ? extends TaskListener> plugin;
+		final ProcessPlugin<?, ?> plugin;
 
-		ProcessByIdAndVersion(ProcessIdAndVersion idAndVersion, ProcessPlugin<?, ?, ? extends TaskListener> plugin)
+		ProcessByIdAndVersion(ProcessIdAndVersion idAndVersion, ProcessPlugin<?, ?> plugin)
 		{
 			this.processIdAndVersion = idAndVersion;
 			this.plugin = plugin;
@@ -31,7 +31,7 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 			return processIdAndVersion;
 		}
 
-		public ProcessPlugin<?, ?, ? extends TaskListener> getPlugin()
+		public ProcessPlugin<?, ?> getPlugin()
 		{
 			return plugin;
 		}
@@ -40,7 +40,7 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	private final ClassLoader defaultClassLoader;
 	private final ApplicationContext defaultApplicationContext;
 
-	private final Map<ProcessIdAndVersion, ProcessPlugin<?, ?, ? extends TaskListener>> processPluginsByIdAndVersion = new HashMap<>();
+	private final Map<ProcessIdAndVersion, ProcessPlugin<?, ?>> processPluginsByIdAndVersion = new HashMap<>();
 
 	public DelegateProviderImpl(ClassLoader mainClassLoader, ApplicationContext mainApplicationContext)
 	{
@@ -56,7 +56,7 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	}
 
 	@Override
-	public void setProcessPlugins(List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins)
+	public void setProcessPlugins(List<ProcessPlugin<?, ?>> plugins)
 	{
 		processPluginsByIdAndVersion.putAll(plugins.stream()
 				.flatMap(plugin -> plugin.getProcessKeysAndVersions().stream()

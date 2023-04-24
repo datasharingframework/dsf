@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 import org.springframework.core.env.ConfigurableEnvironment;
 
@@ -13,18 +12,15 @@ import dev.dsf.bpe.plugin.AbstractProcessPlugin;
 import dev.dsf.bpe.plugin.ProcessPlugin;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
-import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
 
-public class ProcessPluginImpl
-		extends AbstractProcessPlugin<ProcessPluginDefinition, ProcessPluginApi, DefaultUserTaskListener>
-		implements ProcessPlugin<ProcessPluginDefinition, ProcessPluginApi, DefaultUserTaskListener>
+public class ProcessPluginImpl extends AbstractProcessPlugin<ProcessPluginDefinition, ProcessPluginApi>
+		implements ProcessPlugin<ProcessPluginDefinition, ProcessPluginApi>
 {
 	public ProcessPluginImpl(ProcessPluginDefinition processPluginDefinition, ProcessPluginApi processPluginApi,
-			DefaultUserTaskListener defaultUserTaskListener, boolean draft, Path jarFile, ClassLoader classLoader,
-			FhirContext fhirContext, ConfigurableEnvironment environment)
+			boolean draft, Path jarFile, ClassLoader classLoader, FhirContext fhirContext,
+			ConfigurableEnvironment environment)
 	{
-		super(processPluginDefinition, processPluginApi, defaultUserTaskListener, draft, jarFile, classLoader,
-				fhirContext, environment);
+		super(processPluginDefinition, processPluginApi, draft, jarFile, classLoader, fhirContext, environment);
 	}
 
 	@Override
@@ -76,17 +72,9 @@ public class ProcessPluginImpl
 	}
 
 	@Override
-	protected void registerApiBeans(BiConsumer<String, Object> registry)
+	protected Class<?> getDefaultSpringConfiguration()
 	{
-		registry.accept("processPluginApi", getProcessPluginApi());
-		registry.accept("endpointProvider", getProcessPluginApi().getEndpointProvider());
-		registry.accept("fhirContext", getProcessPluginApi().getFhirContext());
-		registry.accept("fhirWebserviceClientProvider", getProcessPluginApi().getFhirWebserviceClientProvider());
-		registry.accept("mailService", getProcessPluginApi().getMailService());
-		registry.accept("objectMapper", getProcessPluginApi().getObjectMapper());
-		registry.accept("organizationProvider", getProcessPluginApi().getOrganizationProvider());
-		registry.accept("questionnaireResponseHelper", getProcessPluginApi().getQuestionnaireResponseHelper());
-		registry.accept("taskHelper", getProcessPluginApi().getTaskHelper());
+		return DefaultSpringConfiguration.class;
 	}
 
 	@Override

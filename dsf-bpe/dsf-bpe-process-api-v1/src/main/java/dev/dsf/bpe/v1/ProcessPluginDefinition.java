@@ -66,9 +66,9 @@ public interface ProcessPluginDefinition
 
 	/**
 	 * <i>Return <code>List.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
-	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.
+	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.</i>
 	 * <p>
-	 * Occurrences of</i> <code>#{version}</code> <i>will be replaced with the value of
+	 * <i>Occurrences of</i> <code>#{version}</code> <i>will be replaced with the value of
 	 * {@link #getResourceVersion()}<br>
 	 * Occurrences of</i> <code>#{date}</code> </i>will be replaced with the value of
 	 * {@link #getResourceReleaseDate()}<br>
@@ -85,12 +85,12 @@ public interface ProcessPluginDefinition
 	/**
 	 * <i>Return <code>Map.of("testcom_process", List.of("foo.xml"));</code> for a foo.xml file located in the root
 	 * folder of the process plugin jar needed for a process called testcom_process. The returned files will be read via
-	 * {@link ClassLoader#getResourceAsStream(String)}.
+	 * {@link ClassLoader#getResourceAsStream(String)}.</i>
 	 * <p>
-	 * Supported metadata resource types are ActivityDefinition, CodeSystem, Library, Measure, NamingSystem,
-	 * Questionnaire, StructureDefinition, Task and ValueSet.
+	 * <i>Supported metadata resource types are ActivityDefinition, CodeSystem, Library, Measure, NamingSystem,
+	 * Questionnaire, StructureDefinition, Task and ValueSet.</i>
 	 * <p>
-	 * Occurrences of</i> <code>#{version}</code> <i>will be replaced with the value of
+	 * <i>Occurrences of</i> <code>#{version}</code> <i>will be replaced with the value of
 	 * {@link #getResourceVersion()}<br>
 	 * Occurrences of</i> <code>#{date}</code> <i>will be replaced with the value of
 	 * {@link #getResourceReleaseDate()}<br>

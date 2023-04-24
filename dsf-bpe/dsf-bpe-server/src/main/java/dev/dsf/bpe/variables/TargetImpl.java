@@ -14,7 +14,7 @@ public class TargetImpl implements Target
 	private final String correlationKey;
 
 	@JsonCreator
-	private TargetImpl(
+	public TargetImpl(
 			@JsonProperty("organizationIdentifierValue") @JsonAlias("targetOrganizationIdentifierValue") String organizationIdentifierValue,
 			@JsonProperty("endpointIdentifierValue") String endpointIdentifierValue,
 			@JsonProperty("endpointUrl") @JsonAlias("targetEndpointUrl") String endpointUrl,
@@ -24,20 +24,6 @@ public class TargetImpl implements Target
 		this.endpointIdentifierValue = endpointIdentifierValue;
 		this.endpointUrl = endpointUrl;
 		this.correlationKey = correlationKey;
-	}
-
-	public static TargetImpl createUniDirectionalTarget(String targetOrganizationIdentifierValue,
-			String targetEndpointIdentifierValue, String targetEndpointUrl)
-	{
-		return new TargetImpl(targetOrganizationIdentifierValue, targetEndpointIdentifierValue, targetEndpointUrl,
-				null);
-	}
-
-	public static TargetImpl createBiDirectionalTarget(String targetOrganizationIdentifierValue,
-			String targetEndpointIdentifierValue, String targetEndpointUrl, String correlationKey)
-	{
-		return new TargetImpl(targetOrganizationIdentifierValue, targetEndpointIdentifierValue, targetEndpointUrl,
-				correlationKey);
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import dev.dsf.bpe.listener.DebugLoggingBpmnParseListener;
 import dev.dsf.bpe.listener.DefaultBpmnParseListener;
 import dev.dsf.bpe.listener.EndListener;
 import dev.dsf.bpe.listener.StartListener;
+import dev.dsf.bpe.variables.VariablesImpl;
 
 @Configuration
 public class CamundaConfig
@@ -76,20 +77,20 @@ public class CamundaConfig
 	@Bean
 	public StartListener startListener()
 	{
-		return new StartListener(propertiesConfig.getServerBaseUrl());
+		return new StartListener(propertiesConfig.getServerBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean
 	public EndListener endListener()
 	{
-		return new EndListener(propertiesConfig.getServerBaseUrl(),
+		return new EndListener(propertiesConfig.getServerBaseUrl(), VariablesImpl::new,
 				fhirClientConfig.clientProvider().getLocalWebserviceClient());
 	}
 
 	@Bean
 	public ContinueListener continueListener()
 	{
-		return new ContinueListener(propertiesConfig.getServerBaseUrl());
+		return new ContinueListener(propertiesConfig.getServerBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean

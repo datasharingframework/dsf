@@ -24,13 +24,24 @@ import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Bean;
 
 import dev.dsf.bpe.v1.ProcessPluginApi;
-import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnUserTask;
 import dev.dsf.bpe.v1.variables.Variables;
 
+/**
+ * Default {@link TaskListener} implementation. This listener will be added to user tasks if no other
+ * {@link TaskListener} is defined for the 'create' event type.
+ * <p>
+ * BPMN user tasks need to define the form to be used with type 'Embedded or External Task Forms' and the canonical URL
+ * of the a {@link Questionnaire} resource as the form key.
+ * <p>
+ * To modify the behavior of the listener, for example to set default values in the created 'in-progress'
+ * {@link QuestionnaireResponse}, extend this class, register it as a prototype {@link Bean} and specify the class name
+ * as a task listener with event type 'create' in the BPMN.
+ */
 public class DefaultUserTaskListener implements TaskListener, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTaskListener.class);
@@ -77,7 +88,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 			QuestionnaireResponse created = api.getFhirWebserviceClientProvider().getLocalWebserviceClient()
 					.withRetryForever(60000).create(questionnaireResponse);
-			execution.setVariable(BpmnExecutionVariables.QUESTIONNAIRE_RESPONSE_ID, created.getIdElement().getIdPart());
 
 			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
 					api.getQuestionnaireResponseHelper().getLocalVersionlessAbsoluteUrl(created));

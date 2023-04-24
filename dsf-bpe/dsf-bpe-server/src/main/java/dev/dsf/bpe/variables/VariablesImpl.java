@@ -8,11 +8,14 @@ import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.value.TypedValue;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.bpe.listener.ListenerVariables;
+import dev.dsf.bpe.subscription.QuestionnaireResponseHandler;
 import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v1.variables.Target;
 import dev.dsf.bpe.v1.variables.Targets;
@@ -22,7 +25,7 @@ import dev.dsf.bpe.variables.FhirResourcesListValues.FhirResourcesListValue;
 import dev.dsf.bpe.variables.TargetValues.TargetValue;
 import dev.dsf.bpe.variables.TargetsValues.TargetsValue;
 
-public class VariablesImpl implements Variables
+public class VariablesImpl implements Variables, ListenerVariables
 {
 	private static final Logger logger = LoggerFactory.getLogger(VariablesImpl.class);
 
@@ -44,23 +47,18 @@ public class VariablesImpl implements Variables
 	}
 
 	@Override
-	public Target createUniDirectionalTarget(String targetOrganizationIdentifierValue,
-			String targetEndpointIdentifierValue, String targetEndpointUrl)
+	public Target createTarget(String organizationIdentifierValue, String endpointIdentifierValue,
+			String endpointAddress, String correlationKey)
 	{
-		return TargetImpl.createUniDirectionalTarget(targetOrganizationIdentifierValue, targetEndpointIdentifierValue,
-				targetEndpointUrl);
+		Objects.requireNonNull(organizationIdentifierValue, "organizationIdentifierValue");
+		Objects.requireNonNull(endpointIdentifierValue, "endpointIdentifierValue");
+		Objects.requireNonNull(endpointAddress, "endpointAddress");
+
+		return new TargetImpl(organizationIdentifierValue, endpointIdentifierValue, endpointAddress, correlationKey);
 	}
 
 	@Override
-	public Target createBiDirectionalTarget(String targetOrganizationIdentifierValue,
-			String targetEndpointIdentifierValue, String targetEndpointUrl, String correlationKey)
-	{
-		return TargetImpl.createBiDirectionalTarget(targetOrganizationIdentifierValue, targetEndpointIdentifierValue,
-				targetEndpointUrl, correlationKey);
-	}
-
-	@Override
-	public void setTarget(Target target)
+	public void setTarget(Target target) throws IllegalArgumentException
 	{
 		if (target == null)
 		{
@@ -86,6 +84,9 @@ public class VariablesImpl implements Variables
 	@Override
 	public Targets createTargets(List<? extends Target> targets)
 	{
+		if (targets == null)
+			return new TargetsImpl(Collections.emptyList());
+
 		Optional<? extends Target> firstNonMatch = targets.stream().filter(t -> !(t instanceof TargetImpl)).findFirst();
 		if (firstNonMatch.isPresent())
 			throw new IllegalArgumentException("Target implementing class " + firstNonMatch.get().getClass().getName()
@@ -95,7 +96,7 @@ public class VariablesImpl implements Variables
 	}
 
 	@Override
-	public void setTargets(Targets targets)
+	public void setTargets(Targets targets) throws IllegalArgumentException
 	{
 		if (targets == null)
 		{
@@ -175,7 +176,9 @@ public class VariablesImpl implements Variables
 				logger.trace("Task [{}] id: {}, parentActivityInstanceId: {}", i, t.getIdElement().getIdPart(),
 						t.getUserData(TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID));
 			}
-			return tasks;
+
+			// wrapping again as unmodifiable list to make sure we stay independent from the rest of the code base
+			return Collections.unmodifiableList(tasks);
 		}
 	}
 
@@ -208,6 +211,7 @@ public class VariablesImpl implements Variables
 			logger.warn("Given task is null");
 	}
 
+	@Override
 	public void onStart(Task task)
 	{
 		if (task != null)
@@ -219,6 +223,7 @@ public class VariablesImpl implements Variables
 			logger.warn("Given task is null");
 	}
 
+	@Override
 	public void onContinue(Task task)
 	{
 		if (task != null)
@@ -234,6 +239,7 @@ public class VariablesImpl implements Variables
 			logger.warn("Given task is null");
 	}
 
+	@Override
 	public void onEnd()
 	{
 		List<Task> tasks = new ArrayList<>(getTasks());
@@ -242,14 +248,24 @@ public class VariablesImpl implements Variables
 	}
 
 	@Override
+	public QuestionnaireResponse getLatestReceivedQuestionnaireResponse()
+	{
+		return (QuestionnaireResponse) getResource(QuestionnaireResponseHandler.QUESTIONNAIRE_RESPONSE_VARIABLE);
+	}
+
+	@Override
 	public void setVariable(String variableName, TypedValue value)
 	{
+		Objects.requireNonNull(variableName, "variableName");
+
 		execution.setVariable(variableName, value);
 	}
 
 	@Override
 	public Object getVariable(String variableName)
 	{
+		Objects.requireNonNull(variableName, "variableName");
+
 		return execution.getVariable(variableName);
 	}
 }

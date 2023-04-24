@@ -38,7 +38,6 @@ import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.ProcessPluginApiImpl;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
 import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
-import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
 import dev.dsf.bpe.v1.service.EndpointProvider;
 import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
 import dev.dsf.bpe.v1.service.MailService;
@@ -150,7 +149,6 @@ public class ProcessPluginImplTest
 	private ProcessPluginApi processPluginApi = new ProcessPluginApiImpl(endpointProvider, fhirContext,
 			fhirWebserviceClientProvider, mailService, objectMapper, organizationProvider, processAuthorizationHelper,
 			questionnaireResponseHelper, readAccessHelper, taskHelper);
-	private DefaultUserTaskListener defaultUserTaskListener = mock(DefaultUserTaskListener.class);
 	private ConfigurableEnvironment environment = new StandardEnvironment();
 
 	@Test
@@ -339,7 +337,7 @@ public class ProcessPluginImplTest
 
 	private ProcessPluginImpl createPlugin(ProcessPluginDefinition processPluginDefinition, boolean draft)
 	{
-		return new ProcessPluginImpl(processPluginDefinition, processPluginApi, defaultUserTaskListener, draft,
-				Paths.get("test.jar"), getClass().getClassLoader(), fhirContext, environment);
+		return new ProcessPluginImpl(processPluginDefinition, processPluginApi, draft, Paths.get("test.jar"),
+				getClass().getClassLoader(), fhirContext, environment);
 	}
 }

@@ -16,7 +16,6 @@ import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,12 +30,11 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginLoaderImpl.class);
 
 	private final Path pluginDirectory;
-	private final List<ProcessPluginFactory<?, ? extends TaskListener>> processPluginFactories = new ArrayList<>();
+	private final List<ProcessPluginFactory<?>> processPluginFactories = new ArrayList<>();
 	private final FhirContext fhirContext;
 	private final ConfigurableEnvironment environment;
 
-	public ProcessPluginLoaderImpl(
-			Collection<? extends ProcessPluginFactory<?, ? extends TaskListener>> processPluginFactories,
+	public ProcessPluginLoaderImpl(Collection<? extends ProcessPluginFactory<?>> processPluginFactories,
 			Path pluginDirectory, FhirContext fhirContext, ConfigurableEnvironment environment)
 	{
 		this.pluginDirectory = pluginDirectory;
@@ -46,9 +44,8 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		if (processPluginFactories != null)
 		{
 			this.processPluginFactories.addAll(processPluginFactories);
-			this.processPluginFactories.sort(Comparator
-					.<ProcessPluginFactory<?, ? extends TaskListener>> comparingInt(ProcessPluginFactory::getApiVersion)
-					.reversed());
+			this.processPluginFactories.sort(
+					Comparator.<ProcessPluginFactory<?>> comparingInt(ProcessPluginFactory::getApiVersion).reversed());
 		}
 	}
 
@@ -61,11 +58,11 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 	}
 
 	@Override
-	public List<ProcessPlugin<?, ?, ? extends TaskListener>> loadPlugins()
+	public List<ProcessPlugin<?, ?>> loadPlugins()
 	{
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(pluginDirectory))
 		{
-			List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins = new ArrayList<>();
+			List<ProcessPlugin<?, ?>> plugins = new ArrayList<>();
 
 			directoryStream.forEach(p ->
 			{
@@ -75,7 +72,7 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 					logger.warn("Ignoring {}: {}", p.toAbsolutePath().toString(), "Not a .jar file");
 				else
 				{
-					ProcessPlugin<?, ?, ? extends TaskListener> plugin = load(p);
+					ProcessPlugin<?, ?> plugin = load(p);
 					if (plugin != null)
 						plugins.add(plugin);
 				}
@@ -90,9 +87,9 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		}
 	}
 
-	private ProcessPlugin<?, ?, ? extends TaskListener> load(Path jar)
+	private ProcessPlugin<?, ?> load(Path jar)
 	{
-		for (ProcessPluginFactory<?, ? extends TaskListener> factory : processPluginFactories)
+		for (ProcessPluginFactory<?> factory : processPluginFactories)
 		{
 			var plugin = load(jar, factory);
 
@@ -108,7 +105,7 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		return null;
 	}
 
-	private <D> ProcessPlugin<?, ?, ? extends TaskListener> load(Path jar, ProcessPluginFactory<D, ?> factory)
+	private <D> ProcessPlugin<?, ?> load(Path jar, ProcessPluginFactory<D> factory)
 	{
 		try
 		{

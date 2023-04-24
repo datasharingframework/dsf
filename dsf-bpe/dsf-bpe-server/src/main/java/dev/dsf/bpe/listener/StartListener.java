@@ -1,5 +1,7 @@
 package dev.dsf.bpe.listener;
 
+import java.util.function.Function;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.hl7.fhir.r4.model.Task;
@@ -8,19 +10,18 @@ import org.slf4j.LoggerFactory;
 
 import dev.dsf.bpe.subscription.TaskHandler;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
-import dev.dsf.bpe.variables.VariablesImpl;
 
 public class StartListener extends AbstractListener implements ExecutionListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(StartListener.class);
 
-	public StartListener(String serverBaseUrl)
+	public StartListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory)
 	{
-		super(serverBaseUrl);
+		super(serverBaseUrl, variablesFactory);
 	}
 
 	@Override
-	public void doNotify(DelegateExecution execution, VariablesImpl variables) throws Exception
+	public void doNotify(DelegateExecution execution, ListenerVariables variables) throws Exception
 	{
 		Task task = variables.getResource(TaskHandler.TASK_VARIABLE);
 

@@ -2,6 +2,9 @@ package dev.dsf.bpe.v1.constants;
 
 import org.hl7.fhir.r4.model.Coding;
 
+/**
+ * Constants defining standard DSF CodeSystems
+ */
 public final class CodeSystems
 {
 	private CodeSystems()

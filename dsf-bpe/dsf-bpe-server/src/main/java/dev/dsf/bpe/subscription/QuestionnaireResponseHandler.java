@@ -13,13 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnUserTask;
 import dev.dsf.bpe.variables.FhirResourceValues;
 
 public class QuestionnaireResponseHandler implements ResourceHandler<QuestionnaireResponse>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseHandler.class);
+
+	public static final String QUESTIONNAIRE_RESPONSE_VARIABLE = QuestionnaireResponseHandler.class.getName()
+			+ ".questionnaireResponse";
 
 	private final TaskService userTaskService;
 
@@ -56,7 +58,7 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 						"QuestionnaireResponse '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
 						questionnaireResponseId, questionnaire, userTaskId, businessKey, user + "|" + userType);
 
-				Map<String, Object> variables = Map.of(BpmnExecutionVariables.QUESTIONNAIRE_RESPONSE_COMPLETED,
+				Map<String, Object> variables = Map.of(QUESTIONNAIRE_RESPONSE_VARIABLE,
 						FhirResourceValues.create(questionnaireResponse));
 				userTaskService.complete(userTaskId, variables);
 			}, () ->

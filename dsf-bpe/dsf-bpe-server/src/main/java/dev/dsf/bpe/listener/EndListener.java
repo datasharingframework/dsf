@@ -2,6 +2,7 @@ package dev.dsf.bpe.listener;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
-import dev.dsf.bpe.variables.VariablesImpl;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 
 public class EndListener extends AbstractListener implements ExecutionListener
@@ -20,9 +20,10 @@ public class EndListener extends AbstractListener implements ExecutionListener
 
 	private final FhirWebserviceClient webserviceClient;
 
-	public EndListener(String serverBaseUrl, FhirWebserviceClient fhirWebserviceClient)
+	public EndListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory,
+			FhirWebserviceClient fhirWebserviceClient)
 	{
-		super(serverBaseUrl);
+		super(serverBaseUrl, variablesFactory);
 
 		this.webserviceClient = fhirWebserviceClient;
 	}
@@ -36,7 +37,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 	}
 
 	@Override
-	public void doNotify(DelegateExecution execution, VariablesImpl variables) throws Exception
+	public void doNotify(DelegateExecution execution, ListenerVariables variables) throws Exception
 	{
 		List<Task> tasks = variables.getCurrentTasks();
 

@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -75,7 +74,7 @@ import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
 
-public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implements ProcessPlugin<D, A, L>
+public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 {
 	private static final class FileAndResource
 	{
@@ -158,7 +157,6 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 
 	private final D processPluginDefinition;
 	private final A processPluginApi;
-	private final L defaultUserTaskListener;
 	private final boolean draft;
 	private final Path jarFile;
 	private final ClassLoader processPluginClassLoader;
@@ -170,13 +168,11 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 	private List<BpmnFileAndModel> processModels;
 	private Map<ProcessIdAndVersion, List<FileAndResource>> fhirResources;
 
-	public AbstractProcessPlugin(D processPluginDefinition, A processPluginApi, L defaultUserTaskListener,
-			boolean draft, Path jarFile, ClassLoader processPluginClassLoader, FhirContext fhirContext,
-			ConfigurableEnvironment environment)
+	public AbstractProcessPlugin(D processPluginDefinition, A processPluginApi, boolean draft, Path jarFile,
+			ClassLoader processPluginClassLoader, FhirContext fhirContext, ConfigurableEnvironment environment)
 	{
 		Objects.requireNonNull(processPluginDefinition, "definition");
 		Objects.requireNonNull(processPluginApi, "processPluginApi");
-		Objects.requireNonNull(defaultUserTaskListener, "defaultUserTaskListener");
 		Objects.requireNonNull(jarFile, "jarFile");
 		Objects.requireNonNull(processPluginClassLoader, "processPluginClassLoader");
 		Objects.requireNonNull(fhirContext, "fhirContext");
@@ -184,7 +180,6 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 
 		this.processPluginDefinition = processPluginDefinition;
 		this.processPluginApi = processPluginApi;
-		this.defaultUserTaskListener = defaultUserTaskListener;
 		this.draft = draft;
 		this.jarFile = jarFile;
 		this.processPluginClassLoader = processPluginClassLoader;
@@ -208,7 +203,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 
 	protected abstract List<String> getDefinitionProcessModels();
 
-	protected abstract void registerApiBeans(BiConsumer<String, Object> registry);
+	protected abstract Class<?> getDefaultSpringConfiguration();
 
 	protected abstract String getProcessPluginApiVersion();
 
@@ -497,12 +492,6 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 	}
 
 	@Override
-	public L getDefaultUserTaskListener()
-	{
-		return defaultUserTaskListener;
-	}
-
-	@Override
 	public boolean isDraft()
 	{
 		return draft;
@@ -567,7 +556,7 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 	private ApplicationContext createParentApplicationContext()
 	{
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		registerApiBeans(factory::registerSingleton);
+		factory.registerSingleton("processPluginApi", getProcessPluginApi());
 		GenericApplicationContext context = new GenericApplicationContext(factory);
 		context.refresh();
 		return context;
@@ -578,10 +567,12 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		try
 		{
 			var context = new AnnotationConfigApplicationContext();
-			context.setClassLoader(getProcessPluginClassLoader());
-			context.register(getDefinitionSpringConfigurations().toArray(Class<?>[]::new));
-			context.setEnvironment(environment);
 			context.setParent(createParentApplicationContext());
+			context.setClassLoader(getProcessPluginClassLoader());
+			context.register(Stream
+					.concat(Stream.of(getDefaultSpringConfiguration()), getDefinitionSpringConfigurations().stream())
+					.toArray(Class<?>[]::new));
+			context.setEnvironment(environment);
 			context.refresh();
 			return context;
 		}
@@ -751,9 +742,8 @@ public abstract class AbstractProcessPlugin<D, A, L extends TaskListener> implem
 		return true;
 	}
 
-	// TODO filter BPMN Models that use the AbstractTaskMessageSend for IntermediateThrowEvent, EndEvent or SendTask but
-	// do not declare variable BpmnExecutionVariables.INSTANTIATES_CANONICAL, BpmnExecutionVariables.MESSAGE_NAME,
-	// BpmnExecutionVariables.PROFILE
+	// TODO filter BPMN Models that use UserTasks but either do not declare a camunda formKey or do not contain the
+	// matching questionnaire resource
 	private Stream<BpmnFileAndModel> filterBpmnModelsWithNotAvailableBeans(List<BpmnFileAndModel> models,
 			ApplicationContext applicationContext)
 	{

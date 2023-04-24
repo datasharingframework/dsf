@@ -13,6 +13,9 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 
+/**
+ * Constants defining standard DSF NamingSystems
+ */
 public final class NamingSystems
 {
 	private NamingSystems()

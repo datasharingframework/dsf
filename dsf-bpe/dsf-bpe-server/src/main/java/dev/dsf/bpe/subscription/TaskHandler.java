@@ -206,7 +206,8 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 									businessKey);
 
 				if (correlationKey != null)
-					correlation = correlation.localVariableEquals("correlationKey", correlationKey);
+					correlation = correlation.localVariableEquals(BpmnExecutionVariables.CORRELATION_KEY,
+							correlationKey);
 
 				// throws MismatchingMessageCorrelationException - if none or more than one execution or process
 				// definition is matched by the correlation

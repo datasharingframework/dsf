@@ -1,6 +1,8 @@
 package dev.dsf.bpe.v1;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,7 +17,12 @@ import dev.dsf.bpe.v1.variables.Variables;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 
-// TODO JavaDoc for all methods with example use
+/**
+ * Gives access to services available to process plugins. This api and all services excepted {@link Variables} can be
+ * injected using {@link Autowired} into spring {@link Configuration} classes.
+ *
+ * @see ProcessPluginDefinition#getSpringConfigurations()
+ */
 public interface ProcessPluginApi
 {
 	EndpointProvider getEndpointProvider();

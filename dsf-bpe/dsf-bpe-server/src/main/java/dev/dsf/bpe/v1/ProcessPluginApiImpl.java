@@ -129,6 +129,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	@Override
 	public Variables getVariables(DelegateExecution execution)
 	{
+		// returning a new VariablesImpl since DelegateExecution is BPMN activity specific
 		return new VariablesImpl(execution);
 	}
 }

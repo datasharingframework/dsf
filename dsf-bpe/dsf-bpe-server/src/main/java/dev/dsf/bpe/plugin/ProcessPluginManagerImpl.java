@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
@@ -85,8 +84,8 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		if (localOrganizationIdentifierValue.isEmpty())
 			logger.warn("Local organization identifier unknown, check DSF FHIR server allow list");
 
-		List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins = removeDuplicates(processPluginLoader.loadPlugins()
-				.stream().filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null))));
+		List<ProcessPlugin<?, ?>> plugins = removeDuplicates(processPluginLoader.loadPlugins().stream()
+				.filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null))));
 
 		if (plugins.isEmpty())
 		{
@@ -152,10 +151,9 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.filter(r -> r instanceof Organization).map(r -> (Organization) r).filter(Organization::getActive);
 	}
 
-	private List<ProcessPlugin<?, ?, ? extends TaskListener>> removeDuplicates(
-			Stream<ProcessPlugin<?, ?, ? extends TaskListener>> plugins)
+	private List<ProcessPlugin<?, ?>> removeDuplicates(Stream<ProcessPlugin<?, ?>> plugins)
 	{
-		Map<ProcessIdAndVersion, List<ProcessPlugin<?, ?, ? extends TaskListener>>> pluginsByProcessIdAndVersion = new HashMap<>();
+		Map<ProcessIdAndVersion, List<ProcessPlugin<?, ?>>> pluginsByProcessIdAndVersion = new HashMap<>();
 		plugins.forEach(plugin ->
 		{
 			List<ProcessIdAndVersion> processes = plugin.getProcessKeysAndVersions();
@@ -165,7 +163,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 					pluginsByProcessIdAndVersion.get(process).add(plugin);
 				else
 				{
-					List<ProcessPlugin<?, ?, ? extends TaskListener>> list = new ArrayList<>();
+					List<ProcessPlugin<?, ?>> list = new ArrayList<>();
 					list.add(plugin);
 					pluginsByProcessIdAndVersion.put(process, list);
 				}
@@ -184,8 +182,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.flatMap(e -> e.getValue().stream()).distinct().toList();
 	}
 
-	private void onProcessesDeployed(List<ProcessStateChangeOutcome> changes,
-			List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins)
+	private void onProcessesDeployed(List<ProcessStateChangeOutcome> changes, List<ProcessPlugin<?, ?>> plugins)
 	{
 		Set<ProcessIdAndVersion> activeProcesses = changes.stream()
 				.filter(c -> EnumSet.of(ProcessState.ACTIVE, ProcessState.DRAFT).contains(c.getNewProcessState()))
@@ -202,7 +199,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	}
 
 	private Consumer<Entry<String, ProcessPluginDeplyomentStateListener>> onProcessesDeployed(
-			ProcessPlugin<?, ?, ? extends TaskListener> plugin, List<String> activePluginProcesses)
+			ProcessPlugin<?, ?> plugin, List<String> activePluginProcesses)
 	{
 		return entry ->
 		{

@@ -26,7 +26,6 @@ import dev.dsf.bpe.plugin.ProcessPluginManagerImpl;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.ProcessPluginApiImpl;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
-import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
 import dev.dsf.bpe.v1.plugin.ProcessPluginFactoryImpl;
 import dev.dsf.bpe.v1.service.EndpointProvider;
 import dev.dsf.bpe.v1.service.EndpointProviderImpl;
@@ -97,15 +96,9 @@ public class PluginConfig
 	}
 
 	@Bean
-	public ProcessPluginFactory<ProcessPluginDefinition, DefaultUserTaskListener> processPluginFactoryV1()
+	public ProcessPluginFactory<ProcessPluginDefinition> processPluginFactoryV1()
 	{
-		return new ProcessPluginFactoryImpl(processPluginApiV1(), defaultUserTaskListenerV1());
-	}
-
-	@Bean
-	public DefaultUserTaskListener defaultUserTaskListenerV1()
-	{
-		return new DefaultUserTaskListener(processPluginApiV1());
+		return new ProcessPluginFactoryImpl(processPluginApiV1());
 	}
 
 	@Bean

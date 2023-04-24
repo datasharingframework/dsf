@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.variable.serializer.AbstractTypedValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
@@ -82,7 +81,7 @@ public class FallbackSerializerFactoryImpl implements FallbackSerializerFactory
 	private final Map<String, TypedValueSerializerWrapper> serializersByName = new HashMap<>();
 
 	@Override
-	public void setProcessPlugins(List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins)
+	public void setProcessPlugins(List<ProcessPlugin<?, ?>> plugins)
 	{
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		List<TypedValueSerializerWrapper> serializers = plugins.stream().map(ProcessPlugin::getTypedValueSerializers)
