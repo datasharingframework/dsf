@@ -92,7 +92,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		task = webserviceClient.update(task);
-		
+
 		Map<String, Object> variables = Map.of(BPMN_EXECUTION_VARIABLE_TASK, FhirResourceValues.create(task));
 
 		try
