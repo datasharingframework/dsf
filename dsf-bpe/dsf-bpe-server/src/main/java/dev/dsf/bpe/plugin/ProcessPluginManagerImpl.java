@@ -2,18 +2,26 @@ package dev.dsf.bpe.plugin;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.TaskListener;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +29,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.camunda.ProcessPluginConsumer;
 import dev.dsf.bpe.v1.ProcessPluginDeplyomentStateListener;
-import dev.dsf.bpe.v1.service.OrganizationProvider;
+import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
+import dev.dsf.fhir.client.BasicFhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClient;
 
 public class ProcessPluginManagerImpl implements ProcessPluginManager, InitializingBean
 {
@@ -32,11 +42,17 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	private final ProcessPluginLoader processPluginLoader;
 	private final BpmnProcessStateChangeService bpmnProcessStateChangeService;
 	private final FhirResourceHandler fhirResourceHandler;
-	private final OrganizationProvider organizationProvider;
+
+	private final String localEndpointAddress;
+	private final FhirWebserviceClient localWebserviceClient;
+	private final int fhirServerRequestMaxRetries;
+	private final long fhirServerRetryDelayMillis;
 
 	public ProcessPluginManagerImpl(List<ProcessPluginConsumer> processPluginConsumers,
 			ProcessPluginLoader processPluginLoader, BpmnProcessStateChangeService bpmnProcessStateChangeService,
-			FhirResourceHandler fhirResourceHandler, OrganizationProvider organizationProvider)
+			FhirResourceHandler fhirResourceHandler, String localEndpointAddress,
+			FhirWebserviceClient localWebserviceClient, int fhirServerRequestMaxRetries,
+			long fhirServerRetryDelayMillis)
 	{
 		if (processPluginConsumers != null)
 			this.processPluginConsumers.addAll(processPluginConsumers);
@@ -44,7 +60,11 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		this.processPluginLoader = processPluginLoader;
 		this.bpmnProcessStateChangeService = bpmnProcessStateChangeService;
 		this.fhirResourceHandler = fhirResourceHandler;
-		this.organizationProvider = organizationProvider;
+
+		this.localEndpointAddress = localEndpointAddress;
+		this.localWebserviceClient = localWebserviceClient;
+		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
+		this.fhirServerRetryDelayMillis = fhirServerRetryDelayMillis;
 	}
 
 	@Override
@@ -53,19 +73,20 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		Objects.requireNonNull(processPluginLoader, "processPluginLoader");
 		Objects.requireNonNull(bpmnProcessStateChangeService, "bpmnProcessStateChangeService");
 		Objects.requireNonNull(fhirResourceHandler, "fhirResourceHandler");
+
+		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
+		Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
 	}
 
 	@Override
 	public void loadAndDeployPlugins()
 	{
-		String localOrganizationIdentifierValue = organizationProvider.getLocalOrganizationIdentifierValue()
-				.orElse(null);
-
-		if (localOrganizationIdentifierValue == null)
+		Optional<String> localOrganizationIdentifierValue = getLocalOrganizationIdentifierValue();
+		if (localOrganizationIdentifierValue.isEmpty())
 			logger.warn("Local organization identifier unknown, check DSF FHIR server allow list");
 
 		List<ProcessPlugin<?, ?, ? extends TaskListener>> plugins = removeDuplicates(processPluginLoader.loadPlugins()
-				.stream().filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue)));
+				.stream().filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null))));
 
 		if (plugins.isEmpty())
 		{
@@ -86,6 +107,49 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		fhirResourceHandler.applyStateChangesAndStoreNewResourcesInDb(resources, outcomes);
 
 		onProcessesDeployed(outcomes, plugins);
+	}
+
+	private BasicFhirWebserviceClient retryClient()
+	{
+		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
+			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
+		else
+			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);
+	}
+
+	private Optional<String> getLocalOrganizationIdentifierValue()
+	{
+		Bundle resultBundle = retryClient().searchWithStrictHandling(Endpoint.class,
+				Map.of("status", Collections.singletonList("active"), "address",
+						Collections.singletonList(localEndpointAddress), "_include",
+						Collections.singletonList("Endpoint:organization")));
+
+		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 2
+				|| resultBundle.getEntry().get(0).getResource() == null
+				|| !(resultBundle.getEntry().get(0).getResource() instanceof Endpoint)
+				|| resultBundle.getEntry().get(1).getResource() == null
+				|| !(resultBundle.getEntry().get(1).getResource() instanceof Organization))
+		{
+			logger.warn("No active (or more than one) Endpoint found for address '{}'", localEndpointAddress);
+			return Optional.empty();
+		}
+		else if (getActiveOrganizationFromIncludes(resultBundle).count() != 1)
+		{
+			logger.warn("No active (or more than one) Organization found by active Endpoint with address '{}'",
+					localEndpointAddress);
+			return Optional.empty();
+		}
+
+		return getActiveOrganizationFromIncludes(resultBundle).findFirst().flatMap(OrganizationIdentifier::findFirst)
+				.map(Identifier::getValue);
+	}
+
+	private Stream<Organization> getActiveOrganizationFromIncludes(Bundle resultBundle)
+	{
+		return resultBundle.getEntry().stream().filter(BundleEntryComponent::hasSearch)
+				.filter(e -> SearchEntryMode.INCLUDE.equals(e.getSearch().getMode()))
+				.filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.filter(r -> r instanceof Organization).map(r -> (Organization) r).filter(Organization::getActive);
 	}
 
 	private List<ProcessPlugin<?, ?, ? extends TaskListener>> removeDuplicates(
