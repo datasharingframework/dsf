@@ -8,8 +8,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.activity.AbstractTaskMessageSend;
+import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 
 /**
  * A provider configuration file named "dev.dsf.ProcessPluginDefinition" containing the canonical name of the class
@@ -106,10 +114,27 @@ public interface ProcessPluginDefinition
 	Map<String, List<String>> getFhirResourcesByProcessId();
 
 	/**
+	 * List of {@link Configuration} annotated spring configuration classes.
+	 * <p>
 	 * <i>All services defined in {@link ProcessPluginApi} and {@link ProcessPluginApi} itself can be {@link Autowired}
-	 * in {@link Configuration} classes</i>
+	 * in {@link Configuration} classes.
+	 * <p>
+	 * All implementations used for BPMN service tasks, message send tasks and throw events as well as task- and user
+	 * task listeners need to be declared as spring {@link Bean}s with {@link Scope}</i> <code>"prototype"</code><i>.
+	 * Other classes not directly used within BPMN activities should be declared with the default singleton scope.
+	 * <p>
+	 * Configuration classes that defined private fields annotated with {@link Value} defining property placeholders,
+	 * can be configured via environment variables. A field</i> <code>private boolean specialFunction;</code>
+	 * <i>annotated with</i> <code>&#64;Value("${org.test.process.special:false}")</code> <i>can be configured with the
+	 * environment variable</i> <code>ORG_TEST_PROCESS_SPECIAL</code>. To take advantage of the
+	 * "dsf-tools-documentation-generator" maven plugin to generate a markdown file with configuration options for the
+	 * plugin also add the {@link ProcessDocumentation} annotation.
 	 *
 	 * @return {@link Configuration} annotated classes, defining {@link Bean} annotated factory methods
+	 * @see AbstractServiceDelegate
+	 * @see AbstractTaskMessageSend
+	 * @see DefaultUserTaskListener
+	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
 	List<Class<?>> getSpringConfigurations();
 }

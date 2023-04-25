@@ -26,8 +26,11 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.ProcessPluginDefinition;
 import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
@@ -38,12 +41,22 @@ import dev.dsf.fhir.client.FhirWebserviceClient;
 
 /**
  * Base class for implementing BPMN message send tasks, intermediate message throw events and message end events using
- * FHIR Task resources within the DSF. Requires three String fields to be injected via BPMN:
+ * FHIR Task resources. Requires three String fields to be injected via BPMN:
  * <ul>
- * <li><b>instantiatesCanonical</b> with the
- * <li><b>messageName</b> with the
- * <li><b>profile</b> with the
+ * <li><b>instantiatesCanonical</b> with the URL (including version) of the Activity to start or continue.
+ * <li><b>messageName</b> with the with the BPMN message-name of the start event, intermediate message catch event or
+ * message receive task.
+ * <li><b>profile</b> with the URL (including version) of the profile (StructureDefinition) that the Task resource used
+ * should conform to.
  * </ul>
+ * <p>
+ * Configure BPMN message send tasks, intermediate message throw events and message end event with an implementation of
+ * type 'Java class' with the fully qualified class name of the class extending this abstract implementation.
+ * <p>
+ * Configure your service task implementation as a {@link Bean} in your spring {@link Configuration} class with scope
+ * <code>"prototype"</code>.
+ *
+ * @see ProcessPluginDefinition#getSpringConfigurations()
  */
 public abstract class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 {
@@ -74,10 +87,10 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 	/**
 	 * @param instantiatesCanonical
 	 *            not <code>null</code>
-	 * @deprecated only for field injection
+	 * @deprecated only for process engine field injection
 	 */
 	@Deprecated
-	public void setInstantiatesCanonical(FixedValue instantiatesCanonical)
+	public final void setInstantiatesCanonical(FixedValue instantiatesCanonical)
 	{
 		this.instantiatesCanonical = instantiatesCanonical;
 	}
@@ -104,10 +117,10 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 	/**
 	 * @param messageName
 	 *            not <code>null</code>
-	 * @deprecated only for field injection
+	 * @deprecated only for process engine field injection
 	 */
 	@Deprecated
-	public void setMessageName(FixedValue messageName)
+	public final void setMessageName(FixedValue messageName)
 	{
 		this.messageName = messageName;
 	}
@@ -134,10 +147,10 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 	/**
 	 * @param profile
 	 *            not <code>null</code>
-	 * @deprecated only for field injection
+	 * @deprecated only for process engine field injection
 	 */
 	@Deprecated
-	public void setProfile(FixedValue profile)
+	public final void setProfile(FixedValue profile)
 	{
 		this.profile = profile;
 	}

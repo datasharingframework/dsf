@@ -14,11 +14,27 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.ProcessPluginDefinition;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.variables.Variables;
 
+/**
+ * Abstract implementation of the {@link JavaDelegate} interface with added error handling and convenient access to
+ * process execution variables with the <b>variables</b> parameter of the
+ * {@link #doExecute(DelegateExecution, Variables)} method.
+ * <p>
+ * Configure BPMN service tasks with an implementation of type 'Java class' with the fully qualified class name of the
+ * class extending this abstract implementation.
+ * <p>
+ * Configure your service task implementation as a {@link Bean} in your spring {@link Configuration} class with scope
+ * <code>"prototype"</code>.
+ *
+ * @see ProcessPluginDefinition#getSpringConfigurations()
+ */
 public abstract class AbstractServiceDelegate implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
@@ -84,6 +100,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	}
 
 	/**
+	 * Implement this method to execute custom business logic within BPMN service tasks.
+	 *
 	 * @param execution
 	 *            Process instance information and variables
 	 * @param variables
@@ -91,8 +109,10 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	 * @throws BpmnError
 	 *             Thrown when an error boundary event should be called
 	 * @throws Exception
-	 *             Uncaught exceptions will result in task status failed, the exception message will be written as an
-	 *             error output
+	 *             Uncaught exceptions thrown by this method will result in Task status <i>failed</i> for all current
+	 *             <i>in-progress</i> Task resource with the exception message added as an error output. An exception
+	 *             (not {@link BpmnError}) thrown by this method will also result in the process instance stopping
+	 *             execution and being deleted.
 	 */
 	protected abstract void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception;
 
