@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -47,6 +48,7 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -1142,11 +1144,21 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 
 	private boolean isValid(Task resource, String file, String localOrganizationIdentifierValue)
 	{
-		boolean identifierOk = TaskIdentifier.findFirst(resource).isPresent();
-		if (!identifierOk)
+		Optional<Identifier> identifier = TaskIdentifier.findFirst(resource);
+		boolean identifierOk = false;
+		if (identifier.isEmpty())
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: No Task.identifier wwith system '{}'",
+			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: No Task.identifier with system '{}'",
 					file, getDefinitionName(), getDefinitionVersion(), TaskIdentifier.SID);
+		}
+		else
+		{
+			identifierOk = identifier.get().hasValue() && !identifier.get().getValue().contains("|");
+
+			if (!identifierOk)
+				logger.warn(
+						"Ignoring FHIR resource {} from process plugin {}-{}: No Task.identifier with system '{}' and value, or value contains | character",
+						file, getDefinitionName(), getDefinitionVersion(), TaskIdentifier.SID);
 		}
 
 		boolean statusOk = TaskStatus.DRAFT.equals(resource.getStatus());
@@ -1307,22 +1319,26 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 		return entry.getValue().stream().filter(fileAndResource ->
 		{
 			if (fileAndResource.getResource() instanceof Task)
-				return instantiatesCanonicalMatchesProcessId(entry.getKey(), fileAndResource);
+				return instantiatesCanonicalMatchesProcessIdAndIdentifierValid(entry.getKey(), fileAndResource);
 			else
 				return true;
 		}).toList();
 	}
 
-	private boolean instantiatesCanonicalMatchesProcessId(ProcessIdAndVersion expectedProcessIdAndVersion,
-			FileAndResource fileAndResource)
+	private boolean instantiatesCanonicalMatchesProcessIdAndIdentifierValid(
+			ProcessIdAndVersion expectedProcessIdAndVersion, FileAndResource fileAndResource)
 	{
 		String instantiatesCanonical = ((Task) fileAndResource.getResource()).getInstantiatesCanonical();
+		String identifierValue = TaskIdentifier.findFirst(((Task) fileAndResource.getResource()))
+				.map(Identifier::getValue).get();
+
 		Matcher instantiatesCanonicalMatcher = INSTANTIATES_CANONICAL_PATTERN.matcher(instantiatesCanonical);
 		if (instantiatesCanonicalMatcher.matches())
 		{
 			String processDomain = instantiatesCanonicalMatcher.group("domain").replace(".", "");
 			String processName = instantiatesCanonicalMatcher.group("processName");
 			String processVersion = instantiatesCanonicalMatcher.group("processVersion");
+			String processUrl = instantiatesCanonicalMatcher.group("processUrl");
 			String processId = processDomain + "_" + processName;
 
 			boolean processIdOk = expectedProcessIdAndVersion.getId().equals(processId);
@@ -1330,7 +1346,8 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			{
 				logger.warn(
 						"Ignoring FHIR resource {} from process plugin {}-{} for process {}: Task.instantiatesCanonical does not match process id (instantiatesCanonical: '{}' vs. process-id '{}')",
-						fileAndResource.getFile(), getDefinitionName(), getDefinitionVersion(), instantiatesCanonical,
+						fileAndResource.getFile(), getDefinitionName(), getDefinitionVersion(),
+						expectedProcessIdAndVersion.getId(), instantiatesCanonical,
 						expectedProcessIdAndVersion.getId());
 			}
 
@@ -1339,11 +1356,22 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			{
 				logger.warn(
 						"Ignoring FHIR resource {} from process plugin {}-{} for process {}: Task.instantiatesCanonical|version does not match declared resource version (instantiatesCanonical: '{}' vs. resource-version '{}')",
-						fileAndResource.getFile(), getDefinitionName(), getDefinitionVersion(), instantiatesCanonical,
+						fileAndResource.getFile(), getDefinitionName(), getDefinitionVersion(),
+						expectedProcessIdAndVersion.getId(), instantiatesCanonical,
 						expectedProcessIdAndVersion.getVersion());
 			}
 
-			return processIdOk && processVersionOk;
+			String expectedIdentifierValueStart = processUrl + "/" + processVersion + "/";
+			boolean identifierValueOk = identifierValue.startsWith(expectedIdentifierValueStart);
+			if (!identifierValueOk)
+			{
+				logger.warn(
+						"Ignoring FHIR resource {} from process plugin {}-{} for process {}: Task.identifier.value is invalid (identifier.value: '{}' not starting with '{}')",
+						fileAndResource.getFile(), getDefinitionName(), getDefinitionVersion(),
+						expectedProcessIdAndVersion.getId(), identifierValue, expectedIdentifierValueStart);
+			}
+
+			return processIdOk && processVersionOk && identifierValueOk;
 		}
 		else
 			// no log, already tested

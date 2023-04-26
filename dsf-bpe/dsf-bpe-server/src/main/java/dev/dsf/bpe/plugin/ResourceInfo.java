@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.hl7.fhir.r4.model.ResourceType;
 
+import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
+
 public class ResourceInfo implements Comparable<ResourceInfo>
 {
 	private final ResourceType resourceType;
@@ -136,7 +138,7 @@ public class ResourceInfo implements Comparable<ResourceInfo>
 		if (ResourceType.NamingSystem.equals(getResourceType()))
 			return "name=" + getName();
 		if (ResourceType.Task.equals(getResourceType()))
-			return "identifier=" + getIdentifier();
+			return "identifier=" + TaskIdentifier.SID + "|" + getIdentifier() + "&status=draft";
 		else
 			return "url=" + getUrl() + "&version=" + getVersion();
 	}

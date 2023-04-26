@@ -12,7 +12,7 @@
 	<publisher value="DSF" />
 	<description value="Name identifying a draft Task resource" />
 	<usage
-		value="Used withing the DSF to identify draft Task resources, created as examples using process plugins. Values need to be given in the form {process-url}/{task-example-name}|{process-version} e.g. http://dsf.dev/bpe/Process/ping/startPing|1.0" />
+		value="Used withing the DSF to identify draft Task resources, created as examples using process plugins. Values must be defined in the form {process-url}/{process-version}/{task-example-name} e.g. http://test.org/bpe/Process/someProcessName/1.0/someExampleName" />
 	<uniqueId>
 		<type value="other" />
 		<value value="http://dsf.dev/sid/task-identifier" />
