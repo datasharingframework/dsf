@@ -202,16 +202,23 @@ public interface Variables
 	<R extends Resource> R getResource(String variableName);
 
 	/**
-	 * @return {@link Task} that started this process instance, not <code>null</code>
+	 * Returns the {@link Task} associated with the message start event of the process.
+	 *
+	 * @return {@link Task} that started the process instance, not <code>null</code>
 	 * @see #updateTask(Task)
 	 * @see #getLatestTask()
+	 * @see #getTasks()
 	 */
-	Task getMainTask();
+	Task getStartTask();
 
 	/**
-	 * @return Last received {@link Task}, not <code>null</code>
+	 * Returns the latest {@link Task} received by this process or subprocess via a intermediate message catch event or
+	 * message receive task.
+	 *
+	 * @return Last received {@link Task} of the current process or subprocess, not <code>null</code>
 	 * @see #updateTask(Task)
-	 * @see #getMainTask()
+	 * @see #getStartTask()
+	 * @see #getCurrentTasks()
 	 */
 	Task getLatestTask();
 
@@ -222,7 +229,7 @@ public interface Variables
 	List<Task> getTasks();
 
 	/**
-	 * @return All {@link Task} resources received by the current process / subprocess
+	 * @return All {@link Task} resources received by the current process or subprocess
 	 * @see #getTasks()
 	 */
 	List<Task> getCurrentTasks();
@@ -233,7 +240,7 @@ public interface Variables
 	 *
 	 * @param task
 	 *            may be <code>null</code>
-	 * @see #getMainTask()
+	 * @see #getStartTask()
 	 * @see #getLatestTask()
 	 * @see #getTasks()
 	 * @see #getCurrentTasks()

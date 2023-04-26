@@ -30,7 +30,7 @@ public class ContinueListener extends AbstractListener implements ExecutionListe
 			variables.onContinue(task);
 			boolean subProcess = execution.getParentId() != null
 					&& !execution.getParentId().equals(execution.getProcessInstanceId());
-			logContinue(logger, subProcess, task, subProcess ? variables.getMainTask() : null);
+			logContinue(logger, subProcess, task, subProcess ? variables.getStartTask() : null);
 		}
 		else
 			logger.warn("Variable 'task' null, not updating tasks");

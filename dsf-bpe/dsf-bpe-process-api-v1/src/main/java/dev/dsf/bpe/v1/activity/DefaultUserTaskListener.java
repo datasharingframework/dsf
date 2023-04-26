@@ -99,7 +99,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			logger.debug("Error while executing user task listener " + getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
 					exception.getClass().getName(), exception.getMessage());
 
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "

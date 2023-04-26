@@ -47,7 +47,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 			updateIfInprogress(task);
 			boolean subProcess = execution.getParentId() != null
 					&& !execution.getParentId().equals(execution.getProcessInstanceId());
-			logEnd(logger, subProcess, task, subProcess ? variables.getMainTask() : null);
+			logEnd(logger, subProcess, task, subProcess ? variables.getStartTask() : null);
 		}
 
 		variables.onEnd();

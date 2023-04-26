@@ -220,7 +220,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
 				exception.getClass().getName(), exception.getMessage());
 
 		updateFailedIfInprogress(variables.getTasks(), errorMessage);
@@ -235,7 +235,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
 				exception.getClass().getName(), exception.getMessage());
 
 		updateFailedIfInprogress(variables.getTasks(), errorMessage);
@@ -268,7 +268,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 			logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task {}, last reason: {} - ",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
 					exception.getClass().getName(), exception.getMessage());
 
 			updateFailedIfInprogress(variables.getTasks(), errorMessage);

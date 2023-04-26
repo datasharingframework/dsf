@@ -148,7 +148,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
-	public Task getMainTask()
+	public Task getStartTask()
 	{
 		List<Task> tasks = getTasks();
 		return tasks == null || tasks.isEmpty() ? null : tasks.get(0);
@@ -157,7 +157,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public Task getLatestTask()
 	{
-		List<Task> tasks = getTasks();
+		List<Task> tasks = getCurrentTasks();
 		return tasks == null || tasks.isEmpty() ? null : tasks.get(tasks.size() - 1);
 	}
 

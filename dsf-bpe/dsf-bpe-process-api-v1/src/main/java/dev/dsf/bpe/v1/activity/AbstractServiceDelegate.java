@@ -74,7 +74,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			logger.error(
 					"Process {} encountered error boundary event in step {} for task {}, error-code: {}, message: {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()), error.getErrorCode(),
+					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()), error.getErrorCode(),
 					error.getMessage());
 
 			throw error;
@@ -85,7 +85,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			logger.debug("Error while executing service delegate " + getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getMainTask()),
+					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
 					exception.getClass().getName(), exception.getMessage());
 
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
