@@ -184,6 +184,9 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 
 	private int getSortIndex(ProcessesResource resource)
 	{
+		if (resource.getResource() == null)
+			return -1;
+
 		return switch (resource.getResource().getResourceType())
 		{
 			case ActivityDefinition -> 7;

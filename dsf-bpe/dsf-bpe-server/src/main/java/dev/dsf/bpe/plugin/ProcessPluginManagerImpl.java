@@ -88,10 +88,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null))));
 
 		if (plugins.isEmpty())
-		{
 			logger.warn("No process plugins deployed");
-			return;
-		}
 
 		processPluginConsumers.forEach(c -> c.setProcessPlugins(plugins));
 
