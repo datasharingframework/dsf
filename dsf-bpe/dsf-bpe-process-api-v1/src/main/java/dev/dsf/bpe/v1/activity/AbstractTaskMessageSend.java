@@ -465,7 +465,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 
 		IdType created = doSend(client, task);
 
-		logger.info("Task {} send [task: {}]", task.getInstantiatesCanonical(), created.getValue());
+		logger.info("Task {} send [task: {}]", task.getInstantiatesCanonical(), created.toVersionless().getValue());
 	}
 
 	/**
