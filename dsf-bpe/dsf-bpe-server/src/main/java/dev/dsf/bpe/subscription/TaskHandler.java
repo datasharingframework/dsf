@@ -1,5 +1,6 @@
 package dev.dsf.bpe.subscription;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -11,12 +12,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.camunda.bpm.engine.MismatchingMessageCorrelationException;
+import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
+import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
@@ -34,6 +40,53 @@ import dev.dsf.fhir.client.FhirWebserviceClient;
 public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskHandler.class);
+
+	private static final class ProcessNotFoundException extends ProcessEngineException
+	{
+		private static final long serialVersionUID = 1L;
+
+		private final String startMessageName;
+
+		ProcessNotFoundException(String processDomain, String processDefinitionKey, String processVersion,
+				String startMessageName)
+		{
+			super(toMessage(processDomain, processDefinitionKey, processVersion, startMessageName));
+			this.startMessageName = startMessageName;
+		}
+
+		private static String toMessage(String processDomain, String processDefinitionKey, String processVersion,
+				String startMessageName)
+		{
+			Objects.requireNonNull(processDomain, "processDomain");
+			Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
+
+			if (processVersion != null && !processVersion.isBlank())
+			{
+				if (startMessageName != null && !startMessageName.isBlank())
+					return "Process with id '" + processDomain + "_" + processDefinitionKey + "', version '"
+							+ processVersion + "' and start message-name '" + startMessageName + "' not found";
+				else
+					return "Process with id: '" + processDomain + "_" + processDefinitionKey + "' and version '"
+							+ processVersion + "' not found";
+			}
+			else
+			{
+				if (startMessageName != null && !startMessageName.isBlank())
+					return "Process with id: '" + processDomain + "_" + processDefinitionKey
+							+ "' and start message-name: '" + startMessageName + "' not found";
+				else
+					return "Process with id: '" + processDomain + "_" + processDefinitionKey + "' not found";
+			}
+		}
+
+		String getShortMessage()
+		{
+			if (startMessageName != null && !startMessageName.isBlank())
+				return "Process with start message-name '" + startMessageName + "' not found";
+			else
+				return "Process not found";
+		}
+	}
 
 	public static final String TASK_VARIABLE = TaskHandler.class.getName() + ".task";
 
@@ -82,7 +135,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		if (businessKey == null)
 		{
 			businessKey = UUID.randomUUID().toString();
-			logger.debug("Adding business-key {} to task with id {}", businessKey, task.getId());
+			logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getId());
 			task.addInput().setType(new CodeableConcept(BpmnMessage.businessKey()))
 					.setValue(new StringType(businessKey));
 		}
@@ -96,14 +149,40 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 			onMessage(businessKey, correlationKey, processDomain, processDefinitionKey, processVersion, messageName,
 					variables);
 		}
-		catch (Exception exception)
+		catch (MismatchingMessageCorrelationException e)
 		{
-			logger.error("Error while handling Task", exception);
+			logger.warn("Unable to handle Task with id {}: {}", task.getId(), e.getMessage());
+			updateTaskFailed(task, "Unable to correlate Task");
+		}
+		catch (ProcessNotFoundException e)
+		{
+			logger.warn("Unable to handle Task with id {}: {}", task.getId(), e.getMessage());
+			updateTaskFailed(task, e.getShortMessage());
+		}
+		catch (Exception e)
+		{
+			logger.error("Unable to handle Task with id " + task.getId(), e);
+			updateTaskFailed(task, e);
+		}
+	}
 
-			task.addOutput().setType(new CodeableConcept(BpmnMessage.error()))
-					.setValue(new StringType(exception.getClass().getName() + ": " + exception.getMessage()));
-			task.setStatus(Task.TaskStatus.FAILED);
+	private void updateTaskFailed(Task task, Exception e)
+	{
+		updateTaskFailed(task, e.getClass().getName() + ": " + e.getMessage());
+	}
+
+	private void updateTaskFailed(Task task, String message)
+	{
+		task.addOutput().setType(new CodeableConcept(BpmnMessage.error())).setValue(new StringType(message));
+		task.setStatus(Task.TaskStatus.FAILED);
+
+		try
+		{
 			webserviceClient.update(task);
+		}
+		catch (Exception ex)
+		{
+			logger.error("Unable to update Task with id {} (status failed)", task.getId());
 		}
 	}
 
@@ -153,24 +232,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		ProcessDefinition processDefinition = getProcessDefinition(processDomain, processDefinitionKey, processVersion);
 
 		if (processDefinition == null)
-		{
-			if (processVersion != null && !processVersion.isBlank())
-			{
-				logger.warn(
-						"Process with id: {}_{} and version: {} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
-						processDomain, processDefinitionKey, processVersion);
-				throw new RuntimeException("Process with id: " + processDomain + "_" + processDefinitionKey
-						+ " and version: " + processVersion + " not found");
-			}
-			else
-			{
-				logger.warn(
-						"Process with id: {}_{} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
-						processDomain, processDefinitionKey);
-				throw new RuntimeException(
-						"Process with id: " + processDomain + "_" + processDefinitionKey + " not found");
-			}
-		}
+			throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
 
 		if (businessKey == null)
 		{
@@ -190,8 +252,23 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 			if (instances.size() + instancesWithAlternativeBusinessKey.size() <= 0)
 			{
-				runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
-						.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
+				BpmnModelInstance model = repositoryService.getBpmnModelInstance(processDefinition.getId());
+				Collection<StartEvent> startEvents = model == null ? Collections.emptySet()
+						: model.getModelElementsByType(StartEvent.class);
+				Stream<String> startEventMesssageNames = startEvents.stream().flatMap(e ->
+				{
+					Collection<MessageEventDefinition> m = e.getChildElementsByType(MessageEventDefinition.class);
+					return m == null ? Stream.empty() : m.stream();
+				}).map(d -> d.getMessage().getName());
+
+				if (startEventMesssageNames.anyMatch(m -> m.equals(messageName)))
+				{
+					runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
+							.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
+				}
+				else
+					throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion,
+							messageName);
 			}
 			else
 			{
