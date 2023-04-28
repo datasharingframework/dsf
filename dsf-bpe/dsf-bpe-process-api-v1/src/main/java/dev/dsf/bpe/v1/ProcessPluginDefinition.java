@@ -78,9 +78,9 @@ public interface ProcessPluginDefinition
 	 * <p>
 	 * <i>Occurrences of</i> <code>#{version}</code> <i>will be replaced with the value of
 	 * {@link #getResourceVersion()}<br>
-	 * Occurrences of</i> <code>#{date}</code> </i>will be replaced with the value of
+	 * Occurrences of</i> <code>#{date}</code> <i>will be replaced with the value of
 	 * {@link #getResourceReleaseDate()}<br>
-	 * Occurrences of</i> <code>#{organization}</code> </i>will be replaced with the local organization DSF identifier
+	 * Occurrences of</i> <code>#{organization}</code> <i>will be replaced with the local organization DSF identifier
 	 * value, or</i> <code>"null"</code> <i>if no local organization can be found in the allow list<br>
 	 * Other placeholders of the form</i> <code>#{property.name}</code> <i>will be replaced with values from equivalent
 	 * environment variable, e.g.</i> <code>PROPERTY_NAME</code>
@@ -117,13 +117,13 @@ public interface ProcessPluginDefinition
 	 * List of {@link Configuration} annotated spring configuration classes.
 	 * <p>
 	 * <i>All services defined in {@link ProcessPluginApi} and {@link ProcessPluginApi} itself can be {@link Autowired}
-	 * in {@link Configuration} classes.
+	 * in {@link Configuration} classes.</i>
 	 * <p>
-	 * All implementations used for BPMN service tasks, message send tasks and throw events as well as task- and user
+	 * <i>All implementations used for BPMN service tasks, message send tasks and throw events as well as task- and user
 	 * task listeners need to be declared as spring {@link Bean}s with {@link Scope}</i> <code>"prototype"</code><i>.
-	 * Other classes not directly used within BPMN activities should be declared with the default singleton scope.
+	 * Other classes not directly used within BPMN activities should be declared with the default singleton scope.</i>
 	 * <p>
-	 * Configuration classes that defined private fields annotated with {@link Value} defining property placeholders,
+	 * <i>Configuration classes that defined private fields annotated with {@link Value} defining property placeholders,
 	 * can be configured via environment variables. A field</i> <code>private boolean specialFunction;</code>
 	 * <i>annotated with</i> <code>&#64;Value("${org.test.process.special:false}")</code> <i>can be configured with the
 	 * environment variable</i> <code>ORG_TEST_PROCESS_SPECIAL</code>. To take advantage of the
