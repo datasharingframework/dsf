@@ -5,6 +5,9 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +20,10 @@ import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class PropertiesConfig
+public class PropertiesConfig implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
+
 	@Documentation(required = true, description = "The address of the database used for the DSF BPE server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/bpe")
 	@Value("${dev.dsf.bpe.db.url}")
 	private String dbUrl;
@@ -259,6 +264,24 @@ public class PropertiesConfig
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		if (serverBaseUrl.endsWith("//"))
+		{
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", serverBaseUrl);
+			throw new IllegalArgumentException("Invalid ServerBaseUrl, ending in //");
+		}
+		else if (!serverBaseUrl.startsWith("https://"))
+		{
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", serverBaseUrl);
+			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with https://");
+		}
+
+		if (serverBaseUrl.endsWith("/"))
+			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+	}
+
 	public String getDbUrl()
 	{
 		return dbUrl;
@@ -341,7 +364,9 @@ public class PropertiesConfig
 
 	public String getServerBaseUrl()
 	{
-		return serverBaseUrl;
+		return serverBaseUrl != null && serverBaseUrl.endsWith("/")
+				? serverBaseUrl.substring(0, serverBaseUrl.length() - 1)
+				: serverBaseUrl;
 	}
 
 	public int getWebserviceClientLocalReadTimeout()
