@@ -28,8 +28,8 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-task-base-0.5.0.xml"), List.of("dsf-bpmn-message-0.5.0.xml"),
-			List.of("dsf-bpmn-message-0.5.0.xml"));
+			List.of("dsf-task-base-1.0.0.xml"), List.of("dsf-bpmn-message-1.0.0.xml"),
+			List.of("dsf-bpmn-message-1.0.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -103,7 +103,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-base");
-		task.setInstantiatesUri("http://dsf.dev/bpe/Process/foo/0.1.0");
+		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/foo|0.1.0");
 		task.setStatus(status);
 		task.setIntent(Task.TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

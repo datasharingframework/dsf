@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import dev.dsf.bpe.process.ProcessKeyAndVersion;
-import dev.dsf.bpe.process.ProcessesResource;
-import dev.dsf.bpe.process.ResourceInfo;
+import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.plugin.ProcessesResource;
+import dev.dsf.bpe.plugin.ResourceInfo;
 
 public interface ProcessPluginResourcesDao
 {
-	Map<ProcessKeyAndVersion, List<ResourceInfo>> getResources() throws SQLException;
+	Map<ProcessIdAndVersion, List<ResourceInfo>> getResources() throws SQLException;
 
 	void addOrRemoveResources(Collection<? extends ProcessesResource> newResources, List<UUID> deletedResourcesIds,
-			List<ProcessKeyAndVersion> excludedProcesses) throws SQLException;
+			List<ProcessIdAndVersion> excludedProcesses) throws SQLException;
 }

@@ -46,8 +46,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY = "business-key";
 
-	private static final String INSTANTIATES_URI_PATTERN_STRING = "(?<processUrl>http://(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*(?:[A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])/bpe/Process/[-\\w]+)/(?<processVersion>\\d+\\.\\d+\\.\\d+)";
-	private static final Pattern INSTANTIATES_URI_PATTERN = Pattern.compile(INSTANTIATES_URI_PATTERN_STRING);
+	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9]{1,63}|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
+			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
+	private static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
+			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);
 
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
 
@@ -81,12 +83,12 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				{
 					logger.info("Create of Task authorized for identity '{}'", identity.getName());
 					return Optional.of(
-							"local or remote user, task.status draft or requested, task.requester current users organization, task.restriction.recipient local organization, process with instantiatesUri and message-name allowed for current user, task matches profile");
+							"local or remote user, task.status draft or requested, task.requester current users organization, task.restriction.recipient local organization, process with instantiatesCanonical and message-name allowed for current user, task matches profile");
 				}
 				else
 				{
 					logger.warn(
-							"Create of Task unauthorized, process with instantiatesUri, message-name, requester or recipient not allowed for current user",
+							"Create of Task unauthorized, process with instantiatesCanonical, message-name, requester or recipient not allowed for current user",
 							identity.getName());
 					return Optional.empty();
 				}
@@ -166,16 +168,17 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			errors.add("task.restriction missing");
 		}
 
-		if (newResource.hasInstantiatesUri())
+		if (newResource.hasInstantiatesCanonical())
 		{
-			if (!INSTANTIATES_URI_PATTERN.matcher(newResource.getInstantiatesUri()).matches())
+			if (!INSTANTIATES_CANONICAL_PATTERN.matcher(newResource.getInstantiatesCanonical()).matches())
 			{
-				errors.add("task.instantiatesUri not matching " + INSTANTIATES_URI_PATTERN_STRING + " pattern");
+				errors.add("task.instantiatesCanonical not matching " + INSTANTIATES_CANONICAL_PATTERN_STRING
+						+ " pattern");
 			}
 		}
 		else
 		{
-			errors.add("task.instantiatesUri missing");
+			errors.add("task.instantiatesCanonical missing");
 		}
 
 		if (newResource.hasInput())
@@ -223,7 +226,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			return false;
 		}
 
-		Matcher matcher = INSTANTIATES_URI_PATTERN.matcher(newResource.getInstantiatesUri());
+		Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(newResource.getInstantiatesCanonical());
 		if (matcher.matches())
 		{
 			String processUrl = matcher.group("processUrl");
@@ -277,7 +280,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		}
 		else
 		{
-			logger.warn("task.instantiatesUri not matching {} pattern", INSTANTIATES_URI_PATTERN_STRING);
+			logger.warn("task.instantiatesCanonical not matching {} pattern", INSTANTIATES_CANONICAL_PATTERN_STRING);
 			return false;
 		}
 	}
@@ -363,9 +366,9 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						if (!newResource.hasOutput())
 						{
 							logger.info(
-									"local user (user is part of task.restriction.recipient organization), task.status inprogress, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+									"local user (user is part of task.restriction.recipient organization), task.status inprogress, properties task.instantiatesCanonical, task.requester, task.restriction, task.input not changed");
 							return Optional.of(
-									"local user (user part of task.restriction.recipient), task.status inprogress, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+									"local user (user part of task.restriction.recipient), task.status inprogress, properties task.instantiatesCanonical, task.requester, task.restriction, task.input not changed");
 						}
 						else
 						{
@@ -380,9 +383,9 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					{
 						// might have output
 						logger.info(
-								"local user (user is part of task.restriction.recipient organization), task.status completed or failed, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+								"local user (user is part of task.restriction.recipient organization), task.status completed or failed, properties task.instantiatesCanonical, task.requester, task.restriction, task.input not changed");
 						return Optional.of(
-								"local user (user part of task.restriction.recipient), task.status completed or failed, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+								"local user (user part of task.restriction.recipient), task.status completed or failed, properties task.instantiatesCanonical, task.requester, task.restriction, task.input not changed");
 					}
 					else
 					{
@@ -400,7 +403,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			else
 			{
 				logger.warn(
-						"Update of Task unauthorized, expected taks.status draft and current user part of task.requester or task.status requester or inprogress and current local user part of task.restriction.recipient");
+						"Update of Task unauthorized, expected task.status draft and current user part of task.requester or task.status requester or inprogress and current local user part of task.restriction.recipient");
 				return Optional.empty();
 			}
 		}
@@ -425,9 +428,9 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			errors.add("task.restriction");
 		}
 
-		if (!oldResource.getInstantiatesUri().equals(newResource.getInstantiatesUri()))
+		if (!oldResource.getInstantiatesCanonical().equals(newResource.getInstantiatesCanonical()))
 		{
-			errors.add("task.instantiatesUri");
+			errors.add("task.instantiatesCanonical");
 		}
 
 		List<ParameterComponent> oldResourceInputs = oldResource.getInput();

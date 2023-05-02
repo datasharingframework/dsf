@@ -52,7 +52,7 @@ public class ValueSetExpanderTest
 
 	private List<CodeSystem> readCodeSystems()
 	{
-		return Stream.of("dsf-read-access-tag-0.5.0.xml", "dsf-bpmn-message-0.5.0.xml")
+		return Stream.of("dsf-read-access-tag-0.5.0.xml", "dsf-bpmn-message-1.0.0.xml")
 				.map(file -> "/fhir/CodeSystem/" + file).map(this::readCodeSystem).collect(Collectors.toList());
 	}
 

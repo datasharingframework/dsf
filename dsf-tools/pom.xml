@@ -64,7 +64,7 @@
 
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-process-base</artifactId>
+				<artifactId>dsf-bpe-process-api-v1</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

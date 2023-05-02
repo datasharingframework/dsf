@@ -13,14 +13,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.DataFormatException;
-import dev.dsf.bpe.process.ProcessKeyAndVersion;
-import dev.dsf.bpe.process.ProcessesResource;
-import dev.dsf.bpe.process.ResourceInfo;
+import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.plugin.ProcessesResource;
+import dev.dsf.bpe.plugin.ResourceInfo;
 
 public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements ProcessPluginResourcesDao
 {
@@ -32,22 +33,22 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 	}
 
 	@Override
-	public Map<ProcessKeyAndVersion, List<ResourceInfo>> getResources() throws SQLException
+	public Map<ProcessIdAndVersion, List<ResourceInfo>> getResources() throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"SELECT process_key_and_version, resource_type, resource_id, url, version, name FROM process_plugin_resources ORDER BY process_key_and_version"))
+						"SELECT process_key_and_version, resource_type, resource_id, url, version, name, identifier FROM process_plugin_resources ORDER BY process_key_and_version"))
 		{
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
-				Map<ProcessKeyAndVersion, List<ResourceInfo>> resources = new HashMap<>();
+				Map<ProcessIdAndVersion, List<ResourceInfo>> resources = new HashMap<>();
 
-				ProcessKeyAndVersion processKeyAndVersion = null;
+				ProcessIdAndVersion processKeyAndVersion = null;
 				List<ResourceInfo> processKeyAndVersionResources = null;
 				while (result.next())
 				{
-					ProcessKeyAndVersion currentProcessKeyAndVersion = ProcessKeyAndVersion
+					ProcessIdAndVersion currentProcessKeyAndVersion = ProcessIdAndVersion
 							.fromString(result.getString(1));
 
 					if (!currentProcessKeyAndVersion.equals(processKeyAndVersion))
@@ -57,14 +58,17 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 						resources.put(processKeyAndVersion, processKeyAndVersionResources);
 					}
 
-					String resourceType = result.getString(2);
+					String resourceTypeString = result.getString(2);
 					UUID resourceId = result.getObject(3, UUID.class);
 					String url = result.getString(4);
 					String version = result.getString(5);
 					String name = result.getString(6);
+					String identifier = result.getString(7);
 
-					processKeyAndVersionResources
-							.add(new ResourceInfo(resourceType, url, version, name).setResourceId(resourceId));
+					ResourceInfo resourceInfo = new ResourceInfo(
+							resourceTypeString == null ? null : ResourceType.valueOf(resourceTypeString), url, version,
+							name, identifier).setResourceId(resourceId);
+					processKeyAndVersionResources.add(resourceInfo);
 				}
 
 				return resources;
@@ -74,7 +78,7 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 
 	@Override
 	public void addOrRemoveResources(Collection<? extends ProcessesResource> newResources,
-			List<UUID> deletedResourcesIds, List<ProcessKeyAndVersion> excludedProcesses) throws SQLException
+			List<UUID> deletedResourcesIds, List<ProcessIdAndVersion> excludedProcesses) throws SQLException
 	{
 		Objects.requireNonNull(newResources, "newResources");
 		Objects.requireNonNull(deletedResourcesIds, "deletedResourcesIds");
@@ -88,74 +92,98 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 			connection.setReadOnly(false);
 			connection.setAutoCommit(false);
 
-			// non NamingSystem resources
-			try (PreparedStatement statement = connection.prepareStatement(
-					"INSERT INTO process_plugin_resources (process_key_and_version, resource_type, resource_id, url, version) VALUES (?, ?, ?, ?, ?) "
-							+ "ON CONFLICT (process_key_and_version, resource_type, url, version) "
-							+ "WHERE resource_type <> 'NamingSystem'" + " DO UPDATE SET resource_id = ?"))
+			for (ProcessesResource resource : newResources)
 			{
-				for (ProcessesResource resource : newResources)
+				for (ProcessIdAndVersion process : resource.getProcesses())
 				{
-					if ("NamingSystem".equals(resource.getResourceInfo().getResourceType()))
-						continue;
+					final ResourceType resourceType = resource.getResourceInfo().getResourceType();
 
-					for (ProcessKeyAndVersion process : resource.getProcesses())
+					// non NamingSystem and non Task resources
+					if (!ResourceType.NamingSystem.equals(resourceType) && !ResourceType.Task.equals(resourceType))
 					{
-						ResourceInfo resourceInfo = resource.getResourceInfo();
+						try (PreparedStatement statement = connection.prepareStatement(
+								"INSERT INTO process_plugin_resources (process_key_and_version, resource_type, resource_id, url, version) VALUES (?, ?, ?, ?, ?) "
+										+ "ON CONFLICT (process_key_and_version, resource_type, url, version) "
+										+ "WHERE resource_type <> 'NamingSystem'" + " DO UPDATE SET resource_id = ?"))
+						{
+							ResourceInfo resourceInfo = resource.getResourceInfo();
 
-						statement.setString(1, process.toString());
-						statement.setString(2, resourceInfo.getResourceType());
-						statement.setObject(3, uuidToPgObject(resourceInfo.getResourceId()));
-						statement.setString(4, resourceInfo.getUrl());
-						statement.setString(5, resourceInfo.getVersion());
+							statement.setString(1, process.toString());
+							statement.setString(2, resourceType.name());
+							statement.setObject(3, uuidToPgObject(resourceInfo.getResourceId()));
+							statement.setString(4, resourceInfo.getUrl());
+							statement.setString(5, resourceInfo.getVersion());
 
-						statement.setObject(6, uuidToPgObject(resourceInfo.getResourceId()));
+							statement.setObject(6, uuidToPgObject(resourceInfo.getResourceId()));
 
-						statement.addBatch();
-						logger.trace("Executing query '{}'", statement);
+							statement.addBatch();
+							logger.trace("Executing query '{}'", statement);
+
+							statement.executeBatch();
+						}
+						catch (SQLException e)
+						{
+							connection.rollback();
+							throw e;
+						}
+					}
+					else if (ResourceType.NamingSystem.equals(resourceType))
+					{
+						// NamingSystem resources
+						try (PreparedStatement statement = connection.prepareStatement(
+								"INSERT INTO process_plugin_resources (process_key_and_version, resource_type, resource_id, name) VALUES (?, 'NamingSystem', ?, ?) "
+										+ "ON CONFLICT (process_key_and_version, resource_type, name) "
+										+ "WHERE resource_type = 'NamingSystem'" + " DO UPDATE SET resource_id = ?"))
+						{
+
+							ResourceInfo resourceInfo = resource.getResourceInfo();
+
+							statement.setString(1, process.toString());
+							statement.setObject(2, uuidToPgObject(resourceInfo.getResourceId()));
+							statement.setString(3, resourceInfo.getName());
+
+							statement.setObject(4, uuidToPgObject(resourceInfo.getResourceId()));
+
+							statement.addBatch();
+							logger.trace("Executing query '{}'", statement);
+
+							statement.executeBatch();
+						}
+						catch (SQLException e)
+						{
+							connection.rollback();
+							throw e;
+						}
+					}
+					else if (ResourceType.Task.equals(resourceType))
+					{
+						// Task resources
+						try (PreparedStatement statement = connection.prepareStatement(
+								"INSERT INTO process_plugin_resources (process_key_and_version, resource_type, resource_id, identifier) VALUES (?, 'Task', ?, ?) "
+										+ "ON CONFLICT (process_key_and_version, resource_type, identifier) "
+										+ "WHERE resource_type = 'Task'" + " DO UPDATE SET resource_id = ?"))
+						{
+
+							ResourceInfo resourceInfo = resource.getResourceInfo();
+
+							statement.setString(1, process.toString());
+							statement.setObject(2, uuidToPgObject(resourceInfo.getResourceId()));
+							statement.setString(3, resourceInfo.getIdentifier());
+
+							statement.setObject(4, uuidToPgObject(resourceInfo.getResourceId()));
+
+							statement.addBatch();
+							logger.trace("Executing query '{}'", statement);
+
+							statement.executeBatch();
+						}
+						catch (SQLException e)
+						{
+							connection.rollback();
+							throw e;
+						}
 					}
 				}
-
-				statement.executeBatch();
-			}
-			catch (SQLException e)
-			{
-				connection.rollback();
-				throw e;
-			}
-
-			// NamingSystem resources
-			try (PreparedStatement statement = connection.prepareStatement(
-					"INSERT INTO process_plugin_resources (process_key_and_version, resource_type, resource_id, name) VALUES (?, 'NamingSystem', ?, ?) "
-							+ "ON CONFLICT (process_key_and_version, resource_type, name) "
-							+ "WHERE resource_type = 'NamingSystem'" + " DO UPDATE SET resource_id = ?"))
-			{
-				for (ProcessesResource resource : newResources)
-				{
-					if (!"NamingSystem".equals(resource.getResourceInfo().getResourceType()))
-						continue;
-
-					for (ProcessKeyAndVersion process : resource.getProcesses())
-					{
-						ResourceInfo resourceInfo = resource.getResourceInfo();
-
-						statement.setString(1, process.toString());
-						statement.setObject(2, uuidToPgObject(resourceInfo.getResourceId()));
-						statement.setString(3, resourceInfo.getName());
-
-						statement.setObject(4, uuidToPgObject(resourceInfo.getResourceId()));
-
-						statement.addBatch();
-						logger.trace("Executing query '{}'", statement);
-					}
-				}
-
-				statement.executeBatch();
-			}
-			catch (SQLException e)
-			{
-				connection.rollback();
-				throw e;
 			}
 
 			try (PreparedStatement statement = connection
@@ -180,7 +208,7 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 			try (PreparedStatement statement = connection
 					.prepareStatement("DELETE FROM process_plugin_resources WHERE process_key_and_version = ?"))
 			{
-				for (ProcessKeyAndVersion process : excludedProcesses)
+				for (ProcessIdAndVersion process : excludedProcesses)
 				{
 					statement.setString(1, process.toString());
 

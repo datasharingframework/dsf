@@ -28,19 +28,7 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-documentation-generator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-validation</artifactId>
-			<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-			<exclusions>
-				<exclusion>
-					<groupId>dev.dsf</groupId>
-					<artifactId>dsf-tools-bundle-generator</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>

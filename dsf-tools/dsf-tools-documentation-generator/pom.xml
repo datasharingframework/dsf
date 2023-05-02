@@ -30,17 +30,11 @@
 
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-bpe-process-base</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>dsf-common-documentation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-documentation</artifactId>
+			<artifactId>dsf-bpe-process-api-v1</artifactId>
 		</dependency>
 
 		<dependency>

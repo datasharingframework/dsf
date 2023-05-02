@@ -218,7 +218,10 @@ public class JettyServer
 				e.addSuppressed(e1);
 			}
 
-			throw new RuntimeException(e);
+			if (e instanceof RuntimeException)
+				throw (RuntimeException) e;
+			else
+				throw new RuntimeException(e);
 		}
 	}
 

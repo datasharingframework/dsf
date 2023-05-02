@@ -1,0 +1,19 @@
+<NamingSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
+		</tag>		
+	</meta>
+	<name value="DsfPractitionerIdentifier"/>
+	<status value="active"/>
+	<kind value="identifier"/>
+	<date value="2023-04-23"/>
+	<publisher value="DSF"/>
+	<description value="E-mail address identifying a practitioner"/>
+	<usage value="Used withing the DSF to identify practitioners"/>
+	<uniqueId>
+		<type value="other"/>
+		<value value="http://dsf.dev/sid/practitioner-identifier"/>
+	</uniqueId>
+</NamingSystem> 

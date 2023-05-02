@@ -5,10 +5,10 @@
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<name value="DSF_Organization_Identifier"/>
+	<name value="DsfOrganizationIdentifier"/>
 	<status value="active"/>
 	<kind value="identifier"/>
-	<date value="2021-08-24"/>
+	<date value="2023-04-23"/>
 	<publisher value="DSF"/>
 	<description
 			value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, ukhd.de, uksh.de"/>
@@ -17,7 +17,7 @@
 		<modifierExtension url="http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference" >
 			<valueBoolean value="true"/>
 		</modifierExtension>
-		<type value="uri"/>
+		<type value="other"/>
 		<value value="http://dsf.dev/sid/organization-identifier"/>
 	</uniqueId>
 </NamingSystem> 

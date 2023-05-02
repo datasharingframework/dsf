@@ -3,12 +3,12 @@ package dev.dsf.bpe.dao;
 import java.sql.SQLException;
 import java.util.Map;
 
-import dev.dsf.bpe.process.ProcessKeyAndVersion;
-import dev.dsf.bpe.process.ProcessState;
+import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.plugin.ProcessState;
 
 public interface ProcessStateDao
 {
-	void updateStates(Map<ProcessKeyAndVersion, ProcessState> states) throws SQLException;
+	void updateStates(Map<ProcessIdAndVersion, ProcessState> states) throws SQLException;
 
-	Map<ProcessKeyAndVersion, ProcessState> getStates() throws SQLException;
+	Map<ProcessIdAndVersion, ProcessState> getStates() throws SQLException;
 }

@@ -5,10 +5,10 @@
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<name value="DSF_Endpoint_Identifier"/>
+	<name value="DsfEndpointIdentifier"/>
 	<status value="active"/>
 	<kind value="identifier"/>
-	<date value="2021-08-24"/>
+	<date value="2023-04-23"/>
 	<publisher value="DSF"/>
 	<description value="Shortest DNS that resolves a DSF endpoint, typically the domain name used in endpoint.address"/>
 	<usage value="Used withing the DSF to identify endpoints"/>
@@ -16,7 +16,7 @@
 		<modifierExtension url="http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference" >
 			<valueBoolean value="true"/>
 		</modifierExtension>
-		<type value="uri"/>
+		<type value="other"/>
 		<value value="http://dsf.dev/sid/endpoint-identifier"/>
 	</uniqueId>
 </NamingSystem> 

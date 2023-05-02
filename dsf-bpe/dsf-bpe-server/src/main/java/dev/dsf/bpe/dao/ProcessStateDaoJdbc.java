@@ -13,8 +13,8 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.bpe.process.ProcessKeyAndVersion;
-import dev.dsf.bpe.process.ProcessState;
+import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.plugin.ProcessState;
 
 public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessStateDao
 {
@@ -26,7 +26,7 @@ public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessState
 	}
 
 	@Override
-	public void updateStates(Map<ProcessKeyAndVersion, ProcessState> states) throws SQLException
+	public void updateStates(Map<ProcessIdAndVersion, ProcessState> states) throws SQLException
 	{
 		Objects.requireNonNull(states, "states");
 
@@ -40,7 +40,7 @@ public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessState
 			try (PreparedStatement statement = connection.prepareStatement(
 					"INSERT INTO process_states (process_key_and_version, state) VALUES (?, ?) ON CONFLICT (process_key_and_version) DO UPDATE SET state = ?"))
 			{
-				for (Entry<ProcessKeyAndVersion, ProcessState> entry : states.entrySet())
+				for (Entry<ProcessIdAndVersion, ProcessState> entry : states.entrySet())
 				{
 					statement.setString(1, entry.getKey().toString());
 					statement.setString(2, entry.getValue().name());
@@ -56,17 +56,17 @@ public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessState
 	}
 
 	@Override
-	public Map<ProcessKeyAndVersion, ProcessState> getStates() throws SQLException
+	public Map<ProcessIdAndVersion, ProcessState> getStates() throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT process_key_and_version, state FROM process_states");
 				ResultSet resultSet = statement.executeQuery())
 		{
-			Map<ProcessKeyAndVersion, ProcessState> states = new HashMap<>();
+			Map<ProcessIdAndVersion, ProcessState> states = new HashMap<>();
 			while (resultSet.next())
 			{
-				ProcessKeyAndVersion processKeyAndVersion = ProcessKeyAndVersion.fromString(resultSet.getString(1));
+				ProcessIdAndVersion processKeyAndVersion = ProcessIdAndVersion.fromString(resultSet.getString(1));
 				ProcessState state = ProcessState.valueOf(resultSet.getString(2));
 
 				states.putIfAbsent(processKeyAndVersion, state);

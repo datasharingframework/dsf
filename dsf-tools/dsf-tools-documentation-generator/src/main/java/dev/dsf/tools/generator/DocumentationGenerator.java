@@ -42,8 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import dev.dsf.bpe.ProcessPluginDefinition;
-import dev.dsf.bpe.documentation.ProcessDocumentation;
+import dev.dsf.bpe.v1.ProcessPluginDefinition;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 import dev.dsf.common.documentation.Documentation;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
@@ -107,6 +107,7 @@ public class DocumentationGenerator extends AbstractMojo
 			writeFields(dsfFields, dsfDocumentationGenerator(), file, workingPackage);
 		}
 
+		// TODO add process API version abstraction
 		Set<Field> processFields = reflections.getFieldsAnnotatedWith(ProcessDocumentation.class);
 		if (!processFields.isEmpty())
 		{
@@ -165,7 +166,7 @@ public class DocumentationGenerator extends AbstractMojo
 			ProcessPluginDefinition processPluginDefinition = pluginDefinitionClasses.get(0).getConstructor()
 					.newInstance();
 
-			return processPluginDefinition.getBpmnFiles().map(f -> getProcessName(classLoader, f))
+			return processPluginDefinition.getProcessModels().stream().map(f -> getProcessName(classLoader, f))
 					.filter(Optional::isPresent).map(Optional::get).collect(toList());
 		}
 		catch (Exception e)

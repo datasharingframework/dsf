@@ -4,8 +4,6 @@ import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParser;
 import org.camunda.bpm.engine.impl.cfg.BpmnParseFactory;
 
-import dev.dsf.bpe.delegate.DelegateProvider;
-
 public class MultiVersionBpmnParseFactory implements BpmnParseFactory
 {
 	private final DelegateProvider delegateProvider;

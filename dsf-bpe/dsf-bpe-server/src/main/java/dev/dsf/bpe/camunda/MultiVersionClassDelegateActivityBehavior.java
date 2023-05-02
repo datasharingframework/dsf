@@ -13,8 +13,7 @@ import org.camunda.bpm.engine.impl.pvm.delegate.ActivityBehavior;
 import org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 
-import dev.dsf.bpe.delegate.DelegateProvider;
-import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.plugin.ProcessIdAndVersion;
 
 public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActivityBehavior
 {
@@ -32,7 +31,7 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 	protected ActivityBehavior getActivityBehaviorInstance(ActivityExecution execution)
 	{
 		ExecutionEntity e = (ExecutionEntity) execution;
-		ProcessKeyAndVersion processKeyAndVersion = new ProcessKeyAndVersion(e.getProcessDefinition().getKey(),
+		ProcessIdAndVersion processKeyAndVersion = new ProcessIdAndVersion(e.getProcessDefinition().getKey(),
 				e.getProcessDefinition().getVersionTag());
 
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
@@ -52,7 +51,7 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 		}
 	};
 
-	private Object instantiateDelegate(ProcessKeyAndVersion processKeyAndVersion, String className,
+	private Object instantiateDelegate(ProcessIdAndVersion processKeyAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations)
 	{
 		try

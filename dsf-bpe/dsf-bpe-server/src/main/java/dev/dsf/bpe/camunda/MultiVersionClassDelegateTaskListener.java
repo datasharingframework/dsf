@@ -13,8 +13,7 @@ import org.camunda.bpm.engine.impl.task.delegate.TaskListenerInvocation;
 import org.camunda.bpm.engine.impl.task.listener.ClassDelegateTaskListener;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 
-import dev.dsf.bpe.delegate.DelegateProvider;
-import dev.dsf.bpe.process.ProcessKeyAndVersion;
+import dev.dsf.bpe.plugin.ProcessIdAndVersion;
 
 public class MultiVersionClassDelegateTaskListener extends ClassDelegateTaskListener
 {
@@ -33,7 +32,7 @@ public class MultiVersionClassDelegateTaskListener extends ClassDelegateTaskList
 	{
 		TaskEntity te = (TaskEntity) delegateTask;
 
-		ProcessKeyAndVersion processKeyAndVersion = new ProcessKeyAndVersion(te.getProcessDefinition().getKey(),
+		ProcessIdAndVersion processKeyAndVersion = new ProcessIdAndVersion(te.getProcessDefinition().getKey(),
 				te.getProcessDefinition().getVersionTag());
 
 		TaskListener taskListenerInstance = getTaskListenerInstance(processKeyAndVersion);
@@ -50,7 +49,7 @@ public class MultiVersionClassDelegateTaskListener extends ClassDelegateTaskList
 		}
 	}
 
-	protected TaskListener getTaskListenerInstance(ProcessKeyAndVersion processKeyAndVersion)
+	protected TaskListener getTaskListenerInstance(ProcessIdAndVersion processKeyAndVersion)
 	{
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
@@ -65,7 +64,7 @@ public class MultiVersionClassDelegateTaskListener extends ClassDelegateTaskList
 		}
 	}
 
-	private Object instantiateDelegate(ProcessKeyAndVersion processKeyAndVersion, String className,
+	private Object instantiateDelegate(ProcessIdAndVersion processKeyAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations)
 	{
 		try

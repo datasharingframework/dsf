@@ -1,5 +1,6 @@
 package dev.dsf.fhir.client;
 
+import java.net.UnknownHostException;
 import java.util.function.Supplier;
 
 import org.apache.http.conn.ConnectTimeoutException;
@@ -105,6 +106,7 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 
 	private boolean isRetryCause(Throwable cause)
 	{
-		return cause instanceof ConnectTimeoutException || cause instanceof HttpHostConnectException;
+		return cause instanceof ConnectTimeoutException || cause instanceof HttpHostConnectException
+				|| cause instanceof UnknownHostException;
 	}
 }
