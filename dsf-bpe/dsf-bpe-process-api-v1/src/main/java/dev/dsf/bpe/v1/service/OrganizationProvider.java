@@ -20,7 +20,7 @@ public interface OrganizationProvider
 	 * Retrieves the local {@link Organization} resources by searching for the managing {@link Organization} of the
 	 * local {@link Endpoint} resources. The local {@link Endpoint} resource is identified by the DSF FHIR server
 	 * address configured for the DSF BPE server.
-	 * 
+	 *
 	 * @return Managing {@link Organization} for the {@link Endpoint} resource with address equal to the DSF FHIR server
 	 *         base address configured for this DSF BPE, empty {@link Optional} if no such resource exists
 	 * @see #getRemoteOrganizations()
