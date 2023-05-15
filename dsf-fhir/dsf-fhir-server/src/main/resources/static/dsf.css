@@ -8,7 +8,8 @@ table#header {
 }
 
 table#header img {
-	height: 6em;
+	height: 7em;
+	padding-bottom: 0.38em;
 	display: block;
 }
 
@@ -18,13 +19,13 @@ td#url {
 
 td#url h1 {
 	font-family: monospace;
-	color: #29235c;
+	color: #326F95;
 	margin: 0 0 0 1em;
 	word-break: break-word;
 }
 
 td#url h1 a:link, td#url h1 a:visited, td#url h1 a:active {
-	color: #29235c;
+	color: #326F95;
 	text-decoration: none;
 }
 
@@ -93,7 +94,7 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 }
 
 .icon:hover>path {
-	fill: #29235c;
+	fill: #326F95;
 }
 
 #help {
@@ -109,7 +110,7 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 }
 
 #help>#help-title {
-	color: #29235c;
+	color: #326F95;
 	position: relative;
 	top: -1.9em;
 	font-family: sans-serif;
@@ -154,21 +155,21 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 }
 
 #bookmarks>#bookmarks-title {
-	color: #29235c;
+	color: #326F95;
 	position: relative;
 	top: -1.9em;
 	font-family: sans-serif;
 }
 
 #bookmarks a:link, #bookmarks a:visited, #bookmarks a:active {
-	color: #29235c;
+	color: #326F95;
 	text-decoration: none;
 	vertical-align: super;
 	font-family: monospace;
 }
 
 #bookmarks a:hover {
-	/* color: #29235c; */
+	/* color: #326F95; */
 	text-decoration: underline;
 	/* vertical-align: super;
 	font-family: monospace; */
