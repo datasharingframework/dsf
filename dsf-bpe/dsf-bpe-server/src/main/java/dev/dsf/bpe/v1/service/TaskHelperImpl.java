@@ -1,22 +1,16 @@
 package dev.dsf.bpe.v1.service;
 
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.r4.model.Base64BinaryType;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.hl7.fhir.r4.model.UrlType;
 
 public class TaskHelperImpl implements TaskHelper
 {
@@ -32,134 +26,102 @@ public class TaskHelperImpl implements TaskHelper
 	}
 
 	@Override
-	public Optional<String> getFirstInputParameterStringValue(Task task, String system, String code)
+	public String getLocalVersionlessAbsoluteUrl(Task task)
 	{
-		return getInputParameterStringValues(task, system, code).findFirst();
+		if (task == null)
+			return null;
+
+		return task.getIdElement().toVersionless().withServerBase(serverBaseUrl, ResourceType.Task.name()).getValue();
+	}
+
+	@Override
+	public Stream<String> getInputParameterStringValues(Task task, Coding coding)
+	{
+		return getInputParameterValues(task, coding, StringType.class).map(StringType::getValue);
 	}
 
 	@Override
 	public Stream<String> getInputParameterStringValues(Task task, String system, String code)
 	{
-		return getInputParameterValues(task, system, code, StringType.class).map(t -> t.asStringValue());
+		return getInputParameterValues(task, system, code, StringType.class).map(StringType::getValue);
 	}
 
 	@Override
-	public Optional<Boolean> getFirstInputParameterBooleanValue(Task task, String system, String code)
+	public <T extends Type> Stream<T> getInputParameterValues(Task task, Coding coding, Class<T> expectedType)
 	{
-		return getInputParameterBooleanValues(task, system, code).findFirst();
+		return getInputParameters(task, coding, expectedType).filter(ParameterComponent::hasValue)
+				.map(c -> expectedType.cast(c.getValue()));
 	}
 
 	@Override
-	public Stream<Boolean> getInputParameterBooleanValues(Task task, String system, String code)
+	public <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code,
+			Class<T> expectedType)
 	{
-		return getInputParameterValues(task, system, code, BooleanType.class).map(t -> t.getValue());
+		return getInputParameters(task, system, code, expectedType).filter(ParameterComponent::hasValue)
+				.map(c -> expectedType.cast(c.getValue()));
 	}
 
 	@Override
-	public Optional<Reference> getFirstInputParameterReferenceValue(Task task, String system, String code)
+	public Stream<ParameterComponent> getInputParametersWithExtension(Task task, Coding coding,
+			Class<? extends Type> expectedType, String extensionUrl)
 	{
-		return getInputParameterReferenceValues(task, system, code).findFirst();
+		return getInputParameters(task, coding, expectedType).filter(ParameterComponent::hasExtension)
+				.filter(c -> c.getExtension().stream().anyMatch(e -> Objects.equals(extensionUrl, e.getUrl())));
 	}
 
 	@Override
-	public Stream<Reference> getInputParameterReferenceValues(Task task, String system, String code)
+	public Stream<ParameterComponent> getInputParametersWithExtension(Task task, String system, String code,
+			Class<? extends Type> expectedType, String extensionUrl)
 	{
-		return getInputParameterValues(task, system, code, Reference.class);
+		return getInputParameters(task, system, code, expectedType).filter(ParameterComponent::hasExtension)
+				.filter(c -> c.getExtension().stream().anyMatch(e -> Objects.equals(extensionUrl, e.getUrl())));
 	}
 
 	@Override
-	public Optional<UrlType> getFirstInputParameterUrlValue(Task task, String system, String code)
+	public Stream<ParameterComponent> getInputParameters(Task task, Coding coding, Class<? extends Type> expectedType)
 	{
-		return getInputParameterUrlValues(task, system, code).findFirst();
+		if (coding == null)
+			return Stream.empty();
+
+		return getInputParameters(task, coding.getSystem(), coding.getCode(), expectedType);
 	}
 
 	@Override
-	public Stream<UrlType> getInputParameterUrlValues(Task task, String system, String code)
+	public Stream<ParameterComponent> getInputParameters(Task task, String system, String code,
+			Class<? extends Type> expectedType)
 	{
-		return getInputParameterValues(task, system, code, UrlType.class);
-	}
+		Objects.requireNonNull(expectedType, "expectedType");
 
-	@Override
-	public Optional<byte[]> getFirstInputParameterByteValue(Task task, String system, String code)
-	{
-		return getInputParameterValues(task, system, code, Base64BinaryType.class).map(Base64BinaryType::getValue)
-				.findFirst();
-	}
+		if (task == null)
+			return Stream.empty();
 
-	@Override
-	public Stream<ParameterComponent> getInputParameterWithExtension(Task task, String system, String code, String url)
-	{
-		return task.getInput().stream()
-				.filter(input -> input.getType().getCoding().stream()
-						.anyMatch(coding -> coding.getSystem().equals(system) && coding.getCode().equals(code)))
-				.filter(input -> input.getExtension().stream().anyMatch(extension -> extension.getUrl().equals(url)));
-	}
-
-	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
-	{
-		return task.getInput().stream().filter(c -> type.isInstance(c.getValue()))
+		return task.getInput().stream().filter(c -> c.hasType() && c.getType().hasCoding())
 				.filter(c -> c.getType().getCoding().stream()
-						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
-				.map(c -> type.cast(c.getValue()));
+						.anyMatch(co -> Objects.equals(system, co.getSystem()) && Objects.equals(code, co.getCode())))
+				.filter(c -> c.hasValue() && expectedType.isInstance(c.getValue()));
 	}
 
 	@Override
-	public ParameterComponent createInput(String system, String code, String value)
+	public ParameterComponent createInput(Type value, Coding coding)
 	{
-		return new ParameterComponent(new CodeableConcept(new Coding(system, code, null)), new StringType(value));
+		return new ParameterComponent(new CodeableConcept(coding), value);
 	}
 
 	@Override
-	public ParameterComponent createInput(String system, String code, boolean value)
+	public ParameterComponent createInput(Type value, String system, String code)
 	{
-		return new ParameterComponent(new CodeableConcept(new Coding(system, code, null)), new BooleanType(value));
+		return createInput(value, new Coding(system, code, null));
 	}
 
 	@Override
-	public ParameterComponent createInput(String system, String code, Reference reference)
+	public TaskOutputComponent createOutput(Type value, Coding coding)
 	{
-		return new ParameterComponent(new CodeableConcept(new Coding(system, code, null)), reference);
+		return new TaskOutputComponent(new CodeableConcept(coding), value);
 	}
 
 	@Override
-	public ParameterComponent createInput(String system, String code, byte[] bytes)
+	public TaskOutputComponent createOutput(Type value, String system, String code)
 	{
-		return new ParameterComponent(new CodeableConcept(new Coding(system, code, null)), new Base64BinaryType(bytes));
-	}
-
-	@Override
-	public ParameterComponent createInputUnsignedInt(String system, String code, int value)
-	{
-		return new ParameterComponent(new CodeableConcept(new Coding(system, code, null)), new UnsignedIntType(value));
-	}
-
-	@Override
-	public ParameterComponent createInput(String system, String code, int value)
-	{
-		return new ParameterComponent(new CodeableConcept(new Coding(system, code, null)), new IntegerType(value));
-	}
-
-	@Override
-	public TaskOutputComponent createOutput(String system, String code, String value)
-	{
-		return new TaskOutputComponent(new CodeableConcept(new Coding(system, code, null)), new StringType(value));
-	}
-
-	@Override
-	public TaskOutputComponent createOutputUnsignedInt(String system, String code, int value)
-	{
-		return new TaskOutputComponent(new CodeableConcept(new Coding(system, code, null)), new UnsignedIntType(value));
-	}
-
-	@Override
-	public TaskOutputComponent createOutput(String system, String code, Reference reference)
-	{
-		return new TaskOutputComponent(new CodeableConcept(new Coding(system, code, null)), reference);
-	}
-
-	@Override
-	public String getLocalVersionlessAbsoluteUrl(Task task)
-	{
-		return task.getIdElement().toVersionless().withServerBase(serverBaseUrl, ResourceType.Task.name()).getValue();
+		return createOutput(value, new Coding(system, code, null));
 	}
 }
