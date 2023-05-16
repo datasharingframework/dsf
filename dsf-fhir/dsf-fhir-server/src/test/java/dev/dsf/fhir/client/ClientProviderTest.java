@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -50,8 +51,9 @@ public class ClientProviderTest
 		exceptionHandler = mock(ExceptionHandler.class);
 
 		provider = new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
-				remoteReadTimeout, remoteConnectTimeout, remoteProxySchemeHostPort, remoteProxyUsername,
-				remoteProxyPassword, logRequests, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
+				remoteReadTimeout, remoteConnectTimeout,
+				new ProxyConfigImpl(remoteProxySchemeHostPort, remoteProxyUsername, remoteProxyPassword, null),
+				logRequests, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
 	}
 
 	@Test

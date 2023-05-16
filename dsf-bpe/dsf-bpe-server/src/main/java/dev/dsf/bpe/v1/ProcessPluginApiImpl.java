@@ -8,6 +8,7 @@ import org.springframework.beans.factory.InitializingBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.v1.config.ProxyConfig;
 import dev.dsf.bpe.v1.service.EndpointProvider;
 import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
 import dev.dsf.bpe.v1.service.MailService;
@@ -21,6 +22,7 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 
 public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 {
+	private final ProxyConfig proxyConfig;
 	private final EndpointProvider endpointProvider;
 	private final FhirContext fhirContext;
 	private final FhirWebserviceClientProvider fhirWebserviceClientProvider;
@@ -32,13 +34,14 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
 
-	public ProcessPluginApiImpl(EndpointProvider endpointProvider, FhirContext fhirContext,
+	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			FhirWebserviceClientProvider fhirWebserviceClientProvider, MailService mailService,
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
 			TaskHelper taskHelper)
 	{
+		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
 		this.fhirContext = fhirContext;
 		this.fhirWebserviceClientProvider = fhirWebserviceClientProvider;
@@ -54,6 +57,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(proxyConfig, "proxyConfig");
 		Objects.requireNonNull(endpointProvider, "endpointProvider");
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(fhirWebserviceClientProvider, "fhirWebserviceClientProvider");
@@ -64,6 +68,12 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+	}
+
+	@Override
+	public ProxyConfig getProxyConfig()
+	{
+		return proxyConfig;
 	}
 
 	@Override

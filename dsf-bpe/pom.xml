@@ -126,6 +126,11 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-config</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>

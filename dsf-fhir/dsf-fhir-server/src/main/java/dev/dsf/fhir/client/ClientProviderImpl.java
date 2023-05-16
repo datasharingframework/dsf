@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.service.ReferenceCleaner;
@@ -23,9 +24,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 
 	private final int remoteReadTimeout;
 	private final int remoteConnectTimeout;
-	private final String remoteProxySchemeHostPort;
-	private final String remoteProxyUsername;
-	private final char[] remoteProxyPassword;
+	private ProxyConfig proxyConfig;
 	private final boolean logRequests;
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;
@@ -33,8 +32,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	private final ExceptionHandler exceptionHandler;
 
 	public ClientProviderImpl(KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
-			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
-			String remoteProxySchemeHostPort, String remoteProxyUsername, char[] remoteProxyPassword,
+			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout, ProxyConfig proxyConfig,
 			boolean logRequests, FhirContext fhirContext, ReferenceCleaner referenceCleaner, EndpointDao endpointDao,
 			ExceptionHandler exceptionHandler)
 	{
@@ -43,9 +41,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		this.webserviceKeyStorePassword = webserviceKeyStorePassword;
 		this.remoteReadTimeout = remoteReadTimeout;
 		this.remoteConnectTimeout = remoteConnectTimeout;
-		this.remoteProxySchemeHostPort = remoteProxySchemeHostPort;
-		this.remoteProxyUsername = remoteProxyUsername;
-		this.remoteProxyPassword = remoteProxyPassword;
+		this.proxyConfig = proxyConfig;
 		this.logRequests = logRequests;
 		this.fhirContext = fhirContext;
 		this.referenceCleaner = referenceCleaner;
@@ -60,6 +56,8 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		Objects.requireNonNull(webserviceKeyStore, "webserviceKeyStore");
 		Objects.requireNonNull(webserviceKeyStorePassword, "webserviceKeyStorePassword");
 
+		Objects.requireNonNull(proxyConfig, "proxyConfig");
+
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(endpointDao, "endpointDao");
@@ -71,10 +69,13 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	{
 		if (endpointExists(serverBase))
 		{
+			String proxyUrl = proxyConfig.isEnabled(serverBase) ? proxyConfig.getUrl() : null;
+			String proxyUsername = proxyConfig.isEnabled(serverBase) ? proxyConfig.getUsername() : null;
+			char[] proxyPassword = proxyConfig.isEnabled(serverBase) ? proxyConfig.getPassword() : null;
+
 			FhirWebserviceClient client = new FhirWebserviceClientJersey(serverBase, webserviceTrustStore,
-					webserviceKeyStore, webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername,
-					remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, logRequests, null, fhirContext,
-					referenceCleaner);
+					webserviceKeyStore, webserviceKeyStorePassword, proxyUrl, proxyUsername, proxyPassword,
+					remoteConnectTimeout, remoteReadTimeout, logRequests, null, fhirContext, referenceCleaner);
 
 			return Optional.of(client);
 		}

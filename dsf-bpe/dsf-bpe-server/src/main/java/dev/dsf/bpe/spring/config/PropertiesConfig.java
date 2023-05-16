@@ -15,6 +15,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import dev.dsf.common.config.ProxyConfig;
+import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
@@ -72,18 +74,6 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.connect:5000}")
 	private int webserviceClientRemoteConnectTimeout;
 
-	@Documentation(description = "Proxy location, set if the DSF BPE server can reach the internet only through a proxy", example = "http://proxy.foo:8080")
-	@Value("${dev.dsf.bpe.fhir.client.remote.proxy.url:#{null}}")
-	private String webserviceClientRemoteProxySchemeHostPort;
-
-	@Documentation(description = "Proxy username, set if the the DSF BPE server can reach the internet only through a proxy which requests authentication")
-	@Value("${dev.dsf.bpe.fhir.client.remote.proxy.username:#{null}}")
-	private String webserviceClientRemoteProxyUsername;
-
-	@Documentation(description = "Proxy password, set if the the DSF BPE server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
-	@Value("${dev.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
-	private char[] webserviceClientRemoteProxyPassword;
-
 	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
 	@Value("${dev.dsf.bpe.fhir.client.remote.verbose:false}")
 	private boolean webserviceClientRemoteVerbose;
@@ -100,33 +90,9 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.client.local.timeout.connect:2000}")
 	private int webserviceClientLocalConnectTimeout;
 
-	@Documentation(description = "Proxy location, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy", example = "http://proxy.foo:8080")
-	@Value("${dev.dsf.bpe.fhir.client.local.proxy.url:#{null}}")
-	private String webserviceClientLocalProxySchemeHostPort;
-
-	@Documentation(description = "Proxy username, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication")
-	@Value("${dev.dsf.bpe.fhir.client.local.proxy.username:#{null}}")
-	private String webserviceClientLocalProxyUsername;
-
-	@Documentation(description = "Proxy password, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
-	@Value("${dev.dsf.bpe.fhir.client.local.proxy.password:#{null}}")
-	private char[] webserviceClientLocalProxyPassword;
-
 	@Documentation(description = "To enable verbose logging of requests to and replies from the local DSF FHIR server, set to `true`")
 	@Value("${dev.dsf.bpe.fhir.client.local.verbose:false}")
 	private boolean webserviceClientLocalVerbose;
-
-	@Documentation(description = "Proxy location, set if the DSF BPE server can reach internal servers via websocket, like the DSF FHIR server, only through a proxy", example = "http://proxy.foo:8080")
-	@Value("${dev.dsf.bpe.fhir.client.local.websocket.proxy.url:#{null}}")
-	private String websocketClientProxySchemeHostPort;
-
-	@Documentation(description = "Proxy username, set if the DSF BPE server can reach internal servers via websocket, like the DSF FHIR server, only through a proxy which requests authentication")
-	@Value("${dev.dsf.bpe.fhir.client.local.websocket.proxy.username:#{null}}")
-	private String websocketClientProxyUsername;
-
-	@Documentation(description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
-	@Value("${dev.dsf.bpe.fhir.client.local.websocket.proxy.password:#{null}}")
-	private char[] websocketClientProxyPassword;
 
 	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
 	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
@@ -255,6 +221,22 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${jetty.status.port}")
 	private int jettyStatusConnectorPort;
 
+	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
+	@Value("${dev.dsf.bpe.proxy.url:#{null}}")
+	private String proxyUrl;
+
+	@Documentation(description = "Forward proxy username", recommendation = "Configure username if proxy requires authentication")
+	@Value("${dev.dsf.bpe.proxy.username:#{null}}")
+	private String proxyUsername;
+
+	@Documentation(description = "Forward Proxy password", recommendation = "Configure password if proxy requires authentication, use docker secret file to configure using *${env_variable}_FILE*")
+	@Value("${dev.dsf.bpe.proxy.password:#{null}}")
+	private char[] proxyPassword;
+
+	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+	@Value("#{'${dev.dsf.bpe.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
+	private List<String> proxyNoProxy;
+
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
@@ -342,21 +324,6 @@ public class PropertiesConfig implements InitializingBean
 		return webserviceClientRemoteConnectTimeout;
 	}
 
-	public String getWebserviceClientRemoteProxySchemeHostPort()
-	{
-		return webserviceClientRemoteProxySchemeHostPort;
-	}
-
-	public String getWebserviceClientRemoteProxyUsername()
-	{
-		return webserviceClientRemoteProxyUsername;
-	}
-
-	public char[] getWebserviceClientRemoteProxyPassword()
-	{
-		return webserviceClientRemoteProxyPassword;
-	}
-
 	public boolean getWebserviceClientRemoteVerbose()
 	{
 		return webserviceClientRemoteVerbose;
@@ -379,39 +346,9 @@ public class PropertiesConfig implements InitializingBean
 		return webserviceClientLocalConnectTimeout;
 	}
 
-	public String getWebserviceClientLocalProxySchemeHostPort()
-	{
-		return webserviceClientLocalProxySchemeHostPort;
-	}
-
-	public String getWebserviceClientLocalProxyUsername()
-	{
-		return webserviceClientLocalProxyUsername;
-	}
-
-	public char[] getWebserviceClientLocalProxyPassword()
-	{
-		return webserviceClientLocalProxyPassword;
-	}
-
 	public boolean getWebserviceClientLocalVerbose()
 	{
 		return webserviceClientLocalVerbose;
-	}
-
-	public String getWebsocketClientProxySchemeHostPort()
-	{
-		return websocketClientProxySchemeHostPort;
-	}
-
-	public String getWebsocketClientProxyUsername()
-	{
-		return websocketClientProxyUsername;
-	}
-
-	public char[] getWebsocketClientProxyPassword()
-	{
-		return websocketClientProxyPassword;
 	}
 
 	public String getTaskSubscriptionSearchParameter()
@@ -572,5 +509,11 @@ public class PropertiesConfig implements InitializingBean
 	public int getJettyStatusConnectorPort()
 	{
 		return jettyStatusConnectorPort;
+	}
+
+	@Bean
+	public ProxyConfig proxyConfig()
+	{
+		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}
 }

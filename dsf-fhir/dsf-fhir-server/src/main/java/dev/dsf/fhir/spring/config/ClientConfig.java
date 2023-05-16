@@ -65,11 +65,9 @@ public class ClientConfig implements InitializingBean
 
 			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, keyStorePassword,
 					propertiesConfig.getWebserviceClientReadTimeout(),
-					propertiesConfig.getWebserviceClientConnectTimeout(),
-					propertiesConfig.getWebserviceClientProxyUrl(), propertiesConfig.getWebserviceClientProxyUsername(),
-					propertiesConfig.getWebserviceClientProxyPassword(), propertiesConfig.getWebserviceClientVerbose(),
-					fhirConfig.fhirContext(), referenceConfig.referenceCleaner(), daoConfig.endpointDao(),
-					helperConfig.exceptionHandler());
+					propertiesConfig.getWebserviceClientConnectTimeout(), propertiesConfig.proxyConfig(),
+					propertiesConfig.getWebserviceClientVerbose(), fhirConfig.fhirContext(),
+					referenceConfig.referenceCleaner(), daoConfig.endpointDao(), helperConfig.exceptionHandler());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | PKCSException e)
 		{
@@ -113,12 +111,12 @@ public class ClientConfig implements InitializingBean
 	{
 		logger.info(
 				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}}",
+						+ " proxy: {}, no_proxy: {}}",
 				propertiesConfig.getWebserviceClientCertificateTrustCertificatesFile(),
 				propertiesConfig.getWebserviceClientCertificateFile(),
 				propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
 				propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
-				propertiesConfig.getWebserviceClientProxyUrl(), propertiesConfig.getWebserviceClientProxyUsername(),
-				propertiesConfig.getWebserviceClientProxyPassword() != null ? "***" : "null");
+				propertiesConfig.proxyConfig().isEnabled() ? "enabled" : "disabled",
+				propertiesConfig.proxyConfig().getNoProxyUrls());
 	}
 }

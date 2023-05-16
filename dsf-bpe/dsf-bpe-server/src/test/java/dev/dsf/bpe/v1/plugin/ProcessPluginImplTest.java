@@ -38,6 +38,7 @@ import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.ProcessPluginApiImpl;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
 import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.config.ProxyConfig;
 import dev.dsf.bpe.v1.service.EndpointProvider;
 import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
 import dev.dsf.bpe.v1.service.MailService;
@@ -135,8 +136,9 @@ public class ProcessPluginImplTest
 		}
 	}
 
-	private FhirContext fhirContext = FhirContext.forR4();
+	private ProxyConfig proxyConfig = mock(ProxyConfig.class);
 	private EndpointProvider endpointProvider = mock(EndpointProvider.class);
+	private FhirContext fhirContext = FhirContext.forR4();
 	private FhirWebserviceClientProvider fhirWebserviceClientProvider = mock(FhirWebserviceClientProvider.class);
 	private MailService mailService = mock(MailService.class);
 	private ObjectMapper objectMapper = ObjectMapperFactory.createObjectMapper(fhirContext);
@@ -146,7 +148,7 @@ public class ProcessPluginImplTest
 	private ReadAccessHelper readAccessHelper = mock(ReadAccessHelper.class);
 	private TaskHelper taskHelper = mock(TaskHelper.class);
 
-	private ProcessPluginApi processPluginApi = new ProcessPluginApiImpl(endpointProvider, fhirContext,
+	private ProcessPluginApi processPluginApi = new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext,
 			fhirWebserviceClientProvider, mailService, objectMapper, organizationProvider, processAuthorizationHelper,
 			questionnaireResponseHelper, readAccessHelper, taskHelper);
 	private ConfigurableEnvironment environment = new StandardEnvironment();

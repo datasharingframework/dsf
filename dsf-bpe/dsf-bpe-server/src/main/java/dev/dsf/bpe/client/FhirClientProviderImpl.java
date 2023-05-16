@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClientJersey;
 import dev.dsf.fhir.client.WebsocketClient;
@@ -30,9 +31,6 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	private final String localWebserviceBaseUrl;
 	private final int localWebserviceReadTimeout;
 	private final int localWebserviceConnectTimeout;
-	private final String localWebserviceProxySchemeHostPort;
-	private final String localWebserviceProxyUsername;
-	private final char[] localWebserviceProxyPassword;
 	private final boolean localWebserviceLogRequests;
 
 	private final KeyStore webserviceTrustStore;
@@ -41,9 +39,6 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 
 	private final int remoteWebserviceReadTimeout;
 	private final int remoteWebserviceConnectTimeout;
-	private final String remoteWebserviceProxySchemeHostPort;
-	private final String remoteWebserviceProxyUsername;
-	private final char[] remoteWebserviceProxyPassword;
 	private final boolean remoteWebserviceLogRequests;
 
 	private final String localWebsocketUrl;
@@ -51,21 +46,14 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	private final KeyStore localWebsocketKeyStore;
 	private final char[] localWebsocketKeyStorePassword;
 
-	private final String localWebsocketProxySchemeHostPort;
-	private final String localWebsocketProxyUsername;
-	private final char[] localWebsocketProxyPassword;
+	private final ProxyConfig proxyConfig;
 
 	public FhirClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
 			String localWebserviceBaseUrl, int localWebserviceReadTimeout, int localWebserviceConnectTimeout,
-			String localWebserviceProxySchemeHostPort, String localWebserviceProxyUsername,
-			char[] localWebserviceProxyPassword, boolean localWebserviceLogRequests, KeyStore webserviceTrustStore,
-			KeyStore webserviceKeyStore, char[] webserviceKeyStorePassword, int remoteWebserviceReadTimeout,
-			int remoteWebserviceConnectTimeout, String remoteWebserviceProxySchemeHostPort,
-			String remoteWebserviceProxyUsername, char[] remoteWebserviceProxyPassword,
+			boolean localWebserviceLogRequests, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
+			char[] webserviceKeyStorePassword, int remoteWebserviceReadTimeout, int remoteWebserviceConnectTimeout,
 			boolean remoteWebserviceLogRequests, String localWebsocketUrl, KeyStore localWebsocketTrustStore,
-			KeyStore localWebsocketKeyStore, char[] localWebsocketKeyStorePassword,
-			String localWebsocketProxySchemeHostPort, String localWebsocketProxyUsername,
-			char[] localWebsocketProxyPassword)
+			KeyStore localWebsocketKeyStore, char[] localWebsocketKeyStorePassword, ProxyConfig proxyConfig)
 	{
 		this.fhirContext = fhirContext;
 		this.referenceCleaner = referenceCleaner;
@@ -73,9 +61,6 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 		this.localWebserviceBaseUrl = localWebserviceBaseUrl;
 		this.localWebserviceReadTimeout = localWebserviceReadTimeout;
 		this.localWebserviceConnectTimeout = localWebserviceConnectTimeout;
-		this.localWebserviceProxySchemeHostPort = localWebserviceProxySchemeHostPort;
-		this.localWebserviceProxyUsername = localWebserviceProxyUsername;
-		this.localWebserviceProxyPassword = localWebserviceProxyPassword;
 		this.localWebserviceLogRequests = localWebserviceLogRequests;
 
 		this.webserviceTrustStore = webserviceTrustStore;
@@ -84,18 +69,14 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 
 		this.remoteWebserviceReadTimeout = remoteWebserviceReadTimeout;
 		this.remoteWebserviceConnectTimeout = remoteWebserviceConnectTimeout;
-		this.remoteWebserviceProxySchemeHostPort = remoteWebserviceProxySchemeHostPort;
-		this.remoteWebserviceProxyUsername = remoteWebserviceProxyUsername;
-		this.remoteWebserviceProxyPassword = remoteWebserviceProxyPassword;
 		this.remoteWebserviceLogRequests = remoteWebserviceLogRequests;
 
 		this.localWebsocketUrl = localWebsocketUrl;
 		this.localWebsocketTrustStore = localWebsocketTrustStore;
 		this.localWebsocketKeyStore = localWebsocketKeyStore;
 		this.localWebsocketKeyStorePassword = localWebsocketKeyStorePassword;
-		this.localWebsocketProxySchemeHostPort = localWebsocketProxySchemeHostPort;
-		this.localWebsocketProxyUsername = localWebsocketProxyUsername;
-		this.localWebsocketProxyPassword = localWebsocketProxyPassword;
+
+		this.proxyConfig = proxyConfig;
 	}
 
 	@Override
@@ -118,6 +99,8 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 		Objects.requireNonNull(localWebsocketTrustStore, "localWebsocketTrustStore");
 		Objects.requireNonNull(localWebsocketKeyStore, "localWebsocketKeyStore");
 		Objects.requireNonNull(localWebsocketKeyStorePassword, "localWebsocketKeyStorePassword");
+
+		Objects.requireNonNull(proxyConfig, "proxyConfig");
 	}
 
 	public String getLocalBaseUrl()
@@ -133,17 +116,19 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 				return webserviceClientsByUrl.get(webserviceUrl);
 			else
 			{
+				String proxyUrl = proxyConfig.isEnabled(webserviceUrl) ? proxyConfig.getUrl() : null;
+				String proxyUsername = proxyConfig.isEnabled(webserviceUrl) ? proxyConfig.getUsername() : null;
+				char[] proxyPassword = proxyConfig.isEnabled(webserviceUrl) ? proxyConfig.getPassword() : null;
+
 				FhirWebserviceClient client;
 				if (localWebserviceBaseUrl.equals(webserviceUrl))
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
-							webserviceKeyStorePassword, localWebserviceProxySchemeHostPort,
-							localWebserviceProxyUsername, localWebserviceProxyPassword, localWebserviceConnectTimeout,
-							localWebserviceReadTimeout, localWebserviceLogRequests, null, fhirContext,
-							referenceCleaner);
+							webserviceKeyStorePassword, proxyUrl, proxyUsername, proxyPassword,
+							localWebserviceConnectTimeout, localWebserviceReadTimeout, localWebserviceLogRequests, null,
+							fhirContext, referenceCleaner);
 				else
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
-							webserviceKeyStorePassword, remoteWebserviceProxySchemeHostPort,
-							remoteWebserviceProxyUsername, remoteWebserviceProxyPassword,
+							webserviceKeyStorePassword, proxyUrl, proxyUsername, proxyPassword,
 							remoteWebserviceConnectTimeout, remoteWebserviceReadTimeout, remoteWebserviceLogRequests,
 							null, fhirContext, referenceCleaner);
 
@@ -191,8 +176,10 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	protected WebsocketClientTyrus createWebsocketClient(Runnable reconnector, String subscriptionId)
 	{
 		return new WebsocketClientTyrus(reconnector, URI.create(localWebsocketUrl), localWebsocketTrustStore,
-				localWebsocketKeyStore, localWebsocketKeyStorePassword, localWebsocketProxySchemeHostPort,
-				localWebsocketProxyUsername, localWebsocketProxyPassword, subscriptionId);
+				localWebsocketKeyStore, localWebsocketKeyStorePassword,
+				proxyConfig.isEnabled(localWebsocketUrl) ? proxyConfig.getUrl() : null,
+				proxyConfig.isEnabled(localWebsocketUrl) ? proxyConfig.getUsername() : null,
+				proxyConfig.isEnabled(localWebsocketUrl) ? proxyConfig.getPassword() : null, subscriptionId);
 	}
 
 	@Override
