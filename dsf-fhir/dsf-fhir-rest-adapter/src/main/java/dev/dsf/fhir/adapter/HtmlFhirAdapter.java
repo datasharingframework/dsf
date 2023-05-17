@@ -144,7 +144,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				<link rel="icon" type="image/svg+xml" href="${basePath}static/favicon.svg">
 				<link rel="icon" type="image/png" href="${basePath}static/favicon_32x32.png" sizes="32x32">
 				<link rel="icon" type="image/png" href="${basePath}static/favicon_96x96.png" sizes="96x96">
-				<meta name="theme-color" content="#29235c">
+				<meta name="theme-color" content="#326F95">
 				<script src="${basePath}static/prettify.js"></script>
 				<script src="${basePath}static/tabs.js"></script>
 				<script src="${basePath}static/bookmarks.js"></script>
@@ -227,7 +227,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 						<table id="header">
 						<tr>
 						<td>
-						<image src="${basePath}static/highmed.svg">
+						<image src="${basePath}static/logo.svg">
 						</td>
 						<td id="url">
 						<h1>

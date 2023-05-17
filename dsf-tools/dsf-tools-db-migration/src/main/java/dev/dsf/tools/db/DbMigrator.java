@@ -1,9 +1,11 @@
 package dev.dsf.tools.db;
 
+import java.io.ByteArrayOutputStream;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
@@ -11,14 +13,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import liquibase.Contexts;
-import liquibase.Liquibase;
+import liquibase.LabelExpression;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.command.CommandScope;
+import liquibase.command.core.UpdateCommandStep;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.ui.LoggerUIService;
 
 public final class DbMigrator
@@ -59,16 +64,27 @@ public final class DbMigrator
 					{
 						Database database = DatabaseFactory.getInstance()
 								.findCorrectDatabaseImplementation(new JdbcConnection(connection));
-						try (Liquibase liquibase = new Liquibase("db/db.changelog.xml",
-								new ClassLoaderResourceAccessor(), database))
-						{
-							ChangeLogParameters changeLogParameters = liquibase.getChangeLogParameters();
-							config.getChangeLogParameters().forEach(changeLogParameters::set);
 
-							logger.info("Executing DB migration ...");
-							liquibase.update(new Contexts());
-							logger.info("Executing DB migration [Done]");
-						}
+						ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
+						config.getChangeLogParameters().forEach(changeLogParameters::set);
+						ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+						CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+						updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+						updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "db/db.changelog.xml");
+						updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, new Contexts().toString());
+						updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG,
+								new LabelExpression().getOriginalString());
+						updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS,
+								changeLogParameters);
+						updateCommand.setOutput(output);
+
+						logger.info("Executing DB migration ...");
+						updateCommand.execute();
+
+						Arrays.stream(output.toString().split("[\r\n]+")).filter(row -> !row.isBlank())
+								.forEach(row -> logger.debug("{}", row));
+						logger.info("Executing DB migration [Done]");
 					}
 				}
 				catch (SQLException e)

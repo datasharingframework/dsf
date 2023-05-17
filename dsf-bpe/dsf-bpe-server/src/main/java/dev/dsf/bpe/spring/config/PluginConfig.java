@@ -26,6 +26,8 @@ import dev.dsf.bpe.plugin.ProcessPluginManagerImpl;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.ProcessPluginApiImpl;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
+import dev.dsf.bpe.v1.config.ProxyConfig;
+import dev.dsf.bpe.v1.config.ProxyConfigDelegate;
 import dev.dsf.bpe.v1.plugin.ProcessPluginFactoryImpl;
 import dev.dsf.bpe.v1.service.EndpointProvider;
 import dev.dsf.bpe.v1.service.EndpointProviderImpl;
@@ -74,6 +76,8 @@ public class PluginConfig
 	@Bean
 	public ProcessPluginApi processPluginApiV1()
 	{
+		ProxyConfig proxyConfig = new ProxyConfigDelegate(propertiesConfig.proxyConfig());
+
 		FhirWebserviceClientProvider clientProvider = new FhirWebserviceClientProviderImpl(
 				fhirClientConfig.clientProvider());
 		EndpointProvider endpointProvider = new EndpointProviderImpl(clientProvider,
@@ -90,9 +94,9 @@ public class PluginConfig
 		ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
 		TaskHelper taskHelper = new TaskHelperImpl(propertiesConfig.getServerBaseUrl());
 
-		return new ProcessPluginApiImpl(endpointProvider, fhirContext, clientProvider, mailService, objectMapper,
-				organizationProvider, processAuthorizationHelper, questionnaireResponseHelper, readAccessHelper,
-				taskHelper);
+		return new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext, clientProvider, mailService,
+				objectMapper, organizationProvider, processAuthorizationHelper, questionnaireResponseHelper,
+				readAccessHelper, taskHelper);
 	}
 
 	@Bean

@@ -49,32 +49,29 @@ public class FhirClientConfig implements InitializingBean
 	{
 		logger.info(
 				"Local webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}, serverBase: {}}",
+						+ " url: {}, proxy: {}}",
 				propertiesConfig.getClientCertificateTrustStoreFile(), propertiesConfig.getClientCertificateFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
-				propertiesConfig.getWebserviceClientLocalProxySchemeHostPort(),
-				propertiesConfig.getWebserviceClientLocalProxyUsername(),
-				propertiesConfig.getWebserviceClientLocalProxyPassword() != null ? "***" : "null",
-				propertiesConfig.getServerBaseUrl());
+				propertiesConfig.getServerBaseUrl(),
+				propertiesConfig.proxyConfig().isEnabled(propertiesConfig.getServerBaseUrl()) ? "enabled" : "disabled");
 		logger.info(
 				"Local websocket client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}, websocketUrl: {}}",
+						+ " url: {}, proxy: {}}",
 				propertiesConfig.getClientCertificateTrustStoreFile(), propertiesConfig.getClientCertificateFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
-				propertiesConfig.getWebsocketClientProxySchemeHostPort(),
-				propertiesConfig.getWebsocketClientProxyUsername(),
-				propertiesConfig.getWebsocketClientProxyPassword() != null ? "***" : "null", getWebsocketUrl());
+				getWebsocketUrl(),
+				propertiesConfig.proxyConfig().isEnabled(getWebsocketUrl()) ? "enabled" : "disabled");
 		logger.info(
 				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}}",
+						+ " proxy: {}}",
 				propertiesConfig.getClientCertificateTrustStoreFile(), propertiesConfig.getClientCertificateFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
-				propertiesConfig.getWebserviceClientRemoteProxySchemeHostPort(),
-				propertiesConfig.getWebserviceClientRemoteProxyUsername(),
-				propertiesConfig.getWebserviceClientRemoteProxyPassword() != null ? "***" : "null");
+				propertiesConfig.proxyConfig().isEnabled()
+						? "enabled if remote server not in " + propertiesConfig.proxyConfig().getNoProxyUrls()
+						: "disabled");
 	}
 
 	@Bean
@@ -104,19 +101,11 @@ public class FhirClientConfig implements InitializingBean
 			return new FhirClientProviderImpl(fhirConfig.fhirContext(), referenceCleaner(),
 					propertiesConfig.getServerBaseUrl(), propertiesConfig.getWebserviceClientLocalReadTimeout(),
 					propertiesConfig.getWebserviceClientLocalConnectTimeout(),
-					propertiesConfig.getWebserviceClientLocalProxySchemeHostPort(),
-					propertiesConfig.getWebserviceClientLocalProxyUsername(),
-					propertiesConfig.getWebserviceClientLocalProxyPassword(),
 					propertiesConfig.getWebserviceClientLocalVerbose(), webserviceTrustStore, webserviceKeyStore,
 					keyStorePassword, propertiesConfig.getWebserviceClientRemoteReadTimeout(),
 					propertiesConfig.getWebserviceClientRemoteConnectTimeout(),
-					propertiesConfig.getWebserviceClientRemoteProxySchemeHostPort(),
-					propertiesConfig.getWebserviceClientRemoteProxyUsername(),
-					propertiesConfig.getWebserviceClientRemoteProxyPassword(),
 					propertiesConfig.getWebserviceClientRemoteVerbose(), getWebsocketUrl(), webserviceTrustStore,
-					webserviceKeyStore, keyStorePassword, propertiesConfig.getWebsocketClientProxySchemeHostPort(),
-					propertiesConfig.getWebsocketClientProxyUsername(),
-					propertiesConfig.getWebsocketClientProxyPassword());
+					webserviceKeyStore, keyStorePassword, propertiesConfig.proxyConfig());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | PKCSException e)
 		{

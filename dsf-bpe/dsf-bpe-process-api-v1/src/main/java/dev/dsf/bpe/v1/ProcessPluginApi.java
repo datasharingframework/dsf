@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.v1.config.ProxyConfig;
 import dev.dsf.bpe.v1.service.EndpointProvider;
 import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
 import dev.dsf.bpe.v1.service.MailService;
@@ -25,6 +26,8 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelper;
  */
 public interface ProcessPluginApi
 {
+	ProxyConfig getProxyConfig();
+
 	EndpointProvider getEndpointProvider();
 
 	FhirContext getFhirContext();

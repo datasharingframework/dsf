@@ -32,11 +32,11 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-documentation-generator</artifactId>
+			<artifactId>dsf-common-auth</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-auth</artifactId>
+			<artifactId>dsf-common-config</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
