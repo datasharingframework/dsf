@@ -40,6 +40,12 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-status</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -80,7 +86,7 @@
 				<executions>
 					<execution>
 						<id>copy-dependencies-to-docker</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
@@ -91,7 +97,7 @@
 					</execution>
 					<execution>
 						<id>copy-server-jar-to-docker</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
@@ -109,7 +115,7 @@
 					</execution>
 					<execution>
 						<id>copy-status-client-to-docker</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
