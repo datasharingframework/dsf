@@ -52,10 +52,8 @@ import dev.dsf.common.auth.conf.RoleConfig;
 
 public class IdentityProviderTest
 {
-	private static final String LOCAL_ORGANIZATION_NAME = "Local Organization";
 	private static final String LOCAL_ORGANIZATION_COMMON_NAME = "local.org";
 	private static final String LOCAL_ORGANIZATION_IDENTIFIER_VALUE = "id.local.org";
-	private static final String REMOTE_ORGANIZATION_NAME = "Remote Organization";
 	private static final String REMOTE_ORGANIZATION_COMMON_NAME = "remote.org";
 	private static final String REMOTE_ORGANIZATION_IDENTIFIER_VALUE = "id.remote.org";
 	private static final String LOCAL_PRACTITIONER_NAME_GIVEN = "Tyler";
@@ -130,11 +128,9 @@ public class IdentityProviderTest
 
 		LOCAL_ORGANIZATION.addIdentifier().setSystem(OrganizationProvider.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
-		LOCAL_ORGANIZATION.setName(LOCAL_ORGANIZATION_NAME);
 
 		REMOTE_ORGANIZATION.addIdentifier().setSystem(OrganizationProvider.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(REMOTE_ORGANIZATION_IDENTIFIER_VALUE);
-		REMOTE_ORGANIZATION.setName(REMOTE_ORGANIZATION_NAME);
 
 		LOCAL_PRACTITIONER.addIdentifier().setSystem(PractitionerProvider.PRACTITIONER_IDENTIFIER_SYSTEM)
 				.setValue(LOCAL_PRACTITIONER_MAIL);
@@ -194,11 +190,11 @@ public class IdentityProviderTest
 		assertNotNull(orgI.getCertificate());
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
-		assertEquals(LOCAL_ORGANIZATION_NAME, orgI.getDisplayName());
+		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
 		assertEquals(FhirServerRole.LOCAL_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(LOCAL_ORGANIZATION, orgI.getOrganization());
-		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue());
+		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
@@ -219,11 +215,11 @@ public class IdentityProviderTest
 		assertNotNull(orgI.getCertificate());
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
-		assertEquals(REMOTE_ORGANIZATION_NAME, orgI.getDisplayName());
+		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
 		assertEquals(FhirServerRole.REMOTE_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(REMOTE_ORGANIZATION, orgI.getOrganization());
-		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue());
+		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
@@ -276,7 +272,7 @@ public class IdentityProviderTest
 		assertEquals(EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE), practitionerI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE + "/" + LOCAL_PRACTITIONER_MAIL, practitionerI.getName());
 		assertEquals(LOCAL_ORGANIZATION, practitionerI.getOrganization());
-		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue());
+		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue().get());
 		assertEquals(Set.of(PRACTIONER_ROLE1, PRACTIONER_ROLE2), practitionerI.getPractionerRoles());
 		assertEquals(LOCAL_PRACTITIONER, practitionerI.getPractitioner());
 
@@ -363,7 +359,7 @@ public class IdentityProviderTest
 		assertEquals(EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE, FhirServerRole.HISTORY, FhirServerRole.PERMANENT_DELETE), practitionerI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE + "/" + LOCAL_PRACTITIONER_MAIL, practitionerI.getName());
 		assertEquals(LOCAL_ORGANIZATION, practitionerI.getOrganization());
-		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue());
+		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue().get());
 
 		assertNotNull(practitionerI.getPractionerRoles());
 		Set<Coding> expectedPractitionerRoles = Set.of(PRACTIONER_ROLE1, PRACTIONER_ROLE2, PRACTIONER_ROLE3, PRACTIONER_ROLE4);
