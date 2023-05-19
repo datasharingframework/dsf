@@ -50,12 +50,6 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-status</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
