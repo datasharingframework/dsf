@@ -19,7 +19,6 @@
                <value value="${dev.dsf.fhir.server.organization.identifier.value}"/>
             </identifier>
             <active value="true"/>
-            <name value="${dev.dsf.fhir.server.organization.name}"/>
             <endpoint>
                <reference value="urn:uuid:6b405f8a-a201-475d-8dd7-4d73314855e1"/>
                <type value="Endpoint"/>
@@ -44,14 +43,13 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="Test_MeDIC_1_Endpoint"/>
+               <value value="${dev.dsf.fhir.server.endpoint.identifier.value}"/>
             </identifier>
             <status value="active"/>
             <connectionType>
                <system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
                <code value="hl7-fhir-rest"/>
             </connectionType>
-            <name value="Test MeDIC 1 Endpoint"/>
             <managingOrganization>
                <reference value="urn:uuid:cf62edc2-cc5d-43ed-ac0e-caf09f7326c3"/>
                <type value="Organization"/>
@@ -64,12 +62,12 @@
             </payloadType>
             <payloadMimeType value="application/fhir+json"/>
             <payloadMimeType value="application/fhir+xml"/>
-            <address value="https://medic1/fhir"/>
+            <address value="${dev.dsf.fhir.server.endpoint.address}"/>
          </Endpoint>
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_MeDIC_1_Endpoint"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|${dev.dsf.fhir.server.endpoint.identifier.value}"/>
       </request>
    </entry>
 </Bundle>

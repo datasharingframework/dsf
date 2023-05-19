@@ -19,7 +19,6 @@
 					<value value="Test_Organization"/>
 				</identifier>
 				<active value="true"/>
-				<name value="Test Organization"/>
 				<endpoint>
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"/>
 					<type value="Endpoint"/>
@@ -45,14 +44,13 @@
 				</meta>
 				<identifier>
 					<system value="http://dsf.dev/sid/endpoint-identifier"/>
-					<value value="Test_Endpoint"/>
+					<value value="${dev.dsf.fhir.server.endpoint.identifier.value}"/>
 				</identifier>
 				<status value="active"/>
 				<connectionType>
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
 					<code value="hl7-fhir-rest"/>
 				</connectionType>
-				<name value="Test Endpoint"/>
 				<managingOrganization>
 					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 					<type value="Organization"/>
@@ -65,13 +63,13 @@
 				</payloadType>
 				<payloadMimeType value="application/fhir+json"/>
 				<payloadMimeType value="application/fhir+xml"/>
-				<address value="https://localhost/fhir"/>
+				<address value="${dev.dsf.fhir.server.endpoint.address}"/>
 			</Endpoint>
 		</resource>
 		<request>
 			<method value="POST"/>
 			<url value="Endpoint"/>
-			<ifNoneExist value="identifier=http://dsf.dev/sid/endpoint-identifier|Test_Endpoint"/>
+			<ifNoneExist value="identifier=http://dsf.dev/sid/endpoint-identifier|${dev.dsf.fhir.server.endpoint.identifier.value}"/>
 		</request>
 	</entry>
 	<entry>
@@ -90,7 +88,6 @@
 					<value value="Parent_Organization"/>
 				</identifier>
 				<active value="true"/>
-				<name value="Parent Organization"/>
 			</Organization>
 		</resource>
 		<request>

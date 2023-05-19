@@ -56,15 +56,14 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	@Override
 	public String getName()
 	{
-		return getOrganizationIdentifierValue() + "/"
-				+ getIdentifierValue(practitioner::getIdentifier, PRACTITIONER_IDENTIFIER_SYSTEM);
+		return getOrganizationIdentifierValue().orElse("?") + "/"
+				+ getIdentifierValue(practitioner::getIdentifier, PRACTITIONER_IDENTIFIER_SYSTEM).orElse("?");
 	}
 
 	@Override
 	public String getDisplayName()
 	{
-		return practitioner != null && practitioner.hasName() ? practitioner.getNameFirstRep().getNameAsSingleString()
-				: "";
+		return practitioner.hasName() ? practitioner.getNameFirstRep().getNameAsSingleString() : "";
 	}
 
 	@Override

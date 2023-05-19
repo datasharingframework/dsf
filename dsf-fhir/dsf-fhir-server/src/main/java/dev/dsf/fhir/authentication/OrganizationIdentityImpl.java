@@ -30,12 +30,12 @@ public class OrganizationIdentityImpl extends AbstractIdentity implements Organi
 	@Override
 	public String getName()
 	{
-		return getOrganizationIdentifierValue();
+		return getOrganizationIdentifierValue().orElse("?");
 	}
 
 	@Override
 	public String getDisplayName()
 	{
-		return getOrganization() != null && getOrganization().hasName() ? getOrganization().getName() : "";
+		return getOrganizationIdentifierValue().orElse("?");
 	}
 }
