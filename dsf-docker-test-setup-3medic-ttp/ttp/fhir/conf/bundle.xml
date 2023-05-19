@@ -19,7 +19,6 @@
                <value value="${dev.dsf.fhir.server.organization.identifier.value}"/>
             </identifier>
             <active value="true"/>
-            <name value="${dev.dsf.fhir.server.organization.name}"/>
             <endpoint>
                <reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"/>
                <type value="Endpoint"/>
@@ -50,7 +49,6 @@
                <value value="Test_MeDIC_1"/>
             </identifier>
             <active value="true"/>
-            <name value="Test MeDIC 1"/>
             <endpoint>
                <reference value="urn:uuid:6b405f8a-a201-475d-8dd7-4d73314855e1"/>
                <type value="Endpoint"/>
@@ -81,7 +79,6 @@
                <value value="Test_MeDIC_2"/>
             </identifier>
             <active value="true"/>
-            <name value="Test MeDIC 2"/>
             <endpoint>
                <reference value="urn:uuid:1712b523-1783-40fa-a317-375415686457"/>
                <type value="Endpoint"/>
@@ -112,7 +109,6 @@
                <value value="Test_MeDIC_3"/>
             </identifier>
             <active value="true"/>
-            <name value="Test MeDIC 3"/>
             <endpoint>
                <reference value="urn:uuid:1c3d45f9-5aa8-4979-892e-bf2d29b398e0"/>
                <type value="Endpoint"/>
@@ -137,14 +133,13 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="Test_TTP_Endpoint"/>
+               <value value="${dev.dsf.fhir.server.endpoint.identifier.value}"/>
             </identifier>
             <status value="active"/>
             <connectionType>
                <system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
                <code value="hl7-fhir-rest"/>
             </connectionType>
-            <name value="Test TTP Endpoint"/>
             <managingOrganization>
                <reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
                <type value="Organization"/>
@@ -157,12 +152,12 @@
             </payloadType>
             <payloadMimeType value="application/fhir+json"/>
             <payloadMimeType value="application/fhir+xml"/>
-            <address value="https://ttp/fhir"/>
+            <address value="${dev.dsf.fhir.server.endpoint.address}"/>
          </Endpoint>
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_TTP_Endpoint"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|${dev.dsf.fhir.server.endpoint.identifier.value}"/>
       </request>
    </entry>
    <entry>
@@ -178,14 +173,13 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="Test_MeDIC_1_Endpoint"/>
+               <value value="medic1"/>
             </identifier>
             <status value="active"/>
             <connectionType>
                <system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
                <code value="hl7-fhir-rest"/>
             </connectionType>
-            <name value="Test MeDIC 1 Endpoint"/>
             <managingOrganization>
                <reference value="urn:uuid:cf62edc2-cc5d-43ed-ac0e-caf09f7326c3"/>
                <type value="Organization"/>
@@ -203,7 +197,7 @@
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_MeDIC_1_Endpoint"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|medic1"/>
       </request>
    </entry>
    <entry>
@@ -219,14 +213,13 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="Test_MeDIC_2_Endpoint"/>
+               <value value="medic2"/>
             </identifier>
             <status value="active"/>
             <connectionType>
                <system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
                <code value="hl7-fhir-rest"/>
             </connectionType>
-            <name value="Test MeDIC 2 Endpoint"/>
             <managingOrganization>
                <reference value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf"/>
                <type value="Organization"/>
@@ -244,7 +237,7 @@
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_MeDIC_2_Endpoint"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|medic2"/>
       </request>
    </entry>
    <entry>
@@ -260,14 +253,13 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="Test_MeDIC_3_Endpoint"/>
+               <value value="medic3"/>
             </identifier>
             <status value="active"/>
             <connectionType>
                <system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
                <code value="hl7-fhir-rest"/>
             </connectionType>
-            <name value="Test MeDIC 3 Endpoint"/>
             <managingOrganization>
                <reference value="urn:uuid:a49a45d2-88cc-4830-a028-413d68d9a439"/>
                <type value="Organization"/>
@@ -285,7 +277,7 @@
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_MeDIC_3_Endpoint"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|medic3"/>
       </request>
    </entry>
    <entry>
@@ -304,7 +296,6 @@
                <value value="highmed.org"/>
             </identifier>
             <active value="true"/>
-            <name value="HiGHmed Consortium"/>
          </Organization>
       </resource>
       <request>

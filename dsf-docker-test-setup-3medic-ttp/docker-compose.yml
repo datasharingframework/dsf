@@ -122,10 +122,6 @@ services:
       - app_medic1_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic1/fhir/conf/bundle.xml
-        target: /opt/fhir/conf/bundle.xml
-        read_only: true
-      - type: bind
         source: ./medic1/fhir/log
         target: /opt/fhir/log
     environment:
@@ -145,7 +141,6 @@ services:
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic1_fhir_server_permanent_delete_user
       DEV_DSF_FHIR_SERVER_BASE_URL: https://medic1/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 1
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
@@ -191,10 +186,6 @@ services:
       - app_medic2_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic2/fhir/conf/bundle.xml
-        target: /opt/fhir/conf/bundle.xml
-        read_only: true
-      - type: bind
         source: ./medic2/fhir/log
         target: /opt/fhir/log
     environment:
@@ -214,7 +205,6 @@ services:
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic2_fhir_server_permanent_delete_user
       DEV_DSF_FHIR_SERVER_BASE_URL: https://medic2/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 2
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
@@ -260,10 +250,6 @@ services:
       - app_medic3_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic3/fhir/conf/bundle.xml
-        target: /opt/fhir/conf/bundle.xml
-        read_only: true
-      - type: bind
         source: ./medic3/fhir/log
         target: /opt/fhir/log
     environment:
@@ -283,7 +269,6 @@ services:
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic3_fhir_server_permanent_delete_user
       DEV_DSF_FHIR_SERVER_BASE_URL: https://medic3/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 3
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
@@ -352,7 +337,6 @@ services:
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: ttp_fhir_server_permanent_delete_user
       DEV_DSF_FHIR_SERVER_BASE_URL: https://ttp/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test TTP
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${TTP_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC1: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC2: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
