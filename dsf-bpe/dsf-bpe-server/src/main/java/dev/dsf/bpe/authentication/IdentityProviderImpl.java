@@ -56,9 +56,9 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public String getOrganizationIdentifierValue()
+			public Optional<String> getOrganizationIdentifierValue()
 			{
-				return "";
+				return Optional.empty();
 			}
 
 			@Override
@@ -129,9 +129,9 @@ public class IdentityProviderImpl implements IdentityProvider
 			}
 
 			@Override
-			public String getOrganizationIdentifierValue()
+			public Optional<String> getOrganizationIdentifierValue()
 			{
-				return "";
+				return Optional.empty();
 			}
 
 			@Override

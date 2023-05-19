@@ -56,7 +56,7 @@ public class TestIdentity implements Identity
 	}
 
 	@Override
-	public String getOrganizationIdentifierValue()
+	public Optional<String> getOrganizationIdentifierValue()
 	{
 		throw new UnsupportedOperationException();
 	}

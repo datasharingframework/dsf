@@ -58,22 +58,22 @@ public abstract class AbstractIdentity implements Identity
 	}
 
 	@Override
-	public String getOrganizationIdentifierValue()
+	public Optional<String> getOrganizationIdentifierValue()
 	{
 		return getIdentifierValue(organization::getIdentifier, ORGANIZATION_IDENTIFIER_SYSTEM);
 	}
 
-	protected String getIdentifierValue(Supplier<List<Identifier>> identifiers, String identifierSystem)
+	protected Optional<String> getIdentifierValue(Supplier<List<Identifier>> identifiers, String identifierSystem)
 	{
 		Objects.requireNonNull(identifiers, "identifiers");
 		Objects.requireNonNull(identifierSystem, "identifierSystem");
 
 		List<Identifier> ids = identifiers.get();
 		if (ids == null)
-			return "";
+			return Optional.empty();
 
 		return ids.stream().filter(i -> i != null).filter(i -> identifierSystem.equals(i.getSystem()))
-				.filter(Identifier::hasValue).findFirst().map(Identifier::getValue).orElse("");
+				.filter(Identifier::hasValue).findFirst().map(Identifier::getValue);
 	}
 
 	@Override

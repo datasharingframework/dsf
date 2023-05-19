@@ -261,8 +261,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 					boolean okForRequester = processAuthorizationHelper
 							.getRequesters(activityDefinition, processUrl, processVersion, messageName, taskProfiles)
-							.anyMatch(r -> r.isRequesterAuthorized(requester,
-									getAffiliations(connection, requester.getOrganizationIdentifierValue())));
+							.anyMatch(r -> r.isRequesterAuthorized(requester, getAffiliations(connection,
+									requester.getOrganizationIdentifierValue().orElse(null))));
 
 					if (!okForRecipient)
 						logger.warn("Task not allowed for recipient");
