@@ -616,29 +616,18 @@
 	</build>
 
 	<distributionManagement>
-		<!-- for deployment to GitHub Packages the id must be 'github',
-		if not the deployment fails with a 401 error;
-		repository also used for snapshots if no snapshotRepository defined -->
 		<repository>
+			<id>ossrh</id>
+			<name>Sonatype Nexus release repository</name>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<!-- for deployment to GitHub Packages the id must be 'github', if not the deployment fails with a 401 error -->
+		<snapshotRepository>
 			<id>github</id>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/datasharingframework/dsf</url>
-		</repository>
+		</snapshotRepository>
 	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>sonatype-snapshot</id>
-			<name>oss.sonatype.org snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
 
 	<profiles>
 		<profile>
