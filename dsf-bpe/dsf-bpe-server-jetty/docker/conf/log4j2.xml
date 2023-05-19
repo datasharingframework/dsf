@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO" monitorInterval="30" verbose="false">
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
@@ -15,7 +14,7 @@
 		</RollingFile>
 	</Appenders>
 	<Loggers>
-		<Logger name="org.highmed" level="DEBUG" />
+		<Logger name="dev.dsf" level="DEBUG" />
 		<Logger name="de.netzwerk_universitaetsmedizin" level="DEBUG" />
 		<Logger name="de.medizininformatik_initiative" level="DEBUG" />
 		<Logger name="org.eclipse.jetty" level="INFO" />

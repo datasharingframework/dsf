@@ -22,16 +22,18 @@
 .pln { color: #000 }  /* plain text */
 
 @media screen {
-  .str { color: #080 }  /* string content */
-  .kwd { color: #008 }  /* a keyword */
+  .str { color: #326F95 }  /* string content */
+  a:has(.str) { color: #326F95 }
+  .kwd { color: #54AEA0 }  /* a keyword */
   .com { color: #800 }  /* a comment */
   .typ { color: #606 }  /* a type name */
   .lit { color: #066 }  /* a literal value */
   /* punctuation, lisp open bracket, lisp close bracket */
   .pun, .opn, .clo { color: #660 }
-  .tag { color: #008 }  /* a markup tag name */
-  .atn { color: #606 }  /* a markup attribute name */
-  .atv { color: #080 }  /* a markup attribute value */
+  .tag { color: #326F95 }  /* a markup tag name */
+  .atn { color: #63C7A6 }  /* a markup attribute name */
+  .atv { color: #326F95 }  /* a markup attribute value */
+  a:has(.atv) { color: #326F95 }
   .dec, .var { color: #606 }  /* a declaration; a variable name */
   .fun { color: red }  /* a function name */
 }

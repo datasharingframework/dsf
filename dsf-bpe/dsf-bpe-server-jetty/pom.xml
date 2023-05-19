@@ -1,58 +1,44 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-server-jetty</artifactId>
 
 	<parent>
-		<groupId>org.highmed.dsf</groupId>
+		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>0.9.0</version>
+		<version>1.0.0-M1</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-db-migration</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-tools-documentation-generator</artifactId>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-documentation</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-consent-client-stub</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-openehr-client-stub</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-mpi-client-stub</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-pseudonymization-client-stub</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>jetty-utils</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>compile</scope>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-jetty</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -83,7 +69,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.dsf.bpe.BpeJettyServer</mainClass>
+							<mainClass>dev.dsf.bpe.BpeJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -94,7 +80,7 @@
 				<executions>
 					<execution>
 						<id>copy-dependencies-to-docker</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
@@ -105,17 +91,35 @@
 					</execution>
 					<execution>
 						<id>copy-server-jar-to-docker</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>org.highmed.dsf</groupId>
+									<groupId>dev.dsf</groupId>
 									<artifactId>dsf-bpe-server-jetty</artifactId>
 									<version>${project.version}</version>
 									<destFileName>dsf_bpe.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>docker</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-status-client-to-docker</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>dev.dsf</groupId>
+									<artifactId>dsf-common-status</artifactId>
+									<version>${project.version}</version>
+									<destFileName>dsf_status_client.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>docker</outputDirectory>
@@ -132,6 +136,7 @@
 							<directory>docker</directory>
 							<includes>
 								<include>dsf_bpe.jar</include>
+								<include>dsf_status_client.jar</include>
 								<include>lib/*.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
@@ -147,32 +152,19 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
 				<executions>
 					<execution>
 						<goals>
-							<goal>exec</goal>
+							<goal>generate</goal>
 						</goals>
-						<phase>prepare-package</phase>
 					</execution>
 				</executions>
 				<configuration>
-					<executable>java</executable>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath/>
-						<argument>
-							org.highmed.dsf.tools.generator.DocumentationGenerator
-						</argument>
-						<argument>
-							org.highmed.dsf.bpe
-						</argument>
-					</arguments>
-					<includeProjectDependencies>true</includeProjectDependencies>
-					<addResourcesToClasspath>true</addResourcesToClasspath>
-					<classpathScope>compile</classpathScope>
-					<workingDirectory>${project.basedir}</workingDirectory>
+					<workingPackages>
+						<workingPackage>dev.dsf.bpe</workingPackage>
+					</workingPackages>
 				</configuration>
 			</plugin>
 		</plugins>

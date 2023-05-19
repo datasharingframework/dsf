@@ -1,59 +1,54 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-fhir-server-jetty</artifactId>
 
 	<parent>
-		<groupId>org.highmed.dsf</groupId>
+		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>0.9.0</version>
+		<version>1.0.0-M1</version>
 	</parent>
-
-	<properties>
-		<main.basedir>${project.basedir}/../..</main.basedir>
-	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-server</artifactId>
-			<!-- Workaround for exec maven plugin issue in dsf-fhir-server module -->
-			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
-			<exclusions>
-				<exclusion>
-					<groupId>org.highmed.dsf</groupId>
-					<artifactId>dsf-tools-bundle-generator</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-db-migration</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-tools-documentation-generator</artifactId>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-documentation</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>jetty-utils</artifactId>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-jetty</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-server-impl</artifactId>
+			<artifactId>websocket-jakarta-server</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.jetty.toolchain</groupId>
+					<artifactId>jetty-jakarta-websocket-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -84,7 +79,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.dsf.fhir.FhirJettyServer</mainClass>
+							<mainClass>dev.dsf.fhir.FhirJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -95,18 +90,19 @@
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
 							<outputDirectory>docker/lib</outputDirectory>
 							<includeScope>compile</includeScope>
+							<excludeArtifactIds>camunda-bpmn-model,camunda-xml-model</excludeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
 						<id>copy</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
@@ -117,6 +113,24 @@
 									<artifactId>${project.artifactId}</artifactId>
 									<version>${project.version}</version>
 									<destFileName>dsf_fhir.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>docker</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-status-client-to-docker</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>dev.dsf</groupId>
+									<artifactId>dsf-common-status</artifactId>
+									<version>${project.version}</version>
+									<destFileName>dsf_status_client.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>docker</outputDirectory>
@@ -133,6 +147,7 @@
 							<directory>docker</directory>
 							<includes>
 								<include>dsf_fhir.jar</include>
+								<include>dsf_status_client.jar</include>
 								<include>lib/*.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
@@ -141,32 +156,19 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
 				<executions>
 					<execution>
 						<goals>
-							<goal>exec</goal>
+							<goal>generate</goal>
 						</goals>
-						<phase>prepare-package</phase>
 					</execution>
 				</executions>
 				<configuration>
-					<executable>java</executable>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath/>
-						<argument>
-							org.highmed.dsf.tools.generator.DocumentationGenerator
-						</argument>
-						<argument>
-							org.highmed.dsf.fhir
-						</argument>
-					</arguments>
-					<includeProjectDependencies>true</includeProjectDependencies>
-					<addResourcesToClasspath>true</addResourcesToClasspath>
-					<classpathScope>compile</classpathScope>
-					<workingDirectory>${project.basedir}</workingDirectory>
+					<workingPackages>
+						<workingPackage>dev.dsf.fhir</workingPackage>
+					</workingPackages>
 				</configuration>
 			</plugin>
 		</plugins>

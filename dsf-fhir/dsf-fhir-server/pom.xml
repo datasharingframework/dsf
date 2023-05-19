@@ -1,49 +1,72 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-fhir-server</artifactId>
 
 	<parent>
-		<groupId>org.highmed.dsf</groupId>
+		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>0.9.0</version>
+		<version>1.0.0-M1</version>
 	</parent>
-
-	<properties>
-		<main.basedir>${project.basedir}/../..</main.basedir>
-	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-rest-adapter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-webservice-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-build-info-reader</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-tools-documentation-generator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-validation</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-auth</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-auth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-documentation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-status</artifactId>
+		</dependency>
 
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
@@ -67,6 +90,16 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-jakarta-server</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.jetty.toolchain</groupId>
+					<artifactId>jetty-jakarta-websocket-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
@@ -83,16 +116,6 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -134,14 +157,19 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-jetty</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-websocket-client</artifactId>
 			<scope>test</scope>
 		</dependency>
@@ -151,27 +179,25 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>jetty-utils</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-server-impl</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- See workaround exec plugin below-->
-		<!-- <dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>log4j2-utils</artifactId>
-			<scope>test</scope>
-		</dependency>-->
-		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- For async logging with log4j2 -->
 		<dependency>
 			<groupId>com.lmax</groupId>
@@ -223,6 +249,7 @@
 						<include>**/*DaoTest</include>
 						<include>**/*IntegrationTest</include>
 					</includes>
+					<reuseForks>false</reuseForks>
 				</configuration>
 				<executions>
 					<execution>

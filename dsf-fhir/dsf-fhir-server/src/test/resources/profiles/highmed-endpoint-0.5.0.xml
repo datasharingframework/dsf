@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-	<url value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
+	<url value="http://dsf.dev/fhir/StructureDefinition/endpoint"/>
 	<version value="0.5.0"/>
 	<name value="Endpoint"/>
 	<status value="draft"/>
@@ -29,13 +29,13 @@
 		</element>
 		<element id="Endpoint.identifier:sliceIdentifier.system">
 			<path value="Endpoint.identifier.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/highmed-endpoint"/>
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/highmed-endpoint"/>
 		</element>
 		<element id="Endpoint.identifier:sliceIdentifier.value">
 			<path value="Endpoint.identifier.value"/>
 			<binding>
 				<strength value="required"/>
-				<valueSet value="http://highmed.org/fhir/ValueSet/highmed-endpoint"/>
+				<valueSet value="http://dsf.dev/fhir/ValueSet/highmed-endpoint"/>
 			</binding>
 		</element>
 		<element id="Endpoint.managingOrganization">
@@ -43,7 +43,7 @@
 			<min value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://highmed.org/fhir/StructureDefinition/organization"/>
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization"/>
 			</type>
 		</element>
 	</differential>

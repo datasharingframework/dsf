@@ -1,33 +1,43 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-fhir-rest-adapter</artifactId>
 
 	<parent>
-		<groupId>org.highmed.dsf</groupId>
+		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>0.9.0</version>
+		<version>1.0.0-M1</version>
 	</parent>
-	
-	<properties>
-		<main.basedir>${project.basedir}/../..</main.basedir>
-	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-auth</artifactId>
+		</dependency>
+				
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>log4j2-utils</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

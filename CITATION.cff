@@ -5,7 +5,7 @@ authors:
     given-names: Hauke
   - family-names: Wettstein
     given-names: Reto
-  - name: Contributors of the HiGHmed DSF
+  - name: Contributors of the DSF
 preferred-citation:
   authors:
     - family-names: Hund
@@ -23,12 +23,12 @@ preferred-citation:
   pages: 126-133
   doi: 10.3233/SHTI210060
   type: proceedings
-title: "HiGHmed Data Sharing Framework (HiGHmed DSF)"
-version: 0.9.0
-date-released: 2022-10-17
-url: https://github.com/highmed/highmed-dsf/wiki
-repository-code: https://github.com/highmed/highmed-dsf
-repository-artifact: https://github.com/highmed/highmed-dsf/releases
+title: "Data Sharing Framework (DSF)"
+version: 1.0.0-M1
+date-released: 2023-05-19
+url: https://dsf.dev
+repository-code: https://github.com/datasharingframework/dsf
+repository-artifact: https://github.com/datasharingframework/dsf/releases
 license: Apache-2.0
 references:
   - type: proceedings
@@ -175,3 +175,49 @@ references:
     year: 2022
     pages: 41-49
     doi: 10.3233/SHTI220802
+  - type: proceedings
+    authors:
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Wettstein
+        given-names: Reto
+      - family-names: Hampf
+        given-names: Christopher
+      - family-names: Bialke
+        given-names: Martin
+      - family-names: Kurscheidt
+        given-names: Maximilian
+      - family-names: Schweizer
+        given-names: Simon Tobias
+      - family-names: Zilske
+        given-names: Christoph
+      - family-names: Mödinger
+        given-names: Simon
+      - family-names: Fegeler
+        given-names: Christian
+    title: "No Transfer Without Validation: A Data Sharing Framework Use Case"
+    journal: Stud Health Technol Inform
+    volume: 302
+    year: 2023
+    pages: 68-72
+    doi: 10.3233/SHTI230066
+  - type: proceedings
+    authors:
+      - family-names: Zilske
+        given-names: Christoph
+      - family-names: Kurscheidt
+        given-names: Maximilian
+      - family-names: Schweizer
+        given-names: Simon Tobias
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Mödinger
+        given-names: Simon
+      - family-names: Fegeler
+        given-names: Christian
+    title: "Monitoring Distributed Business Processes in Biomedical Research"
+    journal: Stud Health Technol Inform
+    volume: 302
+    year: 2023
+    pages: 252-256
+    doi: 10.3233/SHTI230113
