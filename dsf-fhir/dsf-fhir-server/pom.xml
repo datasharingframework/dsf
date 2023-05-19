@@ -249,6 +249,7 @@
 						<include>**/*DaoTest</include>
 						<include>**/*IntegrationTest</include>
 					</includes>
+					<reuseForks>false</reuseForks>
 				</configuration>
 				<executions>
 					<execution>
