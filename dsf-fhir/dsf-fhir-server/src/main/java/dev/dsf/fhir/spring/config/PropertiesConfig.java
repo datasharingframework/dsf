@@ -1,6 +1,9 @@
 package dev.dsf.fhir.spring.config;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
@@ -115,7 +119,29 @@ public class PropertiesConfig
 	{
 		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 
+		injectEndpointProperties(environment);
+
 		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	private static void injectEndpointProperties(ConfigurableEnvironment environment)
+	{
+		try
+		{
+			URL baseUrl = new URL(environment.getRequiredProperty("dev.dsf.fhir.server.base.url"));
+			if (baseUrl.getHost() == null || baseUrl.getHost().isBlank())
+				throw new IllegalStateException("No hostname defined in FHIR server base url");
+
+			Properties properties = new Properties();
+			properties.put("dev.dsf.fhir.server.endpoint.address", baseUrl.toString());
+			properties.put("dev.dsf.fhir.server.endpoint.identifier.value", baseUrl.getHost());
+
+			environment.getPropertySources().addFirst(new PropertiesPropertySource("enpoint-properties", properties));
+		}
+		catch (MalformedURLException | IllegalStateException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	public String getDbUrl()
