@@ -52,6 +52,29 @@
 		</license>
 	</licenses>
 
+	<developers>
+		<developer>
+			<id>hhund</id>
+			<name>Hauke Hund</name>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<email>hauke.hund@hs-heilbronn.de</email>
+			<organization>GECKO Institute, Heilbronn University of Applied Sciences</organization>
+			<organizationUrl>https://www.hs-heilbronn.de</organizationUrl>
+		</developer>
+		<developer>
+			<id>wetret</id>
+			<name>Reto Wettstein</name>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<email>reto.wettstein@med.uni-heidelberg.de</email>
+			<organization>Institute for Medical Informatics, Heidelberg University Hospital</organization>
+			<organizationUrl>https://www.klinikum.uni-heidelberg.de</organizationUrl>
+		</developer>
+	</developers>
+
 	<dependencyManagement>
 		<dependencies>
 			<!-- logging -->
