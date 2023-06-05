@@ -5,7 +5,7 @@
 * Build the project from the root directory of this repository `dsf/` by executing the following command.
 
     ```sh
-    mvn clean package
+    mvn clean install
     ```
 
 * Add one entry for each organization to your hosts file

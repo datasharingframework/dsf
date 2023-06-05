@@ -3,7 +3,7 @@
 
 	<groupId>dev.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0-M1</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -51,6 +51,29 @@
 			<distribution>manual</distribution>
 		</license>
 	</licenses>
+
+	<developers>
+		<developer>
+			<id>hhund</id>
+			<name>Hauke Hund</name>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<email>hauke.hund@hs-heilbronn.de</email>
+			<organization>GECKO Institute, Heilbronn University of Applied Sciences</organization>
+			<organizationUrl>https://www.hs-heilbronn.de</organizationUrl>
+		</developer>
+		<developer>
+			<id>wetret</id>
+			<name>Reto Wettstein</name>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<email>reto.wettstein@med.uni-heidelberg.de</email>
+			<organization>Institute for Medical Informatics, Heidelberg University Hospital</organization>
+			<organizationUrl>https://www.klinikum.uni-heidelberg.de</organizationUrl>
+		</developer>
+	</developers>
 
 	<dependencyManagement>
 		<dependencies>
@@ -612,33 +635,35 @@
 					<staticGroups>java,*</staticGroups>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
 	<distributionManagement>
-		<!-- for deployment to GitHub Packages the id must be 'github',
-		if not the deployment fails with a 401 error;
-		repository also used for snapshots if no snapshotRepository defined -->
 		<repository>
+			<id>sonatype</id>
+			<name>Sonatype Nexus release repository</name>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<!-- for deployment to GitHub Packages the id must be 'github', if not the deployment fails with a 401 error -->
+		<snapshotRepository>
 			<id>github</id>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/datasharingframework/dsf</url>
-		</repository>
+		</snapshotRepository>
 	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>sonatype-snapshot</id>
-			<name>oss.sonatype.org snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
 
 	<profiles>
 		<profile>

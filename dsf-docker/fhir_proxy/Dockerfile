@@ -1,5 +1,7 @@
 FROM httpd:2.4-alpine
-LABEL maintainer="hauke.hund@hs-heilbronn.de"
+LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
+LABEL org.opencontainers.image.description="DSF FHIR Reverse Proxy"
+LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
 
 COPY ./conf/ /usr/local/apache2/conf/
 RUN mkdir /usr/local/apache2/ssl/ && \

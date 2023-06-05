@@ -9,7 +9,9 @@ RUN chown root:java ./ && \
 
 
 FROM azul/zulu-openjdk:17-jre-headless
-LABEL maintainer="hauke.hund@hs-heilbronn.de"
+LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
+LABEL org.opencontainers.image.description="DSF FHIR Server"
+LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
 
 EXPOSE 8080
 
