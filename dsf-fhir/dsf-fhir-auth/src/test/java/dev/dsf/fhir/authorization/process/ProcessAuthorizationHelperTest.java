@@ -38,7 +38,7 @@ public class ProcessAuthorizationHelperTest
 		ad.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
 		ad.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		ad.setUrl("http://dsf.dev/bpe/Process/test");
-		ad.setVersion("0.5.0");
+		ad.setVersion("1.0.0");
 		ad.setStatus(PublicationStatus.ACTIVE);
 		ad.setKind(ActivityDefinitionKind.TASK);
 
@@ -103,7 +103,7 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(requesters);
 			List<Requester> requestersList = requesters.collect(Collectors.toList());
@@ -115,7 +115,7 @@ public class ProcessAuthorizationHelperTest
 					TestIdentity.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)),
 					Collections.emptyList()));
 
-			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(recipients);
 			List<Recipient> recipientsList = recipients.collect(Collectors.toList());
@@ -137,7 +137,7 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(requesters);
 			List<Requester> requestersList = requesters.collect(Collectors.toList());
@@ -150,7 +150,7 @@ public class ProcessAuthorizationHelperTest
 							.setValue("organization.com")));
 			assertTrue(requestersList.get(0).isRequesterAuthorized(remoteUser, Collections.emptyList()));
 
-			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(recipients);
 			List<Recipient> recipientsList = recipients.collect(Collectors.toList());

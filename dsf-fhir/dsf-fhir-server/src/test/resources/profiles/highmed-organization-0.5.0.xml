@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
 	<url value="http://dsf.dev/fhir/StructureDefinition/organization"/>
-	<version value="0.5.0"/>
+	<version value="1.0.0"/>
 	<name value="Organization"/>
 	<status value="active"/>
 	<date value="2019-05-21"/>

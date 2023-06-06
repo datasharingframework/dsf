@@ -19,6 +19,7 @@
 	<compose>
 		<include>
 			<system value="http://dsf.dev/fhir/CodeSystem/bpmn-message"/>
+			<version value="1.0.0"/>
 		</include>
 	</compose>
 </ValueSet> 

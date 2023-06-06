@@ -47,7 +47,7 @@
 		</extension>
 	</extension>
 	<url value="http://dsf.dev/bpe/Process/test" />
-	<version value="0.5.0" />
+	<version value="1.0.0" />
 	<status value="active" />
 	<kind value="Task" />
 </ActivityDefinition>

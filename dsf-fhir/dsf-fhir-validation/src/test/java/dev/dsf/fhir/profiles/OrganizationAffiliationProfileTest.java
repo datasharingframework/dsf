@@ -23,10 +23,10 @@ public class OrganizationAffiliationProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-organization-affiliation-0.5.0.xml", "dsf-organization-0.5.0.xml",
-					"dsf-organization-parent-0.5.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-1.0.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-1.0.0.xml"));
+			Arrays.asList("dsf-organization-affiliation-1.0.0.xml", "dsf-organization-1.0.0.xml",
+					"dsf-organization-parent-1.0.0.xml"),
+			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"),
+			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
