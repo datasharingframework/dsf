@@ -39,8 +39,8 @@ public class CodeSystemTest
 		c1.setCode("TTP");
 		c1.setDefinition("Trusted Third Party");
 		ConceptDefinitionComponent c2 = codeSystem.addConcept();
-		c2.setCode("MeDIC");
-		c2.setDefinition("Medical Data Integration Center");
+		c2.setCode("DIC");
+		c2.setDefinition("Data Integration Center");
 
 		String s = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
 		logger.debug(s);

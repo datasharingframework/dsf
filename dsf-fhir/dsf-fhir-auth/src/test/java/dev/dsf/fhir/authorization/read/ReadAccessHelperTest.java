@@ -169,7 +169,7 @@ public class ReadAccessHelperTest
 	{
 		final String consortiumIdentifier = "consortium.com";
 		final String roleSystem = "http://dsf.dev/fhir/CodeSystem/organization-role";
-		final String roleCode = "MeDIC";
+		final String roleCode = "DIC";
 
 		try (InputStream in = Files
 				.newInputStream(Paths.get("src/test/resources/authorization/read-access/tag_role.xml")))

@@ -40,9 +40,9 @@ public class ActivityDefinitionProfileTest
 					"dsf-coding-process-authorization-remote-all-0.5.0.xml",
 					"dsf-coding-process-authorization-remote-consortium-role-0.5.0.xml",
 					"dsf-coding-process-authorization-remote-organization-0.5.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml",
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-1.0.0.xml",
 					"dsf-process-authorization-0.5.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml",
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-1.0.0.xml",
 					"dsf-process-authorization-recipient-0.5.0.xml", "dsf-process-authorization-requester-0.5.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
@@ -122,7 +122,7 @@ public class ActivityDefinitionProfileTest
 		consortiumRole.addExtension("consortium",
 				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.org"));
 		consortiumRole.addExtension("role",
-				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "MeDIC", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
 		logResource(ad);
@@ -160,7 +160,7 @@ public class ActivityDefinitionProfileTest
 		consortiumRole.addExtension("consortium",
 				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.org"));
 		consortiumRole.addExtension("role",
-				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "MeDIC", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
 		logResource(ad);

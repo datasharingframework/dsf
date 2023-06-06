@@ -70,7 +70,7 @@
 					"profile": [ "http://dsf.dev/fhir/StructureDefinition/research-study" ]
 				},
 				"extension": [ {
-					"url": "http://dsf.dev/fhir/StructureDefinition/extension-participating-medic",
+					"url": "http://dsf.dev/fhir/StructureDefinition/extension-participating-dic",
 					"valueReference": {
 						"type": "Organization",
 						"identifier": {

@@ -19,27 +19,27 @@ services:
         target: /etc/nginx/nginx.conf
         read_only: true
     networks:
-      medic1-fhir-frontend:
+      dic1-fhir-frontend:
         ipv4_address: 172.20.0.2
-      medic2-fhir-frontend:
+      dic2-fhir-frontend:
         ipv4_address: 172.20.0.10
-      medic3-fhir-frontend:
+      dic3-fhir-frontend:
         ipv4_address: 172.20.0.18
       ttp-fhir-frontend:
         ipv4_address: 172.20.0.26
-      medic1-bpe-frontend:
+      dic1-bpe-frontend:
         ipv4_address: 172.20.0.34
-      medic2-bpe-frontend:
+      dic2-bpe-frontend:
         ipv4_address: 172.20.0.42
-      medic3-bpe-frontend:
+      dic3-bpe-frontend:
         ipv4_address: 172.20.0.50
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.58
       internet:
         aliases:
-          - medic1
-          - medic2
-          - medic3
+          - dic1
+          - dic2
+          - dic3
           - ttp
     environment:
       TZ: Europe/Berlin
@@ -58,13 +58,13 @@ services:
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: postgres
     networks:
-      - medic1-fhir-backend
-      - medic2-fhir-backend
-      - medic3-fhir-backend
+      - dic1-fhir-backend
+      - dic2-fhir-backend
+      - dic3-fhir-backend
       - ttp-fhir-backend
-      - medic1-bpe-backend
-      - medic2-bpe-backend
-      - medic3-bpe-backend
+      - dic1-bpe-backend
+      - dic2-bpe-backend
+      - dic3-bpe-backend
       - ttp-bpe-backend
     secrets:
       - db_liquibase.password
@@ -106,42 +106,42 @@ services:
       --spi-truststore-file-password=password
       --spi-truststore-file-hostname-verification-policy=STRICT
 
-  medic1-fhir:
+  dic1-fhir:
     image: datasharingframework/fhir
     restart: "no"
     ports:
      - 127.0.0.1:5001:5001
     secrets:
       - db_liquibase.password
-      - db_medic1_fhir_user.password
-      - db_medic1_fhir_user_permanent_delete.password
+      - db_dic1_fhir_user.password
+      - db_dic1_fhir_user_permanent_delete.password
       - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_medic1_client_certificate.pem
-      - app_medic1_client_certificate_private_key.pem
-      - app_medic1_client_certificate_private_key.pem.password
+      - app_dic1_client_certificate.pem
+      - app_dic1_client_certificate_private_key.pem
+      - app_dic1_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic1/fhir/log
+        source: ./dic1/fhir/log
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic1_fhir_user.password
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic1_fhir_user_permanent_delete.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user_permanent_delete.password
       DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic1_client_certificate.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic1_client_certificate_private_key.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic1_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/medic1_fhir
-      DEV_DSF_FHIR_DB_USER_GROUP: medic1_fhir_users
-      DEV_DSF_FHIR_DB_USER_USERNAME: medic1_fhir_server_user
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic1_fhir_permanent_delete_users
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic1_fhir_server_permanent_delete_user
-      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic1/fhir
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic1_fhir
+      DEV_DSF_FHIR_DB_USER_GROUP: dic1_fhir_users
+      DEV_DSF_FHIR_DB_USER_USERNAME: dic1_fhir_server_user
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic1_fhir_permanent_delete_users
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dic1_fhir_server_permanent_delete_user
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://dic1/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_1
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${DIC1_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
@@ -155,57 +155,57 @@ services:
               - HISTORY
               - PERMANENT_DELETE
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/medic1 
+      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic1
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: medic1-fhir
+      JETTY_AUTH_OIDC_CLIENT_ID: dic1-fhir
       JETTY_AUTH_OIDC_CLIENT_SECRET: mF0GEtjFoyWIM3in4VCwifGI3azb4DTn
       JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
-      medic1-fhir-frontend:
+      dic1-fhir-frontend:
         ipv4_address: 172.20.0.3
-      medic1-fhir-backend:
+      dic1-fhir-backend:
       internet:
     depends_on:
       - db
       - proxy
       - keycloak
 
-  medic2-fhir:
+  dic2-fhir:
     image: datasharingframework/fhir
     restart: "no"
     ports:
      - 127.0.0.1:5002:5002
     secrets:
       - db_liquibase.password
-      - db_medic2_fhir_user.password
-      - db_medic2_fhir_user_permanent_delete.password
+      - db_dic2_fhir_user.password
+      - db_dic2_fhir_user_permanent_delete.password
       - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_medic2_client_certificate.pem
-      - app_medic2_client_certificate_private_key.pem
-      - app_medic2_client_certificate_private_key.pem.password
+      - app_dic2_client_certificate.pem
+      - app_dic2_client_certificate_private_key.pem
+      - app_dic2_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic2/fhir/log
+        source: ./dic2/fhir/log
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic2_fhir_user.password
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic2_fhir_user_permanent_delete.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user_permanent_delete.password
       DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic2_client_certificate.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic2_client_certificate_private_key.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic2_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/medic2_fhir
-      DEV_DSF_FHIR_DB_USER_GROUP: medic2_fhir_users
-      DEV_DSF_FHIR_DB_USER_USERNAME: medic2_fhir_server_user
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic2_fhir_permanent_delete_users
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic2_fhir_server_permanent_delete_user
-      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic2/fhir
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic2_fhir
+      DEV_DSF_FHIR_DB_USER_GROUP: dic2_fhir_users
+      DEV_DSF_FHIR_DB_USER_USERNAME: dic2_fhir_server_user
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic2_fhir_permanent_delete_users
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dic2_fhir_server_permanent_delete_user
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://dic2/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_2
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${DIC2_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
@@ -219,57 +219,57 @@ services:
               - HISTORY
               - PERMANENT_DELETE
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/medic2 
+      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic2
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: medic2-fhir
+      JETTY_AUTH_OIDC_CLIENT_ID: dic2-fhir
       JETTY_AUTH_OIDC_CLIENT_SECRET: P7XhxzBixIf9vPdprItkbOXZwtSX2JNt
       JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
-      medic2-fhir-frontend:
+      dic2-fhir-frontend:
         ipv4_address: 172.20.0.11
-      medic2-fhir-backend:
+      dic2-fhir-backend:
       internet:
     depends_on:
       - db
       - proxy
       - keycloak
 
-  medic3-fhir:
+  dic3-fhir:
     image: datasharingframework/fhir
     restart: "no"
     ports:
      - 127.0.0.1:5003:5003
     secrets:
       - db_liquibase.password
-      - db_medic3_fhir_user.password
-      - db_medic3_fhir_user_permanent_delete.password
+      - db_dic3_fhir_user.password
+      - db_dic3_fhir_user_permanent_delete.password
       - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_medic3_client_certificate.pem
-      - app_medic3_client_certificate_private_key.pem
-      - app_medic3_client_certificate_private_key.pem.password
+      - app_dic3_client_certificate.pem
+      - app_dic3_client_certificate_private_key.pem
+      - app_dic3_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic3/fhir/log
+        source: ./dic3/fhir/log
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic3_fhir_user.password
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic3_fhir_user_permanent_delete.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user_permanent_delete.password
       DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic3_client_certificate.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic3_client_certificate_private_key.pem
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic3_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/medic3_fhir
-      DEV_DSF_FHIR_DB_USER_GROUP: medic3_fhir_users
-      DEV_DSF_FHIR_DB_USER_USERNAME: medic3_fhir_server_user
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic3_fhir_permanent_delete_users
-      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic3_fhir_server_permanent_delete_user
-      DEV_DSF_FHIR_SERVER_BASE_URL: https://medic3/fhir
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic3_fhir
+      DEV_DSF_FHIR_DB_USER_GROUP: dic3_fhir_users
+      DEV_DSF_FHIR_DB_USER_USERNAME: dic3_fhir_server_user
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic3_fhir_permanent_delete_users
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dic3_fhir_server_permanent_delete_user
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://dic3/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_3
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${DIC3_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
@@ -283,15 +283,15 @@ services:
               - HISTORY
               - PERMANENT_DELETE
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/medic3 
+      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic3
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: medic3-fhir
+      JETTY_AUTH_OIDC_CLIENT_ID: dic3-fhir
       JETTY_AUTH_OIDC_CLIENT_SECRET: 9i9WRfIedG7N3QoL5WuGM8hCoySblAhK
       JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
-      medic3-fhir-frontend:
+      dic3-fhir-frontend:
         ipv4_address: 172.20.0.19
-      medic3-fhir-backend:
+      dic3-fhir-backend:
       internet:
     depends_on:
       - db
@@ -338,9 +338,9 @@ services:
       DEV_DSF_FHIR_SERVER_BASE_URL: https://ttp/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${TTP_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC1: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC2: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
-      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC3: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_DIC1: ${DIC1_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_DIC2: ${DIC2_BUNDLE_USER_THUMBPRINT}
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_DIC3: ${DIC3_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
@@ -369,193 +369,193 @@ services:
       - proxy
       - keycloak
 
-  medic1-bpe:
+  dic1-bpe:
     image: datasharingframework/bpe
     restart: "no"
     ports:
      - 127.0.0.1:5011:5011
     secrets:
       - db_liquibase.password
-      - db_medic1_bpe_user.password
-      - db_medic1_bpe_user_camunda.password
+      - db_dic1_bpe_user.password
+      - db_dic1_bpe_user_camunda.password
       - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_medic1_client_certificate.pem
-      - app_medic1_client_certificate_private_key.pem
-      - app_medic1_client_certificate_private_key.pem.password
+      - app_dic1_client_certificate.pem
+      - app_dic1_client_certificate_private_key.pem
+      - app_dic1_client_certificate_private_key.pem.password
     volumes:
     - type: bind
-      source: ./medic1/bpe/process
+      source: ./dic1/bpe/process
       target: /opt/bpe/process
       read_only: true
     - type: bind
-      source: ./medic1/bpe/log
+      source: ./dic1/bpe/log
       target: /opt/bpe/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic1_bpe_user.password
-      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic1_bpe_user_camunda.password
+      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user.password
+      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user_camunda.password
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic1_client_certificate.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic1_client_certificate_private_key.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic1_client_certificate_private_key.pem.password
-      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/medic1_bpe
-      DEV_DSF_BPE_DB_USER_GROUP: medic1_bpe_users
-      DEV_DSF_BPE_DB_USER_USERNAME: medic1_bpe_server_user
-      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic1_camunda_users
-      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic1_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
-      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic1/fhir
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic1_bpe
+      DEV_DSF_BPE_DB_USER_GROUP: dic1_bpe_users
+      DEV_DSF_BPE_DB_USER_USERNAME: dic1_bpe_server_user
+      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic1_camunda_users
+      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic1_camunda_server_user
+      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_dic_1
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic1/fhir
       DEV_DSF_BPE_MAIL_HOST: mailhog
       DEV_DSF_BPE_MAIL_PORT: 1025
-      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic1
-      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic1
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@dic1
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@dic1
       #DEV_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/medic1
+      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic1
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: medic1-bpe
+      JETTY_AUTH_OIDC_CLIENT_ID: dic1-bpe
       JETTY_AUTH_OIDC_CLIENT_SECRET: ytqFCErw9GfhVUrrM8xc0Grbu4r7qGig
       JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
-      medic1-bpe-frontend:
+      dic1-bpe-frontend:
         ipv4_address: 172.20.0.35
-      medic1-bpe-backend:
+      dic1-bpe-backend:
       internet:
     depends_on:
       - db
-      - medic1-fhir
+      - dic1-fhir
       - keycloak
 
-  medic2-bpe:
+  dic2-bpe:
     image: datasharingframework/bpe
     restart: "no"
     ports:
      - 127.0.0.1:5012:5012
     secrets:
       - db_liquibase.password
-      - db_medic2_bpe_user.password
-      - db_medic2_bpe_user_camunda.password
+      - db_dic2_bpe_user.password
+      - db_dic2_bpe_user_camunda.password
       - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_medic2_client_certificate.pem
-      - app_medic2_client_certificate_private_key.pem
-      - app_medic2_client_certificate_private_key.pem.password
+      - app_dic2_client_certificate.pem
+      - app_dic2_client_certificate_private_key.pem
+      - app_dic2_client_certificate_private_key.pem.password
     volumes:
     - type: bind
-      source: ./medic2/bpe/process
+      source: ./dic2/bpe/process
       target: /opt/bpe/process
       read_only: true
     - type: bind
-      source: ./medic2/bpe/log
+      source: ./dic2/bpe/log
       target: /opt/bpe/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic2_bpe_user.password
-      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic2_bpe_user_camunda.password
+      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user.password
+      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user_camunda.password
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic2_client_certificate.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic2_client_certificate_private_key.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic2_client_certificate_private_key.pem.password
-      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/medic2_bpe
-      DEV_DSF_BPE_DB_USER_GROUP: medic2_bpe_users
-      DEV_DSF_BPE_DB_USER_USERNAME: medic2_bpe_server_user
-      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic2_camunda_users
-      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic2_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
-      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2/fhir
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic2_bpe
+      DEV_DSF_BPE_DB_USER_GROUP: dic2_bpe_users
+      DEV_DSF_BPE_DB_USER_USERNAME: dic2_bpe_server_user
+      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic2_camunda_users
+      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic2_camunda_server_user
+      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_2
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic2/fhir
       DEV_DSF_BPE_MAIL_HOST: mailhog
       DEV_DSF_BPE_MAIL_PORT: 1025
-      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic2
-      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic2
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@dic2
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@dic2
       #DEV_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/medic2
+      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic2
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: medic2-bpe
+      JETTY_AUTH_OIDC_CLIENT_ID: dic2-bpe
       JETTY_AUTH_OIDC_CLIENT_SECRET: 5GtUIUfoXnQVcsRfd0Hg4EGv14iAknGq
       JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
-      medic2-bpe-frontend:
+      dic2-bpe-frontend:
         ipv4_address: 172.20.0.43
-      medic2-bpe-backend:
+      dic2-bpe-backend:
       internet:
     depends_on:
       - db
-      - medic2-fhir
+      - dic2-fhir
       - keycloak
 
-  medic3-bpe:
+  dic3-bpe:
     image: datasharingframework/bpe
     restart: "no"
     ports:
      - 127.0.0.1:5014:5014
     secrets:
       - db_liquibase.password
-      - db_medic3_bpe_user.password
-      - db_medic3_bpe_user_camunda.password
+      - db_dic3_bpe_user.password
+      - db_dic3_bpe_user_camunda.password
       - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_medic3_client_certificate.pem
-      - app_medic3_client_certificate_private_key.pem
-      - app_medic3_client_certificate_private_key.pem.password
+      - app_dic3_client_certificate.pem
+      - app_dic3_client_certificate_private_key.pem
+      - app_dic3_client_certificate_private_key.pem.password
     volumes:
     - type: bind
-      source: ./medic3/bpe/process
+      source: ./dic3/bpe/process
       target: /opt/bpe/process
       read_only: true
     - type: bind
-      source: ./medic3/bpe/log
+      source: ./dic3/bpe/log
       target: /opt/bpe/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic3_bpe_user.password
-      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic3_bpe_user_camunda.password
+      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user.password
+      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user_camunda.password
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic3_client_certificate.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic3_client_certificate_private_key.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic3_client_certificate_private_key.pem.password
-      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/medic3_bpe
-      DEV_DSF_BPE_DB_USER_GROUP: medic3_bpe_users
-      DEV_DSF_BPE_DB_USER_USERNAME: medic3_bpe_server_user
-      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic3_camunda_users
-      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic3_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
-      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic3/fhir
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic3_bpe
+      DEV_DSF_BPE_DB_USER_GROUP: dic3_bpe_users
+      DEV_DSF_BPE_DB_USER_USERNAME: dic3_bpe_server_user
+      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic3_camunda_users
+      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic3_camunda_server_user
+      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_3
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic3/fhir
       DEV_DSF_BPE_MAIL_HOST: mailhog
       DEV_DSF_BPE_MAIL_PORT: 1025
-      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@medic3
-      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@medic3
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@dic3
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@dic3
       #DEV_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/medic3
+      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic3
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: medic3-bpe
+      JETTY_AUTH_OIDC_CLIENT_ID: dic3-bpe
       JETTY_AUTH_OIDC_CLIENT_SECRET: VGTQD3WWH4uGUMz408NWNzcHF1MsfV0l
       JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
-      medic3-bpe-frontend:
+      dic3-bpe-frontend:
         ipv4_address: 172.20.0.51
-      medic3-bpe-backend:
+      dic3-bpe-backend:
       internet:
     depends_on:
       - db
-      - medic3-fhir
+      - dic3-fhir
       - mailhog
       - keycloak
 
@@ -643,32 +643,32 @@ secrets:
   db_liquibase.password:
     file: ./secrets/db_liquibase.password
     
-  db_medic1_bpe_user.password:
-    file: ./secrets/db_medic1_bpe_user.password
-  db_medic1_bpe_user_camunda.password:
-    file: ./secrets/db_medic1_bpe_user_camunda.password
-  db_medic1_fhir_user.password:
-    file: ./secrets/db_medic1_fhir_user.password
-  db_medic1_fhir_user_permanent_delete.password:
-    file: ./secrets/db_medic1_fhir_user_permanent_delete.password
+  db_dic1_bpe_user.password:
+    file: ./secrets/db_dic1_bpe_user.password
+  db_dic1_bpe_user_camunda.password:
+    file: ./secrets/db_dic1_bpe_user_camunda.password
+  db_dic1_fhir_user.password:
+    file: ./secrets/db_dic1_fhir_user.password
+  db_dic1_fhir_user_permanent_delete.password:
+    file: ./secrets/db_dic1_fhir_user_permanent_delete.password
     
-  db_medic2_bpe_user.password:
-    file: ./secrets/db_medic2_bpe_user.password
-  db_medic2_bpe_user_camunda.password:
-    file: ./secrets/db_medic2_bpe_user_camunda.password
-  db_medic2_fhir_user.password:
-    file: ./secrets/db_medic2_fhir_user.password
-  db_medic2_fhir_user_permanent_delete.password:
-    file: ./secrets/db_medic2_fhir_user_permanent_delete.password
+  db_dic2_bpe_user.password:
+    file: ./secrets/db_dic2_bpe_user.password
+  db_dic2_bpe_user_camunda.password:
+    file: ./secrets/db_dic2_bpe_user_camunda.password
+  db_dic2_fhir_user.password:
+    file: ./secrets/db_dic2_fhir_user.password
+  db_dic2_fhir_user_permanent_delete.password:
+    file: ./secrets/db_dic2_fhir_user_permanent_delete.password
     
-  db_medic3_bpe_user.password:
-    file: ./secrets/db_medic3_bpe_user.password
-  db_medic3_bpe_user_camunda.password:
-    file: ./secrets/db_medic3_bpe_user_camunda.password
-  db_medic3_fhir_user.password:
-    file: ./secrets/db_medic3_fhir_user.password
-  db_medic3_fhir_user_permanent_delete.password:
-    file: ./secrets/db_medic3_fhir_user_permanent_delete.password
+  db_dic3_bpe_user.password:
+    file: ./secrets/db_dic3_bpe_user.password
+  db_dic3_bpe_user_camunda.password:
+    file: ./secrets/db_dic3_bpe_user_camunda.password
+  db_dic3_fhir_user.password:
+    file: ./secrets/db_dic3_fhir_user.password
+  db_dic3_fhir_user_permanent_delete.password:
+    file: ./secrets/db_dic3_fhir_user_permanent_delete.password
     
   db_ttp_bpe_user.password:
     file: ./secrets/db_ttp_bpe_user.password
@@ -691,26 +691,26 @@ secrets:
   app_client_trust_certificates.pem:
     file: ./secrets/app_testca_certificate.pem
 
-  app_medic1_client_certificate.pem:
-    file: ./secrets/app_medic1-client_certificate.pem
-  app_medic1_client_certificate_private_key.pem:
-    file: ./secrets/app_medic1-client_private-key.pem
-  app_medic1_client_certificate_private_key.pem.password:
-    file: ./secrets/app_medic1-client_private-key.pem.password
+  app_dic1_client_certificate.pem:
+    file: ./secrets/app_dic1-client_certificate.pem
+  app_dic1_client_certificate_private_key.pem:
+    file: ./secrets/app_dic1-client_private-key.pem
+  app_dic1_client_certificate_private_key.pem.password:
+    file: ./secrets/app_dic1-client_private-key.pem.password
 
-  app_medic2_client_certificate.pem:
-    file: ./secrets/app_medic2-client_certificate.pem
-  app_medic2_client_certificate_private_key.pem:
-    file: ./secrets/app_medic2-client_private-key.pem
-  app_medic2_client_certificate_private_key.pem.password:
-    file: ./secrets/app_medic2-client_private-key.pem.password
+  app_dic2_client_certificate.pem:
+    file: ./secrets/app_dic2-client_certificate.pem
+  app_dic2_client_certificate_private_key.pem:
+    file: ./secrets/app_dic2-client_private-key.pem
+  app_dic2_client_certificate_private_key.pem.password:
+    file: ./secrets/app_dic2-client_private-key.pem.password
     
-  app_medic3_client_certificate.pem:
-    file: ./secrets/app_medic3-client_certificate.pem
-  app_medic3_client_certificate_private_key.pem:
-    file: ./secrets/app_medic3-client_private-key.pem
-  app_medic3_client_certificate_private_key.pem.password:
-    file: ./secrets/app_medic3-client_private-key.pem.password
+  app_dic3_client_certificate.pem:
+    file: ./secrets/app_dic3-client_certificate.pem
+  app_dic3_client_certificate_private_key.pem:
+    file: ./secrets/app_dic3-client_private-key.pem
+  app_dic3_client_certificate_private_key.pem.password:
+    file: ./secrets/app_dic3-client_private-key.pem.password
     
   app_ttp_client_certificate.pem:
     file: ./secrets/app_ttp-client_certificate.pem
@@ -720,27 +720,27 @@ secrets:
     file: ./secrets/app_ttp-client_private-key.pem.password
 
 networks:
-  medic1-fhir-frontend:
+  dic1-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.0/29
-  medic1-fhir-backend:
-  medic2-fhir-frontend:
+  dic1-fhir-backend:
+  dic2-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.8/29
-  medic2-fhir-backend:
-  medic3-fhir-frontend:
+  dic2-fhir-backend:
+  dic3-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.16/29
-  medic3-fhir-backend:
+  dic3-fhir-backend:
   ttp-fhir-frontend:
     driver: bridge
     ipam:
@@ -748,27 +748,27 @@ networks:
       config:
       - subnet: 172.20.0.24/29
   ttp-fhir-backend:
-  medic1-bpe-frontend:
+  dic1-bpe-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.32/29
-  medic1-bpe-backend:
-  medic2-bpe-frontend:
+  dic1-bpe-backend:
+  dic2-bpe-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.40/29
-  medic2-bpe-backend:
-  medic3-bpe-frontend:
+  dic2-bpe-backend:
+  dic3-bpe-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.48/29
-  medic3-bpe-backend:
+  dic3-bpe-backend:
   ttp-bpe-frontend:
     driver: bridge
     ipam:

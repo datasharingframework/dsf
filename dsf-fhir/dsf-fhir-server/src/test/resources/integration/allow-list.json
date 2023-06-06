@@ -31,19 +31,19 @@
                 ],
                 "identifier": [{
                         "system": "http://dsf.dev/sid/organization-identifier",
-                        "value": "Test_MeDIC_2"
+                        "value": "Test_DIC_2"
                     }
                 ],
                 "active": true,
                 "type": [{
                         "coding": [{
                                 "system": "http://dsf.dev/fhir/CodeSystem/organization-role",
-                                "code": "MeDIC"
+                                "code": "DIC"
                             }
                         ]
                     }
                 ],
-                "name": "Test MeDIC 2",
+                "name": "Test DIC 2",
                 "endpoint": [{
                         "reference": "urn:uuid:d2dd5ba3-22f0-4406-bdd6-7a939d9a347e",
                         "type": "Endpoint"
@@ -52,7 +52,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_2"
+                "url": "Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_2"
             }
         }, {
             "fullUrl": "urn:uuid:d2dd5ba3-22f0-4406-bdd6-7a939d9a347e",
@@ -68,7 +68,7 @@
                 },
                 "identifier": [{
                         "system": "http://dsf.dev/sid/endpoint-identifier",
-                        "value": "Test_MeDIC_2_Endpoint"
+                        "value": "Test_DIC_2_Endpoint"
                     }
                 ],
                 "status": "active",
@@ -76,7 +76,7 @@
                     "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
                     "code": "hl7-fhir-rest"
                 },
-                "name": "Test MeDIC 2 Endpoint",
+                "name": "Test DIC 2 Endpoint",
                 "managingOrganization": {
                     "reference": "urn:uuid:18d87756-1ceb-4925-b2c2-9846f353f219",
                     "type": "Organization"
@@ -90,11 +90,11 @@
                     }
                 ],
                 "payloadMimeType": ["application/fhir+json", "application/fhir+xml"],
-                "address": "https://medic2/fhir"
+                "address": "https://dic2/fhir"
             },
             "request": {
                 "method": "PUT",
-                "url": "Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_MeDIC_2_Endpoint"
+                "url": "Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_DIC_2_Endpoint"
             }
         }, {
             "fullUrl": "urn:uuid:e3c9ee5c-199d-4fc8-869c-d1fd1cf7283e",
@@ -199,19 +199,19 @@
                 ],
                 "identifier": [{
                         "system": "http://dsf.dev/sid/organization-identifier",
-                        "value": "Test_MeDIC_1"
+                        "value": "Test_DIC_1"
                     }
                 ],
                 "active": true,
                 "type": [{
                         "coding": [{
                                 "system": "http://dsf.dev/fhir/CodeSystem/organization-role",
-                                "code": "MeDIC"
+                                "code": "DIC"
                             }
                         ]
                     }
                 ],
-                "name": "Test MeDIC 1",
+                "name": "Test DIC 1",
                 "endpoint": [{
                         "reference": "urn:uuid:89dc2b55-fec3-44d5-86c1-8fc35dfeb3b8",
                         "type": "Endpoint"
@@ -220,7 +220,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_1"
+                "url": "Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_1"
             }
         }, {
             "fullUrl": "urn:uuid:89dc2b55-fec3-44d5-86c1-8fc35dfeb3b8",
@@ -236,7 +236,7 @@
                 },
                 "identifier": [{
                         "system": "http://dsf.dev/sid/endpoint-identifier",
-                        "value": "Test_MeDIC_1_Endpoint"
+                        "value": "Test_DIC_1_Endpoint"
                     }
                 ],
                 "status": "active",
@@ -244,7 +244,7 @@
                     "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
                     "code": "hl7-fhir-rest"
                 },
-                "name": "Test MeDIC 1 Endpoint",
+                "name": "Test DIC 1 Endpoint",
                 "managingOrganization": {
                     "reference": "urn:uuid:8d9eb2e7-5940-46d5-9035-90151b6d5f7a",
                     "type": "Organization"
@@ -258,11 +258,11 @@
                     }
                 ],
                 "payloadMimeType": ["application/fhir+json", "application/fhir+xml"],
-                "address": "https://medic1/fhir"
+                "address": "https://dic1/fhir"
             },
             "request": {
                 "method": "PUT",
-                "url": "Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_MeDIC_1_Endpoint"
+                "url": "Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_DIC_1_Endpoint"
             }
         }, {
             "fullUrl": "urn:uuid:ede98d88-679f-4e46-8559-f99eb6cb84b8",
@@ -283,19 +283,19 @@
                 ],
                 "identifier": [{
                         "system": "http://dsf.dev/sid/organization-identifier",
-                        "value": "Test_MeDIC_3"
+                        "value": "Test_DIC_3"
                     }
                 ],
                 "active": true,
                 "type": [{
                         "coding": [{
                                 "system": "http://dsf.dev/fhir/CodeSystem/organization-role",
-                                "code": "MeDIC"
+                                "code": "DIC"
                             }
                         ]
                     }
                 ],
-                "name": "Test MeDIC 3",
+                "name": "Test DIC 3",
                 "endpoint": [{
                         "reference": "urn:uuid:7a6dbc0c-d38d-4107-99ae-7a9bdadcc6b3",
                         "type": "Endpoint"
@@ -304,7 +304,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_3"
+                "url": "Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_3"
             }
         }, {
             "fullUrl": "urn:uuid:7a6dbc0c-d38d-4107-99ae-7a9bdadcc6b3",
@@ -320,7 +320,7 @@
                 },
                 "identifier": [{
                         "system": "http://dsf.dev/sid/endpoint-identifier",
-                        "value": "Test_MeDIC_3_Endpoint"
+                        "value": "Test_DIC_3_Endpoint"
                     }
                 ],
                 "status": "active",
@@ -328,7 +328,7 @@
                     "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
                     "code": "hl7-fhir-rest"
                 },
-                "name": "Test MeDIC 3 Endpoint",
+                "name": "Test DIC 3 Endpoint",
                 "managingOrganization": {
                     "reference": "urn:uuid:ede98d88-679f-4e46-8559-f99eb6cb84b8",
                     "type": "Organization"
@@ -342,11 +342,11 @@
                     }
                 ],
                 "payloadMimeType": ["application/fhir+json", "application/fhir+xml"],
-                "address": "https://medic3/fhir"
+                "address": "https://dic3/fhir"
             },
             "request": {
                 "method": "PUT",
-                "url": "Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_MeDIC_3_Endpoint"
+                "url": "Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|Test_DIC_3_Endpoint"
             }
         }
     ]

@@ -168,7 +168,7 @@ public class ProcessAuthorizationHelperTest
 			affiliation.getParticipatingOrganization().getIdentifier()
 					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 			affiliation.getCodeFirstRep().getCodingFirstRep()
-					.setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("MeDIC");
+					.setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("DIC");
 			assertTrue(recipientsList.get(0).isRecipientAuthorized(localUser, Collections.singleton(affiliation)));
 		}
 	}

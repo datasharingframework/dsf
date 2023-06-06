@@ -42,11 +42,11 @@
                </tag>
             </meta>
             <extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.medic1}"/>
+               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.dic1}"/>
             </extension>
             <identifier>
                <system value="http://dsf.dev/sid/organization-identifier"/>
-               <value value="Test_MeDIC_1"/>
+               <value value="Test_DIC_1"/>
             </identifier>
             <active value="true"/>
             <endpoint>
@@ -57,7 +57,7 @@
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_1"/>
+         <url value="Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_1"/>
       </request>
    </entry>
    <entry>
@@ -72,11 +72,11 @@
                </tag>
             </meta>
             <extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.medic2}"/>
+               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.dic2}"/>
             </extension>
             <identifier>
                <system value="http://dsf.dev/sid/organization-identifier"/>
-               <value value="Test_MeDIC_2"/>
+               <value value="Test_DIC_2"/>
             </identifier>
             <active value="true"/>
             <endpoint>
@@ -87,7 +87,7 @@
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_2"/>
+         <url value="Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_2"/>
       </request>
    </entry>
    <entry>
@@ -102,11 +102,11 @@
                </tag>
             </meta>
             <extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.medic3}"/>
+               <valueString value="${dev.dsf.fhir.server.organization.thumbprint.dic3}"/>
             </extension>
             <identifier>
                <system value="http://dsf.dev/sid/organization-identifier"/>
-               <value value="Test_MeDIC_3"/>
+               <value value="Test_DIC_3"/>
             </identifier>
             <active value="true"/>
             <endpoint>
@@ -117,7 +117,7 @@
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_3"/>
+         <url value="Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_3"/>
       </request>
    </entry>
    <entry>
@@ -173,7 +173,7 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="medic1"/>
+               <value value="dic1"/>
             </identifier>
             <status value="active"/>
             <connectionType>
@@ -192,12 +192,12 @@
             </payloadType>
             <payloadMimeType value="application/fhir+json"/>
             <payloadMimeType value="application/fhir+xml"/>
-            <address value="https://medic1/fhir"/>
+            <address value="https://dic1/fhir"/>
          </Endpoint>
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|medic1"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|dic1"/>
       </request>
    </entry>
    <entry>
@@ -213,7 +213,7 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="medic2"/>
+               <value value="dic2"/>
             </identifier>
             <status value="active"/>
             <connectionType>
@@ -232,12 +232,12 @@
             </payloadType>
             <payloadMimeType value="application/fhir+json"/>
             <payloadMimeType value="application/fhir+xml"/>
-            <address value="https://medic2/fhir"/>
+            <address value="https://dic2/fhir"/>
          </Endpoint>
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|medic2"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|dic2"/>
       </request>
    </entry>
    <entry>
@@ -253,7 +253,7 @@
             </meta>
             <identifier>
                <system value="http://dsf.dev/sid/endpoint-identifier"/>
-               <value value="medic3"/>
+               <value value="dic3"/>
             </identifier>
             <status value="active"/>
             <connectionType>
@@ -272,12 +272,12 @@
             </payloadType>
             <payloadMimeType value="application/fhir+json"/>
             <payloadMimeType value="application/fhir+xml"/>
-            <address value="https://medic3/fhir"/>
+            <address value="https://dic3/fhir"/>
          </Endpoint>
       </resource>
       <request>
          <method value="PUT"/>
-         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|medic3"/>
+         <url value="Endpoint?identifier=http://dsf.dev/sid/endpoint-identifier|dic3"/>
       </request>
    </entry>
    <entry>
@@ -371,7 +371,7 @@
             <code>
                <coding>
                   <system value="http://dsf.dev/fhir/CodeSystem/organization-role"/>
-                  <code value="MeDIC"/>
+                  <code value="DIC"/>
                </coding>
             </code>
             <code>
@@ -389,7 +389,7 @@
       <request>
          <method value="POST"/>
          <url value="OrganizationAffiliation"/>
-         <ifNoneExist value="primary-organization:identifier=http://dsf.dev/sid/organization-identifier|highmed.org&amp;participating-organization:identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_1"/>
+         <ifNoneExist value="primary-organization:identifier=http://dsf.dev/sid/organization-identifier|highmed.org&amp;participating-organization:identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_1"/>
       </request>
    </entry>
    <entry>
@@ -415,7 +415,7 @@
             <code>
                <coding>
                   <system value="http://dsf.dev/fhir/CodeSystem/organization-role"/>
-                  <code value="MeDIC"/>
+                  <code value="DIC"/>
                </coding>
             </code>
             <code>
@@ -433,7 +433,7 @@
       <request>
          <method value="POST"/>
          <url value="OrganizationAffiliation"/>
-         <ifNoneExist value="primary-organization:identifier=http://dsf.dev/sid/organization-identifier|highmed.org&amp;participating-organization:identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_2"/>
+         <ifNoneExist value="primary-organization:identifier=http://dsf.dev/sid/organization-identifier|highmed.org&amp;participating-organization:identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_2"/>
       </request>
    </entry>
    <entry>
@@ -459,7 +459,7 @@
             <code>
                <coding>
                   <system value="http://dsf.dev/fhir/CodeSystem/organization-role"/>
-                  <code value="MeDIC"/>
+                  <code value="DIC"/>
                </coding>
             </code>
             <code>
@@ -477,7 +477,7 @@
       <request>
          <method value="POST"/>
          <url value="OrganizationAffiliation"/>
-         <ifNoneExist value="primary-organization:identifier=http://dsf.dev/sid/organization-identifier|highmed.org&amp;participating-organization:identifier=http://dsf.dev/sid/organization-identifier|Test_MeDIC_3"/>
+         <ifNoneExist value="primary-organization:identifier=http://dsf.dev/sid/organization-identifier|highmed.org&amp;participating-organization:identifier=http://dsf.dev/sid/organization-identifier|Test_DIC_3"/>
       </request>
    </entry>
 </Bundle>

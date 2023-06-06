@@ -31,8 +31,8 @@ public class CodeSystemProfileTest
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("dsf-code-system-0.5.0.xml", "dsf-extension-read-access-organization-0.5.0.xml",
 					"dsf-extension-read-access-consortium-role-0.5.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml"));
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-1.0.0.xml"),
+			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-1.0.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
