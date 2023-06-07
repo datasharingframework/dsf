@@ -40,6 +40,12 @@ values ('history.cleanup.job.lock', '0', 1);
 insert into ACT_GE_PROPERTY
 values ('startup.lock', '0', 1);
 
+insert into ACT_GE_PROPERTY
+values ('telemetry.lock', '0', 1);
+
+insert into ACT_GE_PROPERTY
+values ('installationId.lock', '0', 1);
+
 create table ACT_GE_BYTEARRAY (
     ID_ varchar(64),
     REV_ integer,
@@ -63,7 +69,7 @@ create table ACT_GE_SCHEMA_LOG (
 );
 
 insert into ACT_GE_SCHEMA_LOG
-values ('0', CURRENT_TIMESTAMP, '7.12.0');
+values ('0', CURRENT_TIMESTAMP, '7.19.0');
 
 create table ACT_RE_DEPLOYMENT (
     ID_ varchar(64),
@@ -100,7 +106,7 @@ create table ACT_RU_EXECUTION (
 
 create table ACT_RU_JOB (
     ID_ varchar(64) NOT NULL,
-	  REV_ integer,
+    REV_ integer,
     TYPE_ varchar(255) NOT NULL,
     LOCK_EXP_TIME_ timestamp,
     LOCK_OWNER_ varchar(255),
@@ -112,6 +118,7 @@ create table ACT_RU_JOB (
     RETRIES_ integer,
     EXCEPTION_STACK_ID_ varchar(64),
     EXCEPTION_MSG_ varchar(4000),
+    FAILED_ACT_ID_ varchar(255),
     DUEDATE_ timestamp,
     REPEAT_ varchar(255),
     REPEAT_OFFSET_ bigint DEFAULT 0,
@@ -124,6 +131,7 @@ create table ACT_RU_JOB (
     SEQUENCE_COUNTER_ bigint,
     TENANT_ID_ varchar(64),
     CREATE_TIME_ timestamp,
+    LAST_FAILURE_LOG_ID_ varchar(64),
     primary key (ID_)
 );
 
@@ -138,6 +146,7 @@ create table ACT_RU_JOBDEF (
     SUSPENSION_STATE_ integer,
     JOB_PRIORITY_ bigint,
     TENANT_ID_ varchar(64),
+    DEPLOYMENT_ID_ varchar(64),
     primary key (ID_)
 );
 
@@ -160,6 +169,17 @@ create table ACT_RE_PROCDEF (
     primary key (ID_)
 );
 
+create table ACT_RE_CAMFORMDEF (
+    ID_ varchar(64) NOT NULL,
+    REV_ integer,
+    KEY_ varchar(255) NOT NULL,
+    VERSION_ integer NOT NULL,
+    DEPLOYMENT_ID_ varchar(64),
+    RESOURCE_NAME_ varchar(4000),
+    TENANT_ID_ varchar(64),
+    primary key (ID_)
+);
+
 create table ACT_RU_TASK (
     ID_ varchar(64),
     REV_ integer,
@@ -178,6 +198,7 @@ create table ACT_RU_TASK (
     DELEGATION_ varchar(64),
     PRIORITY_ integer,
     CREATE_TIME_ timestamp,
+    LAST_UPDATED_ timestamp,
     DUE_DATE_ timestamp,
     FOLLOW_UP_DATE_ timestamp,
     SUSPENSION_STATE_ integer,
@@ -204,9 +225,11 @@ create table ACT_RU_VARIABLE (
     NAME_ varchar(255) not null,
     EXECUTION_ID_ varchar(64),
     PROC_INST_ID_ varchar(64),
+    PROC_DEF_ID_ varchar(64),
     CASE_EXECUTION_ID_ varchar(64),
     CASE_INST_ID_ varchar(64),
     TASK_ID_ varchar(64),
+    BATCH_ID_ varchar(64),
     BYTEARRAY_ID_ varchar(64),
     DOUBLE_ double precision,
     LONG_ bigint,
@@ -241,6 +264,7 @@ create table ACT_RU_INCIDENT (
   INCIDENT_TYPE_ varchar(255) not null,
   EXECUTION_ID_ varchar(64),
   ACTIVITY_ID_ varchar(255),
+  FAILED_ACTIVITY_ID_ varchar(255),
   PROC_INST_ID_ varchar(64),
   PROC_DEF_ID_ varchar(64),
   CAUSE_INCIDENT_ID_ varchar(64),
@@ -248,6 +272,7 @@ create table ACT_RU_INCIDENT (
   CONFIGURATION_ varchar(255),
   TENANT_ID_ varchar(64),
   JOB_DEF_ID_ varchar(64),
+  ANNOTATION_ varchar(4000),
   primary key (ID_)
 );
 
@@ -260,6 +285,8 @@ create table ACT_RU_AUTHORIZATION (
   RESOURCE_TYPE_ integer not null,
   RESOURCE_ID_ varchar(255),
   PERMS_ integer,
+  REMOVAL_TIME_ timestamp,
+  ROOT_PROC_INST_ID_ varchar(64),
   primary key (ID_)
 );
 
@@ -284,6 +311,13 @@ create table ACT_RU_METER_LOG (
   primary key (ID_)
 );
 
+create table ACT_RU_TASK_METER_LOG (
+  ID_ varchar(64) not null,
+  ASSIGNEE_HASH_ bigint,
+  TIMESTAMP_ timestamp,
+  primary key (ID_)
+);
+
 create table ACT_RU_EXT_TASK (
   ID_ varchar(64) not null,
   REV_ integer not null,
@@ -302,6 +336,7 @@ create table ACT_RU_EXT_TASK (
   ACT_INST_ID_ varchar(64),
   TENANT_ID_ varchar(64),
   PRIORITY_ bigint NOT NULL DEFAULT 0,
+  LAST_FAILURE_LOG_ID_ varchar(64),
   primary key (ID_)
 );
 
@@ -320,6 +355,8 @@ create table ACT_RU_BATCH (
   CONFIGURATION_ varchar(255),
   TENANT_ID_ varchar(64),
   CREATE_USER_ID_ varchar(255),
+  START_TIME_ timestamp,
+  EXEC_START_TIME_ timestamp,
   primary key (ID_)
 );
 
@@ -327,14 +364,19 @@ create index ACT_IDX_EXE_ROOT_PI on ACT_RU_EXECUTION(ROOT_PROC_INST_ID_);
 create index ACT_IDX_EXEC_BUSKEY on ACT_RU_EXECUTION(BUSINESS_KEY_);
 create index ACT_IDX_EXEC_TENANT_ID on ACT_RU_EXECUTION(TENANT_ID_);
 create index ACT_IDX_TASK_CREATE on ACT_RU_TASK(CREATE_TIME_);
+create index ACT_IDX_TASK_LAST_UPDATED on ACT_RU_TASK(LAST_UPDATED_);
 create index ACT_IDX_TASK_ASSIGNEE on ACT_RU_TASK(ASSIGNEE_);
+create index ACT_IDX_TASK_OWNER on ACT_RU_TASK(OWNER_);
 create index ACT_IDX_TASK_TENANT_ID on ACT_RU_TASK(TENANT_ID_);
 create index ACT_IDX_IDENT_LNK_USER on ACT_RU_IDENTITYLINK(USER_ID_);
 create index ACT_IDX_IDENT_LNK_GROUP on ACT_RU_IDENTITYLINK(GROUP_ID_);
 create index ACT_IDX_EVENT_SUBSCR_CONFIG_ on ACT_RU_EVENT_SUBSCR(CONFIGURATION_);
 create index ACT_IDX_EVENT_SUBSCR_TENANT_ID on ACT_RU_EVENT_SUBSCR(TENANT_ID_);
+
 create index ACT_IDX_VARIABLE_TASK_ID on ACT_RU_VARIABLE(TASK_ID_);
 create index ACT_IDX_VARIABLE_TENANT_ID on ACT_RU_VARIABLE(TENANT_ID_);
+create index ACT_IDX_VARIABLE_TASK_NAME_TYPE on ACT_RU_VARIABLE(TASK_ID_, NAME_, TYPE_);
+
 create index ACT_IDX_INC_CONFIGURATION on ACT_RU_INCIDENT(CONFIGURATION_);
 create index ACT_IDX_INC_TENANT_ID on ACT_RU_INCIDENT(TENANT_ID_);
 -- CAM-5914
@@ -352,6 +394,9 @@ CREATE INDEX ACT_IDX_METER_LOG_REPORT ON ACT_RU_METER_LOG(NAME_, REPORTER_, MILL
 -- old metric timestamp column
 CREATE INDEX ACT_IDX_METER_LOG_TIME ON ACT_RU_METER_LOG(TIMESTAMP_);
 CREATE INDEX ACT_IDX_METER_LOG ON ACT_RU_METER_LOG(NAME_, TIMESTAMP_);
+
+-- task metric timestamp column
+CREATE INDEX ACT_IDX_TASK_METER_LOG_TIME ON ACT_RU_TASK_METER_LOG(TIMESTAMP_);
 
 create index ACT_IDX_EXT_TASK_TOPIC on ACT_RU_EXT_TASK(TOPIC_NAME_);
 create index ACT_IDX_EXT_TASK_TENANT_ID on ACT_RU_EXT_TASK(TENANT_ID_);
@@ -522,6 +567,12 @@ alter table ACT_RU_EXT_TASK
     foreign key (ERROR_DETAILS_ID_)
     references ACT_GE_BYTEARRAY (ID_);
 
+create index ACT_IDX_BATCH_ID ON ACT_RU_VARIABLE(BATCH_ID_);
+alter table ACT_RU_VARIABLE
+    add constraint ACT_FK_VAR_BATCH
+    foreign key (BATCH_ID_)
+    references ACT_RU_BATCH (ID_);
+
 -- indexes for deadlock problems - https://app.camunda.com/jira/browse/CAM-2567 --
 create index ACT_IDX_INC_CAUSEINCID on ACT_RU_INCIDENT(CAUSE_INCIDENT_ID_);
 create index ACT_IDX_INC_EXID on ACT_RU_INCIDENT(EXECUTION_ID_);
@@ -545,6 +596,10 @@ create index ACT_IDX_EVENT_SUBSCR_EVT_NAME ON ACT_RU_EVENT_SUBSCR(EVENT_NAME_);
 create index ACT_IDX_PROCDEF_DEPLOYMENT_ID ON ACT_RE_PROCDEF(DEPLOYMENT_ID_);
 create index ACT_IDX_PROCDEF_TENANT_ID ON ACT_RE_PROCDEF(TENANT_ID_);
 create index ACT_IDX_PROCDEF_VER_TAG ON ACT_RE_PROCDEF(VERSION_TAG_);
+
+-- indices for history cleanup: https://jira.camunda.com/browse/CAM-11616
+create index ACT_IDX_AUTH_ROOT_PI on ACT_RU_AUTHORIZATION(ROOT_PROC_INST_ID_);
+create index ACT_IDX_AUTH_RM_TIME on ACT_RU_AUTHORIZATION(REMOVAL_TIME_);
 --
 -- Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
 -- under one or more contributor license agreements. See the NOTICE file
@@ -794,7 +849,7 @@ create table ACT_HI_ACTINST (
     CALL_CASE_INST_ID_ varchar(64),
     ACT_NAME_ varchar(255),
     ACT_TYPE_ varchar(255) not null,
-    ASSIGNEE_ varchar(64),
+    ASSIGNEE_ varchar(255),
     START_TIME_ timestamp not null,
     END_TIME_ timestamp,
     DURATION_ bigint,
@@ -891,6 +946,7 @@ create table ACT_HI_DETAIL (
     TENANT_ID_ varchar(64),
     OPERATION_ID_ varchar(64),
     REMOVAL_TIME_ timestamp,
+    INITIAL_ boolean,
     primary key (ID_)
 );
 
@@ -988,6 +1044,7 @@ create table ACT_HI_INCIDENT (
   INCIDENT_MSG_ varchar(4000),
   INCIDENT_TYPE_ varchar(255) not null,
   ACTIVITY_ID_ varchar(255),
+  FAILED_ACTIVITY_ID_ varchar(255),
   CAUSE_INCIDENT_ID_ varchar(64),
   ROOT_CAUSE_INCIDENT_ID_ varchar(64),
   CONFIGURATION_ varchar(255),
@@ -995,6 +1052,7 @@ create table ACT_HI_INCIDENT (
   INCIDENT_STATE_ integer,
   TENANT_ID_ varchar(64),
   JOB_DEF_ID_ varchar(64),
+  ANNOTATION_ varchar(4000),
   REMOVAL_TIME_ timestamp,
   primary key (ID_)
 );
@@ -1013,6 +1071,7 @@ create table ACT_HI_JOB_LOG (
     JOB_DEF_TYPE_ varchar(255),
     JOB_DEF_CONFIGURATION_ varchar(255),
     ACT_ID_ varchar(255),
+    FAILED_ACT_ID_ varchar(255),
     EXECUTION_ID_ varchar(64),
     ROOT_PROC_INST_ID_ varchar(64),
     PROCESS_INSTANCE_ID_ varchar(64),
@@ -1021,6 +1080,7 @@ create table ACT_HI_JOB_LOG (
     DEPLOYMENT_ID_ varchar(64),
     SEQUENCE_COUNTER_ bigint,
     TENANT_ID_ varchar(64),
+    HOSTNAME_ varchar(255),
     REMOVAL_TIME_ timestamp,
     primary key (ID_)
 );
@@ -1039,6 +1099,7 @@ create table ACT_HI_BATCH (
     START_TIME_ timestamp not null,
     END_TIME_ timestamp,
     REMOVAL_TIME_ timestamp,
+    EXEC_START_TIME_ timestamp,
     primary key (ID_)
 );
 
@@ -1075,7 +1136,7 @@ create index ACT_IDX_HI_PRO_INST_ROOT_PI on ACT_HI_PROCINST(ROOT_PROC_INST_ID_);
 create index ACT_IDX_HI_PRO_INST_RM_TIME on ACT_HI_PROCINST(REMOVAL_TIME_);
 
 create index ACT_IDX_HI_ACTINST_ROOT_PI on ACT_HI_ACTINST(ROOT_PROC_INST_ID_);
-create index ACT_IDX_HI_ACT_INST_START on ACT_HI_ACTINST(START_TIME_);
+create index ACT_IDX_HI_ACT_INST_START_END on ACT_HI_ACTINST(START_TIME_, END_TIME_);
 create index ACT_IDX_HI_ACT_INST_END on ACT_HI_ACTINST(END_TIME_);
 create index ACT_IDX_HI_ACT_INST_PROCINST on ACT_HI_ACTINST(PROC_INST_ID_, ACT_ID_);
 create index ACT_IDX_HI_ACT_INST_COMP on ACT_HI_ACTINST(EXECUTION_ID_, ACT_ID_, END_TIME_, ID_);
@@ -1126,12 +1187,17 @@ create index ACT_IDX_HI_VAR_INST_TENANT_ID on ACT_HI_VARINST(TENANT_ID_);
 create index ACT_IDX_HI_VAR_INST_PROC_DEF_KEY on ACT_HI_VARINST(PROC_DEF_KEY_);
 create index ACT_IDX_HI_VARINST_BYTEAR on ACT_HI_VARINST(BYTEARRAY_ID_);
 create index ACT_IDX_HI_VARINST_RM_TIME on ACT_HI_VARINST(REMOVAL_TIME_);
+create index ACT_IDX_HI_VAR_PI_NAME_TYPE on ACT_HI_VARINST(PROC_INST_ID_, NAME_, VAR_TYPE_);
+create index ACT_IDX_HI_VARINST_NAME on ACT_HI_VARINST(NAME_);
+create index ACT_IDX_HI_VARINST_ACT_INST_ID on ACT_HI_VARINST(ACT_INST_ID_);
 
 create index ACT_IDX_HI_INCIDENT_TENANT_ID on ACT_HI_INCIDENT(TENANT_ID_);
 create index ACT_IDX_HI_INCIDENT_PROC_DEF_KEY on ACT_HI_INCIDENT(PROC_DEF_KEY_);
 create index ACT_IDX_HI_INCIDENT_ROOT_PI on ACT_HI_INCIDENT(ROOT_PROC_INST_ID_);
 create index ACT_IDX_HI_INCIDENT_PROCINST on ACT_HI_INCIDENT(PROC_INST_ID_);
 create index ACT_IDX_HI_INCIDENT_RM_TIME on ACT_HI_INCIDENT(REMOVAL_TIME_);
+create index ACT_IDX_HI_INCIDENT_CREATE_TIME on ACT_HI_INCIDENT(CREATE_TIME_);
+create index ACT_IDX_HI_INCIDENT_END_TIME on ACT_HI_INCIDENT(END_TIME_);
 
 create index ACT_IDX_HI_JOB_LOG_ROOT_PI on ACT_HI_JOB_LOG(ROOT_PROC_INST_ID_);
 create index ACT_IDX_HI_JOB_LOG_PROCINST on ACT_HI_JOB_LOG(PROCESS_INSTANCE_ID_);
