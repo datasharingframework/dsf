@@ -72,11 +72,11 @@ public abstract class AbstractJettyConfig implements JettyConfig
 	public Map<String, String> getAllProperties()
 	{
 		Map<String, String> properties = new HashMap<>();
-		properties.put(PROPERTY_JETTY_STATUS_HOST, getStatusHost().orElse(null));
-		properties.put(PROPERTY_JETTY_STATUS_PORT, getStatusPort().map(String::valueOf).orElse(null));
 		properties.put(PROPERTY_JETTY_HOST, getHost().orElse(null));
 		properties.put(PROPERTY_JETTY_PORT, getPort().map(String::valueOf).orElse(null));
 		properties.put(PROPERTY_JETTY_CONTEXT_PATH, getContextPath().orElse(null));
+		properties.put(PROPERTY_JETTY_STATUS_HOST, getStatusHost().orElse(null));
+		properties.put(PROPERTY_JETTY_STATUS_PORT, getStatusPort().map(String::valueOf).orElse(null));
 
 		properties.put(PROPERTY_JETTY_SERVER_CERTIFICATE, getServerCertificatePath().map(Path::toString).orElse(null));
 		properties.put(PROPERTY_JETTY_SERVER_CERTIFICATE_CHAIN,
@@ -90,6 +90,10 @@ public abstract class AbstractJettyConfig implements JettyConfig
 				getClientTrustCertificatesPath().map(Path::toString).orElse(null));
 		properties.put(PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME,
 				getClientCertificateHeaderName().orElse(null));
+
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW,
+				String.valueOf(getOidcAuthorizationCodeFlowEndabled()));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_BEARER_TOKEN, String.valueOf(getOidcBearerTokenEnabled()));
 
 		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL, getOidcProviderBaseUrl().orElse(null));
 		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CONNECT_TIMEOUT,
@@ -106,11 +110,12 @@ public abstract class AbstractJettyConfig implements JettyConfig
 				getOidcProviderClientCertificatePrivateKeyPassword().map(String::valueOf).orElse(null));
 		properties.put(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_PROXY_URL,
 				getOidcProviderClientProxyUrl().map(URL::toString).orElse(null));
+
 		properties.put(PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID, getOidcClientId().orElse(null));
 		properties.put(PROPERTY_JETTY_AUTH_OIDC_CLIENT_SECRET, getOidcClientSecret().orElse(null));
-		properties.put(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT,
-				String.valueOf(getOidcSsoBackChannelLogoutEnabled()));
-		properties.put(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH, getOidcSsoBackChannelPath().orElse(null));
+
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT, String.valueOf(getOidcBackChannelLogoutEnabled()));
+		properties.put(PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH, getOidcBackChannelPath().orElse(null));
 
 		properties.put(PROPERTY_JETTY_LOG4J_CONFIG, getLog4JConfigPath().map(Path::toString).orElse(null));
 		return properties;

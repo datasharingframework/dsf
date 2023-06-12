@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.common.auth.BackChannelLogoutAuthenticator;
+import dev.dsf.common.auth.BearerTokenAuthenticator;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
 import dev.dsf.common.auth.DsfLoginService;
@@ -69,31 +70,74 @@ public class JettyServer
 	private void configureSecurityHandler(WebAppContext webAppContext, int statusConnectorPort,
 			KeyStore clientTrustStore, OidcConfig oidcConfig)
 	{
+		SessionHandler sessionHandler = webAppContext.getSessionHandler();
 		DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
 
 		DsfOpenIdConfiguration openIdConfiguration = null;
 		OpenIdAuthenticator openIdAuthenticator = null;
 		DsfOpenIdLoginService openIdLoginService = null;
+		BearerTokenAuthenticator bearerTokenAuthenticator = null;
 		BackChannelLogoutAuthenticator backChannelLogoutAuthenticator = null;
 
 		if (oidcConfig != null)
 		{
 			openIdConfiguration = new DsfOpenIdConfiguration(oidcConfig.providerBaseUrl(), oidcConfig.clientId(),
-					oidcConfig.clientSecret(), createOidcClient(oidcConfig), oidcConfig.ssoBackChannelLogoutEnabled());
-			openIdAuthenticator = new OpenIdAuthenticator(openIdConfiguration);
-			openIdLoginService = new DsfOpenIdLoginService(openIdConfiguration, dsfLoginService);
+					oidcConfig.clientSecret(), createOidcClient(oidcConfig), oidcConfig.bckChannelLogoutEnabled(),
+					oidcConfig.bearerTokenEnabled());
 
-			if (oidcConfig.ssoBackChannelLogoutEnabled())
-				backChannelLogoutAuthenticator = new BackChannelLogoutAuthenticator(openIdConfiguration,
-						oidcConfig.ssoBackChannelPath());
+			if (oidcConfig.authorizationCodeFlowEnabled())
+			{
+				if (oidcConfig.providerBaseUrl() == null)
+					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL).get();
+				else if (oidcConfig.clientId() == null)
+					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID).get();
+				else if (oidcConfig.clientSecret() == null)
+					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_CLIENT_SECRET).get();
+				else
+				{
+					openIdAuthenticator = new OpenIdAuthenticator(openIdConfiguration);
+					logger.info("OIDC authorization code flow enabled");
+				}
+			}
+
+			if (oidcConfig.bearerTokenEnabled())
+			{
+				if (oidcConfig.providerBaseUrl() == null)
+					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL).get();
+				else
+				{
+					bearerTokenAuthenticator = new BearerTokenAuthenticator(openIdConfiguration);
+					logger.info("OIDC bearer token enabled");
+				}
+			}
+
+			if (oidcConfig.bckChannelLogoutEnabled())
+			{
+				if (!oidcConfig.authorizationCodeFlowEnabled())
+					throw JettyConfig
+							.propertyNotDefinedTrue(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW).get();
+				else if (oidcConfig.clientId() == null)
+					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID).get();
+				else if (oidcConfig.ssoBackChannelPath() == null)
+					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH)
+							.get();
+				else
+				{
+					backChannelLogoutAuthenticator = new BackChannelLogoutAuthenticator(openIdConfiguration,
+							oidcConfig.ssoBackChannelPath());
+					logger.info("OIDC back-channel logout enabled");
+				}
+			}
+
+			openIdLoginService = new DsfOpenIdLoginService(openIdConfiguration, dsfLoginService);
 		}
 
 		StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusConnectorPort);
 		ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
 				clientTrustStore);
-		DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(statusPortAuthenticator,
-				clientCertificateAuthenticator, openIdAuthenticator, openIdLoginService,
-				backChannelLogoutAuthenticator);
+		DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,
+				statusPortAuthenticator, clientCertificateAuthenticator, bearerTokenAuthenticator, openIdAuthenticator,
+				openIdLoginService, backChannelLogoutAuthenticator);
 
 		SecurityHandler securityHandler = new DsfSecurityHandler(dsfLoginService, delegatingAuthenticator,
 				openIdConfiguration);
@@ -101,7 +145,6 @@ public class JettyServer
 
 		webAppContext.setSecurityHandler(securityHandler);
 
-		SessionHandler sessionHandler = webAppContext.getSessionHandler();
 		sessionHandler.addEventListener(backChannelLogoutAuthenticator);
 	}
 

@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -24,19 +23,19 @@ public class EnvJettyConfig extends AbstractJettyConfig implements JettyConfig
 
 	private Optional<String> getString(String propertyName, Supplier<Optional<String>> defaultValue)
 	{
-		final String envVariableName = propertyToEnvironmentVariableName(propertyName);
+		final String envVariableName = JettyConfig.propertyToEnvironmentVariableName(propertyName);
 		return Optional.ofNullable(System.getenv(envVariableName)).or(defaultValue);
 	}
 
 	private Optional<char[]> getCharArray(String propertyName, Supplier<Optional<char[]>> defaultValue)
 	{
-		final String envVariableName = propertyToEnvironmentVariableName(propertyName);
+		final String envVariableName = JettyConfig.propertyToEnvironmentVariableName(propertyName);
 		return Optional.ofNullable(System.getenv(envVariableName)).map(String::toCharArray).or(defaultValue);
 	}
 
 	private Optional<Integer> getPort(String propertyName, Supplier<Optional<Integer>> defaultValue)
 	{
-		final String envVariableName = propertyToEnvironmentVariableName(propertyName);
+		final String envVariableName = JettyConfig.propertyToEnvironmentVariableName(propertyName);
 		return getString(envVariableName, Optional::empty).map(value ->
 		{
 			try
@@ -59,7 +58,7 @@ public class EnvJettyConfig extends AbstractJettyConfig implements JettyConfig
 
 	private Optional<Long> getTimeout(String propertyName, Supplier<Optional<Long>> defaultValue)
 	{
-		final String envVariableName = propertyToEnvironmentVariableName(propertyName);
+		final String envVariableName = JettyConfig.propertyToEnvironmentVariableName(propertyName);
 		return getString(envVariableName, Optional::empty).map(value ->
 		{
 			try
@@ -76,7 +75,7 @@ public class EnvJettyConfig extends AbstractJettyConfig implements JettyConfig
 
 	private Optional<Path> getPath(String propertyName, Supplier<Optional<Path>> defaultValue)
 	{
-		final String envVariableName = propertyToEnvironmentVariableName(propertyName);
+		final String envVariableName = JettyConfig.propertyToEnvironmentVariableName(propertyName);
 		return getString(envVariableName, Optional::empty).map(value ->
 		{
 			Path pathValue = Paths.get(value);
@@ -91,7 +90,7 @@ public class EnvJettyConfig extends AbstractJettyConfig implements JettyConfig
 
 	private Optional<URL> getUrl(String propertyName, Supplier<Optional<URL>> defaultValue)
 	{
-		final String envVariableName = propertyToEnvironmentVariableName(propertyName);
+		final String envVariableName = JettyConfig.propertyToEnvironmentVariableName(propertyName);
 		return getString(envVariableName, Optional::empty).map(value ->
 		{
 			try
@@ -108,13 +107,8 @@ public class EnvJettyConfig extends AbstractJettyConfig implements JettyConfig
 
 	private boolean getBoolean(String propertyName, Supplier<Boolean> defaultValue)
 	{
-		final String envVariableName = propertyToEnvironmentVariableName(propertyName);
+		final String envVariableName = JettyConfig.propertyToEnvironmentVariableName(propertyName);
 		return getString(envVariableName, Optional::empty).map(Boolean::parseBoolean).orElseGet(defaultValue);
-	}
-
-	private String propertyToEnvironmentVariableName(String propertyName)
-	{
-		return propertyName.toUpperCase(Locale.ENGLISH).replace('.', '_');
 	}
 
 	@Override
@@ -185,6 +179,19 @@ public class EnvJettyConfig extends AbstractJettyConfig implements JettyConfig
 	}
 
 	@Override
+	public boolean getOidcAuthorizationCodeFlowEndabled()
+	{
+		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW,
+				delegate::getOidcAuthorizationCodeFlowEndabled);
+	}
+
+	@Override
+	public boolean getOidcBearerTokenEnabled()
+	{
+		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_BEARER_TOKEN, delegate::getOidcBearerTokenEnabled);
+	}
+
+	@Override
 	public Optional<String> getOidcProviderBaseUrl()
 	{
 		return getString(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL, delegate::getOidcProviderBaseUrl);
@@ -251,16 +258,15 @@ public class EnvJettyConfig extends AbstractJettyConfig implements JettyConfig
 	}
 
 	@Override
-	public boolean getOidcSsoBackChannelLogoutEnabled()
+	public boolean getOidcBackChannelLogoutEnabled()
 	{
-		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT,
-				delegate::getOidcSsoBackChannelLogoutEnabled);
+		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT, delegate::getOidcBackChannelLogoutEnabled);
 	}
 
 	@Override
-	public Optional<String> getOidcSsoBackChannelPath()
+	public Optional<String> getOidcBackChannelPath()
 	{
-		return getString(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH, delegate::getOidcSsoBackChannelPath);
+		return getString(PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH, delegate::getOidcBackChannelPath);
 	}
 
 	@Override

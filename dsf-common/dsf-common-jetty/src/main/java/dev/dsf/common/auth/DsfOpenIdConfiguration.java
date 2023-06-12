@@ -22,15 +22,17 @@ public class DsfOpenIdConfiguration extends OpenIdConfiguration
 	private static final Logger logger = LoggerFactory.getLogger(DsfOpenIdConfiguration.class);
 
 	private final boolean backChannelLogoutEnabled;
+	private final boolean bearerTokenEnabled;
 
 	private RSAKeyProvider rsaKeyProvider;
 
 	public DsfOpenIdConfiguration(String issuer, String clientId, String clientSecret, HttpClient httpClient,
-			boolean backChannelLogoutEnabled)
+			boolean backChannelLogoutEnabled, boolean bearerTokenEnabled)
 	{
 		super(issuer, null, null, clientId, clientSecret, httpClient);
 
 		this.backChannelLogoutEnabled = backChannelLogoutEnabled;
+		this.bearerTokenEnabled = bearerTokenEnabled;
 	}
 
 	@Override
@@ -38,7 +40,7 @@ public class DsfOpenIdConfiguration extends OpenIdConfiguration
 	{
 		super.processMetadata(discoveryDocument);
 
-		if (backChannelLogoutEnabled)
+		if (backChannelLogoutEnabled || bearerTokenEnabled)
 		{
 			String jwksUri = (String) discoveryDocument.get("jwks_uri");
 			if (jwksUri == null)
