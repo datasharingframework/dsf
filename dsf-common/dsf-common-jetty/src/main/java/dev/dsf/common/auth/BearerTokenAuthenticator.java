@@ -86,9 +86,10 @@ public class BearerTokenAuthenticator extends LoginAuthenticator
 
 				return new UserAuthentication(getAuthMethod(), user);
 			}
-			catch(TokenExpiredException e)
+			catch (TokenExpiredException e)
 			{
-				servletResponse.setHeader(HttpHeader.WWW_AUTHENTICATE.asString(), "Bearer error=\"invalid_token\", error_description=\"The access token expired\"");
+				servletResponse.setHeader(HttpHeader.WWW_AUTHENTICATE.asString(),
+						"Bearer error=\"invalid_token\", error_description=\"The access token expired\"");
 				servletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return Authentication.SEND_FAILURE;
 			}

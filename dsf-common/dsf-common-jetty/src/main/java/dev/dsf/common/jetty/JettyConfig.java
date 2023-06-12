@@ -212,7 +212,8 @@ public interface JettyConfig
 
 	default Optional<OidcConfig> getOidcConfig()
 	{
-		if (!getOidcAuthorizationCodeFlowEndabled() && !getOidcBearerTokenEnabled() && !getOidcBackChannelLogoutEnabled())
+		if (!getOidcAuthorizationCodeFlowEndabled() && !getOidcBearerTokenEnabled()
+				&& !getOidcBackChannelLogoutEnabled())
 			return Optional.empty();
 
 		Duration clientIdleTimeout = getOidcProviderClientIdleTimeout()
