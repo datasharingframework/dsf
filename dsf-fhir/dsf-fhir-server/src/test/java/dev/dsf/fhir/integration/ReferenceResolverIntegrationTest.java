@@ -118,8 +118,8 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 
 	private ActivityDefinition readActivityDefinition() throws IOException
 	{
-		try (InputStream in = Files.newInputStream(
-				Paths.get("src/test/resources/integration/task/highmed-test-activity-definition2-0.5.xml")))
+		try (InputStream in = Files
+				.newInputStream(Paths.get("src/test/resources/integration/task/dsf-test-activity-definition2-1.0.xml")))
 		{
 			return fhirContext.newXmlParser().parseResource(ActivityDefinition.class, in);
 		}
@@ -128,7 +128,7 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 	private StructureDefinition readTestTaskProfile() throws IOException
 	{
 		try (InputStream in = Files
-				.newInputStream(Paths.get("src/test/resources/integration/task/highmed-test-task-profile-0.5.xml")))
+				.newInputStream(Paths.get("src/test/resources/integration/task/dsf-test-task-profile-1.0.xml")))
 		{
 			return fhirContext.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
@@ -203,7 +203,7 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 	private Task readTestTask() throws IOException
 	{
 		try (InputStream in = Files
-				.newInputStream(Paths.get("src/test/resources/integration/task/highmed-test-task-0.5.xml")))
+				.newInputStream(Paths.get("src/test/resources/integration/task/dsf-test-task-1.0.xml")))
 		{
 			return fhirContext.newXmlParser().parseResource(Task.class, in).setAuthoredOn(new Date());
 		}

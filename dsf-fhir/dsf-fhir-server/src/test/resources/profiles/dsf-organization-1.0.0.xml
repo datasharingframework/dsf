@@ -42,17 +42,17 @@
 			</slicing>
 			<min value="1"/>
 		</element>
-		<element id="Organization.identifier:HiGHmed">
+		<element id="Organization.identifier:DSF">
 			<path value="Organization.identifier"/>
-			<sliceName value="HiGHmed"/>
+			<sliceName value="DSF"/>
 			<min value="1"/>
 			<max value="1"/>
 		</element>
-		<element id="Organization.identifier:HiGHmed.system">
+		<element id="Organization.identifier:DSF.system">
 			<path value="Organization.identifier.system"/>
-			<fixedUri value="http://dsf.dev/fhir/CodeSystem/highmed-organization"/>
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/organization"/>
 		</element>
-		<element id="Organization.identifier:HiGHmed.value">
+		<element id="Organization.identifier:DSF.value">
 			<path value="Organization.identifier.value"/>
 			<binding>
 				<strength value="required"/>

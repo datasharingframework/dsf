@@ -6,7 +6,7 @@
     </tag>
   </meta>
   <url value="http://dsf.dev/fhir/StructureDefinition/test-task" />
-  <version value="0.5" />
+  <version value="1.0" />
   <name value="TestTask" />
   <status value="active" />
   <experimental value="false" />
@@ -20,7 +20,7 @@
   <differential>
     <element id="Task.instantiatesCanonical">
       <path value="Task.instantiatesCanonical" />
-      <fixedCanonical value="http://dsf.dev/bpe/Process/test|0.5" />
+      <fixedCanonical value="http://dsf.dev/bpe/Process/test|1.0" />
     </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
