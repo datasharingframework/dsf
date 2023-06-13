@@ -63,7 +63,7 @@ public class LibraryDaoTest extends AbstractResourceDaoTest<Library, LibraryDao>
 	@Override
 	public String getVersion()
 	{
-		return "0.5.0";
+		return "1.0.0";
 	}
 
 	@Override

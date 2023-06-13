@@ -15,7 +15,7 @@
 				<extension url="role">
 					<valueCoding>
 						<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
-						<code value="MeDIC" />
+						<code value="DIC" />
 					</valueCoding>
 				</extension>
 			</extension>

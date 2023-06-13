@@ -506,7 +506,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 		if (!StringUtils.isBlank(url))
 			researchStudy.addRelatedArtifact().setType(RelatedArtifactType.DOCUMENTATION).setUrl(url);
 
-		researchStudy.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-participating-medic")
+		researchStudy.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-participating-dic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
 						.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization")));
 		readAccessHelper.addLocal(researchStudy);

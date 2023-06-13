@@ -191,7 +191,7 @@
 				<code>
 					<coding>
 						<system value="http://dsf.dev/fhir/CodeSystem/organization-role"/>
-						<code value="MeDIC"/>
+						<code value="DIC"/>
 					</coding>
 				</code>
 				<code>

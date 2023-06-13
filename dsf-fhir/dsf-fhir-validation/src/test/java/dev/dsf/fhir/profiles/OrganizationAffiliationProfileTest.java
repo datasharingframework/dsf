@@ -23,10 +23,10 @@ public class OrganizationAffiliationProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-organization-affiliation-0.5.0.xml", "dsf-organization-0.5.0.xml",
-					"dsf-organization-parent-0.5.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml"),
-			Arrays.asList("dsf-read-access-tag-0.5.0.xml", "dsf-organization-role-0.6.0.xml"));
+			Arrays.asList("dsf-organization-affiliation-1.0.0.xml", "dsf-organization-1.0.0.xml",
+					"dsf-organization-parent-1.0.0.xml"),
+			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"),
+			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -40,7 +40,7 @@ public class OrganizationAffiliationProfileTest
 		a.getOrganization().setReference("Organization/" + UUID.randomUUID().toString());
 		a.getParticipatingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
 		a.getCodeFirstRep().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role")
-				.setCode("MeDIC");
+				.setCode("DIC");
 		a.getEndpointFirstRep().setReference("Endpoint/" + UUID.randomUUID().toString());
 
 		ValidationResult result = resourceValidator.validate(a);

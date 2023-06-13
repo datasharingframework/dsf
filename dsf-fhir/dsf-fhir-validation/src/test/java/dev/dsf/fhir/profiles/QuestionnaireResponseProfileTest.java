@@ -36,7 +36,7 @@ public class QuestionnaireResponseProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-questionnaire-response-0.9.0.xml"), Collections.emptyList(), Collections.emptyList());
+			Arrays.asList("dsf-questionnaire-response-1.0.0.xml"), Collections.emptyList(), Collections.emptyList());
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

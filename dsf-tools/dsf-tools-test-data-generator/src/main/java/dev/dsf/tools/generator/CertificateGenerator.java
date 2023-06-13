@@ -59,11 +59,11 @@ public class CertificateGenerator
 	private static final char[] CERT_PASSWORD = "password".toCharArray();
 
 	private static final String[] SERVER_COMMON_NAMES = { "localhost", "keycloak" };
-	private static final String[] CLIENT_COMMON_NAMES = { "ttp-client", "medic1-client", "medic2-client",
-			"medic3-client", "test-client", "Webbrowser Test User" };
+	private static final String[] CLIENT_COMMON_NAMES = { "ttp-client", "dic1-client", "dic2-client", "dic3-client",
+			"test-client", "Webbrowser Test User" };
 
 	private static final Map<String, List<String>> DNS_NAMES = Map.of("localhost",
-			Arrays.asList("localhost", "host.docker.internal", "fhir", "ttp", "medic1", "medic2", "medic3"));
+			Arrays.asList("localhost", "host.docker.internal", "fhir", "ttp", "dic1", "dic2", "dic3"));
 
 	private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
 
@@ -607,9 +607,9 @@ public class CertificateGenerator
 		writePrivateKeyEncrypted(fhirClientPrivateKeyFile, clientCertFiles.keyPair.getPrivate());
 	}
 
-	public void copyDockerTest3MedicTtpCertificates()
+	public void copyDockerTest3DicTtpCertificates()
 	{
-		Path baseFolder = Paths.get("../../dsf-docker-test-setup-3medic-ttp/secrets/");
+		Path baseFolder = Paths.get("../../dsf-docker-test-setup-3dic-ttp/secrets/");
 
 		final X509Certificate testCaCertificate = ca.getCertificate();
 
@@ -627,10 +627,9 @@ public class CertificateGenerator
 		logger.info("Copying localhost private-key file to {}", localhostCertificatePrivateKey);
 		writePrivateKeyNotEncrypted(localhostCertificatePrivateKey, localhost.keyPair.getPrivate());
 
-		List<String> commonNames = Arrays.asList("medic1", "medic2", "medic3", "ttp");
-		commonNames
-				.forEach(cn -> copyDockerTest3MedicTtpClientCertFiles("../../dsf-docker-test-setup-3medic-ttp/secrets/",
-						cn + "-client"));
+		List<String> commonNames = Arrays.asList("dic1", "dic2", "dic3", "ttp");
+		commonNames.forEach(cn -> copyDockerTest3DicTtpClientCertFiles("../../dsf-docker-test-setup-3dic-ttp/secrets/",
+				cn + "-client"));
 
 		Path fhirCacertFile = baseFolder.resolve("app_testca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
@@ -666,7 +665,7 @@ public class CertificateGenerator
 		}
 	}
 
-	private void copyDockerTest3MedicTtpClientCertFiles(String folder, String commonName)
+	private void copyDockerTest3DicTtpClientCertFiles(String folder, String commonName)
 	{
 		final CertificateFiles clientCertFiles = clientCertificateFilesByCommonName.get(commonName);
 

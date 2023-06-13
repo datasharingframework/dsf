@@ -58,7 +58,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
+				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(updatedBundle);
 	}
@@ -72,7 +72,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
+				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(id);
 	}
@@ -86,8 +86,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(allowList,
-				Map.of("identifier", Collections
-						.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
+				Map.of("identifier",
+						Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(outcome);
 	}
@@ -95,7 +95,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testDeleteTaskProfileViaBundleTestSupportedProfilesInConformanceStatement() throws Exception
 	{
-		final String taskProfileUrl = "http://dsf.dev/fhir/StructureDefinition/highmed-task-test";
+		final String taskProfileUrl = "http://dsf.dev/fhir/StructureDefinition/task-test";
 		final String taskProfileVersion = "1.2.3";
 
 		StructureDefinition newS = new StructureDefinition();
