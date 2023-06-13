@@ -33,9 +33,9 @@ public class ActivityDefinitionWithExtension
 		a.setStatus(PublicationStatus.DRAFT);
 		a.setExperimental(true);
 		a.setDate(new Date());
-		a.setPublisher("HiGHmed");
-		a.getContactFirstRep().setName("HiGHmed").getTelecomFirstRep().setSystem(ContactPointSystem.EMAIL)
-				.setValue("pmo@highmed.org");
+		a.setPublisher("DSF");
+		a.getContactFirstRep().setName("DSF").getTelecomFirstRep().setSystem(ContactPointSystem.EMAIL)
+				.setValue("pmo@dsf.dev");
 		a.setDescription(
 				"Process to send PING messages to remote Organizations and to receive corresponding PONG message");
 		a.setKind(ActivityDefinitionKind.TASK);

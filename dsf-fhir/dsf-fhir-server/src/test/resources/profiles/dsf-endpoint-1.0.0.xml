@@ -29,13 +29,13 @@
 		</element>
 		<element id="Endpoint.identifier:sliceIdentifier.system">
 			<path value="Endpoint.identifier.system"/>
-			<fixedUri value="http://dsf.dev/fhir/CodeSystem/highmed-endpoint"/>
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/endpoint"/>
 		</element>
 		<element id="Endpoint.identifier:sliceIdentifier.value">
 			<path value="Endpoint.identifier.value"/>
 			<binding>
 				<strength value="required"/>
-				<valueSet value="http://dsf.dev/fhir/ValueSet/highmed-endpoint"/>
+				<valueSet value="http://dsf.dev/fhir/ValueSet/endpoint"/>
 			</binding>
 		</element>
 		<element id="Endpoint.managingOrganization">
@@ -43,7 +43,7 @@
 			<min value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization"/>
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization|1.0.0"/>
 			</type>
 		</element>
 	</differential>

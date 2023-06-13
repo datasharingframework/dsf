@@ -6,7 +6,7 @@
 	</meta>
 	<identifier>
 		<system value="http://dsf.dev/fhir/CodeSystem/bundle"></system>
-		<value value="HiGHmed_white_list"></value>
+		<value value="allow_list"></value>
 	</identifier>
 	<type value="transaction"></type>
 	<entry>

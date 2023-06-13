@@ -9,7 +9,7 @@
     },
     "identifier": {
         "system": "http://dsf.dev/fhir/CodeSystem/update-allowlist",
-        "value": "highmed_allowlist"
+        "value": "allowlist"
     },
     "type": "transaction",
     "entry": [{

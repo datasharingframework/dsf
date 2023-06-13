@@ -25,12 +25,12 @@ public class CodeSystemTest
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://dsf.dev/fhir/CodeSystem/organization-role");
 		codeSystem.setVersion("0.1.0");
-		codeSystem.setName("HiGHmed_Organization_Type");
-		codeSystem.setTitle("HiGHmed Organization Type");
+		codeSystem.setName("DSF_Organization_Type");
+		codeSystem.setTitle("DSF Organization Type");
 		codeSystem.setStatus(PublicationStatus.ACTIVE);
 		codeSystem.setExperimental(false);
 		codeSystem.setDate(new Date());
-		codeSystem.setPublisher("HiGHmed");
+		codeSystem.setPublisher("DSF");
 		codeSystem.setCaseSensitive(true);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setVersionNeeded(false);

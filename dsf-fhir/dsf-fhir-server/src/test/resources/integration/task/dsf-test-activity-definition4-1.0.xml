@@ -11,18 +11,26 @@
 			<valueString value="test-message" />
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://dsf.dev/fhir/StructureDefinition/test-task|0.5" />
+			<valueCanonical value="http://dsf.dev/fhir/StructureDefinition/test-task|1.0" />
 		</extension>
 		<extension url="requester">
 			<valueCoding>
-				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization">
-					<valueIdentifier>
-						<system value="http://dsf.dev/sid/organization-identifier" />
-						<value value="External_Test_Organization" />
-					</valueIdentifier>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role">
+					<extension url="consortium">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="Parent_Organization" />
+						</valueIdentifier>
+					</extension>
+					<extension url="role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="DTS" />
+						</valueCoding>
+					</extension>
 				</extension>
 				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
-				<code value="REMOTE_ORGANIZATION" />
+				<code value="REMOTE_ROLE" />
 			</valueCoding>
 		</extension>
 		<extension url="recipient">
@@ -37,7 +45,7 @@
 					<extension url="role">
 						<valueCoding>
 							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
-							<code value="DIC" />
+							<code value="COS" />
 						</valueCoding>
 					</extension>
 				</extension>
@@ -47,7 +55,7 @@
 		</extension>
 	</extension>
 	<url value="http://dsf.dev/bpe/Process/test" />
-	<version value="0.5" />
+	<version value="1.0" />
 	<status value="active" />
 	<kind value="Task" />
 </ActivityDefinition>
