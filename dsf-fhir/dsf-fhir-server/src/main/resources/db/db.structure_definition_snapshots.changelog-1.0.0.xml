@@ -18,9 +18,6 @@
 			<column name="structure_definition_snapshot" type="${json}">
 				<constraints nullable="false" />
 			</column>
-			<column name="structure_definition_snapshot_info" type="${json}">
-				<constraints nullable="true" />
-			</column>
 		</createTable>
 
 		<addPrimaryKey tableName="structure_definition_snapshots" columnNames="structure_definition_snapshot_id, version" />
