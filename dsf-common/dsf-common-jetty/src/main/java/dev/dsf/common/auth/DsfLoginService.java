@@ -72,10 +72,12 @@ public class DsfLoginService implements LoginService
 			return null;
 
 		Principal principal = null;
-		if (username == null && credentials instanceof X509Certificate[])
+		if (credentials instanceof X509Certificate[])
 			principal = identityProvider.getIdentity((X509Certificate[]) credentials);
-		else if (username != null && credentials instanceof OpenIdCredentials)
+		else if (credentials instanceof OpenIdCredentials)
 			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl((OpenIdCredentials) credentials));
+		else if (credentials instanceof String)
+			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl((String) credentials));
 
 		if (principal == null)
 			return null;

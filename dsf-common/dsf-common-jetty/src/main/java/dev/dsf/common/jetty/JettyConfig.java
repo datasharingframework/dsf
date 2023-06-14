@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +26,6 @@ public interface JettyConfig
 	String PROPERTY_JETTY_HOST = "jetty.host";
 	String PROPERTY_JETTY_HOST_DEFAULT = "127.0.0.1";
 	String PROPERTY_JETTY_PORT = "jetty.port";
-	String PROPERTY_JETTY_BASE_URL = "jetty.base.url";
 	String PROPERTY_JETTY_CONTEXT_PATH = "jetty.context.path";
 	String PROPERTY_JETTY_STATUS_HOST = "jetty.status.host";
 	String PROPERTY_JETTY_STATUS_HOST_DEFAULT = "127.0.0.1";
@@ -40,6 +40,9 @@ public interface JettyConfig
 	String PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME = "jetty.auth.client.certificate.header.name";
 	String PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME_DEFAULT = "X-ClientCert";
 
+	String PROPERTY_JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW = "jetty.auth.oidc.authorization.code.flow";
+	String PROPERTY_JETTY_AUTH_OIDC_BEARER_TOKEN = "jetty.auth.oidc.bearer.token";
+
 	String PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL = "jetty.auth.oidc.provider.base.url";
 	String PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_CONNECT_TIMEOUT = "jetty.auth.oidc.provider.client.connectTimeout";
 	String PROPERTY_JETTY_AUTH_OIDC_PROVIDER_CLIENT_IDLE_TIMEOUT = "jetty.auth.oidc.provider.client.idleTimeout";
@@ -52,21 +55,35 @@ public interface JettyConfig
 	String PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID = "jetty.auth.oidc.client.id";
 	String PROPERTY_JETTY_AUTH_OIDC_CLIENT_SECRET = "jetty.auth.oidc.client.secret";
 
-	String PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT = "jetty.auth.oidc.sso.back.channel.logout";
-	String PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH = "jetty.auth.oidc.sso.back.channel.path";
-	String PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH_DEFAULT = "/sso-logout";
+	String PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT = "jetty.auth.oidc.back.channel.logout";
+	String PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH = "jetty.auth.oidc.back.channel.logout.path";
+	String PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH_DEFAULT = "/back-channel-logout";
 
 	String PROPERTY_JETTY_LOG4J_CONFIG = "jetty.log4j.config";
 	String PROPERTY_JETTY_LOG4J_CONFIG_DEFAULT = "conf/log4j2.xml";
 
+	static String propertyToEnvironmentVariableName(String propertyName)
+	{
+		return propertyName.toUpperCase(Locale.ENGLISH).replace('.', '_');
+	}
+
 	static Supplier<RuntimeException> propertyNotDefined(String propertyName)
 	{
-		return () -> new RuntimeException("Property " + propertyName + " not defined");
+		return () -> new RuntimeException("Property " + propertyName + " not defined (environment variable "
+				+ propertyToEnvironmentVariableName(propertyName) + ")");
+	}
+
+	static Supplier<RuntimeException> propertyNotDefinedTrue(String propertyName)
+	{
+		return () -> new RuntimeException("Property " + propertyName + " not defined as 'true' (environment variable "
+				+ propertyToEnvironmentVariableName(propertyName) + ")");
 	}
 
 	static Supplier<RuntimeException> propertiesNotDefined(String propertyName1, String propertyName2)
 	{
-		return () -> new RuntimeException("Property " + propertyName1 + " or " + propertyName2 + " not defined");
+		return () -> new RuntimeException("Property " + propertyName1 + " or " + propertyName2
+				+ " not defined (environment variables " + propertyToEnvironmentVariableName(propertyName1) + " or "
+				+ propertyToEnvironmentVariableName(propertyName2) + ")");
 	}
 
 	default Optional<String> getStatusHost()
@@ -109,6 +126,15 @@ public interface JettyConfig
 		return Optional.of(PROPERTY_JETTY_AUTH_CLIENT_CERTIFICATE_HEADER_NAME_DEFAULT);
 	}
 
+	default boolean getOidcAuthorizationCodeFlowEndabled()
+	{
+		return false;
+	}
+
+	default boolean getOidcBearerTokenEnabled()
+	{
+		return false;
+	}
 
 	default Optional<String> getOidcProviderBaseUrl()
 	{
@@ -174,19 +200,20 @@ public interface JettyConfig
 		return Optional.empty();
 	}
 
-	default boolean getOidcSsoBackChannelLogoutEnabled()
+	default boolean getOidcBackChannelLogoutEnabled()
 	{
 		return false;
 	}
 
-	default Optional<String> getOidcSsoBackChannelPath()
+	default Optional<String> getOidcBackChannelPath()
 	{
-		return Optional.of(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH_DEFAULT);
+		return Optional.of(PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH_DEFAULT);
 	}
 
 	default Optional<OidcConfig> getOidcConfig()
 	{
-		if (getOidcProviderBaseUrl().isEmpty() || getOidcClientId().isEmpty() || getOidcClientSecret().isEmpty())
+		if (!getOidcAuthorizationCodeFlowEndabled() && !getOidcBearerTokenEnabled()
+				&& !getOidcBackChannelLogoutEnabled())
 			return Optional.empty();
 
 		Duration clientIdleTimeout = getOidcProviderClientIdleTimeout()
@@ -196,12 +223,12 @@ public interface JettyConfig
 
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
 
-		return Optional
-				.of(new OidcConfig(getOidcProviderBaseUrl().get(), getOidcClientId().get(), getOidcClientSecret().get(),
-						getOidcSsoBackChannelLogoutEnabled(), getOidcSsoBackChannelPath().orElse(null),
-						clientIdleTimeout, clientConnectTimeout, getOidcProviderClientTrustStore().orElse(null),
-						getOidcProviderClientKeyStore(keyStorePassword).orElse(null), keyStorePassword,
-						getOidcClientProxy().orElse(null)));
+		return Optional.of(new OidcConfig(getOidcAuthorizationCodeFlowEndabled(), getOidcBearerTokenEnabled(),
+				getOidcProviderBaseUrl().get(), getOidcClientId().orElse(null), getOidcClientSecret().orElse(null),
+				getOidcBackChannelLogoutEnabled(), getOidcBackChannelPath().orElse(null), clientIdleTimeout,
+				clientConnectTimeout, getOidcProviderClientTrustStore().orElse(null),
+				getOidcProviderClientKeyStore(keyStorePassword).orElse(null), keyStorePassword,
+				getOidcClientProxy().orElse(null)));
 	}
 
 	default Optional<Path> getLog4JConfigPath()

@@ -155,11 +155,13 @@ services:
               - HISTORY
               - PERMANENT_DELETE
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic1
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: dic1-fhir
       JETTY_AUTH_OIDC_CLIENT_SECRET: mF0GEtjFoyWIM3in4VCwifGI3azb4DTn
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       dic1-fhir-frontend:
         ipv4_address: 172.20.0.3
@@ -219,11 +221,13 @@ services:
               - HISTORY
               - PERMANENT_DELETE
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic2
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: dic2-fhir
       JETTY_AUTH_OIDC_CLIENT_SECRET: P7XhxzBixIf9vPdprItkbOXZwtSX2JNt
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       dic2-fhir-frontend:
         ipv4_address: 172.20.0.11
@@ -283,11 +287,13 @@ services:
               - HISTORY
               - PERMANENT_DELETE
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic3
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: dic3-fhir
       JETTY_AUTH_OIDC_CLIENT_SECRET: 9i9WRfIedG7N3QoL5WuGM8hCoySblAhK
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       dic3-fhir-frontend:
         ipv4_address: 172.20.0.19
@@ -354,11 +360,13 @@ services:
               - HISTORY
               - PERMANENT_DELETE
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/ttp 
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: ttp-fhir
       JETTY_AUTH_OIDC_CLIENT_SECRET: SquCQFwjUFqIpU8xQj9pFg79fFxlu2Eu
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       ttp-fhir-frontend:
         ipv4_address: 172.20.0.27
@@ -419,11 +427,13 @@ services:
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic1
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: dic1-bpe
       JETTY_AUTH_OIDC_CLIENT_SECRET: ytqFCErw9GfhVUrrM8xc0Grbu4r7qGig
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       dic1-bpe-frontend:
         ipv4_address: 172.20.0.35
@@ -484,11 +494,13 @@ services:
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic2
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: dic2-bpe
       JETTY_AUTH_OIDC_CLIENT_SECRET: 5GtUIUfoXnQVcsRfd0Hg4EGv14iAknGq
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       dic2-bpe-frontend:
         ipv4_address: 172.20.0.43
@@ -549,11 +561,13 @@ services:
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic3
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: dic3-bpe
       JETTY_AUTH_OIDC_CLIENT_SECRET: VGTQD3WWH4uGUMz408NWNzcHF1MsfV0l
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       dic3-bpe-frontend:
         ipv4_address: 172.20.0.51
@@ -616,11 +630,13 @@ services:
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
       JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/ttp 
       JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
       JETTY_AUTH_OIDC_CLIENT_ID: ttp-bpe
       JETTY_AUTH_OIDC_CLIENT_SECRET: dTB3Etd2lZ6cn6mK6YbUMvk3A5FmiOoA
-      JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT: 'true'
     networks:
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.59

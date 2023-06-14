@@ -224,6 +224,18 @@ public final class PropertyJettyConfig extends AbstractJettyConfig implements Je
 	}
 
 	@Override
+	public boolean getOidcAuthorizationCodeFlowEndabled()
+	{
+		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW);
+	}
+
+	@Override
+	public boolean getOidcBearerTokenEnabled()
+	{
+		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_BEARER_TOKEN);
+	}
+
+	@Override
 	public Optional<String> getOidcProviderBaseUrl()
 	{
 		return getString(PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL);
@@ -285,16 +297,16 @@ public final class PropertyJettyConfig extends AbstractJettyConfig implements Je
 	}
 
 	@Override
-	public boolean getOidcSsoBackChannelLogoutEnabled()
+	public boolean getOidcBackChannelLogoutEnabled()
 	{
-		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT);
+		return getBoolean(PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT);
 	}
 
 	@Override
-	public Optional<String> getOidcSsoBackChannelPath()
+	public Optional<String> getOidcBackChannelPath()
 	{
-		return getString(PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH,
-				PROPERTY_JETTY_AUTH_OIDC_SSO_BACK_CHANNEL_LOGOUT_PATH_DEFAULT);
+		return getString(PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH,
+				PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH_DEFAULT);
 	}
 
 	@Override
