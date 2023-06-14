@@ -30,7 +30,6 @@
 			CREATE INDEX structure_definition_snapshot_id_index ON structure_definition_snapshots USING btree (structure_definition_snapshot_id);
 			CREATE INDEX structure_definition_snapshot_index ON structure_definition_snapshots USING gin (structure_definition_snapshot);
 			CREATE INDEX structure_definition_snapshot_id_version_index ON structure_definition_snapshots USING btree (structure_definition_snapshot_id, version);
-			CREATE INDEX structure_definition_snapshot_info_index ON structure_definition_snapshots USING gin (structure_definition_snapshot_info);
 		</sql>
 
 		<createView viewName="current_structure_definition_snapshots" replaceIfExists="true">
