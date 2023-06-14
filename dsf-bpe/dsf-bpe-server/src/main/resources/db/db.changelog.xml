@@ -4,29 +4,13 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<include file="db/db.create-db-users.changelog-0.1.0.xml" />
+	<include file="db/db.create-db-users.changelog-1.0.0.xml" />
 	
-	<include file="db/db.camunda_engine.changelog-0.1.0.xml" />
-	<include file="db/db.camunda_identity.changelog-0.1.0.xml" />
-
-	<include file="db/db.camunda_engine.changelog-0.2.0.xml" />
-
-	<include file="db/db.camunda_engine.changelog-0.3.0.xml" />
-
-	<include file="db/db.process_plugin_resources.changelog-0.4.0.xml" />
-	<include file="db/db.process_plugin_resources.changelog-0.4.0.1.xml" />
-	<include file="db/db.process_states.changelog-0.4.0.xml" />
-
-	<include file="db/db.camunda_engine.changelog-0.5.0.xml" />
-	<include file="db/db.camunda_engine.changelog-0.5.3.xml" />
-
-	<include file="db/db.camunda_engine.changelog-0.6.0.xml" />
-	
-	<include file="db/db.last_event.changelog-0.8.0.xml" />
-
-	<include file="db/db.camunda_engine.changelog-0.8.0.xml" />
-
 	<include file="db/db.camunda_engine.changelog-1.0.0.xml" />
+	<include file="db/db.camunda_identity.changelog-1.0.0.xml" />
+
 	<include file="db/db.process_plugin_resources.changelog-1.0.0.xml" />
-	
+	<include file="db/db.process_states.changelog-1.0.0.xml" />
+
+	<include file="db/db.last_event.changelog-1.0.0.xml" />
 </databaseChangeLog>
