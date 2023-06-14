@@ -37,7 +37,7 @@
 					<extension url="role">
 						<valueCoding>
 							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
-							<code value="MeDIC" />
+							<code value="DIC" />
 						</valueCoding>
 					</extension>
 				</extension>
@@ -47,7 +47,7 @@
 		</extension>
 	</extension>
 	<url value="http://dsf.dev/bpe/Process/test" />
-	<version value="0.5.0" />
+	<version value="1.0.0" />
 	<status value="active" />
 	<kind value="Task" />
 </ActivityDefinition>

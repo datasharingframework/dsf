@@ -53,32 +53,32 @@ public class EnvGenerator
 						WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint)));
 	}
 
-	public void generateAndWriteDockerTest3MedicTtpDockerFhirEnvFiles(
+	public void generateAndWriteDockerTest3DicTtpDockerFhirEnvFiles(
 			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
 		String webbroserTestUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"Webbrowser Test User").findFirst().get();
 
-		String bundleMedic1UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic1-client").findFirst().get();
+		String bundleDic1UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "dic1-client")
+				.findFirst().get();
 
-		String bundleMedic2UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic2-client").findFirst().get();
+		String bundleDic2UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "dic2-client")
+				.findFirst().get();
 
-		String bundleMedic3UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic3-client").findFirst().get();
+		String bundleDic3UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "dic3-client")
+				.findFirst().get();
 
 		String bundleTtpUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client")
 				.findFirst().get();
 
 		List<EnvEntry> entries = List.of(
-				new EnvEntry("MEDIC1_" + BUNDLE_USER_THUMBPRINT, bundleMedic1UserThumbprint,
-						WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint),
-				new EnvEntry("MEDIC2_" + BUNDLE_USER_THUMBPRINT, bundleMedic2UserThumbprint, null, null),
-				new EnvEntry("MEDIC3_" + BUNDLE_USER_THUMBPRINT, bundleMedic3UserThumbprint, null, null),
+				new EnvEntry("DIC1_" + BUNDLE_USER_THUMBPRINT, bundleDic1UserThumbprint, WEBBROSER_TEST_USER_THUMBPRINT,
+						webbroserTestUserThumbprint),
+				new EnvEntry("DIC2_" + BUNDLE_USER_THUMBPRINT, bundleDic2UserThumbprint, null, null),
+				new EnvEntry("DIC3_" + BUNDLE_USER_THUMBPRINT, bundleDic3UserThumbprint, null, null),
 				new EnvEntry("TTP_" + BUNDLE_USER_THUMBPRINT, bundleTtpUserThumbprint, null, null));
 
-		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/.env"), entries);
+		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3dic-ttp/.env"), entries);
 	}
 
 	private Stream<String> filterAndMapToThumbprint(Map<String, CertificateFiles> clientCertificateFilesByCommonName,

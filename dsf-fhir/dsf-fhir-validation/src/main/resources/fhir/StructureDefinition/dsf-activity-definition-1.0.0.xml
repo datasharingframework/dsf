@@ -1,0 +1,55 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://dsf.dev/fhir/StructureDefinition/activity-definition" />
+  <version value="1.0.0" />
+  <name value="ActivityDefinition" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2023-05-19" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="ActivityDefinition" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/ActivityDefinition" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="ActivityDefinition.extension">
+      <path value="ActivityDefinition.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="ActivityDefinition.extension:process-authorization">
+      <path value="ActivityDefinition.extension" />
+      <sliceName value="process-authorization" />
+      <min value="1" />
+      <max value="*" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization|1.0.0" />
+      </type>
+    </element>
+    <element id="ActivityDefinition.url">
+      <path value="ActivityDefinition.url" />
+      <min value="1" />
+    </element>
+    <element id="ActivityDefinition.version">
+      <path value="ActivityDefinition.version" />
+      <min value="1" />
+    </element>
+    <element id="ActivityDefinition.kind">
+      <path value="ActivityDefinition.kind" />
+      <min value="1" />
+      <fixedCode value="Task" />
+    </element>
+  </differential>
+</StructureDefinition>

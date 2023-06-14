@@ -92,7 +92,7 @@ public class DocumentReferenceIntegrationTest extends AbstractIntegrationTest
 		DocumentReference documentReference = createValidDocumentReference();
 		readAccessHelper.addLocal(documentReference);
 		readAccessHelper.addRole(documentReference, "Parent_Organization",
-				"http://dsf.dev/fhir/CodeSystem/organization-role", "MeDIC");
+				"http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
 
 		DocumentReference created = getWebserviceClient().create(documentReference);
 		assertNotNull(created);
