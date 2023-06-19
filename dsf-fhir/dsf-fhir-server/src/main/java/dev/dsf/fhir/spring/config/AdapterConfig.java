@@ -1,6 +1,6 @@
 package dev.dsf.fhir.spring.config;
 
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.adapter.HtmlFhirAdapter;
 import dev.dsf.fhir.adapter.QuestionnaireResponseHtmlGenerator;
+import dev.dsf.fhir.adapter.TaskHtmlGenerator;
 
 @Configuration
 public class AdapterConfig
@@ -18,7 +19,6 @@ public class AdapterConfig
 
 	@Autowired
 	private PropertiesConfig propertiesConfig;
-
 
 	@Bean
 	public FhirAdapter fhirAdapter()
@@ -30,6 +30,6 @@ public class AdapterConfig
 	public HtmlFhirAdapter htmlFhirAdapter()
 	{
 		return new HtmlFhirAdapter(fhirConfig.fhirContext(), () -> propertiesConfig.getServerBaseUrl(),
-				Collections.singleton(new QuestionnaireResponseHtmlGenerator()));
+				List.of(new QuestionnaireResponseHtmlGenerator(), new TaskHtmlGenerator()));
 	}
 }

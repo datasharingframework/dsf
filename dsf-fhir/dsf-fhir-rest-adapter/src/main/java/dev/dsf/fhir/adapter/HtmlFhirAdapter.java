@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -145,6 +146,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				<link rel="icon" type="image/png" href="${basePath}static/favicon_32x32.png" sizes="32x32">
 				<link rel="icon" type="image/png" href="${basePath}static/favicon_96x96.png" sizes="96x96">
 				<meta name="theme-color" content="#326F95">
+				<script src="${basePath}static/util.js"></script>
 				<script src="${basePath}static/prettify.js"></script>
 				<script src="${basePath}static/tabs.js"></script>
 				<script src="${basePath}static/bookmarks.js"></script>
@@ -158,7 +160,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				+ uriInfo.getPath() + "</title>\n");
 		out.write("</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled(type))
-				+ ");checkBookmarked();\">\n");
+				+ ");checkBookmarked();" + adaptFormInputs(resource) + "\">\n");
 
 		out.write("<div id=\"icons\">\n");
 
@@ -431,6 +433,14 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 	private boolean isHtmlEnabled(Class<?> resourceType)
 	{
 		return htmlGeneratorsByType.containsKey(resourceType);
+	}
+
+	private String adaptFormInputs(BaseResource resource)
+	{
+		if (resource instanceof Task task)
+			return Task.TaskStatus.DRAFT.equals(task.getStatus()) ? "adaptFormInputs();" : "";
+		else
+			return "";
 	}
 
 	private Optional<String> getResourceName(BaseResource resource, String uuid)

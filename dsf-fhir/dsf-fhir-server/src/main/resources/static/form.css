@@ -5,7 +5,7 @@ form {
     font-family: Epilogue, sans-serif;
 }
 
-fieldset#qr-form-fieldset {
+fieldset#form-fieldset {
     display: block;
     margin: 0;
     padding: 0;
@@ -49,9 +49,9 @@ fieldset#qr-form-fieldset {
     padding-top: 15px;
 }
 
-.info-color-completed {
-    background-color: #a3c585;
-    color: #4b6043;
+.info-color-draft-requested {
+   background-color: #deecf9;
+   color: #12395d;
 }
 
 .info-color-progress {
@@ -59,17 +59,39 @@ fieldset#qr-form-fieldset {
     color: #864401;
 }
 
+.info-color-completed {
+    background-color: #a3c585;
+    color: #4b6043;
+}
+
+.info-color-stopped-failed {
+   background-color: #9858b;
+   color: #761137;
+}
+
 .info-link {
     font-family: monospace;
     font-size: 130%;
+}
+
+.info-link-task {
+    color: #326F95;
+}
+
+.info-link-draft-requested {
+   color: #12395d;
+}
+
+.info-link-progress {
+    color: #864401;
 }
 
 .info-link-completed {
     color: #4b6043;
 }
 
-.info-link-progress {
-    color: #864401;
+.info-link-stopped-failed {
+   color: #761137;
 }
 
 .info-link:active {
@@ -77,12 +99,20 @@ fieldset#qr-form-fieldset {
     font-size: 130%;
 }
 
-.info-link-completed:active {
-    color: #4b6043;
+.info-link-draft-requested:active  {
+   color: #12395d;
 }
 
 .info-link-progress:active {
     color: #864401;
+}
+
+.info-link-completed:active {
+    color: #4b6043;
+}
+
+.info-link-stopped-failed:active {
+   color: #761137;
 }
 
 .info-icon {
@@ -92,12 +122,20 @@ fieldset#qr-form-fieldset {
     width: 35px;
 }
 
-.info-icon > path.info-path-completed {
-    fill: #4b6043;
+.info-icon > path.info-path-draft-requested {
+    fill: #12395d;
 }
 
 .info-icon > path.info-path-progress {
     fill: #864401;
+}
+
+.info-icon > path.info-path-completed {
+    fill: #4b6043;
+}
+
+.info-icon > path.info-path-stopped-failed {
+    fill: #761137;
 }
 
 .info-list {
@@ -119,8 +157,15 @@ fieldset#qr-form-fieldset {
 label {
     display: block;
     padding: 12px 12px 12px 0;
-    font-weight: 500;
+    font-weight: regular;
 }
+
+.row-label {
+    padding: 12px 12px 6px 6px;
+    font-weight: bold;
+    font-size: small;
+}
+
 
 label.radio {
     padding: 5px 12px 5px 0;
@@ -150,6 +195,10 @@ input[type=date], input[type=time], input[type=datetime-local], input[type=numbe
     box-sizing: border-box;
     resize: none;
     display: block;
+}
+
+.invisible {
+    display: none;
 }
 
 button.submit {

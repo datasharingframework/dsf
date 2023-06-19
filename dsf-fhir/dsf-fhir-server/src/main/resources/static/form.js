@@ -1,9 +1,49 @@
+function startProcess() {
+    const taskStringBefore = document.getElementById("json").innerText
+    const task = JSON.parse(taskStringBefore)
+
+    const errors = []
+    readTaskInputsFromForm(task, errors)
+
+    console.log(task)
+    console.log(errors)
+
+    if (errors.length === 0) {
+        const taskStringAfter = JSON.stringify(task)
+        createTask(taskStringAfter)
+    }
+}
+
+function readTaskInputsFromForm(task, errors) {
+    task.status = "requested"
+
+    // TODO set requester as practitioner-identifier if OIDC
+    //task.requester.type = "Practitioner"
+    //task.requester.identifier.value = ""
+    //task.requester.identifier.system = "http://dsf.dev/sid/practitioner-identifier"
+
+    task.authoredOn = new Date().toISOString()
+    task.meta.lastUpdated = null
+    task.meta.version = null
+
+    task.input.forEach((input) => {
+        if (input.hasOwnProperty("type")) {
+            const id = input.type.coding[0].code
+
+            if (id !== "message-name" && id !== "business-key" && id !== "correlation-key") {
+                const inputValueType = Object.keys(input).find((string) => string.startsWith("value"))
+                input[inputValueType] = readAndValidateValue(id, inputValueType, errors)
+            }
+        }
+    })
+}
+
 function completeQuestionnaireResponse() {
     const questionnaireResponseStringBefore = document.getElementById("json").innerText
     const questionnaireResponse = JSON.parse(questionnaireResponseStringBefore)
 
     const errors = []
-    readAnswersFromForm(questionnaireResponse, errors)
+    readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors)
 
     console.log(questionnaireResponse)
     console.log(errors)
@@ -14,16 +54,16 @@ function completeQuestionnaireResponse() {
     }
 }
 
-function readAnswersFromForm(questionnaireResponse, errors) {
-    questionnaireResponse.status = "completed";
+function readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors) {
+    questionnaireResponse.status = "completed"
 
     questionnaireResponse.item.forEach((item) => {
-        if (item.hasOwnProperty('answer')) {
+        if (item.hasOwnProperty("answer")) {
             const id = item.linkId
 
             if (id !== "business-key" && id !== "user-task-id") {
                 const answer = item.answer[0]
-                const answerType = Object.keys(answer)[0]
+                const answerType = Object.keys(answer).find((string) => string.startsWith("value"))
 
                 answer[answerType] = readAndValidateValue(id, answerType, errors)
             }
@@ -31,31 +71,37 @@ function readAnswersFromForm(questionnaireResponse, errors) {
     })
 }
 
-function readAndValidateValue(id, answerType, errors) {
+function readAndValidateValue(id, valueType, errors) {
     const value = document.getElementById(id).value
 
-    const rowElement = document.getElementById(id + "-answer-row");
-    const errorListElement = document.getElementById(id + "-error");
+    const rowElement = document.getElementById(id + "-input-row")
+    const errorListElement = document.getElementById(id + "-error")
     errorListElement.replaceChildren()
 
-    if (answerType === 'valueString') {
+    if (valueType === 'valueString') {
         return validateString(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueInteger') {
+    } else if (valueType === 'valueInteger') {
         return validateInteger(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueDecimal') {
+    } else if (valueType === 'valueDecimal') {
         return validateDecimal(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueDate') {
+    } else if (valueType === 'valueDate') {
         return validateDate(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueTime') {
+    } else if (valueType === 'valueTime') {
         return validateTime(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueDateTime') {
+    } else if (valueType === 'valueDateTime') {
         return validateDateTime(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueUri') {
+    } else if (valueType === 'valueUri') {
         return validateUrl(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueReference') {
+    } else if (valueType === 'valueReference') {
         return validateReference(rowElement, errorListElement, value, errors, id)
-    } else if (answerType === 'valueBoolean') {
+    } else if (valueType === 'valueBoolean') {
         return document.querySelector("input[name=" + id + "]:checked").value
+    } else if (valueType === "valueIdentifier") {
+        // TODO
+        return null
+    } else if (valueType === "valueCoding") {
+        // TODO
+        return null
     } else {
         return null
     }
@@ -137,7 +183,7 @@ function validateReference(rowElement, errorListElement, value, errors, id) {
     validateString(rowElement, errorListElement, value, errors, id)
 
     try {
-        new URL(value);
+        new URL(value)
         removeError(rowElement, errorListElement)
         return {reference: value}
     } catch (_) {
@@ -150,7 +196,7 @@ function validateUrl(rowElement, errorListElement, value, errors, id) {
     validateString(rowElement, errorListElement, value, errors, id)
 
     try {
-        new URL(value);
+        new URL(value)
         removeError(rowElement, errorListElement)
         return value
     } catch (_) {
@@ -164,56 +210,79 @@ function addError(rowElement, errorListElement, errors, id, message) {
 
     rowElement.classList.add("error")
 
-    const errorMessageElement = document.createElement("li");
-    errorMessageElement.appendChild(document.createTextNode(message));
+    const errorMessageElement = document.createElement("li")
+    errorMessageElement.appendChild(document.createTextNode(message))
 
-    errorListElement.appendChild(errorMessageElement);
-    errorListElement.classList.remove("error-list-not-visible");
-    errorListElement.classList.add("error-list-visible");
+    errorListElement.appendChild(errorMessageElement)
+    errorListElement.classList.remove("error-list-not-visible")
+    errorListElement.classList.add("error-list-visible")
 }
 
 function removeError(rowElement, errorListElement) {
-    rowElement.classList.remove("error");
+    rowElement.classList.remove("error")
 
-    errorListElement.classList.remove("error-list-visible");
-    errorListElement.classList.add("error-list-not-visible");
+    errorListElement.classList.remove("error-list-visible")
+    errorListElement.classList.add("error-list-not-visible")
     errorListElement.replaceChildren()
 }
 
 function updateQuestionnaireResponse(questionnaireResponse) {
     const fullUrl = window.location.origin + window.location.pathname
-    const url = fullUrl.slice(0, fullUrl.indexOf("/_history") + 1)
+    const requestUrl = fullUrl.slice(0, fullUrl.indexOf("/_history") + 1)
+    const resourceBaseUrlWithoutId = fullUrl.slice(0, fullUrl.indexOf("/QuestionnaireResponse") + "/QuestionnaireResponse".length)
 
     enableSpinner()
 
-    fetch(url, {
+    fetch(requestUrl, {
         method: "PUT",
         headers: {
-            'Content-type': 'application/json'
+            'Content-type': 'application/json',
+            'Accept': 'application/json'
         },
         body: questionnaireResponse
     }).then(response => {
-        console.log(response)
+        parseResponse(response, false, resourceBaseUrlWithoutId)
+    })
+}
 
-        if (response.ok) {
-            disableSpinner()
-            window.scrollTo(0, 0);
-            location.reload();
-        } else if (response.status >= 400 && response.status < 600) {
-	        response.text().then((responseText) => {
-	            document.open();
-        	    document.write(responseText);
-        	    document.close();
-        	});
-	    } else {
-            const status = response.status
-            const statusText = response.statusText === null ? " - " + response.statusText : ""
+function createTask(task) {
+    const fullUrl = window.location.origin + window.location.pathname
+    const requestUrl = fullUrl.slice(0, fullUrl.indexOf("/Task") + "/Task".length)
 
-            response.text().then((responseText) => {
-                const alertText = "Status: " + status + statusText + "\n\n" + responseText.replace(/<!--.*?-->/sg, "")
-                window.alert(alertText);
+    enableSpinner()
+
+    fetch(requestUrl, {
+        method: "POST",
+        headers: {
+            'Content-type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: task
+    }).then(response => {
+        parseResponse(response, true, requestUrl)
+    })
+}
+
+function parseResponse(response, redirect, resourceBaseUrlWithoutId) {
+    console.log(response)
+
+    const status = response.status
+    const statusOk = response.ok
+    const statusText = response.statusText === null ? " - " + response.statusText : ""
+
+    response.text().then((text) => {
+        console.log(text)
+
+        if (statusOk) {
+            const resource = JSON.parse(text)
+            setTimeout(() => {
                 disableSpinner()
-            })
+                window.location.href = resourceBaseUrlWithoutId + "/" + resource.id
+            }, 1000)
+        } else {
+            disableSpinner()
+            const alertText = "Status: " + status + statusText + "\n\n" + text
+            window.alert(alertText)
         }
     })
 }
@@ -228,4 +297,10 @@ function disableSpinner() {
     const spinner = document.getElementById("spinner")
     spinner.classList.remove("spinner-enabled")
     spinner.classList.add("spinner-disabled")
+}
+
+function adaptFormInputs() {
+    // TODO set requester as practitioner-identifier if OIDC
+    // TODO load cardinalities and add inputs
+    console.log("Cardinalities to be loaded..")
 }
