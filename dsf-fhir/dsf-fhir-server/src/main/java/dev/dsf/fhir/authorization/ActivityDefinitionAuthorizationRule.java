@@ -68,7 +68,7 @@ public class ActivityDefinitionAuthorizationRule
 		List<String> errors = new ArrayList<String>();
 
 		if (!processAuthorizationHelper.isValid(newResource, taskProfile -> true, organizationIdentifier -> true,
-				consortiumMemberRole -> true))
+				parentOrganizationRole -> true))
 		{
 			errors.add("ActivityDefinition.extension with url "
 					+ ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION

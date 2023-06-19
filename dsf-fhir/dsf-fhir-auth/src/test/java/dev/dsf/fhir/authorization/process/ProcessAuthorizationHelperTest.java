@@ -83,7 +83,7 @@ public class ProcessAuthorizationHelperTest
 	}
 
 	@Test
-	public void testActivityDefinitionRequesterRemoteOrganizationRecipientLocalConsortiumRoleValidViaFile()
+	public void testActivityDefinitionRequesterRemoteOrganizationRecipientLocalParentOrganizationRoleValidViaFile()
 			throws Exception
 	{
 		try (InputStream in = Files.newInputStream(Paths.get(
@@ -130,7 +130,7 @@ public class ProcessAuthorizationHelperTest
 	}
 
 	@Test
-	public void testGetRequesterRemoteOrganizationRecipientLocalConsortiumRoleViaFile() throws Exception
+	public void testGetRequesterRemoteOrganizationRecipientLocalParentOrganizationRoleViaFile() throws Exception
 	{
 		try (InputStream in = Files.newInputStream(Paths.get(
 				"src/test/resources/authorization/process-authorization/req_remote_organization_rec_local_role.xml")))
@@ -164,7 +164,7 @@ public class ProcessAuthorizationHelperTest
 			OrganizationAffiliation affiliation = new OrganizationAffiliation();
 			affiliation.setActive(true);
 			affiliation.getOrganization().getIdentifier()
-					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("consortium.org");
+					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.org");
 			affiliation.getParticipatingOrganization().getIdentifier()
 					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 			affiliation.getCodeFirstRep().getCodingFirstRep()
@@ -507,18 +507,18 @@ public class ProcessAuthorizationHelperTest
 	{
 		String messageName = "messageName";
 		String taskProfile = "http://foo.com/fhir/StructureDefinition/bar";
-		String consortium1 = "consortium1.org";
+		String parentOrganization1 = "parent1.org";
 		String role1System = "http://baz.com/fhir/CodeSystem/cs1";
 		String role1Code = "code1";
-		String consortium2 = "consortium2.org";
+		String parentOrganization2 = "parent2.org";
 		String role2System = "http://baz.com/fhir/CodeSystem/cs2";
 		String role2Code = "code2";
-		String consortium3 = "consortium3.org";
+		String parentOrganization3 = "parent3.org";
 		String role3System = "http://baz.com/fhir/CodeSystem/cs3";
 		String role3Code = "code3";
-		Requester requesterLocalRole = Requester.localRole(consortium1, role1System, role1Code);
-		Requester requesterRemoteRole = Requester.remoteRole(consortium2, role2System, role2Code);
-		Recipient recipientLocalRole = Recipient.localRole(consortium3, role3System, role3Code);
+		Requester requesterLocalRole = Requester.localRole(parentOrganization1, role1System, role1Code);
+		Requester requesterRemoteRole = Requester.remoteRole(parentOrganization2, role2System, role2Code);
+		Recipient recipientLocalRole = Recipient.localRole(parentOrganization3, role3System, role3Code);
 
 		var ad = createActivityDefinition();
 
@@ -577,7 +577,8 @@ public class ProcessAuthorizationHelperTest
 		Extension reqCode1Ext = reqCode1.getExtension().get(0);
 		assertNotNull(reqCode1Ext);
 		assertTrue(reqCode1Ext.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE, reqCode1Ext.getUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE,
+				reqCode1Ext.getUrl());
 		assertTrue(reqCode1Ext.hasExtension());
 		assertFalse(reqCode1Ext.hasValue());
 		assertNotNull(reqCode1Ext.getExtension());
@@ -585,11 +586,12 @@ public class ProcessAuthorizationHelperTest
 		List<Extension> reqCode1ExtExts = reqCode1Ext.getExtension();
 		Extension reqCode1ExtC = reqCode1ExtExts.get(0);
 		assertTrue(reqCode1ExtC.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION,
 				reqCode1ExtC.getUrl());
 		Extension reqCode1ExtR = reqCode1ExtExts.get(1);
 		assertTrue(reqCode1ExtR.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE,
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ROLE,
 				reqCode1ExtR.getUrl());
 		assertTrue(reqCode1ExtC.hasValue());
 		assertTrue(reqCode1ExtC.getValue() instanceof Identifier);
@@ -597,7 +599,7 @@ public class ProcessAuthorizationHelperTest
 		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
 				((Identifier) reqCode1ExtC.getValue()).getSystem());
 		assertTrue(((Identifier) reqCode1ExtC.getValue()).hasValue());
-		assertEquals(consortium1, ((Identifier) reqCode1ExtC.getValue()).getValue());
+		assertEquals(parentOrganization1, ((Identifier) reqCode1ExtC.getValue()).getValue());
 		assertTrue(reqCode1ExtR.hasValue());
 		assertTrue(reqCode1ExtR.getValue() instanceof Coding);
 		assertTrue(((Coding) reqCode1ExtR.getValue()).hasSystem());
@@ -626,7 +628,8 @@ public class ProcessAuthorizationHelperTest
 		Extension reqCode2Ext = reqCode2.getExtension().get(0);
 		assertNotNull(reqCode2Ext);
 		assertTrue(reqCode2Ext.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE, reqCode2Ext.getUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE,
+				reqCode2Ext.getUrl());
 		assertTrue(reqCode2Ext.hasExtension());
 		assertFalse(reqCode2Ext.hasValue());
 		assertNotNull(reqCode2Ext.getExtension());
@@ -634,11 +637,12 @@ public class ProcessAuthorizationHelperTest
 		List<Extension> reqCode2ExtExts = reqCode2Ext.getExtension();
 		Extension reqCode2ExtC = reqCode2ExtExts.get(0);
 		assertTrue(reqCode2ExtC.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION,
 				reqCode2ExtC.getUrl());
 		Extension reqCode2ExtR = reqCode2ExtExts.get(1);
 		assertTrue(reqCode2ExtR.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE,
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ROLE,
 				reqCode2ExtR.getUrl());
 		assertTrue(reqCode2ExtC.hasValue());
 		assertTrue(reqCode2ExtC.getValue() instanceof Identifier);
@@ -646,7 +650,7 @@ public class ProcessAuthorizationHelperTest
 		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
 				((Identifier) reqCode2ExtC.getValue()).getSystem());
 		assertTrue(((Identifier) reqCode2ExtC.getValue()).hasValue());
-		assertEquals(consortium2, ((Identifier) reqCode2ExtC.getValue()).getValue());
+		assertEquals(parentOrganization2, ((Identifier) reqCode2ExtC.getValue()).getValue());
 		assertTrue(reqCode2ExtR.hasValue());
 		assertTrue(reqCode2ExtR.getValue() instanceof Coding);
 		assertTrue(((Coding) reqCode2ExtR.getValue()).hasSystem());
@@ -675,7 +679,8 @@ public class ProcessAuthorizationHelperTest
 		Extension recCodeExt = recCode.getExtension().get(0);
 		assertNotNull(recCodeExt);
 		assertTrue(recCodeExt.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE, recCodeExt.getUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE,
+				recCodeExt.getUrl());
 		assertTrue(recCodeExt.hasExtension());
 		assertFalse(recCodeExt.hasValue());
 
@@ -684,11 +689,12 @@ public class ProcessAuthorizationHelperTest
 		List<Extension> recCodeExtExts = recCodeExt.getExtension();
 		Extension recCodeExtC = recCodeExtExts.get(0);
 		assertTrue(recCodeExtC.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION,
 				recCodeExtC.getUrl());
 		Extension recCodeExtR = recCodeExtExts.get(1);
 		assertTrue(recCodeExtR.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE,
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ROLE,
 				recCodeExtR.getUrl());
 		assertTrue(recCodeExtC.hasValue());
 		assertTrue(recCodeExtC.getValue() instanceof Identifier);
@@ -696,7 +702,7 @@ public class ProcessAuthorizationHelperTest
 		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
 				((Identifier) recCodeExtC.getValue()).getSystem());
 		assertTrue(((Identifier) recCodeExtC.getValue()).hasValue());
-		assertEquals(consortium3, ((Identifier) recCodeExtC.getValue()).getValue());
+		assertEquals(parentOrganization3, ((Identifier) recCodeExtC.getValue()).getValue());
 		assertTrue(recCodeExtR.hasValue());
 		assertTrue(recCodeExtR.getValue() instanceof Coding);
 		assertTrue(((Coding) recCodeExtR.getValue()).hasSystem());

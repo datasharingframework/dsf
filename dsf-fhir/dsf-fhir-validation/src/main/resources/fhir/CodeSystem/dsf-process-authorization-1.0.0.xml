@@ -32,12 +32,12 @@
 	<concept>
 		<code value="LOCAL_ROLE"/>
 		<display value="LOCAL_ROLE"/>
-		<definition value="Process authorization for a local consortium member with role specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
+		<definition value="Process authorization for a local parent organization member with a role specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
 	</concept>
 	<concept>
 		<code value="REMOTE_ROLE"/>
 		<display value="REMOTE_ROLE"/>
-		<definition value="Process authorization for a remote consortium member with role specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
+		<definition value="Process authorization for a remote parent organization member with a role specified via extension http://dsf.dev/fhir/StructureDefinition/extension"/>
 	</concept>
 	<concept>
 		<code value="LOCAL_ALL"/>

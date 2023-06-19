@@ -807,9 +807,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Coding recipient = (Coding) ad3
 				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization")
 				.getExtensionByUrl("recipient").getValue();
-		Coding role = (Coding) recipient
-				.getExtensionByUrl(
-						"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role")
+		Coding role = (Coding) recipient.getExtensionByUrl(
+				"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role")
 				.getExtensionByUrl("role").getValue();
 		role.setCode("TTP");
 

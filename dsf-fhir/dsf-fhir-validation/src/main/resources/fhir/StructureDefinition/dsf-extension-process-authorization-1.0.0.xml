@@ -85,10 +85,10 @@
       <type>
         <code value="Coding" />
         <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-all|1.0.0" />
-        <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-consortium-role|1.0.0" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role|1.0.0" />
         <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization|1.0.0" />
         <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-all|1.0.0" />
-        <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-consortium-role|1.0.0" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-parent-organization-role|1.0.0" />
         <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-organization|1.0.0" />
       </type>
       <binding>
@@ -111,7 +111,7 @@
       <type>
         <code value="Coding" />
         <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-all|1.0.0" />
-        <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-consortium-role|1.0.0" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role|1.0.0" />
         <profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization|1.0.0" />
       </type>
       <binding>

@@ -27,18 +27,18 @@ import dev.dsf.fhir.validation.ValidationSupportRule;
 
 public class ActivityDefinitionProfileTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(EndpointProfileTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProfileTest.class);
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("dsf-activity-definition-1.0.0.xml", "dsf-extension-process-authorization-1.0.0.xml",
-					"dsf-extension-process-authorization-consortium-role-1.0.0.xml",
+					"dsf-extension-process-authorization-parent-organization-role-1.0.0.xml",
 					"dsf-extension-process-authorization-organization-1.0.0.xml",
 					"dsf-coding-process-authorization-local-all-1.0.0.xml",
-					"dsf-coding-process-authorization-local-consortium-role-1.0.0.xml",
+					"dsf-coding-process-authorization-local-parent-organization-role-1.0.0.xml",
 					"dsf-coding-process-authorization-local-organization-1.0.0.xml",
 					"dsf-coding-process-authorization-remote-all-1.0.0.xml",
-					"dsf-coding-process-authorization-remote-consortium-role-1.0.0.xml",
+					"dsf-coding-process-authorization-remote-parent-organization-role-1.0.0.xml",
 					"dsf-coding-process-authorization-remote-organization-1.0.0.xml"),
 			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml",
 					"dsf-process-authorization-1.0.0.xml"),
@@ -57,6 +57,7 @@ public class ActivityDefinitionProfileTest
 		ad.setVersion("1.0.0");
 		ad.setStatus(PublicationStatus.ACTIVE);
 		ad.setKind(ActivityDefinitionKind.TASK);
+		ad.setName("TestProcess");
 
 		return ad;
 	}
@@ -117,10 +118,10 @@ public class ActivityDefinitionProfileTest
 
 		Coding recipientCoding = new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ROLE", null);
 		Extension consortiumRole = recipientCoding.addExtension();
-		consortiumRole
-				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role");
-		consortiumRole.addExtension("consortium",
-				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.org"));
+		consortiumRole.setUrl(
+				"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role");
+		consortiumRole.addExtension("parent-organization",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("parent.org"));
 		consortiumRole.addExtension("role",
 				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
@@ -155,10 +156,10 @@ public class ActivityDefinitionProfileTest
 		Coding recipientCoding = new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "REMOTE_ROLE",
 				null);
 		Extension consortiumRole = recipientCoding.addExtension();
-		consortiumRole
-				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role");
-		consortiumRole.addExtension("consortium",
-				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.org"));
+		consortiumRole.setUrl(
+				"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role");
+		consortiumRole.addExtension("parent-organization",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("parent.org"));
 		consortiumRole.addExtension("role",
 				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
@@ -170,6 +171,6 @@ public class ActivityDefinitionProfileTest
 		logMessages(result);
 
 		assertFalse(result.isSuccessful());
-		assertEquals(25, result.getMessages().size());
+		assertEquals(24, result.getMessages().size());
 	}
 }

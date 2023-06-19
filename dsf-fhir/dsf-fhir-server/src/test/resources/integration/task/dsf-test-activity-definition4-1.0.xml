@@ -15,8 +15,8 @@
 		</extension>
 		<extension url="requester">
 			<valueCoding>
-				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role">
-					<extension url="consortium">
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
 						<valueIdentifier>
 							<system value="http://dsf.dev/sid/organization-identifier" />
 							<value value="Parent_Organization" />
@@ -35,8 +35,8 @@
 		</extension>
 		<extension url="recipient">
 			<valueCoding>
-				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role">
-					<extension url="consortium">
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
 						<valueIdentifier>
 							<system value="http://dsf.dev/sid/organization-identifier" />
 							<value value="Parent_Organization" />

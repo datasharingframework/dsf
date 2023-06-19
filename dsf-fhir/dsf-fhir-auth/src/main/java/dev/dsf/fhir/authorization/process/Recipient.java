@@ -20,9 +20,9 @@ public interface Recipient extends WithAuthorization
 		return new Organization(true, organizationIdentifier);
 	}
 
-	static Recipient localRole(String consortiumIdentifier, String roleSystem, String roleCode)
+	static Recipient localRole(String parentOrganizationIdentifier, String roleSystem, String roleCode)
 	{
-		return new Role(true, consortiumIdentifier, roleSystem, roleCode);
+		return new Role(true, parentOrganizationIdentifier, roleSystem, roleCode);
 	}
 
 	boolean recipientMatches(Extension recipientExtension);

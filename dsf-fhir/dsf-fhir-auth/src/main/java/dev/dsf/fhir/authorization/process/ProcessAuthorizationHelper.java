@@ -30,9 +30,9 @@ public interface ProcessAuthorizationHelper
 
 	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization";
 
-	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role";
-	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM = "consortium";
-	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE = "role";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION = "parent-organization";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ROLE = "role";
 
 	ActivityDefinition add(ActivityDefinition activityDefinition, String messageName, String taskProfile,
 			Requester requester, Recipient recipient);

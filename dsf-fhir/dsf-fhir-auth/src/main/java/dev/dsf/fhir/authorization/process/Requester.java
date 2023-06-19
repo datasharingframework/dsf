@@ -40,19 +40,20 @@ public interface Requester extends WithAuthorization
 		return new Organization(localIdentity, organizationIdentifier);
 	}
 
-	static Requester localRole(String consortiumIdentifier, String roleSystem, String roleCode)
+	static Requester localRole(String parentOrganizationIdentifier, String roleSystem, String roleCode)
 	{
-		return role(true, consortiumIdentifier, roleSystem, roleCode);
+		return role(true, parentOrganizationIdentifier, roleSystem, roleCode);
 	}
 
-	static Requester remoteRole(String consortiumIdentifier, String roleSystem, String roleCode)
+	static Requester remoteRole(String parentOrganizationIdentifier, String roleSystem, String roleCode)
 	{
-		return role(false, consortiumIdentifier, roleSystem, roleCode);
+		return role(false, parentOrganizationIdentifier, roleSystem, roleCode);
 	}
 
-	static Requester role(boolean localIdentity, String consortiumIdentifier, String roleSystem, String roleCode)
+	static Requester role(boolean localIdentity, String parentOrganizationIdentifier, String roleSystem,
+			String roleCode)
 	{
-		return new Role(localIdentity, consortiumIdentifier, roleSystem, roleCode);
+		return new Role(localIdentity, parentOrganizationIdentifier, roleSystem, roleCode);
 	}
 
 	boolean requesterMatches(Extension requesterExtension);

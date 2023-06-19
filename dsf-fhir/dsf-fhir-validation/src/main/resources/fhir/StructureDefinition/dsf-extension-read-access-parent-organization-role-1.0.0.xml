@@ -5,9 +5,9 @@
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role" />
   <version value="1.0.0" />
-  <name value="ProcessAuthorizationConsortiumRole" />
+  <name value="ReadAccessParentOrganizationRole" />
   <status value="active" />
   <experimental value="false" />
   <date value="2023-05-19" />
@@ -22,11 +22,6 @@
   <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
   <derivation value="constraint" />
   <differential>
-    <element id="Extension">
-      <path value="Extension" />
-      <min value="1" />
-      <max value="1" />
-    </element>
     <element id="Extension.extension">
       <path value="Extension.extension" />
       <slicing>
@@ -37,29 +32,29 @@
         <rules value="open" />
       </slicing>
     </element>
-    <element id="Extension.extension:consortium">
+    <element id="Extension.extension:parentOrganization">
       <path value="Extension.extension" />
-      <sliceName value="consortium" />
+      <sliceName value="parentOrganization" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Extension.extension:consortium.url">
+    <element id="Extension.extension:parentOrganization.url">
       <path value="Extension.extension.url" />
-      <fixedUri value="consortium" />
+      <fixedUri value="parent-organization" />
     </element>
-    <element id="Extension.extension:consortium.value[x]">
+    <element id="Extension.extension:parentOrganization.value[x]">
       <path value="Extension.extension.value[x]" />
       <min value="1" />
       <type>
         <code value="Identifier" />
       </type>
     </element>
-    <element id="Extension.extension:consortium.value[x].system">
+    <element id="Extension.extension:parentOrganization.value[x].system">
       <path value="Extension.extension.value[x].system" />
       <min value="1" />
       <fixedUri value="http://dsf.dev/sid/organization-identifier" />
     </element>
-    <element id="Extension.extension:consortium.value[x].value">
+    <element id="Extension.extension:parentOrganization.value[x].value">
       <path value="Extension.extension.value[x].value" />
       <min value="1" />
     </element>
@@ -90,11 +85,11 @@
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
+      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />
-    <max value="0" />
+      <max value="0" />
     </element>
   </differential>
 </StructureDefinition>

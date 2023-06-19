@@ -13,13 +13,15 @@ import dev.dsf.common.auth.conf.Identity;
 
 public class RoleTest
 {
-	private static final String CONSORTIUM_IDENTIFIER = "consortium.org";
+	private static final String PARENT_ORGANIZATION_IDENTIFIER = "parent.org";
 	private static final String MEMBER_IDENTIFIER = "member.com";
 	private static final String MEMBER_ROLE_SYSTEM = "roleSystem";
 	private static final String MEMBER_ROLE_CODE = "roleCode";
 
-	private static final Role local = new Role(true, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
-	private static final Role remote = new Role(false, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
+	private static final Role local = new Role(true, PARENT_ORGANIZATION_IDENTIFIER, MEMBER_ROLE_SYSTEM,
+			MEMBER_ROLE_CODE);
+	private static final Role remote = new Role(false, PARENT_ORGANIZATION_IDENTIFIER, MEMBER_ROLE_SYSTEM,
+			MEMBER_ROLE_CODE);
 
 	private static org.hl7.fhir.r4.model.Organization createFhirOrganization(String identifierValue)
 	{
@@ -52,13 +54,14 @@ public class RoleTest
 	private static final Identity REMOTE_ORG_BAD_IDENTIFIER_SYSTEM = TestIdentity
 			.remote(createFhirOrganization(MEMBER_IDENTIFIER, "bad.system"));
 
-	private static OrganizationAffiliation createOrganizationAffiliation(String consortiumIdentifier,
+	private static OrganizationAffiliation createOrganizationAffiliation(String parentOrganizationIdentifier,
 			String memberIdentifier, String memberRoleSystem, String memberRoleCode)
 	{
 		var a = new OrganizationAffiliation();
 		a.setActive(true);
 		a.getOrganization().setType("Organization").getIdentifier()
-				.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue(consortiumIdentifier);
+				.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue(parentOrganizationIdentifier);
 		a.getParticipatingOrganization().setType("Organization").getIdentifier()
 				.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue(memberIdentifier);
 		a.getCodeFirstRep().getCodingFirstRep().setSystem(memberRoleSystem).setCode(memberRoleCode);
@@ -66,8 +69,8 @@ public class RoleTest
 		return a;
 	}
 
-	private static final OrganizationAffiliation OK_AFFILIATION = createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-			MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
+	private static final OrganizationAffiliation OK_AFFILIATION = createOrganizationAffiliation(
+			PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
 
 	private static Stream<OrganizationAffiliation> okAffiliation()
 	{
@@ -131,8 +134,8 @@ public class RoleTest
 	@Test
 	public void testLocalRoleRecipientNotOkBadMemberRoleCode() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
 		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
@@ -140,8 +143,8 @@ public class RoleTest
 	@Test
 	public void testLocalRoleRecipientNotOkBadMemberRoleSystem() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
 		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
@@ -205,8 +208,8 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRecipientNotOkBadMemberRoleCode() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
 		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
@@ -214,8 +217,8 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRecipientNotOkMemberRoleSystem() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
 		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
@@ -279,8 +282,8 @@ public class RoleTest
 	@Test
 	public void testLocalRoleRequesterNotOkBadMemberRoleCode() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
 		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
@@ -288,8 +291,8 @@ public class RoleTest
 	@Test
 	public void testLocalRoleRequesterNotOkMemberRoleSystem() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
 		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
@@ -353,8 +356,8 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRequesterNotOkBadMemberRoleCode() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
 		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
@@ -362,8 +365,8 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRequesterNotOkMemberRoleSystem() throws Exception
 	{
-		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
-				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
+		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(
+				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
 		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}

@@ -5,9 +5,9 @@
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-consortium-role" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role" />
   <version value="1.0.0" />
-  <name value="ProcessAuthorizationRemoteConsortiumRole" />
+  <name value="ProcessAuthorizationLocalParentOrganizationRole" />
   <status value="active" />
   <experimental value="false" />
   <date value="2023-05-19" />
@@ -35,7 +35,7 @@
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role|1.0.0" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role|1.0.0" />
       </type>
     </element>
     <element id="Coding.system">
@@ -46,7 +46,7 @@
     <element id="Coding.code">
       <path value="Coding.code" />
       <min value="1" />
-      <fixedCode value="REMOTE_ROLE" />
+      <fixedCode value="LOCAL_ROLE" />
     </element>
   </differential>
 </StructureDefinition>

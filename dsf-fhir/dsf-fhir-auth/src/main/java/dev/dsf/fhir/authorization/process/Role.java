@@ -20,15 +20,15 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 public class Role implements Recipient, Requester
 {
 	private final boolean localIdentity;
-	private final String consortiumIdentifier;
+	private final String parentOrganizationIdentifier;
 	private final String roleSystem;
 	private final String roleCode;
 
-	public Role(boolean localIdentity, String consortiumIdentifier, String roleSystem, String roleCode)
+	public Role(boolean localIdentity, String parentOrganizationIdentifier, String roleSystem, String roleCode)
 	{
-		Objects.requireNonNull(consortiumIdentifier, "consortiumIdentifier");
-		if (consortiumIdentifier.isBlank())
-			throw new IllegalArgumentException("consortiumIdentifier blank");
+		Objects.requireNonNull(parentOrganizationIdentifier, "parentOrganizationIdentifier");
+		if (parentOrganizationIdentifier.isBlank())
+			throw new IllegalArgumentException("parentOrganizationIdentifier blank");
 		Objects.requireNonNull(roleSystem, "roleSystem");
 		if (roleSystem.isBlank())
 			throw new IllegalArgumentException("roleSystem blank");
@@ -37,7 +37,7 @@ public class Role implements Recipient, Requester
 			throw new IllegalArgumentException("roleCode blank");
 
 		this.localIdentity = localIdentity;
-		this.consortiumIdentifier = consortiumIdentifier;
+		this.parentOrganizationIdentifier = parentOrganizationIdentifier;
 		this.roleSystem = roleSystem;
 		this.roleCode = roleCode;
 	}
@@ -58,10 +58,10 @@ public class Role implements Recipient, Requester
 	{
 		return identity != null && identity.getOrganization() != null && identity.getOrganization().getActive()
 				&& identity.isLocalIdentity() == localIdentity && affiliations != null
-				&& hasConsortiumMemberRole(identity.getOrganization(), affiliations);
+				&& hasParentOrganizationMemberRole(identity.getOrganization(), affiliations);
 	}
 
-	private boolean hasConsortiumMemberRole(org.hl7.fhir.r4.model.Organization recipientOrganization,
+	private boolean hasParentOrganizationMemberRole(org.hl7.fhir.r4.model.Organization recipientOrganization,
 			Stream<OrganizationAffiliation> affiliations)
 	{
 		return affiliations
@@ -69,13 +69,13 @@ public class Role implements Recipient, Requester
 				// check affiliation active
 				.filter(OrganizationAffiliation::getActive)
 
-				// check consortium identifier
+				// check parent-organization identifier
 				.filter(OrganizationAffiliation::hasOrganization).filter(a -> a.getOrganization().hasIdentifier())
 				.filter(a -> a.getOrganization().getIdentifier().hasSystem())
 				.filter(a -> a.getOrganization().getIdentifier().hasValue())
 				.filter(a -> ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM
 						.equals(a.getOrganization().getIdentifier().getSystem()))
-				.filter(a -> consortiumIdentifier.equals(a.getOrganization().getIdentifier().getValue()))
+				.filter(a -> parentOrganizationIdentifier.equals(a.getOrganization().getIdentifier().getValue()))
 
 				// check member identifier
 				.filter(OrganizationAffiliation::hasParticipatingOrganization)
@@ -113,19 +113,22 @@ public class Role implements Recipient, Requester
 
 	private Coding toCoding()
 	{
-		Identifier consortium = new Reference().getIdentifier()
-				.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue(consortiumIdentifier);
-		Extension consortiumExt = new Extension(
-				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM)
-				.setValue(consortium);
+		Identifier parentOrganization = new Reference().getIdentifier()
+				.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue(parentOrganizationIdentifier);
+		Extension parentOrganizationExt = new Extension(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION)
+				.setValue(parentOrganization);
 
 		Coding role = new Coding(roleSystem, roleCode, null);
 		Extension roleExt = new Extension(
-				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE).setValue(role);
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ROLE)
+				.setValue(role);
 
 		Coding coding = getProcessAuthorizationCode();
-		coding.addExtension().setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE)
-				.addExtension(consortiumExt).addExtension(roleExt);
+		coding.addExtension()
+				.setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE)
+				.addExtension(parentOrganizationExt).addExtension(roleExt);
 		return coding;
 	}
 
@@ -137,7 +140,7 @@ public class Role implements Recipient, Requester
 						.equals(requesterExtension.getUrl())
 				&& requesterExtension.hasValue() && requesterExtension.getValue() instanceof Coding
 				&& matches((Coding) requesterExtension.getValue()) && requesterExtension.getValue().hasExtension()
-				&& hasMatchingConsortiumRoleExtension(requesterExtension.getValue().getExtension());
+				&& hasMatchingParentOrganizationRoleExtension(requesterExtension.getValue().getExtension());
 	}
 
 	@Override
@@ -148,38 +151,39 @@ public class Role implements Recipient, Requester
 						.equals(recipientExtension.getUrl())
 				&& recipientExtension.hasValue() && recipientExtension.getValue() instanceof Coding
 				&& matches((Coding) recipientExtension.getValue()) && recipientExtension.getValue().hasExtension()
-				&& hasMatchingConsortiumRoleExtension(recipientExtension.getValue().getExtension());
+				&& hasMatchingParentOrganizationRoleExtension(recipientExtension.getValue().getExtension());
 	}
 
-	private boolean hasMatchingConsortiumRoleExtension(List<Extension> extension)
+	private boolean hasMatchingParentOrganizationRoleExtension(List<Extension> extension)
 	{
-		return extension.stream().anyMatch(this::consortiumRoleExtensionMatches);
+		return extension.stream().anyMatch(this::parentOrganizationRoleExtensionMatches);
 	}
 
-	private boolean consortiumRoleExtensionMatches(Extension extension)
+	private boolean parentOrganizationRoleExtensionMatches(Extension extension)
 	{
-		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE.equals(extension.getUrl())
-				&& extension.hasExtension() && hasMatchingConsortiumExtension(extension.getExtension())
+		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE
+				.equals(extension.getUrl()) && extension.hasExtension()
+				&& hasMatchingParentOrganizationExtension(extension.getExtension())
 				&& hasMatchingRoleExtension(extension.getExtension());
 	}
 
-	private boolean hasMatchingConsortiumExtension(List<Extension> extension)
+	private boolean hasMatchingParentOrganizationExtension(List<Extension> extension)
 	{
-		return extension.stream().anyMatch(this::consortiumExtensionMatches);
+		return extension.stream().anyMatch(this::parentOrganizationExtensionMatches);
 	}
 
-	private boolean consortiumExtensionMatches(Extension extension)
+	private boolean parentOrganizationExtensionMatches(Extension extension)
 	{
-		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM
+		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION
 				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Identifier
-				&& consortiumIdentifierMatches((Identifier) extension.getValue());
+				&& parentOrganizationIdentifierMatches((Identifier) extension.getValue());
 	}
 
-	private boolean consortiumIdentifierMatches(Identifier identifier)
+	private boolean parentOrganizationIdentifierMatches(Identifier identifier)
 	{
 		return identifier != null && identifier.hasSystem() && identifier.hasValue()
 				&& ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM.equals(identifier.getSystem())
-				&& consortiumIdentifier.equals(identifier.getValue());
+				&& parentOrganizationIdentifier.equals(identifier.getValue());
 	}
 
 	private boolean hasMatchingRoleExtension(List<Extension> extension)
@@ -189,7 +193,7 @@ public class Role implements Recipient, Requester
 
 	private boolean roleExtensionMatches(Extension extension)
 	{
-		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE
+		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ROLE
 				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Coding
 				&& roleMatches((Coding) extension.getValue());
 	}
@@ -263,37 +267,39 @@ public class Role implements Recipient, Requester
 	{
 		if (coding != null && coding.hasExtension())
 		{
-			List<Extension> consortiumRoles = coding.getExtension().stream().filter(Extension::hasUrl).filter(
-					e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE.equals(e.getUrl()))
+			List<Extension> parentOrganizationRoles = coding.getExtension().stream().filter(Extension::hasUrl)
+					.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE
+							.equals(e.getUrl()))
 					.collect(Collectors.toList());
-			if (consortiumRoles.size() == 1)
+			if (parentOrganizationRoles.size() == 1)
 			{
-				Extension consortiumRole = consortiumRoles.get(0);
-				List<Extension> consortiums = consortiumRole.getExtension().stream().filter(Extension::hasUrl).filter(
-						e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM
+				Extension parentOrganizationRole = parentOrganizationRoles.get(0);
+				List<Extension> parentOrganizations = parentOrganizationRole.getExtension().stream()
+						.filter(Extension::hasUrl)
+						.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION
 								.equals(e.getUrl()))
 						.collect(Collectors.toList());
-				List<Extension> roles = consortiumRole.getExtension().stream().filter(Extension::hasUrl)
-						.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE
+				List<Extension> roles = parentOrganizationRole.getExtension().stream().filter(Extension::hasUrl).filter(
+						e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ROLE
 								.equals(e.getUrl()))
 						.collect(Collectors.toList());
-				if (consortiums.size() == 1 && roles.size() == 1)
+				if (parentOrganizations.size() == 1 && roles.size() == 1)
 				{
-					Extension consortium = consortiums.get(0);
+					Extension parentOrganization = parentOrganizations.get(0);
 					Extension role = roles.get(0);
 
-					if (consortium.hasValue() && consortium.getValue() instanceof Identifier && role.hasValue()
-							&& role.getValue() instanceof Coding)
+					if (parentOrganization.hasValue() && parentOrganization.getValue() instanceof Identifier
+							&& role.hasValue() && role.getValue() instanceof Coding)
 					{
-						Identifier consortiumIdentifier = (Identifier) consortium.getValue();
+						Identifier parentOrganizationIdentifier = (Identifier) parentOrganization.getValue();
 						Coding roleCoding = (Coding) role.getValue();
 
 						if (ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM
-								.equals(consortiumIdentifier.getSystem())
-								&& organizationWithIdentifierExists.test(consortiumIdentifier)
+								.equals(parentOrganizationIdentifier.getSystem())
+								&& organizationWithIdentifierExists.test(parentOrganizationIdentifier)
 								&& roleExists.test(roleCoding))
 						{
-							return Optional.of(new Role(localIdentity, consortiumIdentifier.getValue(),
+							return Optional.of(new Role(localIdentity, parentOrganizationIdentifier.getValue(),
 									roleCoding.getSystem(), roleCoding.getCode()));
 						}
 					}
