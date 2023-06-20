@@ -1,9 +1,8 @@
 <ActivityDefinition xmlns="http://hl7.org/fhir">
 	<meta>
-		<profile value="http://dsf.dev/fhir/StructureDefinition/activity-definition" />
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
-			<code value="ALL"></code>
+			<code value="ALL" />
 		</tag>
 	</meta>
 	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
@@ -14,18 +13,6 @@
 			<valueCanonical value="http://dsf.dev/fhir/StructureDefinition/test-task|1.0" />
 		</extension>
 		<extension url="requester">
-			<valueCoding>
-				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization">
-					<valueIdentifier>
-						<system value="http://dsf.dev/sid/organization-identifier" />
-						<value value="External_Test_Organization" />
-					</valueIdentifier>
-				</extension>
-				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
-				<code value="REMOTE_ORGANIZATION" />
-			</valueCoding>
-		</extension>
-		<extension url="recipient">
 			<valueCoding>
 				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
 					<extension url="parent-organization">
@@ -43,6 +30,12 @@
 				</extension>
 				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
 				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ALL" />
 			</valueCoding>
 		</extension>
 	</extension>

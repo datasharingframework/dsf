@@ -95,7 +95,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 				.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE);
 		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION).setValue(
 				new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(parentOrganizationIdentifier));
-		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ROLE)
+		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE)
 				.setValue(new Coding().setSystem(roleSystem).setCode(roleCode));
 		return resource;
 	}
@@ -235,7 +235,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 					.anyMatch(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())
 							&& Objects.equals(i.getValue(), parentOrganizationIdentifier));
 			boolean role = extensions.getExtension().stream().filter(Extension::hasUrl)
-					.filter(e -> Objects.equals(e.getUrl(), EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ROLE))
+					.filter(e -> Objects.equals(e.getUrl(),
+							EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE))
 					.filter(Extension::hasValue).map(Extension::getValue).filter(v -> v instanceof Coding)
 					.map(v -> (Coding) v)
 					.anyMatch(c -> Objects.equals(c.getSystem(), roleSystem) && Objects.equals(c.getCode(), roleCode));
@@ -396,8 +397,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private boolean isValidExtensionReadAccessParentOrganizationMemberRoleRole(Extension e,
 			Predicate<Coding> roleExists)
 	{
-		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ROLE.equals(e.getUrl()) && e.hasValue()
-				&& e.getValue() instanceof Coding && isValidRole((Coding) e.getValue(), roleExists);
+		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE.equals(e.getUrl())
+				&& e.hasValue() && e.getValue() instanceof Coding && isValidRole((Coding) e.getValue(), roleExists);
 	}
 
 	private boolean isValidRole(Coding coding, Predicate<Coding> roleExists)

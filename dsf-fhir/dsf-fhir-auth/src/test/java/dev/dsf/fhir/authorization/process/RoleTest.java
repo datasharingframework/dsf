@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.stream.Stream;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.Test;
@@ -19,9 +20,12 @@ public class RoleTest
 	private static final String MEMBER_ROLE_CODE = "roleCode";
 
 	private static final Role local = new Role(true, PARENT_ORGANIZATION_IDENTIFIER, MEMBER_ROLE_SYSTEM,
-			MEMBER_ROLE_CODE);
+			MEMBER_ROLE_CODE, null, null);
 	private static final Role remote = new Role(false, PARENT_ORGANIZATION_IDENTIFIER, MEMBER_ROLE_SYSTEM,
-			MEMBER_ROLE_CODE);
+			MEMBER_ROLE_CODE, null, null);
+
+	private static final Role localPractitioner = new Role(true, PARENT_ORGANIZATION_IDENTIFIER, MEMBER_ROLE_SYSTEM,
+			MEMBER_ROLE_CODE, "http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER");
 
 	private static org.hl7.fhir.r4.model.Organization createFhirOrganization(String identifierValue)
 	{
@@ -37,22 +41,39 @@ public class RoleTest
 		return o;
 	}
 
-	private static final Identity LOCAL_ORG_ACTIVE = TestIdentity.local(createFhirOrganization(MEMBER_IDENTIFIER));
-	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestIdentity
+	private static final Identity LOCAL_ORG_ACTIVE = TestOrganizationIdentity
+			.local(createFhirOrganization(MEMBER_IDENTIFIER));
+	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestOrganizationIdentity
 			.local(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false));
-	private static final Identity LOCAL_NO_ORG = TestIdentity.local(null);
-	private static final Identity LOCAL_ORG_BAD_IDENTIFIER = TestIdentity
+	private static final Identity LOCAL_NO_ORG = TestOrganizationIdentity.local(null);
+	private static final Identity LOCAL_ORG_BAD_IDENTIFIER = TestOrganizationIdentity
 			.local(createFhirOrganization("wrong.identifier"));
-	private static final Identity LOCAL_ORG_BAD_IDENTIFIER_SYSTEM = TestIdentity
+	private static final Identity LOCAL_ORG_BAD_IDENTIFIER_SYSTEM = TestOrganizationIdentity
 			.local(createFhirOrganization(MEMBER_IDENTIFIER, "bad.system"));
-	private static final Identity REMOTE_ORG_ACTIVE = TestIdentity.remote(createFhirOrganization(MEMBER_IDENTIFIER));
-	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestIdentity
+	private static final Identity REMOTE_ORG_ACTIVE = TestOrganizationIdentity
+			.remote(createFhirOrganization(MEMBER_IDENTIFIER));
+	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestOrganizationIdentity
 			.remote(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false));
-	private static final Identity REMOTE_NO_ORG = TestIdentity.remote((Organization) null);
-	private static final Identity REMOTE_ORG_BAD_IDENTIFIER = TestIdentity
+	private static final Identity REMOTE_NO_ORG = TestOrganizationIdentity.remote((Organization) null);
+	private static final Identity REMOTE_ORG_BAD_IDENTIFIER = TestOrganizationIdentity
 			.remote(createFhirOrganization("wrong.identifier"));
-	private static final Identity REMOTE_ORG_BAD_IDENTIFIER_SYSTEM = TestIdentity
+	private static final Identity REMOTE_ORG_BAD_IDENTIFIER_SYSTEM = TestOrganizationIdentity
 			.remote(createFhirOrganization(MEMBER_IDENTIFIER, "bad.system"));
+
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(MEMBER_IDENTIFIER).setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1 = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(MEMBER_IDENTIFIER).setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "UAC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2 = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(MEMBER_IDENTIFIER).setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/bad-system", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_NOT_ACTIVE = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(MEMBER_IDENTIFIER).setActive(false),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES = TestPractitionerIdentity
+			.practitioner(createFhirOrganization(MEMBER_IDENTIFIER).setActive(true));
 
 	private static OrganizationAffiliation createOrganizationAffiliation(String parentOrganizationIdentifier,
 			String memberIdentifier, String memberRoleSystem, String memberRoleCode)
@@ -369,5 +390,41 @@ public class RoleTest
 				PARENT_ORGANIZATION_IDENTIFIER, MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
 		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, affiliations));
+	}
+
+	@Test
+	public void testLocalRolePractitionerRequesterOk() throws Exception
+	{
+		assertTrue(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE, okAffiliation()));
+	}
+
+	@Test
+	public void testLocalRolePractitionerRequesterNotOkOrganizationNotActive() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_NOT_ACTIVE, okAffiliation()));
+	}
+
+	@Test
+	public void testLocalRolePractitionerRequesterNotOkPractitionerNoRoles() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES, okAffiliation()));
+	}
+
+	@Test
+	public void testLocalRolePractitionerRequesterNotOkPractitionerBadRole1() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1, okAffiliation()));
+	}
+
+	@Test
+	public void testLocalRolePractitionerRequesterNotOkPractitionerBadRole2() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2, okAffiliation()));
+	}
+
+	@Test
+	public void testLocalRolePractitionerRequesterNotOkNotAPractitioner() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_ORG_ACTIVE, okAffiliation()));
 	}
 }

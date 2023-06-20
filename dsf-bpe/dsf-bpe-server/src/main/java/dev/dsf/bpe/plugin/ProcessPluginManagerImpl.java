@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.camunda.ProcessPluginConsumer;
-import dev.dsf.bpe.v1.ProcessPluginDeplyomentStateListener;
+import dev.dsf.bpe.v1.ProcessPluginDeploymentStateListener;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.fhir.client.BasicFhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClient;
@@ -190,12 +190,12 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 			List<String> activePluginProcesses = plugin.getProcessKeysAndVersions().stream()
 					.filter(activeProcesses::contains).map(ProcessIdAndVersion::getId).toList();
 
-			plugin.getApplicationContext().getBeansOfType(ProcessPluginDeplyomentStateListener.class).entrySet()
+			plugin.getApplicationContext().getBeansOfType(ProcessPluginDeploymentStateListener.class).entrySet()
 					.forEach(onProcessesDeployed(plugin, activePluginProcesses));
 		});
 	}
 
-	private Consumer<Entry<String, ProcessPluginDeplyomentStateListener>> onProcessesDeployed(
+	private Consumer<Entry<String, ProcessPluginDeploymentStateListener>> onProcessesDeployed(
 			ProcessPlugin<?, ?> plugin, List<String> activePluginProcesses)
 	{
 		return entry ->
@@ -207,9 +207,9 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 			catch (Exception e)
 			{
 				logger.warn("Error while executing {} bean {} for process plugin {}, {} - {}",
-						ProcessPluginDeplyomentStateListener.class.getName(), entry.getKey(),
+						ProcessPluginDeploymentStateListener.class.getName(), entry.getKey(),
 						plugin.getJarFile().toString(), e.getClass().getName(), e.getMessage());
-				logger.debug("Error while executing " + ProcessPluginDeplyomentStateListener.class.getName() + " bean "
+				logger.debug("Error while executing " + ProcessPluginDeploymentStateListener.class.getName() + " bean "
 						+ entry.getKey() + " for process plugin " + plugin.getJarFile().toString(), e);
 			}
 		};

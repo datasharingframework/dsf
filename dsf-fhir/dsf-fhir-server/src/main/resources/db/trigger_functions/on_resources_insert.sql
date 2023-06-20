@@ -72,7 +72,7 @@ BEGIN
 				SELECT 
 					jsonb_path_query(parent_organization_role, '$.extension[*] ? (@.url == "parent-organization")
 						.valueIdentifier[*]?(@.system == "http://dsf.dev/sid/organization-identifier")')->>'value' AS parent_organization_identifier
-					, jsonb_path_query(parent_organization_role, '$.extension[*] ? (@.url == "role").valueCoding') AS role
+					, jsonb_path_query(parent_organization_role, '$.extension[*] ? (@.url == "organization-role").valueCoding') AS role
 				FROM (
 					SELECT jsonb_path_query(new_resource,'$.meta.tag[*] ? (@.code == "ROLE" && @.system == "http://dsf.dev/fhir/CodeSystem/read-access-tag")
 						.extension[*] ? (@.url == "http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role")') AS parent_organization_role

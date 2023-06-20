@@ -671,6 +671,148 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateTaskAllowedLocalUserWithRole() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition5-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getPractitionerWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedLocalUserWithoutRole() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition6-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskAllowedLocalUserWithRole2() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition7-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getPractitionerWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedLocalUserWithoutRole2() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition8-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedLocalOrganizationWithoutRole2() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition8-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskAllowedLocalUserWithRole3() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition9-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getPractitionerWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedLocalUserWithoutRole3() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition10-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedLocalOrganizationWithoutRole3() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition10-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getWebserviceClient(), task);
+	}
+
+	@Test
 	public void testCreateTaskAllowedLocalUserVersionSpecificProfile() throws Exception
 	{
 		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition1-1.0.xml");
@@ -726,6 +868,133 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task task = readTestTask("External_Test_Organization", "Test_Organization");
 		testCreateExpectForbidden(getExternalWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedPractitioner1() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition1-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskAllowedLocalUser11() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition11-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedPractitioner11() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition11-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskAllowedLocalUser12() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition12-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskNotAllowedPractitioner12() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition12-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateTaskAllowedLocalUser13() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition13-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskAllowedPractitioner13() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition13-1.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getPractitionerWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
 	}
 
 	@Test
@@ -809,7 +1078,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				.getExtensionByUrl("recipient").getValue();
 		Coding role = (Coding) recipient.getExtensionByUrl(
 				"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role")
-				.getExtensionByUrl("role").getValue();
+				.getExtensionByUrl("organization-role").getValue();
 		role.setCode("TTP");
 
 		ActivityDefinition createdAd3 = getWebserviceClient().create(ad3);

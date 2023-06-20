@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
  * Register a singleton {@link Bean} implementing this interface to execute custom code like connection tests if a
  * process has been deployed.
  */
-public interface ProcessPluginDeplyomentStateListener
+public interface ProcessPluginDeploymentStateListener
 {
 	void onProcessesDeployed(List<String> processes);
 }

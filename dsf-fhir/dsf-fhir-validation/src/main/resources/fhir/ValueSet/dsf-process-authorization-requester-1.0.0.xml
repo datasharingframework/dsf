@@ -25,6 +25,10 @@
 				<display value="LOCAL_ORGANIZATION"/>
 			</concept>
 			<concept>
+				<code value="LOCAL_ORGANIZATION_PRACTITIONER"/>
+				<display value="LOCAL_ORGANIZATION_PRACTITIONER"/>
+			</concept>
+			<concept>
 				<code value="REMOTE_ORGANIZATION"/>
 				<display value="REMOTE_ORGANIZATION"/>
 			</concept>
@@ -33,12 +37,20 @@
 				<display value="LOCAL_ROLE"/>
 			</concept>
 			<concept>
+				<code value="LOCAL_ROLE_PRACTITIONER"/>
+				<display value="LOCAL_ROLE_PRACTITIONER"/>
+			</concept>
+			<concept>
 				<code value="REMOTE_ROLE"/>
 				<display value="REMOTE_ROLE"/>
 			</concept>
 			<concept>
 				<code value="LOCAL_ALL"/>
 				<display value="LOCAL_ALL"/>
+			</concept>
+			<concept>
+				<code value="LOCAL_ALL_PRACTITIONER"/>
+				<display value="LOCAL_ALL_PRACTITIONER"/>
 			</concept>
 			<concept>
 				<code value="REMOTE_ALL"/>

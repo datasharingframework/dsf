@@ -159,7 +159,7 @@ public class CodeSystemProfileTest
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role");
 		ex.addExtension().setUrl("parent-organization").setValue(
 				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("parent.org"));
-		ex.addExtension().setUrl("role")
+		ex.addExtension().setUrl("organization-role")
 				.setValue(new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("TTP"));
 
 		logResource(cs);
@@ -181,7 +181,7 @@ public class CodeSystemProfileTest
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role");
 		ex.addExtension().setUrl("parent-organization").setValue(
 				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("parent.org"));
-		ex.addExtension().setUrl("role")
+		ex.addExtension().setUrl("organization-role")
 				.setValue(new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("FOO"));
 
 		logResource(cs);

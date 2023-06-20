@@ -47,7 +47,7 @@ BEGIN
 				) AS r
 				ON r.resource->'meta'->'tag' @> 
 					('[{"extension":[{"url":"http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role","extension":[{"url":"parent-organization","valueIdentifier":{"system":"http://dsf.dev/sid/organization-identifier","value":"'
-					|| parent_organization_identifier || '"}},{"url":"role","valueCoding":{"system":"'
+					|| parent_organization_identifier || '"}},{"url":"organization-role","valueCoding":{"system":"'
 					|| c.system || '","code":"'
 					|| c.code || '"}}]}],"system":"http://dsf.dev/fhir/CodeSystem/read-access-tag","code":"ROLE"}]')::jsonb
 				WHERE r.resource IS NOT NULL;

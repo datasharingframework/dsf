@@ -12,17 +12,17 @@ public interface Recipient extends WithAuthorization
 {
 	static Recipient localAll()
 	{
-		return new All(true);
+		return new All(true, null, null);
 	}
 
 	static Recipient localOrganization(String organizationIdentifier)
 	{
-		return new Organization(true, organizationIdentifier);
+		return new Organization(true, organizationIdentifier, null, null);
 	}
 
 	static Recipient localRole(String parentOrganizationIdentifier, String roleSystem, String roleCode)
 	{
-		return new Role(true, parentOrganizationIdentifier, roleSystem, roleCode);
+		return new Role(true, parentOrganizationIdentifier, roleSystem, roleCode, null, null);
 	}
 
 	boolean recipientMatches(Extension recipientExtension);
@@ -36,9 +36,5 @@ public interface Recipient extends WithAuthorization
 				recipientAffiliations == null ? null : recipientAffiliations.stream());
 	}
 
-	default Extension toRecipientExtension()
-	{
-		return new Extension().setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT)
-				.setValue(getProcessAuthorizationCode());
-	}
+	Extension toRecipientExtension();
 }

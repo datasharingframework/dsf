@@ -12,48 +12,70 @@ public interface Requester extends WithAuthorization
 {
 	static Requester localAll()
 	{
-		return all(true);
+		return all(true, null, null);
+	}
+
+	static Requester localAllPractitioner(String practitionerRoleSystem, String practitionerRoleCode)
+	{
+		return all(true, practitionerRoleSystem, practitionerRoleCode);
 	}
 
 	static Requester remoteAll()
 	{
-		return all(false);
+		return all(false, null, null);
 	}
 
-	static Requester all(boolean localIdentity)
+	static Requester all(boolean localIdentity, String userRoleSystem, String userRoleCode)
 	{
-		return new All(localIdentity);
+		return new All(localIdentity, userRoleSystem, userRoleCode);
 	}
 
 	static Requester localOrganization(String organizationIdentifier)
 	{
-		return organization(true, organizationIdentifier);
+		return organization(true, organizationIdentifier, null, null);
+	}
+
+	static Requester localOrganizationPractitioner(String organizationIdentifier, String practitionerRoleSystem,
+			String practitionerRoleCode)
+	{
+		return organization(true, organizationIdentifier, practitionerRoleSystem, practitionerRoleCode);
 	}
 
 	static Requester remoteOrganization(String organizationIdentifier)
 	{
-		return organization(false, organizationIdentifier);
+		return organization(false, organizationIdentifier, null, null);
 	}
 
-	static Requester organization(boolean localIdentity, String organizationIdentifier)
+	static Requester organization(boolean localIdentity, String organizationIdentifier, String practitionerRoleSystem,
+			String practitionerRoleCode)
 	{
-		return new Organization(localIdentity, organizationIdentifier);
+		return new Organization(localIdentity, organizationIdentifier, practitionerRoleSystem, practitionerRoleCode);
 	}
 
-	static Requester localRole(String parentOrganizationIdentifier, String roleSystem, String roleCode)
+	static Requester localRole(String parentOrganizationIdentifier, String organizatioRoleSystem,
+			String organizatioRoleCode)
 	{
-		return role(true, parentOrganizationIdentifier, roleSystem, roleCode);
+		return role(true, parentOrganizationIdentifier, organizatioRoleSystem, organizatioRoleCode, null, null);
 	}
 
-	static Requester remoteRole(String parentOrganizationIdentifier, String roleSystem, String roleCode)
+	static Requester localRolePractitioner(String parentOrganizationIdentifier, String organizatioRoleSystem,
+			String organizatioRoleCode, String practitionerRoleSystem, String practitionerRoleCode)
 	{
-		return role(false, parentOrganizationIdentifier, roleSystem, roleCode);
+		return role(true, parentOrganizationIdentifier, organizatioRoleSystem, organizatioRoleCode,
+				practitionerRoleSystem, practitionerRoleCode);
 	}
 
-	static Requester role(boolean localIdentity, String parentOrganizationIdentifier, String roleSystem,
-			String roleCode)
+	static Requester remoteRole(String parentOrganizationIdentifier, String organizatioRoleSystem,
+			String organizatioRoleCode)
 	{
-		return new Role(localIdentity, parentOrganizationIdentifier, roleSystem, roleCode);
+		return role(false, parentOrganizationIdentifier, organizatioRoleSystem, organizatioRoleCode, null, null);
+	}
+
+	static Requester role(boolean localIdentity, String parentOrganizationIdentifier, String organizatioRoleSystem,
+			String organizatioRoleCode, String practitionerRoleSystem, String practitionerRoleCode)
+	{
+		return new Role(localIdentity, parentOrganizationIdentifier, organizatioRoleSystem, organizatioRoleCode,
+				practitionerRoleSystem, practitionerRoleCode);
 	}
 
 	boolean requesterMatches(Extension requesterExtension);
@@ -67,9 +89,5 @@ public interface Requester extends WithAuthorization
 				requesterAffiliations == null ? null : requesterAffiliations.stream());
 	}
 
-	default Extension toRequesterExtension()
-	{
-		return new Extension().setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER)
-				.setValue(getProcessAuthorizationCode());
-	}
+	Extension toRequesterExtension();
 }

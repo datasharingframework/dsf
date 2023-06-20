@@ -34,7 +34,7 @@
 							<value value="parent.org" />
 						</valueIdentifier>
 					</extension>
-					<extension url="role">
+					<extension url="organization-role">
 						<valueCoding>
 							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
 							<code value="DIC" />

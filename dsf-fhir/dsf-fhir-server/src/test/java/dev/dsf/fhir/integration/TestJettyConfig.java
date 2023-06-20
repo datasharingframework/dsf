@@ -30,7 +30,8 @@ public class TestJettyConfig extends AbstractJettyConfig implements JettyConfig
 			String databaseUserUsername, String databaseUserPassword, String databaseDeleteUserUsername,
 			String databaseDeleteUserPassword, String serverBaseUrl, ClientCertificate clientCertificate,
 			String organizationIdentifierValue, Path fhirBundleFile, Path caCertificateFile, Path clientCertificateFile,
-			Path clientCertificatePrivateKeyFile, char[] clientCertificatePrivateKeyPassword)
+			Path clientCertificatePrivateKeyFile, char[] clientCertificatePrivateKeyPassword,
+			ClientCertificate practitionerClientCertificate)
 	{
 		super(AbstractJettyConfig.httpsConnector());
 
@@ -62,7 +63,19 @@ public class TestJettyConfig extends AbstractJettyConfig implements JettyConfig
 				clientCertificatePrivateKeyFile.toString());
 		additionalProperties.put("dev.dsf.fhir.client.certificate.private.key.password",
 				String.valueOf(clientCertificatePrivateKeyPassword));
-		additionalProperties.put("dev.dsf.fhir.server.roleConfig", "");
+		additionalProperties.put("dev.dsf.fhir.server.roleConfig", String.format("""
+				- practitioner-test-user:
+				    thumbprint: %s
+				    dsf-role:
+				      - CREATE
+				      - READ
+				      - UPDATE
+				      - DELETE
+				      - SEARCH
+				      - HISTORY
+				    practitioner-role:
+				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
+				""", practitionerClientCertificate.getCertificateSha512ThumbprintHex()));
 	}
 
 	@Override

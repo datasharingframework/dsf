@@ -132,7 +132,8 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 
 	@Override
 	public boolean isValid(ActivityDefinition activityDefinition, Predicate<CanonicalType> profileExists,
-			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> roleExists)
+			Predicate<Coding> practitionerRoleExists, Predicate<Identifier> organizationWithIdentifierExists,
+			Predicate<Coding> organizationRoleExists)
 	{
 		if (activityDefinition == null)
 			return false;
@@ -145,7 +146,8 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 			return false;
 
 		return processAuthorizations.stream()
-				.map(e -> isProcessAuthorizationValid(e, profileExists, organizationWithIdentifierExists, roleExists))
+				.map(e -> isProcessAuthorizationValid(e, profileExists, practitionerRoleExists,
+						organizationWithIdentifierExists, organizationRoleExists))
 				.allMatch(v -> v) && messageNamesUnique(processAuthorizations);
 	}
 
@@ -157,7 +159,8 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 	}
 
 	private boolean isProcessAuthorizationValid(Extension processAuthorization, Predicate<CanonicalType> profileExists,
-			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> roleExists)
+			Predicate<Coding> practitionerRoleExists, Predicate<Identifier> organizationWithIdentifierExists,
+			Predicate<Coding> organizationRoleExists)
 	{
 		if (processAuthorization == null
 				|| !ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION.equals(processAuthorization.getUrl())
@@ -192,8 +195,10 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 			return false;
 
 		return isMessageNameValid(messageNames.get(0)) && isTaskProfileValid(taskProfiles.get(0), profileExists)
-				&& isRequestersValid(requesters, organizationWithIdentifierExists, roleExists)
-				&& isRecipientsValid(recipients, organizationWithIdentifierExists, roleExists);
+				&& isRequestersValid(requesters, practitionerRoleExists, organizationWithIdentifierExists,
+						organizationRoleExists)
+				&& isRecipientsValid(recipients, practitionerRoleExists, organizationWithIdentifierExists,
+						organizationRoleExists);
 	}
 
 	private boolean isMessageNameValid(Extension messageName)
@@ -216,14 +221,15 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 				&& profileExists.test((CanonicalType) taskProfile.getValue());
 	}
 
-	private boolean isRequestersValid(List<Extension> requesters,
-			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> roleExists)
+	private boolean isRequestersValid(List<Extension> requesters, Predicate<Coding> practitionerRoleExists,
+			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> organizationRoleExists)
 	{
-		return requesters.stream().allMatch(r -> isRequesterValid(r, organizationWithIdentifierExists, roleExists));
+		return requesters.stream().allMatch(r -> isRequesterValid(r, practitionerRoleExists,
+				organizationWithIdentifierExists, organizationRoleExists));
 	}
 
-	private boolean isRequesterValid(Extension requester, Predicate<Identifier> organizationWithIdentifierExists,
-			Predicate<Coding> roleExists)
+	private boolean isRequesterValid(Extension requester, Predicate<Coding> practitionerRoleExists,
+			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> organizationRoleExists)
 	{
 		if (requester == null
 				|| !ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER.equals(requester.getUrl()))
@@ -231,42 +237,47 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 
 		if (requester.hasValue() && requester.getValue() instanceof Coding)
 		{
-			return requesterFrom((Coding) requester.getValue(), organizationWithIdentifierExists, roleExists)
-					.isPresent();
+			return requesterFrom((Coding) requester.getValue(), practitionerRoleExists,
+					organizationWithIdentifierExists, organizationRoleExists).isPresent();
 		}
 
 		return false;
 	}
 
-	private Optional<Requester> requesterFrom(Coding coding, Predicate<Identifier> organizationWithIdentifierExists,
-			Predicate<Coding> roleExists)
+	private Optional<Requester> requesterFrom(Coding coding, Predicate<Coding> practitionerRoleExists,
+			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> organizatioRoleExists)
 	{
 		switch (coding.getCode())
 		{
 			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL:
+			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL_PRACTITIONER:
 			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL:
-				return All.fromRequester(coding);
+				return All.fromRequester(coding, practitionerRoleExists);
 
 			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION:
+			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION_PRACTITIONER:
 			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION:
-				return Organization.fromRequester(coding, organizationWithIdentifierExists);
+				return Organization.fromRequester(coding, practitionerRoleExists, organizationWithIdentifierExists);
 
 			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE:
+			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE_PRACTITIONER:
 			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ROLE:
-				return Role.fromRequester(coding, organizationWithIdentifierExists, roleExists);
+				return Role.fromRequester(coding, practitionerRoleExists, organizationWithIdentifierExists,
+						organizatioRoleExists);
 		}
 
 		return Optional.empty();
 	}
 
-	private boolean isRecipientsValid(List<Extension> recipients,
-			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> roleExists)
+	private boolean isRecipientsValid(List<Extension> recipients, Predicate<Coding> practitionerRoleExists,
+			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> organizationRoleExists)
 	{
-		return recipients.stream().allMatch(r -> isRecipientValid(r, organizationWithIdentifierExists, roleExists));
+		return recipients.stream().allMatch(r -> isRecipientValid(r, practitionerRoleExists,
+				organizationWithIdentifierExists, organizationRoleExists));
 	}
 
-	private boolean isRecipientValid(Extension recipient, Predicate<Identifier> organizationWithIdentifierExists,
-			Predicate<Coding> roleExists)
+	private boolean isRecipientValid(Extension recipient, Predicate<Coding> practitionerRoleExists,
+			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> organizationRoleExists)
 	{
 		if (recipient == null
 				|| !ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT.equals(recipient.getUrl()))
@@ -274,15 +285,15 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 
 		if (recipient.hasValue() && recipient.getValue() instanceof Coding)
 		{
-			return recipientFrom((Coding) recipient.getValue(), organizationWithIdentifierExists, roleExists)
-					.isPresent();
+			return recipientFrom((Coding) recipient.getValue(), practitionerRoleExists,
+					organizationWithIdentifierExists, organizationRoleExists).isPresent();
 		}
 
 		return false;
 	}
 
-	private Optional<Recipient> recipientFrom(Coding coding, Predicate<Identifier> organizationWithIdentifierExists,
-			Predicate<Coding> roleExists)
+	private Optional<Recipient> recipientFrom(Coding coding, Predicate<Coding> practitionerRoleExists,
+			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> organizationRoleExists)
 	{
 		switch (coding.getCode())
 		{
@@ -293,7 +304,7 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 				return Organization.fromRecipient(coding, organizationWithIdentifierExists);
 
 			case ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE:
-				return Role.fromRecipient(coding, organizationWithIdentifierExists, roleExists);
+				return Role.fromRecipient(coding, organizationWithIdentifierExists, organizationRoleExists);
 		}
 
 		return Optional.empty();
@@ -314,7 +325,7 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 							.equals(e.getUrl()))
 					.filter(Extension::hasValue).filter(e -> e.getValue() instanceof Coding)
 					.map(e -> (Coding) e.getValue())
-					.flatMap(coding -> requesterFrom(coding, i -> true, c -> true).stream());
+					.flatMap(coding -> requesterFrom(coding, c -> true, i -> true, c -> true).stream());
 	}
 
 	@Override
@@ -332,7 +343,7 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 							.equals(e.getUrl()))
 					.filter(Extension::hasValue).filter(e -> e.getValue() instanceof Coding)
 					.map(e -> (Coding) e.getValue())
-					.flatMap(coding -> recipientFrom(coding, i -> true, c -> true).stream());
+					.flatMap(coding -> recipientFrom(coding, c -> true, i -> true, c -> true).stream());
 	}
 
 	private Optional<Extension> getAuthorizationExtension(ActivityDefinition activityDefinition, String processUrl,

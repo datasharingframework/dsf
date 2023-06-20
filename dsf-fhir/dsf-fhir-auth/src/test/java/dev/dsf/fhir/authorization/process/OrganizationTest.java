@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.stream.Stream;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.junit.Test;
 
 import dev.dsf.common.auth.conf.Identity;
@@ -22,21 +23,44 @@ public class OrganizationTest
 		return o;
 	}
 
-	private static final Identity LOCAL_ORG_ACTIVE = TestIdentity.local(createFhirOrganization(IDENTIFIER));
-	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestIdentity
+	private static final Identity LOCAL_ORG_ACTIVE = TestOrganizationIdentity.local(createFhirOrganization(IDENTIFIER));
+	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestOrganizationIdentity
 			.local(createFhirOrganization(IDENTIFIER).setActive(false));
-	private static final Identity LOCAL_NO_ORG = TestIdentity.local(null);
-	private static final Identity LOCAL_ORG_BAD_IDENTIFIER_ACTIVE = TestIdentity
+	private static final Identity LOCAL_NO_ORG = TestOrganizationIdentity.local(null);
+	private static final Identity LOCAL_ORG_BAD_IDENTIFIER_ACTIVE = TestOrganizationIdentity
 			.local(createFhirOrganization("bad.identifier"));
-	private static final Identity REMOTE_ORG_ACTIVE = TestIdentity.remote(createFhirOrganization(IDENTIFIER));
-	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestIdentity
+	private static final Identity REMOTE_ORG_ACTIVE = TestOrganizationIdentity
+			.remote(createFhirOrganization(IDENTIFIER));
+	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestOrganizationIdentity
 			.remote(createFhirOrganization(IDENTIFIER).setActive(false));
-	private static final Identity REMOTE_NO_ORG = TestIdentity.remote((org.hl7.fhir.r4.model.Organization) null);
-	private static final Identity REMOTE_ORG_BAD_IDENTIFIER_ACTIVE = TestIdentity
+	private static final Identity REMOTE_NO_ORG = TestOrganizationIdentity
+			.remote((org.hl7.fhir.r4.model.Organization) null);
+	private static final Identity REMOTE_ORG_BAD_IDENTIFIER_ACTIVE = TestOrganizationIdentity
 			.remote(createFhirOrganization("bad.identifier"));
 
-	private static final Organization local = new Organization(true, IDENTIFIER);
-	private static final Organization remote = new Organization(false, IDENTIFIER);
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(IDENTIFIER).setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1 = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(IDENTIFIER).setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "UAC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2 = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(IDENTIFIER).setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/bad-system", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_NOT_ACTIVE = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(IDENTIFIER).setActive(false),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES = TestPractitionerIdentity
+			.practitioner(createFhirOrganization(IDENTIFIER).setActive(true));
+	private static final Identity LOCAL_PRACTITIONER_ORG_BAD_IDENTIFIER_ACTIVE = TestPractitionerIdentity.practitioner(
+			createFhirOrganization("bad.identifier").setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+
+	private static final Organization local = new Organization(true, IDENTIFIER, null, null);
+	private static final Organization remote = new Organization(false, IDENTIFIER, null, null);
+
+	private static final Organization localPractitioner = new Organization(true, IDENTIFIER,
+			"http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER");
 
 	@Test
 	public void testLocalOrganizationRecipientOk() throws Exception
@@ -180,5 +204,48 @@ public class OrganizationTest
 	public void testRemoteOrganizationRequesterNotOkIdentifierWrong() throws Exception
 	{
 		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_BAD_IDENTIFIER_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalOrganizationPractitionerRequesterOk() throws Exception
+	{
+		assertTrue(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalOrganizationPractitionerRequesterNotOkOrganizationNotActive() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_NOT_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalOrganizationPractitionerRequesterNotOkPractitionerNoRoles() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalOrganizationPractitionerRequesterNotOkPractitionerBadRole1() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalOrganizationPractitionerRequesterNotOkPractitionerBadRole2() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalOrganizationPractitionerRequesterNotOkNotAPractitioner() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalOrganizationPractitionerRequesterNotOkBadOrganizationIdentifier() throws Exception
+	{
+		assertFalse(
+				localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_BAD_IDENTIFIER_ACTIVE, Stream.empty()));
 	}
 }

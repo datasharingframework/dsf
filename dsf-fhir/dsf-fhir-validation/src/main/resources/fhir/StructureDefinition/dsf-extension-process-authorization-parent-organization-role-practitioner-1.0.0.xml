@@ -5,12 +5,12 @@
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role-practitioner" />
   <version value="1.0.0" />
-  <name value="ProcessAuthorizationParentOrganizatioRole" />
+  <name value="ProcessAuthorizationParentOrganizatioRolePractitioner" />
   <status value="active" />
   <experimental value="false" />
-  <date value="2023-05-19" />
+  <date value="2023-06-19" />
   <fhirVersion value="4.0.1" />
   <kind value="complex-type" />
   <abstract value="false" />
@@ -88,9 +88,34 @@
       <path value="Extension.extension.value[x].code" />
       <min value="1" />
     </element>
+    <element id="Extension.extension:practitionerRole">
+      <path value="Extension.extension" />
+      <sliceName value="practitionerRole" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Extension.extension:practitionerRole.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="practitioner-role" />
+    </element>
+    <element id="Extension.extension:practitionerRole.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="Coding" />
+      </type>
+    </element>
+    <element id="Extension.extension:practitionerRole.value[x].system">
+      <path value="Extension.extension.value[x].system" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:practitionerRole.value[x].code">
+      <path value="Extension.extension.value[x].code" />
+      <min value="1" />
+    </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role" />
+      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role-practitioner" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />

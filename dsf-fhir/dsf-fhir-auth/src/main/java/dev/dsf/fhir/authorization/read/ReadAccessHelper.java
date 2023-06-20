@@ -26,7 +26,7 @@ public interface ReadAccessHelper
 
 	String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role";
 	String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION = "parent-organization";
-	String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ROLE = "role";
+	String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE = "organization-role";
 
 	/**
 	 * Adds LOCAL tag. Removes ALL tag if present.
