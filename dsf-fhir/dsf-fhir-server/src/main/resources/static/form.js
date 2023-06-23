@@ -1,30 +1,30 @@
 function startProcess() {
-    const taskStringBefore = document.getElementById("json").innerText
-    const task = JSON.parse(taskStringBefore)
-
+    const task = getResourceAsJson()
     const errors = []
+
     readTaskInputsFromForm(task, errors)
 
     console.log(task)
     console.log(errors)
 
     if (errors.length === 0) {
-        const taskStringAfter = JSON.stringify(task)
-        createTask(taskStringAfter)
+        const taskString = JSON.stringify(task)
+        createTask(taskString)
     }
 }
 
 function readTaskInputsFromForm(task, errors) {
-    task.status = "requested"
+    task.id = null
+    task.meta.lastUpdated = null
+    task.meta.version = null
 
     // TODO set requester as practitioner-identifier if OIDC
     //task.requester.type = "Practitioner"
     //task.requester.identifier.value = ""
     //task.requester.identifier.system = "http://dsf.dev/sid/practitioner-identifier"
 
+    task.status = "requested"
     task.authoredOn = new Date().toISOString()
-    task.meta.lastUpdated = null
-    task.meta.version = null
 
     task.input.forEach((input) => {
         if (input.hasOwnProperty("type")) {
@@ -32,25 +32,24 @@ function readTaskInputsFromForm(task, errors) {
 
             if (id !== "message-name" && id !== "business-key" && id !== "correlation-key") {
                 const inputValueType = Object.keys(input).find((string) => string.startsWith("value"))
-                input[inputValueType] = readAndValidateValue(id, inputValueType, errors)
+                input[inputValueType] = readAndValidateValue(input, id, inputValueType, errors)
             }
         }
     })
 }
 
 function completeQuestionnaireResponse() {
-    const questionnaireResponseStringBefore = document.getElementById("json").innerText
-    const questionnaireResponse = JSON.parse(questionnaireResponseStringBefore)
-
+    const questionnaireResponse = getResourceAsJson()
     const errors = []
+
     readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors)
 
     console.log(questionnaireResponse)
     console.log(errors)
 
     if (errors.length === 0) {
-        const questionnaireResponseStringAfter = JSON.stringify(questionnaireResponse)
-        updateQuestionnaireResponse(questionnaireResponseStringAfter)
+        const questionnaireResponseString = JSON.stringify(questionnaireResponse)
+        updateQuestionnaireResponse(questionnaireResponseString)
     }
 }
 
@@ -65,14 +64,16 @@ function readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors)
                 const answer = item.answer[0]
                 const answerType = Object.keys(answer).find((string) => string.startsWith("value"))
 
-                answer[answerType] = readAndValidateValue(id, answerType, errors)
+                answer[answerType] = readAndValidateValue(answer, id, answerType, errors)
             }
         }
     })
 }
 
-function readAndValidateValue(id, valueType, errors) {
-    const value = document.getElementById(id).value
+function readAndValidateValue(templateValue, id, valueType, errors) {
+    const value = document.getElementById(id)?.value
+    const valueSystem = document.getElementById(id + "-system")?.value
+    const valueValue = document.getElementById(id + "-value")?.value
 
     const rowElement = document.getElementById(id + "-input-row")
     const errorListElement = document.getElementById(id + "-error")
@@ -90,18 +91,23 @@ function readAndValidateValue(id, valueType, errors) {
         return validateTime(rowElement, errorListElement, value, errors, id)
     } else if (valueType === 'valueDateTime') {
         return validateDateTime(rowElement, errorListElement, value, errors, id)
+    } else if (valueType === 'valueInstant') {
+        return validateInstant(rowElement, errorListElement, value, errors, id)
     } else if (valueType === 'valueUri') {
         return validateUrl(rowElement, errorListElement, value, errors, id)
     } else if (valueType === 'valueReference') {
-        return validateReference(rowElement, errorListElement, value, errors, id)
+        if (value) {
+            return validateReference(rowElement, errorListElement, value, errors, id)
+        } else {
+            const valueIdentifier = validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, id)
+            return {identifier: valueIdentifier, type: templateValue?.valueReference?.type}
+        }
     } else if (valueType === 'valueBoolean') {
         return document.querySelector("input[name=" + id + "]:checked").value
     } else if (valueType === "valueIdentifier") {
-        // TODO
-        return null
+        return validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, id)
     } else if (valueType === "valueCoding") {
-        // TODO
-        return null
+        return validateCoding(rowElement, errorListElement, value, errors, id)
     } else {
         return null
     }
@@ -179,6 +185,19 @@ function validateDateTime(rowElement, errorListElement, value, errors, id) {
     }
 }
 
+function validateInstant(rowElement, errorListElement, value, errors, id) {
+    validateString(rowElement, errorListElement, value, errors, id)
+
+    try {
+        const dateTime = new Date(value).toISOString()
+        removeError(rowElement, errorListElement)
+        return dateTime
+    } catch (_) {
+        addError(rowElement, errorListElement, errors, id, "Value is not an instant")
+        return null
+    }
+}
+
 function validateReference(rowElement, errorListElement, value, errors, id) {
     validateString(rowElement, errorListElement, value, errors, id)
 
@@ -201,6 +220,32 @@ function validateUrl(rowElement, errorListElement, value, errors, id) {
         return value
     } catch (_) {
         addError(rowElement, errorListElement, errors, id, "Value is not a url")
+        return null
+    }
+}
+
+function validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, id) {
+    const validatedSystem = validateUrl(rowElement, errorListElement, valueSystem, errors, id)
+    const validatedValue = validateString(rowElement, errorListElement, valueValue, errors, id)
+
+    if (validatedSystem && validatedValue) {
+         removeError(rowElement, errorListElement)
+         return {system: valueSystem, value: valueValue}
+    } else {
+        addError(rowElement, errorListElement, errors, id, "System or value not usable for identifier")
+        return null
+    }
+}
+
+function validateCode(rowElement, errorListElement, valueSystem, valueValue, errors, id) {
+    const validatedSystem = validateUrl(rowElement, errorListElement, valueSystem, errors, id)
+    const validatedCode = validateString(rowElement, errorListElement, valueValue, errors, id)
+
+    if (validatedSystem && validatedValue) {
+         removeError(rowElement, errorListElement)
+         return {system: valueSystem, code: valueValue}
+    } else {
+        addError(rowElement, errorListElement, errors, id, "System or code not usable for coding")
         return null
     }
 }
@@ -266,14 +311,10 @@ function createTask(task) {
 function parseResponse(response, redirect, resourceBaseUrlWithoutId) {
     console.log(response)
 
-    const status = response.status
-    const statusOk = response.ok
-    const statusText = response.statusText === null ? " - " + response.statusText : ""
-
     response.text().then((text) => {
         console.log(text)
 
-        if (statusOk) {
+        if (response.ok) {
             const resource = JSON.parse(text)
             setTimeout(() => {
                 disableSpinner()
@@ -281,8 +322,8 @@ function parseResponse(response, redirect, resourceBaseUrlWithoutId) {
             }, 1000)
         } else {
             disableSpinner()
-            const alertText = "Status: " + status + statusText + "\n\n" + text
-            window.alert(alertText)
+            const statusText = response.statusText === null ? " - " + response.statusText : ""
+            window.alert("Status: " + response.status + statusText + "\n\n" + text)
         }
     })
 }
@@ -300,7 +341,42 @@ function disableSpinner() {
 }
 
 function adaptFormInputs() {
-    // TODO set requester as practitioner-identifier if OIDC
-    // TODO load cardinalities and add inputs
-    console.log("Cardinalities to be loaded..")
+//    const resourceType = getResourceTypeForCurrentUrl();
+//
+//    if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === 'Task') {
+//        const task = getResourceAsJson()
+//
+//        if (task.meta !== null && task.meta.profile !== null && task.meta.profile.length > 0) {
+//            const profile = task.meta.profile[0].split("|")
+//
+//            if (profile.length > 0) {
+//                let currentUrl = window.location.origin + window.location.pathname
+//                let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile[0]
+//
+//                if (profile.length > 1) {
+//                    requestUrl = requestUrl + "&version=" + profile[1]
+//                }
+//
+//                fetch(requestUrl, {
+//                    method: "GET",
+//                    headers: {
+//                        'Accept': 'application/json'
+//                    }
+//                }).then(response => {
+//                    console.log(response)
+//
+//                    if (response.ok) {
+//                         response.json().then((json) => {
+//                             // TODO
+//                         })
+//                    }
+//                })
+//            }
+//        }
+//    }
+}
+
+function getResourceAsJson() {
+    const resource = document.getElementById("json").innerText
+    return JSON.parse(resource)
 }

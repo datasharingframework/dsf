@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.UUID;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Task;
 
@@ -79,22 +80,38 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 				+ (draft ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + authoredOn + "\"") + "></input>\n");
 		out.write("</div>\n");
 
-		for (Task.ParameterComponent input : task.getInput())
+		if (task.hasInput())
 		{
-			writeInput(input, draft, out);
+			out.write("<section>");
+			out.write("<h2 class=\"input-output-header\">Inputs</h2>");
+
+			for (Task.ParameterComponent input : task.getInput())
+			{
+				writeInput(input, draft, out);
+			}
+
+			if (draft)
+			{
+				out.write("<div class=\"row row-submit\" id=\"submit-row\">\n");
+				out.write("<button type=\"button\" id=\"submit\" class=\"submit\" " + "onclick=\"startProcess();\""
+						+ ">Start Process</button>\n");
+				out.write("</div>\n");
+			}
+
+			out.write("</section>");
 		}
 
-		if (draft)
+		if (task.hasOutput())
 		{
-			out.write("<div class=\"row row-submit\" id=\"submit-row\">\n");
-			out.write("<button type=\"button\" id=\"submit\" class=\"submit\" " + "onclick=\"startProcess();\""
-					+ ">Start Process</button>\n");
-			out.write("</div>\n");
-		}
+			out.write("<section>");
+			out.write("<h2 class=\"input-output-header\">Outputs</h2>");
 
-		for (Task.TaskOutputComponent output : task.getOutput())
-		{
-			writeOutput(output, out);
+			for (Task.TaskOutputComponent output : task.getOutput())
+			{
+				writeOutput(output, out);
+			}
+
+			out.write("</section>");
 		}
 
 		out.write("</fieldset>\n");
@@ -159,32 +176,45 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 	{
 		String typeCode = getTypeCode(input);
 		boolean display = display(draft, typeCode);
-		boolean writable = !draft;
 
 		if (input.hasValue())
 		{
-			writeInputRow(input.getValue(), typeCode, typeCode, display, writable, out);
+			writeInputRow(input.getValue(), typeCode, typeCode, display, draft, out);
 		}
 	}
 
 	private void writeOutput(Task.TaskOutputComponent output, OutputStreamWriter out) throws IOException
 	{
-		// TODO
+		String typeCode = getTypeCode(output);
+		if (output.hasValue())
+		{
+			writeInputRow(output.getValue(), typeCode, typeCode, true, false, out);
+		}
 	}
 
 	private boolean display(boolean draft, String typeCode)
 	{
-		return !draft && ((CODESYSTEM_BPMN_MESSAGE_MESSAGE_NAME.equals(typeCode)
-				|| CODESYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(typeCode)
-				|| CODESYSTEM_BPMN_MESSAGE_CORRELATION_KEY.equals(typeCode)));
+		if (draft)
+			return !((CODESYSTEM_BPMN_MESSAGE_MESSAGE_NAME.equals(typeCode)
+					|| CODESYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(typeCode)
+					|| CODESYSTEM_BPMN_MESSAGE_CORRELATION_KEY.equals(typeCode)));
+		else
+			return true;
 	}
 
 	private String getTypeCode(Task.ParameterComponent input)
 	{
-		if (input.hasType())
-			return input.getType().getCoding().stream().findFirst()
-					.orElse(new Coding().setCode(UUID.randomUUID().toString())).getCode();
-		else
-			return UUID.randomUUID().toString();
+		return getCode(input.getType());
+	}
+
+	private String getTypeCode(Task.TaskOutputComponent output)
+	{
+		return getCode(output.getType());
+	}
+
+	private String getCode(CodeableConcept codeableConcept)
+	{
+		return codeableConcept.getCoding().stream().findFirst()
+				.orElse(new Coding().setCode(UUID.randomUUID().toString())).getCode();
 	}
 }

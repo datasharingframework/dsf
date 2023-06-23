@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
@@ -106,25 +107,45 @@ public abstract class InputHtmlGenerator
 						+ (writable ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + dateTime + "\"")
 						+ "></input>\n");
 			}
+			else if (type instanceof InstantType)
+			{
+				Date value = ((InstantType) type).getValue();
+				String dateTime = DATE_TIME_FORMAT.format(value);
+
+				out.write("<input type=\"datetime-local\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
+						+ (writable ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + dateTime + "\"")
+						+ "></input>\n");
+			}
 			else if (type instanceof UriType)
 			{
 				String value = ((UriType) type).getValue();
 				out.write("<input type=\"url\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
 						+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
 			}
-			else if (type instanceof Reference)
+			else if (type instanceof Reference reference)
 			{
-				String value = ((Reference) type).getReference();
-				out.write("<input type=\"url\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-						+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
+				if (reference.hasReference())
+				{
+					out.write("<input type=\"url\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
+							+ (writable ? "placeholder=\"" + reference.getReference() + "\""
+									: "value=\"" + reference.getReference() + "\"")
+							+ "></input>\n");
+				}
+				else if (reference.hasIdentifier())
+				{
+					Identifier identifier = reference.getIdentifier();
+					writeInputFieldSystemValueInput(elementId, writable, identifier.getSystem(), identifier.getValue(),
+							out);
+				}
 			}
-			else if (type instanceof Identifier)
+			else if (type instanceof Identifier identifier)
 			{
-				// TODO
+				writeInputFieldSystemValueInput(elementId, writable, identifier.getSystem(), identifier.getValue(),
+						out);
 			}
-			else if (type instanceof Coding)
+			else if (type instanceof Coding coding)
 			{
-				// TODO
+				writeInputFieldSystemValueInput(elementId, writable, coding.getSystem(), coding.getCode(), out);
 			}
 			else
 			{
@@ -132,5 +153,15 @@ public abstract class InputHtmlGenerator
 						+ "' in QuestionnaireResponse.item is not supported");
 			}
 		}
+	}
+
+	private void writeInputFieldSystemValueInput(String elementId, boolean writable, String system, String value,
+			OutputStreamWriter out) throws IOException
+	{
+		out.write("<input type=\"url\" id=\"" + elementId + "-system\" name=\"" + elementId + "-system\" "
+				+ (writable ? "placeholder=\"" + system + "\"" : "value=\"" + system + "\"") + "></input>\n");
+		out.write("<input class=\"identifier-coding-value\" type=\"text\" id=\"" + elementId + "-value\" name=\""
+				+ elementId + "-value\" " + (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"")
+				+ "></input>\n");
 	}
 }
