@@ -71,7 +71,9 @@ function readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors)
 }
 
 function readAndValidateValue(templateValue, id, valueType, errors) {
-    const value = document.getElementById(id)?.value
+    const parentElement = document.getElementById(id)
+
+    const value = parentElement?.value
     const valueSystem = document.getElementById(id + "-system")?.value
     const valueValue = document.getElementById(id + "-value")?.value
 
@@ -96,7 +98,7 @@ function readAndValidateValue(templateValue, id, valueType, errors) {
     } else if (valueType === 'valueUri') {
         return validateUrl(rowElement, errorListElement, value, errors, id)
     } else if (valueType === 'valueReference') {
-        if (value) {
+        if (parentElement) {
             return validateReference(rowElement, errorListElement, value, errors, id)
         } else {
             const valueIdentifier = validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, id)
@@ -107,7 +109,7 @@ function readAndValidateValue(templateValue, id, valueType, errors) {
     } else if (valueType === "valueIdentifier") {
         return validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, id)
     } else if (valueType === "valueCoding") {
-        return validateCoding(rowElement, errorListElement, value, errors, id)
+        return validateCoding(rowElement, errorListElement, valueSystem, valueValue, errors, id)
     } else {
         return null
     }
@@ -237,11 +239,11 @@ function validateIdentifier(rowElement, errorListElement, valueSystem, valueValu
     }
 }
 
-function validateCode(rowElement, errorListElement, valueSystem, valueValue, errors, id) {
+function validateCoding(rowElement, errorListElement, valueSystem, valueValue, errors, id) {
     const validatedSystem = validateUrl(rowElement, errorListElement, valueSystem, errors, id)
     const validatedCode = validateString(rowElement, errorListElement, valueValue, errors, id)
 
-    if (validatedSystem && validatedValue) {
+    if (validatedSystem && validatedCode) {
          removeError(rowElement, errorListElement)
          return {system: valueSystem, code: valueValue}
     } else {

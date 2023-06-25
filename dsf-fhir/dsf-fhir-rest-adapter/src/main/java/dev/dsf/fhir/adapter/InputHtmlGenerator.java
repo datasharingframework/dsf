@@ -78,10 +78,10 @@ public abstract class InputHtmlGenerator
 				boolean valueIsTrue = ((BooleanType) type).getValue();
 
 				out.write("<div>\n");
-				out.write("<label class=\"radio\"><input type=\"radio\" id=\"" + elementId + "\" name=\"" + elementId
-						+ "\" value=\"true\" " + ((valueIsTrue) ? "checked" : "") + "/>Yes</label>\n");
-				out.write("<label class=\"radio\"><input type=\"radio\" id=\"" + elementId + "\" name=\"" + elementId
-						+ "\" value=\"false\" " + ((!valueIsTrue) ? "checked" : "") + "/>No</label>\n");
+				out.write("<label class=\"radio\"><input type=\"radio\" id=\"" + elementId + "-true\" name=\""
+						+ elementId + "\" value=\"true\" " + ((valueIsTrue) ? "checked" : "") + "/>Yes</label>\n");
+				out.write("<label class=\"radio\"><input type=\"radio\" id=\"" + elementId + "-false\" name=\""
+						+ elementId + "\" value=\"false\" " + ((!valueIsTrue) ? "checked" : "") + "/>No</label>\n");
 				out.write("</div>\n");
 			}
 			else if (type instanceof DateType)
