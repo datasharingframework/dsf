@@ -5,6 +5,7 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
@@ -43,17 +44,30 @@ public abstract class InputHtmlGenerator
 			boolean display, boolean writable, OutputStreamWriter out) throws IOException
 	{
 		out.write("<div class=\"row " + (display ? "" : "invisible") + "\" id=\"" + elementId + "-input-row\">\n");
-		out.write("<label class=\"row-label\" for=\"" + elementId + "\">" + elementLabel + "</label>\n");
 
+		writeInputLabel(type, elementId, elementLabel, () -> "", out);
 		writeInputField(type, elementId, writable, out);
-		writeExtensionFields(extensions, elementId, writable, 0, out);
+		writeInputExtensionFields(extensions, elementId, writable, 0, out);
 
 		out.write("<ul class=\"error-list-not-visible\" id=\"" + elementId + "-error\">\n");
 		out.write("</ul>\n");
 		out.write("</div>\n");
 	}
 
-	protected void writeExtensionFields(List<Extension> extensions, String elementId, boolean writable, int depth,
+	protected void writeInputLabel(Type type, String elementId, String elementLabel, Supplier<String> additionalClasses,
+			OutputStreamWriter out) throws IOException
+	{
+		if (type instanceof Identifier || type instanceof Coding)
+		{
+			elementId = elementId + "-system";
+		}
+
+		String forElement = type != null ? " for=\"" + elementId + "\"" : "";
+		out.write("<label class=\"row-label " + additionalClasses.get() + "\"" + forElement + ">" + elementLabel
+				+ "</label>\n");
+	}
+
+	protected void writeInputExtensionFields(List<Extension> extensions, String elementId, boolean writable, int depth,
 			OutputStreamWriter out) throws IOException
 	{
 		for (Extension extension : extensions)
@@ -62,17 +76,21 @@ public abstract class InputHtmlGenerator
 			out.write("<div class=\"" + (depth == 0 ? "row-extension-0" : "row-extension") + "\" id=\""
 					+ extensionElementId + "-extension-row\">\n");
 
-			out.write("<label class=\"row-label" + (extension.hasValue() ? "" : " row-label-extension-no-value")
-					+ "\" for=\"" + extensionElementId + "\"> Extension: " + extension.getUrl() + "</label>\n");
-
+			String extensionElementLabel = "Extension: " + extension.getUrl();
 			if (extension.hasValue())
 			{
+				writeInputLabel(extension.getValue(), extensionElementId, extensionElementLabel, () -> "", out);
 				writeInputField(extension.getValue(), extensionElementId, writable, out);
+			}
+			else
+			{
+				writeInputLabel(null, extensionElementId, extensionElementLabel, () -> "row-label-extension-no-value",
+						out);
 			}
 
 			if (extension.hasExtension())
 			{
-				writeExtensionFields(extension.getExtension(), extensionElementId, writable, ++depth, out);
+				writeInputExtensionFields(extension.getExtension(), extensionElementId, writable, ++depth, out);
 			}
 			out.write("</div>\n");
 		}
