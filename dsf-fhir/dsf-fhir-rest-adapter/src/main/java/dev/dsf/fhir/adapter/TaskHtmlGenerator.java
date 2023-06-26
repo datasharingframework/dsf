@@ -46,7 +46,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		out.write("<div>");
 		out.write("<p>\n");
 		out.write("This Task resource " + (draft ? "can be used" : "was used")
-				+ " to instantiate the following process with:");
+				+ " to instantiate the following process:");
 		out.write("</p>\n");
 		out.write("<ul class=\"info-list\">\n");
 		out.write(
