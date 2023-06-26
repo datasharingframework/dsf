@@ -171,7 +171,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 			logger.warn(
 					"Update of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
 					getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
-					FhirServerRole.DELETE);
+					FhirServerRole.UPDATE);
 			return Optional.empty();
 		}
 	}
