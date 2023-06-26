@@ -179,7 +179,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 
 		if (input.hasValue())
 		{
-			writeInputRow(input.getValue(), typeCode, typeCode, display, draft, out);
+			writeInputRow(input.getValue(), input.getExtension(), typeCode, typeCode, display, draft, out);
 		}
 	}
 
@@ -188,8 +188,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		String typeCode = getTypeCode(output);
 		if (output.hasValue())
 		{
-			writeInputRow(output.getValue(), typeCode, typeCode, true, false, out);
-			// TODO write extensions
+			writeInputRow(output.getValue(), output.getExtension(), typeCode, typeCode, true, false, out);
 		}
 	}
 

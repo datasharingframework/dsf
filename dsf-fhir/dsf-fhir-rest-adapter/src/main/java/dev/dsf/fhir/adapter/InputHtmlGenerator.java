@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -37,17 +39,43 @@ public abstract class InputHtmlGenerator
 		out.write("</div>\n");
 	}
 
-	protected void writeInputRow(Type type, String elementId, String elementLabel, boolean display, boolean writable,
-			OutputStreamWriter out) throws IOException
+	protected void writeInputRow(Type type, List<Extension> extensions, String elementId, String elementLabel,
+			boolean display, boolean writable, OutputStreamWriter out) throws IOException
 	{
 		out.write("<div class=\"row " + (display ? "" : "invisible") + "\" id=\"" + elementId + "-input-row\">\n");
 		out.write("<label class=\"row-label\" for=\"" + elementId + "\">" + elementLabel + "</label>\n");
 
 		writeInputField(type, elementId, writable, out);
+		writeExtensionFields(extensions, elementId, writable, 0, out);
 
 		out.write("<ul class=\"error-list-not-visible\" id=\"" + elementId + "-error\">\n");
 		out.write("</ul>\n");
 		out.write("</div>\n");
+	}
+
+	protected void writeExtensionFields(List<Extension> extensions, String elementId, boolean writable, int depth,
+			OutputStreamWriter out) throws IOException
+	{
+		for (Extension extension : extensions)
+		{
+			String extensionElementId = elementId + "-" + extension.getUrl();
+			out.write("<div class=\"" + (depth == 0 ? "row-extension-0" : "row-extension") + "\" id=\""
+					+ extensionElementId + "-extension-row\">\n");
+
+			out.write("<label class=\"row-label" + (extension.hasValue() ? "" : " row-label-extension-no-value")
+					+ "\" for=\"" + extensionElementId + "\"> Extension: " + extension.getUrl() + "</label>\n");
+
+			if (extension.hasValue())
+			{
+				writeInputField(extension.getValue(), extensionElementId, writable, out);
+			}
+
+			if (extension.hasExtension())
+			{
+				writeExtensionFields(extension.getExtension(), extensionElementId, writable, ++depth, out);
+			}
+			out.write("</div>\n");
+		}
 	}
 
 	protected void writeInputField(Type type, String elementId, boolean writable, OutputStreamWriter out)

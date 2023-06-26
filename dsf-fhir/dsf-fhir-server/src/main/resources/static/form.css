@@ -20,6 +20,21 @@ fieldset#form-fieldset {
     background-color: #f2f2f2;
 }
 
+.row-extension-0 {
+    margin-top: 12px;
+    padding: 0 0 12px 12px;
+    border-radius: 5px;
+    background-color: #e2e2e2;
+}
+
+.row-label-extension-no-value {
+    margin-bottom: -10px;
+}
+
+.row-extension {
+    padding: 10px 0 0 15px;
+}
+
 .row-display {
     padding-top: 15px;
 }
