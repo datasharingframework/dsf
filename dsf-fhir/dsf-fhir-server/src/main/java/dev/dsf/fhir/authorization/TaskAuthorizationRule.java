@@ -127,7 +127,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				}
 				else
 				{
-					logger.warn("Create of Task unauthorized for identity '{}', Task.status requested,  {}",
+					logger.warn("Create of Task unauthorized for identity '{}', Task.status requested, {}",
 							identity.getName(), errors.get());
 					return Optional.empty();
 				}
