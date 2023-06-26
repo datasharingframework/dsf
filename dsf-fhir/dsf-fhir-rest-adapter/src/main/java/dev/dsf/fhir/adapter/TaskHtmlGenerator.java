@@ -2,6 +2,8 @@ package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -85,9 +87,10 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 			out.write("<section>");
 			out.write("<h2 class=\"input-output-header\">Inputs</h2>");
 
+			Map<String, Integer> elementIdIndexMap = new HashMap<>();
 			for (Task.ParameterComponent input : task.getInput())
 			{
-				writeInput(input, draft, out);
+				writeInput(input, elementIdIndexMap, draft, out);
 			}
 
 			if (draft)
@@ -106,9 +109,10 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 			out.write("<section>");
 			out.write("<h2 class=\"input-output-header\">Outputs</h2>");
 
+			Map<String, Integer> elementIdIndexMap = new HashMap<>();
 			for (Task.TaskOutputComponent output : task.getOutput())
 			{
-				writeOutput(output, out);
+				writeOutput(output, elementIdIndexMap, out);
 			}
 
 			out.write("</section>");
@@ -172,23 +176,27 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		}
 	}
 
-	private void writeInput(Task.ParameterComponent input, boolean draft, OutputStreamWriter out) throws IOException
+	private void writeInput(Task.ParameterComponent input, Map<String, Integer> elementIdIndexMap, boolean draft,
+			OutputStreamWriter out) throws IOException
 	{
 		String typeCode = getTypeCode(input);
 		boolean display = display(draft, typeCode);
 
 		if (input.hasValue())
 		{
-			writeInputRow(input.getValue(), input.getExtension(), typeCode, typeCode, display, draft, out);
+			writeInputRow(input.getValue(), input.getExtension(), typeCode, elementIdIndexMap, typeCode, display, draft,
+					out);
 		}
 	}
 
-	private void writeOutput(Task.TaskOutputComponent output, OutputStreamWriter out) throws IOException
+	private void writeOutput(Task.TaskOutputComponent output, Map<String, Integer> elementIdIndexMap,
+			OutputStreamWriter out) throws IOException
 	{
 		String typeCode = getTypeCode(output);
 		if (output.hasValue())
 		{
-			writeInputRow(output.getValue(), output.getExtension(), typeCode, typeCode, true, false, out);
+			writeInputRow(output.getValue(), output.getExtension(), typeCode, elementIdIndexMap, typeCode, true, false,
+					out);
 		}
 	}
 

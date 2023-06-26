@@ -14,11 +14,13 @@ function startProcess() {
 }
 
 function readTaskInputsFromForm(task, errors) {
-    task.id = null
-    task.meta.lastUpdated = null
-    task.meta.version = null
+    delete task["id"]
+    delete task.meta["lastUpdated"]
+    delete task.meta["version"]
+    delete task.meta["versionId"]
+    delete task["identifier"]
 
-    // TODO set requester as practitioner-identifier if OIDC
+    // TODO set requester as practitioner-identifier if OIDC or Personal Client-Certificate
     //task.requester.type = "Practitioner"
     //task.requester.identifier.value = ""
     //task.requester.identifier.system = "http://dsf.dev/sid/practitioner-identifier"
@@ -26,13 +28,15 @@ function readTaskInputsFromForm(task, errors) {
     task.status = "requested"
     task.authoredOn = new Date().toISOString()
 
+    const idIndexMap = new Map()
+
     task.input.forEach((input) => {
         if (input.hasOwnProperty("type")) {
             const id = input.type.coding[0].code
 
             if (id !== "message-name" && id !== "business-key" && id !== "correlation-key") {
                 const inputValueType = Object.keys(input).find((string) => string.startsWith("value"))
-                input[inputValueType] = readAndValidateValue(input, id, inputValueType, errors)
+                input[inputValueType] = readAndValidateValue(input, id, idIndexMap, inputValueType, errors)
             }
         }
     })
@@ -56,6 +60,8 @@ function completeQuestionnaireResponse() {
 function readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors) {
     questionnaireResponse.status = "completed"
 
+    const idIndexMap = new Map()
+
     questionnaireResponse.item.forEach((item) => {
         if (item.hasOwnProperty("answer")) {
             const id = item.linkId
@@ -64,54 +70,67 @@ function readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors)
                 const answer = item.answer[0]
                 const answerType = Object.keys(answer).find((string) => string.startsWith("value"))
 
-                answer[answerType] = readAndValidateValue(answer, id, answerType, errors)
+                answer[answerType] = readAndValidateValue(answer, id, idIndexMap, answerType, errors)
             }
         }
     })
 }
 
-function readAndValidateValue(templateValue, id, valueType, errors) {
-    const parentElement = document.getElementById(id)
+function readAndValidateValue(templateValue, id, idIndexMap, valueType, errors) {
+    const idWithIndex = getIdWithIndex(id, idIndexMap)
+
+    const parentElement = document.getElementById(idWithIndex)
 
     const value = parentElement?.value
-    const valueSystem = document.getElementById(id + "-system")?.value
-    const valueValue = document.getElementById(id + "-value")?.value
+    const valueSystem = document.getElementById(idWithIndex + "-system")?.value
+    const valueValue = document.getElementById(idWithIndex + "-value")?.value
 
-    const rowElement = document.getElementById(id + "-input-row")
-    const errorListElement = document.getElementById(id + "-error")
+    const rowElement = document.getElementById(idWithIndex + "-input-row")
+    const errorListElement = document.getElementById(idWithIndex + "-error")
     errorListElement.replaceChildren()
 
     if (valueType === 'valueString') {
-        return validateString(rowElement, errorListElement, value, errors, id)
+        return validateString(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueInteger') {
-        return validateInteger(rowElement, errorListElement, value, errors, id)
+        return validateInteger(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueDecimal') {
-        return validateDecimal(rowElement, errorListElement, value, errors, id)
+        return validateDecimal(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueDate') {
-        return validateDate(rowElement, errorListElement, value, errors, id)
+        return validateDate(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueTime') {
-        return validateTime(rowElement, errorListElement, value, errors, id)
+        return validateTime(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueDateTime') {
-        return validateDateTime(rowElement, errorListElement, value, errors, id)
+        return validateDateTime(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueInstant') {
-        return validateInstant(rowElement, errorListElement, value, errors, id)
+        return validateInstant(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueUri') {
-        return validateUrl(rowElement, errorListElement, value, errors, id)
+        return validateUrl(rowElement, errorListElement, value, errors, idWithIndex)
     } else if (valueType === 'valueReference') {
         if (parentElement) {
-            return validateReference(rowElement, errorListElement, value, errors, id)
+            return validateReference(rowElement, errorListElement, value, errors, idWithIndex)
         } else {
-            const valueIdentifier = validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, id)
+            const valueIdentifier = validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, idWithIndex)
             return {identifier: valueIdentifier, type: templateValue?.valueReference?.type}
         }
     } else if (valueType === 'valueBoolean') {
-        return document.querySelector("input[name=" + id + "]:checked").value
+        return document.querySelector("input[name=" + idWithIndex + "]:checked").value
     } else if (valueType === "valueIdentifier") {
-        return validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, id)
+        return validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors, idWithIndex)
     } else if (valueType === "valueCoding") {
-        return validateCoding(rowElement, errorListElement, valueSystem, valueValue, errors, id)
+        return validateCoding(rowElement, errorListElement, valueSystem, valueValue, errors, idWithIndex)
     } else {
         return null
+    }
+}
+
+function getIdWithIndex(id, idIndexMap) {
+    if (idIndexMap.has(id)) {
+        const index = idIndexMap.get(id) + 1
+        idIndexMap.set(id, index)
+        return id + "-" + index
+    } else {
+        idIndexMap.set(id, 0)
+        return id + "-0"
     }
 }
 

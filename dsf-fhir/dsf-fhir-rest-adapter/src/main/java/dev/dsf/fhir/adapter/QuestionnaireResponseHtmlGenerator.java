@@ -3,6 +3,8 @@ package dev.dsf.fhir.adapter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.StringType;
@@ -69,9 +71,10 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 
 		out.write("<fieldset id=\"form-fieldset\" " + (completed ? "disabled=\"disabled\"" : "") + ">\n");
 
+		Map<String, Integer> elementIdIndexMap = new HashMap<>();
 		for (QuestionnaireResponse.QuestionnaireResponseItemComponent item : questionnaireResponse.getItem())
 		{
-			writeRow(item, completed, out);
+			writeRow(item, elementIdIndexMap, completed, out);
 		}
 
 		if (QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(questionnaireResponse.getStatus()))
@@ -127,8 +130,8 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 				.orElse("unknown");
 	}
 
-	private void writeRow(QuestionnaireResponse.QuestionnaireResponseItemComponent item, boolean completed,
-			OutputStreamWriter out) throws IOException
+	private void writeRow(QuestionnaireResponse.QuestionnaireResponseItemComponent item,
+			Map<String, Integer> elementIdIndexMap, boolean completed, OutputStreamWriter out) throws IOException
 	{
 		String linkId = item.getLinkId();
 		String text = item.getText();
@@ -136,8 +139,8 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 		boolean writable = !completed;
 
 		if (item.hasAnswer())
-			writeInputRow(item.getAnswerFirstRep().getValue(), Collections.emptyList(), linkId, text, display, writable,
-					out);
+			writeInputRow(item.getAnswerFirstRep().getValue(), Collections.emptyList(), linkId, elementIdIndexMap, text,
+					display, writable, out);
 		else
 			writeDisplayRow(text, linkId, display, out);
 	}

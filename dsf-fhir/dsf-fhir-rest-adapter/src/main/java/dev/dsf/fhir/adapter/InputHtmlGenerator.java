@@ -5,6 +5,7 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.model.BooleanType;
@@ -40,16 +41,20 @@ public abstract class InputHtmlGenerator
 		out.write("</div>\n");
 	}
 
-	protected void writeInputRow(Type type, List<Extension> extensions, String elementId, String elementLabel,
-			boolean display, boolean writable, OutputStreamWriter out) throws IOException
+	protected void writeInputRow(Type type, List<Extension> extensions, String elementId,
+			Map<String, Integer> elementIdIndexMap, String elementLabel, boolean display, boolean writable,
+			OutputStreamWriter out) throws IOException
 	{
-		out.write("<div class=\"row " + (display ? "" : "invisible") + "\" id=\"" + elementId + "-input-row\">\n");
+		String elementIdWithIndex = getElementIdWithIndex(elementId, elementIdIndexMap);
 
-		writeInputLabel(type, elementId, elementLabel, () -> "", out);
-		writeInputField(type, elementId, writable, out);
-		writeInputExtensionFields(extensions, elementId, writable, 0, out);
+		out.write("<div class=\"row" + (display ? "" : " invisible") + "\" id=\"" + elementIdWithIndex
+				+ "-input-row\">\n");
 
-		out.write("<ul class=\"error-list-not-visible\" id=\"" + elementId + "-error\">\n");
+		writeInputLabel(type, elementIdWithIndex, elementLabel, () -> "", out);
+		writeInputField(type, elementIdWithIndex, writable, out);
+		writeInputExtensionFields(extensions, elementIdWithIndex, writable, 0, out);
+
+		out.write("<ul class=\"error-list-not-visible\" id=\"" + elementIdWithIndex + "-error\">\n");
 		out.write("</ul>\n");
 		out.write("</div>\n");
 	}
@@ -60,6 +65,14 @@ public abstract class InputHtmlGenerator
 		if (type instanceof Identifier || type instanceof Coding)
 		{
 			elementId = elementId + "-system";
+		}
+		else if (type instanceof Reference reference && reference.hasIdentifier())
+		{
+			elementId = elementId + "-system";
+		}
+		else if (type instanceof BooleanType)
+		{
+			elementId = elementId + "-true";
 		}
 
 		String forElement = type != null ? " for=\"" + elementId + "\"" : "";
@@ -209,5 +222,20 @@ public abstract class InputHtmlGenerator
 		out.write("<input class=\"identifier-coding-value\" type=\"text\" id=\"" + elementId + "-value\" name=\""
 				+ elementId + "-value\" " + (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"")
 				+ "></input>\n");
+	}
+
+	private String getElementIdWithIndex(String elementId, Map<String, Integer> elementIdIndexMap)
+	{
+		if (elementIdIndexMap.containsKey(elementId))
+		{
+			int index = elementIdIndexMap.get(elementId) + 1;
+			elementIdIndexMap.put(elementId, index);
+			return elementId + "-" + index;
+		}
+		else
+		{
+			elementIdIndexMap.put(elementId, 0);
+			return elementId + "-0";
+		}
 	}
 }
