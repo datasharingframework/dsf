@@ -169,6 +169,19 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		}
 	}
 
+	private void testUpdateExpectForbidden(FhirWebserviceClient client, Task task) throws Exception
+	{
+		try
+		{
+			client.update(task);
+			fail("WebApplicationException expected");
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(403, e.getResponse().getStatus());
+		}
+	}
+
 	@Test
 	public void testCreateForbiddenLocalUserNotPartOfRequesterOrganization() throws Exception
 	{
@@ -629,8 +642,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 	private StructureDefinition readTestTaskProfile() throws IOException
 	{
-		try (InputStream in = Files
-				.newInputStream(Paths.get("src/test/resources/integration/task/dsf-test-task-profile-1.0.xml")))
+		return readTestTaskProfile("dsf-test-task-profile-1.0.xml");
+	}
+
+	private StructureDefinition readTestTaskProfile(String fileName) throws IOException
+	{
+		try (InputStream in = Files.newInputStream(Paths.get("src/test/resources/integration/task", fileName)))
 		{
 			return fhirContext.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
@@ -1436,5 +1453,62 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
 		assertTrue(response.getEntryFirstRep().hasResource());
 		assertTrue(response.getEntryFirstRep().getResource() instanceof Task);
+	}
+
+	@Test
+	public void testCreateAllowViaDraftNotAllowedAsRequestedLocal() throws Exception
+	{
+		ActivityDefinition ad14 = readActivityDefinition("dsf-test-activity-definition14-1.0.xml");
+		ActivityDefinition createdAd14 = getWebserviceClient().create(ad14);
+		assertNotNull(createdAd14);
+		assertNotNull(createdAd14.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		task.addIdentifier().setSystem("http://dsf.dev/sid/task-identifier").setValue("test");
+		task.setStatus(TaskStatus.DRAFT);
+
+		Task createdDraftTask = getWebserviceClient().create(task);
+		assertNotNull(createdDraftTask);
+		assertNotNull(createdDraftTask.getIdElement().getIdPart());
+
+		task.getIdentifier().clear();
+		task.setStatus(TaskStatus.REQUESTED);
+
+		testCreateExpectForbidden(getWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateForbiddenDraftTaskExternalOrganization() throws Exception
+	{
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		task.setStatus(TaskStatus.DRAFT);
+
+		testCreateExpectForbidden(getExternalWebserviceClient(), task);
+	}
+
+	@Test
+	public void testCreateForbiddenDraftTaskPractitionerIdentity() throws Exception
+	{
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		task.setStatus(TaskStatus.DRAFT);
+
+		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+	}
+
+	@Test
+	public void testUpdateRequestedToInProgressForbiddenForExternal() throws Exception
+	{
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		task.setStatus(TaskStatus.REQUESTED);
+		TaskDao dao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		Task createdTask = dao.create(task);
+
+		createdTask.setStatus(TaskStatus.INPROGRESS);
+		testUpdateExpectForbidden(getExternalWebserviceClient(), createdTask);
 	}
 }
