@@ -154,6 +154,8 @@ services:
               - SEARCH
               - HISTORY
               - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
       JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
@@ -220,6 +222,8 @@ services:
               - SEARCH
               - HISTORY
               - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
       JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
@@ -286,6 +290,8 @@ services:
               - SEARCH
               - HISTORY
               - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
       JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
@@ -359,6 +365,8 @@ services:
               - SEARCH
               - HISTORY
               - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
       JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
