@@ -85,7 +85,7 @@ services:
       - db
 
   db:
-    image: postgres:13
+    image: postgres:15
     restart: "no"
 #    ports:
 #      - 127.0.0.1:5432:5432
