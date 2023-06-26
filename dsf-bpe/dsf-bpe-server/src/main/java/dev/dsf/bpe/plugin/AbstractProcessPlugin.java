@@ -73,6 +73,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import dev.dsf.bpe.v1.constants.CodeSystems;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
 
@@ -1159,6 +1160,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 				logger.warn(
 						"Ignoring FHIR resource {} from process plugin {}-{}: No Task.identifier with system '{}' and value, or value contains | character",
 						file, getDefinitionName(), getDefinitionVersion(), TaskIdentifier.SID);
+			// Additional checks see instantiatesCanonicalMatchesProcessIdAndIdentifierValid(...)
 		}
 
 		boolean statusOk = TaskStatus.DRAFT.equals(resource.getStatus());
@@ -1200,10 +1202,42 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			logger.warn(
 					"Ignoring FHIR resource {} from process plugin {}-{}: Task.instantiatesCanonical not matching {}",
 					file, getDefinitionName(), getDefinitionVersion(), INSTANTIATES_CANONICAL_PATTERN_STRING);
+			// Additional checks see instantiatesCanonicalMatchesProcessIdAndIdentifierValid(...)
+		}
+
+		boolean inputOk = false;
+		if (!resource.hasInput())
+		{
+			logger.warn(
+					"Ignoring FHIR resource {} from process plugin {}-{}: Task.input empty, input parameter with {}|{} expected",
+					file, getDefinitionName(), getDefinitionVersion(), CodeSystems.BpmnMessage.URL,
+					CodeSystems.BpmnMessage.Codes.MESSAGE_NAME);
+		}
+		else
+		{
+			inputOk = resource
+					.getInput().stream().filter(
+							i -> i.getType().getCoding().stream()
+									.anyMatch(c -> CodeSystems.BpmnMessage.URL.equals(c.getSystem())
+											&& CodeSystems.BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
+					.count() == 1;
+
+			if (!inputOk)
+				logger.warn(
+						"Ignoring FHIR resource {} from process plugin {}-{}: One input parameter with {}|{} expected",
+						file, getDefinitionName(), getDefinitionVersion(), CodeSystems.BpmnMessage.URL,
+						CodeSystems.BpmnMessage.Codes.MESSAGE_NAME);
+		}
+
+		boolean outputOk = !resource.hasOutput();
+		if (!outputOk)
+		{
+			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.output not empty", file,
+					getDefinitionName(), getDefinitionVersion());
 		}
 
 		// TODO add additional validation steps
-		return identifierOk && statusOk && requesterOk && recipientOk && instantiatesCanonicalOk;
+		return identifierOk && statusOk && requesterOk && recipientOk && instantiatesCanonicalOk && inputOk && outputOk;
 	}
 
 	private boolean isLocalOrganization(Reference reference, String refLocation, String file,
