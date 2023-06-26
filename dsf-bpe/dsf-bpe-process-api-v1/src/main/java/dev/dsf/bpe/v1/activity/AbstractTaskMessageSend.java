@@ -38,6 +38,8 @@ import dev.dsf.bpe.v1.variables.Target;
 import dev.dsf.bpe.v1.variables.Targets;
 import dev.dsf.bpe.v1.variables.Variables;
 import dev.dsf.fhir.client.FhirWebserviceClient;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.StatusType;
 
 /**
  * Base class for implementing BPMN message send tasks, intermediate message throw events and message end events using
@@ -194,11 +196,19 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		}
 		catch (Exception e)
 		{
+			String exceptionMessage = e.getMessage();
+			if (e instanceof WebApplicationException && (e.getMessage() == null || e.getMessage().isBlank()))
+			{
+				StatusType statusInfo = ((WebApplicationException) e).getResponse().getStatusInfo();
+				exceptionMessage = statusInfo.getStatusCode() + " " + statusInfo.getReasonPhrase();
+			}
+
 			String errorMessage = "Task " + instantiatesCanonical + " send failed [recipient: "
 					+ target.getOrganizationIdentifierValue() + ", endpoint: " + target.getEndpointIdentifierValue()
 					+ ", businessKey: " + businessKey
 					+ (target.getCorrelationKey() == null ? "" : ", correlationKey: " + target.getCorrelationKey())
-					+ ", message: " + messageName + ", error: " + e.getClass().getName() + " - " + e.getMessage() + "]";
+					+ ", message: " + messageName + ", error: " + e.getClass().getName() + " - " + exceptionMessage
+					+ "]";
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
