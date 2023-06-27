@@ -82,7 +82,9 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 				+ (draft ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + authoredOn + "\"") + "></input>\n");
 		out.write("</div>\n");
 
-		if (task.hasInput())
+		// the Task has more inputs than the message-name,
+		// just the message-name input is only possible with Task status draft
+		if (task.getInput().size() > 1)
 		{
 			out.write("<section>");
 			out.write("<h2 class=\"input-output-header\">Inputs</h2>");
@@ -91,14 +93,6 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 			for (Task.ParameterComponent input : task.getInput())
 			{
 				writeInput(input, elementIdIndexMap, draft, out);
-			}
-
-			if (draft)
-			{
-				out.write("<div class=\"row row-submit\" id=\"submit-row\">\n");
-				out.write("<button type=\"button\" id=\"submit\" class=\"submit\" " + "onclick=\"startProcess();\""
-						+ ">Start Process</button>\n");
-				out.write("</div>\n");
 			}
 
 			out.write("</section>");
@@ -116,6 +110,14 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 			}
 
 			out.write("</section>");
+		}
+
+		if (draft)
+		{
+			out.write("<div class=\"row row-submit\" id=\"submit-row\">\n");
+			out.write("<button type=\"button\" id=\"submit\" class=\"submit\" " + "onclick=\"startProcess();\""
+					+ ">Start Process</button>\n");
+			out.write("</div>\n");
 		}
 
 		out.write("</fieldset>\n");
