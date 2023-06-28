@@ -2310,7 +2310,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		ResearchStudy rs2 = new ResearchStudy();
 		getReadAccessHelper().addLocal(rs2);
 		getReadAccessHelper().addRole(rs2, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role",
-				"MeDIC");
+				"DIC");
 
 		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
 		ResearchStudy createdRs2 = researchStudyDao.create(rs2);

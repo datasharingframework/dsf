@@ -1,5 +1,6 @@
 package dev.dsf.common.auth;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.jetty.security.openid.JwtDecoder;
@@ -10,53 +11,50 @@ public class DsfOpenIdCredentialsImpl implements DsfOpenIdCredentials
 	private static final String ACCESS_TOKEN = "access_token";
 	private static final String ID_TOKEN = "id_token";
 
-	private final OpenIdCredentials credentials;
+	private final Map<String, Object> idToken;
+	private final Map<String, Object> accessToken;
 
 	public DsfOpenIdCredentialsImpl(OpenIdCredentials credentials)
 	{
-		this.credentials = credentials;
+		this.idToken = JwtDecoder.decode((String) credentials.getResponse().get(ID_TOKEN));
+		this.accessToken = JwtDecoder.decode((String) credentials.getResponse().get(ACCESS_TOKEN));
 	}
 
-	public OpenIdCredentials getCredentials()
+	public DsfOpenIdCredentialsImpl(String accessToken)
 	{
-		return credentials;
+		this.idToken = Collections.emptyMap();
+		this.accessToken = JwtDecoder.decode(accessToken);
 	}
 
 	@Override
 	public String getUserId()
 	{
-		return credentials.getUserId();
+		return (String) accessToken.get("sub");
 	}
 
 	@Override
 	public Map<String, Object> getIdToken()
 	{
-		return getToken(ID_TOKEN);
+		return Collections.unmodifiableMap(idToken);
 	}
 
 	@Override
 	public Map<String, Object> getAccessToken()
 	{
-		return getToken(ACCESS_TOKEN);
-	}
-
-	private Map<String, Object> getToken(String tokenName)
-	{
-		String token = (String) credentials.getResponse().get(tokenName);
-		return JwtDecoder.decode(token);
+		return Collections.unmodifiableMap(accessToken);
 	}
 
 	@Override
 	public Long getLongClaim(String key)
 	{
-		Object o = credentials.getClaims().get(key);
+		Object o = getAccessToken().get(key);
 		return o instanceof Long ? (Long) o : null;
 	}
 
 	@Override
 	public String getStringClaimOrDefault(String key, String defaultValue)
 	{
-		Object o = credentials.getClaims().getOrDefault(key, defaultValue);
+		Object o = getAccessToken().getOrDefault(key, defaultValue);
 		return o instanceof String ? (String) o : defaultValue;
 	}
 }

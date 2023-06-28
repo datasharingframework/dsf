@@ -130,18 +130,18 @@ public class ReadAccessHelperTest
 	@Test
 	public void testHasRole() throws Exception
 	{
-		final String consortiumIdentifier = "consortium.com";
+		final String parentOrganizationIdentifier = "parent.org";
 		final String roleSystem = "role-system";
 		final String roleCode = "role-code";
 
 		var r = new CodeSystem();
 		assertFalse(helper.hasLocal(r));
-		assertFalse(helper.hasRole(r, consortiumIdentifier, roleSystem, roleCode));
+		assertFalse(helper.hasRole(r, parentOrganizationIdentifier, roleSystem, roleCode));
 		assertFalse(helper.hasAll(r));
 
-		helper.addRole(r, consortiumIdentifier, roleSystem, roleCode);
+		helper.addRole(r, parentOrganizationIdentifier, roleSystem, roleCode);
 		assertTrue(helper.hasLocal(r));
-		assertTrue(helper.hasRole(r, consortiumIdentifier, roleSystem, roleCode));
+		assertTrue(helper.hasRole(r, parentOrganizationIdentifier, roleSystem, roleCode));
 		assertFalse(helper.hasAll(r));
 	}
 
@@ -150,7 +150,7 @@ public class ReadAccessHelperTest
 	{
 		OrganizationAffiliation affiliation = new OrganizationAffiliation();
 		affiliation.getOrganization().getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
-				.setValue("consortium.com");
+				.setValue("parent.org");
 		affiliation.addCode().addCoding().setSystem("role-system").setCode("role-code");
 
 		var r = new CodeSystem();
@@ -167,9 +167,9 @@ public class ReadAccessHelperTest
 	@Test
 	public void testHasRoleViaFile() throws Exception
 	{
-		final String consortiumIdentifier = "consortium.com";
+		final String parentOrganizationIdentifier = "parent.org";
 		final String roleSystem = "http://dsf.dev/fhir/CodeSystem/organization-role";
-		final String roleCode = "MeDIC";
+		final String roleCode = "DIC";
 
 		try (InputStream in = Files
 				.newInputStream(Paths.get("src/test/resources/authorization/read-access/tag_role.xml")))
@@ -177,9 +177,9 @@ public class ReadAccessHelperTest
 			var r = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, in);
 
 			assertTrue(helper.isValid(r));
-			assertTrue(helper.isValid(r, org -> consortiumIdentifier.equals(org.getValue()),
+			assertTrue(helper.isValid(r, org -> parentOrganizationIdentifier.equals(org.getValue()),
 					role -> roleSystem.equals(role.getSystem()) && roleCode.equals(role.getCode())));
-			assertTrue(helper.hasRole(r, consortiumIdentifier, roleSystem, roleCode));
+			assertTrue(helper.hasRole(r, parentOrganizationIdentifier, roleSystem, roleCode));
 		}
 	}
 
@@ -243,7 +243,7 @@ public class ReadAccessHelperTest
 	{
 		var r = new CodeSystem();
 		helper.addLocal(r);
-		helper.addRole(r, "consortium.com", "role-system", "role-code");
+		helper.addRole(r, "parent.org", "role-system", "role-code");
 
 		assertTrue(helper.isValid(r));
 	}
@@ -251,15 +251,15 @@ public class ReadAccessHelperTest
 	@Test
 	public void testRoleValidWithTests() throws Exception
 	{
-		final String consortiumIdentifier = "consortium.com";
+		final String parentOrganizationIdentifier = "parent.org";
 		final String roleSystem = "role-system";
 		final String roleCode = "role-code";
 
 		var r = new CodeSystem();
 		helper.addLocal(r);
-		helper.addRole(r, consortiumIdentifier, roleSystem, roleCode);
+		helper.addRole(r, parentOrganizationIdentifier, roleSystem, roleCode);
 
-		assertTrue(helper.isValid(r, org -> consortiumIdentifier.equals(org.getValue()),
+		assertTrue(helper.isValid(r, org -> parentOrganizationIdentifier.equals(org.getValue()),
 				role -> roleSystem.equals(role.getSystem()) && roleCode.equals(role.getCode())));
 	}
 

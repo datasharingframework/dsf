@@ -14,15 +14,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.jakarta.client.JakartaWebSocketShutdownContainer;
 import org.eclipse.jetty.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
@@ -43,9 +53,16 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import de.rwh.utils.crypto.CertificateHelper;
+import de.rwh.utils.crypto.io.CertificateReader;
+import de.rwh.utils.crypto.io.PemIo;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
 import de.rwh.utils.test.LiquibaseTemplateTestRule;
-import dev.dsf.common.jetty.JettyConfig;
+import dev.dsf.common.auth.ClientCertificateAuthenticator;
+import dev.dsf.common.auth.DelegatingAuthenticator;
+import dev.dsf.common.auth.DsfLoginService;
+import dev.dsf.common.auth.DsfSecurityHandler;
+import dev.dsf.common.auth.StatusPortAuthenticator;
 import dev.dsf.common.jetty.JettyServer;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
@@ -58,6 +75,7 @@ import dev.dsf.fhir.integration.X509Certificates.ClientCertificate;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceCleanerImpl;
 import dev.dsf.fhir.service.ReferenceExtractorImpl;
+import jakarta.servlet.ServletContainerInitializer;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -98,6 +116,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
 	private static FhirWebserviceClient externalWebserviceClient;
+	private static FhirWebserviceClient practitionerWebserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -118,6 +137,12 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		externalWebserviceClient = createWebserviceClient(certificates.getExternalClientCertificate().getTrustStore(),
 				certificates.getExternalClientCertificate().getKeyStore(),
 				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
+
+		logger.info("Creating practitioner client ...");
+		practitionerWebserviceClient = createWebserviceClient(
+				certificates.getPractitionerClientCertificate().getTrustStore(),
+				certificates.getPractitionerClientCertificate().getKeyStore(),
+				certificates.getPractitionerClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
@@ -145,17 +170,77 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	private static JettyServer startFhirServer() throws Exception
 	{
-		JettyConfig jettyConfig = new TestJettyConfig(10001, 8001, CONTEXT_PATH, certificates.getCaCertificateFile(),
-				certificates.getServerCertificateFile(), certificates.getServerCertificatePrivateKeyFile(),
-				X509Certificates.PASSWORD, Paths.get("log4j2.xml"), DATABASE_URL, DATABASE_USER, DATABASE_USER_PASSWORD,
-				DATABASE_DELETE_USER, DATABASE_DELETE_USER_PASSWORD, BASE_URL, certificates.getClientCertificate(),
-				"Test_Organization", FHIR_BUNDLE_FILE, certificates.getCaCertificateFile(),
-				certificates.getClientCertificateFile(), certificates.getClientCertificatePrivateKeyFile(),
-				X509Certificates.PASSWORD);
+		int statusPort = 10001;
 
-		JettyServer server = new JettyServer("fhir-server", jettyConfig,
-				Stream.of(JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
-						JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class));
+		Map<String, String> initParameters = new HashMap<>();
+		initParameters.put("dev.dsf.server.status.port", String.valueOf(statusPort));
+
+		initParameters.put("dev.dsf.fhir.db.url", DATABASE_URL);
+		initParameters.put("dev.dsf.fhir.db.user.username", DATABASE_USER);
+		initParameters.put("dev.dsf.fhir.db.user.password", DATABASE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", DATABASE_DELETE_USER);
+		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", DATABASE_DELETE_USER_PASSWORD);
+
+		initParameters.put("dev.dsf.fhir.server.base.url", BASE_URL);
+		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
+		initParameters.put("dev.dsf.fhir.server.init.bundle", FHIR_BUNDLE_FILE.toString());
+
+		initParameters.put("dev.dsf.fhir.client.trust.server.certificate.cas",
+				certificates.getCaCertificateFile().toString());
+		initParameters.put("dev.dsf.fhir.client.certificate", certificates.getClientCertificateFile().toString());
+		initParameters.put("dev.dsf.fhir.client.certificate.private.key",
+				certificates.getClientCertificatePrivateKeyFile().toString());
+		initParameters.put("dev.dsf.fhir.client.certificate.private.key.password",
+				String.valueOf(X509Certificates.PASSWORD));
+
+		initParameters.put("dev.dsf.fhir.server.roleConfig", String.format("""
+				- practitioner-test-user:
+				    thumbprint: %s
+				    dsf-role:
+				      - CREATE
+				      - READ
+				      - UPDATE
+				      - DELETE
+				      - SEARCH
+				      - HISTORY
+				    practitioner-role:
+				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
+				""", certificates.getPractitionerClientCertificate().getCertificateSha512ThumbprintHex()));
+
+		KeyStore caCertificate = CertificateReader.allFromCer(certificates.getCaCertificateFile());
+		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(certificates.getServerCertificatePrivateKeyFile(),
+				X509Certificates.PASSWORD);
+		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificates.getServerCertificateFile());
+		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+		KeyStore serverCertificateKeyStore = CertificateHelper.toJksKeyStore(privateKey,
+				new Certificate[] { certificate }, UUID.randomUUID().toString(), keyStorePassword);
+
+		Function<Server, Connector> apiConnector = JettyServer.httpsConnector("127.0.0.1", 8001, caCertificate,
+				serverCertificateKeyStore, keyStorePassword, false);
+		Function<Server, Connector> statusConnector = JettyServer.statusConnector("127.0.0.1", statusPort);
+		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = Arrays.asList(
+				JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
+				JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
+
+		Consumer<WebAppContext> securityHandlerConfigurer = webAppContext ->
+		{
+			SessionHandler sessionHandler = webAppContext.getSessionHandler();
+			DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
+
+			StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPort);
+			ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
+					caCertificate);
+			DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,
+					statusPortAuthenticator, clientCertificateAuthenticator, null, null, null, null);
+
+			SecurityHandler securityHandler = new DsfSecurityHandler(dsfLoginService, delegatingAuthenticator, null);
+			securityHandler.setSessionRenewedOnAuthentication(true);
+
+			webAppContext.setSecurityHandler(securityHandler);
+		};
+
+		JettyServer server = new JettyServer(apiConnector, statusConnector, "dsf-fhir-server", CONTEXT_PATH,
+				servletContainerInitializers, initParameters, caCertificate, securityHandlerConfigurer);
 
 		server.start();
 
@@ -284,6 +369,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static FhirWebserviceClient getExternalWebserviceClient()
 	{
 		return externalWebserviceClient;
+	}
+
+	protected static FhirWebserviceClient getPractitionerWebserviceClient()
+	{
+		return practitionerWebserviceClient;
 	}
 
 	protected static WebsocketClient getWebsocketClient()

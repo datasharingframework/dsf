@@ -86,7 +86,7 @@ public class LibraryIntegrationTest extends AbstractIntegrationTest
 		Library library = createValidLibrary();
 		readAccessHelper.addLocal(library);
 		readAccessHelper.addRole(library, "Parent_Organization", "http://dsf.dev/fhir/CodeSystem/organization-role",
-				"MeDIC");
+				"DIC");
 
 		Library created = getWebserviceClient().create(library);
 		assertNotNull(created);

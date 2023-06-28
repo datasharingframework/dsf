@@ -3,69 +3,37 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<include file="db/db.create-db-users.changelog-0.1.0.xml" />
+	<include file="db/db.create-db-users.changelog-1.0.0.xml" />
 
-	<include file="db/db.activity_definitions.changelog-0.1.0.xml" />
-	<include file="db/db.binaries.changelog-0.1.0.xml" />
-	<include file="db/db.bundles.changelog-0.1.0.xml" />
-	<include file="db/db.code_systems.changelog-0.1.0.xml" />
-	<include file="db/db.endpoints.changelog-0.1.0.xml" />
-	<include file="db/db.groups.changelog-0.1.0.xml" />
-	<include file="db/db.healthcare_services.changelog-0.1.0.xml" />
-	<include file="db/db.locations.changelog-0.1.0.xml" />
-	<include file="db/db.naming_systems.changelog-0.1.0.xml" />
-	<include file="db/db.organizations.changelog-0.1.0.xml" />
-	<include file="db/db.patients.changelog-0.1.0.xml" />
-	<include file="db/db.practitioner_roles.changelog-0.1.0.xml" />
-	<include file="db/db.practitioners.changelog-0.1.0.xml" />
-	<include file="db/db.provenances.changelog-0.1.0.xml" />
-	<include file="db/db.research_studies.changelog-0.1.0.xml" />
-	<include file="db/db.structure_definitions.changelog-0.1.0.xml" />
-	<include file="db/db.structure_definition_snapshots.changelog-0.1.0.xml" />
-	<include file="db/db.subscriptions.changelog-0.1.0.xml" />
-	<include file="db/db.tasks.changelog-0.1.0.xml" />
-	<include file="db/db.value_sets.changelog-0.1.0.xml" />
+	<include file="db/db.activity_definitions.changelog-1.0.0.xml" />
+	<include file="db/db.binaries.changelog-1.0.0.xml" />
+	<include file="db/db.bundles.changelog-1.0.0.xml" />
+	<include file="db/db.code_systems.changelog-1.0.0.xml" />
+	<include file="db/db.document_references.changelog-1.0.0.xml" />
+	<include file="db/db.endpoints.changelog-1.0.0.xml"/>
+	<include file="db/db.groups.changelog-1.0.0.xml" />
+	<include file="db/db.healthcare_services.changelog-1.0.0.xml" />
+	<include file="db/db.libraries.changelog-1.0.0.xml" />
+	<include file="db/db.locations.changelog-1.0.0.xml" />
+	<include file="db/db.measure_reports.changelog-1.0.0.xml" />
+	<include file="db/db.measures.changelog-1.0.0.xml" />
+	<include file="db/db.naming_systems.changelog-1.0.0.xml" />
+	<include file="db/db.organization_affiliations.changelog-1.0.0.xml" />
+	<include file="db/db.organizations.changelog-1.0.0.xml" />
+	<include file="db/db.patients.changelog-1.0.0.xml" />
+	<include file="db/db.practitioner_roles.changelog-1.0.0.xml" />
+	<include file="db/db.practitioners.changelog-1.0.0.xml" />
+	<include file="db/db.provenances.changelog-1.0.0.xml" />
+	<include file="db/db.questionnaire_responses.changelog-1.0.0.xml" />
+	<include file="db/db.questionnaires.changelog-1.0.0.xml" />
+	<include file="db/db.research_studies.changelog-1.0.0.xml" />
+	<include file="db/db.structure_definition_snapshots.changelog-1.0.0.xml" />
+	<include file="db/db.structure_definitions.changelog-1.0.0.xml" />
+	<include file="db/db.subscriptions.changelog-1.0.0.xml" />
+	<include file="db/db.tasks.changelog-1.0.0.xml" />
+	<include file="db/db.value_sets.changelog-1.0.0.xml" />
 
-	<include file="db/db.activity_definitions.changelog-0.2.0.xml" />
-	<include file="db/db.binaries.changelog-0.2.0.xml" />
-	<include file="db/db.bundles.changelog-0.2.0.xml" />
-	<include file="db/db.code_systems.changelog-0.2.0.xml" />
-	<include file="db/db.endpoints.changelog-0.2.0.xml" />
-	<include file="db/db.groups.changelog-0.2.0.xml" />
-	<include file="db/db.healthcare_services.changelog-0.2.0.xml" />
-	<include file="db/db.locations.changelog-0.2.0.xml" />
-	<include file="db/db.naming_systems.changelog-0.2.0.xml" />
-	<include file="db/db.organizations.changelog-0.2.0.xml" />
-	<include file="db/db.patients.changelog-0.2.0.xml" />
-	<include file="db/db.practitioner_roles.changelog-0.2.0.xml" />
-	<include file="db/db.practitioners.changelog-0.2.0.xml" />
-	<include file="db/db.provenances.changelog-0.2.0.xml" />
-	<include file="db/db.research_studies.changelog-0.2.0.xml" />
-	<include file="db/db.structure_definitions.changelog-0.2.0.xml" />
-	<include file="db/db.structure_definition_snapshots.changelog-0.2.0.xml" />
-	<include file="db/db.subscriptions.changelog-0.2.0.xml" />
-	<include file="db/db.tasks.changelog-0.2.0.xml" />
-	<include file="db/db.value_sets.changelog-0.2.0.xml" />
+	<include file="db/db.history.changelog-1.0.0.xml" />
+	<include file="db/db.read_access.changelog-1.0.0.xml" />
 
-	<include file="db/db.history.changelog-0.2.0.xml" />
-
-	<include file="db/db.libraries.changelog-0.5.0.xml" />
-	<include file="db/db.measure_reports.changelog-0.5.0.xml" />
-	<include file="db/db.measures.changelog-0.5.0.xml" />
-	<include file="db/db.organization_affiliations.changelog-0.5.0.xml" />
-	
-	<include file="db/db.create-db-users.changelog-0.5.0.xml" />
-	<include file="db/db.permanent-delete.changelog-0.5.0.xml" />
-	<include file="db/db.history.changelog-0.5.0.xml" />
-	<include file="db/db.read_access.changelog-0.5.0.xml" />
-
-	<include file="db/db.document_references.changelog-0.6.0.xml" />
-	<include file="db/db.read_access.changelog-0.6.0.xml" />
-
-	<include file="db/db.questionnaires.changelog-0.8.0.xml" />
-	<include file="db/db.questionnaire_responses.changelog-0.8.0.xml" />
-	<include file="db/db.read_access.changelog-0.8.0.xml" />
-
-	<include file="db/db.history.changelog-0.9.0.xml" />
-	<include file="db/db.questionnaire_responses.changelog-0.9.0.xml" />
 </databaseChangeLog>

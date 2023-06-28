@@ -44,8 +44,8 @@ BEGIN
 			SELECT r.id, r.version, 'ROLE', member_organization_id, organization_affiliation_id FROM (
 				SELECT DISTINCT  
 					organization_affiliation_id
-				 	, consortium_identifier
-				 	, consortium_organization_id
+				 	, parent_organization_identifier
+				 	, parent_organization_organization_id
 				 	, member_organization_id
 				 	, coding->>'system' AS coding_system
 				 	, coding->>'code' AS coding_code
@@ -54,9 +54,9 @@ BEGIN
 						organization_affiliation_id
 						, (SELECT jsonb_path_query(organization, '$.identifier[*]?(@.system == "http://dsf.dev/sid/organization-identifier")')->>'value' FROM current_organizations WHERE 
 						   organization_id = (regexp_match(organization_affiliation->'organization'->>'reference', reference_regex))[5]::uuid
-						  ) AS consortium_identifier
+						  ) AS parent_organization_identifier
 					 	, (regexp_match(organization_affiliation->'organization'->>'reference', reference_regex))[5]::uuid
-					 		AS consortium_organization_id
+					 		AS parent_organization_organization_id
 					 	, (regexp_match(organization_affiliation->'participatingOrganization'->>'reference', reference_regex))[5]::uuid
 					 		AS member_organization_id
 						, jsonb_array_elements(jsonb_array_elements(organization_affiliation->'code')->'coding') AS coding
@@ -69,14 +69,14 @@ BEGIN
 							OR organization_id = (regexp_match(organization_affiliation->'participatingOrganization'->>'reference', reference_regex))[5]::uuid)
 						) = 2
 					) AS oa1
-				WHERE consortium_organization_id = NEW.organization_id OR member_organization_id = NEW.organization_id
+				WHERE parent_organization_organization_id = NEW.organization_id OR member_organization_id = NEW.organization_id
 				) AS oa
 				LEFT JOIN (
 					SELECT id, version, resource FROM all_resources
 				) AS r
 				ON r.resource->'meta'->'tag' @> 
-					('[{"extension":[{"url":"http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role","extension":[{"url":"consortium","valueIdentifier":{"system":"http://dsf.dev/sid/organization-identifier","value":"'
-					|| consortium_identifier || '"}},{"url":"role","valueCoding":{"system":"'
+					('[{"extension":[{"url":"http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role","extension":[{"url":"parent-organization","valueIdentifier":{"system":"http://dsf.dev/sid/organization-identifier","value":"'
+					|| parent_organization_identifier || '"}},{"url":"organization-role","valueCoding":{"system":"'
 					|| coding_system || '","code":"'
 					|| coding_code || '"}}]}],"system":"http://dsf.dev/fhir/CodeSystem/read-access-tag","code":"ROLE"}]')::jsonb
 				WHERE r.resource IS NOT NULL

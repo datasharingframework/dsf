@@ -50,8 +50,8 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.server.organization.identifier.value}")
 	private String organizationIdentifierValue;
 
-	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.bpe.fhir.client.trust.certificates}")
+	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_server_trust_certificates.pem")
+	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas}")
 	private String clientCertificateTrustStoreFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
@@ -167,7 +167,7 @@ public class PropertiesConfig implements InitializingBean
 	private char[] mailServerPassword;
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate the server certificate of the SMTP server. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_trust_certificates.pem")
-	@Value("${dev.dsf.bpe.mail.trust.certificates:#{null}}")
+	@Value("${dev.dsf.bpe.mail.trust.server.certificate.cas:#{null}}")
 	private String mailServerTrustStoreFile;
 
 	@Documentation(description = "PEM encoded file with client certificate used to authenticate against the SMTP server. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate.pem")
@@ -218,23 +218,23 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.debug.log.message.variables:false}")
 	private boolean debugLogMessageVariables;
 
-	@Value("${jetty.status.port}")
+	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
 
 	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
-	@Value("${dev.dsf.bpe.proxy.url:#{null}}")
+	@Value("${dev.dsf.proxy.url:#{null}}")
 	private String proxyUrl;
 
 	@Documentation(description = "Forward proxy username", recommendation = "Configure username if proxy requires authentication")
-	@Value("${dev.dsf.bpe.proxy.username:#{null}}")
+	@Value("${dev.dsf.proxy.username:#{null}}")
 	private String proxyUsername;
 
 	@Documentation(description = "Forward Proxy password", recommendation = "Configure password if proxy requires authentication, use docker secret file to configure using *${env_variable}_FILE*")
-	@Value("${dev.dsf.bpe.proxy.password:#{null}}")
+	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
 	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
-	@Value("#{'${dev.dsf.bpe.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
+	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
 	private List<String> proxyNoProxy;
 
 	@Bean // static in order to initialize before @Configuration classes

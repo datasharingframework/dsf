@@ -8,6 +8,9 @@ public interface DsfOpenIdCredentials
 
 	Map<String, Object> getAccessToken();
 
+	/**
+	 * @return empty when authentication via bearer token
+	 */
 	Map<String, Object> getIdToken();
 
 	/**

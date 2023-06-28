@@ -33,9 +33,9 @@ public class ActivityDefinitionWithExtension
 		a.setStatus(PublicationStatus.DRAFT);
 		a.setExperimental(true);
 		a.setDate(new Date());
-		a.setPublisher("HiGHmed");
-		a.getContactFirstRep().setName("HiGHmed").getTelecomFirstRep().setSystem(ContactPointSystem.EMAIL)
-				.setValue("pmo@highmed.org");
+		a.setPublisher("DSF");
+		a.getContactFirstRep().setName("DSF").getTelecomFirstRep().setSystem(ContactPointSystem.EMAIL)
+				.setValue("pmo@dsf.dev");
 		a.setDescription(
 				"Process to send PING messages to remote Organizations and to receive corresponding PONG message");
 		a.setKind(ActivityDefinitionKind.TASK);
@@ -50,7 +50,7 @@ public class ActivityDefinitionWithExtension
 		ot12.addExtension("organization-type",
 				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "TTP", null));
 		ot12.addExtension("organization-type",
-				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "MeDIC", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "DIC", null));
 		e1.addExtension("task-profile",
 				new CanonicalType("http://dsf.dev/fhir/StructureDefinition/task-start-ping-process"));
 
@@ -64,7 +64,7 @@ public class ActivityDefinitionWithExtension
 		ot22.addExtension("organization-type",
 				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "TTP", null));
 		ot22.addExtension("organization-type",
-				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "MeDIC", null));
+				new Coding("http://dsf.dev/fhir/CodeSystem/authorization-role", "DIC", null));
 		e2.addExtension("task-profile", new CanonicalType("http://dsf.dev/fhir/StructureDefinition/task-pong"));
 
 		String xml = FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(a);

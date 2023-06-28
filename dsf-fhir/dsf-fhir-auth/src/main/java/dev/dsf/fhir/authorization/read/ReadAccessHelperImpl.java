@@ -78,12 +78,13 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	}
 
 	@Override
-	public <R extends Resource> R addRole(R resource, String consortiumIdentifier, String roleSystem, String roleCode)
+	public <R extends Resource> R addRole(R resource, String parentOrganizationIdentifier, String roleSystem,
+			String roleCode)
 	{
 		if (resource == null)
 			return null;
 
-		Objects.requireNonNull(consortiumIdentifier, "consortiumIdentifier");
+		Objects.requireNonNull(parentOrganizationIdentifier, "parentOrganizationIdentifier");
 		Objects.requireNonNull(roleSystem, "roleSystem");
 		Objects.requireNonNull(roleCode, "roleCode");
 
@@ -91,10 +92,10 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			addLocal(resource);
 
 		Extension ex = resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_ROLE)
-				.addExtension().setUrl(EXTENSION_READ_ACCESS_CONSORTIUM_ROLE);
-		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_CONSORTIUM)
-				.setValue(new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(consortiumIdentifier));
-		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_ROLE)
+				.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE);
+		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION).setValue(
+				new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(parentOrganizationIdentifier));
+		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE)
 				.setValue(new Coding().setSystem(roleSystem).setCode(roleCode));
 		return resource;
 	}
@@ -107,19 +108,20 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 
 		Objects.requireNonNull(affiliation, "affiliation");
 		if (!affiliation.hasOrganization())
-			throw new IllegalArgumentException("affiliation has no consortium reference");
+			throw new IllegalArgumentException("affiliation has no parent-organization reference");
 		if (!affiliation.getOrganization().hasIdentifier())
-			throw new IllegalArgumentException("affiliation has no consortium reference with identifier");
+			throw new IllegalArgumentException("affiliation has no parent-organization reference with identifier");
 		if (!affiliation.getOrganization().getIdentifier().hasSystem()
 				|| !ORGANIZATION_IDENTIFIER_SYSTEM.equals(affiliation.getOrganization().getIdentifier().getSystem()))
 			throw new IllegalArgumentException(
-					"affiliation has no consortium reference with identifier system " + ORGANIZATION_IDENTIFIER_SYSTEM);
+					"affiliation has no parent-organization reference with identifier system "
+							+ ORGANIZATION_IDENTIFIER_SYSTEM);
 		if (!affiliation.getOrganization().getIdentifier().hasValue()
 				|| affiliation.getOrganization().getIdentifier().getValue().isBlank())
 			throw new IllegalArgumentException(
-					"affiliation has no consortium reference with non blank identifier value");
+					"affiliation has no parent-organization reference with non blank identifier value");
 
-		String consortiumIdentifier = affiliation.getOrganization().getIdentifier().getValue();
+		String parentOrganizationIdentifier = affiliation.getOrganization().getIdentifier().getValue();
 
 		if (!affiliation.hasCode() || affiliation.getCode().size() != 1 || !affiliation.getCodeFirstRep().hasCoding()
 				|| affiliation.getCodeFirstRep().getCoding().size() != 1
@@ -130,7 +132,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		String roleSystem = affiliation.getCodeFirstRep().getCodingFirstRep().getSystem();
 		String roleCode = affiliation.getCodeFirstRep().getCodingFirstRep().getCode();
 
-		return addRole(resource, consortiumIdentifier, roleSystem, roleCode);
+		return addRole(resource, parentOrganizationIdentifier, roleSystem, roleCode);
 	}
 
 	@Override
@@ -199,15 +201,16 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	}
 
 	@Override
-	public boolean hasRole(Resource resource, String consortiumIdentifier, String roleSystem, String roleCode)
+	public boolean hasRole(Resource resource, String parentOrganizationIdentifier, String roleSystem, String roleCode)
 	{
 		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasTag())
 			return false;
 
 		Stream<Extension> extensions = getTagExtensions(resource, READ_ACCESS_TAG_SYSTEM, READ_ACCESS_TAG_VALUE_ROLE,
-				EXTENSION_READ_ACCESS_CONSORTIUM_ROLE);
+				EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE);
 
-		return extensions.filter(Extension::hasExtension).anyMatch(matches(consortiumIdentifier, roleSystem, roleCode));
+		return extensions.filter(Extension::hasExtension)
+				.anyMatch(matches(parentOrganizationIdentifier, roleSystem, roleCode));
 	}
 
 	@Override
@@ -219,18 +222,21 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		return affiliations.stream().anyMatch(affiliation -> hasRole(resource, affiliation));
 	}
 
-	private Predicate<? super Extension> matches(String consortiumIdentifier, String roleSystem, String roleCode)
+	private Predicate<? super Extension> matches(String parentOrganizationIdentifier, String roleSystem,
+			String roleCode)
 	{
 		return extensions ->
 		{
 			boolean cor = extensions.getExtension().stream().filter(Extension::hasUrl)
-					.filter(e -> Objects.equals(e.getUrl(), EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_CONSORTIUM))
+					.filter(e -> Objects.equals(e.getUrl(),
+							EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION))
 					.filter(Extension::hasValue).map(Extension::getValue).filter(v -> v instanceof Identifier)
 					.map(v -> (Identifier) v).filter(Identifier::hasSystem).filter(Identifier::hasValue)
 					.anyMatch(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())
-							&& Objects.equals(i.getValue(), consortiumIdentifier));
+							&& Objects.equals(i.getValue(), parentOrganizationIdentifier));
 			boolean role = extensions.getExtension().stream().filter(Extension::hasUrl)
-					.filter(e -> Objects.equals(e.getUrl(), EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_ROLE))
+					.filter(e -> Objects.equals(e.getUrl(),
+							EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE))
 					.filter(Extension::hasValue).map(Extension::getValue).filter(v -> v instanceof Coding)
 					.map(v -> (Coding) v)
 					.anyMatch(c -> Objects.equals(c.getSystem(), roleSystem) && Objects.equals(c.getCode(), roleCode));
@@ -244,18 +250,18 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null || affiliation == null || !affiliation.hasOrganization() || !affiliation.hasCode())
 			return false;
 
-		Reference consortiumRef = affiliation.getOrganization();
-		if (!consortiumRef.hasIdentifier())
+		Reference parentOrganizationRef = affiliation.getOrganization();
+		if (!parentOrganizationRef.hasIdentifier())
 			return false;
-		Identifier consortiumId = consortiumRef.getIdentifier();
-		if (!consortiumId.hasValue())
+		Identifier parentOrganizationIdentifier = parentOrganizationRef.getIdentifier();
+		if (!parentOrganizationIdentifier.hasValue())
 			return false;
 
-		String consortiumIdentifier = consortiumRef.getIdentifier().getValue();
+		String parentOrganizationIdentifierValue = parentOrganizationRef.getIdentifier().getValue();
 
 		return affiliation.getCode().stream().filter(CodeableConcept::hasCoding).flatMap(c -> c.getCoding().stream())
 				.filter(Coding::hasSystem).filter(Coding::hasCode)
-				.anyMatch(c -> hasRole(resource, consortiumIdentifier, c.getSystem(), c.getCode()));
+				.anyMatch(c -> hasRole(resource, parentOrganizationIdentifierValue, c.getSystem(), c.getCode()));
 	}
 
 	@Override
@@ -360,36 +366,39 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			Predicate<Coding> roleExists)
 	{
 		List<Extension> exts = coding.getExtension().stream().filter(e -> e.hasUrl())
-				.filter(e -> EXTENSION_READ_ACCESS_CONSORTIUM_ROLE.equals(e.getUrl())).collect(Collectors.toList());
+				.filter(e -> EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE.equals(e.getUrl()))
+				.collect(Collectors.toList());
 
-		return coding.hasExtension() && exts.size() == 1 && isValidExtensionReadAccessConsortiumMemberRole(exts.get(0),
-				organizationWithIdentifierExists, roleExists);
+		return coding.hasExtension() && exts.size() == 1 && isValidExtensionReadAccessParentOrganizationMemberRole(
+				exts.get(0), organizationWithIdentifierExists, roleExists);
 	}
 
-	private boolean isValidExtensionReadAccessConsortiumMemberRole(Extension extension,
+	private boolean isValidExtensionReadAccessParentOrganizationMemberRole(Extension extension,
 			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> roleExists)
 	{
 		return extension.hasExtension() && extension.getExtension().size() == 2
 				&& extension.getExtension().stream()
-						.filter(e -> isValidExtensionReadAccessConsortiumMemberRoleConsortium(e,
+						.filter(e -> isValidExtensionReadAccessParentOrganizationMemberRoleParentOrganization(e,
 								organizationWithIdentifierExists))
 						.count() == 1
 				&& extension.getExtension().stream()
-						.filter(e -> isValidExtensionReadAccessConsortiumMemberRoleRole(e, roleExists)).count() == 1;
+						.filter(e -> isValidExtensionReadAccessParentOrganizationMemberRoleRole(e, roleExists))
+						.count() == 1;
 	}
 
-	private boolean isValidExtensionReadAccessConsortiumMemberRoleConsortium(Extension e,
+	private boolean isValidExtensionReadAccessParentOrganizationMemberRoleParentOrganization(Extension e,
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
-		return e.hasUrl() && EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_CONSORTIUM.equals(e.getUrl()) && e.hasValue()
-				&& e.getValue() instanceof Identifier
+		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION.equals(e.getUrl())
+				&& e.hasValue() && e.getValue() instanceof Identifier
 				&& isValidOrganizationIdentifier((Identifier) e.getValue(), organizationWithIdentifierExists);
 	}
 
-	private boolean isValidExtensionReadAccessConsortiumMemberRoleRole(Extension e, Predicate<Coding> roleExists)
+	private boolean isValidExtensionReadAccessParentOrganizationMemberRoleRole(Extension e,
+			Predicate<Coding> roleExists)
 	{
-		return e.hasUrl() && EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_ROLE.equals(e.getUrl()) && e.hasValue()
-				&& e.getValue() instanceof Coding && isValidRole((Coding) e.getValue(), roleExists);
+		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE.equals(e.getUrl())
+				&& e.hasValue() && e.getValue() instanceof Coding && isValidRole((Coding) e.getValue(), roleExists);
 	}
 
 	private boolean isValidRole(Coding coding, Predicate<Coding> roleExists)

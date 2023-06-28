@@ -62,20 +62,15 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 	@Override
 	public String getAuthMethod()
 	{
-		return "BACK_CHANNEL_LOGOUT_AUTHENTICATOR";
+		return "BACK_CHANNEL_LOGOUT";
 	}
 
-	public boolean isSsoLogout(ServletRequest req)
+	public boolean isBackChannelLogoutRequest(ServletRequest request)
 	{
-		if (!openIdConfiguration.isBackChannelLogoutEnabled())
-		{
-			logger.debug("Back-Channel logout disabled");
-			return false;
-		}
+		final HttpServletRequest servletRequest = (HttpServletRequest) request;
 
-		HttpServletRequest request = (HttpServletRequest) req;
-		return HttpMethod.POST.is(request.getMethod()) && ssoLogoutPath.equals(request.getPathInfo())
-				&& MimeTypes.Type.FORM_ENCODED.is(request.getContentType());
+		return HttpMethod.POST.is(servletRequest.getMethod()) && ssoLogoutPath.equals(servletRequest.getPathInfo())
+				&& MimeTypes.Type.FORM_ENCODED.is(servletRequest.getContentType());
 	}
 
 	@Override

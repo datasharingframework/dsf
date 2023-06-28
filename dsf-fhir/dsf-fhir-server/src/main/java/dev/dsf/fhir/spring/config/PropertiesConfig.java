@@ -62,8 +62,8 @@ public class PropertiesConfig
 	@Value("${dev.dsf.fhir.server.init.bundle:conf/bundle.xml}")
 	private String initBundleFile;
 
-	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.fhir.client.trust.certificates}")
+	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_server_trust_certificates.pem")
+	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas}")
 	private String webserviceClientCertificateTrustCertificatesFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
@@ -94,23 +94,23 @@ public class PropertiesConfig
 	@Value("${dev.dsf.fhir.server.static.resource.cache:true}")
 	private boolean staticResourceCacheEnabled;
 
-	@Value("${jetty.status.port}")
+	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
 
-	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_FHIR_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
-	@Value("${dev.dsf.fhir.proxy.url:#{null}}")
+	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
+	@Value("${dev.dsf.proxy.url:#{null}}")
 	private String proxyUrl;
 
 	@Documentation(description = "Forward proxy username", recommendation = "Configure username if proxy requires authentication")
-	@Value("${dev.dsf.fhir.proxy.username:#{null}}")
+	@Value("${dev.dsf.proxy.username:#{null}}")
 	private String proxyUsername;
 
 	@Documentation(description = "Forward Proxy password", recommendation = "Configure password if proxy requires authentication, use docker secret file to configure using *${env_variable}_FILE*")
-	@Value("${dev.dsf.fhir.proxy.password:#{null}}")
+	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
 	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
-	@Value("#{'${dev.dsf.fhir.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
+	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
 	private List<String> proxyNoProxy;
 
 	@Bean // static in order to initialize before @Configuration classes

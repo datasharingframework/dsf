@@ -157,7 +157,7 @@ public class BundleGenerator
 	private List<String> getUrlsSortedByDependencies(List<StructureDefinition> definitions)
 	{
 		Map<String, List<String>> dependencies = definitions.stream()
-				.collect(Collectors.toMap(StructureDefinition::getUrl,
+				.collect(Collectors.toMap(this::toUrlWithVersion,
 						d -> d.getDifferential().getElement().stream().filter(ElementDefinition::hasType)
 								.map(ElementDefinition::getType).flatMap(List::stream)
 								.filter(TypeRefComponent::hasProfile).map(TypeRefComponent::getProfile)
@@ -165,16 +165,21 @@ public class BundleGenerator
 
 		List<String> handled = new ArrayList<>();
 
-		return dependencies.keySet().stream().sorted().flatMap(url ->
+		return dependencies.keySet().stream().sorted().flatMap(urlWithVersion ->
 		{
-			if (handled.contains(url))
+			if (handled.contains(urlWithVersion))
 				return Stream.empty();
 			else
 			{
-				handled.add(url);
-				return getSorted(dependencies, url, handled);
+				handled.add(urlWithVersion);
+				return getSorted(dependencies, urlWithVersion, handled);
 			}
 		}).collect(Collectors.toList());
+	}
+
+	private String toUrlWithVersion(StructureDefinition structureDefinition)
+	{
+		return structureDefinition.getUrl() + "|" + structureDefinition.getVersion();
 	}
 
 	private Stream<String> getSorted(Map<String, List<String>> allDependencies, String current, List<String> handled)

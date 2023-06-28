@@ -6,18 +6,34 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
 	<changeSet author="hhund" id="db.process_plugin_resources.changelog-1.0.0">
-		<addColumn tableName="process_plugin_resources">
+		<createTable tableName="process_plugin_resources">
+			<column name="process_key_and_version" type="TEXT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="resource_type" type="TEXT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="resource_id" type="UUID"/>
 			<column name="identifier" type="TEXT" />
-		</addColumn>
+			<column name="url" type="TEXT"/>
+			<column name="version" type="TEXT"/>
+			<column name="name" type="TEXT"/>
+		</createTable>
 		
 		<sql dbms="postgresql">
-			ALTER TABLE process_plugin_resources DROP CONSTRAINT url_check;
-			ALTER TABLE process_plugin_resources ADD CONSTRAINT url_check CHECK ((resource_type IN ('NamingSystem', 'Task') AND url IS NULL) OR (resource_type NOT IN ('NamingSystem', 'Task') AND url IS NOT NULL));
-			ALTER TABLE process_plugin_resources DROP CONSTRAINT version_check;
-			ALTER TABLE process_plugin_resources ADD CONSTRAINT version_check CHECK ((resource_type IN ('NamingSystem', 'Task') and version IS NULL) OR (resource_type NOT IN ('NamingSystem', 'Task') AND version IS NOT NULL));
 			ALTER TABLE process_plugin_resources ADD CONSTRAINT identifier_check CHECK ((resource_type = 'Task' and identifier IS NOT NULL) OR (resource_type &lt;&gt; 'Task' AND identifier IS NULL));
-			ALTER INDEX process_plugin_resources_unique_not_naming_system RENAME TO process_plugin_resources_unique_metadata_resource;
+			ALTER TABLE process_plugin_resources ADD CONSTRAINT url_check CHECK ((resource_type IN ('NamingSystem', 'Task') AND url IS NULL) OR (resource_type NOT IN ('NamingSystem', 'Task') AND url IS NOT NULL));
+			ALTER TABLE process_plugin_resources ADD CONSTRAINT version_check CHECK ((resource_type IN ('NamingSystem', 'Task') and version IS NULL) OR (resource_type NOT IN ('NamingSystem', 'Task') AND version IS NOT NULL));
+			ALTER TABLE process_plugin_resources ADD CONSTRAINT name_check CHECK ((resource_type = 'NamingSystem' and name IS NOT NULL) OR (resource_type &lt;&gt; 'NamingSystem' AND name IS NULL));
+
+			CREATE UNIQUE INDEX process_plugin_resources_unique_metadata_resource ON process_plugin_resources (process_key_and_version, resource_type, url, version) WHERE resource_type &lt;&gt; 'NamingSystem';
+			CREATE UNIQUE INDEX process_plugin_resources_unique_naming_system ON process_plugin_resources (process_key_and_version, resource_type, name) WHERE resource_type = 'NamingSystem';
 			CREATE UNIQUE INDEX process_plugin_resources_unique_task ON process_plugin_resources (process_key_and_version, resource_type, identifier) WHERE resource_type = 'Task';
+
+			ALTER TABLE process_plugin_resources OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE process_plugin_resources TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE process_plugin_resources TO ${db.server_users_group};
 		</sql>
 	</changeSet>
+
 </databaseChangeLog>

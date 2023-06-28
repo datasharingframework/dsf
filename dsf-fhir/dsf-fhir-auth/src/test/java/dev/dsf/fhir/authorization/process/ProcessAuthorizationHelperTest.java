@@ -38,7 +38,7 @@ public class ProcessAuthorizationHelperTest
 		ad.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
 		ad.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		ad.setUrl("http://dsf.dev/bpe/Process/test");
-		ad.setVersion("0.5.0");
+		ad.setVersion("1.0.0");
 		ad.setStatus(PublicationStatus.ACTIVE);
 		ad.setKind(ActivityDefinitionKind.TASK);
 
@@ -67,7 +67,7 @@ public class ProcessAuthorizationHelperTest
 		pa2.addExtension("recipient",
 				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 
-		assertFalse(helper.isValid(ad, p -> true, o -> true, c -> true));
+		assertFalse(helper.isValid(ad, p -> true, c -> true, o -> true, c -> true));
 	}
 
 	@Test
@@ -78,12 +78,12 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			assertTrue(helper.isValid(ad, p -> true, o -> true, c -> true));
+			assertTrue(helper.isValid(ad, p -> true, c -> true, o -> true, c -> true));
 		}
 	}
 
 	@Test
-	public void testActivityDefinitionRequesterRemoteOrganizationRecipientLocalConsortiumRoleValidViaFile()
+	public void testActivityDefinitionRequesterRemoteOrganizationRecipientLocalParentOrganizationRoleValidViaFile()
 			throws Exception
 	{
 		try (InputStream in = Files.newInputStream(Paths.get(
@@ -91,7 +91,7 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			assertTrue(helper.isValid(ad, c -> true, o -> true, c -> true));
+			assertTrue(helper.isValid(ad, p -> true, c -> true, o -> true, c -> true));
 		}
 	}
 
@@ -103,7 +103,7 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(requesters);
 			List<Requester> requestersList = requesters.collect(Collectors.toList());
@@ -112,10 +112,10 @@ public class ProcessAuthorizationHelperTest
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL,
 					requestersList.get(0).getProcessAuthorizationCode().getCode());
 			assertTrue(requestersList.get(0).isRequesterAuthorized(
-					TestIdentity.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)),
+					TestOrganizationIdentity.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)),
 					Collections.emptyList()));
 
-			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(recipients);
 			List<Recipient> recipientsList = recipients.collect(Collectors.toList());
@@ -124,20 +124,20 @@ public class ProcessAuthorizationHelperTest
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL,
 					recipientsList.get(0).getProcessAuthorizationCode().getCode());
 			assertTrue(recipientsList.get(0).isRecipientAuthorized(
-					TestIdentity.local(new org.hl7.fhir.r4.model.Organization().setActive(true)),
+					TestOrganizationIdentity.local(new org.hl7.fhir.r4.model.Organization().setActive(true)),
 					Collections.emptyList()));
 		}
 	}
 
 	@Test
-	public void testGetRequesterRemoteOrganizationRecipientLocalConsortiumRoleViaFile() throws Exception
+	public void testGetRequesterRemoteOrganizationRecipientLocalParentOrganizationRoleViaFile() throws Exception
 	{
 		try (InputStream in = Files.newInputStream(Paths.get(
 				"src/test/resources/authorization/process-authorization/req_remote_organization_rec_local_role.xml")))
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Requester> requesters = helper.getRequesters(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(requesters);
 			List<Requester> requestersList = requesters.collect(Collectors.toList());
@@ -145,12 +145,14 @@ public class ProcessAuthorizationHelperTest
 			assertTrue(requestersList.get(0) instanceof Organization);
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION,
 					requestersList.get(0).getProcessAuthorizationCode().getCode());
-			Identity remoteUser = TestIdentity.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)
-					.addIdentifier(new Identifier().setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
-							.setValue("organization.com")));
+			Identity remoteUser = TestOrganizationIdentity
+					.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)
+							.addIdentifier(new Identifier()
+									.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+									.setValue("organization.com")));
 			assertTrue(requestersList.get(0).isRequesterAuthorized(remoteUser, Collections.emptyList()));
 
-			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "0.5.0", "foo",
+			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
 			assertNotNull(recipients);
 			List<Recipient> recipientsList = recipients.collect(Collectors.toList());
@@ -158,17 +160,17 @@ public class ProcessAuthorizationHelperTest
 			assertTrue(recipientsList.get(0) instanceof Role);
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE,
 					recipientsList.get(0).getProcessAuthorizationCode().getCode());
-			Identity localUser = TestIdentity.local(new org.hl7.fhir.r4.model.Organization().setActive(true)
+			Identity localUser = TestOrganizationIdentity.local(new org.hl7.fhir.r4.model.Organization().setActive(true)
 					.addIdentifier(new Identifier().setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
 							.setValue("member.com")));
 			OrganizationAffiliation affiliation = new OrganizationAffiliation();
 			affiliation.setActive(true);
 			affiliation.getOrganization().getIdentifier()
-					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("consortium.org");
+					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.org");
 			affiliation.getParticipatingOrganization().getIdentifier()
 					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 			affiliation.getCodeFirstRep().getCodingFirstRep()
-					.setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("MeDIC");
+					.setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("DIC");
 			assertTrue(recipientsList.get(0).isRecipientAuthorized(localUser, Collections.singleton(affiliation)));
 		}
 	}
@@ -507,18 +509,18 @@ public class ProcessAuthorizationHelperTest
 	{
 		String messageName = "messageName";
 		String taskProfile = "http://foo.com/fhir/StructureDefinition/bar";
-		String consortium1 = "consortium1.org";
+		String parentOrganization1 = "parent1.org";
 		String role1System = "http://baz.com/fhir/CodeSystem/cs1";
 		String role1Code = "code1";
-		String consortium2 = "consortium2.org";
+		String parentOrganization2 = "parent2.org";
 		String role2System = "http://baz.com/fhir/CodeSystem/cs2";
 		String role2Code = "code2";
-		String consortium3 = "consortium3.org";
+		String parentOrganization3 = "parent3.org";
 		String role3System = "http://baz.com/fhir/CodeSystem/cs3";
 		String role3Code = "code3";
-		Requester requesterLocalRole = Requester.localRole(consortium1, role1System, role1Code);
-		Requester requesterRemoteRole = Requester.remoteRole(consortium2, role2System, role2Code);
-		Recipient recipientLocalRole = Recipient.localRole(consortium3, role3System, role3Code);
+		Requester requesterLocalRole = Requester.localRole(parentOrganization1, role1System, role1Code);
+		Requester requesterRemoteRole = Requester.remoteRole(parentOrganization2, role2System, role2Code);
+		Recipient recipientLocalRole = Recipient.localRole(parentOrganization3, role3System, role3Code);
 
 		var ad = createActivityDefinition();
 
@@ -577,7 +579,8 @@ public class ProcessAuthorizationHelperTest
 		Extension reqCode1Ext = reqCode1.getExtension().get(0);
 		assertNotNull(reqCode1Ext);
 		assertTrue(reqCode1Ext.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE, reqCode1Ext.getUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE,
+				reqCode1Ext.getUrl());
 		assertTrue(reqCode1Ext.hasExtension());
 		assertFalse(reqCode1Ext.hasValue());
 		assertNotNull(reqCode1Ext.getExtension());
@@ -585,11 +588,13 @@ public class ProcessAuthorizationHelperTest
 		List<Extension> reqCode1ExtExts = reqCode1Ext.getExtension();
 		Extension reqCode1ExtC = reqCode1ExtExts.get(0);
 		assertTrue(reqCode1ExtC.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION,
 				reqCode1ExtC.getUrl());
 		Extension reqCode1ExtR = reqCode1ExtExts.get(1);
 		assertTrue(reqCode1ExtR.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE,
 				reqCode1ExtR.getUrl());
 		assertTrue(reqCode1ExtC.hasValue());
 		assertTrue(reqCode1ExtC.getValue() instanceof Identifier);
@@ -597,7 +602,7 @@ public class ProcessAuthorizationHelperTest
 		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
 				((Identifier) reqCode1ExtC.getValue()).getSystem());
 		assertTrue(((Identifier) reqCode1ExtC.getValue()).hasValue());
-		assertEquals(consortium1, ((Identifier) reqCode1ExtC.getValue()).getValue());
+		assertEquals(parentOrganization1, ((Identifier) reqCode1ExtC.getValue()).getValue());
 		assertTrue(reqCode1ExtR.hasValue());
 		assertTrue(reqCode1ExtR.getValue() instanceof Coding);
 		assertTrue(((Coding) reqCode1ExtR.getValue()).hasSystem());
@@ -626,7 +631,8 @@ public class ProcessAuthorizationHelperTest
 		Extension reqCode2Ext = reqCode2.getExtension().get(0);
 		assertNotNull(reqCode2Ext);
 		assertTrue(reqCode2Ext.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE, reqCode2Ext.getUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE,
+				reqCode2Ext.getUrl());
 		assertTrue(reqCode2Ext.hasExtension());
 		assertFalse(reqCode2Ext.hasValue());
 		assertNotNull(reqCode2Ext.getExtension());
@@ -634,11 +640,13 @@ public class ProcessAuthorizationHelperTest
 		List<Extension> reqCode2ExtExts = reqCode2Ext.getExtension();
 		Extension reqCode2ExtC = reqCode2ExtExts.get(0);
 		assertTrue(reqCode2ExtC.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION,
 				reqCode2ExtC.getUrl());
 		Extension reqCode2ExtR = reqCode2ExtExts.get(1);
 		assertTrue(reqCode2ExtR.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE,
 				reqCode2ExtR.getUrl());
 		assertTrue(reqCode2ExtC.hasValue());
 		assertTrue(reqCode2ExtC.getValue() instanceof Identifier);
@@ -646,7 +654,7 @@ public class ProcessAuthorizationHelperTest
 		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
 				((Identifier) reqCode2ExtC.getValue()).getSystem());
 		assertTrue(((Identifier) reqCode2ExtC.getValue()).hasValue());
-		assertEquals(consortium2, ((Identifier) reqCode2ExtC.getValue()).getValue());
+		assertEquals(parentOrganization2, ((Identifier) reqCode2ExtC.getValue()).getValue());
 		assertTrue(reqCode2ExtR.hasValue());
 		assertTrue(reqCode2ExtR.getValue() instanceof Coding);
 		assertTrue(((Coding) reqCode2ExtR.getValue()).hasSystem());
@@ -675,7 +683,8 @@ public class ProcessAuthorizationHelperTest
 		Extension recCodeExt = recCode.getExtension().get(0);
 		assertNotNull(recCodeExt);
 		assertTrue(recCodeExt.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE, recCodeExt.getUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE,
+				recCodeExt.getUrl());
 		assertTrue(recCodeExt.hasExtension());
 		assertFalse(recCodeExt.hasValue());
 
@@ -684,11 +693,13 @@ public class ProcessAuthorizationHelperTest
 		List<Extension> recCodeExtExts = recCodeExt.getExtension();
 		Extension recCodeExtC = recCodeExtExts.get(0);
 		assertTrue(recCodeExtC.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION,
 				recCodeExtC.getUrl());
 		Extension recCodeExtR = recCodeExtExts.get(1);
 		assertTrue(recCodeExtR.hasUrl());
-		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE,
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE,
 				recCodeExtR.getUrl());
 		assertTrue(recCodeExtC.hasValue());
 		assertTrue(recCodeExtC.getValue() instanceof Identifier);
@@ -696,12 +707,367 @@ public class ProcessAuthorizationHelperTest
 		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
 				((Identifier) recCodeExtC.getValue()).getSystem());
 		assertTrue(((Identifier) recCodeExtC.getValue()).hasValue());
-		assertEquals(consortium3, ((Identifier) recCodeExtC.getValue()).getValue());
+		assertEquals(parentOrganization3, ((Identifier) recCodeExtC.getValue()).getValue());
 		assertTrue(recCodeExtR.hasValue());
 		assertTrue(recCodeExtR.getValue() instanceof Coding);
 		assertTrue(((Coding) recCodeExtR.getValue()).hasSystem());
 		assertEquals(role3System, ((Coding) recCodeExtR.getValue()).getSystem());
 		assertTrue(((Coding) recCodeExtR.getValue()).hasCode());
 		assertEquals(role3Code, ((Coding) recCodeExtR.getValue()).getCode());
+	}
+
+	@Test
+	public void testAddRequesterLocalAllPractitioner() throws Exception
+	{
+		String messageName = "messageName";
+		String taskProfile = "http://foo.com/fhir/StructureDefinition/bar";
+		String practitionerRoleSystem = "http://baz.com/fhir/CodeSystem/cs1";
+		String practitionerRoleCode = "code";
+
+		Recipient recipientLocalAll = Recipient.localAll();
+		Requester requesterLocalAllPractitioner = Requester.localAllPractitioner(practitionerRoleSystem,
+				practitionerRoleCode);
+
+		var ad = createActivityDefinition();
+
+		ad = helper.add(ad, messageName, taskProfile, Collections.singleton(requesterLocalAllPractitioner),
+				Collections.singleton(recipientLocalAll));
+
+		assertNotNull(ad);
+		assertTrue(ad.hasExtension());
+		assertNotNull(ad.getExtension());
+		assertEquals(1, ad.getExtension().size());
+
+		Extension authExt = ad.getExtension().get(0);
+		assertNotNull(authExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION, authExt.getUrl());
+		assertTrue(authExt.hasExtension());
+		assertEquals(4, authExt.getExtension().size());
+
+		Extension mnExt = authExt.getExtension().get(0);
+		assertNotNull(mnExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME, mnExt.getUrl());
+		assertTrue(mnExt.hasValue());
+		assertNotNull(mnExt.getValue());
+		assertTrue(mnExt.getValue() instanceof StringType);
+		assertTrue(((StringType) mnExt.getValue()).hasValue());
+		assertNotNull(((StringType) mnExt.getValue()).getValueAsString());
+		assertEquals(messageName, ((StringType) mnExt.getValue()).getValueAsString());
+
+		Extension tpExt = authExt.getExtension().get(1);
+		assertNotNull(tpExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE, tpExt.getUrl());
+		assertTrue(tpExt.hasValue());
+		assertNotNull(tpExt.getValue());
+		assertTrue(tpExt.getValue() instanceof CanonicalType);
+		assertTrue(((CanonicalType) tpExt.getValue()).hasValue());
+		assertNotNull(((CanonicalType) tpExt.getValue()).getValueAsString());
+		assertEquals(taskProfile, ((CanonicalType) tpExt.getValue()).getValueAsString());
+
+		Extension reqExt = authExt.getExtension().get(2);
+		assertNotNull(reqExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER, reqExt.getUrl());
+		assertTrue(reqExt.hasValue());
+		assertNotNull(reqExt.getValue());
+		assertTrue(reqExt.getValue() instanceof Coding);
+		Coding reqCode = (Coding) reqExt.getValue();
+		assertTrue(reqCode.hasSystem());
+		assertTrue(reqCode.hasCode());
+		assertNotNull(reqCode.getSystem());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM, reqCode.getSystem());
+		assertNotNull(reqCode.getCode());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL_PRACTITIONER, reqCode.getCode());
+		assertTrue(requesterLocalAllPractitioner.requesterMatches(reqExt));
+		assertTrue(requesterLocalAllPractitioner.matches((Coding) reqExt.getValue()));
+		assertTrue(reqCode.hasExtension());
+
+		assertNotNull(reqCode.getExtension());
+		assertEquals(1, reqCode.getExtension().size());
+		Extension reqCodeExt = reqCode.getExtension().get(0);
+		assertNotNull(reqCodeExt);
+		assertTrue(reqCodeExt.hasUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PRACTITIONER, reqCodeExt.getUrl());
+		assertFalse(reqCodeExt.hasExtension());
+		assertTrue(reqCodeExt.hasValue());
+		assertNotNull(reqCodeExt.getValue());
+		assertTrue(reqCodeExt.getValue() instanceof Coding);
+		assertTrue(((Coding) reqCodeExt.getValue()).hasSystem());
+		assertNotNull(((Coding) reqCodeExt.getValue()).getSystem());
+		assertEquals(practitionerRoleSystem, ((Coding) reqCodeExt.getValue()).getSystem());
+		assertTrue(((Coding) reqCodeExt.getValue()).hasCode());
+		assertNotNull(((Coding) reqCodeExt.getValue()).getCode());
+		assertEquals(practitionerRoleCode, ((Coding) reqCodeExt.getValue()).getCode());
+
+		Extension recExt = authExt.getExtension().get(3);
+		assertNotNull(recExt);
+		assertTrue(recExt.hasUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT, recExt.getUrl());
+		assertTrue(recExt.hasValue());
+		assertNotNull(recExt.getValue());
+		assertTrue(recExt.getValue() instanceof Coding);
+		assertTrue(((Coding) recExt.getValue()).hasSystem());
+		assertTrue(((Coding) recExt.getValue()).hasCode());
+		assertNotNull(((Coding) recExt.getValue()).getSystem());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM, ((Coding) recExt.getValue()).getSystem());
+		assertNotNull(((Coding) recExt.getValue()).getCode());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL,
+				((Coding) recExt.getValue()).getCode());
+		assertTrue(recipientLocalAll.recipientMatches(recExt));
+		assertTrue(recipientLocalAll.matches((Coding) recExt.getValue()));
+	}
+
+	@Test
+	public void testAddRequesterLocalOrganizationPractitioner() throws Exception
+	{
+		String messageName = "messageName";
+		String taskProfile = "http://foo.com/fhir/StructureDefinition/bar";
+		String organizationIdentifer = "organization.com";
+		String practitionerRoleSystem = "http://baz.com/fhir/CodeSystem/cs1";
+		String practitionerRoleCode = "code";
+
+		Recipient recipientLocalAll = Recipient.localAll();
+		Requester requesterLocalOrganizationPractitioner = Requester
+				.localOrganizationPractitioner(organizationIdentifer, practitionerRoleSystem, practitionerRoleCode);
+
+		var ad = createActivityDefinition();
+
+		ad = helper.add(ad, messageName, taskProfile, Collections.singleton(requesterLocalOrganizationPractitioner),
+				Collections.singleton(recipientLocalAll));
+
+		assertNotNull(ad);
+		assertTrue(ad.hasExtension());
+		assertNotNull(ad.getExtension());
+		assertEquals(1, ad.getExtension().size());
+
+		Extension authExt = ad.getExtension().get(0);
+		assertNotNull(authExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION, authExt.getUrl());
+		assertTrue(authExt.hasExtension());
+		assertEquals(4, authExt.getExtension().size());
+
+		Extension mnExt = authExt.getExtension().get(0);
+		assertNotNull(mnExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME, mnExt.getUrl());
+		assertTrue(mnExt.hasValue());
+		assertNotNull(mnExt.getValue());
+		assertTrue(mnExt.getValue() instanceof StringType);
+		assertTrue(((StringType) mnExt.getValue()).hasValue());
+		assertNotNull(((StringType) mnExt.getValue()).getValueAsString());
+		assertEquals(messageName, ((StringType) mnExt.getValue()).getValueAsString());
+
+		Extension tpExt = authExt.getExtension().get(1);
+		assertNotNull(tpExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE, tpExt.getUrl());
+		assertTrue(tpExt.hasValue());
+		assertNotNull(tpExt.getValue());
+		assertTrue(tpExt.getValue() instanceof CanonicalType);
+		assertTrue(((CanonicalType) tpExt.getValue()).hasValue());
+		assertNotNull(((CanonicalType) tpExt.getValue()).getValueAsString());
+		assertEquals(taskProfile, ((CanonicalType) tpExt.getValue()).getValueAsString());
+
+		Extension reqExt = authExt.getExtension().get(2);
+		assertNotNull(reqExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER, reqExt.getUrl());
+		assertTrue(reqExt.hasValue());
+		assertNotNull(reqExt.getValue());
+		assertTrue(reqExt.getValue() instanceof Coding);
+		Coding reqCode = (Coding) reqExt.getValue();
+		assertTrue(reqCode.hasSystem());
+		assertTrue(reqCode.hasCode());
+		assertNotNull(reqCode.getSystem());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM, reqCode.getSystem());
+		assertNotNull(reqCode.getCode());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION_PRACTITIONER,
+				reqCode.getCode());
+		assertTrue(requesterLocalOrganizationPractitioner.requesterMatches(reqExt));
+		assertTrue(requesterLocalOrganizationPractitioner.matches((Coding) reqExt.getValue()));
+		assertTrue(reqCode.hasExtension());
+		assertNotNull(reqCode.getExtension());
+		assertEquals(1, reqCode.getExtension().size());
+		Extension reqCodeExt = reqCode.getExtension().get(0);
+		assertNotNull(reqCodeExt);
+		assertTrue(reqCodeExt.hasUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER,
+				reqCodeExt.getUrl());
+		assertTrue(reqCodeExt.hasExtension());
+		assertFalse(reqCodeExt.hasValue());
+		assertNotNull(reqCodeExt.getExtension());
+		assertEquals(2, reqCodeExt.getExtension().size());
+		List<Extension> reqCodeExtExts = reqCodeExt.getExtension();
+		Extension reqCodeExtO = reqCodeExtExts.get(0);
+		assertTrue(reqCodeExtO.hasUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION,
+				reqCodeExtO.getUrl());
+		Extension recCodeExtR = reqCodeExtExts.get(1);
+		assertTrue(recCodeExtR.hasUrl());
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE,
+				recCodeExtR.getUrl());
+		assertTrue(reqCodeExtO.hasValue());
+		assertTrue(reqCodeExtO.getValue() instanceof Identifier);
+		assertTrue(((Identifier) reqCodeExtO.getValue()).hasSystem());
+		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
+				((Identifier) reqCodeExtO.getValue()).getSystem());
+		assertTrue(((Identifier) reqCodeExtO.getValue()).hasValue());
+		assertEquals(organizationIdentifer, ((Identifier) reqCodeExtO.getValue()).getValue());
+		assertTrue(recCodeExtR.hasValue());
+		assertTrue(recCodeExtR.getValue() instanceof Coding);
+		assertTrue(((Coding) recCodeExtR.getValue()).hasSystem());
+		assertEquals(practitionerRoleSystem, ((Coding) recCodeExtR.getValue()).getSystem());
+		assertTrue(((Coding) recCodeExtR.getValue()).hasCode());
+		assertEquals(practitionerRoleCode, ((Coding) recCodeExtR.getValue()).getCode());
+
+		Extension recExt = authExt.getExtension().get(3);
+		assertNotNull(recExt);
+		assertTrue(recExt.hasUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT, recExt.getUrl());
+		assertTrue(recExt.hasValue());
+		assertNotNull(recExt.getValue());
+		assertTrue(recExt.getValue() instanceof Coding);
+		assertTrue(((Coding) recExt.getValue()).hasSystem());
+		assertTrue(((Coding) recExt.getValue()).hasCode());
+		assertNotNull(((Coding) recExt.getValue()).getSystem());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM, ((Coding) recExt.getValue()).getSystem());
+		assertNotNull(((Coding) recExt.getValue()).getCode());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL,
+				((Coding) recExt.getValue()).getCode());
+		assertTrue(recipientLocalAll.recipientMatches(recExt));
+		assertTrue(recipientLocalAll.matches((Coding) recExt.getValue()));
+	}
+
+	@Test
+	public void testAddRequesterLocalRolePractitioner() throws Exception
+	{
+		String messageName = "messageName";
+		String taskProfile = "http://foo.com/fhir/StructureDefinition/bar";
+		String parentOrganizationIdentifer = "parent.org";
+		String organizationRoleSystem = "http://baz.com/fhir/CodeSystem/cs1";
+		String organizationRoleCode = "code1";
+		String practitionerRoleSystem = "http://baz.com/fhir/CodeSystem/cs2";
+		String practitionerRoleCode = "code2";
+
+		Recipient recipientLocalAll = Recipient.localAll();
+		Requester requesterLocalRolePractitioner = Requester.localRolePractitioner(parentOrganizationIdentifer,
+				organizationRoleSystem, organizationRoleCode, practitionerRoleSystem, practitionerRoleCode);
+
+		var ad = createActivityDefinition();
+
+		ad = helper.add(ad, messageName, taskProfile, Collections.singleton(requesterLocalRolePractitioner),
+				Collections.singleton(recipientLocalAll));
+
+		System.out.println(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(ad));
+
+		assertNotNull(ad);
+		assertTrue(ad.hasExtension());
+		assertNotNull(ad.getExtension());
+		assertEquals(1, ad.getExtension().size());
+
+		Extension authExt = ad.getExtension().get(0);
+		assertNotNull(authExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION, authExt.getUrl());
+		assertTrue(authExt.hasExtension());
+		assertEquals(4, authExt.getExtension().size());
+
+		Extension mnExt = authExt.getExtension().get(0);
+		assertNotNull(mnExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME, mnExt.getUrl());
+		assertTrue(mnExt.hasValue());
+		assertNotNull(mnExt.getValue());
+		assertTrue(mnExt.getValue() instanceof StringType);
+		assertTrue(((StringType) mnExt.getValue()).hasValue());
+		assertNotNull(((StringType) mnExt.getValue()).getValueAsString());
+		assertEquals(messageName, ((StringType) mnExt.getValue()).getValueAsString());
+
+		Extension tpExt = authExt.getExtension().get(1);
+		assertNotNull(tpExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE, tpExt.getUrl());
+		assertTrue(tpExt.hasValue());
+		assertNotNull(tpExt.getValue());
+		assertTrue(tpExt.getValue() instanceof CanonicalType);
+		assertTrue(((CanonicalType) tpExt.getValue()).hasValue());
+		assertNotNull(((CanonicalType) tpExt.getValue()).getValueAsString());
+		assertEquals(taskProfile, ((CanonicalType) tpExt.getValue()).getValueAsString());
+
+		Extension reqExt = authExt.getExtension().get(2);
+		assertNotNull(reqExt);
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER, reqExt.getUrl());
+		assertTrue(reqExt.hasValue());
+		assertNotNull(reqExt.getValue());
+		assertTrue(reqExt.getValue() instanceof Coding);
+		Coding reqCode = (Coding) reqExt.getValue();
+		assertTrue(reqCode.hasSystem());
+		assertTrue(reqCode.hasCode());
+		assertNotNull(reqCode.getSystem());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM, reqCode.getSystem());
+		assertNotNull(reqCode.getCode());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE_PRACTITIONER, reqCode.getCode());
+		assertTrue(requesterLocalRolePractitioner.requesterMatches(reqExt));
+		assertTrue(requesterLocalRolePractitioner.matches((Coding) reqExt.getValue()));
+
+		assertTrue(reqCode.hasExtension());
+		assertNotNull(reqCode.getExtension());
+		assertEquals(1, reqCode.getExtension().size());
+		Extension reqCodeExt = reqCode.getExtension().get(0);
+		assertNotNull(reqCodeExt);
+		assertTrue(reqCodeExt.hasUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER,
+				reqCodeExt.getUrl());
+		assertTrue(reqCodeExt.hasExtension());
+		assertFalse(reqCodeExt.hasValue());
+		assertNotNull(reqCodeExt.getExtension());
+		assertEquals(3, reqCodeExt.getExtension().size());
+		List<Extension> reqCodeExtExts = reqCodeExt.getExtension();
+
+		Extension reqCodeExtPO = reqCodeExtExts.get(0);
+		assertTrue(reqCodeExtPO.hasUrl());
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION,
+				reqCodeExtPO.getUrl());
+		Extension recCodeExtOR = reqCodeExtExts.get(1);
+		assertTrue(recCodeExtOR.hasUrl());
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE,
+				recCodeExtOR.getUrl());
+		Extension recCodeExtPR = reqCodeExtExts.get(2);
+		assertTrue(recCodeExtPR.hasUrl());
+		assertEquals(
+				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER_PRACTITIONER_ROLE,
+				recCodeExtPR.getUrl());
+		assertTrue(reqCodeExtPO.hasValue());
+		assertTrue(reqCodeExtPO.getValue() instanceof Identifier);
+		assertTrue(((Identifier) reqCodeExtPO.getValue()).hasSystem());
+		assertEquals(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM,
+				((Identifier) reqCodeExtPO.getValue()).getSystem());
+		assertTrue(((Identifier) reqCodeExtPO.getValue()).hasValue());
+		assertEquals(parentOrganizationIdentifer, ((Identifier) reqCodeExtPO.getValue()).getValue());
+		assertTrue(recCodeExtOR.hasValue());
+		assertTrue(recCodeExtOR.getValue() instanceof Coding);
+		assertTrue(((Coding) recCodeExtOR.getValue()).hasSystem());
+		assertEquals(organizationRoleSystem, ((Coding) recCodeExtOR.getValue()).getSystem());
+		assertTrue(((Coding) recCodeExtOR.getValue()).hasCode());
+		assertEquals(organizationRoleCode, ((Coding) recCodeExtOR.getValue()).getCode());
+		assertTrue(recCodeExtPR.hasValue());
+		assertTrue(recCodeExtPR.getValue() instanceof Coding);
+		assertTrue(((Coding) recCodeExtPR.getValue()).hasSystem());
+		assertEquals(practitionerRoleSystem, ((Coding) recCodeExtPR.getValue()).getSystem());
+		assertTrue(((Coding) recCodeExtPR.getValue()).hasCode());
+		assertEquals(practitionerRoleCode, ((Coding) recCodeExtPR.getValue()).getCode());
+
+		Extension recExt = authExt.getExtension().get(3);
+		assertNotNull(recExt);
+		assertTrue(recExt.hasUrl());
+		assertEquals(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT, recExt.getUrl());
+		assertTrue(recExt.hasValue());
+		assertNotNull(recExt.getValue());
+		assertTrue(recExt.getValue() instanceof Coding);
+		assertTrue(((Coding) recExt.getValue()).hasSystem());
+		assertTrue(((Coding) recExt.getValue()).hasCode());
+		assertNotNull(((Coding) recExt.getValue()).getSystem());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM, ((Coding) recExt.getValue()).getSystem());
+		assertNotNull(((Coding) recExt.getValue()).getCode());
+		assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL,
+				((Coding) recExt.getValue()).getCode());
+		assertTrue(recipientLocalAll.recipientMatches(recExt));
+		assertTrue(recipientLocalAll.matches((Coding) recExt.getValue()));
 	}
 }

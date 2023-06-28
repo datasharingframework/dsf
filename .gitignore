@@ -43,20 +43,20 @@ dsf-docker-test-setup/fhir/secrets/*.pem
 dsf-docker-test-setup/fhir/.env
 
 ###
-# dsf-docker-test-setup-3medic-ttp ignores
+# dsf-docker-test-setup-3dic-ttp ignores
 ###
-dsf-docker-test-setup-3medic-ttp/**/bpe/log/*.log
-dsf-docker-test-setup-3medic-ttp/**/bpe/log/*.log.gz
-dsf-docker-test-setup-3medic-ttp/**/bpe/lib_external/*.jar
-dsf-docker-test-setup-3medic-ttp/**/bpe/process/*.jar
+dsf-docker-test-setup-3dic-ttp/**/bpe/log/*.log
+dsf-docker-test-setup-3dic-ttp/**/bpe/log/*.log.gz
+dsf-docker-test-setup-3dic-ttp/**/bpe/lib_external/*.jar
+dsf-docker-test-setup-3dic-ttp/**/bpe/process/*.jar
 
-dsf-docker-test-setup-3medic-ttp/**/fhir/log/*.log
-dsf-docker-test-setup-3medic-ttp/**/fhir/log/*.log.gz
+dsf-docker-test-setup-3dic-ttp/**/fhir/log/*.log
+dsf-docker-test-setup-3dic-ttp/**/fhir/log/*.log.gz
 
-dsf-docker-test-setup-3medic-ttp/secrets/*.pem
-dsf-docker-test-setup-3medic-ttp/secrets/*.jks
-dsf-docker-test-setup-3medic-ttp/.env
-dsf-docker-test-setup-3medic-ttp/docker-compose.override.yml
+dsf-docker-test-setup-3dic-ttp/secrets/*.pem
+dsf-docker-test-setup-3dic-ttp/secrets/*.jks
+dsf-docker-test-setup-3dic-ttp/.env
+dsf-docker-test-setup-3dic-ttp/docker-compose.override.yml
 
 ###
 # dsf-tools ignores
