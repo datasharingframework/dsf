@@ -6,6 +6,8 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
@@ -17,9 +19,12 @@ import liquibase.LabelExpression;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.CommandScope;
+import liquibase.command.core.ReleaseLocksCommandStep;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.configuration.AbstractMapConfigurationValueProvider;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -37,6 +42,37 @@ public final class DbMigrator
 		DbMigratorExceptions(Throwable cause)
 		{
 			super(cause);
+		}
+	}
+
+
+	private static final class LiquibaseConfigProvider extends AbstractMapConfigurationValueProvider
+	{
+		static final String LIQUIBASE_CHANGELOGLOCK_WAIT_TIME = "liquibase.changelogLockWaitTimeInMinutes";
+
+		final Map<String, Object> map = new HashMap<>();
+
+		LiquibaseConfigProvider(long changelogLockWaitTimeInMinutes)
+		{
+			map.put(LIQUIBASE_CHANGELOGLOCK_WAIT_TIME, changelogLockWaitTimeInMinutes);
+		}
+
+		@Override
+		public int getPrecedence()
+		{
+			return 350;
+		}
+
+		@Override
+		protected Map<?, ?> getMap()
+		{
+			return map;
+		}
+
+		@Override
+		protected String getSourceDescription()
+		{
+			return "DSF config";
 		}
 	}
 
@@ -60,15 +96,35 @@ public final class DbMigrator
 					dataSource.setUsername(config.getDbLiquibaseUsername());
 					dataSource.setPassword(toString(config.getDbLiquibasePassword()));
 
+					LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope()
+							.getSingleton(LiquibaseConfiguration.class);
+					liquibaseConfiguration
+							.registerProvider(new LiquibaseConfigProvider(config.getLiquibaseLockWaitTime()));
+
 					try (Connection connection = dataSource.getConnection())
 					{
 						Database database = DatabaseFactory.getInstance()
 								.findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
+						if (config.forceLiquibaseUnlock())
+						{
+							ByteArrayOutputStream output = new ByteArrayOutputStream();
+							CommandScope unlockCommand = new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME);
+							unlockCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+							unlockCommand.setOutput(output);
+
+							logger.warn("Unlocking DB for migration ...");
+							unlockCommand.execute();
+
+							Arrays.stream(output.toString().split("[\r\n]+")).filter(row -> !row.isBlank())
+									.forEach(row -> logger.debug("{}", row));
+							logger.warn("Unlocking DB for migration [Done]");
+						}
+
 						ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
 						config.getChangeLogParameters().forEach(changeLogParameters::set);
-						ByteArrayOutputStream output = new ByteArrayOutputStream();
 
+						ByteArrayOutputStream output = new ByteArrayOutputStream();
 						CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
 						updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
 						updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "db/db.changelog.xml");

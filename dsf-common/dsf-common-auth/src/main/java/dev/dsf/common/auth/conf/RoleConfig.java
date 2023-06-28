@@ -1,6 +1,7 @@
 package dev.dsf.common.auth.conf;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +10,23 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Coding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RoleConfig
 {
+	private static final Logger logger = LoggerFactory.getLogger(RoleConfig.class);
+
+	private static final String PROPERTY_THUMBPRINT = "thumbprint";
+	private static final String PROPERTY_EMAIL = "email";
+	private static final String PROPERTY_TOKEN_ROLE = "token-role";
+	private static final String PROPERTY_TOKEN_GROUP = "token-group";
+	private static final String PROPERTY_DSF_ROLE = "dsf-role";
+	private static final String PROPERTY_PRACTITIONER_ROLE = "practitioner-role";
+
+	private static final List<String> PROPERTIES = Arrays.asList(PROPERTY_THUMBPRINT, PROPERTY_EMAIL,
+			PROPERTY_TOKEN_ROLE, PROPERTY_TOKEN_GROUP, PROPERTY_DSF_ROLE, PROPERTY_PRACTITIONER_ROLE);
+
 	public class Mapping
 	{
 		private final String name;
@@ -133,26 +148,29 @@ public class RoleConfig
 								{
 									switch ((String) p.getKey())
 									{
-										case "thumbprint":
+										case PROPERTY_THUMBPRINT:
 											thumbprints = getValues(p.getValue());
 											break;
-										case "email":
+										case PROPERTY_EMAIL:
 											emails = getValues(p.getValue());
 											break;
-										case "token-role":
+										case PROPERTY_TOKEN_ROLE:
 											tokenRoles = getValues(p.getValue());
 											break;
-										case "token-group":
+										case PROPERTY_TOKEN_GROUP:
 											tokenGroups = getValues(p.getValue());
 											break;
-										case "dsf-role":
+										case PROPERTY_DSF_ROLE:
 											dsfRoles = getValues(p.getValue()).stream().map(dsfRoleFactory)
 													.filter(r -> r != null).toList();
 											break;
-										case "practitioner-role":
+										case PROPERTY_PRACTITIONER_ROLE:
 											practitionerRoles = getValues(p.getValue()).stream()
 													.map(practitionerRoleFactory).filter(r -> r != null).toList();
 											break;
+										default:
+											logger.warn("Unknown role config property '{}', expected one of {}",
+													p.getKey(), PROPERTIES);
 									}
 								}
 							}

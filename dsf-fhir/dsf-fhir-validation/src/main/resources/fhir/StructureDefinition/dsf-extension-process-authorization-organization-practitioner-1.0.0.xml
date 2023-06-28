@@ -5,9 +5,9 @@
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization-practitioner" />
   <version value="1.0.0" />
-  <name value="ProcessAuthorizationConsortiumRole" />
+  <name value="ProcessAuthorizationOrganizationPractitioner" />
   <status value="active" />
   <experimental value="false" />
   <date value="2023-05-19" />
@@ -37,64 +37,64 @@
         <rules value="open" />
       </slicing>
     </element>
-    <element id="Extension.extension:consortium">
+    <element id="Extension.extension:organization">
       <path value="Extension.extension" />
-      <sliceName value="consortium" />
+      <sliceName value="organization" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Extension.extension:consortium.url">
+    <element id="Extension.extension:organization.url">
       <path value="Extension.extension.url" />
-      <fixedUri value="consortium" />
+      <fixedUri value="organization" />
     </element>
-    <element id="Extension.extension:consortium.value[x]">
+    <element id="Extension.extension:organization.value[x]">
       <path value="Extension.extension.value[x]" />
       <min value="1" />
       <type>
         <code value="Identifier" />
       </type>
     </element>
-    <element id="Extension.extension:consortium.value[x].system">
+    <element id="Extension.extension:organization.value[x].system">
       <path value="Extension.extension.value[x].system" />
       <min value="1" />
       <fixedUri value="http://dsf.dev/sid/organization-identifier" />
     </element>
-    <element id="Extension.extension:consortium.value[x].value">
+    <element id="Extension.extension:organization.value[x].value">
       <path value="Extension.extension.value[x].value" />
       <min value="1" />
     </element>
-    <element id="Extension.extension:role">
+    <element id="Extension.extension:practitionerRole">
       <path value="Extension.extension" />
-      <sliceName value="role" />
+      <sliceName value="practitionerRole" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Extension.extension:role.url">
+     <element id="Extension.extension:practitionerRole.url">
       <path value="Extension.extension.url" />
-      <fixedUri value="role" />
+      <fixedUri value="practitioner-role" />
     </element>
-    <element id="Extension.extension:role.value[x]">
+    <element id="Extension.extension:practitionerRole.value[x]">
       <path value="Extension.extension.value[x]" />
       <min value="1" />
       <type>
         <code value="Coding" />
       </type>
     </element>
-    <element id="Extension.extension:role.value[x].system">
+    <element id="Extension.extension:practitionerRole.value[x].system">
       <path value="Extension.extension.value[x].system" />
       <min value="1" />
     </element>
-    <element id="Extension.extension:role.value[x].code">
+    <element id="Extension.extension:practitionerRole.value[x].code">
       <path value="Extension.extension.value[x].code" />
       <min value="1" />
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role" />
+      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization-practitioner" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />
-    <max value="0" />
+      <max value="0" />
     </element>
   </differential>
 </StructureDefinition>

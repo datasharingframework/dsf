@@ -30,7 +30,7 @@ public class CodeSystemProfileTest
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("dsf-code-system-1.0.0.xml", "dsf-extension-read-access-organization-1.0.0.xml",
-					"dsf-extension-read-access-consortium-role-1.0.0.xml"),
+					"dsf-extension-read-access-parent-organization-role-1.0.0.xml"),
 			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"),
 			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"));
 
@@ -150,15 +150,16 @@ public class CodeSystemProfileTest
 	}
 
 	@Test
-	public void testCodeSystemWithConsortiumMemberReadAccessValid() throws Exception
+	public void testCodeSystemWithParentOrganizationMemberReadAccessValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
 		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
 		Extension ex = cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ROLE")
-				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role");
-		ex.addExtension().setUrl("consortium").setValue(
-				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.com"));
-		ex.addExtension().setUrl("role")
+				.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role");
+		ex.addExtension().setUrl("parent-organization").setValue(
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("parent.org"));
+		ex.addExtension().setUrl("organization-role")
 				.setValue(new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("TTP"));
 
 		logResource(cs);
@@ -171,15 +172,16 @@ public class CodeSystemProfileTest
 	}
 
 	@Test
-	public void testCodeSystemWithConsortiumMemberReadAccessNotValid() throws Exception
+	public void testCodeSystemWithParentOrganizationMemberReadAccessNotValid() throws Exception
 	{
 		CodeSystem cs = createCodeSystem();
 		cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("LOCAL");
 		Extension ex = cs.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ROLE")
-				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role");
-		ex.addExtension().setUrl("consortium").setValue(
-				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("consortium.com"));
-		ex.addExtension().setUrl("role")
+				.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role");
+		ex.addExtension().setUrl("parent-organization").setValue(
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("parent.org"));
+		ex.addExtension().setUrl("organization-role")
 				.setValue(new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("FOO"));
 
 		logResource(cs);

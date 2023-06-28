@@ -37,6 +37,14 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	@Value("${dev.dsf.fhir.db.liquibase.password}")
 	private char[] dbLiquibasePassword;
 
+	@Documentation(description = "To force liquibase to unlock the migration lock set to `true`", recommendation = "Only use this option temporarily to unlock a stuck DB migration step")
+	@Value("${dev.dsf.fhir.db.liquibase.forceUnlock:false}")
+	private boolean dbLiquibaseUnlock;
+
+	@Documentation(description = "Liquibase change lock wait time in minutes, default 2 minutes")
+	@Value("${dev.dsf.fhir.db.liquibase.lockWaitTime:2}")
+	private long dbLiquibaseLockWaitTime;
+
 	@Documentation(description = "The name of the user group to access the database from the DSF FHIR server")
 	@Value("${dev.dsf.fhir.db.user.group:fhir_users}")
 	private String dbUsersGroup;
@@ -100,5 +108,17 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	private String toString(char[] password)
 	{
 		return password == null ? null : String.valueOf(password);
+	}
+
+	@Override
+	public boolean forceLiquibaseUnlock()
+	{
+		return dbLiquibaseUnlock;
+	}
+
+	@Override
+	public long getLiquibaseLockWaitTime()
+	{
+		return dbLiquibaseLockWaitTime;
 	}
 }

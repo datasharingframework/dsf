@@ -1,0 +1,61 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/activity-definition" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL"></code>
+		</tag>
+	</meta>
+	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="test-message" />
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://dsf.dev/fhir/StructureDefinition/test-task|1.0" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization-practitioner">
+					<extension url="organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="Test_Organization" />
+						</valueIdentifier>
+					</extension>
+					<extension url="practitioner-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/practitioner-role" />
+							<code value="COS_USER" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ORGANIZATION_PRACTITIONER" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="Parent_Organization" />
+						</valueIdentifier>
+					</extension>
+					<extension url="organization-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="COS" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+	</extension>
+	<url value="http://dsf.dev/bpe/Process/test" />
+	<version value="1.0" />
+	<status value="active" />
+	<kind value="Task" />
+</ActivityDefinition>

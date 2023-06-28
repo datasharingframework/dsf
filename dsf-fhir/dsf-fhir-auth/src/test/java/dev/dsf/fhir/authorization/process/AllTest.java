@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.stream.Stream;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.Test;
 
@@ -12,15 +13,36 @@ import dev.dsf.common.auth.conf.Identity;
 
 public class AllTest
 {
-	private static final Identity REMOTE_NO_ORG = TestIdentity.remote(null);
-	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestIdentity.remote(new Organization().setActive(false));
-	private static final Identity REMOTE_ORG_ACTIVE = TestIdentity.remote(new Organization().setActive(true));
-	private static final Identity LOCAL_NO_ORG = TestIdentity.local(null);
-	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestIdentity.local(new Organization().setActive(false));
-	private static final Identity LOCAL_ORG_ACTIVE = TestIdentity.local(new Organization().setActive(true));
+	private static final Identity REMOTE_NO_ORG = TestOrganizationIdentity.remote(null);
+	private static final Identity REMOTE_ORG_NOT_ACTIVE = TestOrganizationIdentity
+			.remote(new Organization().setActive(false));
+	private static final Identity REMOTE_ORG_ACTIVE = TestOrganizationIdentity
+			.remote(new Organization().setActive(true));
+	private static final Identity LOCAL_NO_ORG = TestOrganizationIdentity.local(null);
+	private static final Identity LOCAL_ORG_NOT_ACTIVE = TestOrganizationIdentity
+			.local(new Organization().setActive(false));
+	private static final Identity LOCAL_ORG_ACTIVE = TestOrganizationIdentity.local(new Organization().setActive(true));
 
-	private static final All local = new All(true);
-	private static final All remote = new All(false);
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE = TestPractitionerIdentity.practitioner(
+			new Organization().setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1 = TestPractitionerIdentity.practitioner(
+			new Organization().setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "UAC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2 = TestPractitionerIdentity.practitioner(
+			new Organization().setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/bad-system", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_NOT_ACTIVE = TestPractitionerIdentity.practitioner(
+			new Organization().setActive(false),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES = TestPractitionerIdentity
+			.practitioner(new Organization().setActive(true));
+
+	private static final All local = new All(true, null, null);
+	private static final All remote = new All(false, null, null);
+
+	private static final All localPractitioner = new All(true, "http://dsf.dev/fhir/CodeSystem/practitioner-role",
+			"DIC_USER");
 
 	@Test
 	public void testLocalAllRecipientOk() throws Exception
@@ -140,5 +162,41 @@ public class AllTest
 	public void testRemoteAllRequesterNotOkLocalOrganization() throws Exception
 	{
 		assertFalse(remote.isRequesterAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllPractitionerRequesterOk() throws Exception
+	{
+		assertTrue(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllPractitionerRequesterNotOkOrganizationNotActive() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_NOT_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllPractitionerRequesterNotOkPractitionerNoRoles() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllPractitionerRequesterNotOkPractitionerBadRole1() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllPractitionerRequesterNotOkPractitionerBadRole2() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllPractitionerRequesterNotOkNotAPractitioner() throws Exception
+	{
+		assertFalse(localPractitioner.isRequesterAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
 	}
 }

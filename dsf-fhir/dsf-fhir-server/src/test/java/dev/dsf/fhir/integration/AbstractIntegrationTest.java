@@ -98,6 +98,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
 	private static FhirWebserviceClient externalWebserviceClient;
+	private static FhirWebserviceClient practitionerWebserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -118,6 +119,12 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		externalWebserviceClient = createWebserviceClient(certificates.getExternalClientCertificate().getTrustStore(),
 				certificates.getExternalClientCertificate().getKeyStore(),
 				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
+
+		logger.info("Creating practitioner client ...");
+		practitionerWebserviceClient = createWebserviceClient(
+				certificates.getPractitionerClientCertificate().getTrustStore(),
+				certificates.getPractitionerClientCertificate().getKeyStore(),
+				certificates.getPractitionerClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
@@ -151,7 +158,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				DATABASE_DELETE_USER, DATABASE_DELETE_USER_PASSWORD, BASE_URL, certificates.getClientCertificate(),
 				"Test_Organization", FHIR_BUNDLE_FILE, certificates.getCaCertificateFile(),
 				certificates.getClientCertificateFile(), certificates.getClientCertificatePrivateKeyFile(),
-				X509Certificates.PASSWORD);
+				X509Certificates.PASSWORD, certificates.getPractitionerClientCertificate());
 
 		JettyServer server = new JettyServer("fhir-server", jettyConfig,
 				Stream.of(JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
@@ -284,6 +291,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static FhirWebserviceClient getExternalWebserviceClient()
 	{
 		return externalWebserviceClient;
+	}
+
+	protected static FhirWebserviceClient getPractitionerWebserviceClient()
+	{
+		return practitionerWebserviceClient;
 	}
 
 	protected static WebsocketClient getWebsocketClient()

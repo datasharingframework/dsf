@@ -5,12 +5,12 @@
       <code value="ALL" />
     </tag>
   </meta>
-  <url value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-consortium-role" />
+  <url value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role-practitioner" />
   <version value="1.0.0" />
-  <name value="ProcessAuthorizationRemoteConsortiumRole" />
+  <name value="ProcessAuthorizationLocalParentOrganizationRolePractitioner" />
   <status value="active" />
   <experimental value="false" />
-  <date value="2023-05-19" />
+  <date value="2023-06-19" />
   <fhirVersion value="4.0.1" />
   <kind value="complex-type" />
   <abstract value="false" />
@@ -28,14 +28,14 @@
         <rules value="open" />
       </slicing>
     </element>
-    <element id="Coding.extension:consortium-role">
+    <element id="Coding.extension:consortium-role-practitioner">
       <path value="Coding.extension" />
-      <sliceName value="consortium-role" />
+      <sliceName value="consortium-role-practitioner" />
       <min value="1" />
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role|1.0.0" />
+        <profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role-practitioner|1.0.0" />
       </type>
     </element>
     <element id="Coding.system">
@@ -46,7 +46,7 @@
     <element id="Coding.code">
       <path value="Coding.code" />
       <min value="1" />
-      <fixedCode value="REMOTE_ROLE" />
+      <fixedCode value="LOCAL_ROLE_PRACTITIONER" />
     </element>
   </differential>
 </StructureDefinition>

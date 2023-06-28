@@ -1,0 +1,95 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role" />
+  <version value="1.0.0" />
+  <name value="ReadAccessParentOrganizationRole" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2023-05-19" />
+  <fhirVersion value="4.0.1" />
+  <kind value="complex-type" />
+  <abstract value="false" />
+  <context>
+    <type value="element" />
+    <expression value="Coding" />
+  </context>
+  <type value="Extension" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Extension.extension">
+      <path value="Extension.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Extension.extension:parentOrganization">
+      <path value="Extension.extension" />
+      <sliceName value="parentOrganization" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Extension.extension:parentOrganization.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="parent-organization" />
+    </element>
+    <element id="Extension.extension:parentOrganization.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="Identifier" />
+      </type>
+    </element>
+    <element id="Extension.extension:parentOrganization.value[x].system">
+      <path value="Extension.extension.value[x].system" />
+      <min value="1" />
+      <fixedUri value="http://dsf.dev/sid/organization-identifier" />
+    </element>
+    <element id="Extension.extension:parentOrganization.value[x].value">
+      <path value="Extension.extension.value[x].value" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:organizationRole">
+      <path value="Extension.extension" />
+      <sliceName value="organizationRole" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Extension.extension:organizationRole.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="organization-role" />
+    </element>
+    <element id="Extension.extension:organizationRole.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="Coding" />
+      </type>
+    </element>
+    <element id="Extension.extension:organizationRole.value[x].system">
+      <path value="Extension.extension.value[x].system" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:organizationRole.value[x].code">
+      <path value="Extension.extension.value[x].code" />
+      <min value="1" />
+    </element>
+    <element id="Extension.url">
+      <path value="Extension.url" />
+      <fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role" />
+    </element>
+    <element id="Extension.value[x]">
+      <path value="Extension.value[x]" />
+      <max value="0" />
+    </element>
+  </differential>
+</StructureDefinition>

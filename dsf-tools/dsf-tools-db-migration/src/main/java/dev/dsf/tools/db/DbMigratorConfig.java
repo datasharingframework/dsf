@@ -11,4 +11,8 @@ public interface DbMigratorConfig
 	char[] getDbLiquibasePassword();
 
 	Map<String, String> getChangeLogParameters();
+
+	boolean forceLiquibaseUnlock();
+
+	long getLiquibaseLockWaitTime();
 }

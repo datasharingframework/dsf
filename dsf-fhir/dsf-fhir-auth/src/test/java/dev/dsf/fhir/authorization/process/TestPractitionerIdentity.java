@@ -1,34 +1,36 @@
 package dev.dsf.fhir.authorization.process;
 
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Practitioner;
 
+import dev.dsf.common.auth.DsfOpenIdCredentials;
 import dev.dsf.common.auth.conf.DsfRole;
-import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 
-public class TestIdentity implements Identity
+public class TestPractitionerIdentity implements PractitionerIdentity
 {
-	private final boolean localIdentity;
 	private final Organization organization;
+	private final Set<Coding> roles = new HashSet<>();
 
-	private TestIdentity(boolean localIdentity, Organization organization)
+	private TestPractitionerIdentity(Organization organization, Collection<Coding> roles)
 	{
-		this.localIdentity = localIdentity;
 		this.organization = organization;
+
+		if (roles != null)
+			this.roles.addAll(roles);
 	}
 
-	public static TestIdentity remote(Organization organization)
+	public static TestPractitionerIdentity practitioner(Organization organization, Coding... roles)
 	{
-		return new TestIdentity(false, organization);
-	}
-
-	public static TestIdentity local(Organization organization)
-
-	{
-		return new TestIdentity(true, organization);
+		return new TestPractitionerIdentity(organization, Arrays.asList(roles));
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public class TestIdentity implements Identity
 	@Override
 	public boolean isLocalIdentity()
 	{
-		return localIdentity;
+		return true;
 	}
 
 	@Override
@@ -75,6 +77,25 @@ public class TestIdentity implements Identity
 
 	@Override
 	public Optional<X509Certificate> getCertificate()
+	{
+		throw new UnsupportedOperationException();
+
+	}
+
+	@Override
+	public Practitioner getPractitioner()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<Coding> getPractionerRoles()
+	{
+		return roles;
+	}
+
+	@Override
+	public Optional<DsfOpenIdCredentials> getCredentials()
 	{
 		throw new UnsupportedOperationException();
 	}

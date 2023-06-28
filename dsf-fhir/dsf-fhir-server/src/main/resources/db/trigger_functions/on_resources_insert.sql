@@ -70,16 +70,16 @@ BEGIN
 			) AS oa
 			LEFT JOIN (
 				SELECT 
-					jsonb_path_query(consortium_role, '$.extension[*] ? (@.url == "consortium")
-						.valueIdentifier[*]?(@.system == "http://dsf.dev/sid/organization-identifier")')->>'value' AS consortium_identifier
-					, jsonb_path_query(consortium_role, '$.extension[*] ? (@.url == "role").valueCoding') AS role
+					jsonb_path_query(parent_organization_role, '$.extension[*] ? (@.url == "parent-organization")
+						.valueIdentifier[*]?(@.system == "http://dsf.dev/sid/organization-identifier")')->>'value' AS parent_organization_identifier
+					, jsonb_path_query(parent_organization_role, '$.extension[*] ? (@.url == "organization-role").valueCoding') AS role
 				FROM (
 					SELECT jsonb_path_query(new_resource,'$.meta.tag[*] ? (@.code == "ROLE" && @.system == "http://dsf.dev/fhir/CodeSystem/read-access-tag")
-						.extension[*] ? (@.url == "http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role")') AS consortium_role
+						.extension[*] ? (@.url == "http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role")') AS parent_organization_role
 				) AS cr
 			) AS t
-			ON oa.parent_organization_identifier = t.consortium_identifier AND oa.role->>'system' = t.role->>'system' AND oa.role->>'code' = t.role->>'code'
-			WHERE t.consortium_identifier IS NOT NULL AND t.role IS NOT NULL
+			ON oa.parent_organization_identifier = t.parent_organization_identifier AND oa.role->>'system' = t.role->>'system' AND oa.role->>'code' = t.role->>'code'
+			WHERE t.parent_organization_identifier IS NOT NULL AND t.role IS NOT NULL
 		) AS member_organizations;
 
 		GET DIAGNOSTICS role_insert_count = ROW_COUNT;

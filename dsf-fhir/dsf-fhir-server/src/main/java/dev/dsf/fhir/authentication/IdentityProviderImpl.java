@@ -178,7 +178,7 @@ public class IdentityProviderImpl extends AbstractProvider implements IdentityPr
 		else
 		{
 			logger.warn(
-					"Certificate with thumbprint '{}' for '{}' not part of allowlist and not configured as local user or local organization unknown",
+					"Certificate with thumbprint '{}' for '{}' unknown, not part of allowlist and not configured as local user or local organization",
 					thumbprint, getDn(certificates[0]));
 			return null;
 		}

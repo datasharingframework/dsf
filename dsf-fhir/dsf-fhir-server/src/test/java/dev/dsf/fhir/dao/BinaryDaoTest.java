@@ -259,7 +259,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role");
 		ex.addExtension().setUrl("consortium").setValue(
 				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Consortium"));
-		ex.addExtension().setUrl("role")
+		ex.addExtension().setUrl("organization-role")
 				.setValue(new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("DIC"));
 		ResearchStudy createdRs = researchStudyDao.create(rs);
 

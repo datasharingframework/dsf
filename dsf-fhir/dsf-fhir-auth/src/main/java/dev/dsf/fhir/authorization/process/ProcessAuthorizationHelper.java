@@ -14,10 +14,13 @@ public interface ProcessAuthorizationHelper
 {
 	String PROCESS_AUTHORIZATION_SYSTEM = "http://dsf.dev/fhir/CodeSystem/process-authorization";
 	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION = "LOCAL_ORGANIZATION";
+	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION_PRACTITIONER = "LOCAL_ORGANIZATION_PRACTITIONER";
 	String PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION = "REMOTE_ORGANIZATION";
 	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE = "LOCAL_ROLE";
+	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE_PRACTITIONER = "LOCAL_ROLE_PRACTITIONER";
 	String PROCESS_AUTHORIZATION_VALUE_REMOTE_ROLE = "REMOTE_ROLE";
 	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL = "LOCAL_ALL";
+	String PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL_PRACTITIONER = "LOCAL_ALL_PRACTITIONER";
 	String PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL = "REMOTE_ALL";
 
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
@@ -28,11 +31,21 @@ public interface ProcessAuthorizationHelper
 	String EXTENSION_PROCESS_AUTHORIZATION_REQUESTER = "requester";
 	String EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT = "recipient";
 
+	String EXTENSION_PROCESS_AUTHORIZATION_PRACTITIONER = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-practitioner";
+
 	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization";
 
-	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-consortium-role";
-	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM = "consortium";
-	String EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_ROLE = "role";
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization-practitioner";
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION = "organization";
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE = "practitioner-role";
+
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION = "parent-organization";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE = "organization-role";
+
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role-practitioner";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER_PRACTITIONER_ROLE = "practitioner-role";
+
 
 	ActivityDefinition add(ActivityDefinition activityDefinition, String messageName, String taskProfile,
 			Requester requester, Recipient recipient);
@@ -41,7 +54,8 @@ public interface ProcessAuthorizationHelper
 			Collection<? extends Requester> requesters, Collection<? extends Recipient> recipients);
 
 	boolean isValid(ActivityDefinition activityDefinition, Predicate<CanonicalType> profileExists,
-			Predicate<Identifier> organizationWithIdentifierExists, Predicate<Coding> roleExists);
+			Predicate<Coding> practitionerRoleExists, Predicate<Identifier> organizationWithIdentifierExists,
+			Predicate<Coding> organizationRoleExists);
 
 	default Stream<Requester> getRequesters(ActivityDefinition activityDefinition, String processUrl,
 			String processVersion, String messageName, String taskProfile)
