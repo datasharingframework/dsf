@@ -114,6 +114,7 @@ function getInitialBookmarks() {
 		'NamingSystem': ['/fhir/NamingSystem'],
 		'Organization': ['/fhir/Organization', '/fhir/Organization?identifier=highmed.org', '/fhir/Organization?identifier=medizininformatik-initiative.de', '/fhir/Organization?identifier=netzwerk-universitaetsmedizin.de'],
 		'OrganizationAffiliation': ['/fhir/OrganizationAffiliation'],
+		'QuestionnaireResponse': ['/fhir/QuestionnaireResponse?status=in-progress'],
 		'Subscription': ['/fhir/Subscription'],
 		'Task': ['/fhir/Task', '/fhir/Task?_sort=-_lastUpdated', '/fhir/Task?_sort=-_lastUpdated&_count=1', '/fhir/Task?status=draft'],
 		'ValueSet': ['/fhir/ValueSet']
