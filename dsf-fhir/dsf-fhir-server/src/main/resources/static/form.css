@@ -157,6 +157,10 @@ fieldset#form-fieldset {
     padding-left: 20px;
 }
 
+.info-list > li:not(:last-child) {
+	margin-bottom: 0.3em;	
+}
+
 .row:after {
     content: "";
     display: table;
