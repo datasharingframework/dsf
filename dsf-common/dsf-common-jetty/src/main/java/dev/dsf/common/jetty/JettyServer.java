@@ -2,21 +2,28 @@ package dev.dsf.common.jetty;
 
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
-import org.eclipse.jetty.io.ClientConnector;
-import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.openid.OpenIdAuthenticator;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.ForwardedRequestCustomizer;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConfiguration.Customizer;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -25,152 +32,135 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.common.auth.BackChannelLogoutAuthenticator;
-import dev.dsf.common.auth.BearerTokenAuthenticator;
-import dev.dsf.common.auth.ClientCertificateAuthenticator;
-import dev.dsf.common.auth.DelegatingAuthenticator;
-import dev.dsf.common.auth.DsfLoginService;
-import dev.dsf.common.auth.DsfOpenIdConfiguration;
-import dev.dsf.common.auth.DsfOpenIdLoginService;
-import dev.dsf.common.auth.DsfSecurityHandler;
-import dev.dsf.common.auth.StatusPortAuthenticator;
+import de.rwh.utils.crypto.CertificateHelper;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
 
-public class JettyServer
+public final class JettyServer
 {
 	private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
+
+	private static HttpConnectionFactory httpConnectionFactory(Customizer... customizers)
+	{
+		HttpConfiguration httpConfiguration = new HttpConfiguration();
+		httpConfiguration.setSendServerVersion(false);
+		httpConfiguration.setSendXPoweredBy(false);
+		httpConfiguration.setSendDateHeader(false);
+
+		Arrays.stream(customizers).forEach(httpConfiguration::addCustomizer);
+
+		return new HttpConnectionFactory(httpConfiguration);
+	}
+
+	public static Function<Server, Connector> statusConnector(String host, int port)
+	{
+		return server ->
+		{
+			ServerConnector connector = new ServerConnector(server, httpConnectionFactory());
+			connector.setHost(host);
+			connector.setPort(port);
+
+			return connector;
+		};
+	}
+
+	public static final Function<Server, Connector> httpConnector(String host, int port,
+			String clientCertificateHeaderName)
+	{
+		return server ->
+		{
+			ServerConnector connector = new ServerConnector(server,
+					httpConnectionFactory(new ForwardedRequestCustomizer(),
+							new ForwardedSecureRequestCustomizer(clientCertificateHeaderName)));
+			connector.setHost(host);
+			connector.setPort(port);
+
+			return connector;
+		};
+	}
+
+	public static Function<Server, Connector> httpsConnector(String host, int port,
+			KeyStore clientCertificateTrustStore, KeyStore serverCertificateKeyStore, char[] keyStorePassword,
+			boolean needClientAuth)
+	{
+		return server ->
+		{
+			ServerConnector connector = new ServerConnector(server, sslConnectionFactory(clientCertificateTrustStore,
+					serverCertificateKeyStore, keyStorePassword, needClientAuth),
+					httpConnectionFactory(new SecureRequestCustomizer()));
+			connector.setHost(host);
+			connector.setPort(port);
+
+			return connector;
+		};
+	}
+
+	private static SslConnectionFactory sslConnectionFactory(KeyStore clientCertificateTrustStore, KeyStore keyStore,
+			char[] keyStorePassword, boolean needClientAuth)
+	{
+		logCertificateConfig(clientCertificateTrustStore, keyStore);
+
+		SslContextFactory.Server sslContextFactory = new SslContextFactory.Server()
+		{
+			@Override
+			protected KeyStore loadTrustStore(Resource resource) throws Exception
+			{
+				return getTrustStore();
+			}
+		};
+
+		sslContextFactory.setKeyStore(keyStore);
+		sslContextFactory.setKeyStorePassword(String.valueOf(keyStorePassword));
+
+		sslContextFactory.setTrustStore(clientCertificateTrustStore);
+		if (needClientAuth)
+			sslContextFactory.setNeedClientAuth(true);
+		else
+			sslContextFactory.setWantClientAuth(true);
+
+		return new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString());
+	}
+
+	private static void logCertificateConfig(KeyStore trustStore, KeyStore keyStore)
+	{
+		if (!logger.isDebugEnabled())
+			return;
+
+		try
+		{
+			if (trustStore != null)
+				logger.debug("Using trust store for https connector with: {}",
+						CertificateHelper.listCertificateSubjectNames(trustStore));
+
+			if (keyStore != null)
+				logger.debug("Using key store for https connector with: {}",
+						CertificateHelper.listCertificateSubjectNames(keyStore));
+		}
+		catch (KeyStoreException e)
+		{
+			logger.warn("Error while printing trust store / key store config", e);
+		}
+	}
 
 	private final Server server;
 	private final WebAppContext webAppContext;
 
-	public JettyServer(String serverModule, JettyConfig config,
-			Stream<Class<? extends ServletContainerInitializer>> initializers)
+	public JettyServer(Function<Server, Connector> apiConnector, Function<Server, Connector> statusConnector,
+			String mavenServerModuleName, String contextPath,
+			List<Class<? extends ServletContainerInitializer>> servletContainerInitializers,
+			Map<String, String> initParameters, KeyStore clientTrustStore,
+			Consumer<WebAppContext> securityHandlerConfigurer)
 	{
-		config = new EnvJettyConfig(config);
-
 		server = new Server(threadPool());
-		server.addConnector(config.createConnector(server));
-		server.addConnector(config.createStatusConnector(server));
+		server.addConnector(apiConnector.apply(server));
+		server.addConnector(statusConnector.apply(server));
 
-		webAppContext = webAppContext(serverModule, config, initializers);
+		webAppContext = webAppContext(mavenServerModuleName, contextPath, servletContainerInitializers, initParameters);
 
-		int statusConnectorPort = config.getStatusPort()
-				.orElseThrow(JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_STATUS_PORT));
-		KeyStore clientTrustStore = config.getClientTrustStore()
-				.orElseThrow(JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_CLIENT_TRUST_CERTIFICATES));
-
-		configureSecurityHandler(webAppContext, statusConnectorPort, clientTrustStore,
-				config.getOidcConfig().orElse(null));
+		securityHandlerConfigurer.accept(webAppContext);
 
 		server.setHandler(webAppContext);
 		server.setErrorHandler(statusCodeOnlyErrorHandler());
-	}
-
-	private void configureSecurityHandler(WebAppContext webAppContext, int statusConnectorPort,
-			KeyStore clientTrustStore, OidcConfig oidcConfig)
-	{
-		SessionHandler sessionHandler = webAppContext.getSessionHandler();
-		DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
-
-		DsfOpenIdConfiguration openIdConfiguration = null;
-		OpenIdAuthenticator openIdAuthenticator = null;
-		DsfOpenIdLoginService openIdLoginService = null;
-		BearerTokenAuthenticator bearerTokenAuthenticator = null;
-		BackChannelLogoutAuthenticator backChannelLogoutAuthenticator = null;
-
-		if (oidcConfig != null)
-		{
-			openIdConfiguration = new DsfOpenIdConfiguration(oidcConfig.providerBaseUrl(), oidcConfig.clientId(),
-					oidcConfig.clientSecret(), createOidcClient(oidcConfig), oidcConfig.bckChannelLogoutEnabled(),
-					oidcConfig.bearerTokenEnabled());
-
-			if (oidcConfig.authorizationCodeFlowEnabled())
-			{
-				if (oidcConfig.providerBaseUrl() == null)
-					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL).get();
-				else if (oidcConfig.clientId() == null)
-					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID).get();
-				else if (oidcConfig.clientSecret() == null)
-					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_CLIENT_SECRET).get();
-				else
-				{
-					openIdAuthenticator = new OpenIdAuthenticator(openIdConfiguration);
-					logger.info("OIDC authorization code flow enabled");
-				}
-			}
-
-			if (oidcConfig.bearerTokenEnabled())
-			{
-				if (oidcConfig.providerBaseUrl() == null)
-					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_PROVIDER_BASE_URL).get();
-				else
-				{
-					bearerTokenAuthenticator = new BearerTokenAuthenticator(openIdConfiguration);
-					logger.info("OIDC bearer token enabled");
-				}
-			}
-
-			if (oidcConfig.bckChannelLogoutEnabled())
-			{
-				if (!oidcConfig.authorizationCodeFlowEnabled())
-					throw JettyConfig
-							.propertyNotDefinedTrue(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW).get();
-				else if (oidcConfig.clientId() == null)
-					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_CLIENT_ID).get();
-				else if (oidcConfig.ssoBackChannelPath() == null)
-					throw JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT_PATH)
-							.get();
-				else
-				{
-					backChannelLogoutAuthenticator = new BackChannelLogoutAuthenticator(openIdConfiguration,
-							oidcConfig.ssoBackChannelPath());
-					logger.info("OIDC back-channel logout enabled");
-				}
-			}
-
-			openIdLoginService = new DsfOpenIdLoginService(openIdConfiguration, dsfLoginService);
-		}
-
-		StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusConnectorPort);
-		ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
-				clientTrustStore);
-		DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,
-				statusPortAuthenticator, clientCertificateAuthenticator, bearerTokenAuthenticator, openIdAuthenticator,
-				openIdLoginService, backChannelLogoutAuthenticator);
-
-		SecurityHandler securityHandler = new DsfSecurityHandler(dsfLoginService, delegatingAuthenticator,
-				openIdConfiguration);
-		securityHandler.setSessionRenewedOnAuthentication(true);
-
-		webAppContext.setSecurityHandler(securityHandler);
-
-		sessionHandler.addEventListener(backChannelLogoutAuthenticator);
-	}
-
-	private HttpClient createOidcClient(OidcConfig oidcConfig)
-	{
-		SslContextFactory.Client sslContextFactory = new SslContextFactory.Client(false);
-		if (oidcConfig.clientTrustStore() != null)
-			sslContextFactory.setTrustStore(oidcConfig.clientTrustStore());
-		if (oidcConfig.clientKeyStore() != null)
-		{
-			sslContextFactory.setKeyStore(oidcConfig.clientKeyStore());
-			sslContextFactory.setKeyStorePassword(String.valueOf(oidcConfig.clientKeyStorePassword()));
-		}
-
-		ClientConnector connector = new ClientConnector();
-		connector.setSslContextFactory(sslContextFactory);
-		if (oidcConfig.clientIdleTimeout() != null)
-			connector.setIdleTimeout(oidcConfig.clientIdleTimeout());
-		if (oidcConfig.clientConnectTimeout() != null)
-			connector.setConnectTimeout(oidcConfig.clientConnectTimeout());
-
-		HttpClient httpClient = new HttpClientWithGetRetry(new HttpClientTransportOverHTTP(connector), 5);
-		if (oidcConfig.clientProxy() != null)
-			httpClient.getProxyConfiguration().addProxy(oidcConfig.clientProxy());
-
-		return httpClient;
 	}
 
 	private QueuedThreadPool threadPool()
@@ -180,21 +170,20 @@ public class JettyServer
 		return threadPool;
 	}
 
-	private WebAppContext webAppContext(String serverModule, JettyConfig config,
-			Stream<Class<? extends ServletContainerInitializer>> initializers)
+	private WebAppContext webAppContext(String serverMavenModuleName, String contextPath,
+			List<Class<? extends ServletContainerInitializer>> initializers, Map<String, String> initParameters)
 	{
 		String[] classPath = classPath();
 
 		WebAppContext context = new WebAppContext();
-		config.getAllProperties().forEach(context::setInitParameter);
-		context.getServerClassMatcher().exclude(initializers.map(Class::getName).toArray(String[]::new));
-		context.setContextPath(config.getContextPath()
-				.orElseThrow(JettyConfig.propertyNotDefined(JettyConfig.PROPERTY_JETTY_CONTEXT_PATH)));
+		initParameters.forEach(context::setInitParameter);
+		context.getServerClassMatcher().exclude(initializers.stream().map(Class::getName).toArray(String[]::new));
+		context.setContextPath(contextPath);
 		context.setLogUrlOnStart(true);
 		context.setThrowUnavailableOnStartupException(true);
 		context.setConfigurations(new Configuration[] { new AnnotationConfiguration() });
-		context.getMetaData().setWebInfClassesResources(Stream.of(classPath).filter(e -> e.contains(serverModule))
-				.map(Paths::get).map(Resource::newResource).toList());
+		context.getMetaData().setWebInfClassesResources(Stream.of(classPath)
+				.filter(e -> e.contains(serverMavenModuleName)).map(Paths::get).map(Resource::newResource).toList());
 		context.setErrorHandler(statusCodeOnlyErrorHandler());
 
 		logger.debug("Java classpath: {}", Arrays.toString(classPath));
@@ -234,15 +223,6 @@ public class JettyServer
 
 	public final void start()
 	{
-		try
-		{
-			beforeStart();
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-
 		Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
 		try
@@ -266,10 +246,6 @@ public class JettyServer
 			else
 				throw new RuntimeException(e);
 		}
-	}
-
-	public void beforeStart()
-	{
 	}
 
 	public final void stop()

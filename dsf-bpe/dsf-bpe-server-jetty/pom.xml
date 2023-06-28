@@ -163,6 +163,7 @@
 				</executions>
 				<configuration>
 					<workingPackages>
+						<workingPackage>dev.dsf.common</workingPackage>
 						<workingPackage>dev.dsf.bpe</workingPackage>
 					</workingPackages>
 				</configuration>

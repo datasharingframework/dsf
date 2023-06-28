@@ -11,8 +11,8 @@ public class StatusClient
 {
 	public static void main(String[] args)
 	{
-		String statusPort = System.getenv("JETTY_STATUS_PORT");
-		String contextPath = System.getenv("JETTY_CONTEXT_PATH");
+		String statusPort = System.getenv("DEV_DSF_SERVER_STATUS_PORT");
+		String contextPath = System.getenv("DEV_DSF_SERVER_CONTEXT_PATH");
 
 		if (statusPort == null)
 			statusPort = "10000";

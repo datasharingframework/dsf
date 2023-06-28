@@ -23,8 +23,8 @@ COPY --from=builder /opt/fhir ./
 
 USER java
 ENTRYPOINT ["./dsf_fhir_start.sh"]
-ENV JETTY_HOST="0.0.0.0"
-ENV JETTY_PORT="8080"
-ENV JETTY_STATUS_PORT="10000"
-ENV JETTY_CONTEXT_PATH="/fhir"
+ENV DEV_DSF_SERVER_API_HOST="0.0.0.0"
+ENV DEV_DSF_SERVER_API_PORT="8080"
+ENV DEV_DSF_SERVER_STATUS_PORT="10000"
+ENV DEV_DSF_SERVER_CONTEXT_PATH="/fhir"
 HEALTHCHECK --interval=10s --timeout=15s --start-period=10s --retries=5 CMD [ "java", "-cp", "dsf_status_client.jar", "dev.dsf.common.status.client.StatusClient" ]
