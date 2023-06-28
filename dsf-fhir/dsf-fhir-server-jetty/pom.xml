@@ -167,6 +167,7 @@
 				</executions>
 				<configuration>
 					<workingPackages>
+						<workingPackage>dev.dsf.common</workingPackage>
 						<workingPackage>dev.dsf.fhir</workingPackage>
 					</workingPackages>
 				</configuration>

@@ -1,4 +1,4 @@
-package dev.dsf.bpe;
+package dev.dsf.bpe.config;
 
 import java.util.Map;
 
@@ -10,6 +10,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import dev.dsf.common.documentation.Documentation;
+import dev.dsf.tools.db.DbMigrator;
 import dev.dsf.tools.db.DbMigratorConfig;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
@@ -119,5 +120,11 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	public long getLiquibaseLockWaitTime()
 	{
 		return dbLiquibaseLockWaitTime;
+	}
+
+	@Bean
+	public DbMigrator dbMigrator()
+	{
+		return new DbMigrator(this);
 	}
 }

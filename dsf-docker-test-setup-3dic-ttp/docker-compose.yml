@@ -130,7 +130,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
@@ -156,14 +156,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic1
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: dic1-fhir
-      JETTY_AUTH_OIDC_CLIENT_SECRET: mF0GEtjFoyWIM3in4VCwifGI3azb4DTn
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic1
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-fhir
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: mF0GEtjFoyWIM3in4VCwifGI3azb4DTn
     networks:
       dic1-fhir-frontend:
         ipv4_address: 172.20.0.3
@@ -198,7 +198,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
@@ -224,14 +224,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic2
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: dic2-fhir
-      JETTY_AUTH_OIDC_CLIENT_SECRET: P7XhxzBixIf9vPdprItkbOXZwtSX2JNt
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic2
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic2-fhir
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: P7XhxzBixIf9vPdprItkbOXZwtSX2JNt
     networks:
       dic2-fhir-frontend:
         ipv4_address: 172.20.0.11
@@ -266,7 +266,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
@@ -292,14 +292,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic3
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: dic3-fhir
-      JETTY_AUTH_OIDC_CLIENT_SECRET: 9i9WRfIedG7N3QoL5WuGM8hCoySblAhK
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic3
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic3-fhir
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: 9i9WRfIedG7N3QoL5WuGM8hCoySblAhK
     networks:
       dic3-fhir-frontend:
         ipv4_address: 172.20.0.19
@@ -338,7 +338,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
@@ -367,14 +367,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/ttp 
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: ttp-fhir
-      JETTY_AUTH_OIDC_CLIENT_SECRET: SquCQFwjUFqIpU8xQj9pFg79fFxlu2Eu
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-fhir
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: SquCQFwjUFqIpU8xQj9pFg79fFxlu2Eu
     networks:
       ttp-fhir-frontend:
         ipv4_address: 172.20.0.27
@@ -413,7 +413,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
@@ -434,14 +434,14 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic1
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: dic1-bpe
-      JETTY_AUTH_OIDC_CLIENT_SECRET: ytqFCErw9GfhVUrrM8xc0Grbu4r7qGig
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic1
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-bpe
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: ytqFCErw9GfhVUrrM8xc0Grbu4r7qGig
     networks:
       dic1-bpe-frontend:
         ipv4_address: 172.20.0.35
@@ -480,7 +480,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
@@ -501,14 +501,14 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic2
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: dic2-bpe
-      JETTY_AUTH_OIDC_CLIENT_SECRET: 5GtUIUfoXnQVcsRfd0Hg4EGv14iAknGq
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic2
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic2-bpe
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: 5GtUIUfoXnQVcsRfd0Hg4EGv14iAknGq
     networks:
       dic2-bpe-frontend:
         ipv4_address: 172.20.0.43
@@ -547,7 +547,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
@@ -568,14 +568,14 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/dic3
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: dic3-bpe
-      JETTY_AUTH_OIDC_CLIENT_SECRET: VGTQD3WWH4uGUMz408NWNzcHF1MsfV0l
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic3
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic3-bpe
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: VGTQD3WWH4uGUMz408NWNzcHF1MsfV0l
     networks:
       dic3-bpe-frontend:
         ipv4_address: 172.20.0.51
@@ -615,7 +615,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
@@ -637,14 +637,14 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
-      JETTY_AUTH_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      JETTY_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
-      JETTY_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
-      JETTY_AUTH_OIDC_BEARER_TOKEN: 'true'
-      JETTY_AUTH_OIDC_PROVIDER_BASE_URL: https://keycloak:8443/realms/ttp 
-      JETTY_AUTH_OIDC_PROVIDER_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_server_trust_certificates.pem
-      JETTY_AUTH_OIDC_CLIENT_ID: ttp-bpe
-      JETTY_AUTH_OIDC_CLIENT_SECRET: dTB3Etd2lZ6cn6mK6YbUMvk3A5FmiOoA
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-bpe
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: dTB3Etd2lZ6cn6mK6YbUMvk3A5FmiOoA
     networks:
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.59

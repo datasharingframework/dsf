@@ -3,15 +3,24 @@ package dev.dsf.fhir.adapter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 
 public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerator<Task>
 {
+	private static final String CODESYSTEM_BPMN = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
 	private static final String CODESYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
 	private static final String CODESYSTEM_BPMN_MESSAGE_BUSINESS_KEY = "business-key";
 	private static final String CODESYSTEM_BPMN_MESSAGE_CORRELATION_KEY = "correlation-key";
@@ -49,13 +58,20 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 				+ " to instantiate the following process:");
 		out.write("</p>\n");
 		out.write("<ul class=\"info-list\">\n");
-		out.write(
-				"<li><b>URL: <a class=\"info-link info-link-task " + getColorClass(task.getStatus(), ELEMENT_TYPE_LINK)
-						+ "\" href=\"" + href + "\">" + taskCanonicalSplit[0] + "</a></b></li>\n");
-		out.write("<li><b>Version: <a class=\"info-link info-link-task "
+		out.write("<li><b>Process URL: <a class=\"info-link info-link-task "
+				+ getColorClass(task.getStatus(), ELEMENT_TYPE_LINK) + "\" href=\"" + href + "\">"
+				+ taskCanonicalSplit[0] + "</a></b></li>\n");
+		out.write("<li><b>Process Version: <a class=\"info-link info-link-task "
 				+ getColorClass(task.getStatus(), ELEMENT_TYPE_LINK) + "\" href=\"" + href + "\">"
 				+ taskCanonicalSplit[1] + "</a></b></li>\n");
-		out.write("<li><b>Status:</b> " + task.getStatus().getDisplay() + "</li>\n");
+		out.write("<li><b>Task Profile:</b> "
+				+ task.getMeta().getProfile().stream().map(CanonicalType::getValue).collect(Collectors.joining(", "))
+				+ "</li>\n");
+		out.write("<li><b>Task Status:</b> " + task.getStatus().toCode() + "</li>\n");
+		getInput(task, isMessageName()).ifPresent(m -> silentWrite(out, "<li><b>Message-Name:</b> " + m + "</li>\n"));
+		getInput(task, isBusinessKey()).ifPresent(k -> silentWrite(out, "<li><b>Business-Key:</b> " + k + "</li>\n"));
+		getInput(task, isCorrelationKey())
+				.ifPresent(k -> silentWrite(out, "<li><b>Correlation-Key:</b> " + k + "</li>\n"));
 		out.write("</ul>\n");
 		out.write("</div>\n");
 		out.write("</div>\n");
@@ -82,15 +98,17 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 				+ (draft ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + authoredOn + "\"") + "></input>\n");
 		out.write("</div>\n");
 
-		// the Task has more inputs than the message-name,
-		// just the message-name input is only possible with Task status draft
-		if (task.getInput().size() > 1)
+		List<ParameterComponent> filteredInputs = task.getInput().stream()
+				.filter(isMessageName().negate().and(isBusinessKey().negate()).and(isCorrelationKey().negate()))
+				.toList();
+
+		if (filteredInputs.size() > 1)
 		{
 			out.write("<section>");
 			out.write("<h2 class=\"input-output-header\">Inputs</h2>");
 
 			Map<String, Integer> elementIdIndexMap = new HashMap<>();
-			for (Task.ParameterComponent input : task.getInput())
+			for (ParameterComponent input : filteredInputs)
 			{
 				writeInput(input, elementIdIndexMap, draft, out);
 			}
@@ -104,7 +122,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 			out.write("<h2 class=\"input-output-header\">Outputs</h2>");
 
 			Map<String, Integer> elementIdIndexMap = new HashMap<>();
-			for (Task.TaskOutputComponent output : task.getOutput())
+			for (TaskOutputComponent output : task.getOutput())
 			{
 				writeOutput(output, elementIdIndexMap, out);
 			}
@@ -122,6 +140,46 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 
 		out.write("</fieldset>\n");
 		out.write("</form>\n");
+	}
+
+	private void silentWrite(OutputStreamWriter out, String value)
+	{
+		try
+		{
+			out.write(value);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Optional<String> getInput(Task task, Predicate<ParameterComponent> paramMatches)
+	{
+		if (task == null || paramMatches == null)
+			return Optional.empty();
+
+		return task.getInput().stream().filter(paramMatches).filter(i -> i.getValue() instanceof StringType)
+				.map(i -> ((StringType) i.getValue()).getValue()).findFirst();
+	}
+
+	private Predicate<ParameterComponent> isMessageName()
+	{
+		return param -> param != null && param.getType().getCoding().stream().anyMatch(
+				c -> CODESYSTEM_BPMN.equals(c.getSystem()) && CODESYSTEM_BPMN_MESSAGE_MESSAGE_NAME.equals(c.getCode()));
+	}
+
+	private Predicate<ParameterComponent> isBusinessKey()
+	{
+		return param -> param != null && param.getType().getCoding().stream().anyMatch(
+				c -> CODESYSTEM_BPMN.equals(c.getSystem()) && CODESYSTEM_BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode()));
+	}
+
+	private Predicate<ParameterComponent> isCorrelationKey()
+	{
+		return param -> param != null
+				&& param.getType().getCoding().stream().anyMatch(c -> CODESYSTEM_BPMN.equals(c.getSystem())
+						&& CODESYSTEM_BPMN_MESSAGE_CORRELATION_KEY.equals(c.getCode()));
 	}
 
 	private String getColorClass(Task.TaskStatus status, String elementType)

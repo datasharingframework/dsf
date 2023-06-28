@@ -17,6 +17,9 @@ import org.apache.logging.log4j.core.config.DefaultConfiguration;
 
 public final class Log4jInitializer
 {
+	public static final String LOG4J_CONFIG = "dev.dsf.log4j.config";
+	public static final String LOG4J_CONFIG_DEFAULT = "conf/log4j2.xml";
+
 	private Log4jInitializer()
 	{
 	}
@@ -24,11 +27,10 @@ public final class Log4jInitializer
 	// special reader code, to make sure no logger has initialized log4j
 	private static Path readlog4jConfigPath()
 	{
-		String log4jConfig = System.getenv(JettyConfig.PROPERTY_JETTY_LOG4J_CONFIG);
+		String log4jConfig = System.getenv(LOG4J_CONFIG.replace(".", "_"));
 
 		if (log4jConfig == null)
-			log4jConfig = jettyProperties().getProperty(JettyConfig.PROPERTY_JETTY_LOG4J_CONFIG,
-					JettyConfig.PROPERTY_JETTY_LOG4J_CONFIG_DEFAULT);
+			log4jConfig = jettyProperties().getProperty(LOG4J_CONFIG, LOG4J_CONFIG_DEFAULT);
 
 		return Paths.get(log4jConfig);
 	}
@@ -36,7 +38,7 @@ public final class Log4jInitializer
 	private static Properties jettyProperties()
 	{
 		Properties properties = new Properties();
-		Path propertiesFile = Paths.get(JettyConfig.JETTY_PROPERTIES_FILE);
+		Path propertiesFile = Paths.get("conf/jetty.properties");
 		if (Files.isReadable(propertiesFile))
 		{
 			try (Reader reader = new InputStreamReader(Files.newInputStream(propertiesFile), StandardCharsets.UTF_8))
