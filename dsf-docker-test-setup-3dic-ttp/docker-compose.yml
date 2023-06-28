@@ -414,7 +414,7 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: dic1_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic1_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic1_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_dic_1
+      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_1
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic1/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_updateAllowList|1.0
