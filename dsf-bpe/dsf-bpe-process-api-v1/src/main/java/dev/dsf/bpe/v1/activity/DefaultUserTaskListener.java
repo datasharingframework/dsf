@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -132,6 +131,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		return questionnaires.get(0);
 	}
 
+
 	private QuestionnaireResponse createDefaultQuestionnaireResponse(String questionnaireUrlWithVersion,
 			String businessKey, String userTaskId)
 	{
@@ -143,12 +143,9 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 				.setIdentifier(api.getOrganizationProvider().getLocalOrganizationIdentifier()
 						.orElseThrow(() -> new IllegalStateException("Local organization identifier unknown"))));
 
-		if (addBusinessKeyToQuestionnaireResponse())
-		{
-			api.getQuestionnaireResponseHelper().addItemLeafWithAnswer(questionnaireResponse,
-					BpmnUserTask.Codes.BUSINESS_KEY, "The business-key of the process execution",
-					new StringType(businessKey));
-		}
+		api.getQuestionnaireResponseHelper().addItemLeafWithAnswer(questionnaireResponse,
+				BpmnUserTask.Codes.BUSINESS_KEY, "The business-key of the process execution",
+				new StringType(businessKey));
 
 		api.getQuestionnaireResponseHelper().addItemLeafWithAnswer(questionnaireResponse,
 				BpmnUserTask.Codes.USER_TASK_ID, "The user-task-id of the process execution",
@@ -183,13 +180,10 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 	private void checkQuestionnaireResponse(QuestionnaireResponse questionnaireResponse)
 	{
-		if (addBusinessKeyToQuestionnaireResponse())
-		{
-			questionnaireResponse.getItem().stream().filter(i -> BpmnUserTask.Codes.BUSINESS_KEY.equals(i.getLinkId()))
-					.findFirst().orElseThrow(
-							() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
-									+ BpmnUserTask.Codes.BUSINESS_KEY + "'"));
-		}
+		questionnaireResponse.getItem().stream().filter(i -> BpmnUserTask.Codes.BUSINESS_KEY.equals(i.getLinkId()))
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
+						+ BpmnUserTask.Codes.BUSINESS_KEY + "'"));
 
 		questionnaireResponse.getItem().stream().filter(i -> BpmnUserTask.Codes.USER_TASK_ID.equals(i.getLinkId()))
 				.findFirst()
@@ -198,18 +192,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 		if (!QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(questionnaireResponse.getStatus()))
 			throw new RuntimeException("QuestionnaireResponse must be in status 'in-progress'");
-	}
-
-	/**
-	 * <i>Override this method to decided if you want to add the Business-Key to the {@link QuestionnaireResponse}
-	 * resource as an item with {@link QuestionnaireResponseItemComponent#getLinkId()} equal to
-	 * {@link BpmnUserTask.Codes#BUSINESS_KEY}</i>
-	 *
-	 * @return <code>false</code>
-	 */
-	protected boolean addBusinessKeyToQuestionnaireResponse()
-	{
-		return false;
 	}
 
 	/**
