@@ -102,7 +102,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 				.filter(isMessageName().negate().and(isBusinessKey().negate()).and(isCorrelationKey().negate()))
 				.toList();
 
-		if (filteredInputs.size() > 1)
+		if (filteredInputs.size() > 0)
 		{
 			out.write("<section>");
 			out.write("<h2 class=\"input-output-header\">Inputs</h2>");
