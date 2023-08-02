@@ -160,7 +160,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				+ uriInfo.getPath() + "</title>\n");
 		out.write("</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled(type))
-				+ ");checkBookmarked();" + adaptFormInputs(resource) + "\">\n");
+				+ ");checkBookmarked();" + adaptTaskFormInputs(resource) + "\">\n");
 
 		out.write("<div id=\"icons\">\n");
 
@@ -435,10 +435,10 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		return htmlGeneratorsByType.containsKey(resourceType);
 	}
 
-	private String adaptFormInputs(BaseResource resource)
+	private String adaptTaskFormInputs(BaseResource resource)
 	{
 		if (resource instanceof Task task)
-			return Task.TaskStatus.DRAFT.equals(task.getStatus()) ? "adaptFormInputs();" : "";
+			return Task.TaskStatus.DRAFT.equals(task.getStatus()) ? "adaptTaskFormInputs();" : "";
 		else
 			return "";
 	}

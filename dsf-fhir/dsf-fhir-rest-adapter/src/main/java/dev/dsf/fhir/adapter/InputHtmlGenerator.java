@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.model.BooleanType;
@@ -32,179 +33,155 @@ public abstract class InputHtmlGenerator
 	protected static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	protected static final SimpleDateFormat DATE_TIME_DISPLAY_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-	protected void writeDisplayRow(String text, String elementId, boolean display, OutputStreamWriter out)
+	protected void writeDisplayRow(String text, String elementName, boolean display, OutputStreamWriter out)
 			throws IOException
 	{
-		out.write("<div class=\"row row-display" + (display ? "" : " invisible") + "\" id=\"" + elementId
+		out.write("<div class=\"row row-display" + (display ? "" : " invisible") + "\" name=\"" + elementName
 				+ "-display-row\">\n");
 		out.write("<p class=\"p-display\">" + text + "</label>\n");
 		out.write("</div>\n");
 	}
 
-	protected void writeInputRow(Type type, List<Extension> extensions, String elementId,
-			Map<String, Integer> elementIdIndexMap, String elementLabel, boolean display, boolean writable,
+	protected void writeInputRow(Type type, List<Extension> extensions, String elementName,
+			Map<String, Integer> elemenIndexMap, String elementLabel, boolean display, boolean writable,
 			OutputStreamWriter out) throws IOException
 	{
-		String elementIdWithIndex = getElementIdWithIndex(elementId, elementIdIndexMap);
+		int elementIndex = getElementIndex(elementName, elemenIndexMap);
 
-		out.write("<div class=\"row" + (display ? "" : " invisible") + "\" id=\"" + elementIdWithIndex
-				+ "-input-row\">\n");
+		out.write("<div class=\"row" + (display ? "" : " invisible") + "\" name=\"" + elementName
+				+ "-input-row\" index=\"" + elementIndex + "\">\n");
 
-		writeInputLabel(type, elementIdWithIndex, elementLabel, () -> "", out);
-		writeInputField(type, elementIdWithIndex, writable, out);
-		writeInputExtensionFields(extensions, elementIdWithIndex, writable, 0, out);
+		writeInputLabel(elementLabel, elementIndex, () -> "", out);
+		writeInputField(type, elementName, elementIndex, writable, out);
+		writeInputExtensionFields(extensions, elementName, elementIndex, writable, 0, out);
 
-		out.write("<ul class=\"error-list-not-visible\" id=\"" + elementIdWithIndex + "-error\">\n");
+		out.write("<ul class=\"error-list-not-visible\" name=\"" + elementName + "-error\" index=\"" + elementIndex
+				+ "\">\n");
 		out.write("</ul>\n");
 		out.write("</div>\n");
 	}
 
-	protected void writeInputLabel(Type type, String elementId, String elementLabel, Supplier<String> additionalClasses,
+	protected void writeInputLabel(String elementLabel, int elementIndex, Supplier<String> additionalClasses,
 			OutputStreamWriter out) throws IOException
 	{
-		if (type instanceof Identifier || type instanceof Coding)
-		{
-			elementId = elementId + "-system";
-		}
-		else if (type instanceof Reference reference && reference.hasIdentifier())
-		{
-			elementId = elementId + "-system";
-		}
-		else if (type instanceof BooleanType)
-		{
-			elementId = elementId + "-true";
-		}
 
-		String forElement = type != null ? " for=\"" + elementId + "\"" : "";
-		out.write("<label class=\"row-label " + additionalClasses.get() + "\"" + forElement + ">" + elementLabel
-				+ "</label>\n");
+		out.write("<label class=\"row-label " + additionalClasses.get() + "\" index=\"" + elementIndex + "\">"
+				+ elementLabel + "</label>\n");
 	}
 
-	protected void writeInputExtensionFields(List<Extension> extensions, String elementId, boolean writable, int depth,
-			OutputStreamWriter out) throws IOException
+	protected void writeInputExtensionFields(List<Extension> extensions, String elementName, int elementIndex,
+			boolean writable, int depth, OutputStreamWriter out) throws IOException
 	{
 		for (Extension extension : extensions)
 		{
-			String extensionElementId = elementId + "-" + extension.getUrl();
-			out.write("<div class=\"" + (depth == 0 ? "row-extension-0" : "row-extension") + "\" id=\""
-					+ extensionElementId + "-extension-row\">\n");
+			String extensionelementName = elementName + "-" + extension.getUrl();
+			out.write("<div class=\"" + (depth == 0 ? "row-extension-0" : "row-extension") + "\" name=\""
+					+ extensionelementName + "-extension-row\" index=\"" + elementIndex + "\">\n");
 
 			String extensionElementLabel = "Extension: " + extension.getUrl();
 			if (extension.hasValue())
 			{
-				writeInputLabel(extension.getValue(), extensionElementId, extensionElementLabel, () -> "", out);
-				writeInputField(extension.getValue(), extensionElementId, writable, out);
+				writeInputLabel(extensionElementLabel, elementIndex, () -> "", out);
+				writeInputField(extension.getValue(), extensionelementName, elementIndex, writable, out);
 			}
 			else
 			{
-				writeInputLabel(null, extensionElementId, extensionElementLabel, () -> "row-label-extension-no-value",
-						out);
+				writeInputLabel(extensionElementLabel, elementIndex, () -> "row-label-extension-no-value", out);
 			}
 
 			if (extension.hasExtension())
 			{
-				writeInputExtensionFields(extension.getExtension(), extensionElementId, writable, ++depth, out);
+				writeInputExtensionFields(extension.getExtension(), extensionelementName, elementIndex, writable,
+						++depth, out);
 			}
 			out.write("</div>\n");
 		}
 	}
 
-	protected void writeInputField(Type type, String elementId, boolean writable, OutputStreamWriter out)
-			throws IOException
+	protected void writeInputField(Type type, String elementName, int elementIndex, boolean writable,
+			OutputStreamWriter out) throws IOException
 	{
 		if (type != null)
 		{
 			if (type instanceof StringType)
 			{
 				String value = ((StringType) type).getValue();
-				out.write("<input type=\"text\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-						+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "\"></input>\n");
+				writeInputFieldValueInput("text", value, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof IntegerType)
 			{
 				String value = String.valueOf(((IntegerType) type).getValue());
-				out.write("<input type=\"number\" id=\"" + elementId + "\" name=\"" + elementId + "\" step=\"1\" "
-						+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
+				writeInputFieldValueInput("number", value, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof DecimalType)
 			{
 				String value = String.valueOf(((DecimalType) type).getValue());
-				out.write("<input type=\"number\" id=\"" + elementId + "\" name=\"" + elementId + "\" step=\"0.01\" "
-						+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
-			}
-			else if (type instanceof BooleanType)
-			{
-				boolean valueIsTrue = ((BooleanType) type).getValue();
-
-				out.write("<div>\n");
-				out.write("<label class=\"radio\"><input type=\"radio\" id=\"" + elementId + "-true\" name=\""
-						+ elementId + "\" value=\"true\" " + ((valueIsTrue) ? "checked" : "") + "/>Yes</label>\n");
-				out.write("<label class=\"radio\"><input type=\"radio\" id=\"" + elementId + "-false\" name=\""
-						+ elementId + "\" value=\"false\" " + ((!valueIsTrue) ? "checked" : "") + "/>No</label>\n");
-				out.write("</div>\n");
+				writeInputFieldValueInput("number", value, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof DateType)
 			{
 				Date value = ((DateType) type).getValue();
 				String date = DATE_FORMAT.format(value);
-
-				out.write("<input type=\"date\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-						+ (writable ? "placeholder=\"yyyy.MM.dd\"" : "value=\"" + date + "\"") + "></input>\n");
+				writeInputFieldValueInput("date", date, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof TimeType)
 			{
 				String value = ((TimeType) type).getValue();
-				out.write("<input type=\"time\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-						+ (writable ? "placeholder=\"hh:mm:ss\"" : "value=\"" + value + "\"") + "></input>\n");
+				writeInputFieldValueInput("time", value, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof DateTimeType)
 			{
 				Date value = ((DateTimeType) type).getValue();
 				String dateTime = DATE_TIME_FORMAT.format(value);
-
-				out.write("<input type=\"datetime-local\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-						+ (writable ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + dateTime + "\"")
-						+ "></input>\n");
+				writeInputFieldValueInput("datetime-local", dateTime, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof InstantType)
 			{
 				Date value = ((InstantType) type).getValue();
 				String dateTime = DATE_TIME_FORMAT.format(value);
-
-				out.write("<input type=\"datetime-local\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-						+ (writable ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + dateTime + "\"")
-						+ "></input>\n");
+				writeInputFieldValueInput("datetime-local", dateTime, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof UriType)
 			{
 				String value = ((UriType) type).getValue();
-				out.write("<input type=\"url\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-						+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
+				writeInputFieldValueInput("url", value, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof Reference reference)
 			{
 				if (reference.hasReference())
 				{
-					out.write("<input type=\"url\" id=\"" + elementId + "\" name=\"" + elementId + "\" "
-							+ (writable ? "placeholder=\"" + reference.getReference() + "\""
-									: "value=\"" + reference.getReference() + "\"")
-							+ "></input>\n");
+					String value = reference.getReference();
+					writeInputFieldValueInput("url", value, elementName, elementIndex, writable, out);
 				}
 				else if (reference.hasIdentifier())
 				{
 					Identifier identifier = reference.getIdentifier();
-					writeInputFieldSystemValueInput(elementId, writable, identifier.getSystem(), identifier.getValue(),
-							out);
+					writeInputFieldSystemCodeInput(identifier.getSystem(), identifier.getValue(), elementName,
+							elementIndex, writable, out);
 				}
 			}
 			else if (type instanceof Identifier identifier)
 			{
-				writeInputFieldSystemValueInput(elementId, writable, identifier.getSystem(), identifier.getValue(),
-						out);
+				writeInputFieldSystemCodeInput(identifier.getSystem(), identifier.getValue(), elementName, elementIndex,
+						writable, out);
 			}
 			else if (type instanceof Coding coding)
 			{
-				writeInputFieldSystemValueInput(elementId, writable, coding.getSystem(), coding.getCode(), out);
+				writeInputFieldSystemCodeInput(coding.getSystem(), coding.getCode(), elementName, elementIndex,
+						writable, out);
+			}
+			else if (type instanceof BooleanType)
+			{
+				boolean valueIsTrue = ((BooleanType) type).getValue();
+
+				out.write("<div class=\"input-group\">\n");
+				out.write("<label class=\"radio\"><input type=\"radio\" name=\"" + elementName + "\" index=\""
+						+ elementIndex + "\" value=\"true\"" + ((valueIsTrue && !writable) ? " checked" : "")
+						+ "/>Yes</label>\n");
+				out.write("<label class=\"radio\"><input type=\"radio\" name=\"" + elementName + "\" " + "\" index=\""
+						+ elementIndex + "\" value=\"false\"" + ((!valueIsTrue && !writable) ? " checked" : "")
+						+ "/>No</label>\n");
+				out.write("</div>\n");
 			}
 			else
 			{
@@ -214,28 +191,65 @@ public abstract class InputHtmlGenerator
 		}
 	}
 
-	private void writeInputFieldSystemValueInput(String elementId, boolean writable, String system, String value,
-			OutputStreamWriter out) throws IOException
+	private void writeInputFieldValueInput(String type, String value, String elementName, int elementIndex,
+			boolean writable, OutputStreamWriter out) throws IOException
 	{
-		out.write("<input type=\"url\" id=\"" + elementId + "-system\" name=\"" + elementId + "-system\" "
-				+ (writable ? "placeholder=\"" + system + "\"" : "value=\"" + system + "\"") + "></input>\n");
-		out.write("<input class=\"identifier-coding-value\" type=\"text\" id=\"" + elementId + "-value\" name=\""
-				+ elementId + "-value\" " + (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"")
-				+ "></input>\n");
+		out.write("<div class=\"input-group\">\n");
+		writeInput(type, value, elementName, elementIndex, Optional.empty(), writable, out);
+		writePlaceholderButton(elementName, value, writable, out);
+		out.write("</div>\n");
 	}
 
-	private String getElementIdWithIndex(String elementId, Map<String, Integer> elementIdIndexMap)
+	private void writeInputFieldSystemCodeInput(String system, String code, String elementName, int elementIndex,
+			boolean writable, OutputStreamWriter out) throws IOException
 	{
-		if (elementIdIndexMap.containsKey(elementId))
+		out.write("<div class=\"input-group\">\n");
+		writeInput("url", system, elementName + "-system", elementIndex, Optional.empty(), writable, out);
+		writePlaceholderButton(elementName + "-system", system, writable, out);
+		out.write("</div>\n");
+
+		out.write("<div class=\"input-group\">\n");
+		writeInput("text", code, elementName + "-code", elementIndex, Optional.of("identifier-coding-code"), writable,
+				out);
+		writePlaceholderButton(elementName + "-code", code, writable, out);
+		out.write("</div>\n");
+	}
+
+	private void writeInput(String type, String value, String elementName, int elementIndex, Optional<String> classes,
+			boolean writable, OutputStreamWriter out) throws IOException
+	{
+		out.write("<input type=\"" + type + "\"" + (classes.map(c -> " class=\"" + c + "\"").orElse("")) + " name=\""
+				+ elementName + "\" index=\"" + elementIndex + "\" "
+				+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
+	}
+
+	private void writePlaceholderButton(String elementName, String value, boolean writable, OutputStreamWriter out)
+			throws IOException
+	{
+		if (writable)
 		{
-			int index = elementIdIndexMap.get(elementId) + 1;
-			elementIdIndexMap.put(elementId, index);
-			return elementId + "-" + index;
+			out.write("<svg class=\"input-group-svg\" height=\"22\" width=\"22\" viewBox=\"0 -960 960 960\" "
+					+ "onclick=\"insertPlaceholderInValue(this.parentElement, '" + elementName + "', '" + value
+					+ "')\">\n");
+			out.write("<title>Use placeholder</title>\n");
+			out.write(
+					"<path d=\"M180-120q-24.75 0-42.375-17.625T120-180v-440q0-24.75 17.625-42.375T180-680h210v60H180v440h600v-440H570v-60h210q24.75 0 42.375 17.625T840-620v440q0 24.75-17.625 42.375T780-120H180Zm300-203L318-485l43-43 89 89v-521h60v521l89-89 43 43-162 162Z\"/>\n");
+			out.write("</svg>\n");
+		}
+	}
+
+	private int getElementIndex(String elementName, Map<String, Integer> elementIndexMap)
+	{
+		if (elementIndexMap.containsKey(elementName))
+		{
+			int index = elementIndexMap.get(elementName) + 1;
+			elementIndexMap.put(elementName, index);
+			return index;
 		}
 		else
 		{
-			elementIdIndexMap.put(elementId, 0);
-			return elementId + "-0";
+			elementIndexMap.put(elementName, 0);
+			return 0;
 		}
 	}
 }
