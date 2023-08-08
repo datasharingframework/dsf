@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -28,16 +27,11 @@ public class EnvGenerator
 	{
 		final String userThumbprintVariableName;
 		final String userThumbprint;
-		final String webbrowserTestUserThumbprintVariableName;
-		final String webbrowserTestUserThumbprint;
 
-		EnvEntry(String userThumbprintVariableName, String userThumbprint,
-				String webbrowserTestUserThumbprintVariableName, String webbrowserTestUserThumbprint)
+		EnvEntry(String userThumbprintVariableName, String userThumbprint)
 		{
 			this.userThumbprintVariableName = userThumbprintVariableName;
 			this.userThumbprint = userThumbprint;
-			this.webbrowserTestUserThumbprintVariableName = webbrowserTestUserThumbprintVariableName;
-			this.webbrowserTestUserThumbprint = webbrowserTestUserThumbprint;
 		}
 	}
 
@@ -49,8 +43,8 @@ public class EnvGenerator
 				"Webbrowser Test User").findFirst().get();
 
 		writeEnvFile(Paths.get("../../dsf-docker-test-setup/fhir/.env"),
-				Collections.singletonList(new EnvEntry(BUNDLE_USER_THUMBPRINT, bundleUserThumbprint,
-						WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint)));
+				List.of(new EnvEntry(BUNDLE_USER_THUMBPRINT, bundleUserThumbprint),
+						new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint)));
 	}
 
 	public void generateAndWriteDockerTest3DicTtpDockerFhirEnvFiles(
@@ -71,12 +65,11 @@ public class EnvGenerator
 		String bundleTtpUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client")
 				.findFirst().get();
 
-		List<EnvEntry> entries = List.of(
-				new EnvEntry("DIC1_" + BUNDLE_USER_THUMBPRINT, bundleDic1UserThumbprint, WEBBROSER_TEST_USER_THUMBPRINT,
-						webbroserTestUserThumbprint),
-				new EnvEntry("DIC2_" + BUNDLE_USER_THUMBPRINT, bundleDic2UserThumbprint, null, null),
-				new EnvEntry("DIC3_" + BUNDLE_USER_THUMBPRINT, bundleDic3UserThumbprint, null, null),
-				new EnvEntry("TTP_" + BUNDLE_USER_THUMBPRINT, bundleTtpUserThumbprint, null, null));
+		List<EnvEntry> entries = List.of(new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint),
+				new EnvEntry("DIC1_" + BUNDLE_USER_THUMBPRINT, bundleDic1UserThumbprint),
+				new EnvEntry("DIC2_" + BUNDLE_USER_THUMBPRINT, bundleDic2UserThumbprint),
+				new EnvEntry("DIC3_" + BUNDLE_USER_THUMBPRINT, bundleDic3UserThumbprint),
+				new EnvEntry("TTP_" + BUNDLE_USER_THUMBPRINT, bundleTtpUserThumbprint));
 
 		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3dic-ttp/.env"), entries);
 	}
@@ -97,14 +90,6 @@ public class EnvGenerator
 		for (int i = 0; i < entries.size(); i++)
 		{
 			EnvEntry entry = entries.get(i);
-
-			if (entry.webbrowserTestUserThumbprintVariableName != null && entry.webbrowserTestUserThumbprint != null)
-			{
-				builder.append(entry.webbrowserTestUserThumbprintVariableName);
-				builder.append('=');
-				builder.append(entry.webbrowserTestUserThumbprint);
-				builder.append('\n');
-			}
 
 			builder.append(entry.userThumbprintVariableName);
 			builder.append('=');
