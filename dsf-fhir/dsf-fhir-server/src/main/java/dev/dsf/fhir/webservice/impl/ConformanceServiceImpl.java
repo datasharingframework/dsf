@@ -459,6 +459,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addSearchParam(createPrettyParameter());
 			r.addSearchParam(createSummaryParameter());
 			r.addSearchParam(createProfileParameter());
+			r.addSearchParam(createSinceParameter());
+			r.addSearchParam(createAtParameter());
 
 			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
 			var revIncludes = resourceRevIncludeParameters.stream()
@@ -546,6 +548,18 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	{
 		return createSearchParameter("_count", "", SearchParamType.NUMBER,
 				"Specify the numer of returned resources per page, " + defaultPageCount + " if not specified");
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createAtParameter()
+	{
+		return createSearchParameter("_at", "", SearchParamType.DATE,
+				"Only include resource versions that were current at some point during the time period specified in the date time value");
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createSinceParameter()
+	{
+		return createSearchParameter("_since", "", SearchParamType.SPECIAL,
+				"Only include resource versions that were created at or after the given instant in time");
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createFormatParameter()
