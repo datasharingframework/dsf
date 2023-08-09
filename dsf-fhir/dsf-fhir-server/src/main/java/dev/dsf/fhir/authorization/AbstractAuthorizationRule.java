@@ -185,8 +185,8 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
 		if (!uQp.isEmpty())
 		{
-			logger.warn("Unsupported query parameters {} while searching for Organization", uQp);
-			return false;
+			logger.warn("Unable to search for Organization: Unsupported query parameters: {}", uQp);
+			throw new IllegalStateException("Unable to search for Organization: Unsupported query parameters.");
 		}
 
 		try
@@ -196,8 +196,8 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for Organization with identifier", e);
-			return false;
+			logger.warn("Unable to search for Organization", e);
+			throw new RuntimeException("Unable to search for Organization", e);
 		}
 	}
 
@@ -216,8 +216,8 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
 		if (!uQp.isEmpty())
 		{
-			logger.warn("Unsupported query parameters {} while searching for CodeSystem", uQp);
-			return false;
+			logger.warn("Unable to search for CodeSystem: Unsupported query parameters: {}", uQp);
+			throw new IllegalStateException("Unable to search for CodeSystem: Unsupported query parameters");
 		}
 
 		try
@@ -227,8 +227,8 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for Organization with identifier", e);
-			return false;
+			logger.warn("Unable to search for CodeSystem", e);
+			throw new RuntimeException("Unable to search for CodeSystem", e);
 		}
 	}
 

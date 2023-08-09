@@ -88,12 +88,10 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 				if (optDao.isPresent())
 				{
 					SearchQuery<?> searchQuery = optDao.get().createSearchQueryWithoutUserFilter(1, 1);
-					List<SearchQueryParameterError> unsupportedQueryParameters = searchQuery
-							.getUnsupportedQueryParameters();
-
-					if (!unsupportedQueryParameters.isEmpty())
+					List<SearchQueryParameterError> uQp = searchQuery.getUnsupportedQueryParameters();
+					if (!uQp.isEmpty())
 					{
-						errors.add("Subscription.criteria invalid (parameters '" + unsupportedQueryParameters.stream()
+						errors.add("Subscription.criteria invalid (parameters '" + uQp.stream()
 								.map(SearchQueryParameterError::toString).collect(Collectors.joining(", "))
 								+ "' not supported)");
 					}
@@ -136,8 +134,12 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 		SearchQuery<Subscription> query = dao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(queryParameters);
 
-		if (!query.getUnsupportedQueryParameters().isEmpty())
-			return false;
+		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
+		if (!uQp.isEmpty())
+		{
+			logger.warn("Unable to search for Subscription: Unsupported query parameters: {}", uQp);
+			throw new IllegalStateException("Unable to search for Subscription: Unsupported query parameters");
+		}
 
 		try
 		{
@@ -146,8 +148,8 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for Subscriptions", e);
-			return false;
+			logger.warn("Unable to search for Subscription", e);
+			throw new RuntimeException("Unable to search for Subscription", e);
 		}
 	}
 
