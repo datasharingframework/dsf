@@ -1,18 +1,13 @@
 package dev.dsf.fhir.search.parameters.basic;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
-import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import jakarta.ws.rs.core.UriBuilder;
 
-public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> extends AbstractSearchParameter<R>
+public abstract class AbstractCanonicalUrlParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
 	public static enum UriSearchType
 	{
@@ -24,6 +19,11 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 		{
 			this.modifier = modifier;
 		}
+	}
+
+	public static List<String> getNameModifiers()
+	{
+		return Collections.singletonList(UriSearchType.BELOW.modifier);
 	}
 
 	protected static class CanonicalUrlAndSearchType
@@ -48,51 +48,23 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 	}
 
 	@Override
-	protected Stream<String> getModifiedParameterNames()
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		return Stream.of(getParameterName() + UriSearchType.BELOW.modifier);
-	}
-
-	@Override
-	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
-	{
-		List<String> allValues = new ArrayList<>();
-		allValues.addAll(
-				queryParameters.getOrDefault(parameterName + UriSearchType.PRECISE.modifier, Collections.emptyList()));
-		allValues.addAll(
-				queryParameters.getOrDefault(parameterName + UriSearchType.BELOW.modifier, Collections.emptyList()));
-		if (allValues.size() > 1)
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-					parameterName, allValues));
-
-		String precise = getFirst(queryParameters, parameterName + UriSearchType.PRECISE.modifier);
-		if (precise != null)
-		{
-			valueAndType = toValueAndType(precise, UriSearchType.PRECISE);
-			return;
-		}
-
-		String below = getFirst(queryParameters, parameterName + UriSearchType.BELOW.modifier);
-		if (below != null)
-		{
-			valueAndType = toValueAndType(below, UriSearchType.BELOW);
-			return;
-		}
-
+		if ((parameterName + UriSearchType.PRECISE.modifier).equals(queryParameterName))
+			valueAndType = toValueAndType(queryParameterValue, UriSearchType.PRECISE);
+		else if ((parameterName + UriSearchType.BELOW.modifier).equals(queryParameterName))
+			valueAndType = toValueAndType(queryParameterValue, UriSearchType.BELOW);
 		// TODO
-		// String above = queryParameters.getFirst(parameterName + UriSearchType.ABOVE.modifier);
-		// if (above != null && !above.isBlank())
-		// {
-		// valueAndType = new UriValueAndSearchType(above, UriSearchType.ABOVE);
-		// return;
-		// }
+		// else if ((parameterName + UriSearchType.ABOVE.modifier).equals(queryParameterName))
+		// valueAndType = toValueAndType(queryParameterValue, UriSearchType.ABOVE);
 	}
 
-	protected static CanonicalUrlAndSearchType toValueAndType(String parameter, UriSearchType type)
+	private CanonicalUrlAndSearchType toValueAndType(String value, UriSearchType type)
 	{
-		if (parameter != null && !parameter.isBlank())
+		if (value != null && !value.isBlank())
 		{
-			String[] split = parameter.split("[|]");
+			String[] split = value.split("[|]");
 			if (split.length == 1)
 				return new CanonicalUrlAndSearchType(split[0], null, type);
 			else if (split.length == 2)
@@ -114,9 +86,14 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterName()
 	{
-		bundleUri.replaceQueryParam(parameterName + valueAndType.type.modifier,
-				valueAndType.url + (hasVersion() ? ("|" + valueAndType.version) : ""));
+		return parameterName + valueAndType.type.modifier;
+	}
+
+	@Override
+	public String getBundleUriQueryParameterValue()
+	{
+		return valueAndType.url + (hasVersion() ? ("|" + valueAndType.version) : "");
 	}
 }

@@ -1,5 +1,8 @@
 package dev.dsf.fhir.dao.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.HealthcareService;
@@ -17,7 +20,10 @@ public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<Healthcare
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, HealthcareService.class, "healthcare_services",
 				"healthcare_service", "healthcare_service_id", HealthcareServiceIdentityFilter::new,
-				with(HealthcareServiceActive::new, HealthcareServiceIdentifier::new), with());
+				Arrays.asList(factory(HealthcareServiceActive.PARAMETER_NAME, HealthcareServiceActive::new),
+						factory(HealthcareServiceIdentifier.PARAMETER_NAME, HealthcareServiceIdentifier::new,
+								HealthcareServiceIdentifier.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

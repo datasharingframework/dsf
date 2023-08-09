@@ -20,8 +20,8 @@ import dev.dsf.fhir.search.parameters.basic.TokenValueAndSearchType;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/clinical-identifier", type = SearchParamType.TOKEN, documentation = "Identifies this document reference across multiple systems")
 public class DocumentReferenceIdentifier extends AbstractTokenParameter<DocumentReference>
 {
-	public static final String RESOURCE_COLUMN = "document_reference";
 	public static final String PARAMETER_NAME = "identifier";
+	public static final String RESOURCE_COLUMN = "document_reference";
 
 	public DocumentReferenceIdentifier()
 	{
@@ -35,27 +35,37 @@ public class DocumentReferenceIdentifier extends AbstractTokenParameter<Document
 		{
 			case CODE:
 				if (valueAndType.negated)
-					return "NOT (document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'value' = ?)";
+					return "NOT (" + RESOURCE_COLUMN + "->'identifier' @> ?::jsonb OR " + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'value' = ?)";
 				else
-					return "(document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'value' = ?)";
+					return "(" + RESOURCE_COLUMN + "->'identifier' @> ?::jsonb OR " + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'value' = ?)";
 			case CODE_AND_SYSTEM:
 				if (valueAndType.negated)
-					return "NOT (document_reference->'identifier' @> ?::jsonb OR (document_reference->'masterIdentifier'->>'value' = ? AND document_reference->'masterIdentifier'->>'system' = ?))";
+					return "NOT (" + RESOURCE_COLUMN + "->'identifier' @> ?::jsonb OR (" + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'value' = ? AND " + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'system' = ?))";
 				else
-					return "(document_reference->'identifier' @> ?::jsonb OR (document_reference->'masterIdentifier'->>'value' = ? AND document_reference->'masterIdentifier'->>'system' = ?))";
+					return "(" + RESOURCE_COLUMN + "->'identifier' @> ?::jsonb OR (" + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'value' = ? AND " + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'system' = ?))";
 			case SYSTEM:
 				if (valueAndType.negated)
-					return "NOT (document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'system' = ?)";
+					return "NOT (" + RESOURCE_COLUMN + "->'identifier' @> ?::jsonb OR " + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'system' = ?)";
 				else
-					return "(document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'system' = ?)";
+					return "(" + RESOURCE_COLUMN + "->'identifier' @> ?::jsonb OR " + RESOURCE_COLUMN
+							+ "->'masterIdentifier'->>'system' = ?)";
 			case CODE_AND_NO_SYSTEM_PROPERTY:
 				if (valueAndType.negated)
-					return "(SELECT count(*) FROM ("
-							+ "SELECT identifier FROM jsonb_array_elements(document_reference->'identifier') AS identifier UNION SELECT document_reference->'masterIdentifier') AS document_reference_identifiers "
+					return "(SELECT count(*) FROM (" + "SELECT identifier FROM jsonb_array_elements(" + RESOURCE_COLUMN
+							+ "->'identifier') AS identifier UNION SELECT " + RESOURCE_COLUMN
+							+ "->'masterIdentifier') AS document_reference_identifiers "
 							+ "WHERE identifier->>'value' <> ? OR (identifier ?? 'system')" + ") > 0";
 				else
-					return "(SELECT count(*) FROM ("
-							+ "SELECT identifier FROM jsonb_array_elements(document_reference->'identifier') AS identifier UNION SELECT document_reference->'masterIdentifier') AS document_reference_identifiers "
+					return "(SELECT count(*) FROM (" + "SELECT identifier FROM jsonb_array_elements(" + RESOURCE_COLUMN
+							+ "->'identifier') AS identifier UNION SELECT " + RESOURCE_COLUMN
+							+ "->'masterIdentifier') AS document_reference_identifiers "
 							+ "WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')" + ") > 0";
 			default:
 				return "";
@@ -157,8 +167,8 @@ public class DocumentReferenceIdentifier extends AbstractTokenParameter<Document
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(SELECT string_agg((identifier->>'system')::text || (identifier->>'value')::text, ' ') FROM (SELECT identifier FROM jsonb_array_elements(document_reference->'identifier') identifier "
-				+ "UNION SELECT document_reference->'masterIdentifier') AS document_reference_identifier)"
-				+ sortDirectionWithSpacePrefix;
+		return "(SELECT string_agg((identifier->>'system')::text || (identifier->>'value')::text, ' ') FROM (SELECT identifier FROM jsonb_array_elements("
+				+ RESOURCE_COLUMN + "->'identifier') identifier " + "UNION SELECT " + RESOURCE_COLUMN
+				+ "->'masterIdentifier') AS document_reference_identifier)" + sortDirectionWithSpacePrefix;
 	}
 }

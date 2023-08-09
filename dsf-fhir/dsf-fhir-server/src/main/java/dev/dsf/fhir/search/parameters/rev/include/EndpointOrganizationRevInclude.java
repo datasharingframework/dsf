@@ -1,6 +1,8 @@
 package dev.dsf.fhir.search.parameters.rev.include;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
@@ -10,11 +12,16 @@ import dev.dsf.fhir.search.IncludeParameterDefinition;
 import dev.dsf.fhir.search.IncludeParts;
 
 @IncludeParameterDefinition(resourceType = Endpoint.class, parameterName = "organization", targetResourceTypes = Organization.class)
-public class EndpointOrganizationRevInclude extends AbstractRevIncludeParameterFactory
+public class EndpointOrganizationRevInclude extends AbstractRevIncludeParameter
 {
-	public EndpointOrganizationRevInclude()
+	public static final String RESOURCE_TYPE_NAME = "Endpoint";
+	public static final String PARAMETER_NAME = "organization";
+	public static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+
+	public static List<String> getRevIncludeParameterValues()
 	{
-		super("Endpoint", "organization", "Organization");
+		return Arrays.asList(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override
@@ -24,7 +31,7 @@ public class EndpointOrganizationRevInclude extends AbstractRevIncludeParameterF
 	}
 
 	@Override
-	protected void modifyIncludeResource(Resource resource, Connection connection)
+	protected void modifyRevIncludeResource(IncludeParts includeParts, Resource resource, Connection connection)
 	{
 		// Nothing to do for organizations
 	}

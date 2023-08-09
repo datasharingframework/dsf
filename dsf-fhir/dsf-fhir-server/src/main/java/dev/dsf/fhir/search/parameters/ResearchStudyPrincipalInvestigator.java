@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -30,9 +31,15 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = ResearchStudyPrincipalInvestigator.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ResearchStudy-principalinvestigator", type = SearchParamType.REFERENCE, documentation = "Researcher who oversees multiple aspects of the study")
 public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParameter<ResearchStudy>
 {
-	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	public static final String RESOURCE_TYPE_NAME = "ResearchStudy";
 	public static final String PARAMETER_NAME = "principalinvestigator";
-	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "PractitionerRole" };
+	public static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "PractitionerRole" };
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
+				.map(target -> RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + target).toList();
+	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
 			+ "WHERE concat('Practitioner/', practitioner->>'id') = research_study->'principalInvestigator'->>'reference' "
@@ -41,7 +48,7 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 
 	public ResearchStudyPrincipalInvestigator()
 	{
-		super(ResearchStudy.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
+		super(ResearchStudy.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
 	}
 
 	@Override

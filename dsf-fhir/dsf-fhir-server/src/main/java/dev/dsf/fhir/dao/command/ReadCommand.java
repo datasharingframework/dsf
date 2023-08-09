@@ -202,7 +202,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(identity, effectivePage,
 					effectiveCount);
 			query.configureParameters(cleanQueryParameters);
-			List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
+			List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters();
 
 			if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(handlingType))
 				throw new WebApplicationException(responseGenerator.response(Status.BAD_REQUEST,

@@ -202,8 +202,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
 			throw new WebApplicationException(
 					responseGenerator.badIfNoneExistHeaderValue(ifNoneExist, unsupportedQueryParameters));

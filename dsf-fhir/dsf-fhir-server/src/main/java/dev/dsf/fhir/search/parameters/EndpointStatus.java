@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -18,12 +17,12 @@ import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = EndpointStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-status", type = SearchParamType.TOKEN, documentation = "The current status of the Endpoint (usually expected to be active)")
 public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 {
 	public static final String PARAMETER_NAME = "status";
+	public static final String RESOURCE_COLUMN = "endpoint";
 
 	private org.hl7.fhir.r4.model.Endpoint.EndpointStatus status;
 
@@ -33,15 +32,15 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
-
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			status = toStatus(valueAndType.codeValue, queryParameters.get(parameterName));
+			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Endpoint.EndpointStatus toStatus(String status, List<String> parameterValues)
+	private org.hl7.fhir.r4.model.Endpoint.EndpointStatus toStatus(List<? super SearchQueryParameterError> errors,
+			String status, String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
@@ -52,8 +51,8 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 		}
 		catch (FHIRException e)
 		{
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
-					parameterValues, e));
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					queryParameterValue, e));
 			return null;
 		}
 	}
@@ -67,7 +66,7 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 	@Override
 	public String getFilterQuery()
 	{
-		return "endpoint->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -84,9 +83,9 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), status.toCode());
+		return status.toCode();
 	}
 
 	@Override
@@ -107,6 +106,6 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "endpoint->>'status'" + sortDirectionWithSpacePrefix;
+		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }

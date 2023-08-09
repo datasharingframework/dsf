@@ -4,6 +4,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -27,16 +28,22 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-organization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint")
 public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 {
-	private static final String RESOURCE_TYPE_NAME = "Endpoint";
+	public static final String RESOURCE_TYPE_NAME = "Endpoint";
 	public static final String PARAMETER_NAME = "organization";
-	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+	public static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return List.of(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
+	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
 			+ " WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference')";
 
 	public EndpointOrganization()
 	{
-		super(Endpoint.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(Endpoint.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override

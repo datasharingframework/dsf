@@ -106,7 +106,7 @@ public class OrganizationAffiliationAuthorizationRule
 		SearchQuery<OrganizationAffiliation> query = dao.createSearchQueryWithoutUserFilter(0, 0)
 				.configureParameters(queryParameters);
 
-		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+		if (!query.getUnsupportedQueryParameters().isEmpty())
 			return false;
 
 		try

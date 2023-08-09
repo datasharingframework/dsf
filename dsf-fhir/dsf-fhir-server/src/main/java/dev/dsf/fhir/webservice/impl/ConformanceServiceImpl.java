@@ -94,6 +94,7 @@ import dev.dsf.fhir.search.parameters.EndpointIdentifier;
 import dev.dsf.fhir.search.parameters.EndpointName;
 import dev.dsf.fhir.search.parameters.EndpointOrganization;
 import dev.dsf.fhir.search.parameters.EndpointStatus;
+import dev.dsf.fhir.search.parameters.GroupIdentifier;
 import dev.dsf.fhir.search.parameters.HealthcareServiceActive;
 import dev.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
 import dev.dsf.fhir.search.parameters.LibraryDate;
@@ -165,7 +166,7 @@ import dev.dsf.fhir.search.parameters.ValueSetStatus;
 import dev.dsf.fhir.search.parameters.ValueSetUrl;
 import dev.dsf.fhir.search.parameters.ValueSetVersion;
 import dev.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
-import dev.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameterFactory;
+import dev.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameter;
 import dev.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationParticipatingOrganizationRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationPrimaryOrganizationRevInclude;
@@ -310,7 +311,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
-		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
+		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameter>>>();
 
 		searchParameters.put(ActivityDefinition.class,
 				Arrays.asList(ActivityDefinitionDate.class, ActivityDefinitionUrl.class,
@@ -330,7 +331,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				EndpointName.class, EndpointOrganization.class, EndpointStatus.class));
 		revIncludeParameters.put(Endpoint.class, Arrays.asList(OrganizationEndpointRevInclude.class));
 
-		// no Group search parameters
+		searchParameters.put(Group.class, Arrays.asList(GroupIdentifier.class));
 		revIncludeParameters.put(Group.class, Arrays.asList(ResearchStudyEnrollmentRevInclude.class));
 
 		searchParameters.put(HealthcareService.class,

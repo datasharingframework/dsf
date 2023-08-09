@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -33,11 +34,17 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
 public class TaskRequester extends AbstractReferenceParameter<Task>
 {
-	private static final String RESOURCE_TYPE_NAME = "Task";
+	public static final String RESOURCE_TYPE_NAME = "Task";
 	public static final String PARAMETER_NAME = "requester";
-	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
+	public static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
 			"PractitionerRole" };
 	// TODO add Device, RelatedPerson if supported, see also doResolveReferencesForMatching, matches, getIncludeSql
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
+				.map(target -> RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + target).toList();
+	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
 			+ "WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference' "
@@ -50,7 +57,7 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 
 	public TaskRequester()
 	{
-		super(Task.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
+		super(Task.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
 	}
 
 	@Override

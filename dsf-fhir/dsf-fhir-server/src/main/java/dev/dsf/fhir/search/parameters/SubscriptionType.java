@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -14,14 +13,16 @@ import org.hl7.fhir.r4.model.Subscription;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = SubscriptionType.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription-type", type = SearchParamType.TOKEN, documentation = "The type of channel for the sent notifications")
 public class SubscriptionType extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "type";
+	public static final String RESOURCE_COLUMN = "subscription";
 
 	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType channelType;
 
@@ -31,15 +32,17 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			channelType = toChannelType(valueAndType.codeValue);
+			channelType = toChannelType(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType toChannelType(String status)
+	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType toChannelType(
+			List<? super SearchQueryParameterError> errors, String status, String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
@@ -50,6 +53,8 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 		}
 		catch (FHIRException e)
 		{
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					queryParameterValue, e));
 			return null;
 		}
 	}
@@ -63,7 +68,7 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->'channel'->>'type' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return RESOURCE_COLUMN + "->'channel'->>'type' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -80,9 +85,9 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), channelType.toCode());
+		return channelType.toCode();
 	}
 
 	@Override
@@ -103,6 +108,6 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "subscription->'channel'->>'type'" + sortDirectionWithSpacePrefix;
+		return RESOURCE_COLUMN + "->'channel'->>'type'" + sortDirectionWithSpacePrefix;
 	}
 }

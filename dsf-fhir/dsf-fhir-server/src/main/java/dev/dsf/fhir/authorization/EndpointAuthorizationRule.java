@@ -111,7 +111,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		EndpointDao dao = getDao();
 		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
 
-		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+		if (!query.getUnsupportedQueryParameters().isEmpty())
 			return false;
 
 		try
@@ -133,7 +133,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		EndpointDao dao = getDao();
 		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
 
-		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+		if (!query.getUnsupportedQueryParameters().isEmpty())
 			return false;
 
 		try

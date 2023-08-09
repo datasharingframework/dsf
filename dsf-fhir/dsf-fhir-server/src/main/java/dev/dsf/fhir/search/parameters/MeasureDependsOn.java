@@ -4,6 +4,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Library;
@@ -21,13 +22,19 @@ import dev.dsf.fhir.search.parameters.basic.AbstractCanonicalReferenceParameter;
 @SearchParameterDefinition(name = MeasureDependsOn.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Measure-depends-on", type = SearchParamType.REFERENCE, documentation = "What resource is being referenced")
 public class MeasureDependsOn extends AbstractCanonicalReferenceParameter<Measure>
 {
-	private static final String RESOURCE_TYPE_NAME = "Measure";
+	public static final String RESOURCE_TYPE_NAME = "Measure";
 	public static final String PARAMETER_NAME = "depends-on";
-	private static final String TARGET_RESOURCE_TYPE_NAME = "Library";
+	public static final String TARGET_RESOURCE_TYPE_NAME = "Library";
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return List.of(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
+	}
 
 	public MeasureDependsOn()
 	{
-		super(Measure.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(Measure.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override

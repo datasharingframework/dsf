@@ -1,28 +1,19 @@
 package dev.dsf.fhir.search.parameters.basic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.search.SearchQuery;
-import dev.dsf.fhir.search.SearchQueryIncludeParameter;
 import dev.dsf.fhir.search.SearchQueryParameter;
 import dev.dsf.fhir.search.SearchQueryParameterError;
-import dev.dsf.fhir.search.SearchQuerySortParameter;
-import dev.dsf.fhir.search.SearchQuerySortParameter.SortDirection;
+import dev.dsf.fhir.search.SearchQuerySortParameterConfiguration;
+import dev.dsf.fhir.search.SearchQuerySortParameterConfiguration.SortDirection;
+import dev.dsf.fhir.search.parameters.SearchQuerySortParameter;
 
-public abstract class AbstractSearchParameter<R extends Resource> implements SearchQueryParameter<R>
+public abstract class AbstractSearchParameter<R extends Resource>
+		implements SearchQueryParameter<R>, SearchQuerySortParameter
 {
 	protected final String parameterName;
-
-	private SearchQuerySortParameter sortParameter;
-	private final List<SearchQueryParameterError> errors = new ArrayList<SearchQueryParameterError>();
 
 	public AbstractSearchParameter(String parameterName)
 	{
@@ -35,84 +26,30 @@ public abstract class AbstractSearchParameter<R extends Resource> implements Sea
 		return parameterName;
 	}
 
-	@Override
-	public Stream<String> getBaseAndModifiedParameterNames()
-	{
-		return Stream.concat(Stream.of(getParameterName()), getModifiedParameterNames());
-	}
-
-	protected Stream<String> getModifiedParameterNames()
-	{
-		return Stream.empty();
-	}
-
-	protected IllegalStateException notDefined()
+	protected final IllegalStateException notDefined()
 	{
 		return new IllegalStateException("not defined");
 	}
 
 	@Override
-	public final void configure(Map<String, List<String>> queryParameters)
+	public SearchQueryParameter<R> configure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		SortDirection sortDirection = getSortDirection(getFirst(queryParameters, SearchQuery.PARAMETER_SORT));
-		if (sortDirection != null)
-			sortParameter = new SearchQuerySortParameter(getSortSql(sortDirection.getSqlModifierWithSpacePrefix()),
-					parameterName, sortDirection);
-
-		configureIncludeParameter(queryParameters);
-
-		configureSearchParameter(queryParameters);
+		doConfigure(errors, queryParameterName, queryParameterValue);
+		return this;
 	}
+
+	protected abstract void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue);
 
 	@Override
-	public List<SearchQueryParameterError> getErrors()
+	public SearchQuerySortParameterConfiguration configureSort(List<? super SearchQueryParameterError> errors,
+			String queryParameterSortValue)
 	{
-		return Collections.unmodifiableList(errors);
-	}
-
-	protected final void addError(SearchQueryParameterError error)
-	{
-		errors.add(error);
-	}
-
-	protected static String getFirst(Map<String, List<String>> queryParameters, String key)
-	{
-		if (queryParameters.containsKey(key) && !queryParameters.get(key).isEmpty())
-			return queryParameters.get(key).get(0);
-		else
-			return null;
-	}
-
-	private SortDirection getSortDirection(String sortParameters)
-	{
-		if (sortParameters == null || sortParameters.isBlank())
-			return null;
-
-		Optional<String> sortParameter = Arrays.stream(sortParameters.split(","))
-				.filter(s -> s.equals(parameterName) || s.equals("+" + parameterName) || s.equals("-" + parameterName))
-				.findFirst();
-
-		return sortParameter.map(SortDirection::fromString).orElse(null);
-	}
-
-	protected void configureIncludeParameter(Map<String, List<String>> queryParameters)
-	{
-		// default impl does nothing
-	}
-
-	protected abstract void configureSearchParameter(Map<String, List<String>> queryParameters);
-
-	@Override
-	public Optional<SearchQuerySortParameter> getSortParameter()
-	{
-		return Optional.ofNullable(sortParameter);
+		SortDirection direction = SortDirection.fromString(queryParameterSortValue);
+		return new SearchQuerySortParameterConfiguration(getSortSql(direction.getSqlModifierWithSpacePrefix()),
+				parameterName, direction);
 	}
 
 	protected abstract String getSortSql(String sortDirectionWithSpacePrefix);
-
-	@Override
-	public List<SearchQueryIncludeParameter> getIncludeParameters()
-	{
-		return Collections.emptyList();
-	}
 }

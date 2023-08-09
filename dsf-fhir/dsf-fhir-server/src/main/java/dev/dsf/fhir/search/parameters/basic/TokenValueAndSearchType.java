@@ -1,15 +1,8 @@
 package dev.dsf.fhir.search.parameters.basic;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-
-import dev.dsf.fhir.search.SearchQueryParameterError;
-
 public class TokenValueAndSearchType
 {
-	static final String NOT = ":not";
+	public static final String NOT = ":not";
 
 	public final String systemValue;
 	public final String codeValue;
@@ -24,37 +17,32 @@ public class TokenValueAndSearchType
 		this.negated = negated;
 	}
 
-	public static Optional<TokenValueAndSearchType> fromParamValue(String parameterName,
-			Map<String, List<String>> queryParameters, Consumer<SearchQueryParameterError> errors)
+	/**
+	 * @param parameterName
+	 *            not <code>null</code>, not blank
+	 * @param queryParameterName
+	 *            not <code>null</code>, not blank
+	 * @param queryParameterValue
+	 *            not <code>null</code>, not blank
+	 */
+	public static TokenValueAndSearchType fromParamValue(String parameterName, String queryParameterName,
+			String queryParameterValue)
 	{
-		String param = null;
-		if (queryParameters.containsKey(parameterName) && !queryParameters.get(parameterName).isEmpty())
-			param = queryParameters.get(parameterName).get(0);
-		else if (queryParameters.containsKey(parameterName + NOT)
-				&& !queryParameters.get(parameterName + NOT).isEmpty())
-			param = queryParameters.get(parameterName + NOT).get(0);
+		boolean negated = (parameterName + NOT).equals(queryParameterName);
 
-		if (param != null && !param.isBlank())
-		{
-			boolean negated = queryParameters.containsKey(parameterName + NOT)
-					&& !queryParameters.get(parameterName + NOT).isEmpty();
-
-			if (param.indexOf('|') == -1)
-				return Optional.of(new TokenValueAndSearchType(null, param, TokenSearchType.CODE, negated));
-			else if (param.charAt(0) == '|')
-				return Optional.of(new TokenValueAndSearchType(null, param.substring(1),
-						TokenSearchType.CODE_AND_NO_SYSTEM_PROPERTY, negated));
-			else if (param.charAt(param.length() - 1) == '|')
-				return Optional.of(new TokenValueAndSearchType(param.substring(0, param.length() - 1), null,
-						TokenSearchType.SYSTEM, negated));
-			else
-			{
-				String[] splitAtPipe = param.split("[|]");
-				return Optional.of(new TokenValueAndSearchType(splitAtPipe[0], splitAtPipe[1],
-						TokenSearchType.CODE_AND_SYSTEM, negated));
-			}
-		}
+		if (queryParameterValue.indexOf('|') == -1)
+			return new TokenValueAndSearchType(null, queryParameterValue, TokenSearchType.CODE, negated);
+		else if (queryParameterValue.charAt(0) == '|')
+			return new TokenValueAndSearchType(null, queryParameterValue.substring(1),
+					TokenSearchType.CODE_AND_NO_SYSTEM_PROPERTY, negated);
+		else if (queryParameterValue.charAt(queryParameterValue.length() - 1) == '|')
+			return new TokenValueAndSearchType(queryParameterValue.substring(0, queryParameterValue.length() - 1), null,
+					TokenSearchType.SYSTEM, negated);
 		else
-			return Optional.empty();
+		{
+			String[] splitAtPipe = queryParameterValue.split("[|]");
+			return new TokenValueAndSearchType(splitAtPipe[0], splitAtPipe[1], TokenSearchType.CODE_AND_SYSTEM,
+					negated);
+		}
 	}
 }

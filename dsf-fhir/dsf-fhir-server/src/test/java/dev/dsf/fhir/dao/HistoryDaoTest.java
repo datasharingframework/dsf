@@ -3,6 +3,7 @@ package dev.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -69,7 +70,7 @@ public class HistoryDaoTest extends AbstractDbTest
 
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilters(TestOrganizationIdentity.local(createdOrganization)),
-				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter());
+				new PageAndCount(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter());
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -88,7 +89,8 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class);
+				new PageAndCount(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
+				Organization.class);
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -107,8 +109,8 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class,
-				UUID.fromString(createdOrganization.getIdElement().getIdPart()));
+				new PageAndCount(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
+				Organization.class, UUID.fromString(createdOrganization.getIdElement().getIdPart()));
 
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());

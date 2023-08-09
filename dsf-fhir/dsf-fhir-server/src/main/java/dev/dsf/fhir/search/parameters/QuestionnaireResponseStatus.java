@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -18,12 +17,12 @@ import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = QuestionnaireResponseStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/QuestionnaireResponse-status", type = SearchParamType.TOKEN, documentation = "The status of the questionnaire response")
 public class QuestionnaireResponseStatus extends AbstractTokenParameter<QuestionnaireResponse>
 {
 	public static final String PARAMETER_NAME = "status";
+	public static final String RESOURCE_COLUMN = "questionnaire_response";
 
 	private QuestionnaireResponse.QuestionnaireResponseStatus status;
 
@@ -33,15 +32,17 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			status = toStatus(valueAndType.codeValue, queryParameters.get(parameterName));
+			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private QuestionnaireResponse.QuestionnaireResponseStatus toStatus(String status, List<String> parameterValues)
+	private QuestionnaireResponse.QuestionnaireResponseStatus toStatus(List<? super SearchQueryParameterError> errors,
+			String status, String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
@@ -52,8 +53,8 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 		}
 		catch (FHIRException e)
 		{
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
-					parameterValues, e));
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					queryParameterValue, e));
 			return null;
 		}
 	}
@@ -67,7 +68,7 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 	@Override
 	public String getFilterQuery()
 	{
-		return "questionnaire_response->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -84,10 +85,11 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), status.toCode());
+		return status.toCode();
 	}
+
 
 	@Override
 	public boolean matches(Resource resource)
@@ -107,6 +109,6 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "questionnaire_response->>'status'" + sortDirectionWithSpacePrefix;
+		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }

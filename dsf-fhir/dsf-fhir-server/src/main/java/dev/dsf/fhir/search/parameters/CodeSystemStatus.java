@@ -6,11 +6,13 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractStatusParameter;
 
-@SearchParameterDefinition(name = CodeSystemStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem-status", type = SearchParamType.TOKEN, documentation = "The current status of the code system")
+@SearchParameterDefinition(name = AbstractStatusParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem-status", type = SearchParamType.TOKEN, documentation = "The current status of the code system")
 public class CodeSystemStatus extends AbstractStatusParameter<CodeSystem>
 {
+	public static final String RESOURCE_COLUMN = "code_system";
+
 	public CodeSystemStatus()
 	{
-		super("code_system", CodeSystem.class);
+		super(RESOURCE_COLUMN, CodeSystem.class);
 	}
 }

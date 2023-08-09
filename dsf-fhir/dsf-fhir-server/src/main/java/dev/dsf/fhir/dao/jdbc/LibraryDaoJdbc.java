@@ -2,6 +2,8 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -16,6 +18,7 @@ import dev.dsf.fhir.search.parameters.LibraryIdentifier;
 import dev.dsf.fhir.search.parameters.LibraryStatus;
 import dev.dsf.fhir.search.parameters.LibraryUrl;
 import dev.dsf.fhir.search.parameters.LibraryVersion;
+import dev.dsf.fhir.search.parameters.LocationIdentifier;
 
 public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements LibraryDao
 {
@@ -24,9 +27,14 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 	public LibraryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
-				LibraryIdentityFilter::new, with(LibraryDate::new, LibraryIdentifier::new, LibraryStatus::new,
-						LibraryUrl::new, LibraryVersion::new),
-				with());
+				LibraryIdentityFilter::new,
+				Arrays.asList(factory(LibraryDate.PARAMETER_NAME, LibraryDate::new),
+						factory(LibraryIdentifier.PARAMETER_NAME, LibraryIdentifier::new,
+								LocationIdentifier.getNameModifiers()),
+						factory(LibraryStatus.PARAMETER_NAME, LibraryStatus::new, LibraryStatus.getNameModifiers()),
+						factory(LibraryUrl.PARAMETER_NAME, LibraryUrl::new, LibraryUrl.getNameModifiers()),
+						factory(LibraryVersion.PARAMETER_NAME, LibraryVersion::new, LibraryVersion.getNameModifiers())),
+				Collections.emptyList());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

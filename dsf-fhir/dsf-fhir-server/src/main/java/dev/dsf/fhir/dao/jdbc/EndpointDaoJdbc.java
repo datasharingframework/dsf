@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import javax.sql.DataSource;
 
@@ -28,9 +29,19 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 	public EndpointDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint",
-				"endpoint_id", EndpointIdentityFilter::new, with(EndpointAddress::new, EndpointIdentifier::new,
-						EndpointName::new, EndpointOrganization::new, EndpointStatus::new),
-				with(OrganizationEndpointRevInclude::new));
+				"endpoint_id", EndpointIdentityFilter::new,
+				Arrays.asList(
+						factory(EndpointAddress.PARAMETER_NAME, EndpointAddress::new,
+								EndpointAddress.getNameModifiers()),
+						factory(EndpointIdentifier.PARAMETER_NAME, EndpointIdentifier::new,
+								EndpointIdentifier.getNameModifiers()),
+						factory(EndpointName.PARAMETER_NAME, EndpointName::new, EndpointName.getNameModifiers()),
+						factory(EndpointOrganization.PARAMETER_NAME, EndpointOrganization::new,
+								EndpointOrganization.getNameModifiers(), EndpointOrganization::new,
+								EndpointOrganization.getIncludeParameterValues()),
+						factory(EndpointStatus.PARAMETER_NAME, EndpointStatus::new, EndpointStatus.getNameModifiers())),
+				Arrays.asList(factory(OrganizationEndpointRevInclude::new,
+						OrganizationEndpointRevInclude.getRevIncludeParameterValues())));
 	}
 
 	@Override

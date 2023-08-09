@@ -1,5 +1,8 @@
 package dev.dsf.fhir.dao.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -15,7 +18,9 @@ public class MeasureReportDaoJdbc extends AbstractResourceDaoJdbc<MeasureReport>
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, MeasureReport.class, "measure_reports",
 				"measure_report", "measure_report_id", MeasureReportIdentityFilter::new,
-				with(MeasureReportIdentifier::new), with());
+				Arrays.asList(factory(MeasureReportIdentifier.PARAMETER_NAME, MeasureReportIdentifier::new,
+						MeasureReportIdentifier.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

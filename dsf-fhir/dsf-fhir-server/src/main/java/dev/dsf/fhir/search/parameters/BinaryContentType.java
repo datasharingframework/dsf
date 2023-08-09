@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeType;
@@ -13,14 +12,15 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = BinaryContentType.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Binary-contentType", type = SearchParamType.TOKEN, documentation = "The MIME type of the actual binary content")
 public class BinaryContentType extends AbstractTokenParameter<Binary>
 {
 	public static final String PARAMETER_NAME = "contentType";
+	public static final String RESOURCE_COLUMN = "binary_json";
 
 	private CodeType contentType;
 
@@ -30,9 +30,10 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
 			contentType = toContentType(valueAndType.codeValue);
@@ -55,7 +56,7 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	@Override
 	public String getFilterQuery()
 	{
-		return "binary_json->>'contentType' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return RESOURCE_COLUMN + "->>'contentType' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -72,9 +73,9 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), contentType.getValue());
+		return contentType.getValue();
 	}
 
 	@Override
@@ -95,6 +96,6 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "binary_json->>'contentType'" + sortDirectionWithSpacePrefix;
+		return RESOURCE_COLUMN + "->>'contentType'" + sortDirectionWithSpacePrefix;
 	}
 }

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.sql.DataSource;
 
@@ -22,7 +24,9 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
 				new PreparedStatementFactoryBinary(fhirContext), BinaryIdentityFilter::new,
-				with(BinaryContentType::new), with());
+				Arrays.asList(factory(BinaryContentType.PARAMETER_NAME, BinaryContentType::new,
+						BinaryContentType.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

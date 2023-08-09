@@ -89,7 +89,7 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 				{
 					SearchQuery<?> searchQuery = optDao.get().createSearchQueryWithoutUserFilter(1, 1);
 					List<SearchQueryParameterError> unsupportedQueryParameters = searchQuery
-							.getUnsupportedQueryParameters(cComponentes.getQueryParams());
+							.getUnsupportedQueryParameters();
 
 					if (!unsupportedQueryParameters.isEmpty())
 					{
@@ -136,7 +136,7 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 		SearchQuery<Subscription> query = dao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(queryParameters);
 
-		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+		if (!query.getUnsupportedQueryParameters().isEmpty())
 			return false;
 
 		try

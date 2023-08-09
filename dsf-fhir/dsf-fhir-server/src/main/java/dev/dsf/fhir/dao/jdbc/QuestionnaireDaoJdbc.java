@@ -2,6 +2,8 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -25,9 +27,16 @@ public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire>
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Questionnaire.class, "questionnaires",
 				"questionnaire", "questionnaire_id", QuestionnaireIdentityFilter::new,
-				with(QuestionnaireDate::new, QuestionnaireIdentifier::new, QuestionnaireStatus::new,
-						QuestionnaireUrl::new, QuestionnaireVersion::new),
-				with());
+				Arrays.asList(factory(QuestionnaireDate.PARAMETER_NAME, QuestionnaireDate::new),
+						factory(QuestionnaireIdentifier.PARAMETER_NAME, QuestionnaireIdentifier::new,
+								QuestionnaireIdentifier.getNameModifiers()),
+						factory(QuestionnaireStatus.PARAMETER_NAME, QuestionnaireStatus::new,
+								QuestionnaireStatus.getNameModifiers()),
+						factory(QuestionnaireUrl.PARAMETER_NAME, QuestionnaireUrl::new,
+								QuestionnaireUrl.getNameModifiers()),
+						factory(QuestionnaireVersion.PARAMETER_NAME, QuestionnaireVersion::new,
+								QuestionnaireVersion.getNameModifiers())),
+				Collections.emptyList());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

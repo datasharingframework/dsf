@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -32,11 +33,17 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = QuestionnaireResponseSubject.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/QuestionnaireResponse-subject", type = SearchParamType.REFERENCE, documentation = "The subject of the questionnaire response")
 public class QuestionnaireResponseSubject extends AbstractReferenceParameter<QuestionnaireResponse>
 {
-	private static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
+	public static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
 	public static final String PARAMETER_NAME = "subject";
 
 	// TODO if needed, modify for Reference(Any), see also doResolveReferencesForMatching, matches, getIncludeSql
 	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Organization", "Practitioner", "PractitionerRole" };
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
+				.map(target -> RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + target).toList();
+	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
 			+ "WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'subject'->>'reference' "
@@ -47,7 +54,7 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 
 	public QuestionnaireResponseSubject()
 	{
-		super(QuestionnaireResponse.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
+		super(QuestionnaireResponse.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
 	}
 
 	@Override

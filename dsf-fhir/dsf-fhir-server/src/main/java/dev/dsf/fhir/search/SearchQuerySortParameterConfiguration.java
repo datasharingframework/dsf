@@ -1,6 +1,6 @@
 package dev.dsf.fhir.search;
 
-public class SearchQuerySortParameter
+public class SearchQuerySortParameterConfiguration
 {
 	public static enum SortDirection
 	{
@@ -38,7 +38,7 @@ public class SearchQuerySortParameter
 	private final String parameterName;
 	private final SortDirection direction;
 
-	public SearchQuerySortParameter(String sql, String parameterName, SortDirection direction)
+	public SearchQuerySortParameterConfiguration(String sql, String parameterName, SortDirection direction)
 	{
 		this.sql = sql;
 		this.parameterName = parameterName;

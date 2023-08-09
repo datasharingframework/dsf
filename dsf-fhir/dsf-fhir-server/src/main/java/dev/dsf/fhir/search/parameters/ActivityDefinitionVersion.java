@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Resource;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractVersionParameter;
 
-@SearchParameterDefinition(name = ActivityDefinitionVersion.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition-version", type = SearchParamType.TOKEN, documentation = "The business version of the activity definition")
+@SearchParameterDefinition(name = AbstractVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition-version", type = SearchParamType.TOKEN, documentation = "The business version of the activity definition")
 public class ActivityDefinitionVersion extends AbstractVersionParameter<ActivityDefinition>
 {
 	public static final String RESOURCE_COLUMN = "activity_definition";

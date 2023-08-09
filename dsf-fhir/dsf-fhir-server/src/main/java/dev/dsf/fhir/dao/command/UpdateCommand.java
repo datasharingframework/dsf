@@ -154,7 +154,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedParams = query.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedParams = query.getUnsupportedQueryParameters();
 		if (!unsupportedParams.isEmpty())
 			throw new WebApplicationException(responseGenerator.unsupportedConditionalUpdateQuery(index,
 					entry.getRequest().getUrl(), unsupportedParams));
