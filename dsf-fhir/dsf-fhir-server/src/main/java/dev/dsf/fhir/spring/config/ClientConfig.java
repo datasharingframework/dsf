@@ -50,6 +50,9 @@ public class ClientConfig implements InitializingBean
 	@Autowired
 	private ReferenceConfig referenceConfig;
 
+	@Autowired
+	private BuildInfoReaderConfig buildInfoReaderConfig;
+
 	@Bean
 	public ClientProvider clientProvider()
 	{
@@ -67,7 +70,8 @@ public class ClientConfig implements InitializingBean
 					propertiesConfig.getWebserviceClientReadTimeout(),
 					propertiesConfig.getWebserviceClientConnectTimeout(), propertiesConfig.proxyConfig(),
 					propertiesConfig.getWebserviceClientVerbose(), fhirConfig.fhirContext(),
-					referenceConfig.referenceCleaner(), daoConfig.endpointDao(), helperConfig.exceptionHandler());
+					referenceConfig.referenceCleaner(), daoConfig.endpointDao(), helperConfig.exceptionHandler(),
+					buildInfoReaderConfig.buildInfoReader());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | PKCSException e)
 		{
