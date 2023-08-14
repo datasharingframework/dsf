@@ -182,7 +182,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(0, 0)
 				.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unsupported query parameters {} while searching for Organization", uQp);
@@ -213,7 +213,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		SearchQuery<CodeSystem> query = dao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unsupported query parameters {} while searching for CodeSystem", uQp);

@@ -94,6 +94,7 @@ import dev.dsf.fhir.search.parameters.EndpointIdentifier;
 import dev.dsf.fhir.search.parameters.EndpointName;
 import dev.dsf.fhir.search.parameters.EndpointOrganization;
 import dev.dsf.fhir.search.parameters.EndpointStatus;
+import dev.dsf.fhir.search.parameters.GroupIdentifier;
 import dev.dsf.fhir.search.parameters.HealthcareServiceActive;
 import dev.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
 import dev.dsf.fhir.search.parameters.LibraryDate;
@@ -165,7 +166,7 @@ import dev.dsf.fhir.search.parameters.ValueSetStatus;
 import dev.dsf.fhir.search.parameters.ValueSetUrl;
 import dev.dsf.fhir.search.parameters.ValueSetVersion;
 import dev.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
-import dev.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameterFactory;
+import dev.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameter;
 import dev.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationParticipatingOrganizationRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationPrimaryOrganizationRevInclude;
@@ -310,7 +311,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
-		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
+		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameter>>>();
 
 		searchParameters.put(ActivityDefinition.class,
 				Arrays.asList(ActivityDefinitionDate.class, ActivityDefinitionUrl.class,
@@ -330,7 +331,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				EndpointName.class, EndpointOrganization.class, EndpointStatus.class));
 		revIncludeParameters.put(Endpoint.class, Arrays.asList(OrganizationEndpointRevInclude.class));
 
-		// no Group search parameters
+		searchParameters.put(Group.class, Arrays.asList(GroupIdentifier.class));
 		revIncludeParameters.put(Group.class, Arrays.asList(ResearchStudyEnrollmentRevInclude.class));
 
 		searchParameters.put(HealthcareService.class,
@@ -458,6 +459,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addSearchParam(createPrettyParameter());
 			r.addSearchParam(createSummaryParameter());
 			r.addSearchParam(createProfileParameter());
+			r.addSearchParam(createSinceParameter());
+			r.addSearchParam(createAtParameter());
 
 			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
 			var revIncludes = resourceRevIncludeParameters.stream()
@@ -545,6 +548,18 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	{
 		return createSearchParameter("_count", "", SearchParamType.NUMBER,
 				"Specify the numer of returned resources per page, " + defaultPageCount + " if not specified");
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createAtParameter()
+	{
+		return createSearchParameter("_at", "", SearchParamType.DATE,
+				"Only include resource versions that were current at some point during the time period specified in the date time value");
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createSinceParameter()
+	{
+		return createSearchParameter("_since", "", SearchParamType.SPECIAL,
+				"Only include resource versions that were created at or after the given instant in time");
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createFormatParameter()

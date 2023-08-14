@@ -175,8 +175,7 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 		SearchQuery<?> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
 			throw new WebApplicationException(responseGenerator.badConditionalDeleteRequest(index,
 					UriComponentsBuilder.newInstance()

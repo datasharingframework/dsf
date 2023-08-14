@@ -1,5 +1,8 @@
 package dev.dsf.fhir.dao.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.DocumentReference;
@@ -16,7 +19,9 @@ public class DocumentReferenceDaoJdbc extends AbstractResourceDaoJdbc<DocumentRe
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, DocumentReference.class, "document_references",
 				"document_reference", "document_reference_id", DocumentReferenceIdentityFilter::new,
-				with(DocumentReferenceIdentifier::new), with());
+				Arrays.asList(factory(DocumentReferenceIdentifier.PARAMETER_NAME, DocumentReferenceIdentifier::new,
+						DocumentReferenceIdentifier.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

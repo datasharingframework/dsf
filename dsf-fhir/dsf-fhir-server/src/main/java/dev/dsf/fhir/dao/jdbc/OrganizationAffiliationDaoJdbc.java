@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -36,10 +37,27 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 		super(dataSource, permanentDeleteDataSource, fhirContext, OrganizationAffiliation.class,
 				"organization_affiliations", "organization_affiliation", "organization_affiliation_id",
 				OrganizationAffiliationIdentityFilter::new,
-				with(OrganizationAffiliationActive::new, OrganizationAffiliationEndpoint::new,
-						OrganizationAffiliationIdentifier::new, OrganizationAffiliationParticipatingOrganization::new,
-						OrganizationAffiliationPrimaryOrganization::new, OrganizationAffiliationRole::new),
-				with());
+				Arrays.asList(factory(OrganizationAffiliationActive.PARAMETER_NAME, OrganizationAffiliationActive::new),
+						factory(OrganizationAffiliationEndpoint.PARAMETER_NAME, OrganizationAffiliationEndpoint::new,
+								OrganizationAffiliationEndpoint.getNameModifiers(),
+								OrganizationAffiliationEndpoint::new,
+								OrganizationAffiliationEndpoint.getIncludeParameterValues()),
+						factory(OrganizationAffiliationIdentifier.PARAMETER_NAME,
+								OrganizationAffiliationIdentifier::new,
+								OrganizationAffiliationIdentifier.getNameModifiers()),
+						factory(OrganizationAffiliationParticipatingOrganization.PARAMETER_NAME,
+								OrganizationAffiliationParticipatingOrganization::new,
+								OrganizationAffiliationParticipatingOrganization.getNameModifiers(),
+								OrganizationAffiliationParticipatingOrganization::new,
+								OrganizationAffiliationParticipatingOrganization.getIncludeParameterValues()),
+						factory(OrganizationAffiliationPrimaryOrganization.PARAMETER_NAME,
+								OrganizationAffiliationPrimaryOrganization::new,
+								OrganizationAffiliationPrimaryOrganization.getNameModifiers(),
+								OrganizationAffiliationPrimaryOrganization::new,
+								OrganizationAffiliationPrimaryOrganization.getIncludeParameterValues()),
+						factory(OrganizationAffiliationRole.PARAMETER_NAME, OrganizationAffiliationRole::new,
+								OrganizationAffiliationRole.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

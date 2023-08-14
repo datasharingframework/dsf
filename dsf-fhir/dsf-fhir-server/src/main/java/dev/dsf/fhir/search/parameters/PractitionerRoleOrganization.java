@@ -4,6 +4,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -27,16 +28,22 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = PractitionerRoleOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-organization", type = SearchParamType.REFERENCE, documentation = "The identity of the organization the practitioner represents / acts on behalf of")
 public class PractitionerRoleOrganization extends AbstractReferenceParameter<PractitionerRole>
 {
-	private static final String RESOURCE_TYPE_NAME = "PractitionerRole";
+	public static final String RESOURCE_TYPE_NAME = "PractitionerRole";
 	public static final String PARAMETER_NAME = "organization";
-	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+	public static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return List.of(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
+	}
 
 	private static final String PRACTITIONER_IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
 			+ " WHERE concat('Organization/', organization->>'id') = practitioner_role->'organization'->>'reference')";
 
 	public PractitionerRoleOrganization()
 	{
-		super(PractitionerRole.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(PractitionerRole.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override

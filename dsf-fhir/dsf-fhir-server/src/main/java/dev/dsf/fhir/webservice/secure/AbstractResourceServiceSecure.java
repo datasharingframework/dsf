@@ -543,8 +543,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
 		{
 			audit.info(
@@ -625,8 +624,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), 1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
 		{
 			audit.info(

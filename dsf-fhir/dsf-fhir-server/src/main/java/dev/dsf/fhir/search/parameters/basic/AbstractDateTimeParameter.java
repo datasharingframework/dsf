@@ -10,25 +10,18 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import jakarta.ws.rs.core.UriBuilder;
 
-public abstract class AbstractDateTimeParameter<R extends DomainResource> extends AbstractSearchParameter<R>
+public abstract class AbstractDateTimeParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
 	public static enum DateTimeSearchType
 	{
@@ -89,10 +82,9 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 	private static final DateTimeFormatter YEAR_FORMAT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter YEAR_MONTH_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM");
 
-	private List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
+	protected DateTimeValueAndTypeAndSearchType valueAndType;
 
 	private final String timestampColumn;
-	private final List<Object> values = new ArrayList<>();
 
 	public AbstractDateTimeParameter(String parameterName, String timestampColumn)
 	{
@@ -102,56 +94,14 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 	}
 
 	@Override
-	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		List<String> parameters = queryParameters.getOrDefault(parameterName, Collections.emptyList());
-
-		parameters.stream().limit(2).map(value -> parse(value, parameters)).filter(v -> v != null)
-				.collect(Collectors.toCollection(() -> valuesAndTypes));
-
-		DateTimeValueAndTypeAndSearchType first = valuesAndTypes.size() < 1 ? null : valuesAndTypes.get(0);
-		DateTimeValueAndTypeAndSearchType second = valuesAndTypes.size() < 2 ? null : valuesAndTypes.get(1);
-
-		if (parameters.size() > 2)
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-					parameterName, parameters, "More than two " + parameterName + " values"));
-		else if (valuesAndTypes.size() == 2)
-		{
-			// if two search operators, only for example lt and gt are allowed in combination
-			if (!((EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(first.searchType)
-					&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))
-					|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(second.searchType)
-							&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(first.searchType))))
-				addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-						parameterName, parameters,
-						"Seach operators " + first.searchType + " and " + second.searchType + " can't be combined"));
-		}
-
-		if (valuesAndTypes.size() > 1 && (!((EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT)
-				.contains(first.searchType)
-				&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))
-				|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(second.searchType)
-						&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(first.searchType)))))
-		{
-			valuesAndTypes.clear();
-			valuesAndTypes.add(first);
-		}
-
-		checkParameters(parameters);
+		valueAndType = parse(errors, queryParameterValue);
 	}
 
-	/**
-	 * Override to perform additional parameter checks
-	 *
-	 * @param parameters
-	 *            to be checked, not <code>null</code>
-	 * @see #addError(SearchQueryParameterError)
-	 */
-	protected void checkParameters(List<String> parameters)
-	{
-	}
-
-	private DateTimeValueAndTypeAndSearchType parse(String parameterValue, List<String> parameterValues)
+	private DateTimeValueAndTypeAndSearchType parse(List<? super SearchQueryParameterError> errors,
+			String parameterValue)
 	{
 		final String fixedParameterValue = parameterValue.replace(' ', '+');
 
@@ -160,16 +110,15 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 		{
 			String prefix = fixedParameterValue.substring(0, 2);
 			String value = fixedParameterValue.substring(2, fixedParameterValue.length()).toUpperCase();
-			return parseValue(value, DateTimeSearchType.valueOf(prefix.toUpperCase()), fixedParameterValue,
-					parameterValues);
+			return parseValue(errors, value, DateTimeSearchType.valueOf(prefix.toUpperCase()), fixedParameterValue);
 		}
 		else
-			return parseValue(fixedParameterValue, DateTimeSearchType.EQ, fixedParameterValue, parameterValues);
+			return parseValue(errors, fixedParameterValue, DateTimeSearchType.EQ, fixedParameterValue);
 	}
 
 	// yyyy-mm-ddThh:mm:ss[Z|(+|-)hh:mm]
-	private DateTimeValueAndTypeAndSearchType parseValue(String value, DateTimeSearchType searchType,
-			String parameterValue, List<String> parameterValues)
+	private DateTimeValueAndTypeAndSearchType parseValue(List<? super SearchQueryParameterError> errors, String value,
+			DateTimeSearchType searchType, String parameterValue)
 	{
 		try
 		{
@@ -227,110 +176,107 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 			}
 		}
 
-		addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
-				parameterValues, parameterValue + " not parsable"));
+		errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+				parameterValue, parameterValue + " not parsable"));
 		return null;
-	}
-
-	/**
-	 * @return list contains max 2 values
-	 */
-	public List<DateTimeValueAndTypeAndSearchType> getValuesAndTypes()
-	{
-		return valuesAndTypes;
 	}
 
 	@Override
 	public boolean isDefined()
 	{
-		return !valuesAndTypes.isEmpty();
+		return valueAndType != null;
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterName()
 	{
-		bundleUri.replaceQueryParam(parameterName,
-				valuesAndTypes.stream().map(value -> value.searchType.prefix + toUrlValue(value)).toArray());
+		return parameterName;
 	}
 
-	private String toUrlValue(DateTimeValueAndTypeAndSearchType value)
+	@Override
+	public String getBundleUriQueryParameterValue()
 	{
-		switch (value.type)
+		return valueAndType.searchType.prefix + toUrlValue(valueAndType);
+	}
+
+	protected final String toUrlValue(DateTimeValueAndTypeAndSearchType value)
+	{
+		return switch (value.type)
 		{
-			case ZONED_DATE_TIME:
-				return ((ZonedDateTime) value.value).format(DATE_TIME_FORMAT_OUT);
-			case LOCAL_DATE:
-				return ((LocalDate) value.value).format(DATE_FORMAT);
-			case YEAR_PERIOD:
-				return ((LocalDatePair) value.value).startInclusive.format(YEAR_FORMAT);
-			case YEAR_MONTH_PERIOD:
-				return ((LocalDatePair) value.value).startInclusive.format(YEAR_MONTH_FORMAT);
-			default:
-				return "";
-		}
+			case ZONED_DATE_TIME -> ((ZonedDateTime) value.value).format(DATE_TIME_FORMAT_OUT);
+			case LOCAL_DATE -> ((LocalDate) value.value).format(DATE_FORMAT);
+			case YEAR_PERIOD -> ((LocalDatePair) value.value).startInclusive.format(YEAR_FORMAT);
+			case YEAR_MONTH_PERIOD -> ((LocalDatePair) value.value).startInclusive.format(YEAR_MONTH_FORMAT);
+			default -> throw new IllegalArgumentException(
+					"Unexpected " + DateTimeType.class.getName() + " value: " + value.type);
+		};
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		values.clear();
-
-		return getValuesAndTypes().stream().map(this::getSubquery).collect(Collectors.joining(" AND "));
-	}
-
-	private String getSubquery(DateTimeValueAndTypeAndSearchType value)
-	{
-		switch (value.type)
+		return switch (valueAndType.type)
 		{
-			case ZONED_DATE_TIME:
-				return getSubquery((ZonedDateTime) value.value, value.searchType);
-			case LOCAL_DATE:
-				return getSubquery((LocalDate) value.value, value.searchType);
-			case YEAR_MONTH_PERIOD:
-			case YEAR_PERIOD:
-				return getSubquery((LocalDatePair) value.value);
-			default:
-				return "";
-		}
+			case ZONED_DATE_TIME -> getDateTimeQuery(valueAndType.searchType.operator);
+			case LOCAL_DATE -> getDateQuery(valueAndType.searchType.operator);
+			case YEAR_MONTH_PERIOD, YEAR_PERIOD -> getDatePairQuery();
+			default -> throw new IllegalArgumentException(
+					"Unexpected " + DateTimeType.class.getName() + " value: " + valueAndType.type);
+		};
 	}
 
-	private String getSubquery(ZonedDateTime value, DateTimeSearchType searchType)
+	private String getDateTimeQuery(String operator)
 	{
-		values.add(value);
-
-		return "(" + timestampColumn + ")::timestamp " + searchType.operator + " ?";
+		return "(" + timestampColumn + ")::timestamp " + operator + " ?";
 	}
 
-	private String getSubquery(LocalDate value, DateTimeSearchType searchType)
+	private String getDateQuery(String operator)
 	{
-		values.add(value);
-
-		return "(" + timestampColumn + ")::date " + searchType.operator + " ?";
+		return "(" + timestampColumn + ")::date " + operator + " ?";
 	}
 
-	private String getSubquery(LocalDatePair value)
+	private String getDatePairQuery()
 	{
-		return getSubquery(value.startInclusive, DateTimeSearchType.GE) + " AND "
-				+ getSubquery(value.endExclusive, DateTimeSearchType.LT);
+		return getDateQuery(DateTimeSearchType.GE.operator) + " AND " + getDateQuery(DateTimeSearchType.LT.operator);
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		return values.size();
+		return switch (valueAndType.type)
+		{
+			case ZONED_DATE_TIME, LOCAL_DATE -> 1;
+			case YEAR_MONTH_PERIOD, YEAR_PERIOD -> 2;
+			default -> throw new IllegalArgumentException(
+					"Unexpected " + DateTimeType.class.getName() + " value: " + valueAndType.type);
+		};
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		Object value = values.get(subqueryParameterIndex - 1);
-
-		if (value instanceof ZonedDateTime)
-			statement.setTimestamp(parameterIndex, Timestamp
-					.valueOf(((ZonedDateTime) value).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
-		else if (value instanceof LocalDate)
-			statement.setDate(parameterIndex, Date.valueOf((LocalDate) value));
+		switch (valueAndType.type)
+		{
+			case ZONED_DATE_TIME:
+				statement.setTimestamp(parameterIndex, Timestamp.valueOf(((ZonedDateTime) valueAndType.value)
+						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
+				break;
+			case LOCAL_DATE:
+				statement.setDate(parameterIndex, Date.valueOf((LocalDate) valueAndType.value));
+				break;
+			case YEAR_MONTH_PERIOD:
+			case YEAR_PERIOD:
+				if (subqueryParameterIndex == 1)
+					statement.setDate(parameterIndex,
+							Date.valueOf(((LocalDatePair) valueAndType.value).startInclusive));
+				if (subqueryParameterIndex == 2)
+					statement.setDate(parameterIndex, Date.valueOf(((LocalDatePair) valueAndType.value).endExclusive));
+				break;
+			default:
+				throw new IllegalArgumentException(
+						"Unexpected " + DateTimeType.class.getName() + " value: " + valueAndType.type);
+		}
 	}
 
 	@Override
@@ -340,7 +286,7 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 			throw notDefined();
 
 		ZonedDateTime lastUpdated = toZonedDateTime(resource.getMeta().getLastUpdated());
-		return lastUpdated != null && getValuesAndTypes().stream().allMatch(value -> matches(lastUpdated, value));
+		return lastUpdated != null && matches(lastUpdated, valueAndType);
 	}
 
 	private ZonedDateTime toZonedDateTime(java.util.Date date)

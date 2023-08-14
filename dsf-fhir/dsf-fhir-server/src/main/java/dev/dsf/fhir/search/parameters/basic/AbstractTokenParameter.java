@@ -1,21 +1,21 @@
 package dev.dsf.fhir.search.parameters.basic;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
-import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import jakarta.ws.rs.core.UriBuilder;
 
 public abstract class AbstractTokenParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
+	public static List<String> getNameModifiers()
+	{
+		return List.of(TokenValueAndSearchType.NOT);
+	}
+
 	protected TokenValueAndSearchType valueAndType;
 
 	public AbstractTokenParameter(String parameterName)
@@ -24,24 +24,10 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 	}
 
 	@Override
-	protected Stream<String> getModifiedParameterNames()
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		return Stream.of(parameterName + TokenValueAndSearchType.NOT);
-	}
-
-	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
-	{
-		valueAndType = TokenValueAndSearchType.fromParamValue(parameterName, queryParameters, this::addError)
-				.orElse(null);
-
-		if ((queryParameters.get(parameterName) != null
-				|| queryParameters.get(parameterName + TokenValueAndSearchType.NOT) != null)
-				&& ((queryParameters.getOrDefault(parameterName, Collections.emptyList())).size()
-						+ (queryParameters.getOrDefault(parameterName + TokenValueAndSearchType.NOT,
-								Collections.emptyList())).size()) > 1)
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-					parameterName, queryParameters.get(parameterName)));
+		valueAndType = TokenValueAndSearchType.fromParamValue(parameterName, queryParameterName, queryParameterValue);
 	}
 
 	@Override
@@ -51,34 +37,23 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterName()
 	{
-		switch (valueAndType.type)
+		return valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName;
+	}
+
+	@Override
+	public String getBundleUriQueryParameterValue()
+	{
+		return switch (valueAndType.type)
 		{
-			case CODE:
-				bundleUri.replaceQueryParam(
-						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
-						valueAndType.codeValue);
-				break;
-
-			case CODE_AND_SYSTEM:
-				bundleUri.replaceQueryParam(
-						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
-						valueAndType.systemValue + "|" + valueAndType.codeValue);
-				break;
-
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				bundleUri.replaceQueryParam(
-						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
-						"|" + valueAndType.codeValue);
-				break;
-
-			case SYSTEM:
-				bundleUri.replaceQueryParam(
-						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
-						valueAndType.systemValue + "|");
-				break;
-		}
+			case CODE -> valueAndType.codeValue;
+			case CODE_AND_SYSTEM -> valueAndType.systemValue + "|" + valueAndType.codeValue;
+			case CODE_AND_NO_SYSTEM_PROPERTY -> "|" + valueAndType.codeValue;
+			case SYSTEM -> valueAndType.systemValue + "|";
+			default -> throw new IllegalArgumentException(
+					"Unexpected " + TokenSearchType.class.getName() + " value: " + valueAndType.type);
+		};
 	}
 
 	protected boolean codingMatches(List<CodeableConcept> codes)
@@ -89,20 +64,15 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 
 	public static boolean codingMatches(TokenValueAndSearchType valueAndType, Coding coding)
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case CODE:
-				return Objects.equals(valueAndType.codeValue, coding.getCode());
-			case CODE_AND_SYSTEM:
-				return Objects.equals(valueAndType.codeValue, coding.getCode())
-						&& Objects.equals(valueAndType.systemValue, coding.getSystem());
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return Objects.equals(valueAndType.codeValue, coding.getCode())
-						&& (coding.getSystem() == null || coding.getSystem().isBlank());
-			case SYSTEM:
-				return Objects.equals(valueAndType.systemValue, coding.getSystem());
-			default:
-				return false;
-		}
+			case CODE -> Objects.equals(valueAndType.codeValue, coding.getCode());
+			case CODE_AND_SYSTEM -> Objects.equals(valueAndType.codeValue, coding.getCode())
+					&& Objects.equals(valueAndType.systemValue, coding.getSystem());
+			case CODE_AND_NO_SYSTEM_PROPERTY -> Objects.equals(valueAndType.codeValue, coding.getCode())
+					&& (coding.getSystem() == null || coding.getSystem().isBlank());
+			case SYSTEM -> Objects.equals(valueAndType.systemValue, coding.getSystem());
+			default -> false;
+		};
 	}
 }

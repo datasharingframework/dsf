@@ -1,7 +1,5 @@
 package dev.dsf.fhir.search;
 
-import java.util.List;
-
 public class SearchQueryParameterError
 {
 	public static enum SearchQueryParameterErrorType
@@ -11,34 +9,33 @@ public class SearchQueryParameterError
 
 	private final SearchQueryParameterErrorType type;
 	private final String parameterName;
-	private final List<String> parameterValues;
+	private final String parameterValue;
 	private final Exception exception;
 	private final String message;
 
-	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName,
-			List<String> parameterValues)
+	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName, String parameterValue)
 	{
-		this(type, parameterName, parameterValues, null, null);
+		this(type, parameterName, parameterValue, null, null);
 	}
 
-	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName,
-			List<String> parameterValues, String message)
+	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName, String parameterValue,
+			String message)
 	{
-		this(type, parameterName, parameterValues, null, message);
+		this(type, parameterName, parameterValue, null, message);
 	}
 
-	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName,
-			List<String> parameterValues, Exception exception)
+	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName, String parameterValue,
+			Exception exception)
 	{
-		this(type, parameterName, parameterValues, exception, null);
+		this(type, parameterName, parameterValue, exception, null);
 	}
 
-	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName,
-			List<String> parameterValues, Exception exception, String message)
+	public SearchQueryParameterError(SearchQueryParameterErrorType type, String parameterName, String parameterValue,
+			Exception exception, String message)
 	{
 		this.type = type;
 		this.parameterName = parameterName;
-		this.parameterValues = parameterValues;
+		this.parameterValue = parameterValue;
 		this.exception = exception;
 		this.message = message;
 	}
@@ -53,9 +50,9 @@ public class SearchQueryParameterError
 		return parameterName;
 	}
 
-	public List<String> getParameterValues()
+	public String getParameterValue()
 	{
-		return parameterValues;
+		return parameterValue;
 	}
 
 	public Exception getException()
@@ -92,10 +89,10 @@ public class SearchQueryParameterError
 				b.append("'");
 			}
 		}
-		if (parameterValues != null)
+		if (parameterValue != null)
 		{
-			b.append(", values: ");
-			b.append(parameterValues);
+			b.append(", value: ");
+			b.append(parameterValue);
 		}
 
 		return b.toString();

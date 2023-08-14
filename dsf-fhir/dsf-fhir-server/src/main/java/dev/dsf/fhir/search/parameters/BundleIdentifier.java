@@ -18,6 +18,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 {
 	public static final String PARAMETER_NAME = "identifier";
+	public static final String RESOURCE_COLUMN = "bundle";
 
 	public BundleIdentifier()
 	{
@@ -32,12 +33,14 @@ public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 			case CODE:
 			case CODE_AND_SYSTEM:
 			case SYSTEM:
-				return "bundle->'identifier' " + (valueAndType.negated ? "<>" : "=") + " ?::jsonb";
+				return RESOURCE_COLUMN + "->'identifier' " + (valueAndType.negated ? "<>" : "=") + " ?::jsonb";
 			case CODE_AND_NO_SYSTEM_PROPERTY:
 				if (valueAndType.negated)
-					return "bundle->'identifier'->>'value' <> ? OR (bundle->'identifier' ?? 'system')";
+					return RESOURCE_COLUMN + "->'identifier'->>'value' <> ? OR (" + RESOURCE_COLUMN
+							+ "->'identifier' ?? 'system')";
 				else
-					return "bundle->'identifier'->>'value' = ? AND NOT (bundle->'identifier' ?? 'system')";
+					return RESOURCE_COLUMN + "->'identifier'->>'value' = ? AND NOT (" + RESOURCE_COLUMN
+							+ "->'identifier' ?? 'system')";
 			default:
 				return "";
 		}
@@ -82,8 +85,8 @@ public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(bundle->'identifier'->>'system')::text || (bundle->'identifier'->>'value')::text"
-				+ sortDirectionWithSpacePrefix;
+		return "(" + RESOURCE_COLUMN + "->'identifier'->>'system')::text || (" + RESOURCE_COLUMN
+				+ "->'identifier'->>'value')::text" + sortDirectionWithSpacePrefix;
 	}
 
 	@Override
