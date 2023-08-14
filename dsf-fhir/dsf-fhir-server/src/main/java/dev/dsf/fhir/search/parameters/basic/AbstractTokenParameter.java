@@ -28,15 +28,6 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 			String queryParameterValue)
 	{
 		valueAndType = TokenValueAndSearchType.fromParamValue(parameterName, queryParameterName, queryParameterValue);
-
-		// TODO
-		// if ((queryParameters.get(parameterName) != null
-		// || queryParameters.get(parameterName + TokenValueAndSearchType.NOT) != null)
-		// && ((queryParameters.getOrDefault(parameterName, Collections.emptyList())).size()
-		// + (queryParameters.getOrDefault(parameterName + TokenValueAndSearchType.NOT,
-		// Collections.emptyList())).size()) > 1)
-		// addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-		// parameterName, queryParameters.get(parameterName)));
 	}
 
 	@Override
