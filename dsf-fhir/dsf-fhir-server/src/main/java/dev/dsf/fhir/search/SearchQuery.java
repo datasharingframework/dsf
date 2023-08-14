@@ -273,7 +273,6 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		return elements.collect(Collectors.joining(" AND "));
 	}
 
-	// TODO rename ?
 	public List<SearchQueryParameterError> getUnsupportedQueryParameters()
 	{
 		return errors;
