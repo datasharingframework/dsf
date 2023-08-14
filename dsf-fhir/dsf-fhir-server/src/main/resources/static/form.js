@@ -397,19 +397,12 @@ function adaptTaskFormInputs() {
         const task = getResourceAsJson()
 
         if (task.meta !== null && task.meta.profile !== null && task.meta.profile.length > 0) {
-            const profile = task.meta.profile[0].split("|")
+            const profile = task.meta.profile[0]
 
-            if (profile.length > 0) {
-                let currentUrl = window.location.origin + window.location.pathname
-                let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile[0]
+            let currentUrl = window.location.origin + window.location.pathname
+            let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile
 
-                if (profile.length > 1) {
-                    requestUrl = requestUrl + "&version=" + profile[1]
-                }
-
-                loadStructureDefinition(requestUrl)
-                .then(bundle => parseStructureDefinition(bundle))
-            }
+            loadStructureDefinition(requestUrl).then(bundle => parseStructureDefinition(bundle))
         }
     }
 }
@@ -499,12 +492,12 @@ function modifyInputRow(definition, indices) {
 
     const label = row.querySelector("label")
     if (label) {
-        const cardinalities = htmlToElement("<span class=\"cardinalities\"> [" + definition.min + ".." + definition.max + "]</span>")
+        const cardinalities = htmlToElement('<span class="cardinalities"></span>', " [" + definition.min + ".." + definition.max + "]")
         label.appendChild(cardinalities)
 
         if (definition.max !== "1") {
-            const plusIcon = htmlToElement("<span class=\"plus-minus-icon\"></span>")
-            const plusIconSvg = htmlToElement("<svg height=\"20\" width=\"20\" viewBox=\"0 -960 960 960\"><title>Add additional input</title><path d=\"M453-280h60v-166h167v-60H513v-174h-60v174H280v60h173v166Zm27.266 200q-82.734 0-155.5-31.5t-127.266-86q-54.5-54.5-86-127.341Q80-397.681 80-480.5q0-82.819 31.5-155.659Q143-709 197.5-763t127.341-85.5Q397.681-880 480.5-880q82.819 0 155.659 31.5Q709-817 763-763t85.5 127Q880-563 880-480.266q0 82.734-31.5 155.5T763-197.684q-54 54.316-127 86Q563-80 480.266-80Zm.234-60Q622-140 721-239.5t99-241Q820-622 721.188-721 622.375-820 480-820q-141 0-240.5 98.812Q140-622.375 140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z\"/></svg>")
+            const plusIcon = htmlToElement('<span class="plus-minus-icon"></span>')
+            const plusIconSvg = htmlToElement('<svg height="20" width="20" viewBox="0 -960 960 960"><title>Add additional input</title><path d="M453-280h60v-166h167v-60H513v-174h-60v174H280v60h173v166Zm27.266 200q-82.734 0-155.5-31.5t-127.266-86q-54.5-54.5-86-127.341Q80-397.681 80-480.5q0-82.819 31.5-155.659Q143-709 197.5-763t127.341-85.5Q397.681-880 480.5-880q82.819 0 155.659 31.5Q709-817 763-763t85.5 127Q880-563 880-480.266q0 82.734-31.5 155.5T763-197.684q-54 54.316-127 86Q563-80 480.266-80Zm.234-60Q622-140 721-239.5t99-241Q820-622 721.188-721 622.375-820 480-820q-141 0-240.5 98.812Q140-622.375 140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/></svg>')
 
             plusIconSvg.addEventListener("click", () => {
                 appendInputRowAfter(row, definition, indices)
@@ -527,11 +520,12 @@ function appendInputRowAfter(inputRow, definition, indices) {
     clone.querySelectorAll("[index]").forEach( e => { e.setAttribute("index", index) })
 
     clone.querySelector("span[class='plus-minus-icon']").remove()
+    clone.querySelectorAll("input").forEach( e => { e.value = '' })
 
     const label = clone.querySelector("label")
     if (label) {
-        const minusIcon = htmlToElement("<span class=\"plus-minus-icon\"></span>")
-        const minusIconSvg = htmlToElement("<svg height=\"20\" width=\"20\" viewBox=\"0 -960 960 960\"><path d=\"M280-453h400v-60H280v60ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z\"/></svg>")
+        const minusIcon = htmlToElement('<span class="plus-minus-icon"></span>')
+        const minusIconSvg = htmlToElement('<svg height="20" width="20" viewBox="0 -960 960 960"><path d="M280-453h400v-60H280v60ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z"/></svg>')
 
         minusIconSvg.addEventListener("click", () => { clone.remove() })
 
@@ -548,10 +542,15 @@ function insertPlaceholderInValue(element, name, placeholder) {
     input.value = placeholder
 }
 
-function htmlToElement(html) {
-    const template = document.createElement('template');
-    template.innerHTML = html;
-    return template.content.firstChild;
+function htmlToElement(html, innerText) {
+    const template = document.createElement('template')
+    template.innerHTML = html
+    const child = template.content.firstChild
+    
+    if (innerText)
+        child.innerText = innerText
+        
+    return child
 }
 
 function getDefinitionId(definition) {

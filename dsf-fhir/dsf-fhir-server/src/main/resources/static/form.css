@@ -15,8 +15,8 @@ fieldset#form-fieldset {
 
 .row {
     border-radius: 5px;
-    padding: 0 15px 15px 15px;
-    margin-bottom: 10px;
+    padding: 0 1em 1em 1em;
+    margin-bottom: 0.7em;
     background-color: #f2f2f2;
 }
 
@@ -302,8 +302,8 @@ button.submit[disabled] {
 
 .plus-minus-icon {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 0.2em;
+    right: 0.1em;
     cursor: pointer;
 }
 
@@ -316,14 +316,15 @@ button.submit[disabled] {
 }
 
 .input-group {
-    position: relative
+    display: flex;
+    flex-direction: row;
 }
 
 .input-group-svg {
-    position: absolute;
-    right: 0.45rem;
-    bottom: 0.65rem;
     cursor: pointer;
+    align-self: center;
+    margin-left: 0.46em;
+    rotate: 180deg;
 }
 
 .input-group-svg > path {
@@ -334,32 +335,11 @@ button.submit[disabled] {
 	fill: #326F95;
 }
 
-input[type="date"]::-webkit-inner-spin-button,
-input[type="date"]::-webkit-calendar-picker-indicator {
-    display: none;
-    -webkit-appearance: none;
-}
-
-input[type="time"]::-webkit-inner-spin-button,
-input[type="time"]::-webkit-calendar-picker-indicator {
-    display: none;
-    -webkit-appearance: none;
-}
-
-input[type="dateTime-local"]::-webkit-inner-spin-button,
-input[type="dateTime-local"]::-webkit-calendar-picker-indicator {
-    display: none;
-    -webkit-appearance: none;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
 input[type=number] {
-  -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    -o-appearance: textfield;
+    appearance: textfield;
 }
 
 ::placeholder {
