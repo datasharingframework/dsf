@@ -78,23 +78,23 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 
 		out.write("<fieldset id=\"form-fieldset\" " + (draft ? "" : "disabled=\"disabled\"") + ">\n");
 
-		out.write("<div class=\"row\" id=\"requester-row\">\n");
-		out.write("<label class=\"row-label\" for=\"requester\">requester</label>\n");
-		out.write("<input type=\"text\" id=\"requester\" name=\"requester\" disabled=\"disabled\" value=\""
+		out.write("<div class=\"row\" name=\"requester-row\">\n");
+		out.write("<label class=\"row-label\">requester</label>\n");
+		out.write("<input type=\"text\" name=\"requester\" disabled=\"disabled\" value=\""
 				+ task.getRequester().getIdentifier().getValue() + "\"></input>\n");
 		out.write("</div>\n");
 
-		out.write("<div class=\"row\" id=\"recipient-row\">\n");
-		out.write("<label class=\"row-label\" for=\"recipient\">recipient</label>\n");
-		out.write("<input type=\"text\" id=\"recipient\" name=\"recipient\" disabled=\"disabled\" value=\""
+		out.write("<div class=\"row\" name=\"recipient-row\">\n");
+		out.write("<label class=\"row-label\">recipient</label>\n");
+		out.write("<input type=\"text\" name=\"recipient\" disabled=\"disabled\" value=\""
 				+ task.getRestriction().getRecipient().stream().findFirst().get().getIdentifier().getValue()
 				+ "\"></input>\n");
 		out.write("</div>\n");
 
 		String authoredOn = DATE_TIME_FORMAT.format(task.getAuthoredOn());
-		out.write("<div class=\"row " + (draft ? "invisible" : "") + "\" id=\"authored-on-row\">\n");
-		out.write("<label class=\"row-label\" for=\"authored-on\">authored-on</label>\n");
-		out.write("<input type=\"datetime-local\" id=\"authored-on\" name=\"authored-on\" "
+		out.write("<div class=\"row " + (draft ? "invisible" : "") + "\" name=\"authored-on-row\">\n");
+		out.write("<label class=\"row-label\">authored-on</label>\n");
+		out.write("<input type=\"datetime-local\" name=\"authored-on\" "
 				+ (draft ? "placeholder=\"yyyy.MM.dd hh:mm:ss\"" : "value=\"" + authoredOn + "\"") + "></input>\n");
 		out.write("</div>\n");
 
@@ -102,15 +102,15 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 				.filter(isMessageName().negate().and(isBusinessKey().negate()).and(isCorrelationKey().negate()))
 				.toList();
 
-		if (filteredInputs.size() > 1)
+		if (filteredInputs.size() > 0)
 		{
-			out.write("<section>");
+			out.write("<section id=\"inputs\">");
 			out.write("<h2 class=\"input-output-header\">Inputs</h2>");
 
-			Map<String, Integer> elementIdIndexMap = new HashMap<>();
+			Map<String, Integer> elemenIndexMap = new HashMap<>();
 			for (ParameterComponent input : filteredInputs)
 			{
-				writeInput(input, elementIdIndexMap, draft, out);
+				writeInput(input, elemenIndexMap, draft, out);
 			}
 
 			out.write("</section>");
@@ -118,13 +118,13 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 
 		if (task.hasOutput())
 		{
-			out.write("<section>");
+			out.write("<section id=\"outputs\">");
 			out.write("<h2 class=\"input-output-header\">Outputs</h2>");
 
-			Map<String, Integer> elementIdIndexMap = new HashMap<>();
+			Map<String, Integer> elemenIndexMap = new HashMap<>();
 			for (TaskOutputComponent output : task.getOutput())
 			{
-				writeOutput(output, elementIdIndexMap, out);
+				writeOutput(output, elemenIndexMap, out);
 			}
 
 			out.write("</section>");
@@ -132,8 +132,8 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 
 		if (draft)
 		{
-			out.write("<div class=\"row row-submit\" id=\"submit-row\">\n");
-			out.write("<button type=\"button\" id=\"submit\" class=\"submit\" " + "onclick=\"startProcess();\""
+			out.write("<div class=\"row row-submit\" name=\"submit-row\">\n");
+			out.write("<button type=\"button\" name=\"submit\" class=\"submit\" " + "onclick=\"startProcess();\""
 					+ ">Start Process</button>\n");
 			out.write("</div>\n");
 		}
@@ -236,7 +236,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		}
 	}
 
-	private void writeInput(Task.ParameterComponent input, Map<String, Integer> elementIdIndexMap, boolean draft,
+	private void writeInput(Task.ParameterComponent input, Map<String, Integer> elemenIndexMap, boolean draft,
 			OutputStreamWriter out) throws IOException
 	{
 		String typeCode = getTypeCode(input);
@@ -244,18 +244,18 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 
 		if (input.hasValue())
 		{
-			writeInputRow(input.getValue(), input.getExtension(), typeCode, elementIdIndexMap, typeCode, display, draft,
+			writeInputRow(input.getValue(), input.getExtension(), typeCode, elemenIndexMap, typeCode, display, draft,
 					out);
 		}
 	}
 
-	private void writeOutput(Task.TaskOutputComponent output, Map<String, Integer> elementIdIndexMap,
+	private void writeOutput(Task.TaskOutputComponent output, Map<String, Integer> elemenIndexMap,
 			OutputStreamWriter out) throws IOException
 	{
 		String typeCode = getTypeCode(output);
 		if (output.hasValue())
 		{
-			writeInputRow(output.getValue(), output.getExtension(), typeCode, elementIdIndexMap, typeCode, true, false,
+			writeInputRow(output.getValue(), output.getExtension(), typeCode, elemenIndexMap, typeCode, true, false,
 					out);
 		}
 	}
