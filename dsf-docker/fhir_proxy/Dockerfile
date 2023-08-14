@@ -14,6 +14,9 @@ RUN mkdir /usr/local/apache2/ssl/ && \
 ENV SSL_CERTIFICATE_CHAIN_FILE="/does/not/exist"
 ENV SSL_CA_DN_REQUEST_FILE="/does/not/exist"
 
+# setting default value - client certificate required, use 'optional' when using OIDC 
+ENV SSL_VERIFY_CLIENT="require"
+
 # timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a reply
 ENV PROXY_PASS_TIMEOUT_HTTP=60
 # timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a reply
