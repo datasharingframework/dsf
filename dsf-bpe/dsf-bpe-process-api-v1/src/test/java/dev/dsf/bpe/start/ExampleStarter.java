@@ -129,7 +129,7 @@ public class ExampleStarter
 		FhirContext context = FhirContext.forR4();
 		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
-		return new FhirWebserviceClientJersey(baseUrl, trustStore, keyStore, certificatePassword, null, null, null, 0,
-				0, false, null, context, referenceCleaner);
+		return new FhirWebserviceClientJersey(baseUrl, trustStore, keyStore, certificatePassword, null, null, null,
+				null, 0, 0, false, "DSF Example Starter", context, referenceCleaner);
 	}
 }
