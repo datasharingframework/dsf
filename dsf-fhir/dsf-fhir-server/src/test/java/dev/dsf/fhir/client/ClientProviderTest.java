@@ -21,6 +21,7 @@ import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.tools.build.BuildInfoReader;
 
 public class ClientProviderTest
 {
@@ -28,6 +29,7 @@ public class ClientProviderTest
 	private EndpointDao endpointDao;
 	private ExceptionHandler exceptionHandler;
 	private ClientProvider provider;
+	private BuildInfoReader buildInfoReader;
 
 	@Before
 	public void before() throws Exception
@@ -49,11 +51,12 @@ public class ClientProviderTest
 		referenceCleaner = mock(ReferenceCleaner.class);
 		endpointDao = mock(EndpointDao.class);
 		exceptionHandler = mock(ExceptionHandler.class);
+		buildInfoReader = mock(BuildInfoReader.class);
 
 		provider = new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
 				remoteReadTimeout, remoteConnectTimeout,
 				new ProxyConfigImpl(remoteProxySchemeHostPort, remoteProxyUsername, remoteProxyPassword, null),
-				logRequests, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
+				logRequests, fhirContext, referenceCleaner, endpointDao, exceptionHandler, buildInfoReader);
 	}
 
 	@Test
@@ -62,6 +65,7 @@ public class ClientProviderTest
 	{
 		final String serverBase = "http://foo/fhir/";
 
+		when(buildInfoReader.getProjectVersion()).thenReturn("1.2.3-TEST");
 		when(exceptionHandler.handleSqlException(any(SupplierWithSqlException.class))).thenReturn(true);
 
 		Optional<FhirWebserviceClient> client = provider.getClient(serverBase);
@@ -69,8 +73,9 @@ public class ClientProviderTest
 		assertTrue(client.isPresent());
 		assertEquals(serverBase, client.get().getBaseUrl());
 
+		verify(buildInfoReader).getProjectVersion();
 		verify(exceptionHandler).handleSqlException(any(SupplierWithSqlException.class));
-		verifyNoMoreInteractions(referenceCleaner, endpointDao, exceptionHandler);
+		verifyNoMoreInteractions(referenceCleaner, endpointDao, exceptionHandler, buildInfoReader);
 	}
 
 	@Test
@@ -84,6 +89,6 @@ public class ClientProviderTest
 		assertTrue(client.isEmpty());
 
 		verify(exceptionHandler).handleSqlException(any(SupplierWithSqlException.class));
-		verifyNoMoreInteractions(referenceCleaner, endpointDao, exceptionHandler);
+		verifyNoMoreInteractions(referenceCleaner, endpointDao, exceptionHandler, buildInfoReader);
 	}
 }

@@ -44,6 +44,9 @@ public class FhirClientConfig implements InitializingBean
 	@Autowired
 	private FhirConfig fhirConfig;
 
+	@Autowired
+	private BuildInfoReaderConfig buildInfoReaderConfig;
+
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
@@ -105,7 +108,8 @@ public class FhirClientConfig implements InitializingBean
 					keyStorePassword, propertiesConfig.getWebserviceClientRemoteReadTimeout(),
 					propertiesConfig.getWebserviceClientRemoteConnectTimeout(),
 					propertiesConfig.getWebserviceClientRemoteVerbose(), getWebsocketUrl(), webserviceTrustStore,
-					webserviceKeyStore, keyStorePassword, propertiesConfig.proxyConfig());
+					webserviceKeyStore, keyStorePassword, propertiesConfig.proxyConfig(),
+					buildInfoReaderConfig.buildInfoReader());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | PKCSException e)
 		{

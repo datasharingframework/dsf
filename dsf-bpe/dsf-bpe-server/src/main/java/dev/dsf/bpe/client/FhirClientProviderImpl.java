@@ -17,10 +17,12 @@ import dev.dsf.fhir.client.FhirWebserviceClientJersey;
 import dev.dsf.fhir.client.WebsocketClient;
 import dev.dsf.fhir.client.WebsocketClientTyrus;
 import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.tools.build.BuildInfoReader;
 
 public class FhirClientProviderImpl implements FhirClientProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirClientProviderImpl.class);
+	private static final String USER_AGENT_VALUE = "DSF/";
 
 	private final Map<String, FhirWebserviceClient> webserviceClientsByUrl = new HashMap<>();
 	private final Map<String, WebsocketClient> websocketClientsBySubscriptionId = new HashMap<>();
@@ -47,13 +49,15 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	private final char[] localWebsocketKeyStorePassword;
 
 	private final ProxyConfig proxyConfig;
+	private final BuildInfoReader buildInfoReader;
 
 	public FhirClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
 			String localWebserviceBaseUrl, int localWebserviceReadTimeout, int localWebserviceConnectTimeout,
 			boolean localWebserviceLogRequests, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			char[] webserviceKeyStorePassword, int remoteWebserviceReadTimeout, int remoteWebserviceConnectTimeout,
 			boolean remoteWebserviceLogRequests, String localWebsocketUrl, KeyStore localWebsocketTrustStore,
-			KeyStore localWebsocketKeyStore, char[] localWebsocketKeyStorePassword, ProxyConfig proxyConfig)
+			KeyStore localWebsocketKeyStore, char[] localWebsocketKeyStorePassword, ProxyConfig proxyConfig,
+			BuildInfoReader buildInfoReader)
 	{
 		this.fhirContext = fhirContext;
 		this.referenceCleaner = referenceCleaner;
@@ -77,6 +81,7 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 		this.localWebsocketKeyStorePassword = localWebsocketKeyStorePassword;
 
 		this.proxyConfig = proxyConfig;
+		this.buildInfoReader = buildInfoReader;
 	}
 
 	@Override
@@ -101,6 +106,7 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 		Objects.requireNonNull(localWebsocketKeyStorePassword, "localWebsocketKeyStorePassword");
 
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
+		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 	}
 
 	public String getLocalBaseUrl()
@@ -123,14 +129,14 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 				FhirWebserviceClient client;
 				if (localWebserviceBaseUrl.equals(webserviceUrl))
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
-							webserviceKeyStorePassword, proxyUrl, proxyUsername, proxyPassword,
-							localWebserviceConnectTimeout, localWebserviceReadTimeout, localWebserviceLogRequests, null,
-							fhirContext, referenceCleaner);
+							webserviceKeyStorePassword, null, proxyUrl, proxyUsername, proxyPassword,
+							localWebserviceConnectTimeout, localWebserviceReadTimeout, localWebserviceLogRequests,
+							USER_AGENT_VALUE + buildInfoReader.getProjectVersion(), fhirContext, referenceCleaner);
 				else
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
-							webserviceKeyStorePassword, proxyUrl, proxyUsername, proxyPassword,
+							webserviceKeyStorePassword, null, proxyUrl, proxyUsername, proxyPassword,
 							remoteWebserviceConnectTimeout, remoteWebserviceReadTimeout, remoteWebserviceLogRequests,
-							null, fhirContext, referenceCleaner);
+							USER_AGENT_VALUE + buildInfoReader.getProjectVersion(), fhirContext, referenceCleaner);
 
 				webserviceClientsByUrl.put(webserviceUrl, client);
 				return client;
@@ -179,7 +185,8 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 				localWebsocketKeyStore, localWebsocketKeyStorePassword,
 				proxyConfig.isEnabled(localWebsocketUrl) ? proxyConfig.getUrl() : null,
 				proxyConfig.isEnabled(localWebsocketUrl) ? proxyConfig.getUsername() : null,
-				proxyConfig.isEnabled(localWebsocketUrl) ? proxyConfig.getPassword() : null, subscriptionId);
+				proxyConfig.isEnabled(localWebsocketUrl) ? proxyConfig.getPassword() : null,
+				USER_AGENT_VALUE + buildInfoReader.getProjectVersion(), subscriptionId);
 	}
 
 	@Override
