@@ -63,10 +63,10 @@ li.L3,
 li.L5,
 li.L6,
 li.L7,
-li.L8 { list-style-type: none }
+li.L8 { list-style-type: none; color: var(--color-prime) }
 /* Alternate shading for lines */
 li.L1,
 li.L3,
 li.L5,
 li.L7,
-li.L9 { background: #eee }
+li.L9 { background: var(--color-alt-background) }

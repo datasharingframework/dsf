@@ -1,6 +1,29 @@
+[theme="light"] {
+	--color-prime: #326F95;
+	--color-background: #fff;
+	--color-alt-background: #eee;
+	--color-tab-button: #000;
+	--color-tab-button-background: #f1f1f1;
+	--color-tab-button-hover: #000;
+	--color-tab-button-background-hover: #ddd;
+	--color-tab-button-background-active: #ccc;
+}
+
+[theme="dark"] {
+	--color-prime: #fff;
+	--color-background: #000;
+	--color-alt-background: #181818;
+	--color-tab-button: #fff;
+	--color-tab-button-background: #181818;
+	--color-tab-button-background-hover: #ddd;
+	--color-tab-button-hover: #000;
+	--color-tab-button-background-active: #888;
+}
+
 body {
 	margin: 2em;
 	font-family: sans-serif;
+	background-color: var(--color-background);
 }
 
 table#header {
@@ -19,13 +42,13 @@ td#url {
 
 td#url h1 {
 	font-family: monospace;
-	color: #326F95;
+	color: var(--color-prime);
 	margin: 0 0 0 1em;
 	word-break: break-word;
 }
 
 td#url h1 a:link, td#url h1 a:visited, td#url h1 a:active {
-	color: #326F95;
+	color: var(--color-prime);
 	text-decoration: none;
 }
 
@@ -39,7 +62,8 @@ td#url h1 a:hover {
 
 .tab button {
 	padding: 0.2em 0.6em;
-	background-color: #f1f1f1;
+	background-color: var(--color-tab-button-background);
+	color: var(--color-tab-button);
 	border: none;
 	outline: none;
 	cursor: pointer;
@@ -47,11 +71,13 @@ td#url h1 a:hover {
 }
 
 .tab button:hover {
-	background-color: #ddd;
+	background-color: var(--color-tab-button-background-hover);
+	color: var(--color-tab-button-hover);
 }
 
 .tab button.active {
-	background-color: #ccc;
+	background-color: var(--color-tab-button-background-active);
+	color: var(--color-tab-button);
 }
 
 pre {
@@ -94,7 +120,7 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 }
 
 .icon:hover>path {
-	fill: #326F95;
+	fill: var(--color-prime);
 }
 
 #help {
@@ -103,14 +129,16 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	right: 1em;
 	padding: 1em;
 	border: 1px solid #ccc;
-	background: white;
+	color: var(--color-prime);
+	background: var(--color-background);
 	padding-top: 2em;
 	max-width: 83%;
 	min-width: 12em;
+	z-index: 1;
 }
 
 #help>#help-title {
-	color: #326F95;
+	color: var(--color-prime);
 	position: relative;
 	top: -1.9em;
 	font-family: sans-serif;
@@ -148,31 +176,29 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	right: 1em;
 	padding: 1em;
 	border: 1px solid #ccc;
-	background: white;
+	background: var(--color-background);
 	padding-top: 2em;
 	max-width: 83%;
 	min-width: 8em;
+	z-index: 1;
 }
 
 #bookmarks>#bookmarks-title {
-	color: #326F95;
+	color: var(--color-prime);
 	position: relative;
 	top: -1.9em;
 	font-family: sans-serif;
 }
 
 #bookmarks a:link, #bookmarks a:visited, #bookmarks a:active {
-	color: #326F95;
+	color: var(--color-prime);
 	text-decoration: none;
 	vertical-align: super;
 	font-family: monospace;
 }
 
 #bookmarks a:hover {
-	/* color: #326F95; */
 	text-decoration: underline;
-	/* vertical-align: super;
-	font-family: monospace; */
 }
 
 #bookmarks>#bookmarks-list {

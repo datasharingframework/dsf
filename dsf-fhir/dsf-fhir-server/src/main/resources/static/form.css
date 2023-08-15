@@ -1,6 +1,5 @@
 form {
     border: 1px solid #ccc;
-    background-color: #ffffff;
     padding: 20px 20px 10px 20px;
     font-family: Epilogue, sans-serif;
 }
@@ -168,7 +167,7 @@ fieldset#form-fieldset {
 }
 
 .row-submit {
-    background-color: #ffffff;
+    background-color: transparent;
     padding: 0;
 }
 
@@ -218,7 +217,7 @@ input.identifier-coding-code {
 }
 
 button.submit {
-    background-color: #29235c;
+    background-color: #326F95;
     color: white;
     padding: 12px 60px;
     border: none;
