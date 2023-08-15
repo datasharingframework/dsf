@@ -135,8 +135,8 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for Organization with thumbprint", e);
-			return false;
+			logger.warn("Unable to search for Organization", e);
+			throw new RuntimeException("Unable to search for OrganizationAffiliation", e);
 		}
 	}
 

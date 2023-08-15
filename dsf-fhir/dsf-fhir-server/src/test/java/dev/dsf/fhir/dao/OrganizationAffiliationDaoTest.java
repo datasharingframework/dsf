@@ -1,6 +1,7 @@
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -475,5 +476,40 @@ public class OrganizationAffiliationDaoTest
 		assertNotNull(createdBinary);
 
 		orgDao.update(createdParentOrg);
+	}
+
+	@Test
+	public void testExistsNotDeletedByParentOrganizationMemberOrganizationRoleAndNotEndpointWithTransaction()
+			throws Exception
+	{
+		final UUID parentOrganization = UUID.randomUUID();
+		final UUID memberOrganization = UUID.randomUUID();
+		final UUID endpoint = UUID.randomUUID();
+		final String roleSystem = "system";
+		final String roleCode = "code";
+
+		OrganizationAffiliation a = new OrganizationAffiliation();
+		a.setActive(true);
+		a.getOrganization().setReference("Organization/" + parentOrganization.toString()).setType("Organization");
+		a.getParticipatingOrganization().setReference("Organization/" + memberOrganization.toString())
+				.setType("Organization");
+		a.addEndpoint().setReference("Endpoint/" + endpoint.toString()).setType("Endpoint");
+		a.getCodeFirstRep().getCodingFirstRep().setSystem(roleSystem).setCode(roleCode);
+
+		OrganizationAffiliation created = dao.create(a);
+		assertNotNull(created);
+
+		try (Connection connection = dao.newReadWriteTransaction())
+		{
+			boolean exists1 = dao
+					.existsNotDeletedByParentOrganizationMemberOrganizationRoleAndNotEndpointWithTransaction(connection,
+							parentOrganization, memberOrganization, roleSystem, roleCode, endpoint);
+			assertFalse(exists1);
+
+			boolean exists2 = dao
+					.existsNotDeletedByParentOrganizationMemberOrganizationRoleAndNotEndpointWithTransaction(connection,
+							parentOrganization, memberOrganization, roleSystem, roleCode, UUID.randomUUID());
+			assertTrue(exists2);
+		}
 	}
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
@@ -47,7 +48,27 @@ public class OrganizationAffiliationIntegrationTest extends AbstractIntegrationT
 	}
 
 	@Test
-	public void testCreateForbiddenResourceExists() throws Exception
+	public void testCreateForbiddenResourceExists1() throws Exception
+	{
+		Organization p = organizationDao.create(createParentOrganization());
+		assertNotNull(p);
+		assertTrue(p.hasIdElement());
+		Organization m = organizationDao.create(createMemberOrganization());
+		assertNotNull(m);
+		assertTrue(m.hasIdElement());
+		Endpoint e = endpointDao.create(createEndpoint("endpoint"));
+		assertNotNull(e);
+		assertTrue(e.hasIdElement());
+
+		OrganizationAffiliation aDic = getWebserviceClient().create(createOrganizationAffiliation(p, m, e, "DIC"));
+		assertNotNull(aDic);
+		assertTrue(aDic.hasIdElement());
+
+		expectForbidden(() -> getWebserviceClient().create(createOrganizationAffiliation(p, m, e, "DMS")));
+	}
+
+	@Test
+	public void testCreateForbiddenResourceExists2() throws Exception
 	{
 		Organization p = organizationDao.create(createParentOrganization());
 		assertNotNull(p);
@@ -108,25 +129,84 @@ public class OrganizationAffiliationIntegrationTest extends AbstractIntegrationT
 		Organization m = organizationDao.create(createMemberOrganization());
 		assertNotNull(m);
 		assertTrue(m.hasIdElement());
-		Endpoint eDic = endpointDao.create(createEndpoint("dic.endpoint"));
-		assertNotNull(eDic);
-		assertTrue(eDic.hasIdElement());
-		Endpoint eDms = endpointDao.create(createEndpoint("dms.endpoint"));
-		assertNotNull(eDms);
-		assertTrue(eDms.hasIdElement());
+		Endpoint eDicDms = endpointDao.create(createEndpoint("dic.endpoint"));
+		assertNotNull(eDicDms);
+		assertTrue(eDicDms.hasIdElement());
+		Endpoint eTtp = endpointDao.create(createEndpoint("ttp.endpoint"));
+		assertNotNull(eTtp);
+		assertTrue(eTtp.hasIdElement());
 
-		OrganizationAffiliation aDic = getWebserviceClient()
-				.create(createOrganizationAffiliation(p, m, eDic, "DIC", "TTP"));
-		assertNotNull(aDic);
-		assertTrue(aDic.hasIdElement());
+		OrganizationAffiliation aDicDms = getWebserviceClient()
+				.create(createOrganizationAffiliation(p, m, eDicDms, "DIC", "DMS"));
+		assertNotNull(aDicDms);
+		assertTrue(aDicDms.hasIdElement());
 
-		OrganizationAffiliation aDms = getWebserviceClient()
-				.create(createOrganizationAffiliation(p, m, eDms, "DMS", "TTP"));
-		assertNotNull(aDms);
-		assertTrue(aDms.hasIdElement());
+		OrganizationAffiliation aTtp = getWebserviceClient().create(createOrganizationAffiliation(p, m, eTtp, "TTP"));
+		assertNotNull(aTtp);
+		assertTrue(aTtp.hasIdElement());
 
-		aDic.getCodeFirstRep().getCodingFirstRep().setCode("DMS");
-		expectForbidden(() -> getWebserviceClient().update(aDic));
+		aTtp.getCodeFirstRep().getCodingFirstRep().setCode("DMS");
+		expectForbidden(() -> getWebserviceClient().update(aTtp));
+	}
+
+	@Test
+	public void testUpdateForbiddenParentModified() throws Exception
+	{
+		Organization p = organizationDao.create(createParentOrganization());
+		assertNotNull(p);
+		assertTrue(p.hasIdElement());
+		Organization m = organizationDao.create(createMemberOrganization());
+		assertNotNull(m);
+		assertTrue(m.hasIdElement());
+		Endpoint e = endpointDao.create(createEndpoint("endpoint"));
+		assertNotNull(e);
+
+		OrganizationAffiliation a = getWebserviceClient().create(createOrganizationAffiliation(p, m, e, "DIC"));
+		assertNotNull(a);
+		assertTrue(a.hasIdElement());
+
+		a.getOrganization().setReference("Organization/" + UUID.randomUUID().toString());
+		expectForbidden(() -> getWebserviceClient().update(a));
+	}
+
+	@Test
+	public void testUpdateForbiddenMemberModified() throws Exception
+	{
+		Organization p = organizationDao.create(createParentOrganization());
+		assertNotNull(p);
+		assertTrue(p.hasIdElement());
+		Organization m = organizationDao.create(createMemberOrganization());
+		assertNotNull(m);
+		assertTrue(m.hasIdElement());
+		Endpoint e = endpointDao.create(createEndpoint("endpoint"));
+		assertNotNull(e);
+
+		OrganizationAffiliation a = getWebserviceClient().create(createOrganizationAffiliation(p, m, e, "DIC"));
+		assertNotNull(a);
+		assertTrue(a.hasIdElement());
+
+		a.getParticipatingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
+		expectForbidden(() -> getWebserviceClient().update(a));
+	}
+
+	@Test
+	public void testUpdateForbiddenEndpointModified() throws Exception
+	{
+		Organization p = organizationDao.create(createParentOrganization());
+		assertNotNull(p);
+		assertTrue(p.hasIdElement());
+		Organization m = organizationDao.create(createMemberOrganization());
+		assertNotNull(m);
+		assertTrue(m.hasIdElement());
+		Endpoint e = endpointDao.create(createEndpoint("endpoint"));
+		assertNotNull(e);
+
+		OrganizationAffiliation a = getWebserviceClient().create(createOrganizationAffiliation(p, m, e, "DIC"));
+		assertNotNull(a);
+		assertTrue(a.hasIdElement());
+
+		a.getEndpointFirstRep().setReference("Endpoint/" + UUID.randomUUID().toString());
+		expectForbidden(() -> getWebserviceClient().update(a));
 	}
 
 	private OrganizationAffiliation createOrganizationAffiliation(Organization parent, Organization member,
