@@ -76,17 +76,17 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		out.write("</div>\n");
 		out.write("</div>\n");
 
-		out.write("<fieldset id=\"form-fieldset\" " + (draft ? "" : "disabled=\"disabled\"") + ">\n");
+		out.write("<fieldset id=\"form-fieldset\"" + (draft ? "" : " disabled") + ">\n");
 
 		out.write("<div class=\"row\" name=\"requester-row\">\n");
 		out.write("<label class=\"row-label\">requester</label>\n");
-		out.write("<input type=\"text\" name=\"requester\" disabled=\"disabled\" value=\""
+		out.write("<input type=\"text\" name=\"requester\" disabled value=\""
 				+ task.getRequester().getIdentifier().getValue() + "\"></input>\n");
 		out.write("</div>\n");
 
 		out.write("<div class=\"row\" name=\"recipient-row\">\n");
 		out.write("<label class=\"row-label\">recipient</label>\n");
-		out.write("<input type=\"text\" name=\"recipient\" disabled=\"disabled\" value=\""
+		out.write("<input type=\"text\" name=\"recipient\" disabled value=\""
 				+ task.getRestriction().getRecipient().stream().findFirst().get().getIdentifier().getValue()
 				+ "\"></input>\n");
 		out.write("</div>\n");

@@ -7,6 +7,25 @@
 	--color-tab-button-hover: #000;
 	--color-tab-button-background-hover: #ddd;
 	--color-tab-button-background-active: #ccc;
+	--color-row-background: #f2f2f2;
+	--color-row-background-deep: #e2e2e2;
+	--color-input-text: #000;
+	--color-input-background: #fff;
+	--color-input-border: #ccc;
+	--color-input-radio-border: #000;
+	--color-input-placeholder: #aaa;
+	--color-info-background-draft-requested: #deecf9;
+	--color-info-text-draft-requested: #326F95;
+  --color-info-background-progress: #fff7c7;
+  --color-info-text-progress: #a25b36;
+  --color-info-background-completed: #e4fde1;
+  --color-info-text-completed: #14452f;
+  --color-info-background-stopped-failed: #ffe1e1;
+  --color-info-text-stopped-failed: #761137;
+  --color-error-background: #ffe1e1;
+  --color-error-text: #761137;
+  --color-disabled-background: #f2f2f2;
+  --color-disabled-text: #545454;
 }
 
 [theme="dark"] {
@@ -18,6 +37,25 @@
 	--color-tab-button-background-hover: #ddd;
 	--color-tab-button-hover: #000;
 	--color-tab-button-background-active: #888;
+	--color-row-background: #333;
+	--color-row-background-deep: #444;
+	--color-input-text: #fff;
+	--color-input-background: #181818;
+	--color-input-border: #666;
+	--color-input-radio-border: #fff;
+	--color-input-placeholder: #666;
+	--color-info-background-draft-requested: #326F95;
+  --color-info-text-draft-requested: #deecf9;
+  --color-info-background-progress: #a25b36;
+  --color-info-text-progress: #fff7c7;
+  --color-info-background-completed: #14452f;
+  --color-info-text-completed: #e4fde1;
+  --color-info-background-stopped-failed: #5e0101;
+  --color-info-text-stopped-failed: #ffe1e1;
+  --color-error-background: #5e0101;
+  --color-error-text: #ffe1e1;
+  --color-disabled-background: #333;
+  --color-disabled-text: #aaa;
 }
 
 body {

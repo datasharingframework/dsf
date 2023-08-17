@@ -69,7 +69,7 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 		out.write("</div>\n");
 		out.write("</div>\n");
 
-		out.write("<fieldset id=\"form-fieldset\" " + (completed ? "disabled=\"disabled\"" : "") + ">\n");
+		out.write("<fieldset id=\"form-fieldset\"" + (completed ? " disabled" : "") + ">\n");
 
 		Map<String, Integer> elemenIndexMap = new HashMap<>();
 		for (QuestionnaireResponse.QuestionnaireResponseItemComponent item : questionnaireResponse.getItem())
