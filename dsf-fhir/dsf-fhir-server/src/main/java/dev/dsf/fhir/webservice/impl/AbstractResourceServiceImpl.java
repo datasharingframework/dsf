@@ -331,8 +331,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
 			throw new WebApplicationException(
 					responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get(), unsupportedQueryParameters));
@@ -649,7 +648,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), effectivePage, effectiveCount);
 		query.configureParameters(queryParameters);
-		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters();
 
 		// if query parameter errors and client requests strict handling -> bad request outcome
 		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(parameterConverter.getPreferHandling(headers)))

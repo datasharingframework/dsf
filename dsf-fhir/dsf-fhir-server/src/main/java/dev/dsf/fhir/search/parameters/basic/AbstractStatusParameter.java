@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -15,7 +14,6 @@ import org.hl7.fhir.r4.model.Resource;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import jakarta.ws.rs.core.UriBuilder;
 
 public class AbstractStatusParameter<R extends MetadataResource> extends AbstractTokenParameter<R>
 {
@@ -35,15 +33,17 @@ public class AbstractStatusParameter<R extends MetadataResource> extends Abstrac
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			status = toStatus(valueAndType.codeValue, queryParameters.get(parameterName));
+			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private PublicationStatus toStatus(String status, List<String> parameterValues)
+	private PublicationStatus toStatus(List<? super SearchQueryParameterError> errors, String status,
+			String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
@@ -54,8 +54,8 @@ public class AbstractStatusParameter<R extends MetadataResource> extends Abstrac
 		}
 		catch (FHIRException e)
 		{
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
-					parameterValues, e));
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					queryParameterValue, e));
 			return null;
 		}
 	}
@@ -86,9 +86,9 @@ public class AbstractStatusParameter<R extends MetadataResource> extends Abstrac
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), status.toCode());
+		return status.toCode();
 	}
 
 	@Override

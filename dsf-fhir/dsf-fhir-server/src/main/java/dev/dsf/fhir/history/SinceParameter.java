@@ -1,6 +1,5 @@
 package dev.dsf.fhir.history;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.DomainResource;
@@ -12,43 +11,31 @@ import dev.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 
 public class SinceParameter extends AbstractDateTimeParameter<DomainResource>
 {
+	public static final String PARAMETER_NAME = "_since";
+
 	public SinceParameter()
 	{
-		super("_since", "last_updated");
+		super(PARAMETER_NAME, "last_updated");
 	}
 
 	@Override
-	protected void checkParameters(List<String> parameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		List<DateTimeValueAndTypeAndSearchType> superValuesAndTypes = super.getValuesAndTypes();
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
-		if (superValuesAndTypes.size() > 1)
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-					parameterName, parameters, "More than one " + parameterName + " values"));
-
-		if (superValuesAndTypes.size() == 1)
+		if (!DateTimeSearchType.EQ.equals(valueAndType.searchType)
+				|| !DateTimeType.ZONED_DATE_TIME.equals(valueAndType.type))
 		{
-			DateTimeValueAndTypeAndSearchType vT = superValuesAndTypes.get(0);
-			if (!DateTimeSearchType.EQ.equals(vT.searchType) || !DateTimeType.ZONED_DATE_TIME.equals(vT.type))
-				addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
-						parameters, "Not instant"));
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					queryParameterValue, "Not instant"));
+			valueAndType = null;
 		}
-	}
-
-	@Override
-	public List<DateTimeValueAndTypeAndSearchType> getValuesAndTypes()
-	{
-		List<DateTimeValueAndTypeAndSearchType> superValuesAndTypes = super.getValuesAndTypes();
-
-		if (superValuesAndTypes.size() == 1)
+		else
 		{
-			DateTimeValueAndTypeAndSearchType vT = superValuesAndTypes.get(0);
-			if (DateTimeSearchType.EQ.equals(vT.searchType) && DateTimeType.ZONED_DATE_TIME.equals(vT.type))
-				return Collections
-						.singletonList(new DateTimeValueAndTypeAndSearchType(vT.value, vT.type, DateTimeSearchType.GE));
+			valueAndType = new DateTimeValueAndTypeAndSearchType(valueAndType.value, valueAndType.type,
+					DateTimeSearchType.GE);
 		}
-
-		return superValuesAndTypes;
 	}
 
 	@Override
@@ -63,5 +50,11 @@ public class SinceParameter extends AbstractDateTimeParameter<DomainResource>
 	{
 		// Not implemented for history
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getBundleUriQueryParameterValue()
+	{
+		return toUrlValue(valueAndType);
 	}
 }

@@ -2,15 +2,10 @@ package dev.dsf.fhir.search.parameters.basic;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -18,15 +13,20 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.search.IncludeParts;
-import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryIncludeParameter;
+import dev.dsf.fhir.search.SearchQueryIncludeParameterConfiguration;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import jakarta.ws.rs.core.UriBuilder;
 
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
+		implements SearchQueryIncludeParameter<R>
 {
-	private static final String PARAMETER_NAME_IDENTIFIER_MODIFIER = ":identifier";
+	public static final String PARAMETER_NAME_IDENTIFIER_MODIFIER = ":identifier";
+
+	public static List<String> getNameModifiers()
+	{
+		return Collections.singletonList(PARAMETER_NAME_IDENTIFIER_MODIFIER);
+	}
 
 	protected static enum ReferenceSearchType
 	{
@@ -58,176 +58,140 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		//
 		// [parameter]=[url] -> absolute id or canonical
 		//
-		// [parameter]:[Type]=[uuid] -> local type+id
 		// [parameter]:identifier=[identifier] -> identifier (not supported for canonical references)
-		public static Optional<ReferenceValueAndSearchType> fromParamValue(List<String> targetResourceTypeNames,
-				String parameterName, Map<String, List<String>> queryParameters,
-				Consumer<SearchQueryParameterError> errors)
+		// [parameter]:[Type]=[uuid] -> local type+id
+		public static ReferenceValueAndSearchType fromParamValue(List<? super SearchQueryParameterError> errors,
+				List<String> targetResourceTypeNames, String parameterName, String queryParameterName,
+				String queryParameterValue)
 		{
-			List<String> allValues = new ArrayList<>();
-			allValues.addAll(queryParameters.getOrDefault(parameterName, Collections.emptyList()));
-			allValues.addAll(queryParameters.getOrDefault(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER,
-					Collections.emptyList()));
-			allValues.addAll(targetResourceTypeNames.stream().flatMap(
-					type -> queryParameters.getOrDefault(parameterName + ":" + type, Collections.emptyList()).stream())
-					.collect(Collectors.toList()));
-
-			if (allValues.size() > 1)
-				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-						parameterName, allValues));
-			else if (allValues.isEmpty())
-				return Optional.empty();
-
-			final String value = allValues.get(0);
-
 			// simple case
-			if (queryParameters.containsKey(parameterName))
+			if (parameterName.equals(queryParameterName))
 			{
-				if (value.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
-					return Optional.of(new ReferenceValueAndSearchType(targetResourceTypeNames.get(0), value, null,
-							null, ReferenceSearchType.ID));
-				else if (value.indexOf('/') == -1 && targetResourceTypeNames.size() > 1)
-					return Optional
-							.of(new ReferenceValueAndSearchType(null, value, null, null, ReferenceSearchType.ID));
-				else if (value.startsWith("http"))
-					return Optional
-							.of(new ReferenceValueAndSearchType(null, null, value, null, ReferenceSearchType.URL));
-				else if (value.indexOf('/') >= 0)
+				if (queryParameterValue.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
+					return new ReferenceValueAndSearchType(targetResourceTypeNames.get(0), queryParameterValue, null,
+							null, ReferenceSearchType.ID);
+				else if (queryParameterValue.indexOf('/') == -1 && targetResourceTypeNames.size() > 1)
+					return new ReferenceValueAndSearchType(null, queryParameterValue, null, null,
+							ReferenceSearchType.ID);
+				else if (queryParameterValue.startsWith("http"))
+					return new ReferenceValueAndSearchType(null, null, queryParameterValue, null,
+							ReferenceSearchType.URL);
+				else if (queryParameterValue.indexOf('/') >= 0)
 				{
-					String[] splitAtSlash = value.split("/");
-					if (splitAtSlash.length == 2
-							&& targetResourceTypeNames.stream().anyMatch(name -> name.equals(splitAtSlash[0])))
-						return Optional.of(new ReferenceValueAndSearchType(splitAtSlash[0], splitAtSlash[1], null, null,
-								ReferenceSearchType.RESOURCE_NAME_AND_ID));
-					else
-						errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-								parameterName, queryParameters.get(parameterName),
-								"Unsupported target resource type name " + splitAtSlash[0] + ", not one of "
-										+ targetResourceTypeNames));
-				}
-
-				else
-					errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-							parameterName, queryParameters.get(parameterName)));
-			}
-			// typed parameter
-			else if (targetResourceTypeNames.stream()
-					.anyMatch(type -> queryParameters.containsKey(parameterName + ":" + type)))
-			{
-				final String paramType = targetResourceTypeNames.stream()
-						.filter(type -> queryParameters.containsKey(parameterName + ":" + type)).findFirst().get();
-
-				if (value.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
-				{
-					if (paramType.equals(targetResourceTypeNames.get(0)))
-						return Optional.of(new ReferenceValueAndSearchType(paramType, value, null, null,
-								ReferenceSearchType.TYPE_AND_ID));
-					else
-						errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-								parameterName, queryParameters.get(parameterName),
-								"Unsupported target resource type name " + paramType + ", not equal to "
-										+ targetResourceTypeNames.get(0)));
-				}
-				else if (value.indexOf('/') >= 0)
-				{
-					String[] splitAtSlash = value.split("/");
-					if (splitAtSlash.length == 2
-							&& targetResourceTypeNames.stream().anyMatch(name -> name.equals(splitAtSlash[0])))
+					String[] splitAtSlash = queryParameterValue.split("/");
+					if (splitAtSlash.length == 2)
 					{
-						if (paramType.equals(splitAtSlash[0]))
-							return Optional.of(new ReferenceValueAndSearchType(splitAtSlash[0], splitAtSlash[1], null,
-									null, ReferenceSearchType.TYPE_AND_RESOURCE_NAME_AND_ID));
+
+						if (targetResourceTypeNames.stream().anyMatch(name -> name.equals(splitAtSlash[0])))
+							return new ReferenceValueAndSearchType(splitAtSlash[0], splitAtSlash[1], null, null,
+									ReferenceSearchType.RESOURCE_NAME_AND_ID);
 						else
-							errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-									parameterName, queryParameters.get(parameterName),
-									"Inconsistent target resource type name " + paramType + " vs. " + splitAtSlash[0]));
+						{
+							errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+									parameterName, queryParameterValue, "Unsupported target resource type name "
+											+ splitAtSlash[0] + ", not one of " + targetResourceTypeNames));
+							return null;
+						}
 					}
 					else
-						errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-								parameterName, queryParameters.get(parameterName),
-								"Unsupported target resource type name " + splitAtSlash[0] + ", not one of "
-										+ targetResourceTypeNames));
+					{
+						errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+								parameterName, queryParameterValue,
+								"Unsupported reference " + queryParameterValue + " not 'type/id'"));
+						return null;
+					}
 				}
-			}
-			// identifier
-			else if (queryParameters.containsKey(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER))
-			{
-				if (value != null && !value.isBlank())
+				else
 				{
-					return TokenValueAndSearchType
-							.fromParamValue(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER, queryParameters, errors)
-							.map(identifier -> new ReferenceValueAndSearchType(null, null, null, identifier,
-									ReferenceSearchType.IDENTIFIER));
-				}
-				else if (value == null || value.isBlank())
-				{
-					errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-							parameterName, queryParameters.get(parameterName), "Value empty"));
+					errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+							parameterName, queryParameterValue));
+					return null;
 				}
 			}
 
-			return Optional.empty();
+			// identifier
+			// parameter:identifier=value
+			// parameter:identifier=system|value
+			else if ((parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER).equals(queryParameterName))
+			{
+				TokenValueAndSearchType identifier = TokenValueAndSearchType.fromParamValue(parameterName,
+						queryParameterName, queryParameterValue);
+				return new ReferenceValueAndSearchType(null, null, null, identifier, ReferenceSearchType.IDENTIFIER);
+			}
+
+			// typed parameter
+			// parameter:type=id
+			// parameter:type=type/id
+			else
+			{
+				Optional<String> type = targetResourceTypeNames.stream()
+						.filter(t -> (parameterName + ":" + t).equals(queryParameterName)).findFirst();
+
+				if (type.isPresent())
+				{
+					if (queryParameterValue.indexOf('/') == -1)
+					{
+						return new ReferenceValueAndSearchType(type.get(), queryParameterValue, null, null,
+								ReferenceSearchType.TYPE_AND_ID);
+					}
+					else
+					{
+						String[] splitAtSlash = queryParameterValue.split("/");
+
+						if (splitAtSlash.length == 2)
+						{
+							if (type.get().equals(splitAtSlash[0]))
+							{
+								return new ReferenceValueAndSearchType(type.get(), splitAtSlash[1], null, null,
+										ReferenceSearchType.TYPE_AND_RESOURCE_NAME_AND_ID);
+							}
+							else
+							{
+								errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+										parameterName, queryParameterValue, "Inconsistent target resource type name "
+												+ type.get() + " vs. " + splitAtSlash[0]));
+								return null;
+							}
+						}
+						else
+						{
+							errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+									parameterName, queryParameterValue,
+									"Unsupported reference " + queryParameterValue + " not 'type/id'"));
+							return null;
+						}
+					}
+				}
+				else
+				{
+					errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+							parameterName, queryParameterValue, "Unsupported target resource type in "
+									+ queryParameterName + " not one of " + targetResourceTypeNames));
+					return null;
+				}
+			}
 		}
 	}
 
 	private final Class<R> resourceType;
-	private final String resourceTypeName;
 	private final List<String> targetResourceTypeNames;
-
-	private final List<SearchQueryIncludeParameter> includeParameters = new ArrayList<>();
 
 	protected ReferenceValueAndSearchType valueAndType;
 
-	public AbstractReferenceParameter(Class<R> resourceType, String resourceTypeName, String parameterName,
-			String... targetResourceTypeNames)
+	public AbstractReferenceParameter(Class<R> resourceType, String parameterName, String... targetResourceTypeNames)
 	{
 		super(parameterName);
 
 		this.resourceType = resourceType;
-		this.resourceTypeName = resourceTypeName;
 		this.targetResourceTypeNames = Arrays.asList(targetResourceTypeNames);
 	}
 
 	@Override
-	protected Stream<String> getModifiedParameterNames()
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		return Stream.of(getParameterName() + PARAMETER_NAME_IDENTIFIER_MODIFIER);
-	}
-
-	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
-	{
-		valueAndType = ReferenceValueAndSearchType
-				.fromParamValue(targetResourceTypeNames, parameterName, queryParameters, this::addError).orElse(null);
-	}
-
-	@Override
-	protected void configureIncludeParameter(Map<String, List<String>> queryParameters)
-	{
-		List<IncludeParts> includeParts = getIncludeParts(queryParameters);
-
-		for (IncludeParts ip : includeParts)
-		{
-			String includeSql = getIncludeSql(ip);
-			if (includeSql != null)
-				includeParameters.add(new SearchQueryIncludeParameter(includeSql, ip,
-						(resource, connection) -> modifyIncludeResource(ip, resource, connection)));
-		}
-	}
-
-	private List<IncludeParts> getIncludeParts(Map<String, List<String>> queryParameters)
-	{
-		List<String> includeParameterValues = queryParameters.getOrDefault(SearchQuery.PARAMETER_INCLUDE,
-				Collections.emptyList());
-
-		List<IncludeParts> includeParts = includeParameterValues.stream().map(IncludeParts::fromString)
-				.filter(p -> resourceTypeName.equals(p.getSourceResourceTypeName())
-						&& parameterName.equals(p.getSearchParameterName())
-						&& ((targetResourceTypeNames.size() == 1 && p.getTargetResourceTypeName() == null)
-								|| targetResourceTypeNames.contains(p.getTargetResourceTypeName())))
-				.collect(Collectors.toList());
-
-		return includeParts;
+		valueAndType = ReferenceValueAndSearchType.fromParamValue(errors, targetResourceTypeNames, parameterName,
+				queryParameterName, queryParameterValue);
 	}
 
 	@Override
@@ -237,63 +201,40 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterName()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-				bundleUri.replaceQueryParam(parameterName, valueAndType.id);
-				break;
-			case URL:
-				bundleUri.replaceQueryParam(parameterName, valueAndType.url);
-				break;
-			case RESOURCE_NAME_AND_ID:
-				bundleUri.replaceQueryParam(parameterName, valueAndType.resourceName + "/" + valueAndType.id);
-				break;
-
-			case TYPE_AND_ID:
-				bundleUri.replaceQueryParam(parameterName + ":" + valueAndType.resourceName, valueAndType.id);
-				break;
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				bundleUri.replaceQueryParam(parameterName + ":" + valueAndType.resourceName,
-						valueAndType.resourceName + "/" + valueAndType.id);
-				break;
-
-			case IDENTIFIER:
-			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-						bundleUri.replaceQueryParam(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER,
-								valueAndType.identifier.codeValue);
-						break;
-
-					case CODE_AND_SYSTEM:
-						bundleUri.replaceQueryParam(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER,
-								valueAndType.identifier.systemValue + "|" + valueAndType.identifier.codeValue);
-						break;
-
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						bundleUri.replaceQueryParam(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER,
-								"|" + valueAndType.identifier.codeValue);
-						break;
-
-					case SYSTEM:
-						bundleUri.replaceQueryParam(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER,
-								valueAndType.identifier.systemValue + "|");
-						break;
-				}
-			}
-		}
+			case ID, URL, RESOURCE_NAME_AND_ID -> parameterName;
+			case TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID -> parameterName + ":" + valueAndType.resourceName;
+			case IDENTIFIER -> parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER;
+			default -> throw new IllegalArgumentException(
+					"Unexpected " + ReferenceSearchType.class.getName() + " value: " + valueAndType.type);
+		};
 	}
 
 	@Override
-	public List<SearchQueryIncludeParameter> getIncludeParameters()
+	public String getBundleUriQueryParameterValue()
 	{
-		return Collections.unmodifiableList(includeParameters);
+		return switch (valueAndType.type)
+		{
+			case ID, TYPE_AND_ID -> valueAndType.id;
+			case URL -> valueAndType.url;
+			case RESOURCE_NAME_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				valueAndType.resourceName + "/" + valueAndType.id;
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
+			{
+				case CODE -> valueAndType.identifier.codeValue;
+				case CODE_AND_SYSTEM -> valueAndType.identifier.systemValue + "|" + valueAndType.identifier.codeValue;
+				case CODE_AND_NO_SYSTEM_PROPERTY -> "|" + valueAndType.identifier.codeValue;
+				case SYSTEM -> valueAndType.identifier.systemValue + "|";
+				default -> throw new IllegalArgumentException(
+						"Unexpected " + TokenSearchType.class.getName() + " value: " + valueAndType.identifier.type);
+			};
+			default -> throw new IllegalArgumentException(
+					"Unexpected " + ReferenceSearchType.class.getName() + " value: " + valueAndType.type);
+		};
 	}
-
-	protected abstract String getIncludeSql(IncludeParts includeParts);
 
 	@Override
 	public void resolveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
@@ -303,6 +244,22 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	}
 
 	protected abstract void doResolveReferencesForMatching(R resource, DaoProvider daoProvider) throws SQLException;
+
+	@Override
+	public SearchQueryIncludeParameterConfiguration configureInclude(List<? super SearchQueryParameterError> errors,
+			String queryParameterIncludeValue)
+	{
+		IncludeParts includeParts = IncludeParts.fromString(queryParameterIncludeValue);
+		String includeSql = getIncludeSql(includeParts);
+
+		if (includeSql != null)
+			return new SearchQueryIncludeParameterConfiguration(includeSql, includeParts,
+					(resource, connection) -> modifyIncludeResource(includeParts, resource, connection));
+		else
+			return null;
+	}
+
+	protected abstract String getIncludeSql(IncludeParts includeParts);
 
 	/**
 	 * Use this method to modify the include resources. This method can be used if the resources returned by the include

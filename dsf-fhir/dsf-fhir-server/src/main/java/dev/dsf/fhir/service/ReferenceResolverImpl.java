@@ -340,8 +340,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, 1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
 		{
 			String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
@@ -607,8 +606,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, 1, 1);
 		query.configureParameters(queryParameters);
 
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
+		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
 			return Optional
 					.of(responseGenerator.badReference(logicalNotConditional, bundleIndex, resource, resourceReference,

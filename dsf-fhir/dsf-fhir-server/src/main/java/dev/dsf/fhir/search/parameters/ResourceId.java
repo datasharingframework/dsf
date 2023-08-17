@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,7 +17,6 @@ import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.STRING, documentation = "Logical id of this resource")
 public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
@@ -36,37 +34,29 @@ public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		String firstValue = getFirst(queryParameters, PARAMETER_NAME);
-
-		if (firstValue == null)
-			return; // parameter not defined
-
-		id = toId(firstValue, queryParameters.get(PARAMETER_NAME));
+		id = toId(errors, queryParameterValue);
 	}
 
-	private UUID toId(String firstValue, List<String> values)
+	private UUID toId(List<? super SearchQueryParameterError> errors, String value)
 	{
-		if (values != null && values.size() > 1)
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-					PARAMETER_NAME, values));
-
-		if (firstValue.isBlank())
+		if (value.isBlank())
 		{
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, PARAMETER_NAME,
-					values));
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, PARAMETER_NAME,
+					value));
 			return null;
 		}
 
 		try
 		{
-			return UUID.fromString(firstValue);
+			return UUID.fromString(value);
 		}
 		catch (IllegalArgumentException e)
 		{
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, PARAMETER_NAME,
-					values, e));
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, PARAMETER_NAME,
+					value, e));
 			return null;
 		}
 	}
@@ -115,9 +105,15 @@ public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterName()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, id.toString());
+		return PARAMETER_NAME;
+	}
+
+	@Override
+	public String getBundleUriQueryParameterValue()
+	{
+		return id.toString();
 	}
 
 	@Override

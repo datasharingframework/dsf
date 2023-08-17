@@ -7,9 +7,11 @@ import dev.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 
 public class AtParameter extends AbstractDateTimeParameter<DomainResource>
 {
+	public static final String PARAMETER_NAME = "_at";
+
 	public AtParameter()
 	{
-		super("_at", "last_updated");
+		super(PARAMETER_NAME, "last_updated");
 	}
 
 	@Override

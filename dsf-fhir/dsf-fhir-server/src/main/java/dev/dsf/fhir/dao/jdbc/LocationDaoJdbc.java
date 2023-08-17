@@ -1,5 +1,8 @@
 package dev.dsf.fhir.dao.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Location;
@@ -14,7 +17,9 @@ public class LocationDaoJdbc extends AbstractResourceDaoJdbc<Location> implement
 	public LocationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Location.class, "locations", "location",
-				"location_id", LocationIdentityFilter::new, with(LocationIdentifier::new), with());
+				"location_id", LocationIdentityFilter::new, Arrays.asList(factory(LocationIdentifier.PARAMETER_NAME,
+						LocationIdentifier::new, LocationIdentifier.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

@@ -71,17 +71,17 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 
 		out.write("<fieldset id=\"form-fieldset\" " + (completed ? "disabled=\"disabled\"" : "") + ">\n");
 
-		Map<String, Integer> elementIdIndexMap = new HashMap<>();
+		Map<String, Integer> elemenIndexMap = new HashMap<>();
 		for (QuestionnaireResponse.QuestionnaireResponseItemComponent item : questionnaireResponse.getItem())
 		{
-			writeRow(item, elementIdIndexMap, completed, out);
+			writeRow(item, elemenIndexMap, completed, out);
 		}
 
 		if (QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(questionnaireResponse.getStatus()))
 		{
-			out.write("<div class=\"row row-submit\" id=\"submit-row\">\n");
+			out.write("<div class=\"row row-submit\" name=\"submit-row\">\n");
 			out.write(
-					"<button type=\"button\" id=\"submit\" class=\"submit\" onclick=\"completeQuestionnaireResponse();\">Submit</button>\n");
+					"<button type=\"button\" name=\"submit\" class=\"submit\" onclick=\"completeQuestionnaireResponse();\">Submit</button>\n");
 			out.write("</div>\n");
 		}
 
@@ -131,7 +131,7 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 	}
 
 	private void writeRow(QuestionnaireResponse.QuestionnaireResponseItemComponent item,
-			Map<String, Integer> elementIdIndexMap, boolean completed, OutputStreamWriter out) throws IOException
+			Map<String, Integer> elemenIndexMap, boolean completed, OutputStreamWriter out) throws IOException
 	{
 		String linkId = item.getLinkId();
 		String text = item.getText();
@@ -139,7 +139,7 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 		boolean writable = !completed;
 
 		if (item.hasAnswer())
-			writeInputRow(item.getAnswerFirstRep().getValue(), Collections.emptyList(), linkId, elementIdIndexMap, text,
+			writeInputRow(item.getAnswerFirstRep().getValue(), Collections.emptyList(), linkId, elemenIndexMap, text,
 					display, writable, out);
 		else
 			writeDisplayRow(text, linkId, display, out);

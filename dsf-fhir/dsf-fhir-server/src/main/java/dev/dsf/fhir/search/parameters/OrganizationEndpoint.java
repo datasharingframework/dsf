@@ -4,6 +4,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -27,13 +28,19 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = OrganizationEndpoint.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-endpoint", type = SearchParamType.REFERENCE, documentation = "Technical endpoints providing access to services operated for the organization")
 public class OrganizationEndpoint extends AbstractReferenceParameter<Organization>
 {
-	private static final String RESOURCE_TYPE_NAME = "Organization";
+	public static final String RESOURCE_TYPE_NAME = "Organization";
 	public static final String PARAMETER_NAME = "endpoint";
-	private static final String TARGET_RESOURCE_TYPE_NAME = "Endpoint";
+	public static final String TARGET_RESOURCE_TYPE_NAME = "Endpoint";
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return List.of(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
+	}
 
 	public OrganizationEndpoint()
 	{
-		super(Organization.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(Organization.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override

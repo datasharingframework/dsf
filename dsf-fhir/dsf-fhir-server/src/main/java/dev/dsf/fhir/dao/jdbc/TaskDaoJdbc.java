@@ -1,5 +1,8 @@
 package dev.dsf.fhir.dao.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Task;
@@ -19,8 +22,13 @@ public class TaskDaoJdbc extends AbstractResourceDaoJdbc<Task> implements TaskDa
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Task.class, "tasks", "task", "task_id",
 				TaskIdentityFilter::new,
-				with(TaskAuthoredOn::new, TaskIdentifier::new, TaskModified::new, TaskRequester::new, TaskStatus::new),
-				with());
+				Arrays.asList(factory(TaskAuthoredOn.PARAMETER_NAME, TaskAuthoredOn::new),
+						factory(TaskIdentifier.PARAMETER_NAME, TaskIdentifier::new, TaskIdentifier.getNameModifiers()),
+						factory(TaskModified.PARAMETER_NAME, TaskModified::new),
+						factory(TaskRequester.PARAMETER_NAME, TaskRequester::new, TaskRequester.getNameModifiers(),
+								TaskRequester::new, TaskRequester.getIncludeParameterValues()),
+						factory(TaskStatus.PARAMETER_NAME, TaskStatus::new, TaskStatus.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

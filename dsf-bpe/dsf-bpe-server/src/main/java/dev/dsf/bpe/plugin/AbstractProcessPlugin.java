@@ -1108,8 +1108,6 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 	private boolean isValid(NamingSystem resource, String file)
 	{
 		boolean nameOk = resource.hasName();
-		boolean versionDefined = resource.hasVersion();
-		boolean versionOk = versionDefined && resource.getVersion().equals(getDefinitionResourceVersion());
 
 		if (!nameOk)
 		{
@@ -1117,18 +1115,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 					getDefinitionName(), getDefinitionVersion());
 		}
 
-		if (!versionDefined)
-		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: NamingSystem.version empty", file,
-					getDefinitionName(), getDefinitionVersion());
-		}
-		else if (!versionOk)
-		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: NamingSystem.version not equal to {}",
-					file, getDefinitionName(), getDefinitionVersion(), getDefinitionResourceVersion());
-		}
-
-		return nameOk && versionOk;
+		return nameOk;
 	}
 
 	private boolean isValid(Questionnaire resource, String file)

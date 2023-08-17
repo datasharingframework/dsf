@@ -4,6 +4,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -21,13 +22,19 @@ import dev.dsf.fhir.search.parameters.basic.AbstractCanonicalReferenceParameter;
 @SearchParameterDefinition(name = QuestionnaireResponseQuestionnaire.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/QuestionnaireResponse-questionnaire", type = SearchParamType.REFERENCE, documentation = "The questionnaire the answers are provided for")
 public class QuestionnaireResponseQuestionnaire extends AbstractCanonicalReferenceParameter<QuestionnaireResponse>
 {
-	private static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
+	public static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
 	public static final String PARAMETER_NAME = "questionnaire";
-	private static final String TARGET_RESOURCE_TYPE_NAME = "Questionnaire";
+	public static final String TARGET_RESOURCE_TYPE_NAME = "Questionnaire";
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return List.of(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
+	}
 
 	public QuestionnaireResponseQuestionnaire()
 	{
-		super(QuestionnaireResponse.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(QuestionnaireResponse.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override

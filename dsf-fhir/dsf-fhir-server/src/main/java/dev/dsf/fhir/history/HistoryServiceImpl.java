@@ -1,8 +1,10 @@
 package dev.dsf.fhir.history;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -20,6 +22,7 @@ import dev.dsf.fhir.history.filter.HistoryIdentityFilterFactory;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryParameter;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import jakarta.ws.rs.WebApplicationException;
@@ -92,20 +95,32 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 
 		PageAndCount pageAndCount = new PageAndCount(effectivePage, effectiveCount);
 
-		AtParameter atParameter = new AtParameter();
-		atParameter.configure(queryParameters);
+		List<AtParameter> atParameters = new ArrayList<>();
 		SinceParameter sinceParameter = new SinceParameter();
-		sinceParameter.configure(queryParameters);
+
+		List<SearchQueryParameterError> errors = new ArrayList<>();
+
+		List<String> atValues = queryParameters.getOrDefault(AtParameter.PARAMETER_NAME, Collections.emptyList());
+		atValues.stream().filter(v -> v != null && !v.isBlank()).forEach(atValue ->
+		{
+			AtParameter atParameter = new AtParameter();
+			atParameters.add(atParameter);
+			atParameter.configure(errors, AtParameter.PARAMETER_NAME, atValue);
+		});
+
+		String sinceValue = queryParameters.getFirst(SinceParameter.PARAMETER_NAME);
+		if (sinceValue != null && !sinceValue.isBlank())
+			sinceParameter.configure(errors, SinceParameter.PARAMETER_NAME, sinceValue);
 
 		String path = null;
 		History history;
 		if (resource == null && id == null)
 			history = exceptionHandler.handleSqlException(() -> historyDao.readHistory(
-					historyUserFilterFactory.getIdentityFilters(identity), pageAndCount, atParameter, sinceParameter));
+					historyUserFilterFactory.getIdentityFilters(identity), pageAndCount, atParameters, sinceParameter));
 		else if (resource != null && id != null)
 		{
 			history = exceptionHandler.handleSqlException(() -> historyDao.readHistory(
-					historyUserFilterFactory.getIdentityFilter(identity, resource), pageAndCount, atParameter,
+					historyUserFilterFactory.getIdentityFilter(identity, resource), pageAndCount, atParameters,
 					sinceParameter, resource, parameterConverter.toUuid(getResourceTypeName(resource), id)));
 			path = resource.getAnnotation(ResourceDef.class).name();
 		}
@@ -113,15 +128,11 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		{
 			history = exceptionHandler.handleSqlException(
 					() -> historyDao.readHistory(historyUserFilterFactory.getIdentityFilter(identity, resource),
-							pageAndCount, atParameter, sinceParameter, resource));
+							pageAndCount, atParameters, sinceParameter, resource));
 			path = resource.getAnnotation(ResourceDef.class).name();
 		}
 		else
 			throw new WebApplicationException();
-
-		List<SearchQueryParameterError> errors = new ArrayList<>();
-		errors.addAll(atParameter.getErrors());
-		errors.addAll(sinceParameter.getErrors());
 
 		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(parameterConverter.getPreferHandling(headers)))
 			throw new WebApplicationException(
@@ -139,14 +150,25 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 			bundleUri = bundleUri.path(id);
 
 		bundleUri = bundleUri.path("_history");
-		atParameter.modifyBundleUri(bundleUri);
-		sinceParameter.modifyBundleUri(bundleUri);
+		bundleUri = configureBundleUri(bundleUri, atParameters, sinceParameter);
 
 		Bundle bundle = responseGenerator.createHistoryBundle(history, errors, bundleUri, format, pretty, summaryMode);
 		// clean literal references from bundle entries
 		bundle.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
 				.forEach(referenceCleaner::cleanLiteralReferences);
 		return bundle;
+	}
+
+	private UriBuilder configureBundleUri(UriBuilder bundleUri, List<AtParameter> atParameters,
+			SinceParameter sinceParameter)
+	{
+		Objects.requireNonNull(bundleUri, "bundleUri");
+
+		Stream.concat(atParameters.stream(), Stream.of(sinceParameter)).filter(SearchQueryParameter::isDefined)
+				.forEach(p -> bundleUri.replaceQueryParam(p.getBundleUriQueryParameterName(),
+						p.getBundleUriQueryParameterValue()));
+
+		return bundleUri;
 	}
 
 	private String getResourceTypeName(Class<? extends Resource> resource)

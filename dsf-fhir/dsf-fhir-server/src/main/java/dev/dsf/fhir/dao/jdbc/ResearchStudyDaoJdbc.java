@@ -1,5 +1,8 @@
 package dev.dsf.fhir.dao.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.ResearchStudy;
@@ -17,9 +20,18 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, ResearchStudy.class, "research_studies",
 				"research_study", "research_study_id", ResearchStudyIdentityFilter::new,
-				with(ResearchStudyEnrollment::new, ResearchStudyIdentifier::new,
-						ResearchStudyPrincipalInvestigator::new),
-				with());
+				Arrays.asList(
+						factory(ResearchStudyEnrollment.PARAMETER_NAME, ResearchStudyEnrollment::new,
+								ResearchStudyEnrollment.getNameModifiers(), ResearchStudyEnrollment::new,
+								ResearchStudyEnrollment.getIncludeParameterValues()),
+						factory(ResearchStudyIdentifier.PARAMETER_NAME, ResearchStudyIdentifier::new,
+								ResearchStudyIdentifier.getNameModifiers()),
+						factory(ResearchStudyPrincipalInvestigator.PARAMETER_NAME,
+								ResearchStudyPrincipalInvestigator::new,
+								ResearchStudyPrincipalInvestigator.getNameModifiers(),
+								ResearchStudyPrincipalInvestigator::new,
+								ResearchStudyPrincipalInvestigator.getIncludeParameterValues())),
+				Collections.emptyList());
 	}
 
 	@Override

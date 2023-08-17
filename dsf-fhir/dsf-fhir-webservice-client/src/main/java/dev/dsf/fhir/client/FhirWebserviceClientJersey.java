@@ -77,12 +77,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
 
 	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
-			boolean logRequests, ObjectMapper objectMapper, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
+			ObjectMapper objectMapper, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
+			int connectTimeout, int readTimeout, boolean logRequests, String userAgentValue, FhirContext fhirContext,
+			ReferenceCleaner referenceCleaner)
 	{
-		super(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
-				connectTimeout, readTimeout, objectMapper, Collections.singleton(new FhirAdapter(fhirContext)),
-				logRequests);
+		super(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper,
+				Collections.singleton(new FhirAdapter(fhirContext)), proxySchemeHostPort, proxyUserName, proxyPassword,
+				connectTimeout, readTimeout, logRequests, userAgentValue);
 
 		this.referenceCleaner = referenceCleaner;
 

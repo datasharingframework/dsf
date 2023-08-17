@@ -15,8 +15,8 @@ fieldset#form-fieldset {
 
 .row {
     border-radius: 5px;
-    padding: 0 15px 15px 15px;
-    margin-bottom: 10px;
+    padding: 0 1em 1em 1em;
+    margin-bottom: 0.7em;
     background-color: #f2f2f2;
 }
 
@@ -80,7 +80,7 @@ fieldset#form-fieldset {
 }
 
 .info-color-stopped-failed {
-   background-color: #9858b;
+   background-color: #ffb3b3;
    color: #761137;
 }
 
@@ -178,13 +178,6 @@ label {
     font-weight: regular;
 }
 
-.row-label {
-    padding: 12px 12px 6px 6px;
-    font-weight: bold;
-    font-size: small;
-}
-
-
 label.radio {
     padding: 5px 12px 5px 0;
     font-weight: 100;
@@ -196,6 +189,7 @@ input[type=radio] {
 
 input[type=text], input[type=url], select, textarea {
     width: 100%;
+    min-width: 200px;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -205,8 +199,8 @@ input[type=text], input[type=url], select, textarea {
 }
 
 input[type=date], input[type=time], input[type=datetime-local], input[type=number] {
-    width: auto;
-    min-width: 250px;
+    width: 100%;
+    min-width: 200px;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -215,7 +209,7 @@ input[type=date], input[type=time], input[type=datetime-local], input[type=numbe
     display: block;
 }
 
-input.identifier-coding-value {
+input.identifier-coding-code {
     margin-top: 6px;
 }
 
@@ -291,4 +285,67 @@ button.submit[disabled] {
     border-radius: 50%;
     -webkit-animation: spin .8s linear infinite;
     animation: spin .8s linear infinite;
+}
+
+.cardinalities {
+    font-weight: normal;
+    font-size: x-small;
+    color: gray;
+}
+
+.row-label {
+    padding: 12px 0 6px 6px;
+    font-weight: bold;
+    font-size: small;
+    position: relative;
+}
+
+.plus-minus-icon {
+    position: absolute;
+    bottom: 0.2em;
+    right: 0.1em;
+    cursor: pointer;
+}
+
+.plus-minus-icon:hover > svg > path {
+	fill: #326F95;
+}
+
+.plus-minus-icon > svg > path {
+    fill: #aaa;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: row;
+}
+
+.input-group-svg {
+    cursor: pointer;
+    align-self: center;
+    margin-left: 0.46em;
+    rotate: 180deg;
+}
+
+.input-group-svg > path {
+    fill: #aaa;
+}
+
+.input-group-svg:hover > path {
+	fill: #326F95;
+}
+
+input[type=number] {
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    -o-appearance: textfield;
+    appearance: textfield;
+}
+
+::placeholder {
+  color: #ddd;
+}
+
+::-ms-input-placeholder {
+  color: #ddd;
 }
