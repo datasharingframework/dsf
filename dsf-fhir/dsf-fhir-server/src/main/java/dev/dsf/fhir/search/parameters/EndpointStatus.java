@@ -35,6 +35,8 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
 			String queryParameterValue)
 	{
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
+
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
 			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
