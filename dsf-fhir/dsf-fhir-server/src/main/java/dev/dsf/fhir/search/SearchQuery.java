@@ -293,7 +293,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		{
 			if (value != null && !value.isBlank())
 			{
-				SearchQueryParameterFactory<R> sortParameterFactory = searchParameterFactoriesByParameterName
+				SearchQueryParameterFactory<R> sortParameterFactory = searchParameterFactoriesBySortParameterName
 						.get(value);
 				if (sortParameterFactory != null)
 				{
