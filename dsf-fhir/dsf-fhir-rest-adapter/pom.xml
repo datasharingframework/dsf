@@ -14,10 +14,6 @@
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-auth</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-common</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
