@@ -2,6 +2,7 @@ package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -32,42 +34,47 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 	}
 
 	@Override
-	public void writeHtml(String basePath, Task task, OutputStreamWriter out) throws IOException
+	public boolean isResourceSupported(String basePath, URI resourceUri, Resource resource)
+	{
+		return resource != null && resource instanceof Task;
+	}
+
+	@Override
+	public void writeHtml(String basePath, URI resourceUri, Task task, OutputStreamWriter out) throws IOException
 	{
 		boolean draft = Task.TaskStatus.DRAFT.equals(task.getStatus());
 
 		out.write("<div id=\"spinner\" class=\"spinner spinner-disabled\"></div>");
-		out.write("<form>\n");
-		out.write("<div class=\"row row-info " + getColorClass(task.getStatus(), ELEMENT_TYPE_ROW) + "\">\n");
+		out.write("<form status=\"" + (task.getStatus() == null ? "" : task.getStatus().toCode()) + "\">\n");
+		out.write("<div class=\"row row-info\">\n");
 
 		out.write("<div>");
 		out.write("<svg class=\"info-icon\" id=\"info-icon\" height=\"0.3em\" viewBox=\"0 0 512 512\">");
 		out.write("<title>Info</title>\n");
-		out.write("<path class=\"" + getColorClass(task.getStatus(), ELEMENT_TYPE_PATH)
-				+ "\" d=\"M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z\"/>");
+		out.write(
+				"<path d=\"M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z\"/>");
 		out.write("</svg>");
 		out.write("</div>\n");
 
-		String[] taskCanonicalSplit = task.getInstantiatesCanonical().split("\\|");
-		String href = basePath + "ActivityDefinition?url=" + taskCanonicalSplit[0] + "&version="
-				+ taskCanonicalSplit[1];
-
 		out.write("<div>");
-		out.write("<p>\n");
-		out.write("This Task resource " + (draft ? "can be used" : "was used")
-				+ " to instantiate the following process:");
-		out.write("</p>\n");
 		out.write("<ul class=\"info-list\">\n");
-		out.write("<li><b>Process URL: <a class=\"info-link info-link-task "
-				+ getColorClass(task.getStatus(), ELEMENT_TYPE_LINK) + "\" href=\"" + href + "\">"
-				+ taskCanonicalSplit[0] + "</a></b></li>\n");
-		out.write("<li><b>Process Version: <a class=\"info-link info-link-task "
-				+ getColorClass(task.getStatus(), ELEMENT_TYPE_LINK) + "\" href=\"" + href + "\">"
-				+ taskCanonicalSplit[1] + "</a></b></li>\n");
-		out.write("<li><b>Task Profile:</b> "
-				+ task.getMeta().getProfile().stream().map(CanonicalType::getValue).collect(Collectors.joining(", "))
-				+ "</li>\n");
-		out.write("<li><b>Task Status:</b> " + task.getStatus().toCode() + "</li>\n");
+		out.write("<li><b>ID / Version:</b> " + (task.getIdElement() == null ? "" : task.getIdElement().getIdPart())
+				+ " / " + (task.getIdElement() == null ? "" : task.getIdElement().getVersionIdPart()) + "</li>\n");
+		out.write("<li><b>Last Updated:</b> " + (task.getMeta().getLastUpdated() == null ? ""
+				: DATE_TIME_DISPLAY_FORMAT.format(task.getMeta().getLastUpdated())) + "</li>\n");
+		out.write("<li><b>Status:</b> " + (task.getStatus() == null ? "" : task.getStatus().toCode()) + "</li>\n");
+		out.write("<li><b>Process:</b> <a href=\"" + basePath + "ActivityDefinition?url="
+				+ (task.getInstantiatesCanonical() == null ? "" : task.getInstantiatesCanonical()) + "\">"
+				+ (task.getInstantiatesCanonical() == null ? ""
+						: task.getInstantiatesCanonical().replaceAll("\\|", " | "))
+				+ "</a></li>\n");
+		out.write(
+				"<li><b>Task Profile:</b> "
+						+ task.getMeta().getProfile().stream().map(CanonicalType::getValue)
+								.map(v -> "<a href=\"" + basePath + "StructureDefinition?url=" + v + "\">"
+										+ v.replaceAll("\\|", " | ") + "</a>")
+								.collect(Collectors.joining(", "))
+						+ "</li>\n");
 		getInput(task, isMessageName()).ifPresent(m -> silentWrite(out, "<li><b>Message-Name:</b> " + m + "</li>\n"));
 		getInput(task, isBusinessKey()).ifPresent(k -> silentWrite(out, "<li><b>Business-Key:</b> " + k + "</li>\n"));
 		getInput(task, isCorrelationKey())
@@ -76,17 +83,17 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		out.write("</div>\n");
 		out.write("</div>\n");
 
-		out.write("<fieldset id=\"form-fieldset\" " + (draft ? "" : "disabled=\"disabled\"") + ">\n");
+		out.write("<fieldset id=\"form-fieldset\"" + (draft ? "" : " disabled") + ">\n");
 
 		out.write("<div class=\"row\" name=\"requester-row\">\n");
 		out.write("<label class=\"row-label\">requester</label>\n");
-		out.write("<input type=\"text\" name=\"requester\" disabled=\"disabled\" value=\""
+		out.write("<input type=\"text\" name=\"requester\" disabled value=\""
 				+ task.getRequester().getIdentifier().getValue() + "\"></input>\n");
 		out.write("</div>\n");
 
 		out.write("<div class=\"row\" name=\"recipient-row\">\n");
 		out.write("<label class=\"row-label\">recipient</label>\n");
-		out.write("<input type=\"text\" name=\"recipient\" disabled=\"disabled\" value=\""
+		out.write("<input type=\"text\" name=\"recipient\" disabled value=\""
 				+ task.getRestriction().getRecipient().stream().findFirst().get().getIdentifier().getValue()
 				+ "\"></input>\n");
 		out.write("</div>\n");
@@ -182,64 +189,10 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 						&& CODESYSTEM_BPMN_MESSAGE_CORRELATION_KEY.equals(c.getCode()));
 	}
 
-	private String getColorClass(Task.TaskStatus status, String elementType)
-	{
-		switch (status)
-		{
-			case DRAFT:
-			case REQUESTED:
-			{
-				if (ELEMENT_TYPE_ROW.equals(elementType))
-					return "info-color-draft-requested";
-				else if (ELEMENT_TYPE_LINK.equals(elementType))
-					return "info-link-draft-requested";
-				else if (ELEMENT_TYPE_PATH.equals(elementType))
-					return "info-path-draft-requested";
-			}
-			case INPROGRESS:
-			{
-				if (ELEMENT_TYPE_ROW.equals(elementType))
-					return "info-color-progress";
-				else if (ELEMENT_TYPE_LINK.equals(elementType))
-					return "info-link-progress";
-				else if (ELEMENT_TYPE_PATH.equals(elementType))
-					return "info-path-progress";
-			}
-			case COMPLETED:
-			{
-				if (ELEMENT_TYPE_ROW.equals(elementType))
-					return "info-color-completed";
-				else if (ELEMENT_TYPE_LINK.equals(elementType))
-					return "info-link-completed";
-				else if (ELEMENT_TYPE_PATH.equals(elementType))
-					return "info-path-completed";
-			}
-			case ENTEREDINERROR:
-			case REJECTED:
-			case CANCELLED:
-			case FAILED:
-			{
-				if (ELEMENT_TYPE_ROW.equals(elementType))
-					return "info-color-stopped-failed";
-				else if (ELEMENT_TYPE_LINK.equals(elementType))
-					return "info-link-stopped-failed";
-				else if (ELEMENT_TYPE_PATH.equals(elementType))
-					return "info-path-stopped-failed";
-			}
-			case RECEIVED:
-			case ACCEPTED:
-			case READY:
-			case ONHOLD:
-			case NULL:
-			default:
-				return "";
-		}
-	}
-
 	private void writeInput(Task.ParameterComponent input, Map<String, Integer> elemenIndexMap, boolean draft,
 			OutputStreamWriter out) throws IOException
 	{
-		String typeCode = getTypeCode(input);
+		String typeCode = getCode(input.getType());
 		boolean display = display(draft, typeCode);
 
 		if (input.hasValue())
@@ -252,7 +205,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 	private void writeOutput(Task.TaskOutputComponent output, Map<String, Integer> elemenIndexMap,
 			OutputStreamWriter out) throws IOException
 	{
-		String typeCode = getTypeCode(output);
+		String typeCode = getCode(output.getType());
 		if (output.hasValue())
 		{
 			writeInputRow(output.getValue(), output.getExtension(), typeCode, elemenIndexMap, typeCode, true, false,
@@ -268,16 +221,6 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 					|| CODESYSTEM_BPMN_MESSAGE_CORRELATION_KEY.equals(typeCode)));
 		else
 			return true;
-	}
-
-	private String getTypeCode(Task.ParameterComponent input)
-	{
-		return getCode(input.getType());
-	}
-
-	private String getTypeCode(Task.TaskOutputComponent output)
-	{
-		return getCode(output.getType());
 	}
 
 	private String getCode(CodeableConcept codeableConcept)

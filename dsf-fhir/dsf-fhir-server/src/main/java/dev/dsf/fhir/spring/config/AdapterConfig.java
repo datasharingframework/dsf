@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.adapter.HtmlFhirAdapter;
 import dev.dsf.fhir.adapter.QuestionnaireResponseHtmlGenerator;
+import dev.dsf.fhir.adapter.SearchBundleHtmlGenerator;
 import dev.dsf.fhir.adapter.TaskHtmlGenerator;
 
 @Configuration
@@ -30,6 +31,7 @@ public class AdapterConfig
 	public HtmlFhirAdapter htmlFhirAdapter()
 	{
 		return new HtmlFhirAdapter(fhirConfig.fhirContext(), () -> propertiesConfig.getServerBaseUrl(),
-				List.of(new QuestionnaireResponseHtmlGenerator(), new TaskHtmlGenerator()));
+				List.of(new QuestionnaireResponseHtmlGenerator(), new TaskHtmlGenerator(),
+						new SearchBundleHtmlGenerator(propertiesConfig.getDefaultPageCount())));
 	}
 }

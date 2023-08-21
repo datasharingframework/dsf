@@ -14,7 +14,7 @@
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-auth</artifactId>
 		</dependency>
-				
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>

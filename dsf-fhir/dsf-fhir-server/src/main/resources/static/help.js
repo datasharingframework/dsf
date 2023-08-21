@@ -36,7 +36,7 @@ function createAndShowHelp(httpRequest) {
 				const searchParam = metadata.rest[0].resource.filter(r => r.type === resourceType[1])[0].searchParam;
 				//Resource
 				if (resourceType[1] !== undefined && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
-					createHelp(searchParam);
+					createHelp(searchParam.filter(p => !['_at', '_since'].includes(p.name)));
 				}
 				//Resource/_history
 				else if (resourceType[1] !== undefined && resourceType[2] === undefined && resourceType[3] !== undefined && resourceType[4] === undefined) {

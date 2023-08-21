@@ -2,11 +2,13 @@ package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 
 public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
@@ -22,54 +24,57 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 	}
 
 	@Override
-	public void writeHtml(String basePath, QuestionnaireResponse questionnaireResponse, OutputStreamWriter out)
-			throws IOException
+	public boolean isResourceSupported(String basePath, URI resourceUri, Resource resource)
 	{
-		boolean completed = QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED
+		return resource != null && resource instanceof QuestionnaireResponse;
+	}
+
+	@Override
+	public void writeHtml(String basePath, URI resourceUri, QuestionnaireResponse questionnaireResponse,
+			OutputStreamWriter out) throws IOException
+	{
+		final boolean completed = QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED
 				.equals(questionnaireResponse.getStatus());
 
 		out.write("<div id=\"spinner\" class=\"spinner spinner-disabled\"></div>");
-		out.write("<form>\n");
-		out.write("<div class=\"row row-info " + getColorClass(questionnaireResponse.getStatus(), ELEMENT_TYPE_ROW)
+
+		out.write("<form status=\""
+				+ (questionnaireResponse.getStatus() == null ? "" : questionnaireResponse.getStatus().toCode())
 				+ "\">\n");
 
+		out.write("<div class=\"row row-info\">\n");
 		out.write("<div>");
 		out.write("<svg class=\"info-icon\" id=\"info-icon\" height=\"0.5em\" viewBox=\"0 0 512 512\">");
 		out.write("<title>Info</title>\n");
-		out.write("<path class=\"" + getColorClass(questionnaireResponse.getStatus(), ELEMENT_TYPE_PATH)
-				+ "\" d=\"M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z\"/>");
+		out.write(
+				"<path d=\"M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z\"/>");
 		out.write("</svg>");
 		out.write("</div>\n");
-
-		String urlVersion = questionnaireResponse.getQuestionnaire();
-		String[] urlVersionSplit = urlVersion.split("\\|");
-		String href = basePath + "Questionnaire?url=" + urlVersionSplit[0] + "&version=" + urlVersionSplit[1];
-
 		out.write("<div>");
-		out.write("<p>\n");
-		out.write("This QuestionnaireResponse answers the Questionnaire:</br><b><a class=\"info-link "
-				+ getColorClass(questionnaireResponse.getStatus(), ELEMENT_TYPE_LINK) + "\" href=\"" + href + "\">"
-				+ urlVersion + "</b></a>");
-		out.write("</p>\n");
 		out.write("<ul class=\"info-list\">\n");
-		out.write("<li><b>State:</b> " + questionnaireResponse.getStatus().getDisplay() + "</li>\n");
-		out.write("<li><b>Process instance-id:</b> " + getProcessInstanceId(questionnaireResponse) + "</li>\n");
-
-		String lastUpdated = DATE_TIME_DISPLAY_FORMAT.format(questionnaireResponse.getMeta().getLastUpdated());
-		if (completed)
-		{
-			out.write("<li><b>Completion date:</b> " + lastUpdated + "</li>\n");
-		}
-		else
-		{
-			out.write("<li><b>Creation date:</b> " + lastUpdated + "</li>\n");
-		}
-
+		out.write("<li><b>ID / Version:</b> "
+				+ (questionnaireResponse.getIdElement() == null ? "" : questionnaireResponse.getIdElement().getIdPart())
+				+ " / " + (questionnaireResponse.getIdElement() == null ? ""
+						: questionnaireResponse.getIdElement().getVersionIdPart())
+				+ "</li>\n");
+		out.write("<li><b>Last Updated:</b> "
+				+ (questionnaireResponse.getMeta().getLastUpdated() == null ? ""
+						: DATE_TIME_DISPLAY_FORMAT.format(questionnaireResponse.getMeta().getLastUpdated()))
+				+ "</li>\n");
+		out.write("<li><b>Status:</b> "
+				+ (questionnaireResponse.getStatus() == null ? "" : questionnaireResponse.getStatus().toCode())
+				+ "</li>\n");
+		out.write("<li><b>Questionnaire:</b> <a href=\"" + basePath + "Questionnaire?url="
+				+ (questionnaireResponse.getQuestionnaire() == null ? "" : questionnaireResponse.getQuestionnaire())
+				+ "\">" + (questionnaireResponse.getQuestionnaire() == null ? ""
+						: questionnaireResponse.getQuestionnaire().replaceAll("\\|", " | "))
+				+ "</a></li>\n");
+		out.write("<li><b>Business-Key:</b> " + getProcessInstanceId(questionnaireResponse) + "</li>\n");
 		out.write("</ul>\n");
 		out.write("</div>\n");
 		out.write("</div>\n");
 
-		out.write("<fieldset id=\"form-fieldset\" " + (completed ? "disabled=\"disabled\"" : "") + ">\n");
+		out.write("<fieldset id=\"form-fieldset\"" + (completed ? " disabled" : "") + ">\n");
 
 		Map<String, Integer> elemenIndexMap = new HashMap<>();
 		for (QuestionnaireResponse.QuestionnaireResponseItemComponent item : questionnaireResponse.getItem())
@@ -87,39 +92,6 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 
 		out.write("</fieldset>\n");
 		out.write("</form>\n");
-	}
-
-	private String getColorClass(QuestionnaireResponse.QuestionnaireResponseStatus status, String elementType)
-	{
-		switch (status)
-		{
-			case INPROGRESS:
-				if (ELEMENT_TYPE_ROW.equals(elementType))
-					return "info-color-progress";
-				else if (ELEMENT_TYPE_LINK.equals(elementType))
-					return "info-link-progress";
-				else if (ELEMENT_TYPE_PATH.equals(elementType))
-					return "info-path-progress";
-			case COMPLETED:
-				if (ELEMENT_TYPE_ROW.equals(elementType))
-					return "info-color-completed";
-				else if (ELEMENT_TYPE_LINK.equals(elementType))
-					return "info-link-completed";
-				else if (ELEMENT_TYPE_PATH.equals(elementType))
-					return "info-path-completed";
-			case STOPPED:
-			case ENTEREDINERROR:
-				if (ELEMENT_TYPE_ROW.equals(elementType))
-					return "info-color-stopped-failed";
-				else if (ELEMENT_TYPE_LINK.equals(elementType))
-					return "info-link-stopped-failed";
-				else if (ELEMENT_TYPE_PATH.equals(elementType))
-					return "info-path-stopped-failed";
-			case AMENDED:
-			case NULL:
-			default:
-				return "";
-		}
 	}
 
 	private String getProcessInstanceId(QuestionnaireResponse questionnaireResponse)
