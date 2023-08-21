@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -140,6 +142,16 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		if (includeResources > 0)
 			out.write("<div id=\"footer\"><p style=\"font-style: italic;\">" + includeResources + " include "
 					+ (includeResources == 1 ? "resource" : "resources") + " hidden.</div>");
+
+		List<String> diagnostics = resource.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).filter(r -> r instanceof OperationOutcome)
+				.map(r -> (OperationOutcome) r).map(OperationOutcome::getIssue).flatMap(List::stream)
+				.filter(OperationOutcomeIssueComponent::hasSeverity)
+				.filter(OperationOutcomeIssueComponent::hasDiagnostics)
+				.map(i -> i.getSeverity().getDisplay() + ": " + i.getDiagnostics()).toList();
+		for (String diag : diagnostics)
+			out.write("<div id=\"footer\"><p style=\"font-style: italic;\">" + diag.replaceAll("&", "&amp;")
+					.replaceAll("\"", "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;") + "</div>");
 
 		out.write("</div>");
 	}
