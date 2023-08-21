@@ -9,6 +9,7 @@
 	--color-tab-button-background-active: #ccc;
 	--color-row-background: #f2f2f2;
 	--color-row-background-deep: #e2e2e2;
+	--color-row-background-hover: #ddd;
 	--color-input-text: #000;
 	--color-input-background: #fff;
 	--color-input-border: #ccc;
@@ -49,6 +50,7 @@
 	--color-tab-button-background-active: #888;
 	--color-row-background: #333;
 	--color-row-background-deep: #444;
+	--color-row-background-hover: #777;
 	--color-input-text: #fff;
 	--color-input-background: #181818;
 	--color-input-border: #666;
@@ -350,6 +352,10 @@ pre.lang-html {
 	padding: 1rem 0 1rem 1rem;
 	white-space: nowrap;
 	text-align: left;
+}
+
+.bundle>#list tr:hover td {
+	background-color: var(--color-row-background-hover);
 }
 
 .bundle>#list th:last-child {
