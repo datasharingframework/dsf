@@ -89,14 +89,16 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 			out.write("</a>");
 
 		out.write("</td><td style=\"text-align:center;vertical-align:top;\">");
-		int page = getPage(resourceUri);
-		int count = getCount(resourceUri);
-		int max = (int) Math.ceil((double) resource.getTotal() / count);
-		int firstResource = ((page - 1) * count) + 1;
-		int lastResource = ((page - 1) * count) + resource.getEntry().size();
-		if (page > 0 && page <= max)
+		if (resource.getEntry().size() > 0)
+		{
+			int page = getPage(resourceUri);
+			int count = getCount(resourceUri);
+			int max = (int) Math.ceil((double) resource.getTotal() / count);
+			int firstResource = ((page - 1) * count) + 1;
+			int lastResource = ((page - 1) * count) + resource.getEntry().size();
 			out.write("<span id=\"resources\">Resources " + firstResource + " - " + lastResource + " / "
 					+ resource.getTotal() + "</span><span id=\"page\">Page " + page + " / " + max + "</span>");
+		}
 		out.write("</td><td style=\"text-align:right;\">");
 
 		Optional<String> next = resource.getLink().stream().filter(l -> "next".equals(l.getRelation())).findFirst()
