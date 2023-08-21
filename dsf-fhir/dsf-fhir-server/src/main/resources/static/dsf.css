@@ -22,7 +22,7 @@
 	--color-info-background-progress: #fff7c7;
 	--color-info-text-progress: #a25b36;
 	--color-info-background-completed: #e4fde1;
-	--color-info-text-completed: #14452f;
+	--color-info-text-completed: #357a38;
 	--color-info-background-failed: #ffe1e1;
 	--color-info-text-failed: #761137;
 	--color-info-background-stopped: #ffe1e1;
@@ -34,7 +34,7 @@
 	--color-row-border-draft: #326F95;
 	--color-row-border-requested: #545454;
 	--color-row-border-progress: #a25b36;
-	--color-row-border-completed: #14452f;
+	--color-row-border-completed: #357a38;
 	--color-row-border-failed: #761137;
 	--color-row-border-stopped: #761137;
 }
