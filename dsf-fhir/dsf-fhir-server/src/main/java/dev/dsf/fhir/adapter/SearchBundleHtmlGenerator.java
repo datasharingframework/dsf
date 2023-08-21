@@ -121,13 +121,15 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 		out.write("<table id=\"list\">");
 		out.write(getHeader(resourceUri));
-		out.write(resource.getEntry().stream()
-				.filter(e -> e.hasResource() && e.hasSearch() && e.getSearch().hasMode()
-						&& SearchEntryMode.MATCH.equals(e.getSearch().getMode()))
-				.map(BundleEntryComponent::getResource)
-				.map(r -> "<tr onClick=\"window.location='" + r.getIdElement().toVersionless().getValueAsString()
-						+ "'\" title=\"Open Resource\">" + getRow(r) + "</tr>\n")
-				.collect(Collectors.joining()));
+		out.write(
+				resource.getEntry().stream()
+						.filter(e -> e.hasResource() && e.hasSearch() && e.getSearch().hasMode()
+								&& SearchEntryMode.MATCH.equals(e.getSearch().getMode()))
+						.map(BundleEntryComponent::getResource)
+						.map(r -> "<tr onClick=\"window.location='" + basePath
+								+ r.getIdElement().toVersionless().getValueAsString() + "'\" title=\"Open Resource\">"
+								+ getRow(r) + "</tr>\n")
+						.collect(Collectors.joining()));
 		out.write("</table>");
 
 		long includeResources = resource.getEntry().stream().filter(
