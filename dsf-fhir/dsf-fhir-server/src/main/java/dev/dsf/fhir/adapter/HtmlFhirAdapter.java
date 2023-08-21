@@ -155,8 +155,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				<link rel="stylesheet" type="text/css" href="${basePath}static/dsf.css">
 				<link rel="stylesheet" type="text/css" href="${basePath}static/form.css">
 				""".replace("${basePath}", basePath));
-		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
-				+ uriInfo.getPath() + "</title>\n");
+		out.write("<title>" + getTitle(uriInfo) + "</title>\n");
 		out.write("</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(htmlEnabled) + ");checkBookmarked();"
 				+ adaptFormInputsIfTask(resource) + "setUiTheme();\">\n");
@@ -268,6 +267,16 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 		out.write("</html>");
 		out.flush();
+	}
+
+	private String getTitle(UriInfo uri)
+	{
+		if (uri == null || uri.getPath() == null || uriInfo.getPath().isBlank())
+			return "DSF";
+		else if (uriInfo.getPath().endsWith("/"))
+			return "DSF: " + uriInfo.getPath().substring(0, uriInfo.getPath().length() - 1);
+		else
+			return "DSF: " + uriInfo.getPath();
 	}
 
 	private String getUrlHeading(Resource resource) throws MalformedURLException
