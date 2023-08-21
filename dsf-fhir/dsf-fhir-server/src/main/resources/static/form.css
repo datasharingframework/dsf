@@ -1,383 +1,421 @@
 form {
-    border: 1px solid #ccc;
-    padding: 20px 20px 10px 20px;
-    font-family: Epilogue, sans-serif;
+	border: 1px solid #ccc;
+	padding: 20px 20px 10px 20px;
+	font-family: Epilogue, sans-serif;
 }
 
 fieldset#form-fieldset {
-    display: block;
-    margin: 0;
-    padding: 0;
-    min-inline-size: min-content;
-    border: none;
+	display: block;
+	margin: 0;
+	padding: 0;
+	min-inline-size: min-content;
+	border: none;
 }
 
 .row {
-    border-radius: 5px;
-    padding: 0 1em 1em 1em;
-    margin-bottom: 0.7em;
-    background-color: var(--color-row-background);
+	border-radius: 5px;
+	padding: 0 1em 1em 1em;
+	margin-bottom: 0.7em;
+	background-color: var(--color-row-background);
 }
 
 .row-extension-0 {
-    margin-top: 12px;
-    padding: 0 0 12px 12px;
-    border-radius: 5px;
-    background-color: var(--color-row-background-deep);
+	margin-top: 12px;
+	padding: 0 0 12px 12px;
+	border-radius: 5px;
+	background-color: var(--color-row-background-deep);
 }
 
 .row-label-extension-no-value {
-    margin-bottom: -10px;
+	margin-bottom: -10px;
 }
 
 .row-extension {
-    padding: 10px 15px 0 15px;
+	padding: 10px 15px 0 15px;
 }
 
 .row-display {
-    padding-top: 15px;
+	padding-top: 15px;
 }
 
 .p-display {
-    margin: 0;
-    color: var(--color-input-text)
+	margin: 0;
+	color: var(--color-input-text)
 }
 
 .error {
-    background-color: var(--color-error-background);
+	background-color: var(--color-error-background);
 }
 
 .error-list-not-visible {
-    display: none;
+	display: none;
 }
 
 .error-list-visible {
-    display: block;
-    font-size: small;
-    color: var(--color-error-text);
-    padding-left: 20px;
-    margin-bottom: 0;
+	display: block;
+	font-size: small;
+	color: var(--color-error-text);
+	padding-left: 20px;
+	margin-bottom: 0;
 }
 
 .row-info {
-    display: flex;
-    padding-top: 15px;
+	display: flex;
+	padding-top: 15px;
 }
 
-.info-color-draft-requested {
-   background-color: var(--color-info-background-draft-requested);
-   color: var(--color-info-text-draft-requested);
+form[status=draft] .row-info {
+	background-color: var(--color-info-background-draft);
+	color: var(--color-info-text-draft);
 }
 
-.info-color-progress {
-    background-color: var(--color-info-background-progress);
-    color: var(--color-info-text-progress);
+form[status=requested] .row-info {
+	background-color: var(--color-info-background-requested);
+	color: var(--color-info-text-requested);
 }
 
-.info-color-completed {
-    background-color: var(--color-info-background-completed);
-    color: var(--color-info-text-completed);
+form[status=in-progress] .row-info {
+	background-color: var(--color-info-background-progress);
+	color: var(--color-info-text-progress);
 }
 
-.info-color-stopped-failed {
-    background-color: var(--color-info-background-stopped-failed);
-    color: var(--color-info-text-stopped-failed);
+form[status=completed] .row-info {
+	background-color: var(--color-info-background-completed);
+	color: var(--color-info-text-completed);
 }
 
-.info-link {
-    font-family: monospace;
-    font-size: 130%;
+form[status=failed] .row-info {
+	background-color: var(--color-info-background-failed);
+	color: var(--color-info-text-failed);
 }
 
-.info-link-task {
-    color: #326F95;
+form[status=stopped] .row-info {
+	background-color: var(--color-info-background-stopped);
+	color: var(--color-info-text-stopped);
 }
 
-.info-link-draft-requested {
-   color: var(--color-info-text-draft-requested);
+form[status=draft] .row-info .info-icon>path {
+	fill: var(--color-info-text-draft);
 }
 
-.info-link-progress {
-    color: var(--color-info-text-progress);
+form[status=requested] .row-info .info-icon>path {
+	fill: var(--color-info-text-requested);
 }
 
-.info-link-completed {
-    color: var(--color-info-text-completed);
+form[status=in-progress] .row-info .info-icon>path {
+	fill: var(--color-info-text-progress);
 }
 
-.info-link-stopped-failed {
-   color: var(--color-info-text-stopped-failed);
+form[status=completed] .row-info .info-icon>path {
+	fill: var(--color-info-text-completed);
 }
 
-.info-link:active {
-    font-family: monospace;
-    font-size: 130%;
+form[status=failed] .row-info .info-icon>path {
+	fill: var(--color-info-text-failed);
 }
 
-.info-link-draft-requested:active  {
-   color: var(--color-info-text-draft-requested);
+form[status=stopped] .row-info .info-icon>path {
+	fill: var(--color-info-text-stopped);
 }
 
-.info-link-progress:active {
-    color: var(--color-info-text-progress);
+form[status=draft] .row-info a:link,
+form[status=draft] .row-info a:visited,
+form[status=draft] .row-info a:active {
+	color: var(--color-info-text-draft);
 }
 
-.info-link-completed:active {
-    color: var(--color-info-text-completed);
+form[status=requested] .row-info a:link,
+form[status=requested] .row-info a:visited,
+form[status=requested] .row-info a:active {
+	color: var(--color-info-text-requested);
 }
 
-.info-link-stopped-failed:active {
-   color: var(--color-info-text-stopped-failed);
+form[status=in-progress] .row-info a:link,
+form[status=in-progress] .row-info a:visited,
+form[status=in-progress] .row-info a:active {
+	color: var(--color-info-text-progress);
+}
+
+form[status=completed] .row-info a:link,
+form[status=completed] .row-info a:visited,
+form[status=completed] .row-info a:active {
+	color: var(--color-info-text-completed);
+}
+
+form[status=failed] .row-info a:link,
+form[status=failed] .row-info a:visited,
+form[status=failed] .row-info a:active {
+	color: var(--color-info-text-failed);
+}
+
+form[status=stopped] .row-info a:link,
+form[status=stopped] .row-info a:visited,
+form[status=stopped] .row-info a:active {
+	color: var(--color-info-text-stopped);
+}
+
+form .row-info a:link,
+form .row-info a:visited,
+form .row-info a:active {
+	text-decoration: none;
+}
+
+form .row-info a:hover {
+	text-decoration: underline;
 }
 
 .info-icon {
-    padding-top: 15px;
-    padding-right: 15px;
-    height: 35px;
-    width: 35px;
-}
-
-.info-icon > path.info-path-draft-requested {
-    fill: var(--color-info-text-draft-requested);
-}
-
-.info-icon > path.info-path-progress {
-    fill: var(--color-info-text-progress);
-}
-
-.info-icon > path.info-path-completed {
-    fill: var(--color-info-text-completed);
-}
-
-.info-icon > path.info-path-stopped-failed {
-    fill: var(--color-info-text-stopped-failed);
+	padding-top: 15px;
+	padding-right: 15px;
+	height: 35px;
+	width: 35px;
 }
 
 .info-list {
-    padding-left: 20px;
+	padding-left: 20px;
 }
 
-.info-list > li:not(:last-child) {
-	margin-bottom: 0.3em;	
+.info-list>li:not(:last-child) {
+	margin-bottom: 0.3em;
 }
 
 .row:after {
-    content: "";
-    display: table;
-    clear: both;
+	content: "";
+	display: table;
+	clear: both;
 }
 
 .row-submit {
-    background-color: transparent;
-    padding: 0;
+	background-color: transparent;
+	padding: 0;
 }
 
 label {
-    display: block;
-    padding: 12px 12px 12px 0;
-    font-weight: regular;
+	display: block;
+	padding: 12px 12px 12px 0;
+	font-weight: regular;
 }
 
 label.radio {
-    padding: 5px 12px 5px 0;
-    font-weight: 100;
-    color: var(--color-input-text)
+	padding: 5px 12px 5px 0;
+	font-weight: 100;
+	color: var(--color-input-text)
 }
 
 input {
-  background-color: var(--color-input-background);
-  color: var(--color-input-text);
+	background-color: var(--color-input-background);
+	color: var(--color-input-text);
 }
 
 input[type=radio] {
-    margin-right: 7px;
+	margin-right: 7px;
 }
 
 input[type="radio"] {
-  border: 0.1em solid var(--color-input-radio-border);
-  border-radius: 9px;
-  height: 18px;
-  width: 18px;
-  margin-bottom: -0.2em;
-  -webkit-appearance: none;
+	border: 0.1em solid var(--color-input-radio-border);
+	border-radius: 9px;
+	height: 18px;
+	width: 18px;
+	margin-bottom: -0.2em;
+	-webkit-appearance: none;
+	appearance: none;
 }
 
-input[type="radio"][disabled], fieldset#form-fieldset[disabled] input[type="radio"] {
-  border: 1px solid var(--color-disabled-text);
+input[type="radio"][disabled],
+fieldset#form-fieldset[disabled] input[type="radio"] {
+	border: 1px solid var(--color-disabled-text);
 }
 
 input[type="radio"]:checked {
-  border: 0.1em solid var(--color-prime);
-  background-color: var(--color-prime);
-  box-shadow: inset 0 0 0 0.2em var(--color-background);
+	border: 0.1em solid var(--color-prime);
+	background-color: var(--color-prime);
+	box-shadow: inset 0 0 0 0.2em var(--color-background);
 }
 
-input[type="radio"][disabled]:checked, fieldset#form-fieldset[disabled] input[type="radio"]:checked {
-  border: 0.1em solid var(--color-disabled-text);
-  background-color: var(--color-disabled-text);
-  box-shadow: inset 0 0 0 0.2em var(--color-disabled-background);
+input[type="radio"][disabled]:checked,
+fieldset#form-fieldset[disabled] input[type="radio"]:checked {
+	border: 0.1em solid var(--color-disabled-text);
+	background-color: var(--color-disabled-text);
+	box-shadow: inset 0 0 0 0.2em var(--color-disabled-background);
 }
 
-input[disabled], fieldset#form-fieldset[disabled] input {
-   cursor: default;
-   background-color: var(--color-disabled-background);
-   color: var(--color-disabled-text);
-   border-color: rgba(118, 118, 118, 0.5);
+input[disabled],
+fieldset#form-fieldset[disabled] input {
+	cursor: default;
+	background-color: var(--color-disabled-background);
+	color: var(--color-disabled-text);
+	border-color: rgba(118, 118, 118, 0.5);
 }
 
-input[type=text], input[type=url], select, textarea {
-    width: 100%;
-    min-width: 200px;
-    padding: 12px;
-    border: 1px solid var(--color-input-border);
-    border-radius: 4px;
-    box-sizing: border-box;
-    resize: vertical;
-    display: block;
+input[type=text],
+input[type=url],
+select,
+textarea {
+	width: 100%;
+	min-width: 200px;
+	padding: 12px;
+	border: 1px solid var(--color-input-border);
+	border-radius: 4px;
+	box-sizing: border-box;
+	resize: vertical;
+	display: block;
 }
 
-input[type=date], input[type=time], input[type=datetime-local], input[type=number] {
-    width: 100%;
-    min-width: 200px;
-    padding: 12px;
-    border: 1px solid var(--color-input-border);
-    border-radius: 4px;
-    box-sizing: border-box;
-    resize: none;
-    display: block;
+input[type=date],
+input[type=time],
+input[type=datetime-local],
+input[type=number] {
+	width: 100%;
+	min-width: 200px;
+	padding: 12px;
+	border: 1px solid var(--color-input-border);
+	border-radius: 4px;
+	box-sizing: border-box;
+	resize: none;
+	display: block;
 }
 
 input[type=number] {
-    -webkit-appearance: textfield;
-    -moz-appearance: textfield;
-    -o-appearance: textfield;
-    appearance: textfield;
+	-webkit-appearance: textfield;
+	-moz-appearance: textfield;
+	-o-appearance: textfield;
+	appearance: textfield;
 }
 
 .input-group {
-    display: flex;
-    flex-direction: row;
+	display: flex;
+	flex-direction: row;
 }
 
 .input-group-svg {
-    cursor: pointer;
-    align-self: center;
-    margin-left: 0.46em;
-    rotate: 180deg;
+	cursor: pointer;
+	align-self: center;
+	margin-left: 0.46em;
+	rotate: 180deg;
 }
 
-.input-group-svg > path {
-    fill: #aaa;
+.input-group-svg>path {
+	fill: #aaa;
 }
 
-.input-group-svg:hover > path {
+.input-group-svg:hover>path {
 	fill: #326F95;
 }
 
 input.identifier-coding-code {
-    margin-top: 6px;
+	margin-top: 6px;
 }
 
 .input-output-header {
-    font-family: monospace;
-    font-size: 1.75em;
-    color: #326F95;
-    padding-left: 5px;
-    margin-bottom: 12px;
+	font-family: monospace;
+	font-size: 1.75em;
+	color: #326F95;
+	padding-left: 5px;
+	margin-bottom: 12px;
 }
 
 .invisible {
-    display: none;
+	display: none;
 }
 
 button.submit {
-    background-color: #326F95;
-    color: #fff;
-    padding: 12px 60px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    float: left;
+	background-color: #326F95;
+	color: #fff;
+	padding: 12px 60px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	float: left;
 }
 
 .spinner-enabled {
-    display: block;
+	display: block;
 }
 
 .spinner-disabled {
-    display: none;
+	display: none;
 }
 
 .spinner {
-    position: fixed;
-    width: 100%;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background-color: rgba(255,255,255,0.7);
-    z-index: 9999;
+	position: fixed;
+	width: 100%;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(255, 255, 255, 0.7);
+	z-index: 9999;
 }
 
 @-webkit-keyframes spin {
-    from { -webkit-transform: rotate(0deg); }
-    to { -webkit-transform: rotate(360deg); }
+	from {
+		-webkit-transform: rotate(0deg);
+	}
+
+	to {
+		-webkit-transform: rotate(360deg);
+	}
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .spinner::after {
-    content: '';
-    position: absolute;
-    left: 48%;
-    top: 40%;
-    width: 40px;
-    height: 40px;
-    border-style: solid;
-    border-color: #29235c;
-    border-top-color: transparent;
-    border-width: 4px;
-    border-radius: 50%;
-    -webkit-animation: spin .8s linear infinite;
-    animation: spin .8s linear infinite;
+	content: '';
+	position: absolute;
+	left: 48%;
+	top: 40%;
+	width: 40px;
+	height: 40px;
+	border-style: solid;
+	border-color: #29235c;
+	border-top-color: transparent;
+	border-width: 4px;
+	border-radius: 50%;
+	-webkit-animation: spin .8s linear infinite;
+	animation: spin .8s linear infinite;
 }
 
 .cardinalities {
-    font-weight: normal;
-    font-size: x-small;
-    color: #aaa;
+	font-weight: normal;
+	font-size: x-small;
+	color: #aaa;
 }
 
 .row-label {
-    color: var(--color-input-text);
-    padding: 12px 0 6px 6px;
-    font-weight: bold;
-    font-size: small;
-    position: relative;
+	color: var(--color-input-text);
+	padding: 12px 0 6px 6px;
+	font-weight: bold;
+	font-size: small;
+	position: relative;
 }
 
 .plus-minus-icon {
-    position: absolute;
-    bottom: 0.2em;
-    right: 0.1em;
-    cursor: pointer;
+	position: absolute;
+	bottom: 0.2em;
+	right: 0.1em;
+	cursor: pointer;
 }
 
-.plus-minus-icon:hover > svg > path {
+.plus-minus-icon:hover>svg>path {
 	fill: #326F95;
 }
 
-.plus-minus-icon > svg > path {
-    fill: #aaa;
+.plus-minus-icon>svg>path {
+	fill: #aaa;
 }
 
 ::placeholder {
-    color: var(--color-input-placeholder);
+	color: var(--color-input-placeholder);
 }
 
 ::-ms-input-placeholder {
-    color: var(--color-input-placeholder);
+	color: var(--color-input-placeholder);
 }

@@ -13,10 +13,10 @@ import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +30,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
@@ -52,7 +51,7 @@ import jakarta.ws.rs.ext.Provider;
 
 @Provider
 @Produces(MediaType.TEXT_HTML)
-public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWriter<BaseResource>
+public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWriter<Resource>
 {
 	private static final String RESOURCE_NAMES = "Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary"
 			+ "|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse"
@@ -89,7 +88,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 	private final FhirContext fhirContext;
 	private final Supplier<String> serverBaseProvider;
-	private final Map<Class<? extends BaseResource>, HtmlGenerator<? extends BaseResource>> htmlGeneratorsByType;
+	private final Map<Class<? extends Resource>, List<HtmlGenerator<? extends Resource>>> htmlGeneratorsByType;
 
 	@Context
 	private volatile UriInfo uriInfo;
@@ -105,7 +104,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 		if (htmlGenerators != null)
 			htmlGeneratorsByType = htmlGenerators.stream()
-					.collect(Collectors.toMap(HtmlGenerator::getResourceType, Function.identity()));
+					.collect(Collectors.groupingBy(HtmlGenerator::getResourceType));
 		else
 			htmlGeneratorsByType = Collections.emptyMap();
 	}
@@ -126,17 +125,17 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
 	{
-		return type != null && BaseResource.class.isAssignableFrom(type);
+		return type != null && Resource.class.isAssignableFrom(type);
 	}
 
 	@Override
-	public void writeTo(BaseResource resource, Class<?> type, Type genericType, Annotation[] annotations,
+	public void writeTo(Resource resource, Class<?> type, Type genericType, Annotation[] annotations,
 			MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
 		final String basePath = uriInfo.getBaseUri().getRawPath();
-
-		OutputStreamWriter out = new OutputStreamWriter(entityStream);
+		final boolean htmlEnabled = isHtmlEnabled(type, basePath, resource);
+		final OutputStreamWriter out = new OutputStreamWriter(entityStream);
 
 		out.write("""
 				<!DOCTYPE html>
@@ -159,8 +158,8 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n");
 		out.write("</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled(type))
-				+ ");checkBookmarked();" + adaptFormInputsIfTask(resource) + "setUiTheme();\">\n");
+		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(htmlEnabled) + ");checkBookmarked();"
+				+ adaptFormInputsIfTask(resource) + "setUiTheme();\">\n");
 
 		out.write("<div id=\"icons\">\n");
 
@@ -252,7 +251,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				<div class="tab">
 				""");
 
-		if (isHtmlEnabled(type))
+		if (htmlEnabled)
 			out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
 
 		out.write("""
@@ -264,16 +263,16 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		writeXml(mediaType, basePath, resource, out);
 		writeJson(mediaType, basePath, resource, out);
 
-		if (isHtmlEnabled(type))
+		if (htmlEnabled)
 			writeHtml(type, basePath, resource, out);
 
 		out.write("</html>");
 		out.flush();
 	}
 
-	private String getUrlHeading(BaseResource resource) throws MalformedURLException
+	private String getUrlHeading(Resource resource) throws MalformedURLException
 	{
-		URI uri = getResourceUrl(resource).map(this::toURI).orElse(uriInfo.getRequestUri());
+		URI uri = getResourceUri(resource);
 		String[] pathSegments = uri.getPath().split("/");
 
 		String u = serverBaseProvider.get();
@@ -302,6 +301,12 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		return heading.toString();
 	}
 
+
+	private URI getResourceUri(Resource resource) throws MalformedURLException
+	{
+		return getResourceUrlString(resource).map(this::toURI).orElse(uriInfo.getRequestUri());
+	}
+
 	private URI toURI(String str)
 	{
 		try
@@ -314,7 +319,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		}
 	}
 
-	private Optional<String> getResourceUrl(BaseResource resource) throws MalformedURLException
+	private Optional<String> getResourceUrlString(Resource resource) throws MalformedURLException
 	{
 		if (resource instanceof Resource && resource.getIdElement().hasIdPart())
 		{
@@ -333,7 +338,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 			return Optional.empty();
 	}
 
-	private void writeXml(MediaType mediaType, String basePath, BaseResource resource, OutputStreamWriter out)
+	private void writeXml(MediaType mediaType, String basePath, Resource resource, OutputStreamWriter out)
 			throws IOException
 	{
 		IParser parser = getParser(mediaType, fhirContext::newXmlParser);
@@ -397,7 +402,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		}
 	}
 
-	private void writeJson(MediaType mediaType, String basePath, BaseResource resource, OutputStreamWriter out)
+	private void writeJson(MediaType mediaType, String basePath, Resource resource, OutputStreamWriter out)
 			throws IOException
 	{
 		IParser parser = getParser(mediaType, fhirContext::newJsonParser);
@@ -427,23 +432,33 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 	}
 
 	@SuppressWarnings("unchecked")
-	private void writeHtml(Class<?> resourceType, String basePath, BaseResource resource, OutputStreamWriter out)
+	private void writeHtml(Class<?> resourceType, String basePath, Resource resource, OutputStreamWriter out)
 			throws IOException
 	{
 		out.write("<div id=\"html\" class=\"prettyprint lang-html\" style=\"display:none;\">\n");
 
-		HtmlGenerator<BaseResource> generator = (HtmlGenerator<BaseResource>) htmlGeneratorsByType.get(resourceType);
-		generator.writeHtml(basePath, resource, out);
+		URI resourceUri = getResourceUri(resource);
+
+		HtmlGenerator<Resource> generator = (HtmlGenerator<Resource>) htmlGeneratorsByType.get(resourceType).stream()
+				.filter(g -> g.isResourceSupported(basePath, resourceUri, resource)).findFirst().get();
+		generator.writeHtml(basePath, resourceUri, resource, out);
 
 		out.write("</div>\n");
 	}
 
-	private boolean isHtmlEnabled(Class<?> resourceType)
+	private boolean isHtmlEnabled(Class<?> resourceType, String basePath, Resource resource)
+			throws MalformedURLException
 	{
-		return htmlGeneratorsByType.containsKey(resourceType);
+		URI resourceUri = getResourceUri(resource);
+
+		if (htmlGeneratorsByType.containsKey(resourceType))
+			return uriInfo != null && htmlGeneratorsByType.get(resourceType).stream()
+					.anyMatch(g -> g.isResourceSupported(basePath, resourceUri, resource));
+		else
+			return false;
 	}
 
-	private String adaptFormInputsIfTask(BaseResource resource)
+	private String adaptFormInputsIfTask(Resource resource)
 	{
 		if (resource instanceof Task task)
 			return Task.TaskStatus.DRAFT.equals(task.getStatus()) ? "adaptTaskFormInputs();" : "";
@@ -451,7 +466,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 			return "";
 	}
 
-	private Optional<String> getResourceName(BaseResource resource, String uuid)
+	private Optional<String> getResourceName(Resource resource, String uuid)
 	{
 		if (resource instanceof Bundle)
 		{
