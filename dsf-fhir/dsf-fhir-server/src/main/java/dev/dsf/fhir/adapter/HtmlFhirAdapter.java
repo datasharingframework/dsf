@@ -297,9 +297,9 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 		if (uri.getQuery() != null)
 		{
-			String querValue = HtmlUtils.htmlEscape(uri.getQuery());
-			u += "?" + querValue;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + querValue + "</a>");
+			String queryValue = HtmlUtils.htmlEscape(uri.getQuery());
+			u += "?" + queryValue;
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + queryValue + "</a>");
 		}
 		else if (uriInfo.getQueryParameters().containsKey("_summary"))
 		{
