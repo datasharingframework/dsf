@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.springframework.web.util.HtmlUtils;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.PathSegment;
@@ -150,8 +151,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 				.filter(OperationOutcomeIssueComponent::hasDiagnostics)
 				.map(i -> i.getSeverity().getDisplay() + ": " + i.getDiagnostics()).toList();
 		for (String diag : diagnostics)
-			out.write("<div id=\"footer\"><p style=\"font-style: italic;\">" + diag.replaceAll("&", "&amp;")
-					.replaceAll("\"", "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;") + "</div>");
+			out.write("<div id=\"footer\"><p style=\"font-style: italic;\">" + HtmlUtils.htmlEscape(diag) + "</div>");
 
 		out.write("</div>");
 	}

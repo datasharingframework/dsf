@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.springframework.web.util.HtmlUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -155,7 +156,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				<link rel="stylesheet" type="text/css" href="${basePath}static/dsf.css">
 				<link rel="stylesheet" type="text/css" href="${basePath}static/form.css">
 				""".replace("${basePath}", basePath));
-		out.write("<title>" + getTitle(uriInfo) + "</title>\n");
+		out.write("<title>" + getTitle() + "</title>\n");
 		out.write("</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(htmlEnabled) + ");checkBookmarked();"
 				+ adaptFormInputsIfTask(resource) + "setUiTheme();\">\n");
@@ -269,14 +270,14 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		out.flush();
 	}
 
-	private String getTitle(UriInfo uri)
+	private String getTitle()
 	{
-		if (uri == null || uri.getPath() == null || uriInfo.getPath().isBlank())
+		if (uriInfo == null || uriInfo.getPath() == null || uriInfo.getPath().isBlank())
 			return "DSF";
 		else if (uriInfo.getPath().endsWith("/"))
-			return "DSF: " + uriInfo.getPath().substring(0, uriInfo.getPath().length() - 1);
+			return "DSF: " + HtmlUtils.htmlEscape(uriInfo.getPath().substring(0, uriInfo.getPath().length() - 1));
 		else
-			return "DSF: " + uriInfo.getPath();
+			return "DSF: " + HtmlUtils.htmlEscape(uriInfo.getPath());
 	}
 
 	private String getUrlHeading(Resource resource) throws MalformedURLException
@@ -289,20 +290,22 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 		for (int i = 2; i < pathSegments.length; i++)
 		{
-			u += "/" + pathSegments[i];
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegments[i] + "</a>");
+			String pathSegment = HtmlUtils.htmlEscape(pathSegments[i]);
+			u += "/" + pathSegment;
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegment + "</a>");
 		}
 
 		if (uri.getQuery() != null)
 		{
-			u += "?" + uri.getQuery();
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + uri.getQuery() + "</a>");
+			String querValue = HtmlUtils.htmlEscape(uri.getQuery());
+			u += "?" + querValue;
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + querValue + "</a>");
 		}
 		else if (uriInfo.getQueryParameters().containsKey("_summary"))
 		{
-			u += "?_summary=" + uriInfo.getQueryParameters().getFirst("_summary");
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?_summary="
-					+ uriInfo.getQueryParameters().getFirst("_summary") + "</a>");
+			String summaryValue = HtmlUtils.htmlEscape(uriInfo.getQueryParameters().getFirst("_summary"));
+			u += "?_summary=" + summaryValue;
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?_summary=" + summaryValue + "</a>");
 		}
 
 		heading.append('\n');
@@ -460,11 +463,8 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 	{
 		URI resourceUri = getResourceUri(resource);
 
-		if (htmlGeneratorsByType.containsKey(resourceType))
-			return uriInfo != null && htmlGeneratorsByType.get(resourceType).stream()
-					.anyMatch(g -> g.isResourceSupported(basePath, resourceUri, resource));
-		else
-			return false;
+		return htmlGeneratorsByType.containsKey(resourceType) && htmlGeneratorsByType.get(resourceType).stream()
+				.anyMatch(g -> g.isResourceSupported(basePath, resourceUri, resource));
 	}
 
 	private String adaptFormInputsIfTask(Resource resource)
