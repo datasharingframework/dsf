@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +45,10 @@ import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
 import dev.dsf.fhir.search.SearchQueryIdentityFilter;
+import dev.dsf.fhir.search.SearchQueryIncludeParameter;
 import dev.dsf.fhir.search.SearchQueryParameter;
+import dev.dsf.fhir.search.SearchQueryParameterFactory;
+import dev.dsf.fhir.search.SearchQueryRevIncludeParameter;
 import dev.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
 import dev.dsf.fhir.search.parameters.ResourceId;
 import dev.dsf.fhir.search.parameters.ResourceLastUpdated;
@@ -55,6 +57,15 @@ import dev.dsf.fhir.search.parameters.ResourceProfile;
 abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceDaoJdbc.class);
+
+	protected static <R extends Resource> SearchQueryParameterFactory<R> factory(String parameterName,
+			Supplier<SearchQueryParameter<R>> supplier)
+	{
+		Objects.requireNonNull(parameterName, "parameterName");
+		Objects.requireNonNull(supplier, "supplier");
+
+		return new SearchQueryParameterFactory<>(parameterName, supplier, null, null, null);
+	}
 
 	private static final class ResourceDistinctById
 	{
@@ -112,25 +123,52 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	private final String resourceIdColumn;
 
 	private final PreparedStatementFactory<R> preparedStatementFactory;
-	private final Function<Identity, SearchQueryIdentityFilter> userFilter;
-	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories = new ArrayList<>();
-	private final List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories = new ArrayList<>();
+	private final Function<Identity, SearchQueryIdentityFilter> identityFilter;
+	private final List<SearchQueryParameterFactory<R>> searchParameterFactories = new ArrayList<>();
+	private final List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories = new ArrayList<>();
 
-	@SafeVarargs
-	protected static <T> List<T> with(T... t)
+	private final SearchQueryParameterFactory<R> resourceIdFactory;
+	private final SearchQueryParameterFactory<R> resourceLastUpdatedFactory;
+	private final SearchQueryParameterFactory<R> resourceProfileFactory;
+
+	protected static SearchQueryRevIncludeParameterFactory factory(
+			Supplier<SearchQueryRevIncludeParameter> revIncludeSupplier, List<String> revIncludeParameterValues)
 	{
-		return Arrays.asList(t);
+		Objects.requireNonNull(revIncludeSupplier, "revIncludeSupplier");
+		Objects.requireNonNull(revIncludeParameterValues, "revIncludeParameterValues");
+
+		return new SearchQueryRevIncludeParameterFactory(revIncludeSupplier, revIncludeParameterValues);
 	}
 
-	/*
-	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
-	 * created on a request basis
-	 */
+	protected static <R extends Resource> SearchQueryParameterFactory<R> factory(String parameterName,
+			Supplier<SearchQueryParameter<R>> supplier, List<String> nameModifiers,
+			Supplier<SearchQueryIncludeParameter<R>> includeSupplier, List<String> includeParameterValues)
+	{
+		Objects.requireNonNull(parameterName, "parameterName");
+		Objects.requireNonNull(supplier, "supplier");
+		Objects.requireNonNull(nameModifiers, "nameModifiers");
+		Objects.requireNonNull(includeSupplier, "includeSupplier");
+		Objects.requireNonNull(includeParameterValues, "includeParameterValues");
+
+		return new SearchQueryParameterFactory<>(parameterName, supplier, nameModifiers, includeSupplier,
+				includeParameterValues);
+	}
+
+	protected static <R extends Resource> SearchQueryParameterFactory<R> factory(String parameterName,
+			Supplier<SearchQueryParameter<R>> supplier, List<String> nameModifiers)
+	{
+		Objects.requireNonNull(parameterName, "parameterName");
+		Objects.requireNonNull(supplier, "supplier");
+		Objects.requireNonNull(nameModifiers, "nameModifiers");
+
+		return new SearchQueryParameterFactory<>(parameterName, supplier, nameModifiers, null, null);
+	}
+
 	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
 			Function<Identity, SearchQueryIdentityFilter> userFilter,
-			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
-			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
+			List<SearchQueryParameterFactory<R>> searchParameterFactories,
+			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
 		this(dataSource, permanentDeleteDataSource, fhirContext, resourceType, resourceTable, resourceColumn,
 				resourceIdColumn, new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable,
@@ -138,16 +176,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
-	/*
-	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
-	 * created on a request basis
-	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
 			PreparedStatementFactory<R> preparedStatementFactory,
 			Function<Identity, SearchQueryIdentityFilter> userFilter,
-			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
-			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
+			List<SearchQueryParameterFactory<R>> searchParameterFactories,
+			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
 		this.dataSource = dataSource;
 		this.permanentDeleteDataSource = permanentDeleteDataSource;
@@ -160,12 +194,19 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		this.preparedStatementFactory = preparedStatementFactory;
 
-		this.userFilter = userFilter;
+		this.identityFilter = userFilter;
 
 		if (searchParameterFactories != null)
 			this.searchParameterFactories.addAll(searchParameterFactories);
 		if (searchRevIncludeParameterFactories != null)
 			this.searchRevIncludeParameterFactories.addAll(searchRevIncludeParameterFactories);
+
+		resourceIdFactory = new SearchQueryParameterFactory<>(ResourceId.PARAMETER_NAME,
+				() -> new ResourceId<>(resourceIdColumn), null, null, null);
+		resourceLastUpdatedFactory = new SearchQueryParameterFactory<>(ResourceLastUpdated.PARAMETER_NAME,
+				() -> new ResourceLastUpdated<>(resourceColumn), null, null, null);
+		resourceProfileFactory = new SearchQueryParameterFactory<>(ResourceProfile.PARAMETER_NAME,
+				() -> new ResourceProfile<>(resourceColumn), ResourceProfile.getNameModifiers(), null, null);
 	}
 
 	@Override
@@ -178,7 +219,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(resourceColumn, "resourceColumn");
 		Objects.requireNonNull(resourceIdColumn, "resourceIdColumn");
 		Objects.requireNonNull(preparedStatementFactory, "preparedStatementFactory");
-		Objects.requireNonNull(userFilter, "userFilter");
+		Objects.requireNonNull(identityFilter, "userFilter");
 	}
 
 	protected DataSource getDataSource()
@@ -877,21 +918,15 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return doCreateSearchQuery(null, page, count);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private SearchQuery<R> doCreateSearchQuery(Identity identity, int page, int count)
 	{
 		var builder = SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count);
 
 		if (identity != null)
-			builder = builder.with(userFilter.apply(identity));
+			builder = builder.with(identityFilter.apply(identity));
 
-		return builder
-				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()),
-						new ResourceProfile(getResourceColumn()))
-				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
-				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
-						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
-				.build();
+		return builder.with(resourceIdFactory).with(resourceLastUpdatedFactory).with(resourceProfileFactory)
+				.with(searchParameterFactories).withRevInclude(searchRevIncludeParameterFactories).build();
 	}
 
 	@Override

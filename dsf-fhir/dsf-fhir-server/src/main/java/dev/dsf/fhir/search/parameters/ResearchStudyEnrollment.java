@@ -4,6 +4,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -27,13 +28,19 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://dsf.dev/fhir/SearchParameter/ResearchStudy-enrollment", type = SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
-	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	public static final String RESOURCE_TYPE_NAME = "ResearchStudy";
 	public static final String PARAMETER_NAME = "enrollment";
-	private static final String TARGET_RESOURCE_TYPE_NAME = "Group";
+	public static final String TARGET_RESOURCE_TYPE_NAME = "Group";
+
+	public static List<String> getIncludeParameterValues()
+	{
+		return List.of(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
+	}
 
 	public ResearchStudyEnrollment()
 	{
-		super(ResearchStudy.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(ResearchStudy.class, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override

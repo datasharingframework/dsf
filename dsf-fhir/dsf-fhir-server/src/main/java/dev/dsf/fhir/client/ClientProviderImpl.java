@@ -13,10 +13,12 @@ import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.tools.build.BuildInfoReader;
 
 public class ClientProviderImpl implements ClientProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ClientProviderImpl.class);
+	private static final String USER_AGENT_VALUE = "DSF/";
 
 	private final KeyStore webserviceTrustStore;
 	private final KeyStore webserviceKeyStore;
@@ -30,11 +32,12 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	private final ReferenceCleaner referenceCleaner;
 	private final EndpointDao endpointDao;
 	private final ExceptionHandler exceptionHandler;
+	private final BuildInfoReader buildInfoReader;
 
 	public ClientProviderImpl(KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout, ProxyConfig proxyConfig,
 			boolean logRequests, FhirContext fhirContext, ReferenceCleaner referenceCleaner, EndpointDao endpointDao,
-			ExceptionHandler exceptionHandler)
+			ExceptionHandler exceptionHandler, BuildInfoReader buildInfoReader)
 	{
 		this.webserviceTrustStore = webserviceTrustStore;
 		this.webserviceKeyStore = webserviceKeyStore;
@@ -47,6 +50,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		this.referenceCleaner = referenceCleaner;
 		this.endpointDao = endpointDao;
 		this.exceptionHandler = exceptionHandler;
+		this.buildInfoReader = buildInfoReader;
 	}
 
 	@Override
@@ -55,13 +59,12 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		Objects.requireNonNull(webserviceTrustStore, "webserviceTrustStore");
 		Objects.requireNonNull(webserviceKeyStore, "webserviceKeyStore");
 		Objects.requireNonNull(webserviceKeyStorePassword, "webserviceKeyStorePassword");
-
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
-
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(endpointDao, "endpointDao");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 	}
 
 	@Override
@@ -74,8 +77,9 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 			char[] proxyPassword = proxyConfig.isEnabled(serverBase) ? proxyConfig.getPassword() : null;
 
 			FhirWebserviceClient client = new FhirWebserviceClientJersey(serverBase, webserviceTrustStore,
-					webserviceKeyStore, webserviceKeyStorePassword, proxyUrl, proxyUsername, proxyPassword,
-					remoteConnectTimeout, remoteReadTimeout, logRequests, null, fhirContext, referenceCleaner);
+					webserviceKeyStore, webserviceKeyStorePassword, null, proxyUrl, proxyUsername, proxyPassword,
+					remoteConnectTimeout, remoteReadTimeout, logRequests,
+					USER_AGENT_VALUE + buildInfoReader.getProjectVersion(), fhirContext, referenceCleaner);
 
 			return Optional.of(client);
 		}

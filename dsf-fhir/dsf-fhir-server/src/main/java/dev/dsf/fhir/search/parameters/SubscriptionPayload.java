@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
@@ -13,14 +12,15 @@ import org.hl7.fhir.r4.model.Subscription;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = SubscriptionPayload.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription-payload", type = SearchParamType.TOKEN, documentation = "The mime-type of the notification payload")
 public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "payload";
+	public static final String RESOURCE_COLUMN = "subscription";
 
 	private String payloadMimeType;
 
@@ -30,9 +30,10 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
 			payloadMimeType = valueAndType.codeValue;
@@ -47,7 +48,7 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->'channel'->>'payload' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return RESOURCE_COLUMN + "->'channel'->>'payload' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -64,9 +65,9 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), payloadMimeType);
+		return payloadMimeType;
 	}
 
 	@Override
@@ -87,6 +88,6 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "subscription->'channel'->>'payload'" + sortDirectionWithSpacePrefix;
+		return RESOURCE_COLUMN + "->'channel'->>'payload'" + sortDirectionWithSpacePrefix;
 	}
 }

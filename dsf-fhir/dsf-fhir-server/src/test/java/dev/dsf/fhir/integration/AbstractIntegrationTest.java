@@ -157,15 +157,16 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
-		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
-				false, null, fhirContext, referenceCleaner);
+		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, null,
+				0, 0, false, "DSF Integration Test Client", fhirContext, referenceCleaner);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		return new WebsocketClientTyrus(() ->
-		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, null, null, null, subscriptionIdPart);
+		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, null, null, null,
+				"Integration Test Client", subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception

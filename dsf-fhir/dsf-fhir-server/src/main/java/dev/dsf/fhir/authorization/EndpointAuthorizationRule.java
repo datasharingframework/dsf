@@ -22,6 +22,7 @@ import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceResolver;
 
 public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<Endpoint, EndpointDao>
@@ -111,8 +112,12 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		EndpointDao dao = getDao();
 		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
 
-		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
-			return false;
+		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
+		if (!uQp.isEmpty())
+		{
+			logger.warn("Unable to search for Endpoint: Unsupported query parameters: {}", uQp);
+			throw new IllegalStateException("Unable to search for Endpoint: Unsupported query parameters");
+		}
 
 		try
 		{
@@ -121,8 +126,8 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for Endpoint with address", e);
-			return false;
+			logger.warn("Unable to search for Endpoint", e);
+			throw new RuntimeException("Unable to search for Endpoint", e);
 		}
 	}
 
@@ -133,8 +138,12 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		EndpointDao dao = getDao();
 		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
 
-		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
-			return false;
+		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
+		if (!uQp.isEmpty())
+		{
+			logger.warn("Unable to search for Endpoint: Unsupported query parameters: {}", uQp);
+			throw new IllegalStateException("Unable to search for Endpoint: Unsupported query parameters");
+		}
 
 		try
 		{
@@ -143,8 +152,8 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for Endpoint with identifier", e);
-			return false;
+			logger.warn("Unable to search for Endpoint", e);
+			throw new RuntimeException("Unable to search for Endpoint", e);
 		}
 	}
 

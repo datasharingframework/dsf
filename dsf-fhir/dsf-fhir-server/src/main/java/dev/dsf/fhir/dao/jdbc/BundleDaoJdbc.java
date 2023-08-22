@@ -2,6 +2,8 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.sql.DataSource;
 
@@ -18,7 +20,9 @@ public class BundleDaoJdbc extends AbstractResourceDaoJdbc<Bundle> implements Bu
 	public BundleDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id",
-				BundleIdentityFilter::new, with(BundleIdentifier::new), with());
+				BundleIdentityFilter::new, Arrays.asList(factory(BundleIdentifier.PARAMETER_NAME, BundleIdentifier::new,
+						BundleIdentifier.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

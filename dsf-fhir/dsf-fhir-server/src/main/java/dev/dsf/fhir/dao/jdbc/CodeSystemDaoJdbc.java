@@ -2,6 +2,8 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -24,9 +26,16 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 	public CodeSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, CodeSystem.class, "code_systems", "code_system",
-				"code_system_id", CodeSystemIdentityFilter::new, with(CodeSystemDate::new, CodeSystemIdentifier::new,
-						CodeSystemStatus::new, CodeSystemUrl::new, CodeSystemVersion::new),
-				with());
+				"code_system_id", CodeSystemIdentityFilter::new,
+				Arrays.asList(factory(CodeSystemDate.PARAMETER_NAME, CodeSystemDate::new),
+						factory(CodeSystemIdentifier.PARAMETER_NAME, CodeSystemIdentifier::new,
+								CodeSystemIdentifier.getNameModifiers()),
+						factory(CodeSystemStatus.PARAMETER_NAME, CodeSystemStatus::new,
+								CodeSystemStatus.getNameModifiers()),
+						factory(CodeSystemUrl.PARAMETER_NAME, CodeSystemUrl::new, CodeSystemUrl.getNameModifiers()),
+						factory(CodeSystemVersion.PARAMETER_NAME, CodeSystemVersion::new,
+								CodeSystemVersion.getNameModifiers())),
+				Collections.emptyList());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

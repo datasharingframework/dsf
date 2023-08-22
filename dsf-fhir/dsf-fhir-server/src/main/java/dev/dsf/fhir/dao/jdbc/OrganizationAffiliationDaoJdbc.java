@@ -5,9 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -36,10 +38,27 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 		super(dataSource, permanentDeleteDataSource, fhirContext, OrganizationAffiliation.class,
 				"organization_affiliations", "organization_affiliation", "organization_affiliation_id",
 				OrganizationAffiliationIdentityFilter::new,
-				with(OrganizationAffiliationActive::new, OrganizationAffiliationEndpoint::new,
-						OrganizationAffiliationIdentifier::new, OrganizationAffiliationParticipatingOrganization::new,
-						OrganizationAffiliationPrimaryOrganization::new, OrganizationAffiliationRole::new),
-				with());
+				Arrays.asList(factory(OrganizationAffiliationActive.PARAMETER_NAME, OrganizationAffiliationActive::new),
+						factory(OrganizationAffiliationEndpoint.PARAMETER_NAME, OrganizationAffiliationEndpoint::new,
+								OrganizationAffiliationEndpoint.getNameModifiers(),
+								OrganizationAffiliationEndpoint::new,
+								OrganizationAffiliationEndpoint.getIncludeParameterValues()),
+						factory(OrganizationAffiliationIdentifier.PARAMETER_NAME,
+								OrganizationAffiliationIdentifier::new,
+								OrganizationAffiliationIdentifier.getNameModifiers()),
+						factory(OrganizationAffiliationParticipatingOrganization.PARAMETER_NAME,
+								OrganizationAffiliationParticipatingOrganization::new,
+								OrganizationAffiliationParticipatingOrganization.getNameModifiers(),
+								OrganizationAffiliationParticipatingOrganization::new,
+								OrganizationAffiliationParticipatingOrganization.getIncludeParameterValues()),
+						factory(OrganizationAffiliationPrimaryOrganization.PARAMETER_NAME,
+								OrganizationAffiliationPrimaryOrganization::new,
+								OrganizationAffiliationPrimaryOrganization.getNameModifiers(),
+								OrganizationAffiliationPrimaryOrganization::new,
+								OrganizationAffiliationPrimaryOrganization.getIncludeParameterValues()),
+						factory(OrganizationAffiliationRole.PARAMETER_NAME, OrganizationAffiliationRole::new,
+								OrganizationAffiliationRole.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override
@@ -85,6 +104,38 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 				}
 
 				return affiliations;
+			}
+		}
+	}
+
+	@Override
+	public boolean existsNotDeletedByParentOrganizationMemberOrganizationRoleAndNotEndpointWithTransaction(
+			Connection connection, UUID parentOrganization, UUID memberOrganization, String roleSystem, String roleCode,
+			UUID endpoint) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(parentOrganization, "parentOrganization");
+		Objects.requireNonNull(memberOrganization, "memberOrganization");
+		Objects.requireNonNull(roleSystem, "roleSystem");
+		Objects.requireNonNull(roleCode, "roleCode");
+		Objects.requireNonNull(endpoint, "endpoint");
+
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT count(*) FROM current_organization_affiliations "
+						+ "WHERE organization_affiliation->'organization'->>'reference' = ? "
+						+ "AND organization_affiliation->'participatingOrganization'->>'reference' = ? "
+						+ "AND (SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization_affiliation->'code') AS code, jsonb_array_elements(code->'coding') AS coding) @> ?::jsonb "
+						+ "AND ? NOT IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') AS reference)"))
+		{
+			statement.setString(1, "Organization/" + parentOrganization.toString());
+			statement.setString(2, "Organization/" + memberOrganization.toString());
+			statement.setString(3, "[{\"code\": \"" + roleCode + "\", \"system\": \"" + roleSystem + "\"}]");
+			statement.setString(4, "Endpoint/" + endpoint.toString());
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				return result.next() && result.getInt(1) > 0;
 			}
 		}
 	}

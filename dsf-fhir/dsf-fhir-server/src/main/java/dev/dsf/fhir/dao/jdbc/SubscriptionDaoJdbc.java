@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,9 +30,17 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 	public SubscriptionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Subscription.class, "subscriptions", "subscription",
-				"subscription_id", SubscriptionIdentityFilter::new, with(SubscriptionCriteria::new,
-						SubscriptionPayload::new, SubscriptionStatus::new, SubscriptionType::new),
-				with());
+				"subscription_id", SubscriptionIdentityFilter::new,
+				Arrays.asList(
+						factory(SubscriptionCriteria.PARAMETER_NAME, SubscriptionCriteria::new,
+								SubscriptionCriteria.getNameModifiers()),
+						factory(SubscriptionPayload.PARAMETER_NAME, SubscriptionPayload::new,
+								SubscriptionPayload.getNameModifiers()),
+						factory(SubscriptionStatus.PARAMETER_NAME, SubscriptionStatus::new,
+								SubscriptionStatus.getNameModifiers()),
+						factory(SubscriptionType.PARAMETER_NAME, SubscriptionType::new,
+								SubscriptionType.getNameModifiers())),
+				Collections.emptyList());
 	}
 
 	@Override

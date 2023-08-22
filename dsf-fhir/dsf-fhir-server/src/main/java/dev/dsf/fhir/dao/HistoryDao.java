@@ -14,12 +14,12 @@ import dev.dsf.fhir.search.PageAndCount;
 
 public interface HistoryDao
 {
-	History readHistory(List<HistoryIdentityFilter> filters, PageAndCount pageAndCount, AtParameter atParameter,
+	History readHistory(List<HistoryIdentityFilter> filters, PageAndCount pageAndCount, List<AtParameter> atParameters,
 			SinceParameter sinceParameter) throws SQLException;
 
-	History readHistory(HistoryIdentityFilter filter, PageAndCount pageAndCount, AtParameter atParameter,
+	History readHistory(HistoryIdentityFilter filter, PageAndCount pageAndCount, List<AtParameter> atParameters,
 			SinceParameter sinceParameter, Class<? extends Resource> resource) throws SQLException;
 
-	History readHistory(HistoryIdentityFilter filter, PageAndCount pageAndCount, AtParameter atParameter,
+	History readHistory(HistoryIdentityFilter filter, PageAndCount pageAndCount, List<AtParameter> atParameters,
 			SinceParameter sinceParameter, Class<? extends Resource> resource, UUID id) throws SQLException;
 }

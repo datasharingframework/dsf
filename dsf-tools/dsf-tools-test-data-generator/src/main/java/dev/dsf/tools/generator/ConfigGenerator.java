@@ -90,6 +90,8 @@ public class ConfigGenerator
 				      - SEARCH
 				      - HISTORY
 				      - PERMANENT_DELETE
+				    practitioner-role:
+				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
 				""", webbrowserTestUser.getCertificateSha512ThumbprintHex()));
 
 		writeProperties(Paths.get("config/java-test-fhir-config.properties"), javaTestFhirConfigProperties);

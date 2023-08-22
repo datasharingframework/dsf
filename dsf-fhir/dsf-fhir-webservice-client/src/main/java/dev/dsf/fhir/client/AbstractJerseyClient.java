@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
 
 public class AbstractJerseyClient
 {
@@ -37,13 +39,14 @@ public class AbstractJerseyClient
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			ObjectMapper objectMapper, Collection<?> componentsToRegister)
 	{
-		this(baseUrl, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper,
-				componentsToRegister, false);
+		this(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper, componentsToRegister, null, null, null, 0,
+				0, false, null);
 	}
 
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
-			ObjectMapper objectMapper, Collection<?> componentsToRegister, boolean logRequests)
+			ObjectMapper objectMapper, Collection<?> componentsToRegister, String proxySchemeHostPort,
+			String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout, boolean logRequests,
+			String userAgentValue)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
@@ -63,6 +66,10 @@ public class AbstractJerseyClient
 		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
 		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
 		builder = builder.withConfig(config);
+
+		if (userAgentValue != null && !userAgentValue.isBlank())
+			builder = builder.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
+					.add(HttpHeaders.USER_AGENT, userAgentValue));
 
 		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectTimeout,
 				TimeUnit.MILLISECONDS);

@@ -9,17 +9,14 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
-import jakarta.ws.rs.core.UriBuilder;
+import dev.dsf.fhir.search.parameters.SearchQuerySortParameter;
 
-public interface SearchQueryParameter<R extends Resource> extends MatcherParameter
+public interface SearchQueryParameter<R extends Resource> extends MatcherParameter, SearchQuerySortParameter
 {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -35,9 +32,17 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 		String documentation();
 	}
 
-	void configure(Map<String, List<String>> queryParameters);
-
-	List<SearchQueryParameterError> getErrors();
+	/**
+	 * @param errors
+	 *            not <code>null</code>
+	 * @param queryParameterName
+	 *            not <code>null</code> and not blank
+	 * @param queryParameterValue
+	 *            not <code>null</code> and not blank
+	 * @return the current instance
+	 */
+	SearchQueryParameter<R> configure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue);
 
 	boolean isDefined();
 
@@ -49,18 +54,18 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException;
 
 	/**
-	 * Will not be called if {@link #isDefined()} returns <code>false</code>
+	 * Only called if {@link #isDefined()} returns <code>true</code>
 	 *
-	 * @param bundleUri
-	 *            never <code>null</code>
+	 * @return not <code>null</code>, not blank
 	 */
-	void modifyBundleUri(UriBuilder bundleUri);
+	String getBundleUriQueryParameterName();
 
-	Optional<SearchQuerySortParameter> getSortParameter();
-
-	List<SearchQueryIncludeParameter> getIncludeParameters();
+	/**
+	 * Only called if {@link #isDefined()} returns <code>true</code>
+	 *
+	 * @return not <code>null</code>, not blank
+	 */
+	String getBundleUriQueryParameterValue();
 
 	String getParameterName();
-
-	Stream<String> getBaseAndModifiedParameterNames();
 }

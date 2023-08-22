@@ -2,17 +2,23 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 import javax.sql.DataSource;
 
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.search.SearchQueryIdentityFilter;
+import dev.dsf.fhir.search.SearchQueryParameter;
+import dev.dsf.fhir.search.SearchQueryParameterFactory;
 import dev.dsf.fhir.search.parameters.StructureDefinitionDate;
 import dev.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import dev.dsf.fhir.search.parameters.StructureDefinitionStatus;
@@ -22,6 +28,18 @@ import dev.dsf.fhir.search.parameters.StructureDefinitionVersion;
 abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdbc<StructureDefinition>
 		implements StructureDefinitionDao
 {
+	private static <R extends Resource> SearchQueryParameterFactory<R> factory(String resourceColumn,
+			String parameterName, Function<String, SearchQueryParameter<R>> supplier, List<String> nameModifiers)
+	{
+		return factory(parameterName, () -> supplier.apply(resourceColumn), nameModifiers);
+	}
+
+	private static <R extends Resource> SearchQueryParameterFactory<R> factory(String resourceColumn,
+			String parameterName, Function<String, SearchQueryParameter<R>> supplier)
+	{
+		return factory(parameterName, () -> supplier.apply(resourceColumn));
+	}
+
 	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
 
 	public AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
@@ -30,12 +48,17 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, StructureDefinition.class, resourceTable,
 				resourceColumn, resourceIdColumn, userFilter,
-				with(() -> new StructureDefinitionDate(resourceColumn),
-						() -> new StructureDefinitionIdentifier(resourceColumn),
-						() -> new StructureDefinitionStatus(resourceColumn),
-						() -> new StructureDefinitionUrl(resourceColumn),
-						() -> new StructureDefinitionVersion(resourceColumn)),
-				with());
+				Arrays.asList(
+						factory(resourceColumn, StructureDefinitionDate.PARAMETER_NAME, StructureDefinitionDate::new),
+						factory(resourceColumn, StructureDefinitionIdentifier.PARAMETER_NAME,
+								StructureDefinitionIdentifier::new, StructureDefinitionIdentifier.getNameModifiers()),
+						factory(resourceColumn, StructureDefinitionStatus.PARAMETER_NAME,
+								StructureDefinitionStatus::new, StructureDefinitionStatus.getNameModifiers()),
+						factory(resourceColumn, StructureDefinitionUrl.PARAMETER_NAME, StructureDefinitionUrl::new,
+								StructureDefinitionUrl.getNameModifiers()),
+						factory(resourceColumn, StructureDefinitionVersion.PARAMETER_NAME,
+								StructureDefinitionVersion::new, StructureDefinitionVersion.getNameModifiers())),
+				Collections.emptyList());
 
 		readByUrl = new ReadByUrlDaoJdbc<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
 				resourceColumn);

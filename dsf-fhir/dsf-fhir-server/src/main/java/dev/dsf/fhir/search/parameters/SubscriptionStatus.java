@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -14,14 +13,16 @@ import org.hl7.fhir.r4.model.Subscription;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = SubscriptionStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription-status", type = SearchParamType.TOKEN, documentation = "Search by subscription status")
 public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "status";
+	public static final String RESOURCE_COLUMN = "subscription";
 
 	private org.hl7.fhir.r4.model.Subscription.SubscriptionStatus status;
 
@@ -31,15 +32,17 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			status = toStatus(valueAndType.codeValue);
+			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionStatus toStatus(String status)
+	private org.hl7.fhir.r4.model.Subscription.SubscriptionStatus toStatus(
+			List<? super SearchQueryParameterError> errors, String status, String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
@@ -50,6 +53,8 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 		}
 		catch (FHIRException e)
 		{
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					queryParameterValue, e));
 			return null;
 		}
 	}
@@ -63,7 +68,7 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -80,9 +85,9 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), status.toCode());
+		return status.toCode();
 	}
 
 	@Override
@@ -103,6 +108,6 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "subscription->>'status'" + sortDirectionWithSpacePrefix;
+		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }

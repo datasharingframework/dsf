@@ -5,6 +5,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,9 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.IParser;
+import jakarta.websocket.ClientEndpointConfig;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.DeploymentException;
 import jakarta.websocket.Session;
+import jakarta.ws.rs.core.HttpHeaders;
 
 public class WebsocketClientTyrus implements WebsocketClient
 {
@@ -76,6 +79,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private final String proxySchemeHostPort;
 	private final String proxyUserName;
 	private final char[] proxyPassword;
+	private final String userAgentValue;
 	private final ClientEndpoint endpoint;
 
 	private ClientManager manager;
@@ -84,7 +88,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 
 	public WebsocketClientTyrus(Runnable reconnector, URI wsUri, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
-			String subscriptionIdPart)
+			String userAgentValue, String subscriptionIdPart)
 	{
 		this.wsUri = wsUri;
 
@@ -99,6 +103,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 		this.proxySchemeHostPort = proxySchemeHostPort;
 		this.proxyUserName = proxyUserName;
 		this.proxyPassword = proxyPassword;
+		this.userAgentValue = userAgentValue;
 
 		this.endpoint = createClientEndpoint(reconnector, subscriptionIdPart);
 	}
@@ -133,10 +138,12 @@ public class WebsocketClientTyrus implements WebsocketClient
 			manager.getProperties().put(ClientProperties.PROXY_HEADERS, proxyHeaders);
 		}
 
+		ClientEndpointConfig config = createConfig(userAgentValue);
+
 		try
 		{
 			logger.debug("Connecting to websocket {} and waiting for connection", wsUri);
-			connection = manager.connectToServer(endpoint, wsUri);
+			connection = manager.connectToServer(endpoint, config, wsUri);
 		}
 		catch (DeploymentException e)
 		{
@@ -148,6 +155,21 @@ public class WebsocketClientTyrus implements WebsocketClient
 			logger.warn("Error while connecting to server", e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	private ClientEndpointConfig createConfig(String userAgentValue)
+	{
+		if (userAgentValue == null || userAgentValue.isBlank())
+			return null;
+
+		ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator()
+		{
+			public void beforeRequest(java.util.Map<String, java.util.List<String>> headers)
+			{
+				headers.put(HttpHeaders.USER_AGENT, Collections.singletonList(userAgentValue));
+			}
+		};
+		return ClientEndpointConfig.Builder.create().configurator(configurator).build();
 	}
 
 	@Override

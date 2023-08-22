@@ -2,6 +2,8 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -24,9 +26,15 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	public ValueSetDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, ValueSet.class, "value_sets", "value_set",
-				"value_set_id", ValueSetIdentityFilter::new, with(ValueSetDate::new, ValueSetIdentifier::new,
-						ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new),
-				with());
+				"value_set_id", ValueSetIdentityFilter::new,
+				Arrays.asList(factory(ValueSetDate.PARAMETER_NAME, ValueSetDate::new),
+						factory(ValueSetIdentifier.PARAMETER_NAME, ValueSetIdentifier::new,
+								ValueSetIdentifier.getNameModifiers()),
+						factory(ValueSetStatus.PARAMETER_NAME, ValueSetStatus::new, ValueSetStatus.getNameModifiers()),
+						factory(ValueSetUrl.PARAMETER_NAME, ValueSetUrl::new, ValueSetUrl.getNameModifiers()),
+						factory(ValueSetVersion.PARAMETER_NAME, ValueSetVersion::new,
+								ValueSetVersion.getNameModifiers())),
+				Collections.emptyList());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

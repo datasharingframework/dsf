@@ -72,8 +72,8 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 
 		String organizationIdSp = toSearchParameter(organizationIdentifier);
 
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
-				Map.of("status", Collections.singletonList("active"), "identifier",
+		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
+				Map.of("active", Collections.singletonList("true"), "identifier",
 						Collections.singletonList(organizationIdSp)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1

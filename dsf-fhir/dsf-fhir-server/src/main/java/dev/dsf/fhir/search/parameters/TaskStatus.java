@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -18,12 +17,12 @@ import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
-import jakarta.ws.rs.core.UriBuilder;
 
 @SearchParameterDefinition(name = TaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
 public class TaskStatus extends AbstractTokenParameter<Task>
 {
 	public static final String PARAMETER_NAME = "status";
+	public static final String RESOURCE_COLUMN = "task";
 
 	private org.hl7.fhir.r4.model.Task.TaskStatus status;
 
@@ -33,15 +32,17 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	}
 
 	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		super.configureSearchParameter(queryParameters);
+		super.doConfigure(errors, queryParameterName, queryParameterValue);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			status = toStatus(valueAndType.codeValue, queryParameters.get(parameterName));
+			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(String status, List<String> parameterValues)
+	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(List<? super SearchQueryParameterError> errors,
+			String status, String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
@@ -52,8 +53,8 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 		}
 		catch (FHIRException e)
 		{
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
-					parameterValues, e));
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					queryParameterValue, e));
 			return null;
 		}
 	}
@@ -67,7 +68,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	public String getFilterQuery()
 	{
-		return "task->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -84,9 +85,9 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterValue()
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), status.toCode());
+		return status.toCode();
 	}
 
 	@Override
@@ -107,6 +108,6 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "task->>'status'" + sortDirectionWithSpacePrefix;
+		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }

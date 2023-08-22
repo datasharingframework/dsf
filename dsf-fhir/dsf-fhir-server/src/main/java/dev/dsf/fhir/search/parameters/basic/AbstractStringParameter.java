@@ -1,16 +1,10 @@
 package dev.dsf.fhir.search.parameters.basic;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.DomainResource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
-import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import jakarta.ws.rs.core.UriBuilder;
 
 public abstract class AbstractStringParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
@@ -24,6 +18,11 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 		{
 			this.modifier = modifier;
 		}
+	}
+
+	public static List<String> getNameModifiers()
+	{
+		return List.of(StringSearchType.EXACT.modifier, StringSearchType.CONTAINS.modifier);
 	}
 
 	protected static class StringValueAndSearchType
@@ -46,46 +45,15 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 	}
 
 	@Override
-	protected Stream<String> getModifiedParameterNames()
+	protected void doConfigure(List<? super SearchQueryParameterError> errors, String queryParameterName,
+			String queryParameterValue)
 	{
-		return Stream.of(getParameterName() + StringSearchType.EXACT.modifier,
-				getParameterName() + StringSearchType.CONTAINS.modifier);
-	}
-
-	@Override
-	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
-	{
-		List<String> allValues = new ArrayList<>();
-		allValues.addAll(queryParameters.getOrDefault(parameterName + StringSearchType.STARTS_WITH.modifier,
-				Collections.emptyList()));
-		allValues.addAll(
-				queryParameters.getOrDefault(parameterName + StringSearchType.EXACT.modifier, Collections.emptyList()));
-		allValues.addAll(queryParameters.getOrDefault(parameterName + StringSearchType.CONTAINS.modifier,
-				Collections.emptyList()));
-		if (allValues.size() > 1)
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-					parameterName, allValues));
-
-		String startsWith = getFirst(queryParameters, parameterName + StringSearchType.STARTS_WITH.modifier);
-		if (startsWith != null)
-		{
-			valueAndType = new StringValueAndSearchType(startsWith, StringSearchType.STARTS_WITH);
-			return;
-		}
-
-		String exact = getFirst(queryParameters, parameterName + StringSearchType.EXACT.modifier);
-		if (exact != null)
-		{
-			valueAndType = new StringValueAndSearchType(exact, StringSearchType.EXACT);
-			return;
-		}
-
-		String contains = getFirst(queryParameters, parameterName + StringSearchType.CONTAINS.modifier);
-		if (contains != null)
-		{
-			valueAndType = new StringValueAndSearchType(contains, StringSearchType.CONTAINS);
-			return;
-		}
+		if ((parameterName + StringSearchType.STARTS_WITH.modifier).equals(queryParameterName))
+			valueAndType = new StringValueAndSearchType(queryParameterValue, StringSearchType.STARTS_WITH);
+		else if ((parameterName + StringSearchType.EXACT.modifier).equals(queryParameterName))
+			valueAndType = new StringValueAndSearchType(queryParameterValue, StringSearchType.EXACT);
+		else if ((parameterName + StringSearchType.CONTAINS.modifier).equals(queryParameterName))
+			valueAndType = new StringValueAndSearchType(queryParameterValue, StringSearchType.CONTAINS);
 	}
 
 	@Override
@@ -95,8 +63,14 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	public String getBundleUriQueryParameterName()
 	{
-		bundleUri.replaceQueryParam(parameterName + valueAndType.type.modifier, valueAndType.value);
+		return parameterName + valueAndType.type.modifier;
+	}
+
+	@Override
+	public String getBundleUriQueryParameterValue()
+	{
+		return valueAndType.value;
 	}
 }
