@@ -110,7 +110,7 @@ public class PropertiesConfig
 	private char[] proxyPassword;
 
 	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
-	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
+	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> proxyNoProxy;
 
 	@Bean // static in order to initialize before @Configuration classes
