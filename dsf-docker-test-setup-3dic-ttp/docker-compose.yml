@@ -422,7 +422,6 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: dic1_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic1_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic1_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_1
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic1/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_updateAllowList|1.0
@@ -489,7 +488,6 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: dic2_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic2_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic2_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_2
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic2/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_updateAllowList|1.0
@@ -556,7 +554,6 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: dic3_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic3_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic3_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC_3
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic3/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_updateAllowList|1.0
@@ -624,7 +621,6 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: ttp_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: ttp_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_downloadAllowList|1.0

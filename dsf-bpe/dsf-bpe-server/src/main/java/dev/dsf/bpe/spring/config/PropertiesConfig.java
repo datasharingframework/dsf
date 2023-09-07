@@ -46,10 +46,6 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 
-	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
-	@Value("${dev.dsf.bpe.fhir.server.organization.identifier.value}")
-	private String organizationIdentifierValue;
-
 	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_server_trust_certificates.pem")
 	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas}")
 	private String clientCertificateTrustStoreFile;
@@ -287,11 +283,6 @@ public class PropertiesConfig implements InitializingBean
 	public char[] getDbCamundaPassword()
 	{
 		return dbCamundaPassword;
-	}
-
-	public String getOrganizationIdentifierValue()
-	{
-		return organizationIdentifierValue;
 	}
 
 	public String getClientCertificateTrustStoreFile()
