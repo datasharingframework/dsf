@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.value.TypedValue;
@@ -188,12 +189,21 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("parentActivityInstanceId: {}, parentId: {}", execution.getParentActivityInstanceId(),
 				execution.getParentId());
 
-		return getTasks().stream().filter(t ->
+		List<Task> currentTasks = getTasks().stream().filter(t ->
 		{
 			Object id = t.getUserData(TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID);
 			return Objects.equals(id, execution.getParentActivityInstanceId())
 					|| (id == null && execution.getParentId() == null);
 		}).toList();
+
+		if (logger.isTraceEnabled())
+			logger.trace("Current tasks: {}",
+					currentTasks.stream()
+							.map(t -> t.getIdElement().getValue() + " (parent_activity_instance_id = "
+									+ t.getUserData(TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID) + ")")
+							.collect(Collectors.joining(", ", "[", "]")));
+
+		return currentTasks;
 	}
 
 	@Override
