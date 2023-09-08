@@ -1,7 +1,7 @@
 <Configuration status="INFO" monitorInterval="30" verbose="false">
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout pattern="%highlight{%p %t - %C{1}.%M(%L) | %m%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}" />
+			<PatternLayout pattern="%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%style{%n}{Normal}" />
 		</Console>
 		<RollingFile name="FILE" fileName="log/bpe.log" filePattern="log/bpe_%d{yyyy-MM-dd}_%i.log.gz" ignoreExceptions="false">
 			<PatternLayout>
