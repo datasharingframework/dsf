@@ -118,6 +118,10 @@ public class PropertiesConfig implements InitializingBean
 	@Value("#{'${dev.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processRetired;
 
+	@Documentation(description = "Number of parallel Task / QuestionnaireResponse threads to start new or continue existing processes, a value `<= 0` means number of cpu cores")
+	@Value("${dev.dsf.bpe.process.threads:-1}")
+	private int processStartOrContinueThreads;
+
 	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, `-1` means infinite number of retries")
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.max:-1}")
 	private int fhirServerRequestMaxRetries;
@@ -375,6 +379,11 @@ public class PropertiesConfig implements InitializingBean
 	public List<String> getProcessRetired()
 	{
 		return Collections.unmodifiableList(processRetired);
+	}
+
+	public int getProcessStartOrContinueThreads()
+	{
+		return processStartOrContinueThreads;
 	}
 
 	public int getFhirServerRequestMaxRetries()
