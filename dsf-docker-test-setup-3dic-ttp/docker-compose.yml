@@ -48,7 +48,7 @@ services:
     image: postgres:15
     restart: "no"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
