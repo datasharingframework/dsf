@@ -214,9 +214,13 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.debug.log.message.onActivityEnd:false}")
 	private boolean debugLogMessageOnActivityEnd;
 
-	@Documentation(description = "To enable loging bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.bpe.debug.log.message.variables:false}")
 	private boolean debugLogMessageVariables;
+
+	@Documentation(description = "To enable logging of local bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.variablesLocal:false}")
+	private boolean debugLogMessageVariablesLocal;
 
 	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
@@ -504,6 +508,11 @@ public class PropertiesConfig implements InitializingBean
 	public boolean getDebugLogMessageVariables()
 	{
 		return debugLogMessageVariables;
+	}
+
+	public boolean getDebugLogMessageVariablesLocal()
+	{
+		return debugLogMessageVariablesLocal;
 	}
 
 	public int getJettyStatusConnectorPort()
