@@ -60,8 +60,35 @@ public class StatusService implements InitializingBean
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing DB", e);
-			return Response.serverError().build();
+			String errorMessage = getErrorMessage(e);
+
+			logger.error("Error while accessing DB: {}", errorMessage);
+			if (logger.isDebugEnabled())
+				logger.error("Error while accessing DB", e);
+
+			return Response.serverError().entity(errorMessage).build();
 		}
+	}
+
+	private String getErrorMessage(Throwable e)
+	{
+		StringBuilder b = new StringBuilder();
+
+		while (true)
+		{
+			b.append(e.getClass().getSimpleName());
+			b.append(": ");
+			b.append(e.getMessage());
+
+			if (e.getCause() != null)
+			{
+				b.append(" -> ");
+				e = e.getCause();
+			}
+			else
+				break;
+		}
+
+		return b.toString();
 	}
 }
