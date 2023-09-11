@@ -42,6 +42,6 @@ public class TaskSubscriptionHandlerFactory implements SubscriptionHandlerFactor
 	public PingEventResourceHandler<Task> createPingEventResourceHandler(
 			ExistingResourceLoader<Task> existingResourceLoader)
 	{
-		return new PingEventResourceHandler<>(existingResourceLoader);
+		return new PingEventResourceHandlerImpl<>(existingResourceLoader);
 	}
 }

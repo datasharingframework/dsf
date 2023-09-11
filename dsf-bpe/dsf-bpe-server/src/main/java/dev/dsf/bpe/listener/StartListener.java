@@ -24,6 +24,7 @@ public class StartListener extends AbstractListener implements ExecutionListener
 	public void doNotify(DelegateExecution execution, ListenerVariables variables) throws Exception
 	{
 		Task task = variables.getResource(TaskHandler.TASK_VARIABLE);
+		execution.removeVariable(TaskHandler.TASK_VARIABLE);
 
 		if (task != null)
 		{

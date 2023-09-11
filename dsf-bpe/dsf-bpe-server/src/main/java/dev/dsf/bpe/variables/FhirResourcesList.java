@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Resource;
 
@@ -39,5 +40,12 @@ public class FhirResourcesList
 	public <R extends Resource> List<R> getResourcesAndCast()
 	{
 		return (List<R>) getResources();
+	}
+
+	@Override
+	public String toString()
+	{
+		return "FhirResourcesList" + resources.stream().map(r -> r.getIdElement().toUnqualified().getValue())
+				.collect(Collectors.joining(", ", "[", "]"));
 	}
 }

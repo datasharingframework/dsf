@@ -1,7 +1,7 @@
 <Configuration status="INFO" monitorInterval="30" verbose="false">
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout pattern="%highlight{%p %t - %C{1}.%M(%L) | %m%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}" />
+			<PatternLayout pattern="%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n" />
 		</Console>
 		<RollingFile name="FILE" fileName="log/bpe.log" filePattern="log/bpe_%d{yyyy-MM-dd}_%i.log.gz" ignoreExceptions="false">
 			<PatternLayout>
@@ -18,10 +18,12 @@
 		<Logger name="de.netzwerk_universitaetsmedizin" level="DEBUG" />
 		<Logger name="de.medizininformatik_initiative" level="DEBUG" />
 		<Logger name="org.eclipse.jetty" level="INFO" />
+		<Logger name="dev.dsf.bpe.variables.VariablesImpl" level="TRACE" />
+		<Logger name="org.camunda.bpm.engine.jobexecutor" level="DEBUG" />
 
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE" level="INFO" />
-			<AppenderRef ref="FILE" level="DEBUG" />
+			<AppenderRef ref="FILE" level="TRACE" />
 		</Root>
 	</Loggers>
 </Configuration>
