@@ -134,6 +134,8 @@ function readAndValidateValue(rowElement, templateValue, name, valueType, errors
         return validateInstant(rowElement, errorListElement, value, errors)
     } else if (valueType === 'valueUri') {
         return validateUrl(rowElement, errorListElement, value, errors)
+    } else if (valueType === 'valueUrl') {
+        return validateUrl(rowElement, errorListElement, value, errors)
     } else if (valueType === 'valueReference') {
         if (valueElement) {
             return validateReference(rowElement, errorListElement, value, errors)

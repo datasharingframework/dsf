@@ -18,7 +18,7 @@ import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientManager.ReconnectHandler;
 import org.glassfish.tyrus.client.ClientProperties;
 import org.glassfish.tyrus.client.SslEngineConfigurator;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -196,9 +196,9 @@ public class WebsocketClientTyrus implements WebsocketClient
 	}
 
 	@Override
-	public void setDomainResourceHandler(Consumer<DomainResource> handler, Supplier<IParser> parserFactory)
+	public void setResourceHandler(Consumer<Resource> handler, Supplier<IParser> parserFactory)
 	{
-		endpoint.setDomainResourceHandler(handler, parserFactory);
+		endpoint.setResourceHandler(handler, parserFactory);
 	}
 
 	@Override

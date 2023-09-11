@@ -44,18 +44,9 @@ public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourc
 		{
 			if (resource != null)
 			{
-				logger.trace("writeValue {} id: {}, parentActivityInstanceId: {}", resource.getResourceType().name(),
-						resource.getIdElement().getIdPart(),
-						resource.getUserData(VariablesImpl.TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID));
-
 				String s = newJsonParser().encodeResourceToString(resource);
 				valueFields.setTextValue(resource.getClass().getName());
 				valueFields.setByteArrayValue(s.getBytes(StandardCharsets.UTF_8));
-
-				Object parentActivityInstanceId = resource
-						.getUserData(VariablesImpl.TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID);
-				if (parentActivityInstanceId instanceof String)
-					valueFields.setTextValue2((String) parentActivityInstanceId);
 			}
 		}
 		catch (DataFormatException e)
@@ -83,7 +74,6 @@ public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourc
 	{
 		String className = valueFields.getTextValue();
 		byte[] bytes = valueFields.getByteArrayValue();
-		Object parentActivityInstanceId = valueFields.getTextValue2();
 
 		try
 		{
@@ -99,12 +89,6 @@ public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourc
 				logger.warn("ClassName from DB null, trying to parse FHIR resource without type information");
 				resource = (Resource) newJsonParser().parseResource(new ByteArrayInputStream(bytes));
 			}
-
-			logger.trace("readValue {} id: {}, parentActivityInstanceId: {}", resource.getResourceType().name(),
-					resource.getIdElement().getIdPart(), parentActivityInstanceId);
-
-			if (parentActivityInstanceId instanceof String)
-				resource.setUserData(VariablesImpl.TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID, parentActivityInstanceId);
 
 			return FhirResourceValues.create(resource);
 		}

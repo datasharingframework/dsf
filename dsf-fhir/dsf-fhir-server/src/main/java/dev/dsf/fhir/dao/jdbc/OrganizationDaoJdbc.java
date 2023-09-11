@@ -82,20 +82,20 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 					Organization organization = getResource(result, 1);
 					if (result.next())
 					{
-						logger.warn("Found multiple Organizations with thumprint {}", thumbprintHex);
-						throw new SQLException("Found multiple Organizations with thumprint " + thumbprintHex
+						logger.warn("Found multiple Organizations with thumbprint {}", thumbprintHex);
+						throw new SQLException("Found multiple Organizations with thumbprint " + thumbprintHex
 								+ ", single result expected");
 					}
 					else
 					{
-						logger.debug("Organization with thumprint {}, IdPart {} found", thumbprintHex,
+						logger.debug("Organization with thumbprint {}, IdPart {} found", thumbprintHex,
 								organization.getIdElement().getIdPart());
 						return Optional.of(organization);
 					}
 				}
 				else
 				{
-					logger.debug("Organization with thumprint {} not found", thumbprintHex);
+					logger.debug("Organization with thumbprint {} not found", thumbprintHex);
 					return Optional.empty();
 				}
 			}
@@ -165,13 +165,13 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 				if (result.next())
 				{
 					Organization organization = getResource(result, 1);
-					logger.debug("Organization with thumprint {}, IdPart {} found", thumbprintHex,
+					logger.debug("Organization with thumbprint {}, IdPart {} found", thumbprintHex,
 							organization.getIdElement().getIdPart());
 					return true;
 				}
 				else
 				{
-					logger.debug("Organization with thumprint {} not found", thumbprintHex);
+					logger.debug("Organization with thumbprint {} not found", thumbprintHex);
 					return false;
 				}
 			}
