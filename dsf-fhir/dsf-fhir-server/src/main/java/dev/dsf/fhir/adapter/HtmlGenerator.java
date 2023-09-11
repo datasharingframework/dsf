@@ -14,8 +14,6 @@ public interface HtmlGenerator<R extends Resource>
 	Class<R> getResourceType();
 
 	/**
-	 * @param basePath
-	 *            the applications base base, e.g. /fhir/
 	 * @param resourceUri
 	 *            not <code>null</code>
 	 * @param resource
@@ -24,16 +22,14 @@ public interface HtmlGenerator<R extends Resource>
 	 *            the outputStreamWriter, not <code>null</code>
 	 * @throws IOException
 	 */
-	void writeHtml(String basePath, URI resourceUri, R resource, OutputStreamWriter out) throws IOException;
+	void writeHtml(URI resourceUri, R resource, OutputStreamWriter out) throws IOException;
 
 	/**
-	 * @param basePath
-	 *            the applications base base, e.g. /fhir/
 	 * @param resourceUri
 	 *            not <code>null</code>
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return <code>true</code> if this HtmlGenerator supports the given <b>resource</b> for the given <b>uri</b>
 	 */
-	boolean isResourceSupported(String basePath, URI resourceUri, Resource resource);
+	boolean isResourceSupported(URI resourceUri, Resource resource);
 }

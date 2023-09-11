@@ -103,7 +103,8 @@ public class CamundaConfig
 	public DebugLoggingBpmnParseListener debugLoggingBpmnParseListener()
 	{
 		return new DebugLoggingBpmnParseListener(propertiesConfig.getDebugLogMessageOnActivityStart(),
-				propertiesConfig.getDebugLogMessageOnActivityEnd(), propertiesConfig.getDebugLogMessageVariables());
+				propertiesConfig.getDebugLogMessageOnActivityEnd(), propertiesConfig.getDebugLogMessageVariables(),
+				propertiesConfig.getDebugLogMessageVariablesLocal());
 	}
 
 	@Bean

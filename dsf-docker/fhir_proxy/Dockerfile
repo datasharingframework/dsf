@@ -26,3 +26,6 @@ ENV PROXY_PASS_TIMEOUT_WS=60
 ENV PROXY_PASS_CONNECTION_TIMEOUT_HTTP=30
 # connection timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a connection to be established
 ENV PROXY_PASS_CONNECTION_TIMEOUT_WS=30
+
+# server context path: / character at start, no / character at end
+ENV SERVER_CONTEXT_PATH="/fhir"

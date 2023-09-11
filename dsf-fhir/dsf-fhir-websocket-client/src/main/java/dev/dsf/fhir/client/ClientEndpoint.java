@@ -3,7 +3,7 @@ package dev.dsf.fhir.client;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class ClientEndpoint extends Endpoint
 	}
 
 	private Supplier<IParser> parserFactory;
-	private Consumer<DomainResource> domainResourceHandler;
+	private Consumer<Resource> domainResourceHandler;
 	private Consumer<String> pingHandler;
 
 	@Override
@@ -60,7 +60,7 @@ public class ClientEndpoint extends Endpoint
 						if (pingHandler != null && ("ping " + subscriptionIdPart).equals(message))
 							pingHandler.accept(message);
 						else if (domainResourceHandler != null && parserFactory != null)
-							domainResourceHandler.accept((DomainResource) parserFactory.get().parseResource(message));
+							domainResourceHandler.accept((Resource) parserFactory.get().parseResource(message));
 					}
 					catch (Throwable e)
 					{
@@ -94,7 +94,7 @@ public class ClientEndpoint extends Endpoint
 				+ session.getId() + "}: {}", throwable);
 	}
 
-	public void setDomainResourceHandler(Consumer<DomainResource> handler, Supplier<IParser> parser)
+	public void setResourceHandler(Consumer<Resource> handler, Supplier<IParser> parser)
 	{
 		domainResourceHandler = handler;
 		parserFactory = parser;

@@ -26,6 +26,10 @@ fieldset#form-fieldset {
 	background-color: var(--color-row-background-deep);
 }
 
+.row-extension-0 > .input-group {
+  padding-right: 1em;
+}
+
 .row-label-extension-no-value {
 	margin-bottom: -10px;
 }

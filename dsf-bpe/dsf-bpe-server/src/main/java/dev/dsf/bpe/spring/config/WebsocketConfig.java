@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.dsf.bpe.subscription.ConcurrentSubscriptionHandlerFactory;
 import dev.dsf.bpe.subscription.FhirConnector;
 import dev.dsf.bpe.subscription.FhirConnectorImpl;
 import dev.dsf.bpe.subscription.QuestionnaireResponseHandler;
@@ -44,7 +45,8 @@ public class WebsocketConfig
 	@Bean
 	public SubscriptionHandlerFactory<Task> taskSubscriptionHandlerFactory()
 	{
-		return new TaskSubscriptionHandlerFactory(taskHandler(), daoConfig.lastEventTimeDaoTask());
+		return new ConcurrentSubscriptionHandlerFactory<>(propertiesConfig.getProcessStartOrContinueThreads(),
+				new TaskSubscriptionHandlerFactory(taskHandler(), daoConfig.lastEventTimeDaoTask()));
 	}
 
 	@Bean
@@ -64,8 +66,9 @@ public class WebsocketConfig
 	@Bean
 	public SubscriptionHandlerFactory<QuestionnaireResponse> questionnaireResponseSubscriptionHandlerFactory()
 	{
-		return new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(),
-				daoConfig.lastEventTimeDaoQuestionnaireResponse());
+		return new ConcurrentSubscriptionHandlerFactory<>(propertiesConfig.getProcessStartOrContinueThreads(),
+				new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(),
+						daoConfig.lastEventTimeDaoQuestionnaireResponse()));
 	}
 
 	@Bean

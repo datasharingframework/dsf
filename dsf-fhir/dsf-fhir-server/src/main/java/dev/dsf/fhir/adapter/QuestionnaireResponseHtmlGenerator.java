@@ -24,14 +24,14 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 	}
 
 	@Override
-	public boolean isResourceSupported(String basePath, URI resourceUri, Resource resource)
+	public boolean isResourceSupported(URI resourceUri, Resource resource)
 	{
 		return resource != null && resource instanceof QuestionnaireResponse;
 	}
 
 	@Override
-	public void writeHtml(String basePath, URI resourceUri, QuestionnaireResponse questionnaireResponse,
-			OutputStreamWriter out) throws IOException
+	public void writeHtml(URI resourceUri, QuestionnaireResponse questionnaireResponse, OutputStreamWriter out)
+			throws IOException
 	{
 		final boolean completed = QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED
 				.equals(questionnaireResponse.getStatus());
@@ -64,7 +64,7 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 		out.write("<li><b>Status:</b> "
 				+ (questionnaireResponse.getStatus() == null ? "" : questionnaireResponse.getStatus().toCode())
 				+ "</li>\n");
-		out.write("<li><b>Questionnaire:</b> <a href=\"" + basePath + "Questionnaire?url="
+		out.write("<li><b>Questionnaire:</b> <a href=\"Questionnaire?url="
 				+ (questionnaireResponse.getQuestionnaire() == null ? "" : questionnaireResponse.getQuestionnaire())
 				+ "\">" + (questionnaireResponse.getQuestionnaire() == null ? ""
 						: questionnaireResponse.getQuestionnaire().replaceAll("\\|", " | "))
