@@ -2,9 +2,13 @@ package dev.dsf.fhir.spring.config;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +24,10 @@ import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class PropertiesConfig
+public class PropertiesConfig implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
+
 	@Documentation(required = true, description = "The address of the database used for the DSF FHIR server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/fhir")
 	@Value("${dev.dsf.fhir.db.url}")
 	private String dbUrl;
@@ -144,6 +150,31 @@ public class PropertiesConfig
 		}
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		URL url = new URL(serverBaseUrl);
+		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
+		{
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
+					serverBaseUrl);
+			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with 'http://' or 'https://'");
+		}
+		else if (serverBaseUrl.endsWith("//"))
+		{
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", serverBaseUrl);
+			throw new IllegalArgumentException("Invalid ServerBaseUrl, ending in //");
+		}
+		else if (!serverBaseUrl.startsWith("https://"))
+		{
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", serverBaseUrl);
+			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with https://");
+		}
+
+		if (serverBaseUrl.endsWith("/"))
+			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+	}
+
 	public String getDbUrl()
 	{
 		return dbUrl;
@@ -171,7 +202,7 @@ public class PropertiesConfig
 
 	public String getServerBaseUrl()
 	{
-		return serverBaseUrl;
+		return serverBaseUrl.endsWith("/") ? serverBaseUrl.substring(serverBaseUrl.length() - 1) : serverBaseUrl;
 	}
 
 	public int getDefaultPageCount()

@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -87,8 +88,8 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
+	private final String serverBaseUrl;
 	private final FhirContext fhirContext;
-	private final Supplier<String> serverBaseProvider;
 	private final Map<Class<? extends Resource>, List<HtmlGenerator<? extends Resource>>> htmlGeneratorsByType;
 
 	@Context
@@ -97,17 +98,29 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 	@Context
 	private volatile SecurityContext securityContext;
 
-	public HtmlFhirAdapter(FhirContext fhirContext, Supplier<String> serverBaseProvider,
+	public HtmlFhirAdapter(String serverBaseUrl, FhirContext fhirContext,
 			Collection<? extends HtmlGenerator<?>> htmlGenerators)
 	{
+		this.serverBaseUrl = serverBaseUrl;
 		this.fhirContext = fhirContext;
-		this.serverBaseProvider = serverBaseProvider;
 
 		if (htmlGenerators != null)
 			htmlGeneratorsByType = htmlGenerators.stream()
 					.collect(Collectors.groupingBy(HtmlGenerator::getResourceType));
 		else
 			htmlGeneratorsByType = Collections.emptyMap();
+	}
+
+	private String getServerBaseUrlPathWithLeadingSlash()
+	{
+		try
+		{
+			return new URL(serverBaseUrl).getPath();
+		}
+		catch (MalformedURLException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected FhirContext getFhirContext()
@@ -134,28 +147,28 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 			MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
-		final String basePath = uriInfo.getBaseUri().getRawPath();
-		final boolean htmlEnabled = isHtmlEnabled(type, basePath, resource);
+		final boolean htmlEnabled = isHtmlEnabled(type, resource);
 		final OutputStreamWriter out = new OutputStreamWriter(entityStream);
 
 		out.write("""
 				<!DOCTYPE html>
 				<html>
 				<head>
-				<link rel="icon" type="image/svg+xml" href="${basePath}static/favicon.svg">
-				<link rel="icon" type="image/png" href="${basePath}static/favicon_32x32.png" sizes="32x32">
-				<link rel="icon" type="image/png" href="${basePath}static/favicon_96x96.png" sizes="96x96">
+				<base href="${serverBaseUrl}/">
+				<link rel="icon" type="image/svg+xml" href="static/favicon.svg">
+				<link rel="icon" type="image/png" href="static/favicon_32x32.png" sizes="32x32">
+				<link rel="icon" type="image/png" href="static/favicon_96x96.png" sizes="96x96">
 				<meta name="theme-color" content="#326F95">
-				<script src="${basePath}static/util.js"></script>
-				<script src="${basePath}static/prettify.js"></script>
-				<script src="${basePath}static/tabs.js"></script>
-				<script src="${basePath}static/bookmarks.js"></script>
-				<script src="${basePath}static/help.js"></script>
-				<script src="${basePath}static/form.js"></script>
-				<link rel="stylesheet" type="text/css" href="${basePath}static/prettify.css">
-				<link rel="stylesheet" type="text/css" href="${basePath}static/dsf.css">
-				<link rel="stylesheet" type="text/css" href="${basePath}static/form.css">
-				""".replace("${basePath}", basePath));
+				<script src="static/util.js"></script>
+				<script src="static/prettify.js"></script>
+				<script src="static/tabs.js"></script>
+				<script src="static/bookmarks.js"></script>
+				<script src="static/help.js"></script>
+				<script src="static/form.js"></script>
+				<link rel="stylesheet" type="text/css" href="static/prettify.css">
+				<link rel="stylesheet" type="text/css" href="static/dsf.css">
+				<link rel="stylesheet" type="text/css" href="static/form.css">
+				""".replace("${serverBaseUrl}", getServerBaseUrlPathWithLeadingSlash()));
 		out.write("<title>" + getTitle() + "</title>\n");
 		out.write("</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(htmlEnabled) + ");checkBookmarked();"
@@ -177,13 +190,12 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		{
 			out.write(
 					"""
-							<a href="${basePath}logout">
+							<a href="logout">
 							<svg class="icon" id="logout-icon" viewBox="0 0 24 24">
 							<title>Logout</title>
 							<path d="M5 21q-.825 0-1.413-.587Q3 19.825 3 19V5q0-.825.587-1.413Q4.175 3 5 3h7v2H5v14h7v2Zm11-4-1.375-1.45 2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5Z"/>
 							</svg></a>
-							"""
-							.replace("${basePath}", basePath));
+							""");
 		}
 
 		out.write(
@@ -236,12 +248,11 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 						<table id="header">
 						<tr>
 						<td>
-						<image src="${basePath}static/logo.svg">
+						<image src="static/logo.svg">
 						</td>
 						<td id="url">
 						<h1>
-						"""
-						.replace("${basePath}", basePath));
+						""");
 		out.write(getUrlHeading(resource));
 		out.write("""
 				</h1>
@@ -260,11 +271,11 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				</div>
 				""");
 
-		writeXml(mediaType, basePath, resource, out);
-		writeJson(mediaType, basePath, resource, out);
+		writeXml(mediaType, resource, out);
+		writeJson(mediaType, resource, out);
 
 		if (htmlEnabled)
-			writeHtml(type, basePath, resource, out);
+			writeHtml(type, resource, out);
 
 		out.write("</html>");
 		out.flush();
@@ -285,10 +296,11 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		URI uri = getResourceUri(resource);
 		String[] pathSegments = uri.getPath().split("/");
 
-		String u = serverBaseProvider.get();
+		String u = serverBaseUrl;
 		StringBuilder heading = new StringBuilder("<a href=\"" + u + "/\" title=\"Open " + u + "\">" + u + "</a>");
 
-		for (int i = 2; i < pathSegments.length; i++)
+		String[] basePathSegments = getServerBaseUrlPathWithLeadingSlash().split("/");
+		for (int i = basePathSegments.length; i < pathSegments.length; i++)
 		{
 			String pathSegment = HtmlUtils.htmlEscape(pathSegments[i]);
 			u += "/" + pathSegment;
@@ -336,12 +348,12 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		if (resource instanceof Resource && resource.getIdElement().hasIdPart())
 		{
 			if (!uriInfo.getPath().contains("_history"))
-				return Optional.of(String.format("%s/%s/%s", serverBaseProvider.get(),
-						resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()));
+				return Optional.of(String.format("%s/%s/%s", serverBaseUrl, resource.getIdElement().getResourceType(),
+						resource.getIdElement().getIdPart()));
 			else
-				return Optional.of(String.format("%s/%s/%s/_history/%s", serverBaseProvider.get(),
-						resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart(),
-						resource.getIdElement().getVersionIdPart()));
+				return Optional.of(
+						String.format("%s/%s/%s/_history/%s", serverBaseUrl, resource.getIdElement().getResourceType(),
+								resource.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart()));
 		}
 		else if (resource instanceof Bundle && !resource.getIdElement().hasIdPart())
 			return ((Bundle) resource).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
@@ -350,8 +362,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 			return Optional.empty();
 	}
 
-	private void writeXml(MediaType mediaType, String basePath, Resource resource, OutputStreamWriter out)
-			throws IOException
+	private void writeXml(MediaType mediaType, Resource resource, OutputStreamWriter out) throws IOException
 	{
 		IParser parser = getParser(mediaType, fhirContext::newXmlParser);
 
@@ -367,12 +378,10 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		content = versionMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(resource, result.group(1));
-			return resourceName
-					.map(rN -> "&lt;id value=\"<a href=\"" + basePath + rN + "/" + result.group(1) + "\">"
-							+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
-							+ "&lt;versionId value=\"" + "<a href=\"" + basePath + rN + "/" + result.group(1)
-							+ "/_history/" + result.group(4) + "\">" + result.group(4) + "</a>" + "\"/&gt;")
-					.orElse(result.group(0));
+			return resourceName.map(rN -> "&lt;id value=\"<a href=\"" + rN + "/" + result.group(1) + "\">"
+					+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
+					+ "&lt;versionId value=\"" + "<a href=\"" + rN + "/" + result.group(1) + "/_history/"
+					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\"/&gt;").orElse(result.group(0));
 		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
@@ -414,8 +423,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		}
 	}
 
-	private void writeJson(MediaType mediaType, String basePath, Resource resource, OutputStreamWriter out)
-			throws IOException
+	private void writeJson(MediaType mediaType, Resource resource, OutputStreamWriter out) throws IOException
 	{
 		IParser parser = getParser(mediaType, fhirContext::newJsonParser);
 
@@ -426,17 +434,17 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = JSON_REFERENCE_UUID_PATTERN.matcher(content);
-		content = referenceUuidMatcher.replaceAll(result -> "\"reference\": \"<a href=\"" + basePath + result.group(1)
-				+ "\">" + result.group(1) + "</a>\",");
+		content = referenceUuidMatcher.replaceAll(
+				result -> "\"reference\": \"<a href=\"" + result.group(1) + "\">" + result.group(1) + "</a>\",");
 
 		Matcher idUuidMatcher = JSON_ID_UUID_AND_VERSION_PATTERN.matcher(content);
 		content = idUuidMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(resource, result.group(1));
-			return resourceName.map(rN -> "\"id\": \"<a href=\"" + basePath + rN + "/" + result.group(1) + "\">"
-					+ result.group(1) + "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3)
-					+ "\"versionId\": \"" + "<a href=\"" + basePath + rN + "/" + result.group(1) + "/_history/"
-					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\",").orElse(result.group(0));
+			return resourceName.map(rN -> "\"id\": \"<a href=\"" + rN + "/" + result.group(1) + "\">" + result.group(1)
+					+ "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3) + "\"versionId\": \""
+					+ "<a href=\"" + rN + "/" + result.group(1) + "/_history/" + result.group(4) + "\">"
+					+ result.group(4) + "</a>" + "\",").orElse(result.group(0));
 		});
 
 		out.write(content);
@@ -444,27 +452,25 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 	}
 
 	@SuppressWarnings("unchecked")
-	private void writeHtml(Class<?> resourceType, String basePath, Resource resource, OutputStreamWriter out)
-			throws IOException
+	private void writeHtml(Class<?> resourceType, Resource resource, OutputStreamWriter out) throws IOException
 	{
 		out.write("<div id=\"html\" class=\"prettyprint lang-html\" style=\"display:none;\">\n");
 
 		URI resourceUri = getResourceUri(resource);
 
 		HtmlGenerator<Resource> generator = (HtmlGenerator<Resource>) htmlGeneratorsByType.get(resourceType).stream()
-				.filter(g -> g.isResourceSupported(basePath, resourceUri, resource)).findFirst().get();
-		generator.writeHtml(basePath, resourceUri, resource, out);
+				.filter(g -> g.isResourceSupported(resourceUri, resource)).findFirst().get();
+		generator.writeHtml(resourceUri, resource, out);
 
 		out.write("</div>\n");
 	}
 
-	private boolean isHtmlEnabled(Class<?> resourceType, String basePath, Resource resource)
-			throws MalformedURLException
+	private boolean isHtmlEnabled(Class<?> resourceType, Resource resource) throws MalformedURLException
 	{
 		URI resourceUri = getResourceUri(resource);
 
 		return htmlGeneratorsByType.containsKey(resourceType) && htmlGeneratorsByType.get(resourceType).stream()
-				.anyMatch(g -> g.isResourceSupported(basePath, resourceUri, resource));
+				.anyMatch(g -> g.isResourceSupported(resourceUri, resource));
 	}
 
 	private String adaptFormInputsIfTask(Resource resource)

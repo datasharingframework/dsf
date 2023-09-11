@@ -139,7 +139,7 @@ function readAndValidateValue(rowElement, templateValue, name, valueType, errors
             return validateReference(rowElement, errorListElement, value, errors)
         } else {
             const valueIdentifier = validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors)
-            return {identifier: valueIdentifier, type: templateValue?.valueReference?.type}
+            return { identifier: valueIdentifier, type: templateValue?.valueReference?.type }
         }
     } else if (valueType === 'valueBoolean') {
         return validateBoolean(rowElement, errorListElement, valueBoolean, errors)
@@ -243,7 +243,7 @@ function validateReference(rowElement, errorListElement, value, errors) {
     try {
         new URL(value)
         removeError(rowElement, errorListElement)
-        return {reference: value}
+        return { reference: value }
     } catch (_) {
         addError(rowElement, errorListElement, errors, "Value is not a reference")
         return null
@@ -278,8 +278,8 @@ function validateIdentifier(rowElement, errorListElement, valueSystem, valueValu
     const validatedValue = validateString(rowElement, errorListElement, valueValue, errors)
 
     if (validatedSystem && validatedValue) {
-         removeError(rowElement, errorListElement)
-         return {system: valueSystem, value: valueValue}
+        removeError(rowElement, errorListElement)
+        return { system: valueSystem, value: valueValue }
     } else {
         addError(rowElement, errorListElement, errors, "System or value not usable for identifier")
         return null
@@ -291,8 +291,8 @@ function validateCoding(rowElement, errorListElement, valueSystem, valueValue, e
     const validatedCode = validateString(rowElement, errorListElement, valueValue, errors)
 
     if (validatedSystem && validatedCode) {
-         removeError(rowElement, errorListElement)
-         return {system: valueSystem, code: valueValue}
+        removeError(rowElement, errorListElement)
+        return { system: valueSystem, code: valueValue }
     } else {
         addError(rowElement, errorListElement, errors, "System or code not usable for coding")
         return null
@@ -301,7 +301,7 @@ function validateCoding(rowElement, errorListElement, valueSystem, valueValue, e
 
 function addError(rowElement, errorListElement, errors, message) {
     const id = rowElement.getAttribute("name") + "-" + rowElement.getAttribute("index")
-    errors.push({id: id, error: message})
+    errors.push({ id: id, error: message })
 
     rowElement.classList.add("error")
 
@@ -323,7 +323,7 @@ function removeError(rowElement, errorListElement) {
 
 function updateQuestionnaireResponse(questionnaireResponse) {
     const fullUrl = window.location.origin + window.location.pathname
-    const requestUrl = fullUrl.slice(0, fullUrl.indexOf("/_history") + 1)
+    const requestUrl = fullUrl.indexOf("/_history") < 0 ? fullUrl : fullUrl.slice(0, fullUrl.indexOf("/_history"))
     const resourceBaseUrlWithoutId = fullUrl.slice(0, fullUrl.indexOf("/QuestionnaireResponse") + "/QuestionnaireResponse".length)
 
     enableSpinner()
@@ -336,7 +336,7 @@ function updateQuestionnaireResponse(questionnaireResponse) {
         },
         body: questionnaireResponse
     }).then(response => {
-        parseResponse(response, false, resourceBaseUrlWithoutId)
+        parseResponse(response, resourceBaseUrlWithoutId)
     })
 }
 
@@ -354,11 +354,11 @@ function createTask(task) {
         },
         body: task
     }).then(response => {
-        parseResponse(response, true, requestUrl)
+        parseResponse(response, requestUrl)
     })
 }
 
-function parseResponse(response, redirect, resourceBaseUrlWithoutId) {
+function parseResponse(response, resourceBaseUrlWithoutId) {
     console.log(response)
 
     response.text().then((text) => {
@@ -446,14 +446,14 @@ function groupBy(list, keyGetter) {
     const map = new Map()
 
     list.forEach((item) => {
-         const key = keyGetter(item);
-         const collection = map.get(key)
+        const key = keyGetter(item);
+        const collection = map.get(key)
 
-         if (!collection) {
-             map.set(key, [item])
-         } else {
-             collection.push(item)
-         }
+        if (!collection) {
+            map.set(key, [item])
+        } else {
+            collection.push(item)
+        }
     });
 
     return Array.from(map.values());
@@ -522,10 +522,10 @@ function appendInputRowAfter(inputRow, definition, indices) {
 
     const index = getIndex(getDefinitionId(definition), indices)
     clone.setAttribute("index", index)
-    clone.querySelectorAll("[index]").forEach( e => { e.setAttribute("index", index) })
+    clone.querySelectorAll("[index]").forEach(e => { e.setAttribute("index", index) })
 
     clone.querySelector("span[class='plus-minus-icon']").remove()
-    clone.querySelectorAll("input").forEach( e => { e.value = '' })
+    clone.querySelectorAll("input").forEach(e => { e.value = '' })
 
     const label = clone.querySelector("label")
     if (label) {
@@ -551,10 +551,10 @@ function htmlToElement(html, innerText) {
     const template = document.createElement('template')
     template.innerHTML = html
     const child = template.content.firstChild
-    
+
     if (innerText)
         child.innerText = innerText
-        
+
     return child
 }
 

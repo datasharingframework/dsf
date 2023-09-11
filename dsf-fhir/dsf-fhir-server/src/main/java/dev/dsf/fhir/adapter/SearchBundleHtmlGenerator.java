@@ -2,7 +2,9 @@ package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
@@ -20,13 +22,13 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.springframework.web.util.HtmlUtils;
 
 import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.PathSegment;
 
 public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements HtmlGenerator<Bundle>
 {
@@ -39,11 +41,30 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY = "business-key";
 
+	private final String taskRessourcePath;
+	private final String questionnaireResponseRessourcePath;
+
 	private final int defaultPageCount;
 
-	public SearchBundleHtmlGenerator(int defaultPageCount)
+	public SearchBundleHtmlGenerator(String serverBaseUrl, int defaultPageCount)
 	{
+		String serverBaseUrlPath = getServerBaseUrlPath(serverBaseUrl);
+		taskRessourcePath = serverBaseUrlPath + "/" + ResourceType.Task.name();
+		questionnaireResponseRessourcePath = serverBaseUrlPath + "/" + ResourceType.QuestionnaireResponse.name();
+
 		this.defaultPageCount = defaultPageCount;
+	}
+
+	private String getServerBaseUrlPath(String serverBaseUrl)
+	{
+		try
+		{
+			return new URL(serverBaseUrl).getPath();
+		}
+		catch (MalformedURLException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -53,20 +74,14 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 	}
 
 	@Override
-	public boolean isResourceSupported(String basePath, URI resourceUri, Resource resource)
+	public boolean isResourceSupported(URI resourceUri, Resource resource)
 	{
-		List<PathSegment> segments = UriComponent.decodePath(resourceUri, false);
-
-		return resource != null && resource instanceof Bundle && segments.size() == 2
-				&& basePath.equals("/" + segments.get(0).getPath() + "/") && switch (segments.get(1).getPath())
-				{
-					case "Task", "QuestionnaireResponse" -> true;
-					default -> false;
-				};
+		return resource != null && resource instanceof Bundle && (taskRessourcePath.equals(resourceUri.getPath())
+				|| questionnaireResponseRessourcePath.equals(resourceUri.getPath()));
 	}
 
 	@Override
-	public void writeHtml(String basePath, URI resourceUri, Bundle resource, OutputStreamWriter out) throws IOException
+	public void writeHtml(URI resourceUri, Bundle resource, OutputStreamWriter out) throws IOException
 	{
 		out.write("<div class=\"bundle\">");
 		out.write("<div id=\"header\">");
@@ -131,7 +146,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 						.filter(e -> e.hasResource() && e.hasSearch() && e.getSearch().hasMode()
 								&& SearchEntryMode.MATCH.equals(e.getSearch().getMode()))
 						.map(BundleEntryComponent::getResource)
-						.map(r -> "<tr onClick=\"window.location='" + basePath
+						.map(r -> "<tr onClick=\"window.location=document.head.baseURI+'"
 								+ r.getIdElement().toVersionless().getValueAsString() + "'\" title=\"Open Resource\">"
 								+ getRow(r) + "</tr>\n")
 						.collect(Collectors.joining()));
@@ -178,13 +193,12 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 	private String getHeader(URI uri)
 	{
-		List<PathSegment> segments = UriComponent.decodePath(uri, false);
-		return switch (segments.get(1).getPath())
-		{
-			case "Task" -> getTaskHeader();
-			case "QuestionnaireResponse" -> getQuestionnaireResponseHeader();
-			default -> throw new IllegalArgumentException("Unexpected resource path: " + segments.get(1).getPath());
-		};
+		if (taskRessourcePath.equals(uri.getPath()))
+			return getTaskHeader();
+		else if (questionnaireResponseRessourcePath.equals(uri.getPath()))
+			return getQuestionnaireResponseHeader();
+		else
+			throw new IllegalArgumentException("Unexpected resource path: " + uri.getPath());
 	}
 
 	private String getTaskHeader()

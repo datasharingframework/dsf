@@ -30,8 +30,9 @@ public class AdapterConfig
 	@Bean
 	public HtmlFhirAdapter htmlFhirAdapter()
 	{
-		return new HtmlFhirAdapter(fhirConfig.fhirContext(), () -> propertiesConfig.getServerBaseUrl(),
+		return new HtmlFhirAdapter(propertiesConfig.getServerBaseUrl(), fhirConfig.fhirContext(),
 				List.of(new QuestionnaireResponseHtmlGenerator(), new TaskHtmlGenerator(),
-						new SearchBundleHtmlGenerator(propertiesConfig.getDefaultPageCount())));
+						new SearchBundleHtmlGenerator(propertiesConfig.getServerBaseUrl(),
+								propertiesConfig.getDefaultPageCount())));
 	}
 }
