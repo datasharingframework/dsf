@@ -34,13 +34,13 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 	}
 
 	@Override
-	public boolean isResourceSupported(String basePath, URI resourceUri, Resource resource)
+	public boolean isResourceSupported(URI resourceUri, Resource resource)
 	{
 		return resource != null && resource instanceof Task;
 	}
 
 	@Override
-	public void writeHtml(String basePath, URI resourceUri, Task task, OutputStreamWriter out) throws IOException
+	public void writeHtml(URI resourceUri, Task task, OutputStreamWriter out) throws IOException
 	{
 		boolean draft = Task.TaskStatus.DRAFT.equals(task.getStatus());
 
@@ -63,18 +63,14 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		out.write("<li><b>Last Updated:</b> " + (task.getMeta().getLastUpdated() == null ? ""
 				: DATE_TIME_DISPLAY_FORMAT.format(task.getMeta().getLastUpdated())) + "</li>\n");
 		out.write("<li><b>Status:</b> " + (task.getStatus() == null ? "" : task.getStatus().toCode()) + "</li>\n");
-		out.write("<li><b>Process:</b> <a href=\"" + basePath + "ActivityDefinition?url="
+		out.write("<li><b>Process:</b> <a href=\"ActivityDefinition?url="
 				+ (task.getInstantiatesCanonical() == null ? "" : task.getInstantiatesCanonical()) + "\">"
 				+ (task.getInstantiatesCanonical() == null ? ""
 						: task.getInstantiatesCanonical().replaceAll("\\|", " | "))
 				+ "</a></li>\n");
-		out.write(
-				"<li><b>Task Profile:</b> "
-						+ task.getMeta().getProfile().stream().map(CanonicalType::getValue)
-								.map(v -> "<a href=\"" + basePath + "StructureDefinition?url=" + v + "\">"
-										+ v.replaceAll("\\|", " | ") + "</a>")
-								.collect(Collectors.joining(", "))
-						+ "</li>\n");
+		out.write("<li><b>Task Profile:</b> " + task.getMeta().getProfile().stream().map(CanonicalType::getValue)
+				.map(v -> "<a href=\"StructureDefinition?url=" + v + "\">" + v.replaceAll("\\|", " | ") + "</a>")
+				.collect(Collectors.joining(", ")) + "</li>\n");
 		getInput(task, isMessageName()).ifPresent(m -> silentWrite(out, "<li><b>Message-Name:</b> " + m + "</li>\n"));
 		getInput(task, isBusinessKey()).ifPresent(k -> silentWrite(out, "<li><b>Business-Key:</b> " + k + "</li>\n"));
 		getInput(task, isCorrelationKey())

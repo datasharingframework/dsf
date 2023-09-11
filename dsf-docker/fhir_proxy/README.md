@@ -11,4 +11,5 @@ ${SSL\_VERIFY\_CLIENT} - to set apache config param `SSLVerifyClient `, default 
 ${PROXY\_PASS\_TIMEOUT\_HTTP} - timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a reply, default: `60` seconds  
 ${PROXY\_PASS\_TIMEOUT\_WS} - timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a reply, default: `60` seconds  
 ${PROXY\_PASS\_CONNECTION\_TIMEOUT\_HTTP} - connection timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a connection to be established, default: `30` seconds  
-${PROXY\_PASS\_CONNECTION\_TIMEOUT\_WS} - connection timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a connection to be established, default: `30` seconds
+${PROXY\_PASS\_CONNECTION\_TIMEOUT\_WS} - connection timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a connection to be established, default: `30` seconds  
+${SERVER\_CONTEXT\_PATH} - reverse proxy context path that delegates to the app server, `/` character at start, no `/` character at end, default: `/fhir`

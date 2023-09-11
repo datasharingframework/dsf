@@ -1,7 +1,9 @@
 package dev.dsf.bpe.spring.config;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -253,7 +255,14 @@ public class PropertiesConfig implements InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		if (serverBaseUrl.endsWith("//"))
+		URL url = new URL(serverBaseUrl);
+		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
+		{
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
+					serverBaseUrl);
+			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with 'http://' or 'https://'");
+		}
+		else if (serverBaseUrl.endsWith("//"))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", serverBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, ending in //");
