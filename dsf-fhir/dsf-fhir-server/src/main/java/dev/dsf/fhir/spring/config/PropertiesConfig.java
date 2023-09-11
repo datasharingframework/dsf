@@ -50,8 +50,8 @@ public class PropertiesConfig
 	@Value("${dev.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
 
-	@Documentation(required = true, description = "Role config YAML")
-	@Value("${dev.dsf.fhir.server.roleConfig}")
+	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control).")
+	@Value("${dev.dsf.fhir.server.roleConfig:}")
 	private String roleConfig;
 
 	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
