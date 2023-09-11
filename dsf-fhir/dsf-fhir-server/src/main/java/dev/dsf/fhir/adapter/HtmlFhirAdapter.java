@@ -391,8 +391,8 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 				+ "\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
-		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"" + result.group(1)
-				+ "\">" + result.group(1) + "</a>\"&gt");
+		content = referenceUuidMatcher.replaceAll(
+				result -> "&lt;reference value=\"<a href=\"" + result.group(1) + "\">" + result.group(1) + "</a>\"&gt");
 
 		out.write(content);
 		out.write("</pre>\n");
