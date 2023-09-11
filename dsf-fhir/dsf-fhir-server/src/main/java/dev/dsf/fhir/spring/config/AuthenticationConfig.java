@@ -58,21 +58,15 @@ public class AuthenticationConfig
 	@Bean
 	public RoleConfig roleConfig()
 	{
-		String roleConfig = propertiesConfig.getRoleConfig();
-		if (roleConfig != null)
-		{
-			RoleConfig config = new RoleConfigReader().read(roleConfig,
-					role -> FhirServerRole.isValid(role) ? FhirServerRole.valueOf(role) : null,
-					this::practionerRoleFactory);
+		RoleConfig config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
+				role -> FhirServerRole.isValid(role) ? FhirServerRole.valueOf(role) : null,
+				this::practionerRoleFactory);
 
-			logger.info("Role config: {}", config.toString());
-			return config;
-		}
-		else
-			throw new RuntimeException("Roles not configured");
+		logger.info("Role config: {}", config.toString());
+		return config;
 	}
 
-	// TODO implement practitioner role factory that logs non existing codes as warning
+	// TODO implement role factory that only allows existing roles
 	private Coding practionerRoleFactory(String role)
 	{
 		if (role != null)

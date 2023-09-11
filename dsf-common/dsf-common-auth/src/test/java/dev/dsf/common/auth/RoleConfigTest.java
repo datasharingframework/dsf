@@ -35,11 +35,11 @@ public class RoleConfigTest
 	}
 
 	@Test
-	public void read() throws Exception
+	public void testRead() throws Exception
 	{
 		String document = """
 				- foo:
-				    thumbprint: aabbccdd...
+				    thumbprint: f7f9ef095c5c246d3e8149729221e668b6ffd9a117fe23e2687658f6a203d31a0e769fb20dc2af6361306717116c700c5905a895a7311057af461c5d78a257b5
 				    dsf-role:
 				      - foo
 				      - bar
@@ -47,8 +47,8 @@ public class RoleConfigTest
 				    invalid:
 				- bar:
 				    thumbprint:
-				      - eeffF0011...
-				      - 22334455...
+				      - 2d259cc15ee2fe57bc11e1322040ee9e045dd3efb83ed1cb0f393c3bdfecaf3f6506e5573fbc213a1025a7c3dfef101fc8d85ab069e5662d666ea970c7e0cbb6
+				      - b52a8b63b030181b8b6bc9ca1e47279da4842ef7ab46c08de6c5713a4e8ecc2c1d7f8cd5c17fe4eb0fe43838ee4b020a88634ea47c520dcc7f5f966b66e69190
 				    email:
 				      - one@test.com
 				      - two@test.com
@@ -97,11 +97,15 @@ public class RoleConfigTest
 		assertNotNull(roles.getEntries());
 		assertEquals(5, roles.getEntries().size());
 
-		assertMapping("foo", Arrays.asList("aabbccdd..."), Collections.emptyList(), Collections.emptyList(),
-				Collections.emptyList(), Arrays.asList(TestRole.foo, TestRole.bar, TestRole.baz),
-				Collections.emptyList(), roles.getEntries().get(0));
+		assertMapping("foo", Arrays.asList(
+				"f7f9ef095c5c246d3e8149729221e668b6ffd9a117fe23e2687658f6a203d31a0e769fb20dc2af6361306717116c700c5905a895a7311057af461c5d78a257b5"),
+				Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+				Arrays.asList(TestRole.foo, TestRole.bar, TestRole.baz), Collections.emptyList(),
+				roles.getEntries().get(0));
 
-		assertMapping("bar", Arrays.asList("eeffF0011...", "22334455..."),
+		assertMapping("bar", Arrays.asList(
+				"2d259cc15ee2fe57bc11e1322040ee9e045dd3efb83ed1cb0f393c3bdfecaf3f6506e5573fbc213a1025a7c3dfef101fc8d85ab069e5662d666ea970c7e0cbb6",
+				"b52a8b63b030181b8b6bc9ca1e47279da4842ef7ab46c08de6c5713a4e8ecc2c1d7f8cd5c17fe4eb0fe43838ee4b020a88634ea47c520dcc7f5f966b66e69190"),
 				Arrays.asList("one@test.com", "two@test.com"), Collections.emptyList(), Collections.emptyList(),
 				Arrays.asList(TestRole.foo, TestRole.baz), Collections.emptyList(), roles.getEntries().get(1));
 

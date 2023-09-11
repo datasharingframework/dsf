@@ -1,6 +1,7 @@
 package dev.dsf.common.auth.conf;
 
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.hl7.fhir.r4.model.Coding;
@@ -11,6 +12,10 @@ public class RoleConfigReader
 	public RoleConfig read(String config, Function<String, DsfRole> dsfRoleFactory,
 			Function<String, Coding> practitionerRoleFactory)
 	{
+		Objects.requireNonNull(config, "config");
+		Objects.requireNonNull(dsfRoleFactory, "dsfRoleFactory");
+		Objects.requireNonNull(practitionerRoleFactory, "practitionerRoleFactory");
+
 		Object o = yaml().load(config);
 		return new RoleConfig(o, dsfRoleFactory, practitionerRoleFactory);
 	}
@@ -18,6 +23,10 @@ public class RoleConfigReader
 	public RoleConfig read(InputStream config, Function<String, DsfRole> dsfRoleFactory,
 			Function<String, Coding> practitionerRoleFactory)
 	{
+		Objects.requireNonNull(config, "config");
+		Objects.requireNonNull(dsfRoleFactory, "dsfRoleFactory");
+		Objects.requireNonNull(practitionerRoleFactory, "practitionerRoleFactory");
+
 		Object o = yaml().load(config);
 		return new RoleConfig(o, dsfRoleFactory, practitionerRoleFactory);
 	}
