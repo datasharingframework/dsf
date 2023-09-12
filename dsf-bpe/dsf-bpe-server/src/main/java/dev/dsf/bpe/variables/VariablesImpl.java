@@ -186,12 +186,18 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public Task getStartTask()
 	{
+		logger.trace("getStartTask - parentActivityInstanceId: {}, parentId: {}",
+				execution.getParentActivityInstanceId(), execution.getParentId());
+
 		return getResource(START_TASK);
 	}
 
 	@Override
 	public Task getLatestTask()
 	{
+		logger.trace("getLatestTask - parentActivityInstanceId: {}, parentId: {}",
+				execution.getParentActivityInstanceId(), execution.getParentId());
+
 		List<Task> tasks = getCurrentTasks();
 		return tasks == null || tasks.isEmpty() ? null : tasks.get(tasks.size() - 1);
 	}
@@ -199,6 +205,9 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public List<Task> getTasks()
 	{
+		logger.trace("getTasks - parentActivityInstanceId: {}, parentId: {}", execution.getParentActivityInstanceId(),
+				execution.getParentId());
+
 		List<Task> tasks = Stream
 				.concat(Stream.of(getStartTask()),
 						execution.getVariables().keySet().stream().filter(k -> k.startsWith(TASKS_PREFIX))
@@ -212,8 +221,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public List<Task> getCurrentTasks()
 	{
-		logger.trace("parentActivityInstanceId: {}, parentId: {}", execution.getParentActivityInstanceId(),
-				execution.getParentId());
+		logger.trace("getCurrentTasks - parentActivityInstanceId: {}, parentId: {}",
+				execution.getParentActivityInstanceId(), execution.getParentId());
 
 		Stream<Task> start = execution.getParentId() == null ? Stream.of(getStartTask()) : Stream.empty();
 		Stream<Task> current = getResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
@@ -225,6 +234,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void updateTask(Task task)
 	{
+		logger.trace("updateTask- Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
+
 		if (task != null)
 		{
 			if (getStartTask() != null
@@ -249,6 +260,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void onStart(Task task)
 	{
+		logger.trace("onStart - Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
+
 		if (task != null)
 			setResource(START_TASK, task);
 		else
@@ -258,6 +271,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void onContinue(Task task)
 	{
+		logger.trace("onContinue - Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
+
 		if (task != null)
 		{
 			String instanceId = execution.getParentActivityInstanceId();
@@ -275,6 +290,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void onEnd()
 	{
+		logger.trace("onEnd");
+
 		String instanceId = execution.getParentActivityInstanceId();
 		List<Task> tasks = new ArrayList<>(
 				getResourceListOrDefault(TASKS_PREFIX + instanceId, Collections.emptyList()));
