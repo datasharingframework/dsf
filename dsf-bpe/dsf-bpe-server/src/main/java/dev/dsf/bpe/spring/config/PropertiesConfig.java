@@ -124,6 +124,18 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.process.threads:-1}")
 	private int processStartOrContinueThreads;
 
+	@Documentation(description = "Process engine job executor core pool size")
+	@Value("${dev.dsf.bpe.process.engine.corePoolSize:4}")
+	private int processEngineJobExecutorCorePoolSize;
+
+	@Documentation(description = "Process engine job executor queue size, jobs are added to the queue if all core pool threads are busy")
+	@Value("${dev.dsf.bpe.process.engine.queueSize:40}")
+	private int processEngineJobExecutorQueueSize;
+
+	@Documentation(description = "Process engine job executor max pool size, additional threads until max pool size are created if the queue is full")
+	@Value("${dev.dsf.bpe.process.engine.maxPoolSize:10}")
+	private int processEngineJobExecutorMaxPoolSize;
+
 	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, `-1` means infinite number of retries")
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.max:-1}")
 	private int fhirServerRequestMaxRetries;
@@ -275,6 +287,11 @@ public class PropertiesConfig implements InitializingBean
 
 		if (serverBaseUrl.endsWith("/"))
 			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+
+		logger.info(
+				"Concurrency config: {process-threads: {}, engine-core-pool: {}, engine-queue: {}, engine-max-pool: {}}",
+				getProcessStartOrContinueThreads(), processEngineJobExecutorCorePoolSize,
+				processEngineJobExecutorQueueSize, processEngineJobExecutorMaxPoolSize);
 	}
 
 	public String getDbUrl()
@@ -396,7 +413,25 @@ public class PropertiesConfig implements InitializingBean
 
 	public int getProcessStartOrContinueThreads()
 	{
-		return processStartOrContinueThreads;
+		if (processStartOrContinueThreads <= 0)
+			return Runtime.getRuntime().availableProcessors();
+		else
+			return processStartOrContinueThreads;
+	}
+
+	public int getProcessEngineJobExecutorCorePoolSize()
+	{
+		return processEngineJobExecutorCorePoolSize;
+	}
+
+	public int getProcessEngineJobExecutorQueueSize()
+	{
+		return processEngineJobExecutorQueueSize;
+	}
+
+	public int getProcessEngineJobExecutorMaxPoolSize()
+	{
+		return processEngineJobExecutorMaxPoolSize;
 	}
 
 	public int getFhirServerRequestMaxRetries()
