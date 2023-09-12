@@ -25,8 +25,8 @@ function addCurrentBookmark() {
 	const removeIcon = document.getElementById('bookmark-remove');
 	removeIcon.style.display = 'inline';
 
-	const url = window.location.pathname + window.location.search;
-	const resourceType = getResourceType(url);
+	const url = window.location.pathname.substring(new URL(document.head.baseURI).pathname.length) + window.location.search;
+	const resourceType = getResourceTypeOrMisc(url);
 
 	const bookmarks = getBookmarks();
 
@@ -44,8 +44,8 @@ function removeCurrentBookmark() {
 	const removeIcon = document.getElementById('bookmark-remove');
 	removeIcon.style.display = 'none';
 
-	const url = window.location.pathname + window.location.search;
-	const resourceType = getResourceType(url);
+	const url = window.location.pathname.substring(new URL(document.head.baseURI).pathname.length) + window.location.search;
+	const resourceType = getResourceTypeOrMisc(url);
 
 	const bookmarks = getBookmarks();
 
@@ -57,8 +57,8 @@ function removeCurrentBookmark() {
 }
 
 function checkBookmarked() {
-	const url = window.location.pathname + window.location.search;
-	const resourceType = getResourceType(url);
+	const url = window.location.pathname.substring(new URL(document.head.baseURI).pathname.length) + window.location.search;
+	const resourceType = getResourceTypeOrMisc(url);
 
 	const addIcon = document.getElementById('bookmark-add');
 	const removeIcon = document.getElementById('bookmark-remove');
@@ -78,11 +78,17 @@ function checkBookmarked() {
 
 function getBookmarks() {
 	if (localStorage != null) {
-		return localStorage.getItem('bookmarks') != null && localStorage.getItem('bookmarks') != "" ? JSON.parse(localStorage.getItem('bookmarks')) : getInitialBookmarks();
+		return localStorage.getItem('bookmarks') != null && localStorage.getItem('bookmarks') != "" ? cleanBookmarkUrls(JSON.parse(localStorage.getItem('bookmarks'))) : getInitialBookmarks();
 	}
 	else {
 		alert("session storage not available");
 	}
+}
+
+function cleanBookmarkUrls(bookmarks) {
+	let b = new Object();
+	Object.entries(bookmarks).map(e => new Array(e[0], e[1].map(u => u.startsWith('/fhir/') ? u.substring('/fhir/'.length) : u))).forEach(e => b[e[0]] = e[1]);
+	return b;
 }
 
 function saveBookmarks(bookmarks) {
@@ -94,9 +100,21 @@ function saveBookmarks(bookmarks) {
 	}
 }
 
-function getResourceType(url) {
+function getResourceTypeOrMisc(url) {
 	const regex = new RegExp('(?:(?:http|https):\/\/(?:[A-Za-z0-9\-\\\.\:\%\$]*\/)+)?'
-		+ '(Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition|ConceptMap|Condition|Consent|Contract|Coverage|CoverageEligibilityRequest|CoverageEligibilityResponse|DetectedIssue|Device|DeviceDefinition|DeviceMetric|DeviceRequest|DeviceUseStatement|DiagnosticReport|DocumentManifest|DocumentReference|EffectEvidenceSynthesis|Encounter|Endpoint|EnrollmentRequest|EnrollmentResponse|EpisodeOfCare|EventDefinition|Evidence|EvidenceVariable|ExampleScenario|ExplanationOfBenefit|FamilyMemberHistory|Flag|Goal|GraphDefinition|Group|GuidanceResponse|HealthcareService|ImagingStudy|Immunization|ImmunizationEvaluation|ImmunizationRecommendation|ImplementationGuide|InsurancePlan|Invoice|Library|Linkage|List|Location|Measure|MeasureReport|Media|Medication|MedicationAdministration|MedicationDispense|MedicationKnowledge|MedicationRequest|MedicationStatement|MedicinalProduct|MedicinalProductAuthorization|MedicinalProductContraindication|MedicinalProductIndication|MedicinalProductIngredient|MedicinalProductInteraction|MedicinalProductManufactured|MedicinalProductPackaged|MedicinalProductPharmaceutical|MedicinalProductUndesirableEffect|MessageDefinition|MessageHeader|MolecularSequence|NamingSystem|NutritionOrder|Observation|ObservationDefinition|OperationDefinition|OperationOutcome|Organization|OrganizationAffiliation|Patient|PaymentNotice|PaymentReconciliation|Person|PlanDefinition|Practitioner|PractitionerRole|Procedure|Provenance|Questionnaire|QuestionnaireResponse|RelatedPerson|RequestGroup|ResearchDefinition|ResearchElementDefinition|ResearchStudy|ResearchSubject|RiskAssessment|RiskEvidenceSynthesis|Schedule|SearchParameter|ServiceRequest|Slot|Specimen|SpecimenDefinition|StructureDefinition|StructureMap|Subscription|Substance|SubstanceNucleicAcid|SubstancePolymer|SubstanceProtein|SubstanceReferenceInformation|SubstanceSourceMaterial|SubstanceSpecification|SupplyDelivery|SupplyRequest|Task|TerminologyCapabilities|TestReport|TestScript|ValueSet|VerificationResult|VisionPrescription)'
+		+ '(Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement'
+		+ '|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition'
+		+ '|ConceptMap|Condition|Consent|Contract|Coverage|CoverageEligibilityRequest|CoverageEligibilityResponse|DetectedIssue|Device|DeviceDefinition|DeviceMetric|DeviceRequest|DeviceUseStatement'
+		+ '|DiagnosticReport|DocumentManifest|DocumentReference|EffectEvidenceSynthesis|Encounter|Endpoint|EnrollmentRequest|EnrollmentResponse|EpisodeOfCare|EventDefinition|Evidence|EvidenceVariable'
+		+ '|ExampleScenario|ExplanationOfBenefit|FamilyMemberHistory|Flag|Goal|GraphDefinition|Group|GuidanceResponse|HealthcareService|ImagingStudy|Immunization|ImmunizationEvaluation'
+		+ '|ImmunizationRecommendation|ImplementationGuide|InsurancePlan|Invoice|Library|Linkage|List|Location|Measure|MeasureReport|Media|Medication|MedicationAdministration|MedicationDispense'
+		+ '|MedicationKnowledge|MedicationRequest|MedicationStatement|MedicinalProduct|MedicinalProductAuthorization|MedicinalProductContraindication|MedicinalProductIndication|MedicinalProductIngredient'
+		+ '|MedicinalProductInteraction|MedicinalProductManufactured|MedicinalProductPackaged|MedicinalProductPharmaceutical|MedicinalProductUndesirableEffect|MessageDefinition|MessageHeader'
+		+ '|MolecularSequence|NamingSystem|NutritionOrder|Observation|ObservationDefinition|OperationDefinition|OperationOutcome|Organization|OrganizationAffiliation|Patient|PaymentNotice'
+		+ '|PaymentReconciliation|Person|PlanDefinition|Practitioner|PractitionerRole|Procedure|Provenance|Questionnaire|QuestionnaireResponse|RelatedPerson|RequestGroup|ResearchDefinition'
+		+ '|ResearchElementDefinition|ResearchStudy|ResearchSubject|RiskAssessment|RiskEvidenceSynthesis|Schedule|SearchParameter|ServiceRequest|Slot|Specimen|SpecimenDefinition|StructureDefinition'
+		+ '|StructureMap|Subscription|Substance|SubstanceNucleicAcid|SubstancePolymer|SubstanceProtein|SubstanceReferenceInformation|SubstanceSourceMaterial|SubstanceSpecification|SupplyDelivery'
+		+ '|SupplyRequest|Task|TerminologyCapabilities|TestReport|TestScript|ValueSet|VerificationResult|VisionPrescription)'
 		+ '(?:[\/?#](?:.*)?)?$');
 	const match = regex.exec(url);
 	if (match != null)
@@ -105,19 +123,23 @@ function getResourceType(url) {
 		return '_misc';
 }
 
+function getBasePath() {
+
+}
+
 function getInitialBookmarks() {
 	return {
-		'_misc': ['/fhir/metadata'],
-		'ActivityDefinition': ['/fhir/ActivityDefinition'],
-		'CodeSystem': ['/fhir/CodeSystem'],
-		'Endpoint': ['/fhir/Endpoint'],
-		'NamingSystem': ['/fhir/NamingSystem'],
-		'Organization': ['/fhir/Organization', '/fhir/Organization?identifier=highmed.org', '/fhir/Organization?identifier=medizininformatik-initiative.de', '/fhir/Organization?identifier=netzwerk-universitaetsmedizin.de'],
-		'OrganizationAffiliation': ['/fhir/OrganizationAffiliation'],
-		'QuestionnaireResponse': ['/fhir/QuestionnaireResponse?_sort=-_lastUpdated', '/fhir/QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],
-		'Subscription': ['/fhir/Subscription'],
-		'Task': ['/fhir/Task', '/fhir/Task?_sort=-_lastUpdated', '/fhir/Task?_sort=_profile&status=draft'],
-		'ValueSet': ['/fhir/ValueSet']
+		'_misc': ['metadata'],
+		'ActivityDefinition': ['ActivityDefinition'],
+		'CodeSystem': ['CodeSystem'],
+		'Endpoint': ['Endpoint'],
+		'NamingSystem': ['NamingSystem'],
+		'Organization': ['Organization', 'Organization?identifier=highmed.org', 'Organization?identifier=medizininformatik-initiative.de', 'Organization?identifier=netzwerk-universitaetsmedizin.de'],
+		'OrganizationAffiliation': ['OrganizationAffiliation'],
+		'QuestionnaireResponse': ['QuestionnaireResponse?_sort=-_lastUpdated', 'QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],
+		'Subscription': ['Subscription'],
+		'Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile&status=draft'],
+		'ValueSet': ['ValueSet']
 	};
 }
 
@@ -132,15 +154,15 @@ function createBookmarkList(bookmarks) {
 		if (e[0] !== '_misc' && e[1].length > 0) {
 			const h4 = document.createElement("h4");
 			const h4Link = document.createElement("a");
-			h4Link.href = '/fhir/' + e[0];
-			h4Link.title = 'Open /fhir/' + e[0];
+			h4Link.href = e[0];
+			h4Link.title = 'Open ' + e[0];
 			const h4Content = document.createTextNode(e[0]);
 			h4.appendChild(h4Link);
 			h4Link.appendChild(h4Content);
 			bookmarkList.appendChild(h4);
 		}
 		if (e[1].length > 0) {
-			e[1].filter(b => b !== ('/fhir/' + e[0])).forEach(b => {
+			e[1].filter(b => b !== e[0]).forEach(b => {
 				const div = document.createElement("div");
 				div.setAttribute('id', 'bookmarks-list-entry-' + counter);
 				const divAddIcon = addIcon.cloneNode(true);
@@ -158,7 +180,7 @@ function createBookmarkList(bookmarks) {
 				const divLink = document.createElement("a");
 				divLink.href = b;
 				divLink.title = 'Open ' + b;
-				const divContent = document.createTextNode(b.replaceAll('/fhir/' + e[0], ''));
+				const divContent = document.createTextNode(e[0] === '_misc' ? b : b.substring(e[0].length));
 				div.appendChild(divAddIcon);
 				div.appendChild(divRemoveIcon);
 				div.appendChild(divLink);
@@ -179,7 +201,7 @@ function removeBookmark(url, counter) {
 	const div = document.getElementById('bookmarks-list-entry-' + counter);
 	div.className = 'bookmarks-list-entry-removed';
 
-	const resourceType = getResourceType(url);
+	const resourceType = getResourceTypeOrMisc(url);
 
 	const bookmarks = getBookmarks();
 
@@ -197,7 +219,7 @@ function addBookmark(url, counter) {
 	const div = document.getElementById('bookmarks-list-entry-' + counter);
 	div.className = null;
 
-	const resourceType = getResourceType(url);
+	const resourceType = getResourceTypeOrMisc(url);
 
 	const bookmarks = getBookmarks();
 

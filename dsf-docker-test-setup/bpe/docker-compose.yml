@@ -33,7 +33,6 @@ services:
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/bpe
-      DEV_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_Organization
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://fhir/fhir
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
     networks:

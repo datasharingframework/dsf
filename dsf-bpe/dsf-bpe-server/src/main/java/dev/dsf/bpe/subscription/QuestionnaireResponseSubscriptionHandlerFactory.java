@@ -45,6 +45,6 @@ public class QuestionnaireResponseSubscriptionHandlerFactory
 	public PingEventResourceHandler<QuestionnaireResponse> createPingEventResourceHandler(
 			ExistingResourceLoader<QuestionnaireResponse> existingResourceLoader)
 	{
-		return new PingEventResourceHandler<>(existingResourceLoader);
+		return new PingEventResourceHandlerImpl<>(existingResourceLoader);
 	}
 }

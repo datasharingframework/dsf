@@ -1,7 +1,9 @@
 package dev.dsf.bpe.spring.config;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,10 +47,6 @@ public class PropertiesConfig implements InitializingBean
 	@Documentation(required = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
 	@Value("${dev.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
-
-	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
-	@Value("${dev.dsf.bpe.fhir.server.organization.identifier.value}")
-	private String organizationIdentifierValue;
 
 	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_server_trust_certificates.pem")
 	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas}")
@@ -114,13 +112,29 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
 
-	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List")
+	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List", example = "dsfdev_updateAllowList|1.0, another_process|x.y")
 	@Value("#{'${dev.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processExcluded;
 
-	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available")
+	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available", example = "old_process|x.y")
 	@Value("#{'${dev.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processRetired;
+
+	@Documentation(description = "Number of parallel Task / QuestionnaireResponse threads to start new or continue existing processes, a value `<= 0` means number of cpu cores")
+	@Value("${dev.dsf.bpe.process.threads:-1}")
+	private int processStartOrContinueThreads;
+
+	@Documentation(description = "Process engine job executor core pool size")
+	@Value("${dev.dsf.bpe.process.engine.corePoolSize:4}")
+	private int processEngineJobExecutorCorePoolSize;
+
+	@Documentation(description = "Process engine job executor queue size, jobs are added to the queue if all core pool threads are busy")
+	@Value("${dev.dsf.bpe.process.engine.queueSize:40}")
+	private int processEngineJobExecutorQueueSize;
+
+	@Documentation(description = "Process engine job executor max pool size, additional threads until max pool size are created if the queue is full")
+	@Value("${dev.dsf.bpe.process.engine.maxPoolSize:10}")
+	private int processEngineJobExecutorMaxPoolSize;
 
 	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, `-1` means infinite number of retries")
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.max:-1}")
@@ -214,9 +228,13 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.debug.log.message.onActivityEnd:false}")
 	private boolean debugLogMessageOnActivityEnd;
 
-	@Documentation(description = "To enable loging bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.bpe.debug.log.message.variables:false}")
 	private boolean debugLogMessageVariables;
+
+	@Documentation(description = "To enable logging of local bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.variablesLocal:false}")
+	private boolean debugLogMessageVariablesLocal;
 
 	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
@@ -234,7 +252,7 @@ public class PropertiesConfig implements InitializingBean
 	private char[] proxyPassword;
 
 	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
-	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
+	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> proxyNoProxy;
 
 	@Bean // static in order to initialize before @Configuration classes
@@ -249,7 +267,14 @@ public class PropertiesConfig implements InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		if (serverBaseUrl.endsWith("//"))
+		URL url = new URL(serverBaseUrl);
+		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
+		{
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
+					serverBaseUrl);
+			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with 'http://' or 'https://'");
+		}
+		else if (serverBaseUrl.endsWith("//"))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", serverBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, ending in //");
@@ -262,6 +287,11 @@ public class PropertiesConfig implements InitializingBean
 
 		if (serverBaseUrl.endsWith("/"))
 			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+
+		logger.info(
+				"Concurrency config: {process-threads: {}, engine-core-pool: {}, engine-queue: {}, engine-max-pool: {}}",
+				getProcessStartOrContinueThreads(), processEngineJobExecutorCorePoolSize,
+				processEngineJobExecutorQueueSize, processEngineJobExecutorMaxPoolSize);
 	}
 
 	public String getDbUrl()
@@ -287,11 +317,6 @@ public class PropertiesConfig implements InitializingBean
 	public char[] getDbCamundaPassword()
 	{
 		return dbCamundaPassword;
-	}
-
-	public String getOrganizationIdentifierValue()
-	{
-		return organizationIdentifierValue;
 	}
 
 	public String getClientCertificateTrustStoreFile()
@@ -384,6 +409,29 @@ public class PropertiesConfig implements InitializingBean
 	public List<String> getProcessRetired()
 	{
 		return Collections.unmodifiableList(processRetired);
+	}
+
+	public int getProcessStartOrContinueThreads()
+	{
+		if (processStartOrContinueThreads <= 0)
+			return Runtime.getRuntime().availableProcessors();
+		else
+			return processStartOrContinueThreads;
+	}
+
+	public int getProcessEngineJobExecutorCorePoolSize()
+	{
+		return processEngineJobExecutorCorePoolSize;
+	}
+
+	public int getProcessEngineJobExecutorQueueSize()
+	{
+		return processEngineJobExecutorQueueSize;
+	}
+
+	public int getProcessEngineJobExecutorMaxPoolSize()
+	{
+		return processEngineJobExecutorMaxPoolSize;
 	}
 
 	public int getFhirServerRequestMaxRetries()
@@ -504,6 +552,11 @@ public class PropertiesConfig implements InitializingBean
 	public boolean getDebugLogMessageVariables()
 	{
 		return debugLogMessageVariables;
+	}
+
+	public boolean getDebugLogMessageVariablesLocal()
+	{
+		return debugLogMessageVariablesLocal;
 	}
 
 	public int getJettyStatusConnectorPort()

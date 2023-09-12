@@ -2,7 +2,7 @@ function showHelp() {
 	const httpRequest = new XMLHttpRequest();
 	if (httpRequest != null) {
 		httpRequest.onreadystatechange = () => createAndShowHelp(httpRequest);
-		httpRequest.open('GET', '/fhir/metadata');
+		httpRequest.open('GET', document.head.baseURI + 'metadata');
 		httpRequest.setRequestHeader('Accept', 'application/fhir+json');
 		httpRequest.send();
 	} else {

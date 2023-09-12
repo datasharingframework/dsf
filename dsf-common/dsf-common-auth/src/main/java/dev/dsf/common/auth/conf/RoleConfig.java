@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Coding;
@@ -26,6 +27,12 @@ public class RoleConfig
 
 	private static final List<String> PROPERTIES = Arrays.asList(PROPERTY_THUMBPRINT, PROPERTY_EMAIL,
 			PROPERTY_TOKEN_ROLE, PROPERTY_TOKEN_GROUP, PROPERTY_DSF_ROLE, PROPERTY_PRACTITIONER_ROLE);
+
+	private static final String THUMBPRINT_PATTERN_STRING = "^[a-f0-9]{128}$";
+	private static final Pattern THUMBPRINT_PATTERN = Pattern.compile(THUMBPRINT_PATTERN_STRING);
+
+	private static final String EMAIL_PATTERN_STRING = "^[\\w!#$%&'*+/=?`{\\|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{\\|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_PATTERN_STRING);
 
 	public class Mapping
 	{
@@ -149,36 +156,131 @@ public class RoleConfig
 									switch ((String) p.getKey())
 									{
 										case PROPERTY_THUMBPRINT:
-											thumbprints = getValues(p.getValue());
+											thumbprints = getValues(p.getValue()).stream().map(value ->
+											{
+												if (value == null || value.isBlank())
+												{
+													logger.warn("Ignoring empty of blank thumbprint in rule '{}'",
+															mappingKey);
+													return null;
+												}
+												else if (!THUMBPRINT_PATTERN.matcher(value.trim()).matches())
+												{
+													logger.warn(
+															"Malformed thumbprint: '{}' not matching {}, ignoring value in rule '{}'",
+															value, THUMBPRINT_PATTERN_STRING, mappingKey);
+													return null;
+												}
+												else
+													return value.trim();
+											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_EMAIL:
-											emails = getValues(p.getValue());
+											emails = getValues(p.getValue()).stream().map(value ->
+											{
+												if (value == null || value.isBlank())
+												{
+													logger.warn("Ignoring empty of blank email in rule '{}'",
+															mappingKey);
+													return null;
+												}
+												else if (!EMAIL_PATTERN.matcher(value.trim()).matches())
+												{
+													logger.warn(
+															"Malformed email: '{}' not matching {}, ignoring value in rule '{}'",
+															value, EMAIL_PATTERN_STRING, mappingKey);
+													return null;
+												}
+												else
+													return value.trim();
+											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_TOKEN_ROLE:
-											tokenRoles = getValues(p.getValue());
+											tokenRoles = getValues(p.getValue()).stream().map(value ->
+											{
+												if (value == null || value.isBlank())
+												{
+													logger.warn("Ignoring empty of blank token-role in rule '{}'",
+															mappingKey);
+													return null;
+												}
+												else
+													return value.trim();
+											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_TOKEN_GROUP:
-											tokenGroups = getValues(p.getValue());
+											tokenGroups = getValues(p.getValue()).stream().map(value ->
+											{
+												if (value == null || value.isBlank())
+												{
+													logger.warn("Ignoring empty of blank token-group in rule '{}'",
+															mappingKey);
+													return null;
+												}
+												else
+													return value.trim();
+											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_DSF_ROLE:
-											dsfRoles = getValues(p.getValue()).stream().map(dsfRoleFactory)
-													.filter(r -> r != null).toList();
+											dsfRoles = getValues(p.getValue()).stream().map(value ->
+											{
+												if (value == null || value.isBlank())
+												{
+													logger.warn("Ignoring empty of blank dsf-role in rule '{}'",
+															mappingKey);
+													return null;
+												}
+
+												DsfRole dsfRole = dsfRoleFactory.apply(value.trim());
+												if (dsfRole == null)
+													logger.warn("Unknown dsf-role '{}', ignoring value in rule '{}'",
+															value, mappingKey);
+
+												return dsfRole;
+											}).filter(r -> r != null).toList();
 											break;
 										case PROPERTY_PRACTITIONER_ROLE:
-											practitionerRoles = getValues(p.getValue()).stream()
-													.map(practitionerRoleFactory).filter(r -> r != null).toList();
+											practitionerRoles = getValues(p.getValue()).stream().map(value ->
+											{
+												if (value == null || value.isBlank())
+												{
+													logger.warn(
+															"Ignoring empty of blank practitioner-role in rule '{}'",
+															mappingKey);
+													return null;
+												}
+
+												Coding coding = practitionerRoleFactory.apply(value.trim());
+												if (coding == null)
+													logger.warn(
+															"Unknown practitioner-role '{}', ignoring value in rule '{}'",
+															value, mappingKey);
+
+												return coding;
+											}).filter(r -> r != null).toList();
 											break;
 										default:
-											logger.warn("Unknown role config property '{}', expected one of {}",
-													p.getKey(), PROPERTIES);
+											logger.warn(
+													"Unknown role config property '{}' expected one of {}, ignoring property in rule '{}'",
+													p.getKey(), PROPERTIES, mappingKey);
 									}
 								}
 							}
+
 							entries.add(new Mapping((String) mappingKey, thumbprints, emails, tokenRoles, tokenGroups,
 									dsfRoles, practitionerRoles));
 						}
+						else if (mappingKey != null && mappingKey instanceof String
+								&& (mappingValues == null || !(mappingValues instanceof Map)))
+						{
+							logger.warn("Ignoring invalud rule '{}'", mappingKey);
+						}
+						else
+							logger.warn("Ignoring invalud rule '{}'", mappingKey);
 					});
 				}
+				else
+					logger.warn("Ignoring invalud rule '{}'", mapping);
 			});
 		}
 	}

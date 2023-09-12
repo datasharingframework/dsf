@@ -256,10 +256,11 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 		client.setPingHandler(ping -> pingHandler.onPing(ping, subscriptionIdPart, searchCriteriaQueryParameters));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void setResourceEventHandler(WebsocketClient client, EventType eventType)
 	{
 		EventResourceHandler<R> eventHandler = subscriptionHandlerFactory.createEventResourceHandler();
-		client.setDomainResourceHandler(eventHandler::onResource, createParserFactory(eventType, fhirContext));
+		client.setResourceHandler(r -> eventHandler.onResource((R) r), createParserFactory(eventType, fhirContext));
 	}
 
 	private Supplier<IParser> createParserFactory(EventType eventType, FhirContext fhirContext)

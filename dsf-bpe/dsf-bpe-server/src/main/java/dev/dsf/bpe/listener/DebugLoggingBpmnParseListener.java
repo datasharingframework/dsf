@@ -17,10 +17,12 @@ public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
 	private static final class ExecutionListenerLogger implements ExecutionListener
 	{
 		final boolean logVariables;
+		final boolean logVariablesLocal;
 
-		ExecutionListenerLogger(boolean logVariables)
+		ExecutionListenerLogger(boolean logVariables, boolean logVariablesLocal)
 		{
 			this.logVariables = logVariables;
+			this.logVariablesLocal = logVariablesLocal;
 		}
 
 		@Override
@@ -37,6 +39,9 @@ public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
 
 				if (logVariables)
 					logger.debug("Variables: {}", execution.getVariables());
+
+				if (logVariablesLocal)
+					logger.debug("VariablesLocal: {}", execution.getVariablesLocal());
 			}
 			else
 			{
@@ -50,16 +55,20 @@ public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
 	private final boolean logActivityStart;
 	private final boolean logActivityEnd;
 	private final boolean logVariables;
+	private final boolean logVariablesLocal;
 
 	private final ExecutionListener listener;
 
-	public DebugLoggingBpmnParseListener(boolean logActivityStart, boolean logActivityEnd, boolean logVariables)
+
+	public DebugLoggingBpmnParseListener(boolean logActivityStart, boolean logActivityEnd, boolean logVariables,
+			boolean logVariablesLocal)
 	{
 		this.logActivityStart = logActivityStart;
 		this.logActivityEnd = logActivityEnd;
 		this.logVariables = logVariables;
+		this.logVariablesLocal = logVariablesLocal;
 
-		listener = new ExecutionListenerLogger(logVariables);
+		listener = new ExecutionListenerLogger(logVariables, logVariablesLocal);
 	}
 
 	@Override
@@ -76,6 +85,10 @@ public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
 		if (logVariables)
 			logger.warn(
 					"Process variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+
+		if (logVariablesLocal)
+			logger.warn(
+					"Process local variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
 	}
 
 	private void addListeners(ActivityImpl activity)

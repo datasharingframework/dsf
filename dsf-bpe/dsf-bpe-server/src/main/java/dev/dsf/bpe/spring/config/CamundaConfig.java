@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.camunda.bpm.engine.ProcessEngine;
+import org.camunda.bpm.engine.impl.jobexecutor.DefaultJobExecutor;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.postgresql.Driver;
@@ -103,7 +104,8 @@ public class CamundaConfig
 	public DebugLoggingBpmnParseListener debugLoggingBpmnParseListener()
 	{
 		return new DebugLoggingBpmnParseListener(propertiesConfig.getDebugLogMessageOnActivityStart(),
-				propertiesConfig.getDebugLogMessageOnActivityEnd(), propertiesConfig.getDebugLogMessageVariables());
+				propertiesConfig.getDebugLogMessageOnActivityEnd(), propertiesConfig.getDebugLogMessageVariables(),
+				propertiesConfig.getDebugLogMessageVariablesLocal());
 	}
 
 	@Bean
@@ -124,6 +126,12 @@ public class CamundaConfig
 		// see also MultiVersionSpringProcessEngineConfiguration
 		c.setInitializeTelemetry(false);
 		c.setTelemetryReporterActivate(false);
+
+		DefaultJobExecutor jobExecutor = new DefaultJobExecutor();
+		jobExecutor.setCorePoolSize(propertiesConfig.getProcessEngineJobExecutorCorePoolSize());
+		jobExecutor.setQueueSize(propertiesConfig.getProcessEngineJobExecutorQueueSize());
+		jobExecutor.setMaxPoolSize(propertiesConfig.getProcessEngineJobExecutorMaxPoolSize());
+		c.setJobExecutor(jobExecutor);
 
 		return c;
 	}

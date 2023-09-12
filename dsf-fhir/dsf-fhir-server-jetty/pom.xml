@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 	</parent>
 
 	<dependencies>
@@ -118,24 +118,6 @@
 							<outputDirectory>docker</outputDirectory>
 						</configuration>
 					</execution>
-					<execution>
-						<id>copy-status-client-to-docker</id>
-						<phase>install</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>dev.dsf</groupId>
-									<artifactId>dsf-common-status</artifactId>
-									<version>${project.version}</version>
-									<destFileName>dsf_status_client.jar</destFileName>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>docker</outputDirectory>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -147,7 +129,6 @@
 							<directory>docker</directory>
 							<includes>
 								<include>dsf_fhir.jar</include>
-								<include>dsf_status_client.jar</include>
 								<include>lib/*.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>

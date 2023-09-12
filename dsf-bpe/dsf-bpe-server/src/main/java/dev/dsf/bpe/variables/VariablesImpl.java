@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.value.TypedValue;
@@ -29,9 +30,38 @@ public class VariablesImpl implements Variables, ListenerVariables
 {
 	private static final Logger logger = LoggerFactory.getLogger(VariablesImpl.class);
 
-	public static final String TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID = VariablesImpl.class.getName()
-			+ ".parentActivityInstanceId";
-	private static final String TASKS = VariablesImpl.class.getName() + ".tasks";
+	private static final String TASKS_PREFIX = VariablesImpl.class.getName() + ".tasks.";
+	private static final String START_TASK = VariablesImpl.class.getName() + ".startTask";
+
+	private static final class DistinctTask
+	{
+		final Task task;
+
+		DistinctTask(Task task)
+		{
+			this.task = task;
+		}
+
+		Task getTask()
+		{
+			return task;
+		}
+
+		@Override
+		public boolean equals(Object otherO)
+		{
+			if (otherO instanceof DistinctTask other)
+				return Objects.equals(other.task.getIdElement().getIdPart(), task.getIdElement().getIdPart());
+			else
+				return false;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return task.getIdElement().getIdPart().hashCode();
+		}
+	}
 
 	private final DelegateExecution execution;
 
@@ -129,7 +159,13 @@ public class VariablesImpl implements Variables, ListenerVariables
 	public <R extends Resource> List<R> getResourceList(String variableName)
 	{
 		FhirResourcesList list = (FhirResourcesList) execution.getVariable(variableName);
-		return list == null ? null : list.getResourcesAndCast();
+		return list != null ? list.getResourcesAndCast() : null;
+	}
+
+	private <R extends Resource> List<R> getResourceListOrDefault(String variableName, List<R> defaultList)
+	{
+		List<R> list = getResourceList(variableName);
+		return list != null ? list : defaultList;
 	}
 
 	@Override
@@ -150,13 +186,18 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public Task getStartTask()
 	{
-		List<Task> tasks = getTasks();
-		return tasks == null || tasks.isEmpty() ? null : tasks.get(0);
+		logger.trace("getStartTask - parentActivityInstanceId: {}, parentId: {}",
+				execution.getParentActivityInstanceId(), execution.getParentId());
+
+		return getResource(START_TASK);
 	}
 
 	@Override
 	public Task getLatestTask()
 	{
+		logger.trace("getLatestTask - parentActivityInstanceId: {}, parentId: {}",
+				execution.getParentActivityInstanceId(), execution.getParentId());
+
 		List<Task> tasks = getCurrentTasks();
 		return tasks == null || tasks.isEmpty() ? null : tasks.get(tasks.size() - 1);
 	}
@@ -164,48 +205,53 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public List<Task> getTasks()
 	{
-		List<Task> tasks = getResourceList(TASKS);
+		logger.trace("getTasks - parentActivityInstanceId: {}, parentId: {}", execution.getParentActivityInstanceId(),
+				execution.getParentId());
 
-		if (tasks == null)
-			return Collections.emptyList();
-		else
-		{
-			for (int i = 0; i < tasks.size(); i++)
-			{
-				Task t = tasks.get(i);
-				logger.trace("Task [{}] id: {}, parentActivityInstanceId: {}", i, t.getIdElement().getIdPart(),
-						t.getUserData(TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID));
-			}
+		List<Task> tasks = Stream
+				.concat(Stream.of(getStartTask()),
+						execution.getVariables().keySet().stream().filter(k -> k.startsWith(TASKS_PREFIX))
+								.map(this::getResourceList).flatMap(List::stream).filter(r -> r instanceof Task)
+								.map(r -> (Task) r))
+				.filter(t -> t != null).map(DistinctTask::new).distinct().map(DistinctTask::getTask).toList();
 
-			// wrapping again as unmodifiable list to make sure we stay independent from the rest of the code base
-			return Collections.unmodifiableList(tasks);
-		}
+		return Collections.unmodifiableList(tasks);
 	}
 
 	@Override
 	public List<Task> getCurrentTasks()
 	{
-		logger.trace("parentActivityInstanceId: {}, parentId: {}", execution.getParentActivityInstanceId(),
-				execution.getParentId());
+		logger.trace("getCurrentTasks - parentActivityInstanceId: {}, parentId: {}",
+				execution.getParentActivityInstanceId(), execution.getParentId());
 
-		return getTasks().stream().filter(t ->
-		{
-			Object id = t.getUserData(TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID);
-			return Objects.equals(id, execution.getParentActivityInstanceId())
-					|| (id == null && execution.getParentId() == null);
-		}).toList();
+		Stream<Task> start = execution.getParentId() == null ? Stream.of(getStartTask()) : Stream.empty();
+		Stream<Task> current = getResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
+				Collections.<Task> emptyList()).stream();
+
+		return Collections.unmodifiableList(Stream.concat(start, current).toList());
 	}
 
 	@Override
 	public void updateTask(Task task)
 	{
+		logger.trace("updateTask- Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
+
 		if (task != null)
 		{
-			List<Task> allTasks = getTasks();
-			if (allTasks.contains(task))
-				setResourceList(TASKS, allTasks);
+			if (getStartTask() != null
+					&& Objects.equals(getStartTask().getIdElement().getIdPart(), task.getIdElement().getIdPart()))
+				setResource(START_TASK, task);
 			else
-				logger.warn("Given task not part of all-tasks list, ignoring task");
+			{
+				String instanceId = execution.getParentActivityInstanceId();
+				List<Task> tasks = getResourceListOrDefault(TASKS_PREFIX + instanceId, Collections.emptyList());
+
+				if (tasks.stream().anyMatch(t -> t.getIdElement().getIdPart().equals(task.getIdElement().getIdPart())))
+					setResourceList(TASKS_PREFIX + instanceId, tasks);
+				else
+					logger.warn("Given task {} not part of tasks list '{}', ignoring task",
+							task.getIdElement().getIdPart().toString(), instanceId);
+			}
 		}
 		else
 			logger.warn("Given task is null");
@@ -214,11 +260,10 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void onStart(Task task)
 	{
+		logger.trace("onStart - Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
+
 		if (task != null)
-		{
-			task.setUserData(TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID, execution.getParentActivityInstanceId());
-			setResourceList(TASKS, Collections.singletonList(task));
-		}
+			setResource(START_TASK, task);
 		else
 			logger.warn("Given task is null");
 	}
@@ -226,14 +271,17 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void onContinue(Task task)
 	{
+		logger.trace("onContinue - Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
+
 		if (task != null)
 		{
-			task.setUserData(TASK_USERDATA_PARENT_ACTIVITY_INSTANCE_ID, execution.getParentActivityInstanceId());
+			String instanceId = execution.getParentActivityInstanceId();
 
-			List<Task> tasks = new ArrayList<>(getTasks());
+			List<Task> tasks = new ArrayList<>(
+					getResourceListOrDefault(TASKS_PREFIX + instanceId, Collections.emptyList()));
 			tasks.add(task);
 
-			setResourceList(TASKS, tasks);
+			setResourceList(TASKS_PREFIX + instanceId, tasks);
 		}
 		else
 			logger.warn("Given task is null");
@@ -242,9 +290,13 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void onEnd()
 	{
-		List<Task> tasks = new ArrayList<>(getTasks());
+		logger.trace("onEnd");
+
+		String instanceId = execution.getParentActivityInstanceId();
+		List<Task> tasks = new ArrayList<>(
+				getResourceListOrDefault(TASKS_PREFIX + instanceId, Collections.emptyList()));
 		tasks.removeAll(getCurrentTasks());
-		setResourceList(TASKS, tasks);
+		setResourceList(TASKS_PREFIX + instanceId, tasks);
 	}
 
 	@Override
