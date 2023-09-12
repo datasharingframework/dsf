@@ -112,11 +112,11 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
 
-	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List")
+	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List", example = "dsfdev_updateAllowList|1.0, another_process|x.y")
 	@Value("#{'${dev.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processExcluded;
 
-	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available")
+	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available", example = "old_process|x.y")
 	@Value("#{'${dev.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processRetired;
 
