@@ -112,17 +112,29 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
 
-	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List")
+	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List", example = "dsfdev_updateAllowList|1.0, another_process|x.y")
 	@Value("#{'${dev.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processExcluded;
 
-	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available")
+	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available", example = "old_process|x.y")
 	@Value("#{'${dev.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processRetired;
 
 	@Documentation(description = "Number of parallel Task / QuestionnaireResponse threads to start new or continue existing processes, a value `<= 0` means number of cpu cores")
 	@Value("${dev.dsf.bpe.process.threads:-1}")
 	private int processStartOrContinueThreads;
+
+	@Documentation(description = "Process engine job executor core pool size")
+	@Value("${dev.dsf.bpe.process.engine.corePoolSize:4}")
+	private int processEngineJobExecutorCorePoolSize;
+
+	@Documentation(description = "Process engine job executor queue size, jobs are added to the queue if all core pool threads are busy")
+	@Value("${dev.dsf.bpe.process.engine.queueSize:40}")
+	private int processEngineJobExecutorQueueSize;
+
+	@Documentation(description = "Process engine job executor max pool size, additional threads until max pool size are created if the queue is full")
+	@Value("${dev.dsf.bpe.process.engine.maxPoolSize:10}")
+	private int processEngineJobExecutorMaxPoolSize;
 
 	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, `-1` means infinite number of retries")
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.max:-1}")
@@ -275,6 +287,11 @@ public class PropertiesConfig implements InitializingBean
 
 		if (serverBaseUrl.endsWith("/"))
 			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+
+		logger.info(
+				"Concurrency config: {process-threads: {}, engine-core-pool: {}, engine-queue: {}, engine-max-pool: {}}",
+				getProcessStartOrContinueThreads(), processEngineJobExecutorCorePoolSize,
+				processEngineJobExecutorQueueSize, processEngineJobExecutorMaxPoolSize);
 	}
 
 	public String getDbUrl()
@@ -396,7 +413,25 @@ public class PropertiesConfig implements InitializingBean
 
 	public int getProcessStartOrContinueThreads()
 	{
-		return processStartOrContinueThreads;
+		if (processStartOrContinueThreads <= 0)
+			return Runtime.getRuntime().availableProcessors();
+		else
+			return processStartOrContinueThreads;
+	}
+
+	public int getProcessEngineJobExecutorCorePoolSize()
+	{
+		return processEngineJobExecutorCorePoolSize;
+	}
+
+	public int getProcessEngineJobExecutorQueueSize()
+	{
+		return processEngineJobExecutorQueueSize;
+	}
+
+	public int getProcessEngineJobExecutorMaxPoolSize()
+	{
+		return processEngineJobExecutorMaxPoolSize;
 	}
 
 	public int getFhirServerRequestMaxRetries()

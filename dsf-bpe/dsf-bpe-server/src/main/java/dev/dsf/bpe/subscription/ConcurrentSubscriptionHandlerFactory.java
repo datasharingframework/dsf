@@ -24,19 +24,19 @@ public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 	private final ThreadPoolExecutor executor;
 
 	/**
-	 * Uses {@link Runtime#availableProcessors()} for <b>poolThreadCount</b> if the given value is <code>&lt;= 0</code>.
-	 *
-	 * @param poolThreadCount
+	 * @param corePoolSize
+	 *            <code>&gt; 0</code>
 	 * @param delegate
 	 *            not <code>null</code>
 	 */
-	public ConcurrentSubscriptionHandlerFactory(int poolThreadCount, SubscriptionHandlerFactory<R> delegate)
+	public ConcurrentSubscriptionHandlerFactory(int corePoolSize, SubscriptionHandlerFactory<R> delegate)
 	{
-		if (poolThreadCount <= 0)
-			poolThreadCount = Runtime.getRuntime().availableProcessors();
+		if (corePoolSize <= 0)
+			throw new IllegalArgumentException("corePoolSize <= 0");
 
-		executor = new ThreadPoolExecutor(poolThreadCount, poolThreadCount, 10, TimeUnit.MINUTES, queue,
+		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES, queue,
 				(r, executor) -> logger.error("Unable to handle Task - execution rejected"));
+		executor.allowCoreThreadTimeOut(true);
 
 		this.delegate = delegate;
 	}
