@@ -51,6 +51,12 @@
 			<artifactId>crypto-utils</artifactId>
 		</dependency>
 
+		<!-- dependencies for process plugins -->
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-validation</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
