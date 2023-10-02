@@ -22,10 +22,10 @@ Description: To set apache config param `SSLCACertificateFile`, with the trusted
 
 **SSL_CA_DN_REQUEST_FILE**  
 Description: To set apache config param `SSLCADNRequestFile` with client certificate signing CAs to modify the "Acceptable client certificate CA names" send to the client.  
-Default: All CAs from **SSL_CA_DN_REQUEST_FILE** if not set.  
+Default: If not set, all CAs from **SSL_CA_CERTIFICATE_FILE** are used for the "Acceptable client certificate CA names".
 
 **SSL_VERIFY_CLIENT**  
-Description: To set apache config param `SSLVerifyClient `, default value `require`, set to `optional` when using OIDC authentication.  
+Description: To set apache config param `SSLVerifyClient`, default value `require`, set to `optional` when using OIDC authentication.  
 
 **PROXY_PASS_TIMEOUT_HTTP**  
 Description: timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a reply.  
