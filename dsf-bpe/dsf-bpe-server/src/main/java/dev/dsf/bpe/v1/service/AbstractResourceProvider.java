@@ -1,5 +1,7 @@
 package dev.dsf.bpe.v1.service;
 
+import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,7 +63,7 @@ public abstract class AbstractResourceProvider implements InitializingBean
 					.map(BundleEntryComponent::getResource).filter(targetType::isInstance).map(targetType::cast)
 					.filter(filter).toList());
 
-			hasMore = resultBundle.getTotal() > organizations.size();
+			hasMore = resultBundle.getLink(LINK_NEXT) != null;
 		}
 
 		return organizations;
