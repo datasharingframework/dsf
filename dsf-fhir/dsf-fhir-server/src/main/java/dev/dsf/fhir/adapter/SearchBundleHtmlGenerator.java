@@ -213,11 +213,11 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 			return getTaskHeader();
 		else if (questionnaireResponseRessourcePath.equals(uri.getPath()))
 			return getQuestionnaireResponseHeader();
-		if (organizationResourcePath.equals(uri.getPath()))
+		else if (organizationResourcePath.equals(uri.getPath()))
 			return getOrganizationHeader();
-		if (organizationAffiliationResourcePath.equals(uri.getPath()))
+		else if (organizationAffiliationResourcePath.equals(uri.getPath()))
 			return getOrganizationAffiliationHeader();
-		if (endpointResourcePath.equals(uri.getPath()))
+		else if (endpointResourcePath.equals(uri.getPath()))
 			return getEndpointHeader();
 		else
 			throw new IllegalArgumentException("Unexpected resource path: " + uri.getPath());
