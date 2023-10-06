@@ -65,7 +65,7 @@ public class EndpointHtmlGenerator extends ResourceHtmlGenerator implements Html
 		{
 			String connectionType = resource.getConnectionType().getSystem() + " | " + "<b>"
 					+ resource.getConnectionType().getCode() + "</b>";
-			writeRow("ConnectionType", connectionType, out);
+			writeRow("Connection Type", connectionType, out);
 		}
 
 		List<String> payloadTypes = resource.getPayloadType().stream().flatMap(c -> c.getCoding().stream())
