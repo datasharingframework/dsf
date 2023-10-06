@@ -501,6 +501,7 @@ pre.lang-html {
 
 .row-text, .row-text>a:visited {
   color: var(--color-disabled-text);
+  word-wrap: break-word;
 }
 
 .row-text.id-value {

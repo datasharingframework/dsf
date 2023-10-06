@@ -331,17 +331,18 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 		String name = resource.getName() != null ? resource.getName() : "";
 
-		String endpointId = "", endpointHref = "";
+		String endpointLink = "";
 		if (resource.hasEndpoint())
 		{
-			endpointId = resource.getEndpointFirstRep().getReferenceElement().getIdPart();
-			endpointHref = endpointResourcePath + "/" + endpointId;
+			String endpointId = resource.getEndpointFirstRep().getReferenceElement().getIdPart();
+			String endpointHref = endpointResourcePath + "/" + endpointId;
+			endpointLink = "<a href=\"" + endpointHref + "\">" + endpointId + "</a>"
+					+ (resource.getEndpoint().size() > 1 ? ", ..." : "");
 		}
 
 		return "<td class=\"id-value\" active=\"" + resource.getActive() + "\"><a href=\"" + idHref + "\">" + id
 				+ "</a></td><td>" + resource.getActive() + "</td><td>" + identifier + "</td><td>" + name
-				+ "</td><td class=\"id-value\"><a href=\"" + endpointHref + "\">" + endpointId + "</a>"
-				+ (resource.getEndpoint().size() > 1 ? ", ..." : "") + "</td><td>"
+				+ "</td><td class=\"id-value\">" + endpointLink + "</td><td>"
 				+ DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
 	}
 
@@ -350,37 +351,41 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		String id = resource.getIdElement().getIdPart();
 		String idHref = organizationResourcePath + "/" + id;
 
-		String parentOrganizationId = "", parentOrganizationHref = "";
+		String parentOrganizationLink = "";
 		if (resource.hasOrganization())
 		{
-			parentOrganizationId = resource.getOrganization().getReferenceElement().getIdPart();
-			parentOrganizationHref = organizationResourcePath + "/" + parentOrganizationId;
+			String parentOrganizationId = resource.getOrganization().getReferenceElement().getIdPart();
+			String parentOrganizationHref = organizationResourcePath + "/" + parentOrganizationId;
+			parentOrganizationLink = "<a href=\"" + parentOrganizationHref + "\">" + parentOrganizationId + "</a>";
 		}
 
-		String participatingOrganizationId = "", participatingOrganizationHref = "";
+		String participatingOrganizationLink = "";
 		if (resource.hasParticipatingOrganization())
 		{
-			participatingOrganizationId = resource.getParticipatingOrganization().getReferenceElement().getIdPart();
-			participatingOrganizationHref = organizationResourcePath + "/" + participatingOrganizationId;
+			String participatingOrganizationId = resource.getParticipatingOrganization().getReferenceElement()
+					.getIdPart();
+			String participatingOrganizationHref = organizationResourcePath + "/" + participatingOrganizationId;
+			participatingOrganizationLink = "<a href=\"" + participatingOrganizationHref + "\">"
+					+ participatingOrganizationId + "</a>";
 		}
 
 		String role = resource.getCode().stream().flatMap(c -> c.getCoding().stream())
 				.filter(c -> CODE_SYSTEM_ORGANIZATION_ROLE.equals(c.getSystem())).map(Coding::getCode)
 				.collect(Collectors.joining(", "));
 
-		String endpointId = "", endpointHref = "";
+		String endpointLink = "";
 		if (resource.hasEndpoint())
 		{
-			endpointId = resource.getEndpointFirstRep().getReferenceElement().getIdPart();
-			endpointHref = endpointResourcePath + "/" + endpointId;
+			String endpointId = resource.getEndpointFirstRep().getReferenceElement().getIdPart();
+			String endpointHref = endpointResourcePath + "/" + endpointId;
+			endpointLink = "<a href=\"" + endpointHref + "\">" + endpointId + "</a>"
+					+ (resource.getEndpoint().size() > 1 ? ", ..." : "");
 		}
 
 		return "<td class=\"id-value\" active=\"" + resource.getActive() + "\"><a href=\"" + idHref + "\">" + id
-				+ "</a></td><td>" + resource.getActive() + "</td><td class=\"id-value\"><a href=\""
-				+ parentOrganizationHref + "\">" + parentOrganizationId + "</a></td><td class=\"id-value\"><a href=\""
-				+ participatingOrganizationHref + "\">" + participatingOrganizationId + "</a></td><td>" + role
-				+ "</td><td class=\"id-value\"><a href=\"" + endpointHref + "\">" + endpointId + "</a>"
-				+ (resource.getEndpoint().size() > 1 ? ", ..." : "") + "</td><td>"
+				+ "</a></td><td>" + resource.getActive() + "</td><td class=\"id-value\">" + parentOrganizationLink
+				+ "</td><td class=\"id-value\">" + participatingOrganizationLink + "</td><td>" + role
+				+ "</td><td class=\"id-value\">" + endpointLink + "</td><td>"
 				+ DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
 	}
 
@@ -398,17 +403,18 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 		String name = resource.getName() != null ? resource.getName() : "";
 
-		String managingOrganizationId = "", managingOrganizationHref = "";
+		String managingOrganizationLink = "";
 		if (resource.hasManagingOrganization())
 		{
-			managingOrganizationId = resource.getManagingOrganization().getReferenceElement().getIdPart();
-			managingOrganizationHref = organizationResourcePath + "/" + managingOrganizationId;
+			String managingOrganizationId = resource.getManagingOrganization().getReferenceElement().getIdPart();
+			String managingOrganizationHref = organizationResourcePath + "/" + managingOrganizationId;
+			managingOrganizationLink = "<a href=\"" + managingOrganizationHref + "\">" + managingOrganizationId
+					+ "</a>";
 		}
 
 		return "<td class=\"id-value\" status=\"" + resource.getStatus().toCode() + "\"><a href=\"" + idHref + "\">"
 				+ id + "</a></td><td>" + resource.getStatus().toCode() + "</td><td>" + identifier + "</td><td>" + name
-				+ "</td><td>" + resource.getAddress() + "</td><td class=\"id-value\"><a href=\""
-				+ managingOrganizationHref + "\">" + managingOrganizationId + "</a></td><td>"
-				+ DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
+				+ "</td><td>" + resource.getAddress() + "</td><td class=\"id-value\">" + managingOrganizationLink
+				+ "</td><td>" + DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
 	}
 }
