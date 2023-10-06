@@ -18,8 +18,12 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -37,12 +41,17 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
 	private static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
 			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);
+
 	private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY = "business-key";
+	private static final String CODE_SYSTEM_ORGANIZATION_ROLE = "http://dsf.dev/fhir/CodeSystem/organization-role";
 
 	private final String taskRessourcePath;
 	private final String questionnaireResponseRessourcePath;
+	private final String organizationResourcePath;
+	private final String organizationAffiliationResourcePath;
+	private final String endpointResourcePath;
 
 	private final int defaultPageCount;
 
@@ -51,6 +60,9 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		String serverBaseUrlPath = getServerBaseUrlPath(serverBaseUrl);
 		taskRessourcePath = serverBaseUrlPath + "/" + ResourceType.Task.name();
 		questionnaireResponseRessourcePath = serverBaseUrlPath + "/" + ResourceType.QuestionnaireResponse.name();
+		organizationResourcePath = serverBaseUrlPath + "/" + ResourceType.Organization.name();
+		organizationAffiliationResourcePath = serverBaseUrlPath + "/" + ResourceType.OrganizationAffiliation.name();
+		endpointResourcePath = serverBaseUrlPath + "/" + ResourceType.Endpoint.name();
 
 		this.defaultPageCount = defaultPageCount;
 	}
@@ -76,8 +88,12 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 	@Override
 	public boolean isResourceSupported(URI resourceUri, Resource resource)
 	{
-		return resource != null && resource instanceof Bundle && (taskRessourcePath.equals(resourceUri.getPath())
-				|| questionnaireResponseRessourcePath.equals(resourceUri.getPath()));
+		return resource != null && resource instanceof Bundle
+				&& (taskRessourcePath.equals(resourceUri.getPath())
+						|| questionnaireResponseRessourcePath.equals(resourceUri.getPath())
+						|| organizationResourcePath.equals(resourceUri.getPath())
+						|| organizationAffiliationResourcePath.equals(resourceUri.getPath())
+						|| endpointResourcePath.equals(resourceUri.getPath()));
 	}
 
 	@Override
@@ -85,7 +101,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 	{
 		out.write("<div class=\"bundle\">");
 		out.write("<div id=\"header\">");
-		out.write("<table style=\"width:100%;\"><tr><td>");
+		out.write("<table><tr><td>");
 
 		Optional<String> first = resource.getLink().stream().filter(l -> "first".equals(l.getRelation())).findFirst()
 				.map(BundleLinkComponent::getUrl);
@@ -139,7 +155,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 		out.write("</td></tr></table></div>");
 
-		out.write("<table id=\"list\">");
+		out.write("<div id=\"list\"><table>");
 		out.write(getHeader(resourceUri));
 		out.write(
 				resource.getEntry().stream()
@@ -150,7 +166,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 								+ r.getIdElement().toVersionless().getValueAsString() + "'\" title=\"Open Resource\">"
 								+ getRow(r) + "</tr>\n")
 						.collect(Collectors.joining()));
-		out.write("</table>");
+		out.write("</table></div>");
 
 		long includeResources = resource.getEntry().stream().filter(
 				e -> e.hasResource() && e.hasSearch() && SearchEntryMode.INCLUDE.equals(e.getSearch().getMode()))
@@ -197,6 +213,12 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 			return getTaskHeader();
 		else if (questionnaireResponseRessourcePath.equals(uri.getPath()))
 			return getQuestionnaireResponseHeader();
+		if (organizationResourcePath.equals(uri.getPath()))
+			return getOrganizationHeader();
+		if (organizationAffiliationResourcePath.equals(uri.getPath()))
+			return getOrganizationAffiliationHeader();
+		if (endpointResourcePath.equals(uri.getPath()))
+			return getEndpointHeader();
 		else
 			throw new IllegalArgumentException("Unexpected resource path: " + uri.getPath());
 	}
@@ -211,12 +233,33 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		return "<tr><th>ID</th><th>Status</th><th>Questionnaire</th><th>Business-Key</th><th>Last Updated</th></tr>";
 	}
 
+	private String getOrganizationHeader()
+	{
+		return "<tr><th>ID</th><th>Active</th><th>Identifier</th><th>Name</th><th>Endpoint</th><th>Last Updated</th></tr>";
+	}
+
+	private String getOrganizationAffiliationHeader()
+	{
+		return "<tr><th>ID</th><th>Active</th><th>Parent Organization</th><th>Participating Organization</th><th>Role</th><th>Endpoint</th><th>Last Updated</th></tr>";
+	}
+
+	private String getEndpointHeader()
+	{
+		return "<tr><th>ID</th><th>Status</th><th>Identifier</th><th>Name</th><th>Address</th><th>Managing Organization</th><th>Last Updated</th></tr>";
+	}
+
 	private String getRow(Resource resource)
 	{
 		if (resource instanceof Task)
 			return getTaskRow((Task) resource);
 		else if (resource instanceof QuestionnaireResponse)
 			return getQuestionnaireResponseRow((QuestionnaireResponse) resource);
+		else if (resource instanceof Organization)
+			return getOrganizationRow((Organization) resource);
+		else if (resource instanceof OrganizationAffiliation)
+			return getOrganizationAffiliationRow((OrganizationAffiliation) resource);
+		else if (resource instanceof Endpoint)
+			return getEndpointRow((Endpoint) resource);
 		else
 			throw new IllegalArgumentException("Unexpected resource type: " + resource.getResourceType().name());
 	}
@@ -238,6 +281,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		String businessKey = resource.getInput().stream()
 				.filter(isStringParam(CODE_SYSTEM_BPMN_MESSAGE, CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY)).findFirst()
 				.map(c -> ((StringType) c.getValue()).getValue()).orElse("");
+
 		String messageName = resource.getInput().stream()
 				.filter(isStringParam(CODE_SYSTEM_BPMN_MESSAGE, CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME)).findFirst()
 				.map(c -> ((StringType) c.getValue()).getValue()).orElse("");
@@ -259,14 +303,112 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 	private String getQuestionnaireResponseRow(QuestionnaireResponse resource)
 	{
+		String id = resource.getIdElement().getIdPart();
+		String idHref = questionnaireResponseRessourcePath + "/" + id;
+
 		String businessKey = resource.getItem().stream()
 				.filter(i -> "business-key".equals(i.getLinkId()) && i.hasAnswer() && i.getAnswer().size() == 1
 						&& i.getAnswerFirstRep().hasValueStringType())
 				.map(i -> i.getAnswerFirstRep().getValueStringType().getValue()).findFirst().orElse("");
 
-		return "<td status=\"" + resource.getStatus().toCode() + "\" class=\"id-value\">"
-				+ resource.getIdElement().getIdPart() + "</td><td>" + resource.getStatus().toCode() + "</td><td>"
+		return "<td class=\"id-value\" status=\"" + resource.getStatus().toCode() + "\"><a href=\"" + idHref + "\">"
+				+ id + "</a></td><td>" + resource.getStatus().toCode() + "</td><td>"
 				+ resource.getQuestionnaire().replaceAll("\\|", " \\| ") + "</td><td class=\"id-value\">" + businessKey
 				+ "</td><td>" + DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
+	}
+
+	private String getOrganizationRow(Organization resource)
+	{
+		String id = resource.getIdElement().getIdPart();
+		String idHref = organizationResourcePath + "/" + id;
+
+		String identifier = "";
+		if (resource.hasIdentifier())
+		{
+			identifier = resource.getIdentifier().size() > 1 ? resource.getIdentifierFirstRep().getValue() + ", ..."
+					: resource.getIdentifierFirstRep().getValue();
+		}
+
+		String name = resource.getName() != null ? resource.getName() : "";
+
+		String endpointId = "", endpointHref = "";
+		if (resource.hasEndpoint())
+		{
+			endpointId = resource.getEndpointFirstRep().getReferenceElement().getIdPart();
+			endpointHref = endpointResourcePath + "/" + endpointId;
+		}
+
+		return "<td class=\"id-value\" active=\"" + resource.getActive() + "\"><a href=\"" + idHref + "\">" + id
+				+ "</a></td><td>" + resource.getActive() + "</td><td>" + identifier + "</td><td>" + name
+				+ "</td><td class=\"id-value\"><a href=\"" + endpointHref + "\">" + endpointId + "</a>"
+				+ (resource.getEndpoint().size() > 1 ? ", ..." : "") + "</td><td>"
+				+ DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
+	}
+
+	private String getOrganizationAffiliationRow(OrganizationAffiliation resource)
+	{
+		String id = resource.getIdElement().getIdPart();
+		String idHref = organizationResourcePath + "/" + id;
+
+		String parentOrganizationId = "", parentOrganizationHref = "";
+		if (resource.hasOrganization())
+		{
+			parentOrganizationId = resource.getOrganization().getReferenceElement().getIdPart();
+			parentOrganizationHref = organizationResourcePath + "/" + parentOrganizationId;
+		}
+
+		String participatingOrganizationId = "", participatingOrganizationHref = "";
+		if (resource.hasParticipatingOrganization())
+		{
+			participatingOrganizationId = resource.getParticipatingOrganization().getReferenceElement().getIdPart();
+			participatingOrganizationHref = organizationResourcePath + "/" + participatingOrganizationId;
+		}
+
+		String role = resource.getCode().stream().flatMap(c -> c.getCoding().stream())
+				.filter(c -> CODE_SYSTEM_ORGANIZATION_ROLE.equals(c.getSystem())).map(Coding::getCode)
+				.collect(Collectors.joining(", "));
+
+		String endpointId = "", endpointHref = "";
+		if (resource.hasEndpoint())
+		{
+			endpointId = resource.getEndpointFirstRep().getReferenceElement().getIdPart();
+			endpointHref = endpointResourcePath + "/" + endpointId;
+		}
+
+		return "<td class=\"id-value\" active=\"" + resource.getActive() + "\"><a href=\"" + idHref + "\">" + id
+				+ "</a></td><td>" + resource.getActive() + "</td><td class=\"id-value\"><a href=\""
+				+ parentOrganizationHref + "\">" + parentOrganizationId + "</a></td><td class=\"id-value\"><a href=\""
+				+ participatingOrganizationHref + "\">" + participatingOrganizationId + "</a></td><td>" + role
+				+ "</td><td class=\"id-value\"><a href=\"" + endpointHref + "\">" + endpointId + "</a>"
+				+ (resource.getEndpoint().size() > 1 ? ", ..." : "") + "</td><td>"
+				+ DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
+	}
+
+	private String getEndpointRow(Endpoint resource)
+	{
+		String id = resource.getIdElement().getIdPart();
+		String idHref = organizationResourcePath + "/" + id;
+
+		String identifier = "";
+		if (resource.hasIdentifier())
+		{
+			identifier = resource.getIdentifier().size() > 1 ? resource.getIdentifierFirstRep().getValue() + ", ..."
+					: resource.getIdentifierFirstRep().getValue();
+		}
+
+		String name = resource.getName() != null ? resource.getName() : "";
+
+		String managingOrganizationId = "", managingOrganizationHref = "";
+		if (resource.hasManagingOrganization())
+		{
+			managingOrganizationId = resource.getManagingOrganization().getReferenceElement().getIdPart();
+			managingOrganizationHref = organizationResourcePath + "/" + managingOrganizationId;
+		}
+
+		return "<td class=\"id-value\" status=\"" + resource.getStatus().toCode() + "\"><a href=\"" + idHref + "\">"
+				+ id + "</a></td><td>" + resource.getStatus().toCode() + "</td><td>" + identifier + "</td><td>" + name
+				+ "</td><td>" + resource.getAddress() + "</td><td class=\"id-value\"><a href=\""
+				+ managingOrganizationHref + "\">" + managingOrganizationId + "</a></td><td>"
+				+ DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()) + "</td>";
 	}
 }

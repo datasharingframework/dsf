@@ -26,9 +26,6 @@ import org.hl7.fhir.r4.model.UriType;
 
 public abstract class InputHtmlGenerator
 {
-	protected static final String ELEMENT_TYPE_ROW = "row";
-	protected static final String ELEMENT_TYPE_LINK = "link";
-	protected static final String ELEMENT_TYPE_PATH = "path";
 	protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	protected static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	protected static final SimpleDateFormat DATE_TIME_DISPLAY_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
