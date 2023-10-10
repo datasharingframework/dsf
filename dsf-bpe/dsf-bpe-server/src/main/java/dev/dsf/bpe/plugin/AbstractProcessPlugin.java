@@ -158,6 +158,8 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 	private static final String PROCESS_ID_PATTERN_STRING = "^(?<domainNoDots>[a-zA-Z0-9-]+)_(?<processName>[a-zA-Z0-9-]+)$";
 	private static final Pattern PROCESS_ID_PATTERN = Pattern.compile(PROCESS_ID_PATTERN_STRING);
 
+	private static final String DEFAULT_PROCESS_HISTORY_TIME_TO_LIVE = "P30D";
+
 	private final D processPluginDefinition;
 	private final A processPluginApi;
 	private final boolean draft;
@@ -679,6 +681,18 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 
 					property.setCamundaName(MODEL_ATTRIBUTE_PROCESS_API_VERSION);
 					property.setCamundaValue(getProcessPluginApiVersion());
+
+					if (process.getCamundaHistoryTimeToLiveString() == null
+							|| process.getCamundaHistoryTimeToLiveString().isBlank())
+					{
+						if (isDraft())
+							logger.info("Setting process history time to live for process {} from {} to {}",
+									process.getId(), jarFile.toString(), DEFAULT_PROCESS_HISTORY_TIME_TO_LIVE);
+						else
+							logger.debug("Setting process history time to live for process {} from {} to {}",
+									process.getId(), jarFile.toString(), DEFAULT_PROCESS_HISTORY_TIME_TO_LIVE);
+						process.setCamundaHistoryTimeToLiveString(DEFAULT_PROCESS_HISTORY_TIME_TO_LIVE);
+					}
 				});
 
 				return new BpmnFileAndModel(draft, file, model, getJarFile());
