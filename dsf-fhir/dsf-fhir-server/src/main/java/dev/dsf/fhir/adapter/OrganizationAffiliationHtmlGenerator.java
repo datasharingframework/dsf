@@ -13,16 +13,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 public class OrganizationAffiliationHtmlGenerator extends ResourceHtmlGenerator
 		implements HtmlGenerator<OrganizationAffiliation>
 {
-	private final String endpointResourcePath;
-	private final String organizationResourcePath;
-
-	public OrganizationAffiliationHtmlGenerator(String serverBaseUrl)
-	{
-		String serverBaseUrlPath = getServerBaseUrlPath(serverBaseUrl);
-		organizationResourcePath = serverBaseUrlPath + "/" + ResourceType.Organization.name();
-		endpointResourcePath = serverBaseUrlPath + "/" + ResourceType.Endpoint.name();
-	}
-
 	@Override
 	public Class<OrganizationAffiliation> getResourceType()
 	{
@@ -42,33 +32,34 @@ public class OrganizationAffiliationHtmlGenerator extends ResourceHtmlGenerator
 
 		writeSectionHeader("Organization Affiliation", out);
 
-		if (resource.hasOrganization())
+		if (resource.hasOrganization() && resource.getOrganization().hasReference())
 		{
-			writeRowWithLink("Parent Organization", organizationResourcePath,
+			writeRowWithLink("Parent Organization", ResourceType.Organization.name(),
 					resource.getOrganization().getReferenceElement().getIdPart(), out);
 		}
 
-		if (resource.hasParticipatingOrganization())
+		if (resource.hasParticipatingOrganization() && resource.getParticipatingOrganization().hasReference())
 		{
-			writeRowWithLink("Participating Organization", organizationResourcePath,
+			writeRowWithLink("Participating Organization", ResourceType.Organization.name(),
 					resource.getParticipatingOrganization().getReferenceElement().getIdPart(), out);
 		}
 
 		List<String> roles = resource.getCode().stream().flatMap(c -> c.getCoding().stream())
-				.map(c -> c.getSystem() + " | <b>" + c.getCode() + "</b>").toList();
+				.map(c -> (c.hasSystem() ? c.getSystem() : "") + " | <b>" + (c.hasCode() ? c.getCode() : "") + "</b>")
+				.toList();
 		if (!roles.isEmpty())
 		{
 			writeRowWithList("Roles", roles, out);
 		}
 
-		List<Reference> endpoints = resource.getEndpoint();
+		List<Reference> endpoints = resource.getEndpoint().stream().filter(Reference::hasReference).toList();
 		if (!endpoints.isEmpty())
 		{
 			writeSectionHeader("Endpoints", out);
 
 			for (int i = 0; i < endpoints.size(); i++)
 			{
-				writeRowWithLink("Endpoint " + (i + 1), endpointResourcePath,
+				writeRowWithLink("Endpoint " + (i + 1), ResourceType.Endpoint.name(),
 						endpoints.get(i).getReferenceElement().getIdPart(), out);
 			}
 		}

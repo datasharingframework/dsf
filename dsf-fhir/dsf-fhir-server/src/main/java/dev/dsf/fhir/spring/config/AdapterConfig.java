@@ -34,11 +34,9 @@ public class AdapterConfig
 	public HtmlFhirAdapter htmlFhirAdapter()
 	{
 		return new HtmlFhirAdapter(propertiesConfig.getServerBaseUrl(), fhirConfig.fhirContext(),
-				List.of(new EndpointHtmlGenerator(propertiesConfig.getServerBaseUrl()),
-						new OrganizationHtmlGenerator(propertiesConfig.getServerBaseUrl()),
-						new OrganizationAffiliationHtmlGenerator(propertiesConfig.getServerBaseUrl()),
-						new QuestionnaireResponseHtmlGenerator(), new TaskHtmlGenerator(),
-						new SearchBundleHtmlGenerator(propertiesConfig.getServerBaseUrl(),
+				List.of(new EndpointHtmlGenerator(), new OrganizationHtmlGenerator(),
+						new OrganizationAffiliationHtmlGenerator(), new QuestionnaireResponseHtmlGenerator(),
+						new TaskHtmlGenerator(), new SearchBundleHtmlGenerator(propertiesConfig.getServerBaseUrl(),
 								propertiesConfig.getDefaultPageCount())));
 	}
 }

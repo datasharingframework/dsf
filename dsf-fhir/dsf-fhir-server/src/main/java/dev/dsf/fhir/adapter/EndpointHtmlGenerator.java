@@ -11,14 +11,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 
 public class EndpointHtmlGenerator extends ResourceHtmlGenerator implements HtmlGenerator<Endpoint>
 {
-	private final String organizationResourcePath;
-
-	public EndpointHtmlGenerator(String serverBaseUrl)
-	{
-		String serverBaseUrlPath = getServerBaseUrlPath(serverBaseUrl);
-		organizationResourcePath = serverBaseUrlPath + "/" + ResourceType.Organization.name();
-	}
-
 	@Override
 	public Class<Endpoint> getResourceType()
 	{
@@ -30,11 +22,12 @@ public class EndpointHtmlGenerator extends ResourceHtmlGenerator implements Html
 	{
 		out.write("<div class=\"resource\">\n");
 
-		out.write("<div class=\"row\" status=\"" + resource.getStatus().toCode() + "\">\n");
+		out.write(
+				"<div class=\"row\" status=\"" + (resource.hasStatus() ? resource.getStatus().toCode() : "") + "\">\n");
 		out.write("</div>\n");
 
 		writeMeta(resource, out);
-		writeRow("Status", resource.getStatus().toCode(), out);
+		writeRow("Status", (resource.hasStatus() ? resource.getStatus().toCode() : ""), out);
 
 		writeSectionHeader("Endpoint", out);
 
@@ -49,27 +42,30 @@ public class EndpointHtmlGenerator extends ResourceHtmlGenerator implements Html
 		}
 
 		List<String> identifiers = resource.getIdentifier().stream()
-				.map(i -> i.getSystem() + " | <b>" + i.getValue() + "</b>").toList();
+				.map(i -> (i.hasSystem() ? i.getSystem() : "") + " | <b>" + (i.hasValue() ? i.getValue() : "") + "</b>")
+				.toList();
 		if (!identifiers.isEmpty())
 		{
 			writeRowWithList("Identifiers", identifiers, out);
 		}
 
-		if (resource.hasManagingOrganization())
+		if (resource.hasManagingOrganization() && resource.getManagingOrganization().hasReference())
 		{
-			writeRowWithLink("Managing Organization", organizationResourcePath,
+			writeRowWithLink("Managing Organization", ResourceType.Organization.name(),
 					resource.getManagingOrganization().getReferenceElement().getIdPart(), out);
 		}
 
 		if (resource.hasConnectionType())
 		{
-			String connectionType = resource.getConnectionType().getSystem() + " | " + "<b>"
-					+ resource.getConnectionType().getCode() + "</b>";
+			String connectionType = (resource.getConnectionType().hasSystem() ? resource.getConnectionType().getSystem()
+					: "") + " | " + "<b>"
+					+ (resource.getConnectionType().hasCode() ? resource.getConnectionType().getCode() : "") + "</b>";
 			writeRow("Connection Type", connectionType, out);
 		}
 
 		List<String> payloadTypes = resource.getPayloadType().stream().flatMap(c -> c.getCoding().stream())
-				.map(c -> c.getSystem() + " | <b>" + c.getCode() + "</b>").toList();
+				.map(c -> (c.hasSystem() ? c.getSystem() : "") + " | <b>" + (c.hasCode() ? c.getCode() : "") + "</b>")
+				.toList();
 		if (!payloadTypes.isEmpty())
 		{
 			writeRowWithList("Payload Types", payloadTypes, out);
