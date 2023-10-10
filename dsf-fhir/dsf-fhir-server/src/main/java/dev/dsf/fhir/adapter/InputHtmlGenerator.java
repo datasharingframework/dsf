@@ -3,7 +3,6 @@ package dev.dsf.fhir.adapter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,9 +25,6 @@ import org.hl7.fhir.r4.model.UriType;
 
 public abstract class InputHtmlGenerator
 {
-	protected static final String ELEMENT_TYPE_ROW = "row";
-	protected static final String ELEMENT_TYPE_LINK = "link";
-	protected static final String ELEMENT_TYPE_PATH = "path";
 	protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	protected static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	protected static final SimpleDateFormat DATE_TIME_DISPLAY_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
@@ -103,47 +99,44 @@ public abstract class InputHtmlGenerator
 	{
 		if (type != null)
 		{
-			if (type instanceof StringType)
+			if (type instanceof StringType s)
 			{
-				String value = ((StringType) type).getValue();
+				String value = s.hasValue() ? s.getValue() : "";
 				writeInputFieldValueInput("text", value, elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof IntegerType)
+			else if (type instanceof IntegerType i)
 			{
-				String value = String.valueOf(((IntegerType) type).getValue());
+				String value = i.hasValue() ? String.valueOf(i.getValue()) : "";
 				writeInputFieldValueInput("number", value, elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof DecimalType)
+			else if (type instanceof DecimalType d)
 			{
-				String value = String.valueOf(((DecimalType) type).getValue());
+				String value = d.hasValue() ? String.valueOf(d.getValue()) : "";
 				writeInputFieldValueInput("number", value, elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof DateType)
+			else if (type instanceof DateType d)
 			{
-				Date value = ((DateType) type).getValue();
-				String date = DATE_FORMAT.format(value);
+				String date = d.hasValue() ? DATE_FORMAT.format(d.getValue()) : "";
 				writeInputFieldValueInput("date", date, elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof TimeType)
+			else if (type instanceof TimeType t)
 			{
-				String value = ((TimeType) type).getValue();
+				String value = t.hasValue() ? t.getValue() : "";
 				writeInputFieldValueInput("time", value, elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof DateTimeType)
+			else if (type instanceof DateTimeType dt)
 			{
-				Date value = ((DateTimeType) type).getValue();
-				String dateTime = DATE_TIME_FORMAT.format(value);
+				String dateTime = dt.hasValue() ? DATE_TIME_FORMAT.format(dt.getValue()) : "";
 				writeInputFieldValueInput("datetime-local", dateTime, elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof InstantType)
+			else if (type instanceof InstantType i)
 			{
-				Date value = ((InstantType) type).getValue();
-				String dateTime = DATE_TIME_FORMAT.format(value);
+				String dateTime = i.hasValue() ? DATE_TIME_FORMAT.format(i.getValue()) : "";
 				writeInputFieldValueInput("datetime-local", dateTime, elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof UriType)
+			else if (type instanceof UriType u)
 			{
-				String value = ((UriType) type).getValue();
+				String value = u.hasValue() ? u.getValue() : "";
 				writeInputFieldValueInput("url", value, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof Reference reference)
@@ -160,27 +153,28 @@ public abstract class InputHtmlGenerator
 							elementIndex, writable, out);
 				}
 			}
-			else if (type instanceof Identifier identifier)
+			else if (type instanceof Identifier i)
 			{
-				writeInputFieldSystemCodeInput(identifier.getSystem(), identifier.getValue(), elementName, elementIndex,
-						writable, out);
+				writeInputFieldSystemCodeInput(i.hasSystem() ? i.getSystem() : "", i.hasValue() ? i.getValue() : "",
+						elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof Coding coding)
+			else if (type instanceof Coding c)
 			{
-				writeInputFieldSystemCodeInput(coding.getSystem(), coding.getCode(), elementName, elementIndex,
-						writable, out);
+				writeInputFieldSystemCodeInput(c.hasSystem() ? c.getSystem() : "", c.hasCode() ? c.getCode() : "",
+						elementName, elementIndex, writable, out);
 			}
-			else if (type instanceof BooleanType)
+			else if (type instanceof BooleanType b)
 			{
-				boolean valueIsTrue = ((BooleanType) type).getValue();
+				Boolean value = b.getValue();
 
+				// TODO support empty boolean by using data-absent-reason extension, remove !writable
 				out.write("<div class=\"input-group\">\n");
 				out.write("<label class=\"radio\"><input type=\"radio\" name=\"" + elementName + "\" index=\""
-						+ elementIndex + "\" value=\"true\"" + ((valueIsTrue && !writable) ? " checked" : "")
-						+ "/>Yes</label>\n");
+						+ elementIndex + "\" value=\"true\""
+						+ (Boolean.TRUE.equals(value) && !writable ? " checked" : "") + "/>Yes</label>\n");
 				out.write("<label class=\"radio\"><input type=\"radio\" name=\"" + elementName + "\" " + "\" index=\""
-						+ elementIndex + "\" value=\"false\"" + ((!valueIsTrue && !writable) ? " checked" : "")
-						+ "/>No</label>\n");
+						+ elementIndex + "\" value=\"false\""
+						+ (Boolean.FALSE.equals(value) && !writable ? " checked" : "") + "/>No</label>\n");
 				out.write("</div>\n");
 			}
 			else

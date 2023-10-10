@@ -47,6 +47,9 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 	{
 		Objects.requireNonNull(repositoryService, "repositoryService");
 		Objects.requireNonNull(processStateDao, "processStateDao");
+
+		logger.info("Excluded processes: {}", excluded);
+		logger.info("Retired processes: {}", retired);
 	}
 
 	private Map<ProcessIdAndVersion, ProcessState> getStates()

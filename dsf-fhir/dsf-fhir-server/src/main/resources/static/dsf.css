@@ -304,6 +304,10 @@ pre.lang-html {
 	color: #aaa !important;
 }
 
+.bundle>#header>table {
+  width: 100%
+}
+
 .bundle>#header #resources {
 	padding-right: 1em;
 	color: #aaa
@@ -318,28 +322,31 @@ pre.lang-html {
 	border: 1px solid #ccc;
 	padding: 20px 20px 10px 20px;
 	color: var(--color-prime);
-	overflow-x: auto;
 }
 
 .bundle>#list {
-	border-collapse: separate;
-	border-spacing: 0 1rem;
-	width: 100%;
+	overflow-x: auto;
 }
 
-.bundle>#list tr:not(:first-child) {
+.bundle>#list>table {
+	border-collapse: separate;
+	border-spacing: 0 1rem;
+  width: 100%
+}
+
+.bundle>#list>table tr:not(:first-child) {
 	cursor: pointer;
 }
 
-.bundle>#list th:first-child {
+.bundle>#list>table th:first-child {
 	border-left: 0.5rem solid var(--color-row-background-deep);
 }
 
-.bundle>#list td:first-child {
+.bundle>#list>table td:first-child {
 	border-left: 0.5rem solid var(--color-row-background);
 }
 
-.bundle>#list th {
+.bundle>#list>table th {
 	color: var(--color-prime);
 	background-color: var(--color-row-background-deep);
 	padding: 1rem 0 1rem 1rem;
@@ -347,50 +354,82 @@ pre.lang-html {
 	text-align: left;
 }
 
-.bundle>#list td {
+.bundle>#list>table td {
 	background-color: var(--color-row-background);
 	padding: 1rem 0 1rem 1rem;
 	white-space: nowrap;
 	text-align: left;
 }
 
-.bundle>#list tr:hover td {
+.bundle>#list>table tr:hover td {
 	background-color: var(--color-row-background-hover);
 }
 
-.bundle>#list th:last-child {
+.bundle>#list>table th:last-child {
 	padding-right: 1rem;
 }
 
-.bundle>#list td:last-child {
+.bundle>#list>table td:last-child {
 	padding-right: 1rem;
 }
 
-.bundle>#list td[status="draft"]:first-child {
+.bundle>#list>table td[status="draft"]:first-child {
 	border-left-color: var(--color-row-border-draft);
 }
 
-.bundle>#list td[status="requested"]:first-child {
+.bundle>#list>table td[status="requested"]:first-child {
 	border-left-color: var(--color-row-border-requested);
 }
 
-.bundle>#list td[status="in-progress"]:first-child {
+.bundle>#list>table td[status="in-progress"]:first-child {
 	border-left-color: var(--color-row-border-progress);
 }
 
-.bundle>#list td[status="completed"]:first-child {
+.bundle>#list>table td[status="completed"]:first-child {
 	border-left-color: var(--color-row-border-completed);
 }
 
-.bundle>#list td[status="failed"]:first-child {
+.bundle>#list>table td[status="failed"]:first-child {
 	border-left-color: var(--color-row-border-failed);
 }
 
-.bundle>#list td[status="stopped"]:first-child {
+.bundle>#list>table td[status="stopped"]:first-child {
 	border-left-color: var(--color-row-border-stopped);
 }
 
-.bundle>#list td.id-value {
+.bundle>#list>table td[status="active"]:first-child {
+	border-left-color: var(--color-row-border-completed);
+}
+
+.bundle>#list>table td[status="suspended"]:first-child {
+	border-left-color: var(--color-row-border-stopped);
+}
+
+.bundle>#list>table td[status="error"]:first-child {
+	border-left-color: var(--color-row-border-failed);
+}
+
+.bundle>#list>table td[status="off"]:first-child {
+	border-left-color: var(--color-row-border-requested);
+}
+
+.bundle>#list>table td[status="entered-in-error"]:first-child {
+	border-left-color: var(--color-row-border-failed);
+}
+
+.bundle>#list>table td[status="test"]:first-child {
+	border-left-color: var(--color-row-border-draft);
+}
+
+.bundle>#list>table td[active="true"]:first-child {
+	border-left-color: var(--color-row-border-completed);
+}
+
+.bundle>#list>table td[active="false"]:first-child {
+	border-left-color: var(--color-row-border-requested);
+}
+
+.bundle>#list>table td.id-value {
 	font-family: monospace;
 }
 
@@ -405,16 +444,123 @@ pre.lang-html {
 	text-decoration: underline;
 }
 
-.bundle>#list td:first-child,
-.bundle>#list th:first-child {
+.bundle>#list>table td:first-child,
+.bundle>#list>table th:first-child {
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
 }
 
-.bundle>#list td:last-child,
-.bundle>#list th:last-child {
+.bundle>#list>table td:last-child,
+.bundle>#list>table th:last-child {
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
+}
+
+.section-header {
+	font-family: monospace;
+	font-size: 1.75em;
+	color: #326F95;
+	padding-left: 5px;
+	margin-bottom: 12px;
+}
+
+.resource {
+  border: 1px solid #ccc;
+  padding: 20px 20px 10px 20px;
+  color: var(--color-prime);
+}
+
+.meta {
+  display: flex;
+  flex-direction: row
+}
+
+.profiles {
+  margin-right: 0.7em;
+  width: 67%;
+}
+
+.last-updated {
+  width: 33%;
+}
+
+.row-list {
+  padding-inline-start: 25px;
+  margin-top: 0.15em;
+  margin-bottom: 0.1em;
+}
+
+.row-text>a {
+  text-decoration: none;
+  color: var(--color-disabled-text);
+}
+
+.row-text>a:hover {
+  text-decoration: underline;
+}
+
+.row-text, .row-text>a:visited {
+  color: var(--color-disabled-text);
+  word-wrap: break-word;
+}
+
+.row-text.id-value {
+  font-family: monospace;
+}
+
+div.row-text {
+  padding-left: 6px;
+}
+
+.row[active="true"] {
+	background: var(--color-row-border-completed);
+}
+
+.row[active="false"] {
+	background: var(--color-row-border-requested);
+}
+
+.row[status="active"]:first-child {
+	background: var(--color-row-border-completed);
+}
+
+.row[status="suspended"]:first-child {
+	background: var(--color-row-border-stopped);
+}
+
+.row[status="error"]:first-child {
+	background: var(--color-row-border-failed);
+}
+
+.row[status="off"]:first-child {
+	background: var(--color-row-border-requested);
+}
+
+.row[status="entered-in-error"]:first-child {
+	background: var(--color-row-border-failed);
+}
+
+.row[status="test"]:first-child {
+	background: var(--color-row-border-draft);
+}
+
+.contact {
+  display: flex;
+  flex-direction: row;
+}
+
+.contact-element-100 {
+  width: 100%;
+  margin-right: 0em;
+}
+
+.contact-element-50 {
+  width: 50%;
+  margin-right: 0em;
+}
+
+.contact-element-margin {
+  margin-right: 0.7em;
 }
 
 @media print {
