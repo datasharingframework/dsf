@@ -330,61 +330,61 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		if (resource == null)
 			return Stream.empty();
 
-		if (resource instanceof ActivityDefinition)
-			return getReferences((ActivityDefinition) resource);
+		if (resource instanceof ActivityDefinition ad)
+			return getReferences(ad);
 		// not implemented yet, special rules apply for tmp ids
-		// else if (resource instanceof Bundle)
-		// return getReferences((Bundle) resource);
-		else if (resource instanceof Binary)
-			return getReferences((Binary) resource);
-		else if (resource instanceof CodeSystem)
-			return getReferences((CodeSystem) resource);
-		else if (resource instanceof DocumentReference)
-			return getReferences((DocumentReference) resource);
-		else if (resource instanceof Endpoint)
-			return getReferences((Endpoint) resource);
-		else if (resource instanceof Group)
-			return getReferences((Group) resource);
-		else if (resource instanceof HealthcareService)
-			return getReferences((HealthcareService) resource);
-		else if (resource instanceof Library)
-			return getReferences((Library) resource);
-		else if (resource instanceof Location)
-			return getReferences((Location) resource);
-		else if (resource instanceof Measure)
-			return getReferences((Measure) resource);
-		else if (resource instanceof MeasureReport)
-			return getReferences((MeasureReport) resource);
-		else if (resource instanceof NamingSystem)
-			return getReferences((NamingSystem) resource);
-		else if (resource instanceof OperationOutcome)
-			return getReferences((OperationOutcome) resource);
-		else if (resource instanceof Organization)
-			return getReferences((Organization) resource);
-		else if (resource instanceof OrganizationAffiliation)
-			return getReferences((OrganizationAffiliation) resource);
-		else if (resource instanceof Patient)
-			return getReferences((Patient) resource);
-		else if (resource instanceof Practitioner)
-			return getReferences((Practitioner) resource);
-		else if (resource instanceof PractitionerRole)
-			return getReferences((PractitionerRole) resource);
-		else if (resource instanceof Provenance)
-			return getReferences((Provenance) resource);
-		else if (resource instanceof Questionnaire)
-			return getReferences((Questionnaire) resource);
-		else if (resource instanceof QuestionnaireResponse)
-			return getReferences((QuestionnaireResponse) resource);
-		else if (resource instanceof ResearchStudy)
-			return getReferences((ResearchStudy) resource);
-		else if (resource instanceof StructureDefinition)
-			return getReferences((StructureDefinition) resource);
-		else if (resource instanceof Subscription)
-			return getReferences((Subscription) resource);
-		else if (resource instanceof Task)
-			return getReferences((Task) resource);
-		else if (resource instanceof ValueSet)
-			return getReferences((ValueSet) resource);
+		// else if (resource instanceof Bundle b)
+		// return getReferences(b);
+		else if (resource instanceof Binary b)
+			return getReferences(b);
+		else if (resource instanceof CodeSystem cs)
+			return getReferences(cs);
+		else if (resource instanceof DocumentReference dr)
+			return getReferences(dr);
+		else if (resource instanceof Endpoint e)
+			return getReferences(e);
+		else if (resource instanceof Group g)
+			return getReferences(g);
+		else if (resource instanceof HealthcareService hs)
+			return getReferences(hs);
+		else if (resource instanceof Library l)
+			return getReferences(l);
+		else if (resource instanceof Location l)
+			return getReferences(l);
+		else if (resource instanceof Measure m)
+			return getReferences(m);
+		else if (resource instanceof MeasureReport mr)
+			return getReferences(mr);
+		else if (resource instanceof NamingSystem ns)
+			return getReferences(ns);
+		else if (resource instanceof OperationOutcome oo)
+			return getReferences(oo);
+		else if (resource instanceof Organization o)
+			return getReferences(o);
+		else if (resource instanceof OrganizationAffiliation oa)
+			return getReferences(oa);
+		else if (resource instanceof Patient p)
+			return getReferences(p);
+		else if (resource instanceof Practitioner p)
+			return getReferences(p);
+		else if (resource instanceof PractitionerRole pr)
+			return getReferences(pr);
+		else if (resource instanceof Provenance p)
+			return getReferences(p);
+		else if (resource instanceof Questionnaire q)
+			return getReferences(q);
+		else if (resource instanceof QuestionnaireResponse qr)
+			return getReferences(qr);
+		else if (resource instanceof ResearchStudy rs)
+			return getReferences(rs);
+		else if (resource instanceof StructureDefinition sd)
+			return getReferences(sd);
+		else if (resource instanceof Subscription s)
+			return getReferences(s);
+		else if (resource instanceof Task t)
+			return getReferences(t);
+		else if (resource instanceof ValueSet vs)
+			return getReferences(vs);
 		else if (resource instanceof DomainResource)
 		{
 			logger.debug("DomainResource of type {} not supported, returning extension references only",

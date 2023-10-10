@@ -6,15 +6,10 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>1.2.0</version>
+		<version>1.3.0</version>
 	</parent>
 
 	<dependencies>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-auth</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>

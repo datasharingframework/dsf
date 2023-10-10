@@ -328,7 +328,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 	private URI getResourceUri(Resource resource) throws MalformedURLException
 	{
-		return getResourceUrlString(resource).map(this::toURI).orElse(uriInfo.getRequestUri());
+		return getResourceUrlString(resource).map(this::toURI).orElse(toURI(serverBaseUrl + "/" + uriInfo.getPath()));
 	}
 
 	private URI toURI(String str)
