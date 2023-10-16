@@ -148,10 +148,20 @@ pre {
 	margin-top: 0;
 }
 
+pre.lang-xml {
+	display: none;
+}
+
+pre.lang-json {
+	display: none;
+}
+
 pre.lang-html {
+	display: none;
 	border: 0;
 	font-family: monospace;
 }
+
 
 #icons {
 	position: absolute;
@@ -190,7 +200,12 @@ pre.lang-html {
 	fill: #aaa;
 }
 
+#bookmark-remove.icon {
+	display: none;
+}
+
 #help {
+	display: none;
 	position: absolute;
 	top: 1em;
 	right: 1em;
@@ -220,6 +235,11 @@ pre.lang-html {
 .help-param {
 	font-size: small;
 	font-family: sans-serif;
+	margin-bottom: 1.2em;
+}
+
+.help-param:last-child {
+	margin-bottom: 0;
 }
 
 .help-param-name {
@@ -234,10 +254,11 @@ pre.lang-html {
 .help-param-documentation {
 	max-width: 50em;
 	margin-top: 0.5em;
-	margin-bottom: 1.2em;
+	margin-bottom: 0;
 }
 
 #bookmarks {
+	display: none;
 	position: absolute;
 	top: 1em;
 	right: 1em;
@@ -304,8 +325,23 @@ pre.lang-html {
 	color: #aaa !important;
 }
 
+.bundle {
+	border: 1px solid #ccc;
+	padding: 20px 20px 10px 20px;
+	color: var(--color-prime);
+}
+
 .bundle>#header>table {
   width: 100%
+}
+
+.bundle>#header>table td:nth-child(2) {
+	text-align: center;
+	vertical-align: top;
+}
+
+.bundle>#header>table td:nth-child(3) {
+	text-align: right;
 }
 
 .bundle>#header #resources {
@@ -316,12 +352,6 @@ pre.lang-html {
 .bundle>#header #page {
 	padding-left: 1em;
 	color: #aaa
-}
-
-.bundle {
-	border: 1px solid #ccc;
-	padding: 20px 20px 10px 20px;
-	color: var(--color-prime);
 }
 
 .bundle>#list {

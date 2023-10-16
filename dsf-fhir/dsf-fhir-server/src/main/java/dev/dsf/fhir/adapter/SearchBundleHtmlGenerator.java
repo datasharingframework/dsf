@@ -131,7 +131,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		if (previous.isPresent())
 			out.write("</a>");
 
-		out.write("</td><td style=\"text-align:center;vertical-align:top;\">");
+		out.write("</td><td>");
 		if (resource.getEntry().size() > 0)
 		{
 			int page = getPage(resourceUri);
@@ -142,7 +142,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 			out.write("<span id=\"resources\">Resources " + firstResource + " - " + lastResource + " / "
 					+ resource.getTotal() + "</span><span id=\"page\">Page " + page + " / " + max + "</span>");
 		}
-		out.write("</td><td style=\"text-align:right;\">");
+		out.write("</td><td>");
 
 		Optional<String> next = resource.getLink().stream().filter(l -> "next".equals(l.getRelation())).findFirst()
 				.map(BundleLinkComponent::getUrl);
@@ -170,9 +170,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 				.filter(e -> e.hasResource() && e.hasSearch() && e.getSearch().hasMode()
 						&& SearchEntryMode.MATCH.equals(e.getSearch().getMode()))
 				.map(BundleEntryComponent::getResource)
-				.map(r -> "<tr onClick=\"if(event.target?.tagName?.toLowerCase() !== 'a') window.location=document.head.baseURI + '"
-						+ r.getIdElement().toVersionless().getValueAsString() + "'\" title=\"Open "
-						+ r.getResourceType().name() + "\">" + getRow(r) + "</tr>\n")
+				.map(r -> "<tr title=\"Open " + r.getResourceType().name() + "\">" + getRow(r) + "</tr>\n")
 				.collect(Collectors.joining()));
 		out.write("</table></div>");
 

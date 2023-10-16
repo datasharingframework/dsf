@@ -222,9 +222,7 @@ public abstract class InputHtmlGenerator
 	{
 		if (writable)
 		{
-			out.write("<svg class=\"input-group-svg\" height=\"22\" width=\"22\" viewBox=\"0 -960 960 960\" "
-					+ "onclick=\"insertPlaceholderInValue(this.parentElement, '" + elementName + "', '" + value
-					+ "')\">\n");
+			out.write("<svg class=\"input-group-svg\" height=\"22\" width=\"22\" viewBox=\"0 -960 960 960\">\n");
 			out.write("<title>Use placeholder value</title>\n");
 			out.write(
 					"<path d=\"M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z\"/>\n");
