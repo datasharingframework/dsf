@@ -669,7 +669,13 @@
 								<requireMavenVersion>
 									<version>3.5.4</version>
 								</requireMavenVersion>
+								<bannedDependencies>
+									<excludes>
+										<exclude>commons-logging:commons-logging</exclude>
+									</excludes>
+								</bannedDependencies>
 							</rules>
+							<fail>true</fail>
 						</configuration>
 					</execution>
 				</executions>
