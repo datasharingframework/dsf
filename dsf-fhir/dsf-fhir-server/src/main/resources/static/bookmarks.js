@@ -138,7 +138,7 @@ function getInitialBookmarks() {
 		'OrganizationAffiliation': ['OrganizationAffiliation'],
 		'QuestionnaireResponse': ['QuestionnaireResponse?_sort=-_lastUpdated', 'QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],
 		'Subscription': ['Subscription'],
-		'Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile&status=draft'],
+		'Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile,identifier&status=draft'],
 		'ValueSet': ['ValueSet']
 	};
 }
