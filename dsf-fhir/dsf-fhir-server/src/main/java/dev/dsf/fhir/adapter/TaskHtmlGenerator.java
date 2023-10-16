@@ -136,7 +136,8 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		if (draft)
 		{
 			out.write("<div class=\"row row-submit\" name=\"submit-row\">\n");
-			out.write("<button id=\"start-process\" type=\"button\" name=\"submit\" class=\"submit\">Start Process</button>\n");
+			out.write(
+					"<button id=\"start-process\" type=\"button\" name=\"submit\" class=\"submit\">Start Process</button>\n");
 			out.write("</div>\n");
 		}
 
