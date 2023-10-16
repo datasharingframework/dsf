@@ -427,7 +427,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 		return "<td class=\"id-value\" active=\"" + (resource.hasActive() ? resource.getActive() : "") + "\">"
 				+ createResourceLink(resource) + "</td><td>" + (resource.hasActive() ? resource.getActive() : "")
-				+ "</td><td class=\"id-value\">" + createResourceLink(resource.getParticipatingOrganization())
+				+ "</td><td class=\"id-value\">" + createResourceLink(resource.getOrganization())
 				+ "</td><td class=\"id-value\">" + createResourceLink(resource.getParticipatingOrganization())
 				+ "</td><td>" + role + "</td><td class=\"id-value\">" + createResourceLink(resource.getEndpoint())
 				+ "</td><td>" + toLastUpdated(resource) + "</td>";
