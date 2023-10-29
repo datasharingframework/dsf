@@ -101,8 +101,5 @@ function createHelp(searchParam) {
 		span2.setAttribute('class', 'help-param-type');
 		p.innerText = param.documentation;
 		p.setAttribute('class', 'help-param-documentation');
-
-		if ((i + 1) == searchParam.length)
-			p.setAttribute('style', 'margin-bottom: 0px');
 	}
 }
