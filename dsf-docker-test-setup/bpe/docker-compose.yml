@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   app:
+    build: ../../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
