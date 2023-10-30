@@ -1,5 +1,7 @@
 package dev.dsf.fhir.authentication;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -88,26 +90,41 @@ public class PractitionerProviderImpl extends AbstractProvider implements Practi
 						.filter(n -> n.getTagNo() == GeneralName.rfc822Name).map(GeneralName::getName)
 						.map(IETFUtils::valueToString).toList();
 
-		Stream<String> emails = Stream.concat(Stream.concat(email1.stream(), email2.stream()), rfc822Names.stream())
-				.filter(e -> e != null).filter(e -> e.contains("@"));
+		Stream<String> emails = Stream.concat(Stream.concat(email1.stream(), email2.stream()), rfc822Names.stream());
 		return toPractitioner(!surnames.isEmpty() ? surnames.stream() : commonName.stream(), givennames.stream(),
 				emails);
 	}
 
 	private Practitioner toPractitioner(DsfOpenIdCredentials credentials)
 	{
+		String iss = credentials.getStringClaimOrDefault("iss", "");
+		String sub = credentials.getStringClaimOrDefault("sub", "");
+
 		Stream<String> surname = Stream.of((String) credentials.getStringClaimOrDefault("family_name", ""));
 		Stream<String> givenNames = Stream.of((String) credentials.getStringClaimOrDefault("given_name", ""));
-		Stream<String> emails = Stream.of((String) credentials.getStringClaimOrDefault("email", ""));
+		Stream<String> emails = Stream.of((String) credentials.getStringClaimOrDefault("email", ""), toEmail(iss, sub));
 
 		return toPractitioner(surname, givenNames, emails);
+	}
+
+	private String toEmail(String iss, String sub)
+	{
+		try
+		{
+			return sub + "@" + new URL(iss).getHost();
+		}
+		catch (MalformedURLException e)
+		{
+			return null;
+		}
 	}
 
 	private Practitioner toPractitioner(Stream<String> surname, Stream<String> givenNames, Stream<String> emails)
 	{
 		Practitioner practitioner = new Practitioner();
 
-		emails.map(e -> new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(e))
+		emails.filter(e -> e != null).filter(e -> e.contains("@"))
+				.map(e -> new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(e))
 				.forEach(practitioner::addIdentifier);
 
 		HumanName name = new HumanName();
