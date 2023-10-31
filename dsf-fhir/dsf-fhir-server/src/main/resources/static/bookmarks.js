@@ -138,7 +138,7 @@ function getInitialBookmarks() {
 		'OrganizationAffiliation': ['OrganizationAffiliation'],
 		'QuestionnaireResponse': ['QuestionnaireResponse?_sort=-_lastUpdated', 'QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],
 		'Subscription': ['Subscription'],
-		'Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile&status=draft'],
+		'Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile,identifier&status=draft'],
 		'ValueSet': ['ValueSet']
 	};
 }
@@ -163,17 +163,18 @@ function createBookmarkList(bookmarks) {
 		}
 		if (e[1].length > 0) {
 			e[1].filter(b => b !== e[0]).forEach(b => {
+				const c = counter;
 				const div = document.createElement("div");
-				div.setAttribute('id', 'bookmarks-list-entry-' + counter);
+				div.setAttribute('id', 'bookmarks-list-entry-' + c);
 				const divAddIcon = addIcon.cloneNode(true);
-				divAddIcon.setAttribute('id', 'bookmark-add-' + counter);
-				divAddIcon.setAttribute('onclick', "addBookmark('" + b + "', " + counter + ")");
+				divAddIcon.setAttribute('id', 'bookmark-add-' + c);
+				divAddIcon.addEventListener('click', () => addBookmark(b, c));
 				divAddIcon.setAttribute('viewBox', '4 0 24 24');
 				divAddIcon.style.display = 'none';
 				divAddIcon.children[0].innerHTML = 'Add Bookmark: ' + b;
 				const divRemoveIcon = removeIcon.cloneNode(true);
-				divRemoveIcon.setAttribute('id', 'bookmark-remove-' + counter);
-				divRemoveIcon.setAttribute('onclick', "removeBookmark('" + b + "', " + counter + ")");
+				divRemoveIcon.setAttribute('id', 'bookmark-remove-' + c);
+				divRemoveIcon.addEventListener('click', () =>  removeBookmark(b, c));
 				divRemoveIcon.setAttribute('viewBox', '4 0 24 24');
 				divRemoveIcon.style.display = 'inline';
 				divRemoveIcon.children[0].innerHTML = 'Remove Bookmark: ' + b;

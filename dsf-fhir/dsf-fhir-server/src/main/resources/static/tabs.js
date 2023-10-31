@@ -19,8 +19,8 @@ function openTab(lang) {
     setDownloadLink(lang)
 }
 
-function openInitialTab(htmlEnabled) {
-    if (htmlEnabled)
+function openInitialTab() {
+    if (document.querySelector('div#html') != null)
         openTab("html")
     else {
         const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml"
@@ -68,27 +68,4 @@ function getDownloadFileName(lang) {
         else if (resourceType[1] !== undefined && resourceType[2] !== undefined && resourceType[3] !== undefined && resourceType[4] !== undefined)
             return resourceType[1] + '_' + resourceType[2].replace('/', '') + '_v' + resourceType[4].replace('/', '') + '.' + lang
     }
-}
-
-function setUiTheme(theme = getUiTheme()) {
-    if (theme === 'dark') {
-        document.getElementById('light-mode').style.display = 'block'
-        document.getElementById('dark-mode').style.display = 'none'
-    }
-    else {
-        document.getElementById('light-mode').style.display = 'none'
-        document.getElementById('dark-mode').style.display = 'block'
-    }
-    
-    document.querySelector("html").setAttribute("theme", theme);
-    localStorage.setItem("theme", theme);
-}
-
-function getUiTheme() {
-    if (localStorage !== null && localStorage.getItem("theme") !== null)
-        return localStorage.getItem("theme")
-    else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
-    	return "dark"
-    else
-        return "light"
 }

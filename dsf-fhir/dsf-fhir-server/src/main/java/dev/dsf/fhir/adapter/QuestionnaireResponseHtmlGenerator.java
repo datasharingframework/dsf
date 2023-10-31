@@ -86,7 +86,7 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 		{
 			out.write("<div class=\"row row-submit\" name=\"submit-row\">\n");
 			out.write(
-					"<button type=\"button\" name=\"submit\" class=\"submit\" onclick=\"completeQuestionnaireResponse();\">Submit</button>\n");
+					"<button id=\"complete-questionnaire-response\" type=\"button\" name=\"submit\" class=\"submit\">Submit</button>\n");
 			out.write("</div>\n");
 		}
 

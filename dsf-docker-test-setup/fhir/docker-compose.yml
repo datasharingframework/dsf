@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   proxy:
+    build: ../../dsf-docker/fhir_proxy
     image: datasharingframework/fhir_proxy
     restart: "no"
     ports:
@@ -28,6 +29,7 @@ services:
       - app
 
   app:
+    build: ../../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
