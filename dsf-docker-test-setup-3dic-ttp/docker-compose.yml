@@ -107,6 +107,7 @@ services:
       --spi-truststore-file-hostname-verification-policy=STRICT
 
   dic1-fhir:
+    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
@@ -175,6 +176,7 @@ services:
       - keycloak
 
   dic2-fhir:
+    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
@@ -243,6 +245,7 @@ services:
       - keycloak
 
   dic3-fhir:
+    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
@@ -311,6 +314,7 @@ services:
       - keycloak
 
   ttp-fhir:
+    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
@@ -386,6 +390,7 @@ services:
       - keycloak
 
   dic1-bpe:
+    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
@@ -452,6 +457,7 @@ services:
       - keycloak
 
   dic2-bpe:
+    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
@@ -518,6 +524,7 @@ services:
       - keycloak
 
   dic3-bpe:
+    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
@@ -585,6 +592,7 @@ services:
       - keycloak
 
   ttp-bpe:
+    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
