@@ -29,8 +29,16 @@ public class BrowserPolicyHeaderResponseFilter implements ContainerResponseFilte
 			headers.add("Cross-Origin-Embedder-Policy", "require-corp");
 			headers.add("Cross-Origin-Resource-Policy", "same-site");
 			headers.add("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
-			headers.add("Content-Security-Policy",
-					"frame-ancestors 'none'; default-src 'self'; frame-src 'none'; media-src 'none'; object-src 'none'; worker-src 'none'");
+
+			if (requestContext.getUriInfo() != null && requestContext.getUriInfo().getPath() != null
+					&& requestContext.getUriInfo().getPath().startsWith("Binary/"))
+				headers.add("Content-Security-Policy",
+						"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
+								+ " script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
+			else
+				headers.add("Content-Security-Policy",
+						"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
+								+ " script-src 'self'; style-src 'self'");
 		}
 	}
 }
