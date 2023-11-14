@@ -24,18 +24,18 @@ public abstract class AbstractDbTest
 	protected static final String DATABASE_CAMUNDA_USER = "camunda_user";
 	protected static final String DATABASE_CAMUNDA_USER_PASSWORD = "camunda_user_password";
 
-	protected static final String DATABASE_URL = "jdbc:postgresql://localhost:54321/db";
+	protected static final String ROOT_USER = "postgres";
 
-	protected static final Map<String, String> CHANGE_LOG_PARAMETERS = Map.of("db.liquibase_user", "postgres",
+	protected static final Map<String, String> CHANGE_LOG_PARAMETERS = Map.of("db.liquibase_user", ROOT_USER,
 			"db.server_users_group", DATABASE_USERS_GROUP, "db.server_user", DATABASE_USER, "db.server_user_password",
 			DATABASE_USER_PASSWORD, "db.camunda_users_group", DATABASE_CAMUNDA_USERS_GROUP, "db.camunda_user",
 			DATABASE_CAMUNDA_USER, "db.camunda_user_password", DATABASE_CAMUNDA_USER_PASSWORD);
 
-	public static BasicDataSource createDefaultDataSource()
+	public static BasicDataSource createDefaultDataSource(String host, int port, String databaseName)
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setUrl(DATABASE_URL);
+		dataSource.setUrl("jdbc:postgresql://" + host + ":" + port + "/" + databaseName);
 		dataSource.setUsername(DATABASE_USER);
 		dataSource.setPassword(DATABASE_USER_PASSWORD);
 		dataSource.setDefaultReadOnly(true);
@@ -46,40 +46,11 @@ public abstract class AbstractDbTest
 		return dataSource;
 	}
 
-	public static BasicDataSource createLiquibaseDataSource()
+	public static BasicDataSource createCamundaDataSource(String host, int port, String databaseName)
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setUrl(DATABASE_URL);
-		dataSource.setUsername("postgres");
-		dataSource.setPassword("password");
-		dataSource.setDefaultReadOnly(true);
-
-		dataSource.setTestOnBorrow(true);
-		dataSource.setValidationQuery("SELECT 1");
-
-		return dataSource;
-	}
-
-	public static BasicDataSource createAdminBasicDataSource()
-	{
-		BasicDataSource dataSource = new BasicDataSource();
-		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setUrl("jdbc:postgresql://localhost:54321/postgres");
-		dataSource.setUsername("postgres");
-		dataSource.setPassword("password");
-
-		dataSource.setTestOnBorrow(true);
-		dataSource.setValidationQuery("SELECT 1");
-
-		return dataSource;
-	}
-
-	public static BasicDataSource createCamundaDataSource()
-	{
-		BasicDataSource dataSource = new BasicDataSource();
-		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setUrl(DATABASE_URL);
+		dataSource.setUrl("jdbc:postgresql://" + host + ":" + port + "/" + databaseName);
 		dataSource.setUsername(DATABASE_CAMUNDA_USER);
 		dataSource.setPassword(DATABASE_CAMUNDA_USER_PASSWORD);
 		dataSource.setDefaultReadOnly(true);

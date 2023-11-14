@@ -1270,7 +1270,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getIdPart());
 		assertNotNull(created.getVersionIdPart());
 
-		assertEquals(BASE_URL, created.getBaseUrl());
+		assertEquals(getBaseUrl(), created.getBaseUrl());
 		assertEquals("Binary", created.getResourceType());
 		assertEquals("1", created.getVersionIdPart());
 	}
@@ -1369,7 +1369,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getIdPart());
 		assertNotNull(created.getVersionIdPart());
 
-		assertEquals(BASE_URL, created.getBaseUrl());
+		assertEquals(getBaseUrl(), created.getBaseUrl());
 		assertEquals("Binary", created.getResourceType());
 		assertEquals("1", created.getVersionIdPart());
 	}
@@ -1933,7 +1933,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(updated.getIdPart());
 		assertNotNull(updated.getVersionIdPart());
 
-		assertEquals(BASE_URL, updated.getBaseUrl());
+		assertEquals(getBaseUrl(), updated.getBaseUrl());
 		assertEquals("Binary", updated.getResourceType());
 		assertEquals("2", updated.getVersionIdPart());
 	}
@@ -2038,8 +2038,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
-		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
-				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
+		bundle.addEntry().setFullUrl(getBaseUrl() + "/Binary/" + created.getIdElement().getIdPart())
+				.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Binary/" + created.getIdElement().getIdPart());
 
 		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
 
@@ -2096,8 +2097,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
-		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
-				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
+		bundle.addEntry().setFullUrl(getBaseUrl() + "/Binary/" + created.getIdElement().getIdPart())
+				.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Binary/" + created.getIdElement().getIdPart());
 
 		expectForbidden(() -> getExternalWebserviceClient().postBundle(bundle));
 	}
@@ -2142,8 +2144,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
-		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
-				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
+		bundle.addEntry().setFullUrl(getBaseUrl() + "/Binary/" + created.getIdElement().getIdPart())
+				.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Binary/" + created.getIdElement().getIdPart());
 
 		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
 	}
@@ -2176,8 +2179,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
-		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
-				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
+		bundle.addEntry().setFullUrl(getBaseUrl() + "/Binary/" + created.getIdElement().getIdPart())
+				.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Binary/" + created.getIdElement().getIdPart());
 
 		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
 
@@ -2233,8 +2237,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
-		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
-				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
+		bundle.addEntry().setFullUrl(getBaseUrl() + "/Binary/" + created.getIdElement().getIdPart())
+				.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Binary/" + created.getIdElement().getIdPart());
 
 		Bundle responseBundle = getExternalWebserviceClient().postBundle(bundle);
 		assertNotNull(responseBundle);
@@ -2287,8 +2292,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
-		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
-				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
+		bundle.addEntry().setFullUrl(getBaseUrl() + "/Binary/" + created.getIdElement().getIdPart())
+				.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Binary/" + created.getIdElement().getIdPart());
 
 		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
 		assertNotNull(responseBundle);

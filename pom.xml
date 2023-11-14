@@ -162,12 +162,13 @@
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>crypto-utils</artifactId>
+				<!-- Can't update to 4.0.0 as renamed packages in crypto-utils would break existing process plugins -->
 				<version>3.8.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
-				<version>0.22.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			
 			<dependency>

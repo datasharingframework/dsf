@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,20 +18,20 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.jakarta.client.JakartaWebSocketShutdownContainer;
@@ -50,14 +51,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.SpringServletContainerInitializer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
+import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
-import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
-import de.rwh.utils.test.LiquibaseTemplateTestRule;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
 import dev.dsf.common.auth.DsfLoginService;
@@ -84,25 +86,22 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	@ClassRule
 	public static final X509Certificates certificates = new X509Certificates();
 
-	public static final String INTEGRATION_TEST_DB_TEMPLATE_NAME = "integration_test_template";
-
-	protected static final BasicDataSource adminDataSource = createAdminBasicDataSource();
-	protected static final BasicDataSource liquibaseDataSource = createLiquibaseDataSource();
-	protected static final BasicDataSource defaultDataSource = createDefaultDataSource();
+	protected static BasicDataSource defaultDataSource;
 
 	@ClassRule
-	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
-			adminDataSource, LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, INTEGRATION_TEST_DB_TEMPLATE_NAME,
-			liquibaseDataSource, CHANGE_LOG_FILE, CHANGE_LOG_PARAMETERS, false);
+	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
+			DockerImageName.parse("postgres:15"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
+			CHANGE_LOG_PARAMETERS, false);
 
 	@Rule
-	public final LiquibaseTemplateTestRule templateRule = new LiquibaseTemplateTestRule(adminDataSource,
-			LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, INTEGRATION_TEST_DB_TEMPLATE_NAME);
+	public final PostgresTemplateRule templateRule = new PostgresTemplateRule(liquibaseRule);
+
+	@Rule
+	public final TestNameLoggerRule testNameLoggerRule = new TestNameLoggerRule();
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
 	protected static final String CONTEXT_PATH = "/fhir";
-	protected static final String BASE_URL = "https://localhost:8001" + CONTEXT_PATH;
 	protected static final String WEBSOCKET_URL = "wss://localhost:8001" + CONTEXT_PATH + "/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
@@ -113,6 +112,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	private static final ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
+	private static String baseUrl;
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
 	private static FhirWebserviceClient externalWebserviceClient;
@@ -121,44 +121,48 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	@BeforeClass
 	public static void beforeClass() throws Exception
 	{
+		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
+				liquibaseRule.getDatabaseName());
 		defaultDataSource.start();
-		liquibaseDataSource.start();
-		adminDataSource.start();
 
 		logger.info("Creating Bundle ...");
 		createTestBundle(certificates.getClientCertificate(), certificates.getExternalClientCertificate());
 
+		ServerSocketChannel statusConnectorChannel = JettyServer.serverSocketChannel();
+		ServerSocketChannel apiConnectorChannel = JettyServer.serverSocketChannel();
+
+		baseUrl = "https://localhost:" + apiConnectorChannel.socket().getLocalPort() + CONTEXT_PATH;
+
 		logger.info("Creating webservice client ...");
-		webserviceClient = createWebserviceClient(certificates.getClientCertificate().getTrustStore(),
-				certificates.getClientCertificate().getKeyStore(),
+		webserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
+				certificates.getClientCertificate().getTrustStore(), certificates.getClientCertificate().getKeyStore(),
 				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Creating external webservice client ...");
-		externalWebserviceClient = createWebserviceClient(certificates.getExternalClientCertificate().getTrustStore(),
+		externalWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
+				certificates.getExternalClientCertificate().getTrustStore(),
 				certificates.getExternalClientCertificate().getKeyStore(),
 				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Creating practitioner client ...");
-		practitionerWebserviceClient = createWebserviceClient(
+		practitionerWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
 				certificates.getPractitionerClientCertificate().getTrustStore(),
 				certificates.getPractitionerClientCertificate().getKeyStore(),
 				certificates.getPractitionerClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
-		fhirServer = startFhirServer();
+		fhirServer = startFhirServer(statusConnectorChannel, apiConnectorChannel, baseUrl);
 
 		logger.info("Creating template database ...");
-		try (Connection connection = adminDataSource.getConnection())
-		{
-			liquibaseRule.createTemplateDatabase(connection);
-		}
+		liquibaseRule.createTemplateDatabase();
 	}
 
-	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
+	private static FhirWebserviceClient createWebserviceClient(int apiPort, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
-		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, null,
-				0, 0, false, "DSF Integration Test Client", fhirContext, referenceCleaner);
+		return new FhirWebserviceClientJersey("https://localhost:" + apiPort + CONTEXT_PATH, trustStore, keyStore,
+				keyStorePassword, null, null, null, null, 0, 0, false, "DSF Integration Test Client", fhirContext,
+				referenceCleaner);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
@@ -169,20 +173,21 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				"Integration Test Client", subscriptionIdPart);
 	}
 
-	private static JettyServer startFhirServer() throws Exception
+	private static JettyServer startFhirServer(ServerSocketChannel statusConnectorChannel,
+			ServerSocketChannel apiConnectorChannel, String baseUrl) throws Exception
 	{
-		int statusPort = 10001;
-
 		Map<String, String> initParameters = new HashMap<>();
-		initParameters.put("dev.dsf.server.status.port", String.valueOf(statusPort));
+		initParameters.put("dev.dsf.server.status.port",
+				Integer.toString(statusConnectorChannel.socket().getLocalPort()));
 
-		initParameters.put("dev.dsf.fhir.db.url", DATABASE_URL);
+		initParameters.put("dev.dsf.fhir.db.url", "jdbc:postgresql://" + liquibaseRule.getHost() + ":"
+				+ liquibaseRule.getMappedPort(5432) + "/" + liquibaseRule.getDatabaseName());
 		initParameters.put("dev.dsf.fhir.db.user.username", DATABASE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.password", DATABASE_USER_PASSWORD);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", DATABASE_DELETE_USER_PASSWORD);
 
-		initParameters.put("dev.dsf.fhir.server.base.url", BASE_URL);
+		initParameters.put("dev.dsf.fhir.server.base.url", baseUrl);
 		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
 		initParameters.put("dev.dsf.fhir.server.init.bundle", FHIR_BUNDLE_FILE.toString());
 
@@ -216,19 +221,19 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		KeyStore serverCertificateKeyStore = CertificateHelper.toJksKeyStore(privateKey,
 				new Certificate[] { certificate }, UUID.randomUUID().toString(), keyStorePassword);
 
-		Function<Server, Connector> apiConnector = JettyServer.httpsConnector("127.0.0.1", 8001, caCertificate,
+		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel, caCertificate,
 				serverCertificateKeyStore, keyStorePassword, false);
-		Function<Server, Connector> statusConnector = JettyServer.statusConnector("127.0.0.1", statusPort);
+		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
 		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = Arrays.asList(
 				JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
 				JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
 
-		Consumer<WebAppContext> securityHandlerConfigurer = webAppContext ->
+		BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer = (webAppContext, statusPortSupplier) ->
 		{
 			SessionHandler sessionHandler = webAppContext.getSessionHandler();
 			DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
 
-			StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPort);
+			StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPortSupplier);
 			ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
 					caCertificate);
 			DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,
@@ -324,8 +329,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	public static void afterClass() throws Exception
 	{
 		defaultDataSource.close();
-		liquibaseDataSource.close();
-		adminDataSource.close();
 
 		try
 		{
@@ -360,6 +363,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	{
 		return (AnnotationConfigWebApplicationContext) WebApplicationContextUtils
 				.getWebApplicationContext(fhirServer.getServletContext());
+	}
+
+	protected static String getBaseUrl()
+	{
+		return baseUrl;
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()

@@ -22,10 +22,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
-import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
-import de.rwh.utils.test.LiquibaseTemplateTestRule;
+import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
+import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
@@ -41,39 +42,38 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		R apply(A a, B b, C c);
 	}
 
-	public static final String DAO_DB_TEMPLATE_NAME = "dao_template";
-
-	protected static final BasicDataSource adminDataSource = createAdminBasicDataSource();
-	protected static final BasicDataSource liquibaseDataSource = createLiquibaseDataSource();
-	protected static final BasicDataSource defaultDataSource = createDefaultDataSource();
-	protected static final BasicDataSource permanentDeleteDataSource = createPermanentDeleteDataSource();
+	protected static BasicDataSource defaultDataSource;
+	protected static BasicDataSource permanentDeleteDataSource;
 
 	@ClassRule
-	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
-			adminDataSource, LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, DAO_DB_TEMPLATE_NAME,
-			liquibaseDataSource, CHANGE_LOG_FILE, CHANGE_LOG_PARAMETERS, true);
+	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
+			DockerImageName.parse("postgres:15"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
+			CHANGE_LOG_PARAMETERS, true);
+
+	@Rule
+	public final PostgresTemplateRule templateRule = new PostgresTemplateRule(liquibaseRule);
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
 	{
+		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
+				liquibaseRule.getDatabaseName());
 		defaultDataSource.start();
-		liquibaseDataSource.start();
-		adminDataSource.start();
+
+		permanentDeleteDataSource = createPermanentDeleteDataSource(liquibaseRule.getHost(),
+				liquibaseRule.getMappedPort(5432), liquibaseRule.getDatabaseName());
 		permanentDeleteDataSource.start();
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
-		defaultDataSource.close();
-		liquibaseDataSource.close();
-		adminDataSource.close();
-		permanentDeleteDataSource.close();
-	}
+		if (defaultDataSource != null)
+			defaultDataSource.close();
 
-	@Rule
-	public final LiquibaseTemplateTestRule templateRule = new LiquibaseTemplateTestRule(adminDataSource,
-			LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, DAO_DB_TEMPLATE_NAME);
+		if (permanentDeleteDataSource != null)
+			permanentDeleteDataSource.close();
+	}
 
 	protected final Class<D> resouceClass;
 	protected final TriFunction<DataSource, DataSource, FhirContext, C> daoCreator;
