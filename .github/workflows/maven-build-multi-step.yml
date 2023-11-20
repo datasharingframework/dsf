@@ -18,18 +18,11 @@ jobs:
         java-version: 17
         cache: 'maven'
 
-    - name: Show CPUs available
-      run: lscpu
+    - name: mvn compile test-compile jar:jar install:install
+      run: mvn --batch-mode --fail-at-end --threads 1C compile test-compile jar:jar install:install
 
-    - name: Show RAM available
-      run: free -h
+    - name: mvn surefire:test
+      run: mvn --batch-mode --fail-at-end --threads 1C surefire:test
 
-    - name: Run maven compile
-      run: mvn --batch-mode --fail-at-end --threads 2C compile test-compile
-
-    - name: Run maven tests
-      run: mvn --batch-mode --fail-at-end --threads 2C surefire:test
-
-    - name: Run maven integration tests
-      run: mvn --batch-mode --fail-at-end -D forkCount=2 failsafe:integration-test failsafe:verify
-
+    - name: mvn failsafe:integration-test failsafe:verify
+      run: mvn --batch-mode --fail-at-end --threads 1C -D forkCount=2 failsafe:integration-test failsafe:verify
