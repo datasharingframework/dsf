@@ -18,7 +18,7 @@ jobs:
 
   build:
     needs: check
-    if: needs.check.outputs.should_skip != 'true' || !fromJSON(needs.check.outputs.paths_result).frontend.should_skip
+    if: needs.check.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
