@@ -31,6 +31,8 @@ jobs:
         cache: 'maven'
     - name: mvn compile test-compile jar:jar install:install
       run: mvn --batch-mode --fail-at-end --threads 1C compile test-compile jar:jar install:install
+    - name: mvn javadoc:javadoc-no-fork javadoc:test-javadoc-no-fork
+      run: mvn --batch-mode --fail-at-end --threads 1C javadoc:javadoc-no-fork javadoc:test-javadoc-no-fork
     - name: mvn surefire:test
       run: mvn --batch-mode --fail-at-end --threads 1C surefire:test
     - name: mvn failsafe:integration-test failsafe:verify
