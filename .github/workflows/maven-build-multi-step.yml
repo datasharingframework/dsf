@@ -13,7 +13,6 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v5
         with:
           paths_ignore: '["**/README.md", "dsf-bpe/dsf-bpe-server-jetty/docker", "dsf-docker", "dsf-docker-test-setup", "dsf-docker-test-setup-3dic-ttp", "dsf-fhir/dsf-fhir-server-jetty/docker"]'
-          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
   build:
     needs: check
