@@ -1,0 +1,35 @@
+name: Java CI Build with Maven (multi-step)
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup JDK 17 with maven cache
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: 17
+        cache: 'maven'
+
+    - name: Show CPUs available
+      run: lscpu
+
+    - name: Show RAM available
+      run: free -h
+
+    - name: Run maven compile
+      run: mvn --batch-mode --fail-at-end --threads 2C compile test-compile
+
+    - name: Run maven tests
+      run: mvn --batch-mode --fail-at-end --threads 2C surefire:test
+
+    - name: Run maven integration tests
+      run: mvn --batch-mode --fail-at-end -D forkCount=2 failsafe:integration-test failsafe:verify
+
