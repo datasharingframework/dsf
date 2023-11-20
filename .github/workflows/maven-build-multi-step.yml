@@ -3,26 +3,34 @@ name: Java CI Build with Maven (multi-step)
 on: [push, pull_request]
 
 jobs:
-  build:
-
+  check:
     runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+      paths_result: ${{ steps.skip_check.outputs.paths_result }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          paths_ignore: '["**/README.md", "dsf-bpe/dsf-bpe-server-jetty/docker", "dsf-docker", "dsf-docker-test-setup", "dsf-docker-test-setup-3dic-ttp", "dsf-fhir/dsf-fhir-server-jetty/docker"]'
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
+  build:
+    needs: check
+    if: needs.check.outputs.should_skip != 'true' || !fromJSON(needs.check.outputs.paths_result).frontend.should_skip
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
     - name: Setup JDK 17 with maven cache
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: 17
         cache: 'maven'
-
     - name: mvn compile test-compile jar:jar install:install
       run: mvn --batch-mode --fail-at-end --threads 1C compile test-compile jar:jar install:install
-
     - name: mvn surefire:test
       run: mvn --batch-mode --fail-at-end --threads 1C surefire:test
-
     - name: mvn failsafe:integration-test failsafe:verify
       run: mvn --batch-mode --fail-at-end --threads 1C -D forkCount=2 failsafe:integration-test failsafe:verify
