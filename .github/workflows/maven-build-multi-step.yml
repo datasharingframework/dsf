@@ -13,7 +13,7 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v5
         with:
           cancel_others: 'true'
-          concurrent_skipping: 'same_content'
+          concurrent_skipping: 'same_content_newer'
           paths_ignore: '["**/README.md", "dsf-bpe/dsf-bpe-server-jetty/docker", "dsf-docker", "dsf-docker-test-setup", "dsf-docker-test-setup-3dic-ttp", "dsf-fhir/dsf-fhir-server-jetty/docker"]'
 
   build:
