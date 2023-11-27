@@ -1,5 +1,8 @@
 package dev.dsf.common.auth;
 
+import java.util.Objects;
+import java.util.function.Supplier;
+
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ServerAuthException;
@@ -15,11 +18,13 @@ public class StatusPortAuthenticator implements Authenticator
 {
 	private static final String STATUS_PATH = "/status";
 
-	private final int statusPort;
+	private final Supplier<Integer> statusPortSupplier;
 
-	public StatusPortAuthenticator(int statusPort)
+	public StatusPortAuthenticator(Supplier<Integer> statusPortSupplier)
 	{
-		this.statusPort = statusPort;
+		Objects.requireNonNull(statusPortSupplier, "statusPortSupplier");
+
+		this.statusPortSupplier = statusPortSupplier;
 	}
 
 	@Override
@@ -37,7 +42,7 @@ public class StatusPortAuthenticator implements Authenticator
 	{
 		HttpServletRequest request = (HttpServletRequest) req;
 		return HttpMethod.GET.is(request.getMethod()) && STATUS_PATH.equals(request.getPathInfo())
-				&& statusPort == request.getLocalPort();
+				&& statusPortSupplier.get() != null && statusPortSupplier.get() == request.getLocalPort();
 	}
 
 	@Override

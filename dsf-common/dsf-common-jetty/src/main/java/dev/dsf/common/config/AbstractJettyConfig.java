@@ -39,8 +39,8 @@ import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.openid.OpenIdAuthenticator;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -191,18 +191,18 @@ public abstract class AbstractJettyConfig
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
 	private List<String> proxyNoProxy;
 
-	protected abstract Function<Server, Connector> apiConnector();
+	protected abstract Function<Server, ServerConnector> apiConnector();
 
 	protected abstract String mavenServerModuleName();
 
 	protected abstract List<Class<? extends ServletContainerInitializer>> servletContainerInitializers();
 
-	protected final Function<Server, Connector> httpApiConnector()
+	protected final Function<Server, ServerConnector> httpApiConnector()
 	{
 		return JettyServer.httpConnector(apiHost, apiPort, clientCertificateHeaderName);
 	}
 
-	protected final Function<Server, Connector> httpsApiConnector()
+	protected final Function<Server, ServerConnector> httpsApiConnector()
 	{
 		final char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
 		return JettyServer.httpsConnector(apiHost, apiPort, clientCertificateTrustStore(),
@@ -210,7 +210,7 @@ public abstract class AbstractJettyConfig
 				!oidcAuthorizationCodeFlowEnabled && !oidcBearerTokenEnabled);
 	}
 
-	protected final Function<Server, Connector> statusConnector()
+	protected final Function<Server, ServerConnector> statusConnector()
 	{
 		return JettyServer.statusConnector(statusHost, statusPort);
 	}
@@ -321,7 +321,7 @@ public abstract class AbstractJettyConfig
 		}
 	}
 
-	private void configureSecurityHandler(WebAppContext webAppContext)
+	private void configureSecurityHandler(WebAppContext webAppContext, Supplier<Integer> statusPortSupplier)
 	{
 		SessionHandler sessionHandler = webAppContext.getSessionHandler();
 		DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
@@ -382,7 +382,7 @@ public abstract class AbstractJettyConfig
 			openIdLoginService = new DsfOpenIdLoginService(openIdConfiguration, dsfLoginService);
 		}
 
-		StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPort);
+		StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPortSupplier);
 		ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
 				clientCertificateTrustStore());
 		DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,

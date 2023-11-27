@@ -1,5 +1,9 @@
 package dev.dsf.common.jetty;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -7,14 +11,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
@@ -52,7 +56,36 @@ public final class JettyServer
 		return new HttpConnectionFactory(httpConfiguration);
 	}
 
-	public static Function<Server, Connector> statusConnector(String host, int port)
+	public static ServerSocketChannel serverSocketChannel()
+	{
+		InetSocketAddress bindAddress = new InetSocketAddress(0);
+		ServerSocketChannel serverChannel = null;
+
+		try
+		{
+			serverChannel = ServerSocketChannel.open();
+			serverChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+			serverChannel.bind(bindAddress);
+
+			return serverChannel;
+		}
+		catch (IOException e)
+		{
+			try
+			{
+				if (serverChannel != null)
+					serverChannel.close();
+			}
+			catch (IOException e1)
+			{
+				e.addSuppressed(e1);
+			}
+
+			throw new RuntimeException("Failed to bind to " + bindAddress, e);
+		}
+	}
+
+	public static Function<Server, ServerConnector> statusConnector(String host, int port)
 	{
 		return server ->
 		{
@@ -64,7 +97,26 @@ public final class JettyServer
 		};
 	}
 
-	public static final Function<Server, Connector> httpConnector(String host, int port,
+	public static Function<Server, ServerConnector> statusConnector(ServerSocketChannel channel)
+	{
+		return server ->
+		{
+			try
+			{
+				ServerConnector connector = new ServerConnector(server, httpConnectionFactory());
+				connector.open(channel);
+
+				return connector;
+			}
+			catch (IOException e)
+			{
+				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
+	public static final Function<Server, ServerConnector> httpConnector(String host, int port,
 			String clientCertificateHeaderName)
 	{
 		return server ->
@@ -79,7 +131,53 @@ public final class JettyServer
 		};
 	}
 
-	public static Function<Server, Connector> httpsConnector(String host, int port,
+	public static final Function<Server, ServerConnector> httpConnector(ServerSocketChannel channel,
+			String clientCertificateHeaderName)
+	{
+		return server ->
+		{
+			try
+			{
+				ServerConnector connector = new ServerConnector(server,
+						httpConnectionFactory(new ForwardedRequestCustomizer(),
+								new ForwardedSecureRequestCustomizer(clientCertificateHeaderName)));
+				connector.open(channel);
+
+				return connector;
+			}
+			catch (IOException e)
+			{
+				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
+	public static Function<Server, ServerConnector> httpsConnector(ServerSocketChannel channel,
+			KeyStore clientCertificateTrustStore, KeyStore serverCertificateKeyStore, char[] keyStorePassword,
+			boolean needClientAuth)
+	{
+		return server ->
+		{
+			try
+			{
+				ServerConnector connector = new ServerConnector(
+						server, sslConnectionFactory(clientCertificateTrustStore, serverCertificateKeyStore,
+								keyStorePassword, needClientAuth),
+						httpConnectionFactory(new SecureRequestCustomizer()));
+				connector.open(channel);
+
+				return connector;
+			}
+			catch (IOException e)
+			{
+				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
+	public static Function<Server, ServerConnector> httpsConnector(String host, int port,
 			KeyStore clientCertificateTrustStore, KeyStore serverCertificateKeyStore, char[] keyStorePassword,
 			boolean needClientAuth)
 	{
@@ -145,19 +243,24 @@ public final class JettyServer
 	private final Server server;
 	private final WebAppContext webAppContext;
 
-	public JettyServer(Function<Server, Connector> apiConnector, Function<Server, Connector> statusConnector,
-			String mavenServerModuleName, String contextPath,
+	private final ServerConnector apiConnector;
+	private final ServerConnector statusConnector;
+
+	public JettyServer(Function<Server, ServerConnector> apiConnectorProvider,
+			Function<Server, ServerConnector> statusConnectorProvider, String mavenServerModuleName, String contextPath,
 			List<Class<? extends ServletContainerInitializer>> servletContainerInitializers,
 			Map<String, String> initParameters, KeyStore clientTrustStore,
-			Consumer<WebAppContext> securityHandlerConfigurer)
+			BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer)
 	{
 		server = new Server(threadPool());
-		server.addConnector(apiConnector.apply(server));
-		server.addConnector(statusConnector.apply(server));
+		apiConnector = apiConnectorProvider.apply(server);
+		server.addConnector(apiConnector);
+		statusConnector = statusConnectorProvider.apply(server);
+		server.addConnector(statusConnector);
 
 		webAppContext = webAppContext(mavenServerModuleName, contextPath, servletContainerInitializers, initParameters);
 
-		securityHandlerConfigurer.accept(webAppContext);
+		securityHandlerConfigurer.accept(webAppContext, statusConnector::getLocalPort);
 
 		server.setHandler(webAppContext);
 		server.setErrorHandler(statusCodeOnlyErrorHandler());
@@ -267,5 +370,23 @@ public final class JettyServer
 	public final ServletContext getServletContext()
 	{
 		return webAppContext == null ? null : webAppContext.getServletContext();
+	}
+
+	/**
+	 * @return assigned api port or <code>-1</code> or <code>-2</code>
+	 * @see ServerConnector#getLocalPort()
+	 */
+	public int getApiPort()
+	{
+		return apiConnector.getLocalPort();
+	}
+
+	/**
+	 * @return assigned status port or <code>-1</code> or <code>-2</code>
+	 * @see ServerConnector#getLocalPort()
+	 */
+	public int getStatusPort()
+	{
+		return statusConnector.getLocalPort();
 	}
 }

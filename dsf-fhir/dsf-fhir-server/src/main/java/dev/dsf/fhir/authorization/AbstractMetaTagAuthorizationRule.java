@@ -74,7 +74,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		else
 		{
 			logger.warn("Create of {} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), FhirServerRole.CREATE);
+					getResourceTypeName(), identity.getName(), FhirServerRole.CREATE);
 			return Optional.empty();
 		}
 	}
@@ -103,8 +103,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				if (accessTypes.isEmpty())
 				{
 					logger.warn("Read of {}/{}/_history/{} unauthorized for identity '{}', no matching access tags",
-							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
-							FhirServerRole.READ);
+							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName());
 					return Optional.empty();
 				}
 				else
