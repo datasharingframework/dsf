@@ -1,12 +1,9 @@
-# This workflow will publish a Java project with Maven
-# For more information see: https://docs.github.com/en/free-pro-team@latest/actions/guides/publishing-java-packages-with-maven
-
 name: Java CI Publish with Maven
 
 on:
   pull_request:
-    types: [closed]
-    branches: [develop]
+    types: closed
+    branches: develop
 
 jobs:
   publish:
@@ -28,4 +25,4 @@ jobs:
       - name: Publish with Maven
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B deploy --file pom.xml -Dgpg.skip
+        run: mvn --batch-mode --fail-at-end --threads 1C -DforkCount=2 -Dgpg.skip clean deploy
