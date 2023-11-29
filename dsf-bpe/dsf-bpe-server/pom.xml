@@ -133,6 +133,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.fasterxml.uuid</groupId>
+			<artifactId>java-uuid-generator</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
 		</dependency>
@@ -185,7 +190,7 @@
 				</includes>
 			</testResource>
 		</testResources>
-		
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
