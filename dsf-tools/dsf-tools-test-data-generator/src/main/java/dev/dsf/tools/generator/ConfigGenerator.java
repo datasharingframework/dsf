@@ -51,7 +51,7 @@ public class ConfigGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while reading properties from " + propertiesFile.toString(), e);
+			logger.error("Error while reading properties from {}", propertiesFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 		return properties;
@@ -66,7 +66,7 @@ public class ConfigGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while writing properties to " + propertiesFiles.toString(), e);
+			logger.error("Error while writing properties to {}", propertiesFiles.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}

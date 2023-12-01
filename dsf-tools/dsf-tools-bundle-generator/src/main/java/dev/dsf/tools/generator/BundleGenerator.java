@@ -304,7 +304,7 @@ public class BundleGenerator
 			Bundle bundle;
 			try
 			{
-				logger.info("Generating bundle at " + bundleGenerator.getBundleFilename() + " ...");
+				logger.info("Generating bundle at {} ...", bundleGenerator.getBundleFilename());
 				bundle = bundleGenerator.generateBundle();
 			}
 			catch (IOException e)
@@ -324,7 +324,7 @@ public class BundleGenerator
 			try
 			{
 				bundleGenerator.saveBundle(bundle);
-				logger.info("Bundle saved at " + bundleGenerator.getBundleFilename());
+				logger.info("Bundle saved at {}", bundleGenerator.getBundleFilename());
 			}
 			catch (IOException e)
 			{

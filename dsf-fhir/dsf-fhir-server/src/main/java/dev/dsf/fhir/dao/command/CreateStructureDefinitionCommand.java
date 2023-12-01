@@ -89,7 +89,10 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Error while creating StructureDefinition snapshot: " + e.getMessage(), e);
+				logger.warn("Error while creating StructureDefinition snapshot: {} - {}", e.getClass().getName(),
+						e.getMessage());
+				logger.debug("Error while creating StructureDefinition snapshot", e);
+
 				throw e;
 			}
 		}

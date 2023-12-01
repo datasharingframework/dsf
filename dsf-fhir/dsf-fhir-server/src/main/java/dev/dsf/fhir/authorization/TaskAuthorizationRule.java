@@ -743,9 +743,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		}
 		else
 		{
-			logger.warn("Update of Task/{}/_history/{} unauthorized for identity '{}', no role {}",
-					getResourceTypeName(), oldResourceId, oldResourceVersion, identity.getName(),
-					FhirServerRole.UPDATE);
+			logger.warn("Update of Task/{}/_history/{} unauthorized for identity '{}', no role {}", oldResourceId,
+					oldResourceVersion, identity.getName(), FhirServerRole.UPDATE);
 			return Optional.empty();
 		}
 	}
@@ -851,8 +850,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		}
 		else
 		{
-			logger.warn("Delete of Task/{}/_history/{} unauthorized for identity '{}', no role {}", identity.getName(),
-					FhirServerRole.DELETE);
+			logger.warn("Delete of Task/{}/_history/{} unauthorized for identity '{}', no role {}", oldResourceId,
+					oldResourceVersion, identity.getName(), FhirServerRole.DELETE);
 			return Optional.empty();
 		}
 	}

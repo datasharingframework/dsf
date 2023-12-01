@@ -78,7 +78,9 @@ public class EndListener extends AbstractListener implements ExecutionListener
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to update Task " + getLocalVersionlessAbsoluteUrl(task), e);
+			logger.error("Unable to update Task {}: {} - {}", getLocalVersionlessAbsoluteUrl(task),
+					e.getClass().getName(), e.getMessage());
+			logger.debug("Unable to update Task {}", getLocalVersionlessAbsoluteUrl(task), e);
 		}
 	}
 
@@ -111,7 +113,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey);
 			else
 				logger.info("Process {} finished at {} [task: {}, requester: {}, business-key: {}]", processUrl,
-						getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey);
+						getCurrentTime(), endTaskUrl, requester, businessKey);
 		}
 	}
 }

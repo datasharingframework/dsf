@@ -204,20 +204,21 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 
 		try
 		{
-			logger.info("Connecting websocket to local FHIR server with subscription id {}",
+			logger.info("Connecting websocket to local DSF FHIR server, subscription: {}",
 					subscription.getIdElement().getIdPart());
 			client.connect();
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while connecting websocket to local FHIR server", e);
+			logger.warn("Unable to connect websocket to local DSF FHIR server: {} - {}", e.getClass().getName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
 	private Void onError(Throwable t)
 	{
-		logger.error("Error while connecting to websocket", t);
+		logger.error("Error while connecting websocket: {} - {}", t.getClass().getName(), t.getMessage());
 		return null;
 	}
 

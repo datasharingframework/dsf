@@ -98,7 +98,7 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 
 			newProcessStates.put(process, newState);
 
-			logger.debug("{}: {} -> {}", process.toString(), oldState, newState);
+			logger.debug("Process {} state change: {} -> {}", process.toString(), oldState, newState);
 
 			// NEW -> ACTIVE : - (new process active by default)
 			// NEW -> DRAFT : - (new process active by default)

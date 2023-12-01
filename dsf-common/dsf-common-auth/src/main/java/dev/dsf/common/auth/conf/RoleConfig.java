@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -273,10 +274,10 @@ public class RoleConfig
 						else if (mappingKey != null && mappingKey instanceof String
 								&& (mappingValues == null || !(mappingValues instanceof Map)))
 						{
-							logger.warn("Ignoring invalud rule '{}'", mappingKey);
+							logger.warn("Ignoring invalid rule '{}', no value specified or value not map", mappingKey);
 						}
 						else
-							logger.warn("Ignoring invalud rule '{}'", mappingKey);
+							logger.warn("Ignoring invalid rule '{}'", Objects.toString(mappingKey));
 					});
 				}
 				else

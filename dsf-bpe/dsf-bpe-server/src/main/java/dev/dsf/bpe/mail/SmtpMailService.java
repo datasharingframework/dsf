@@ -372,7 +372,7 @@ public class SmtpMailService implements MailService, InitializingBean
 			Optional<PrivateKey> pivateKey = getFirstPrivateKey(signStore, signStorePassword);
 			if (pivateKey.isEmpty())
 			{
-				logger.warn("Mail signing certificate store has no private key, not signing mails", fromAddress);
+				logger.warn("Mail signing certificate store has no private key, not signing mails");
 				return null;
 			}
 

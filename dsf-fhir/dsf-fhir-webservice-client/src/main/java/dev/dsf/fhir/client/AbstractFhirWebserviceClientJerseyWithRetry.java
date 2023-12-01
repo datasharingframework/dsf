@@ -48,7 +48,8 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 				{
 					if (tryNumber < nTimes || nTimes == RetryClient.RETRY_FOREVER)
 					{
-						logger.warn("Caught {}: {}; trying again in {} ms{}", e.getClass(), e.getMessage(), delayMillis,
+						logger.warn("Caught {} - {}; trying again in {} ms{}", e.getClass(), e.getMessage(),
+								delayMillis,
 								nTimes == RetryClient.RETRY_FOREVER ? " (retry " + (tryNumber + 1) + ")" : "");
 
 						try
@@ -61,7 +62,7 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 					}
 					else
 					{
-						logger.warn("Caught {}: {}; not trying again", e.getClass(), e.getMessage(), delayMillis);
+						logger.warn("Caught {} - {}; not trying again", e.getClass(), e.getMessage());
 					}
 
 					if (caughtException != null)

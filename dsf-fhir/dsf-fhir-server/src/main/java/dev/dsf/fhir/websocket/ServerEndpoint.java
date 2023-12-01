@@ -55,15 +55,11 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	@Override
 	public void onOpen(Session session, EndpointConfig config)
 	{
-		logger.debug("onOpen session: {}", session.getId());
-
 		Principal principal = session.getUserPrincipal();
-
-
 		if (principal == null || !(principal instanceof Identity)
 				|| !((Identity) principal).hasDsfRole(FhirServerRole.WEBSOCKET))
 		{
-			logger.warn("No user in session or user is missing role {}, closing websocket: {}",
+			logger.warn("No user in session or user is missing role {}, closing websocket, session {}",
 					FhirServerRole.WEBSOCKET, session.getId());
 			try
 			{
@@ -71,24 +67,31 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 			}
 			catch (IOException e)
 			{
-				logger.warn("Error while closing websocket", e);
+				logger.warn("Error while closing websocket, session {}: {} - {}", session.getId(),
+						e.getClass().getName(), e.getMessage());
+				logger.debug("Error while closing websocket, session {}", session.getId(), e);
 			}
 
 			return;
 		}
+
+		logger.info("Websocket open, session {}, identity '{}'", session.getId(),
+				principal == null ? null : principal.getName());
 
 		session.addMessageHandler(new Whole<String>() // don't use lambda
 		{
 			@Override
 			public void onMessage(String message)
 			{
-				logger.debug("onMessage session: {}, message: {}", session.getId(), message);
+				logger.debug("Websocket message received, session {}: {}", session.getId(), message);
 
 				if (message != null && !message.isBlank() && message.startsWith(BIND_MESSAGE_START))
 				{
-					logger.debug("Websocket bind message received: {}", message);
-					subscriptionManager.bind((Identity) principal, session,
-							message.substring(BIND_MESSAGE_START.length()));
+					String subscriptionIdPart = message.substring(BIND_MESSAGE_START.length());
+
+					logger.debug("Websocket bind message received, session {}, subscription: {}", session.getId(),
+							subscriptionIdPart);
+					subscriptionManager.bind((Identity) principal, session, subscriptionIdPart);
 				}
 			}
 		});
@@ -109,11 +112,11 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 			{
 				byte[] read = new byte[32];
 				message.getApplicationData().get(read);
-				logger.trace("onPongMessage {} from session {}", Hex.encodeHexString(read), session.getId());
+				logger.trace("Pong frame received, session {}: {}", session.getId(), Hex.encodeHexString(read));
 
 				if (!Arrays.equals(send, read))
-					logger.warn("ping data not equal to pong data {} != {}", Hex.encodeHexString(send),
-							Hex.encodeHexString(read));
+					logger.warn("Ping frame data not equal to pong frame data, session {}: {} vs. {}", session.getId(),
+							Hex.encodeHexString(send), Hex.encodeHexString(read));
 
 				session.removeMessageHandler(this);
 			}
@@ -121,19 +124,22 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 
 		try
 		{
-			logger.trace("sending ping {} to session {}", Hex.encodeHexString(send), session.getId());
+			logger.trace("Sending ping frame, session {}: {}", session.getId(), Hex.encodeHexString(send));
 			session.getAsyncRemote().sendPing(ByteBuffer.wrap(send));
 		}
 		catch (IllegalArgumentException | IOException e)
 		{
-			logger.warn("Error while sending ping to session with id " + session.getId(), e);
+			logger.warn("Error while sending ping frame, session {}: {} - {}", session.getId(), e.getClass().getName(),
+					e.getMessage());
+			logger.debug("Error while sending ping frame, session {}", session.getId(), e);
 		}
 	}
 
 	@Override
 	public void onClose(Session session, CloseReason closeReason)
 	{
-		logger.debug("onClose " + session.getId());
+		logger.info("Websocket closed, session {}: {} - {}", session.getId(), closeReason.getCloseCode().getCode(),
+				closeReason.getReasonPhrase());
 		subscriptionManager.close(session.getId());
 
 		ScheduledFuture<?> pinger = (ScheduledFuture<?>) session.getUserProperties().get(PINGER_PROPERTY);
@@ -142,11 +148,41 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	}
 
 	@Override
-	public void onError(Session session, Throwable thr)
+	public void onError(Session session, Throwable throwable)
 	{
-		logger.info("onError {} - {}", session.getId(),
-				thr != null ? (thr.getClass().getName() + ": " + thr.getMessage()) : "");
+		if (throwable == null)
+			logger.info("Websocket closed with error, session {}: unknown error", session.getId());
+		else
+		{
+			logger.info("Websocket closed with error, session {}: {} - {}", session.getId(),
+					throwable.getClass().getName(), getMessages(throwable));
+			logger.debug("Websocket closed with error, session {}", session.getId(), throwable);
+		}
 	}
+
+	private String getMessages(Throwable e)
+	{
+		StringBuilder b = new StringBuilder();
+		if (e != null)
+		{
+			if (e.getMessage() != null)
+				b.append(e.getMessage());
+
+			Throwable cause = e.getCause();
+			while (cause != null)
+			{
+				if (cause.getMessage() != null)
+				{
+					b.append(' ');
+					b.append(cause.getMessage());
+				}
+
+				cause = cause.getCause();
+			}
+		}
+		return b.toString();
+	}
+
 
 	@Override
 	public void destroy() throws Exception

@@ -151,17 +151,23 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		}
 		catch (MismatchingMessageCorrelationException e)
 		{
-			logger.warn("Unable to handle Task with id {}: {}", task.getId(), e.getMessage());
+			logger.warn("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
+					e.getMessage());
+			logger.debug("Unable to handle Task with id {}", task.getId(), e);
 			updateTaskFailed(task, "Unable to correlate Task");
 		}
 		catch (ProcessNotFoundException e)
 		{
-			logger.warn("Unable to handle Task with id {}: {}", task.getId(), e.getMessage());
+			logger.warn("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
+					e.getMessage());
+			logger.debug("Unable to handle Task with id {}", task.getId(), e);
 			updateTaskFailed(task, e.getShortMessage());
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to handle Task with id " + task.getId(), e);
+			logger.error("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
+					e.getMessage());
+			logger.debug("Unable to handle Task with id {}", task.getId(), e);
 			updateTaskFailed(task, e);
 		}
 	}

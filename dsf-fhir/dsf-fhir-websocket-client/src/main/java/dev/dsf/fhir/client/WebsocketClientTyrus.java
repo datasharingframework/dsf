@@ -38,8 +38,15 @@ public class WebsocketClientTyrus implements WebsocketClient
 		@Override
 		public boolean onConnectFailure(Exception exception)
 		{
-			logger.warn("Websocket connection failed: {}", getMessages(exception));
-			logger.debug("onConnectFailure", exception);
+			if (exception == null)
+				logger.warn("Websocket connection failed: unknown error");
+			else
+			{
+				logger.warn("Websocket connection failed: {} - {}", exception.getClass().getName(),
+						getMessages(exception));
+				logger.debug("Websocket connection failed", exception);
+			}
+
 			return true;
 		}
 
@@ -69,7 +76,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 		@Override
 		public boolean onDisconnect(CloseReason closeReason)
 		{
-			logger.debug("onDisconnect {}", closeReason.getReasonPhrase());
+			logger.debug("Websocket closed: {} - {}", closeReason.getCloseCode(), closeReason.getReasonPhrase());
+
 			return !closed;
 		}
 	};

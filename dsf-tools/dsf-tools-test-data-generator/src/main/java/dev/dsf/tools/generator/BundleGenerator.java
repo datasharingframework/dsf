@@ -45,7 +45,7 @@ public class BundleGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while reading bundle from " + bundleTemplateFile.toString(), e);
+			logger.error("Error while reading bundle from {}", bundleTemplateFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -59,7 +59,7 @@ public class BundleGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while writing bundle to " + bundleFile.toString(), e);
+			logger.error("Error while writing bundle to {}", bundleFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}

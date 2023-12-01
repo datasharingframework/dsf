@@ -69,7 +69,8 @@ public class ExceptionHandler
 
 	public WebApplicationException internalServerError(SQLException e)
 	{
-		logger.error("Error while accessing DB", e);
+		logger.error("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
+		logger.debug("Error while accessing DB", e);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
 				"Error while accessing DB");
@@ -78,7 +79,8 @@ public class ExceptionHandler
 
 	public WebApplicationException internalServerError(ResourceDeletedException e)
 	{
-		logger.error("Error while accessing DB", e);
+		logger.error("Error while accessing DB, resource deleted: {} - {}", e.getClass().getName(), e.getMessage());
+		logger.debug("Error while accessing DB, resource deleted", e);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
 				"Error while accessing DB");
@@ -87,7 +89,8 @@ public class ExceptionHandler
 
 	public WebApplicationException internalServerError(ResourceNotFoundException e)
 	{
-		logger.error("Error while accessing DB", e);
+		logger.error("Error while accessing DB, resource not found: {} - {}", e.getClass().getName(), e.getMessage());
+		logger.debug("Error while accessing DB, resource not found", e);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
 				"Error while accessing DB");
@@ -96,7 +99,8 @@ public class ExceptionHandler
 
 	public WebApplicationException internalServerErrorBundleTransaction(Exception e)
 	{
-		logger.error("Error while executing transaction", e);
+		logger.error("Error while executing transaction bundle: {} - {}", e.getClass().getName(), e.getMessage());
+		logger.debug("Error while executing transaction bundle", e);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
 				"Error while executing transaction");
@@ -105,7 +109,8 @@ public class ExceptionHandler
 
 	public WebApplicationException internalServerErrorBundleBatch(Exception e)
 	{
-		logger.error("Error while executing batch element", e);
+		logger.error("Error while executing batch bundle element: {} - {}", e.getClass().getName(), e.getMessage());
+		logger.debug("Error while executing batch bundle element", e);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
 				"Error while executing batch element");
@@ -259,7 +264,9 @@ public class ExceptionHandler
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing DB", e);
+			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
+			logger.debug("Error while accessing DB", e);
+
 			return onSqlException.get();
 		}
 	}
@@ -273,12 +280,16 @@ public class ExceptionHandler
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing DB", e);
+			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
+			logger.debug("Error while accessing DB", e);
+
 			return onSqlException.get();
 		}
 		catch (ResourceDeletedException e)
 		{
-			logger.warn("Resource with id " + e.getId() + " marked as deleted.", e);
+			logger.warn("Resource with id {} marked as deleted", e.getId());
+			logger.debug("Resource with id {} marked as deleted", e.getId(), e);
+
 			return onResourceDeletedException.get();
 		}
 	}
@@ -291,7 +302,8 @@ public class ExceptionHandler
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing DB", e);
+			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
+			logger.debug("Error while accessing DB", e);
 		}
 	}
 
@@ -304,11 +316,13 @@ public class ExceptionHandler
 		}
 		catch (ResourceNotFoundException e)
 		{
-			logger.error(resourceTypeName + " with id " + e.getId() + " not found", e);
+			logger.warn("{} with id {} not found", resourceTypeName, e.getId());
+			logger.debug("{} with id {} not found", resourceTypeName, e.getId(), e);
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing DB", e);
+			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
+			logger.debug("Error while accessing DB", e);
 		}
 	}
 
@@ -322,12 +336,16 @@ public class ExceptionHandler
 		}
 		catch (ResourceNotFoundException e)
 		{
-			logger.warn(resourceTypeName + " with id " + e.getId() + " not found", e);
+			logger.warn("{} with id {} not found", resourceTypeName, e.getId());
+			logger.debug("{} with id {} not found", resourceTypeName, e.getId(), e);
+
 			return onResourceNotFoundException.get();
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing DB", e);
+			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
+			logger.debug("Error while accessing DB", e);
+
 			return onSqlException.get();
 		}
 	}
@@ -341,6 +359,8 @@ public class ExceptionHandler
 		catch (BadBundleException e)
 		{
 			logger.warn("Error while creating command list for bundle: {}", e.getMessage());
+			logger.debug("Error while creating command list for bundle", e);
+
 			throw new WebApplicationException(responseGenerator.badBundleRequest(e.getMessage()));
 		}
 	}

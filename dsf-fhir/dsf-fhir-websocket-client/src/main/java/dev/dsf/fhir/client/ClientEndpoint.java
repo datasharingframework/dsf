@@ -34,8 +34,7 @@ public class ClientEndpoint extends Endpoint
 	@Override
 	public void onOpen(Session session, EndpointConfig config)
 	{
-		logger.info("Websocket connected {uri: {}, session-id: {}}", session.getRequestURI().toString(),
-				session.getId());
+		logger.info("Websocket open, session {}", session.getId());
 
 		session.addMessageHandler(new MessageHandler.Whole<String>() // don't use lambda
 		{
@@ -44,7 +43,7 @@ public class ClientEndpoint extends Endpoint
 			@Override
 			public void onMessage(String message)
 			{
-				logger.debug("onMessage {}", message);
+				logger.debug("Websocket message received, session {}: {}", session.getId(), message);
 
 				if (("bound " + subscriptionIdPart).equals(message))
 				{
@@ -64,8 +63,9 @@ public class ClientEndpoint extends Endpoint
 					}
 					catch (Throwable e)
 					{
-						logger.error("Error while handling message, caught {}: {}", e.getClass().getName(),
-								e.getMessage());
+						logger.error("Error while handling message, session {}: {} - {}", session.getId(),
+								e.getClass().getName(), e.getMessage());
+						logger.debug("Error while handling message, session {}", session.getId(), e);
 					}
 				}
 			}
@@ -77,8 +77,8 @@ public class ClientEndpoint extends Endpoint
 	@Override
 	public void onClose(Session session, CloseReason closeReason)
 	{
-		logger.info("Websocket closed {uri: {}, session-id: {}}: {}", session.getRequestURI().toString(),
-				session.getId(), closeReason.getReasonPhrase());
+		logger.warn("Websocket closed, session {}: {} - {}", session.getId(), closeReason.getCloseCode().getCode(),
+				closeReason.getReasonPhrase());
 
 		if (CloseReason.CloseCodes.CANNOT_ACCEPT.equals(closeReason.getCloseCode()))
 		{
@@ -90,8 +90,14 @@ public class ClientEndpoint extends Endpoint
 	@Override
 	public void onError(Session session, Throwable throwable)
 	{
-		logger.warn("Websocket closed with error {uri: " + session.getRequestURI().toString() + ", session-id: "
-				+ session.getId() + "}: {}", throwable);
+		if (throwable == null)
+			logger.info("Websocket closed with error, session {}: unknown error", session.getId());
+		else
+		{
+			logger.warn("Websocket closed with error, session {}: {} - {}", session.getId(),
+					throwable.getClass().getName(), throwable.getMessage());
+			logger.debug("Websocket closed with error, session {}", session.getId(), throwable);
+		}
 	}
 
 	public void setResourceHandler(Consumer<Resource> handler, Supplier<IParser> parser)

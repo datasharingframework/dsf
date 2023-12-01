@@ -98,13 +98,14 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			OperationOutcome outcome = response.readEntity(OperationOutcome.class);
 			String message = toString(outcome);
 
-			logger.warn("OperationOutcome: {}", message);
+			logger.warn("Request failed, OperationOutcome: {}", message);
 			return new WebApplicationException(message, response.getStatus());
 		}
 		catch (ProcessingException e)
 		{
 			response.close();
-			logger.warn("{}: {}", e.getClass().getName(), e.getMessage());
+
+			logger.warn("Request failed: {} - {}", e.getClass().getName(), e.getMessage());
 			return new WebApplicationException(e, response.getStatus());
 		}
 	}

@@ -227,7 +227,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 	protected void handleIntermediateThrowEventError(DelegateExecution execution, Variables variables,
 			Exception exception, String errorMessage)
 	{
-		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+		logger.debug("Error while executing Task message send {}", getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
@@ -242,7 +242,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 	protected void handleEndEventError(DelegateExecution execution, Variables variables, Exception exception,
 			String errorMessage)
 	{
-		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+		logger.debug("Error while executing Task message send {}", getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 				api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
@@ -275,8 +275,8 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		// if we are not a multi instance message send task or all sends have failed (targets emtpy)
 		else
 		{
-			logger.debug("Error while executing Task message send " + getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task {}, last reason: {} - ",
+			logger.debug("Error while executing Task message send {}", getClass().getName(), exception);
+			logger.error("Process {} has fatal error in step {} for task {}, last reason: {} - {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
 					exception.getClass().getName(), exception.getMessage());
@@ -342,7 +342,8 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to update Task " + api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e.getClass().getName(), e.getMessage());
+			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
 		}
 	}
 

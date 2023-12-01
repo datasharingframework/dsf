@@ -74,8 +74,12 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (Exception e)
 					{
-						logger.warn("Error while running pre-execute of command " + c.getClass().getSimpleName()
-								+ " for entry at index " + c.getIndex() + ", abborting transaction", e);
+						logger.warn(
+								"Error while running pre-execute of command {} for entry at index {}, abborting transaction: {} - {}",
+								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
+						logger.debug(
+								"Error while running pre-execute of command {} for entry at index {}, abborting transaction",
+								c.getClass().getSimpleName(), c.getIndex(), e);
 
 						try
 						{
@@ -84,7 +88,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						}
 						catch (Exception e1)
 						{
-							logger.warn("Error while writing to audit log", e1);
+							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
+									e1.getMessage());
+							logger.debug("Error while writing to audit log", e1);
 						}
 
 						throw e;
@@ -101,9 +107,11 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (Exception e)
 					{
-						logger.warn("Error while executing command " + c.getClass().getSimpleName()
-								+ " for entry at index " + c.getIndex() + ", rolling back transaction: {}",
-								e.getMessage());
+						logger.warn(
+								"Error while executing command {} for entry at index {}, rolling back transaction: {} - {}",
+								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
+						logger.debug("Error while executing command {} for entry at index {}, rolling back transaction",
+								c.getClass().getSimpleName(), c.getIndex(), e);
 
 						if (hasModifyingCommands)
 						{
@@ -118,7 +126,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						}
 						catch (Exception e1)
 						{
-							logger.warn("Error while writing to audit log", e1);
+							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
+									e1.getMessage());
+							logger.debug("Error while writing to audit log", e1);
 						}
 
 						throw e;
@@ -136,8 +146,12 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (Exception e)
 					{
-						logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
-								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
+						logger.warn(
+								"Error while running post-execute of command {} for entry at index {}, rolling back transaction: {} - {}",
+								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
+						logger.debug(
+								"Error while running post-execute of command {} for entry at index {}, rolling back transaction",
+								c.getClass().getSimpleName(), c.getIndex(), e);
 
 						if (hasModifyingCommands)
 						{
@@ -152,7 +166,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						}
 						catch (Exception e1)
 						{
-							logger.warn("Error while writing to audit log", e1);
+							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
+									e1.getMessage());
+							logger.debug("Error while writing to audit log", e1);
 						}
 
 						throw e;
@@ -173,7 +189,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while handling events", e);
+				logger.warn("Error while handling events: {} - {}", e.getClass().getName(), e.getMessage());
+				logger.debug("Error while handling events", e);
 			}
 
 			try
@@ -187,7 +204,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while writing to audit log", e);
+				logger.warn("Error while writing to audit log: {} - {}", e.getClass().getName(), e.getMessage());
+				logger.debug("Error while writing to audit log", e);
 			}
 
 			Bundle result = new Bundle();

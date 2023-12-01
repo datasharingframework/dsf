@@ -177,7 +177,7 @@ public class CertificateGenerator
 		}
 		catch (IOException | OperatorCreationException e)
 		{
-			logger.error("Error while writing encrypted private-key to " + privateKeyFile.toString(), e);
+			logger.error("Error while writing encrypted private-key to {}", privateKeyFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -190,7 +190,7 @@ public class CertificateGenerator
 		}
 		catch (IOException | OperatorCreationException e)
 		{
-			logger.error("Error while writing not-encrypted private-key to " + privateKeyFile.toString(), e);
+			logger.error("Error while writing not-encrypted private-key to {}", privateKeyFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -203,7 +203,7 @@ public class CertificateGenerator
 		}
 		catch (CertificateEncodingException | IllegalStateException | IOException e)
 		{
-			logger.error("Error while writing certificate to " + certificateFile.toString(), e);
+			logger.error("Error while writing certificate to {}", certificateFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -216,7 +216,7 @@ public class CertificateGenerator
 		}
 		catch (IOException | PKCSException e)
 		{
-			logger.error("Error while reading private-key from " + privateKeyFile.toString(), e);
+			logger.error("Error while reading private-key from {}", privateKeyFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -229,7 +229,7 @@ public class CertificateGenerator
 		}
 		catch (CertificateException | IOException e)
 		{
-			logger.error("Error while reading certificate from " + certFile.toString(), e);
+			logger.error("Error while reading certificate from {}", certFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -251,7 +251,7 @@ public class CertificateGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while writing certificate thumbprints file to " + thumbprintsFile.toString(), e);
+			logger.error("Error while writing certificate thumbprints file to {}", thumbprintsFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -312,7 +312,7 @@ public class CertificateGenerator
 		catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | OperatorCreationException
 				| CertificateException | IllegalStateException | IOException e)
 		{
-			logger.error("Error while signing " + certificateType.toString().toLowerCase() + " certificate", e);
+			logger.error("Error while signing {} certificate", certificateType.toString().toLowerCase(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -373,7 +373,7 @@ public class CertificateGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while reading certificate-request from " + certificateRequestFile.toString(), e);
+			logger.error("Error while reading certificate-request from {}", certificateRequestFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -386,7 +386,7 @@ public class CertificateGenerator
 		}
 		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
 		{
-			logger.error("Error while reading certificate-request from " + certificateRequestFile.toString(), e);
+			logger.error("Error while reading certificate-request from {}", certificateRequestFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -460,7 +460,7 @@ public class CertificateGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while creating directories " + file.getParent().toString(), e);
+			logger.error("Error while creating directories {}", file.getParent().toString(), e);
 			throw new RuntimeException(e);
 		}
 
@@ -696,7 +696,7 @@ public class CertificateGenerator
 		}
 		catch (CertificateEncodingException | IllegalStateException | IOException e)
 		{
-			logger.error("Error while writing certificate to " + certificateFile.toString(), e);
+			logger.error("Error while writing certificate to {}", certificateFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -740,7 +740,7 @@ public class CertificateGenerator
 		}
 		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
 		{
-			logger.error("Error while writing keystore file to " + file.toString(), e);
+			logger.error("Error while writing keystore file to {}", file.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}

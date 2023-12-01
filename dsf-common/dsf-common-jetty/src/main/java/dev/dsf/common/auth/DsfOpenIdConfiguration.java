@@ -80,7 +80,7 @@ public class DsfOpenIdConfiguration extends OpenIdConfiguration
 						return key.get();
 					else
 					{
-						logger.warn("Unable to retrieve key with id " + kid);
+						logger.warn("Unable to retrieve key with id {}", kid);
 						return null;
 					}
 				}
