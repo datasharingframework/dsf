@@ -572,6 +572,26 @@
 					<artifactId>maven-enforcer-plugin</artifactId>
 					<version>3.4.1</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.12.1</version>
+				</plugin>
+				<plugin>
+					<groupId>com.github.spotbugs</groupId>
+					<artifactId>spotbugs-maven-plugin</artifactId>
+					<version>4.8.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>3.5.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-pmd-plugin</artifactId>
+					<version>3.21.2</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -683,6 +703,11 @@
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/datasharingframework/dsf</url>
 		</snapshotRepository>
+		<site>
+			<id>${project.artifactId}-site</id>
+			<!-- static non empty value to enable site:stage goal -->
+			<url>http://localhost</url>
+		</site>
 	</distributionManagement>
 
 	<profiles>
@@ -785,4 +810,30 @@
 			</build>
 		</profile>
 	</profiles>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<configuration>
+					<plugins>
+						<plugin>
+							<groupId>jp.skypencil.findbugs.slf4j</groupId>
+							<artifactId>bug-pattern</artifactId>
+							<version>1.5.0</version>
+						</plugin>
+					</plugins>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
