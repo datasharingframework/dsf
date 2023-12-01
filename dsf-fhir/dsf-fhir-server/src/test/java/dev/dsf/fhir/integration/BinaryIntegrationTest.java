@@ -2856,6 +2856,32 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateLargeBinaryFhirJsonResource1() throws Exception
+	{
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.APPLICATION_JSON);
+		// set to be smaller than 20000000 characters
+		binary.setData(("{\"data\": \"" + "a".repeat(14999826) + "\"}").getBytes());
+		getReadAccessHelper().addAll(binary);
+
+		getWebserviceClient().create(binary);
+	}
+
+	@Test
+	public void testCreateLargeBinaryFhirJsonResource2() throws Exception
+	{
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.APPLICATION_JSON);
+		// set to be larger than 20000000 characters
+		binary.setData(("{\"data\": \"" + "a".repeat(14999999) + "\"}").getBytes());
+		getReadAccessHelper().addAll(binary);
+
+		getWebserviceClient().create(binary);
+	}
+
+	@Test
 	public void testCreateLargeBinaryDirect() throws Exception
 	{
 		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);

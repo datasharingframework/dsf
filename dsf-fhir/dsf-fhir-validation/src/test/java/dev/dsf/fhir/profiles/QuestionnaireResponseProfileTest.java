@@ -173,8 +173,8 @@ public class QuestionnaireResponseProfileTest
 						.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 								|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
 						.filter(m -> m.getMessage() != null)
-						.filter(m -> m.getMessage().startsWith("authored-if-completed")
-								|| m.getMessage().startsWith("author-if-completed"))
+						.filter(m -> m.getMessage().contains("authored-if-completed")
+								|| m.getMessage().contains("author-if-completed"))
 						.count());
 	}
 
@@ -194,8 +194,8 @@ public class QuestionnaireResponseProfileTest
 				result.getMessages().stream()
 						.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 								|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
-						.filter(m -> m.getMessage() != null)
-						.filter(m -> m.getMessage().startsWith("author-if-completed")).count());
+						.filter(m -> m.getMessage() != null).filter(m -> m.getMessage().contains("author-if-completed"))
+						.count());
 	}
 
 	private QuestionnaireResponse createQuestionnaireResponseWithBusinessKey(Type type)

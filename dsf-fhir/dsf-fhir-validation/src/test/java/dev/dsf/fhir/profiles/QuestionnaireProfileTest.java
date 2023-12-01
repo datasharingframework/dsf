@@ -157,8 +157,7 @@ public class QuestionnaireProfileTest
 				result.getMessages().stream()
 						.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 								|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
-						.filter(m -> m.getMessage() != null).filter(m -> m.getMessage().startsWith("type-code"))
-						.count());
+						.filter(m -> m.getMessage() != null).filter(m -> m.getMessage().contains("type-code")).count());
 	}
 
 	private Questionnaire createQuestionnaire(Questionnaire.QuestionnaireItemType type)

@@ -767,12 +767,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (resource.isEmpty())
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome, hint post with id url?
 
-		Type mode = parameters.getParameter("mode");
-		if (!(mode instanceof CodeType))
+		ParametersParameterComponent mode = parameters.getParameter("mode");
+
+		if (!(mode.getValue() instanceof CodeType))
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
 
-		Type profile = parameters.getParameter("profile");
-		if (!(profile instanceof UriType))
+		ParametersParameterComponent profile = parameters.getParameter("profile");
+		if (!(profile.getValue() instanceof UriType))
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
 
 		// TODO handle mode and profile parameters
@@ -805,17 +806,18 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (getResource(parameters, "resource").isPresent())
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
 
-		Type mode = parameters.getParameter("mode");
-		if (!(mode instanceof CodeType) || !(mode instanceof StringType))
+		ParametersParameterComponent mode = parameters.getParameter("mode");
+		if (!(mode.getValue() instanceof CodeType) || !(mode.getValue() instanceof StringType))
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-		if (!"profile".equals(((StringType) mode).getValue()))
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-
-		Type profile = parameters.getParameter("profile");
-		if (!(profile instanceof UriType) || !(mode instanceof UrlType) || !(mode instanceof CanonicalType))
+		if (!"profile".equals(((StringType) mode.getValue()).getValue()))
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
 
-		UriType profileUri = (UriType) profile;
+		ParametersParameterComponent profile = parameters.getParameter("profile");
+		if (!(profile.getValue() instanceof UriType) || !(mode.getValue() instanceof UrlType)
+				|| !(mode.getValue() instanceof CanonicalType))
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
+
+		UriType profileUri = (UriType) profile.getValue();
 
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));

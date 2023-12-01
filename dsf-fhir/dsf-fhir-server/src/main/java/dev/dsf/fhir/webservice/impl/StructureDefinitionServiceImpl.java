@@ -176,17 +176,17 @@ public class StructureDefinitionServiceImpl extends
 	@Override
 	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		Type urlType = parameters.getParameter("url");
+		ParametersParameterComponent urlType = parameters.getParameter("url");
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
 				.filter(p -> "resource".equals(p.getName())).findFirst();
 
 		if (urlType != null && resource.isEmpty())
 		{
-			if (!(urlType instanceof StringType || urlType instanceof UriType))
+			if (!(urlType.getValue() instanceof StringType || urlType.getValue() instanceof UriType))
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 
 			@SuppressWarnings("unchecked")
-			PrimitiveType<String> url = (PrimitiveType<String>) urlType;
+			PrimitiveType<String> url = (PrimitiveType<String>) urlType.getValue();
 
 			logger.trace("Parameters with url {}", url.getValue());
 

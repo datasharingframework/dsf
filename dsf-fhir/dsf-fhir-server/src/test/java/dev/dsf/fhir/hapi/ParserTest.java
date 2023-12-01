@@ -43,16 +43,10 @@ public class ParserTest
 		Bundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class, bundleJson);
 		assertNotNull(bundle);
 		assertEquals("1", bundle.getMeta().getVersionId());
-		// TODO HAPI bug -> null
-		// assertEquals("Bundle.id.version", "1", bundle.getIdElement().getVersionIdPart());
-		assertNull("Bug in HAPI fixed, if method returns 1", bundle.getIdElement().getVersionIdPart());
-		// TODO remove workaround in BundleDaoJdbc#getResource if bug is fixed in HAPI
+		assertEquals("Bundle.id.version", "1", bundle.getIdElement().getVersionIdPart());
 	}
 
-	// TODO HAPI bug -> StackOverflowError
-	// TODO remove workaround in WebserviceClientJersey#read(Class, String)
-	// and WebserviceClientJersey#read(Class, String, String)
-	@Test(expected = StackOverflowError.class)
+	@Test
 	public void testParseBundleWithEntriesWithCircularReferences() throws Exception
 	{
 		Organization org = new Organization();
@@ -74,10 +68,7 @@ public class ParserTest
 		configureParser(fhirContext.newXmlParser()).encodeResourceToString(read);
 	}
 
-	// TODO HAPI bug -> StackOverflowError
-	// TODO remove workaround in WebserviceClientJersey#read(Class, String)
-	// and WebserviceClientJersey#read(Class, String, String)
-	@Test(expected = StackOverflowError.class)
+	@Test
 	public void testParseBundleWithEntriesWithCircularReferencesFile() throws Exception
 	{
 		try (InputStream in = Files.newInputStream(Paths.get("src/test/resources/bundle.xml")))

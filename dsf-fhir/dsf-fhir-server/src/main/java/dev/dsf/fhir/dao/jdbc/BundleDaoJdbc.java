@@ -31,14 +31,4 @@ public class BundleDaoJdbc extends AbstractResourceDaoJdbc<Bundle> implements Bu
 		return resource.copy();
 	}
 
-	@Override
-	protected Bundle getResource(ResultSet result, int index) throws SQLException
-	{
-		// TODO Bugfix HAPI is removing version information from bundle.id
-		Bundle bundle = super.getResource(result, index);
-		IdType fixedId = new IdType(bundle.getResourceType().name(), bundle.getIdElement().getIdPart(),
-				bundle.getMeta().getVersionId());
-		bundle.setIdElement(fixedId);
-		return bundle;
-	}
 }

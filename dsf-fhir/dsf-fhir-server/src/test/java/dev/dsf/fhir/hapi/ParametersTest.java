@@ -36,8 +36,8 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(mode, parameters.getParameter("mode"));
-		assertEquals(uri, parameters.getParameter("uri"));
+		assertEquals(mode, parameters.getParameter("mode").getValue());
+		assertEquals(uri, parameters.getParameter("uri").getValue());
 	}
 
 	@Test
@@ -56,8 +56,8 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(mode, parameters.getParameter("mode"));
-		assertEquals(uri, parameters.getParameter("uri"));
+		assertEquals(mode, parameters.getParameter("mode").getValue());
+		assertEquals(uri, parameters.getParameter("uri").getValue());
 
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
 				.filter(p -> "resource".equals(p.getName())).findFirst();
@@ -95,6 +95,6 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(uri, parameters.getParameter("url"));
+		assertEquals(uri, parameters.getParameter("url").getValue());
 	}
 }

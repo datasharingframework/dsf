@@ -123,10 +123,6 @@ public class BundleTest
 
 		Bundle bRead = newXmlParser().parseResource(Bundle.class, bundleTxt);
 		assertEquals("123", bRead.getMeta().getVersionId());
-		assertNull(bRead.getIdElement().getVersionIdPart());
-
-		// FIXME workaround hapi parser bug
-		bRead.setIdElement(bRead.getIdElement().withVersion(bRead.getMeta().getVersionId()));
 		assertEquals("123", bRead.getIdElement().getVersionIdPart());
 	}
 }
