@@ -13,11 +13,16 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 @Configuration
 public class FhirConfig
 {
-	@Bean
-	public FhirContext fhirContext()
+
+	static
 	{
 		StreamReadConstraints.overrideDefaultStreamReadConstraints(
 				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
+	}
+
+	@Bean
+	public FhirContext fhirContext()
+	{
 		FhirContext context = FhirContext.forR4();
 		HapiLocalizer localizer = new HapiLocalizer()
 		{
