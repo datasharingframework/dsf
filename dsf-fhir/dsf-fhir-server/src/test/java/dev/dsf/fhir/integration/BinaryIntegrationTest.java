@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.DocumentReferenceDao;
 import dev.dsf.fhir.dao.OrganizationDao;
