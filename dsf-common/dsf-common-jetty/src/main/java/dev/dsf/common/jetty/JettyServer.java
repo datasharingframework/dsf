@@ -344,8 +344,8 @@ public final class JettyServer
 				e.addSuppressed(e1);
 			}
 
-			if (e instanceof RuntimeException)
-				throw (RuntimeException) e;
+			if (e instanceof RuntimeException r)
+				throw r;
 			else
 				throw new RuntimeException(e);
 		}

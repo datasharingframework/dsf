@@ -128,36 +128,29 @@ public class RoleConfig
 	public RoleConfig(Object config, Function<String, DsfRole> dsfRoleFactory,
 			Function<String, Coding> practitionerRoleFactory)
 	{
-		if (config != null && config instanceof List)
+		if (config != null && config instanceof List<?> l)
 		{
-			@SuppressWarnings("unchecked")
-			List<Object> cList = (List<Object>) config;
-			cList.forEach(mapping ->
+			l.forEach(mapping ->
 			{
-				if (mapping != null && mapping instanceof Map)
+				if (mapping != null && mapping instanceof Map<?, ?> m)
 				{
-					@SuppressWarnings("unchecked")
-					Map<Object, Object> m = (Map<Object, Object>) mapping;
 					m.forEach((mappingKey, mappingValues) ->
 					{
 						if (mappingKey != null && mappingKey instanceof String && mappingValues != null
-								&& mappingValues instanceof Map)
+								&& mappingValues instanceof Map<?, ?> v)
 						{
-							@SuppressWarnings("unchecked")
-							Map<Object, Object> properties = (Map<Object, Object>) mappingValues;
-
-							// Map<String, Object>
 							List<String> thumbprints = null, emails = null, tokenRoles = null, tokenGroups = null;
 							List<DsfRole> dsfRoles = null;
 							List<Coding> practitionerRoles = null;
-							for (Entry<Object, Object> p : properties.entrySet())
+
+							for (Entry<?, ?> property : v.entrySet())
 							{
-								if (p.getKey() != null && p.getKey() instanceof String)
+								if (property.getKey() != null && property.getKey() instanceof String key)
 								{
-									switch ((String) p.getKey())
+									switch (key)
 									{
 										case PROPERTY_THUMBPRINT:
-											thumbprints = getValues(p.getValue()).stream().map(value ->
+											thumbprints = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -177,7 +170,7 @@ public class RoleConfig
 											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_EMAIL:
-											emails = getValues(p.getValue()).stream().map(value ->
+											emails = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -197,7 +190,7 @@ public class RoleConfig
 											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_TOKEN_ROLE:
-											tokenRoles = getValues(p.getValue()).stream().map(value ->
+											tokenRoles = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -210,7 +203,7 @@ public class RoleConfig
 											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_TOKEN_GROUP:
-											tokenGroups = getValues(p.getValue()).stream().map(value ->
+											tokenGroups = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -223,7 +216,7 @@ public class RoleConfig
 											}).filter(g -> g != null).toList();
 											break;
 										case PROPERTY_DSF_ROLE:
-											dsfRoles = getValues(p.getValue()).stream().map(value ->
+											dsfRoles = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -241,7 +234,7 @@ public class RoleConfig
 											}).filter(r -> r != null).toList();
 											break;
 										case PROPERTY_PRACTITIONER_ROLE:
-											practitionerRoles = getValues(p.getValue()).stream().map(value ->
+											practitionerRoles = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -263,7 +256,7 @@ public class RoleConfig
 										default:
 											logger.warn(
 													"Unknown role config property '{}' expected one of {}, ignoring property in rule '{}'",
-													p.getKey(), PROPERTIES, mappingKey);
+													property.getKey(), PROPERTIES, mappingKey);
 									}
 								}
 							}
@@ -289,10 +282,10 @@ public class RoleConfig
 	@SuppressWarnings("unchecked")
 	private static List<String> getValues(Object o)
 	{
-		if (o instanceof String)
-			return Collections.singletonList((String) o);
-		else if (o instanceof List)
-			return ((List<String>) o);
+		if (o instanceof String s)
+			return Collections.singletonList(s);
+		else if (o instanceof List l)
+			return l;
 		else
 			return Collections.emptyList();
 	}

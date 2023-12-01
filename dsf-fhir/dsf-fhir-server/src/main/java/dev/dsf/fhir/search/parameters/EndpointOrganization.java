@@ -154,9 +154,8 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (e.getManagingOrganization().getResource() instanceof Organization)
+			if (e.getManagingOrganization().getResource() instanceof Organization o)
 			{
-				Organization o = (Organization) e.getManagingOrganization().getResource();
 				return o.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

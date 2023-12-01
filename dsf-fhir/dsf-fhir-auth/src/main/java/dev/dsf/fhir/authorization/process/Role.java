@@ -117,8 +117,8 @@ public class Role implements Recipient, Requester
 
 	private Set<Coding> getPractitionerRoles(Identity identity)
 	{
-		if (identity instanceof PractitionerIdentity)
-			return ((PractitionerIdentity) identity).getPractionerRoles();
+		if (identity instanceof PractitionerIdentity p)
+			return p.getPractionerRoles();
 		else
 			return Collections.emptySet();
 	}
@@ -213,9 +213,8 @@ public class Role implements Recipient, Requester
 	private boolean matches(Extension extension, String url, boolean needsPractitionerRole)
 	{
 		return extension != null && url.equals(extension.getUrl()) && extension.hasValue()
-				&& extension.getValue() instanceof Coding && matches((Coding) extension.getValue())
-				&& extension.getValue().hasExtension() && hasMatchingParentOrganizationRoleExtension(
-						extension.getValue().getExtension(), needsPractitionerRole);
+				&& extension.getValue() instanceof Coding value && matches(value) && value.hasExtension()
+				&& hasMatchingParentOrganizationRoleExtension(value.getExtension(), needsPractitionerRole);
 	}
 
 	private boolean hasMatchingParentOrganizationRoleExtension(List<Extension> extension, boolean needsPractitionerRole)
@@ -250,8 +249,8 @@ public class Role implements Recipient, Requester
 	private boolean parentOrganizationExtensionMatches(Extension extension)
 	{
 		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION
-				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Identifier
-				&& parentOrganizationIdentifierMatches((Identifier) extension.getValue());
+				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Identifier value
+				&& parentOrganizationIdentifierMatches(value);
 	}
 
 	private boolean parentOrganizationIdentifierMatches(Identifier identifier)
@@ -269,8 +268,8 @@ public class Role implements Recipient, Requester
 	private boolean organizationRoleExtensionMatches(Extension extension)
 	{
 		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE
-				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Coding
-				&& organizationRoleMatches((Coding) extension.getValue());
+				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Coding value
+				&& organizationRoleMatches(value);
 	}
 
 	private boolean organizationRoleMatches(Coding coding)
@@ -287,8 +286,8 @@ public class Role implements Recipient, Requester
 	private boolean practitionerRoleExtensionMatches(Extension extension)
 	{
 		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER_PRACTITIONER_ROLE
-				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Coding
-				&& practitionerRoleMatches((Coding) extension.getValue());
+				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Coding value
+				&& practitionerRoleMatches(value);
 	}
 
 	private boolean practitionerRoleMatches(Coding coding)
@@ -385,20 +384,17 @@ public class Role implements Recipient, Requester
 					Extension parentOrganization = parentOrganizations.get(0);
 					Extension organizationRole = organizationRoles.get(0);
 
-					if (parentOrganization.hasValue() && parentOrganization.getValue() instanceof Identifier
-							&& organizationRole.hasValue() && organizationRole.getValue() instanceof Coding)
+					if (parentOrganization.hasValue()
+							&& parentOrganization.getValue() instanceof Identifier parentOrganizationIdentifier
+							&& organizationRole.hasValue()
+							&& organizationRole.getValue() instanceof Coding organizationRoleCoding
+							&& ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM
+									.equals(parentOrganizationIdentifier.getSystem())
+							&& organizationWithIdentifierExists.test(parentOrganizationIdentifier)
+							&& organizationRoleExists.test(organizationRoleCoding))
 					{
-						Identifier parentOrganizationIdentifier = (Identifier) parentOrganization.getValue();
-						Coding organizationRoleCoding = (Coding) organizationRole.getValue();
-
-						if (ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM
-								.equals(parentOrganizationIdentifier.getSystem())
-								&& organizationWithIdentifierExists.test(parentOrganizationIdentifier)
-								&& organizationRoleExists.test(organizationRoleCoding))
-						{
-							return Optional.of(new Role(localIdentity, parentOrganizationIdentifier.getValue(),
-									organizationRoleCoding.getSystem(), organizationRoleCoding.getCode(), null, null));
-						}
+						return Optional.of(new Role(localIdentity, parentOrganizationIdentifier.getValue(),
+								organizationRoleCoding.getSystem(), organizationRoleCoding.getCode(), null, null));
 					}
 				}
 			}
@@ -442,24 +438,21 @@ public class Role implements Recipient, Requester
 					Extension organizationRole = organizationRoles.get(0);
 					Extension practitionerRole = practitionerRoles.get(0);
 
-					if (parentOrganization.hasValue() && parentOrganization.getValue() instanceof Identifier
-							&& organizationRole.hasValue() && organizationRole.getValue() instanceof Coding
-							&& practitionerRole.hasValue() && practitionerRole.getValue() instanceof Coding)
+					if (parentOrganization.hasValue()
+							&& parentOrganization.getValue() instanceof Identifier parentOrganizationIdentifier
+							&& organizationRole.hasValue()
+							&& organizationRole.getValue() instanceof Coding organizationRoleCoding
+							&& practitionerRole.hasValue()
+							&& practitionerRole.getValue() instanceof Coding practitionerRoleCoding
+							&& ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM
+									.equals(parentOrganizationIdentifier.getSystem())
+							&& organizationWithIdentifierExists.test(parentOrganizationIdentifier)
+							&& organizationRoleExists.test(organizationRoleCoding)
+							&& practitionerRoleExists.test(practitionerRoleCoding))
 					{
-						Identifier parentOrganizationIdentifier = (Identifier) parentOrganization.getValue();
-						Coding organizationRoleCoding = (Coding) organizationRole.getValue();
-						Coding practitionerRoleCoding = (Coding) practitionerRole.getValue();
-
-						if (ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM
-								.equals(parentOrganizationIdentifier.getSystem())
-								&& organizationWithIdentifierExists.test(parentOrganizationIdentifier)
-								&& organizationRoleExists.test(organizationRoleCoding)
-								&& practitionerRoleExists.test(practitionerRoleCoding))
-						{
-							return Optional.of(new Role(true, parentOrganizationIdentifier.getValue(),
-									organizationRoleCoding.getSystem(), organizationRoleCoding.getCode(),
-									practitionerRoleCoding.getSystem(), practitionerRoleCoding.getCode()));
-						}
+						return Optional.of(new Role(true, parentOrganizationIdentifier.getValue(),
+								organizationRoleCoding.getSystem(), organizationRoleCoding.getCode(),
+								practitionerRoleCoding.getSystem(), practitionerRoleCoding.getCode()));
 					}
 				}
 			}

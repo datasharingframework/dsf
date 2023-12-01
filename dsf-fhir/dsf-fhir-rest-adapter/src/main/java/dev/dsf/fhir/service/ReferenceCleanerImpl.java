@@ -50,11 +50,8 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 		if (resource == null)
 			return null;
 
-		if (resource instanceof Bundle)
-		{
-			Bundle bundle = (Bundle) resource;
-			bundle.getEntry().stream().map(e -> e.getResource()).forEach(this::fixBundleEntry);
-		}
+		if (resource instanceof Bundle b)
+			b.getEntry().stream().map(e -> e.getResource()).forEach(this::fixBundleEntry);
 
 		return resource;
 	}
@@ -71,10 +68,10 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 
 			references.filter(ResourceReference::hasReference).forEach(r -> r.getReference().setResource(null));
 
-			if (resource instanceof DomainResource && ((DomainResource) resource).hasContained())
+			if (resource instanceof DomainResource d && d.hasContained())
 			{
 				logger.warn("{} has contained resources, removing resources", resource.getClass().getName());
-				((DomainResource) resource).setContained(null);
+				d.setContained(null);
 			}
 		}
 	}

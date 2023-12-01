@@ -261,8 +261,8 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 				logger.warn("Response status for {} not 200 OK but {}, missing resource will not be added",
 						resource.getSearchBundleEntryUrl(), entry.getResponse().getStatus());
 			}
-			else if (!entry.hasResource() || !(entry.getResource() instanceof Bundle)
-					|| !(BundleType.SEARCHSET.equals(((Bundle) entry.getResource()).getType())))
+			else if (!entry.hasResource() || !(entry.getResource() instanceof Bundle b)
+					|| !(BundleType.SEARCHSET.equals(b.getType())))
 			{
 				logger.warn("Response for {} not a searchset Bundle, missing resource will not be added",
 						resource.getSearchBundleEntryUrl());

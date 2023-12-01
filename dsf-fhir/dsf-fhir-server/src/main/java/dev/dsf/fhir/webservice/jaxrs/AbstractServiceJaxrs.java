@@ -30,8 +30,8 @@ public abstract class AbstractServiceJaxrs<S extends BasicService> extends Abstr
 		Principal principal = httpRequest.getUserPrincipal();
 		if (principal != null)
 		{
-			if (principal instanceof Identity)
-				return (Identity) principal;
+			if (principal instanceof Identity identity)
+				return identity;
 			else
 			{
 				logger.warn("Unknown current user principal of type {}", principal.getClass().getName());

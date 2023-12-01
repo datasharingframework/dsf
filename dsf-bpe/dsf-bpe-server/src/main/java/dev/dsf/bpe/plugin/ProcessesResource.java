@@ -33,24 +33,24 @@ public final class ProcessesResource
 	{
 		Objects.requireNonNull(resource, "resource");
 
-		if (resource instanceof ActivityDefinition)
-			return fromMetadataResource((ActivityDefinition) resource);
-		else if (resource instanceof CodeSystem)
-			return fromMetadataResource((CodeSystem) resource);
-		else if (resource instanceof Library)
-			return fromMetadataResource((Library) resource);
-		else if (resource instanceof Measure)
-			return fromMetadataResource((Measure) resource);
-		else if (resource instanceof NamingSystem)
-			return fromNamingSystem((NamingSystem) resource);
-		else if (resource instanceof Questionnaire)
-			return fromMetadataResource((Questionnaire) resource);
-		else if (resource instanceof StructureDefinition)
-			return fromMetadataResource((StructureDefinition) resource);
-		else if (resource instanceof Task)
-			return fromTask((Task) resource);
-		else if (resource instanceof ValueSet)
-			return fromMetadataResource((ValueSet) resource);
+		if (resource instanceof ActivityDefinition a)
+			return fromMetadataResource(a);
+		else if (resource instanceof CodeSystem c)
+			return fromMetadataResource(c);
+		else if (resource instanceof Library l)
+			return fromMetadataResource(l);
+		else if (resource instanceof Measure m)
+			return fromMetadataResource(m);
+		else if (resource instanceof NamingSystem n)
+			return fromNamingSystem(n);
+		else if (resource instanceof Questionnaire q)
+			return fromMetadataResource(q);
+		else if (resource instanceof StructureDefinition s)
+			return fromMetadataResource(s);
+		else if (resource instanceof Task t)
+			return fromTask(t);
+		else if (resource instanceof ValueSet v)
+			return fromMetadataResource(v);
 		else
 			throw new IllegalArgumentException(
 					"MetadataResource of type " + resource.getClass().getName() + " not supported");
@@ -287,24 +287,24 @@ public final class ProcessesResource
 
 	private BundleEntryComponent createAsActive()
 	{
-		if (getResource() instanceof MetadataResource)
-			((MetadataResource) getResource()).setStatus(PublicationStatus.ACTIVE);
+		if (getResource() instanceof MetadataResource m)
+			m.setStatus(PublicationStatus.ACTIVE);
 
 		return create();
 	}
 
 	private BundleEntryComponent createAsDraft()
 	{
-		if (getResource() instanceof MetadataResource)
-			((MetadataResource) getResource()).setStatus(PublicationStatus.DRAFT);
+		if (getResource() instanceof MetadataResource m)
+			m.setStatus(PublicationStatus.DRAFT);
 
 		return create();
 	}
 
 	private BundleEntryComponent createAsRetired()
 	{
-		if (getResource() instanceof MetadataResource)
-			((MetadataResource) getResource()).setStatus(PublicationStatus.RETIRED);
+		if (getResource() instanceof MetadataResource m)
+			m.setStatus(PublicationStatus.RETIRED);
 
 		return create();
 	}
@@ -325,24 +325,24 @@ public final class ProcessesResource
 
 	private BundleEntryComponent updateToActive(String baseUrl)
 	{
-		if (getResource() instanceof MetadataResource)
-			((MetadataResource) getResource()).setStatus(PublicationStatus.ACTIVE);
+		if (getResource() instanceof MetadataResource m)
+			m.setStatus(PublicationStatus.ACTIVE);
 
 		return update(baseUrl);
 	}
 
 	private BundleEntryComponent updateToDraft(String baseUrl)
 	{
-		if (getResource() instanceof MetadataResource)
-			((MetadataResource) getResource()).setStatus(PublicationStatus.DRAFT);
+		if (getResource() instanceof MetadataResource m)
+			m.setStatus(PublicationStatus.DRAFT);
 
 		return update(baseUrl);
 	}
 
 	private BundleEntryComponent updateToRetired(String baseUrl)
 	{
-		if (getResource() instanceof MetadataResource)
-			((MetadataResource) getResource()).setStatus(PublicationStatus.RETIRED);
+		if (getResource() instanceof MetadataResource m)
+			m.setStatus(PublicationStatus.RETIRED);
 
 		return update(baseUrl);
 	}

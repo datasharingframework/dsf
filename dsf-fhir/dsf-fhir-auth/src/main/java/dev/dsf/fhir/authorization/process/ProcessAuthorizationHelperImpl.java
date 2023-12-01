@@ -207,8 +207,8 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 				.equals(messageName.getUrl()))
 			return false;
 
-		return messageName.hasValue() && messageName.getValue() instanceof StringType
-				&& !((StringType) messageName.getValue()).getValueAsString().isBlank();
+		return messageName.hasValue() && messageName.getValue() instanceof StringType value
+				&& !value.getValueAsString().isBlank();
 	}
 
 	private boolean isTaskProfileValid(Extension taskProfile, Predicate<CanonicalType> profileExists)
@@ -217,8 +217,8 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 				.equals(taskProfile.getUrl()))
 			return false;
 
-		return taskProfile.hasValue() && taskProfile.getValue() instanceof CanonicalType
-				&& profileExists.test((CanonicalType) taskProfile.getValue());
+		return taskProfile.hasValue() && taskProfile.getValue() instanceof CanonicalType value
+				&& profileExists.test(value);
 	}
 
 	private boolean isRequestersValid(List<Extension> requesters, Predicate<Coding> practitionerRoleExists,
@@ -235,10 +235,10 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 				|| !ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER.equals(requester.getUrl()))
 			return false;
 
-		if (requester.hasValue() && requester.getValue() instanceof Coding)
+		if (requester.hasValue() && requester.getValue() instanceof Coding value)
 		{
-			return requesterFrom((Coding) requester.getValue(), practitionerRoleExists,
-					organizationWithIdentifierExists, organizationRoleExists).isPresent();
+			return requesterFrom(value, practitionerRoleExists, organizationWithIdentifierExists,
+					organizationRoleExists).isPresent();
 		}
 
 		return false;
@@ -283,10 +283,10 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 				|| !ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT.equals(recipient.getUrl()))
 			return false;
 
-		if (recipient.hasValue() && recipient.getValue() instanceof Coding)
+		if (recipient.hasValue() && recipient.getValue() instanceof Coding value)
 		{
-			return recipientFrom((Coding) recipient.getValue(), practitionerRoleExists,
-					organizationWithIdentifierExists, organizationRoleExists).isPresent();
+			return recipientFrom(value, practitionerRoleExists, organizationWithIdentifierExists,
+					organizationRoleExists).isPresent();
 		}
 
 		return false;

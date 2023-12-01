@@ -36,14 +36,12 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
-		if (delegateInstance instanceof ActivityBehavior)
-		{
-			return new CustomActivityBehavior((ActivityBehavior) delegateInstance);
-		}
-		else if (delegateInstance instanceof JavaDelegate)
-		{
-			return new ServiceTaskJavaDelegateActivityBehavior((JavaDelegate) delegateInstance);
-		}
+		if (delegateInstance instanceof ActivityBehavior b)
+			return new CustomActivityBehavior(b);
+
+		else if (delegateInstance instanceof JavaDelegate d)
+			return new ServiceTaskJavaDelegateActivityBehavior(d);
+
 		else
 		{
 			throw LOG.missingDelegateParentClassException(delegateInstance.getClass().getName(),

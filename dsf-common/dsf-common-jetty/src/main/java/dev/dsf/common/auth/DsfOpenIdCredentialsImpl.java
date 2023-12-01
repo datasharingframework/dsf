@@ -48,13 +48,13 @@ public class DsfOpenIdCredentialsImpl implements DsfOpenIdCredentials
 	public Long getLongClaim(String key)
 	{
 		Object o = getAccessToken().get(key);
-		return o instanceof Long ? (Long) o : null;
+		return o instanceof Long l ? l : null;
 	}
 
 	@Override
 	public String getStringClaimOrDefault(String key, String defaultValue)
 	{
 		Object o = getAccessToken().getOrDefault(key, defaultValue);
-		return o instanceof String ? (String) o : defaultValue;
+		return o instanceof String s ? s : defaultValue;
 	}
 }

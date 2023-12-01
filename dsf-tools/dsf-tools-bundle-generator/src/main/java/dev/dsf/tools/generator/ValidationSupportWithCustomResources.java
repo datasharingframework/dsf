@@ -29,27 +29,26 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 				.filter(r -> r instanceof StructureDefinition || r instanceof CodeSystem || r instanceof ValueSet)
 				.forEach(r ->
 				{
-					if (r instanceof StructureDefinition)
+					if (r instanceof StructureDefinition s)
 					{
-						StructureDefinition sd = (StructureDefinition) r;
+						structureDefinitionsByUrl.put(s.getUrl(), s);
 
-						structureDefinitionsByUrl.put(sd.getUrl(), sd);
-						if (sd.hasVersion())
-							structureDefinitionsByUrl.put(sd.getUrl() + "|" + sd.getVersion(), sd);
+						if (s.hasVersion())
+							structureDefinitionsByUrl.put(s.getUrl() + "|" + s.getVersion(), s);
 					}
-					else if (r instanceof CodeSystem)
+					else if (r instanceof CodeSystem c)
 					{
-						CodeSystem cs = (CodeSystem) r;
-						codeSystemsByUrl.put(cs.getUrl(), cs);
-						if (cs.hasVersion())
-							codeSystemsByUrl.put(cs.getUrl() + "|" + cs.getVersion(), cs);
+						codeSystemsByUrl.put(c.getUrl(), c);
+
+						if (c.hasVersion())
+							codeSystemsByUrl.put(c.getUrl() + "|" + c.getVersion(), c);
 					}
-					else if (r instanceof ValueSet)
+					else if (r instanceof ValueSet v)
 					{
-						ValueSet vs = (ValueSet) r;
-						valueSetsByUrl.put(vs.getUrl(), vs);
-						if (vs.hasVersion())
-							valueSetsByUrl.put(vs.getUrl() + "|" + vs.getVersion(), vs);
+						valueSetsByUrl.put(v.getUrl(), v);
+
+						if (v.hasVersion())
+							valueSetsByUrl.put(v.getUrl() + "|" + v.getVersion(), v);
 					}
 				});
 	}

@@ -46,10 +46,8 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 	@Override
 	public boolean validate(UserIdentity user)
 	{
-		if (!(user.getUserPrincipal() instanceof PractitionerIdentity))
+		if (!(user.getUserPrincipal() instanceof PractitionerIdentity identity))
 			return false;
-
-		PractitionerIdentity identity = (PractitionerIdentity) user.getUserPrincipal();
 
 		if (identity.getCredentials().isEmpty())
 		{

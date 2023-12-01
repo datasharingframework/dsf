@@ -895,10 +895,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			JsonElement jsonElement = it.next();
 			IBaseResource resource = preparedStatementFactory.getJsonParser().parseResource(jsonElement.toString());
-			if (resource instanceof Resource)
+			if (resource instanceof Resource r)
 			{
-				query.modifyIncludeResource((Resource) resource, columnIndex, connection);
-				includeResources.add((Resource) resource);
+				query.modifyIncludeResource(r, columnIndex, connection);
+				includeResources.add(r);
 			}
 			else
 				logger.warn("parsed resouce of type {} not instance of {}, ignoring include resource",

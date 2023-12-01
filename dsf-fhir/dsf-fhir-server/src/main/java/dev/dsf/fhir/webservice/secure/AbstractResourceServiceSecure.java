@@ -787,10 +787,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		catch (Exception e)
 		{
-			StatusType status = e instanceof WebApplicationException
-					&& ((WebApplicationException) e).getResponse() != null
-							? ((WebApplicationException) e).getResponse().getStatusInfo()
-							: Status.INTERNAL_SERVER_ERROR;
+			StatusType status = e instanceof WebApplicationException w && w.getResponse() != null
+					? w.getResponse().getStatusInfo()
+					: Status.INTERNAL_SERVER_ERROR;
 
 			logErrorForStatusCode.accept(status);
 

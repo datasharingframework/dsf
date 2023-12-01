@@ -152,9 +152,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	{
 		Response read = super.read(id, uri, headers);
 
-		if (read.getEntity() instanceof Binary && !isValidFhirRequest(uri, headers))
+		if (read.getEntity() instanceof Binary binary && !isValidFhirRequest(uri, headers))
 		{
-			Binary binary = (Binary) read.getEntity();
 			if (mediaTypeMatches(headers, binary))
 				return toStream(binary);
 			else
@@ -206,9 +205,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	{
 		Response read = super.vread(id, version, uri, headers);
 
-		if (read.getEntity() instanceof Binary && !isValidFhirRequest(uri, headers))
+		if (read.getEntity() instanceof Binary binary && !isValidFhirRequest(uri, headers))
 		{
-			Binary binary = (Binary) read.getEntity();
 			if (mediaTypeMatches(headers, binary))
 				return toStream(binary);
 			else

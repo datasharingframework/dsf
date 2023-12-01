@@ -106,9 +106,8 @@ public class ExampleStarter
 	{
 		FhirWebserviceClient client = createClient(baseUrl);
 
-		if (resource instanceof Bundle)
+		if (resource instanceof Bundle bundle)
 		{
-			Bundle bundle = (Bundle) resource;
 			bundle.getEntry().stream().map(e -> e.getResource().getResourceType()).filter(ResourceType.Task::equals)
 					.findFirst()
 					.orElseThrow(() -> new IllegalArgumentException("Bundle does not contain a Task resource"));

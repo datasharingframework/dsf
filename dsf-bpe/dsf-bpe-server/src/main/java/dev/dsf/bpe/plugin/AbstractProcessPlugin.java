@@ -1020,23 +1020,23 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 
 				IBaseResource resource = newParser(file).parseResource(content);
 
-				if (resource instanceof ActivityDefinition && isValid((ActivityDefinition) resource, file))
+				if (resource instanceof ActivityDefinition a && isValid(a, file))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof CodeSystem && isValid((CodeSystem) resource, file))
+				else if (resource instanceof CodeSystem c && isValid(c, file))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof Library && isValid((Library) resource, file))
+				else if (resource instanceof Library l && isValid(l, file))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof Measure && isValid((Measure) resource, file))
+				else if (resource instanceof Measure m && isValid(m, file))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof NamingSystem && isValid((NamingSystem) resource, file))
+				else if (resource instanceof NamingSystem n && isValid(n, file))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof Questionnaire && isValid((Questionnaire) resource, file))
+				else if (resource instanceof Questionnaire q && isValid(q, file))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof StructureDefinition && isValid((StructureDefinition) resource, file))
+				else if (resource instanceof StructureDefinition s && isValid(s, file))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof Task && isValid((Task) resource, file, localOrganizationIdentifierValue))
+				else if (resource instanceof Task t && isValid(t, file, localOrganizationIdentifierValue))
 					return FileAndResource.of(file, (Resource) resource);
-				else if (resource instanceof ValueSet && isValid((ValueSet) resource, file))
+				else if (resource instanceof ValueSet v && isValid(v, file))
 					return FileAndResource.of(file, (Resource) resource);
 				else
 				{

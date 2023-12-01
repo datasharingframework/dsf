@@ -156,9 +156,8 @@ public class OrganizationAffiliationParticipatingOrganization
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (oA.getParticipatingOrganization().getResource() instanceof Organization)
+			if (oA.getParticipatingOrganization().getResource() instanceof Organization o)
 			{
-				Organization o = (Organization) oA.getParticipatingOrganization().getResource();
 				return o.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

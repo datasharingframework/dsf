@@ -197,9 +197,9 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		catch (Exception e)
 		{
 			String exceptionMessage = e.getMessage();
-			if (e instanceof WebApplicationException && (e.getMessage() == null || e.getMessage().isBlank()))
+			if (e instanceof WebApplicationException w && (e.getMessage() == null || e.getMessage().isBlank()))
 			{
-				StatusType statusInfo = ((WebApplicationException) e).getResponse().getStatusInfo();
+				StatusType statusInfo = w.getResponse().getStatusInfo();
 				exceptionMessage = statusInfo.getStatusCode() + " " + statusInfo.getReasonPhrase();
 			}
 

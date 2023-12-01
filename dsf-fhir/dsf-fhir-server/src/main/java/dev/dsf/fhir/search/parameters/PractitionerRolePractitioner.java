@@ -155,9 +155,8 @@ public class PractitionerRolePractitioner extends AbstractReferenceParameter<Pra
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (pR.getPractitioner().getResource() instanceof Practitioner)
+			if (pR.getPractitioner().getResource() instanceof Practitioner p)
 			{
-				Practitioner p = (Practitioner) pR.getPractitioner().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

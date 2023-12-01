@@ -79,9 +79,9 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 
 	private boolean shouldRetry(RuntimeException e)
 	{
-		if (e instanceof WebApplicationException)
+		if (e instanceof WebApplicationException w)
 		{
-			return isRetryStatusCode((WebApplicationException) e);
+			return isRetryStatusCode(w);
 		}
 		else if (e instanceof ProcessingException)
 		{

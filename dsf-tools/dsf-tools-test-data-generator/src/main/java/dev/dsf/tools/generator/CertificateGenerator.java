@@ -417,9 +417,8 @@ public class CertificateGenerator
 	{
 		logger.debug("Generating public-key from private-key [{}]", commonName);
 
-		if ("RSA".equals(privateKey.getAlgorithm()) && privateKey instanceof RSAPrivateCrtKey)
+		if ("RSA".equals(privateKey.getAlgorithm()) && privateKey instanceof RSAPrivateCrtKey rsaPrivateKey)
 		{
-			RSAPrivateCrtKey rsaPrivateKey = (RSAPrivateCrtKey) privateKey;
 			RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(rsaPrivateKey.getModulus(),
 					rsaPrivateKey.getPublicExponent());
 

@@ -192,9 +192,9 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				Optional<Resource> recipient = referenceResolver.resolveReference(identity, reference, connection);
 				if (recipient.isPresent())
 				{
-					if (recipient.get() instanceof Organization)
+					if (recipient.get() instanceof Organization o)
 					{
-						if (!isLocalOrganization((Organization) recipient.get()))
+						if (!isLocalOrganization(o))
 							errors.add("Task.restriction.recipient not local organization");
 					}
 					else
@@ -284,9 +284,9 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			Optional<Resource> requester = referenceResolver.resolveReference(identity, reference, connection);
 			if (requester.isPresent())
 			{
-				if (requester.get() instanceof Organization)
+				if (requester.get() instanceof Organization o)
 				{
-					if (!isLocalOrganization((Organization) requester.get()))
+					if (!isLocalOrganization(o))
 						errors.add("Task.requester not local organization");
 				}
 				else
@@ -313,9 +313,9 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				Optional<Resource> recipient = referenceResolver.resolveReference(identity, reference, connection);
 				if (recipient.isPresent())
 				{
-					if (recipient.get() instanceof Organization)
+					if (recipient.get() instanceof Organization o)
 					{
-						if (!isLocalOrganization((Organization) recipient.get()))
+						if (!isLocalOrganization(o))
 							errors.add("Task.restriction.recipient not local organization");
 					}
 					else

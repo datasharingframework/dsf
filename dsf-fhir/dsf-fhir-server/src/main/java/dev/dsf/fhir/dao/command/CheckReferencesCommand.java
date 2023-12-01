@@ -60,9 +60,8 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 	// See also AbstractResourceServiceImpl#checkReferenceAfterCreate
 	private boolean checkReferenceAfterUpdate(ResourceReference ref)
 	{
-		if (resource instanceof Task && HTTPVerb.PUT.equals(verb))
+		if (resource instanceof Task task && HTTPVerb.PUT.equals(verb))
 		{
-			Task task = (Task) resource;
 			if (EnumSet.of(TaskStatus.COMPLETED, TaskStatus.FAILED).contains(task.getStatus()))
 			{
 				ReferenceType refType = ref.getType(serverBase);

@@ -155,9 +155,8 @@ public class OrganizationAffiliationPrimaryOrganization extends AbstractReferenc
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (oA.getOrganization().getResource() instanceof Organization)
+			if (oA.getOrganization().getResource() instanceof Organization o)
 			{
-				Organization o = (Organization) oA.getOrganization().getResource();
 				return o.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

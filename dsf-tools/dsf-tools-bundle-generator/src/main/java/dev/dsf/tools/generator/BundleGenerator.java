@@ -236,34 +236,18 @@ public class BundleGenerator
 	{
 		return (BundleEntryComponent e) ->
 		{
-
 			if (e.getResource() == null)
 				return "";
-			else if (e.getResource() instanceof CodeSystem)
-			{
-				CodeSystem cs = (CodeSystem) e.getResource();
-				return cs.getUrl() + "|" + cs.getVersion();
-			}
-			else if (e.getResource() instanceof NamingSystem)
-			{
-				NamingSystem ns = (NamingSystem) e.getResource();
-				return ns.getName();
-			}
-			else if (e.getResource() instanceof ValueSet)
-			{
-				ValueSet vs = (ValueSet) e.getResource();
-				return vs.getUrl() + "|" + vs.getVersion();
-			}
-			else if (e.getResource() instanceof StructureDefinition)
-			{
-				StructureDefinition sd = (StructureDefinition) e.getResource();
-				return sd.getUrl() + "|" + sd.getVersion();
-			}
-			else if (e.getResource() instanceof Subscription)
-			{
-				Subscription s = (Subscription) e.getResource();
+			else if (e.getResource() instanceof CodeSystem c)
+				return c.getUrl() + "|" + c.getVersion();
+			else if (e.getResource() instanceof NamingSystem n)
+				return n.getName();
+			else if (e.getResource() instanceof ValueSet v)
+				return v.getUrl() + "|" + v.getVersion();
+			else if (e.getResource() instanceof StructureDefinition s)
+				return s.getUrl() + "|" + s.getVersion();
+			else if (e.getResource() instanceof Subscription s)
 				return s.getReason();
-			}
 			else
 				return "";
 		};

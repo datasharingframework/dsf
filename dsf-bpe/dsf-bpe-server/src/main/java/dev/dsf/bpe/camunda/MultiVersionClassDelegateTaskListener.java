@@ -53,10 +53,9 @@ public class MultiVersionClassDelegateTaskListener extends ClassDelegateTaskList
 	{
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
-		if (delegateInstance instanceof TaskListener)
-		{
-			return (TaskListener) delegateInstance;
-		}
+		if (delegateInstance instanceof TaskListener l)
+			return l;
+
 		else
 		{
 			throw new ProcessEngineException(

@@ -184,21 +184,18 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (qr.getSubject().getResource() instanceof Organization)
+			if (qr.getSubject().getResource() instanceof Organization o)
 			{
-				Organization o = (Organization) qr.getSubject().getResource();
 				return o.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}
-			else if (qr.getSubject().getResource() instanceof Practitioner)
+			else if (qr.getSubject().getResource() instanceof Practitioner p)
 			{
-				Practitioner p = (Practitioner) qr.getSubject().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}
-			else if (qr.getSubject().getResource() instanceof PractitionerRole)
+			else if (qr.getSubject().getResource() instanceof PractitionerRole p)
 			{
-				PractitionerRole p = (PractitionerRole) qr.getSubject().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

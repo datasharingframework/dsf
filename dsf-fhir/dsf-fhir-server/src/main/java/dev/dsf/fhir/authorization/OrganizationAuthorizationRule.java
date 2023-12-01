@@ -81,9 +81,8 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 		{
 			if (!newResource.getExtension().stream().filter(Extension::hasUrl)
 					.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
-					.allMatch(e -> e.hasValue() && e.getValue() instanceof StringType
-							&& EXTENSION_THUMBPRINT_VALUE_PATTERN.matcher(((StringType) e.getValue()).getValue())
-									.matches()))
+					.allMatch(e -> e.hasValue() && e.getValue() instanceof StringType value
+							&& EXTENSION_THUMBPRINT_VALUE_PATTERN.matcher(value.getValue()).matches()))
 			{
 				errors.add("Organization with '" + EXTENSION_THUMBPRINT_URL + "' has value not matching pattern: "
 						+ EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING);

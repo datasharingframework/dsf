@@ -155,9 +155,8 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (pR.getOrganization().getResource() instanceof Organization)
+			if (pR.getOrganization().getResource() instanceof Organization o)
 			{
-				Organization o = (Organization) pR.getOrganization().getResource();
 				return o.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

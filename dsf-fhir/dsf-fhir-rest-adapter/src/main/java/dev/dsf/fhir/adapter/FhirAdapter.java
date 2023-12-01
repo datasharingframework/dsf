@@ -82,10 +82,10 @@ public class FhirAdapter extends AbstractAdapter
 
 	private BaseResource fixResource(BaseResource resource)
 	{
-		if (resource instanceof Bundle)
-			return fixBundle((Bundle) resource);
-		else if (resource instanceof Binary)
-			return fixBinary((Binary) resource);
+		if (resource instanceof Bundle b)
+			return fixBundle(b);
+		else if (resource instanceof Binary b)
+			return fixBinary(b);
 		else
 			return resource;
 	}
