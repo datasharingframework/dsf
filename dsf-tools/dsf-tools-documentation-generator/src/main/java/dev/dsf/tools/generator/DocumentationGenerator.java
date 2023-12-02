@@ -18,6 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,27 +55,8 @@ public class DocumentationGenerator extends AbstractMojo
 	private static final String ENV_VARIABLE_PLACEHOLDER = "${env_variable}";
 	private static final String PROPERTY_NAME_PLACEHOLDER = " ${property_name}";
 
-	private static final class DocumentationEntry implements Comparable<DocumentationEntry>
+	private record DocumentationEntry(String propertyName, String value)
 	{
-		final String propertyName;
-		final String value;
-
-		DocumentationEntry(String propertyName, String value)
-		{
-			this.propertyName = propertyName;
-			this.value = value;
-		}
-
-		@Override
-		public int compareTo(DocumentationEntry o)
-		{
-			return propertyName.compareToIgnoreCase(o.propertyName);
-		}
-
-		String getValue()
-		{
-			return value;
-		}
 	}
 
 	@Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
@@ -213,8 +195,9 @@ public class DocumentationGenerator extends AbstractMojo
 	private void writeFields(Collection<? extends Field> fields,
 			Function<Field, DocumentationEntry> documentationGenerator, Path file, String workingPackage)
 	{
-		Iterable<String> entries = fields.stream().map(documentationGenerator).sorted()
-				.map(DocumentationEntry::getValue)::iterator;
+		Iterable<String> entries = fields.stream().map(documentationGenerator)
+				.sorted(Comparator.comparing(DocumentationEntry::propertyName, String.CASE_INSENSITIVE_ORDER))
+				.map(DocumentationEntry::value)::iterator;
 		try
 		{
 			Files.write(file, entries, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
@@ -259,7 +242,7 @@ public class DocumentationGenerator extends AbstractMojo
 					: "";
 
 			return new DocumentationEntry(initialProperty,
-					String.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description,
+					String.format("### %s%n%s%s%s%s%s%s%s%n", environment, property, required, processes, description,
 							recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
 							.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty));
 		};
@@ -293,7 +276,7 @@ public class DocumentationGenerator extends AbstractMojo
 					: "";
 
 			return new DocumentationEntry(initialProperty,
-					String.format("### %s\n%s%s%s%s%s%s\n", environment, property, required, description,
+					String.format("### %s%n%s%s%s%s%s%s%n", environment, property, required, description,
 							recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
 							.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty));
 		};
@@ -317,7 +300,7 @@ public class DocumentationGenerator extends AbstractMojo
 		if (title == null || title.isBlank() || value == null || value.isBlank())
 			return "";
 
-		return String.format("- **%s:** `%s`\n", title, value);
+		return String.format("- **%s:** `%s`%n", title, value);
 	}
 
 	private String getDocumentationString(String title, String value)
@@ -325,7 +308,7 @@ public class DocumentationGenerator extends AbstractMojo
 		if (title == null || title.isBlank() || value == null || value.isBlank())
 			return "";
 
-		return String.format("- **%s:** %s\n", title, value);
+		return String.format("- **%s:** %s%n", title, value);
 	}
 
 	private String getProcessNamesAsString(String[] documentationProcessNames, List<String> pluginProcessNames)
