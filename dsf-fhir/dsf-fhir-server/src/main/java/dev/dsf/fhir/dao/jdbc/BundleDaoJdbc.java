@@ -1,14 +1,11 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.BundleDao;
