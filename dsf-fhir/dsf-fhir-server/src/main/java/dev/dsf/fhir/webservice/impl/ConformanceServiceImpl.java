@@ -402,7 +402,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		var standardSortableSearchParameters = Arrays.asList(ResourceId.class, ResourceLastUpdated.class,
 				ResourceProfile.class);
-		var standardOperations = Arrays.asList(createValidateOperation());
 
 		Map<String, List<CanonicalType>> profileUrlsByResource = validationSupport.fetchAllStructureDefinitions()
 				.stream().filter(r -> r instanceof StructureDefinition).map(r -> (StructureDefinition) r)
@@ -479,7 +478,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.getSearchParam().sort(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName));
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
-			standardOperations.forEach(r::addOperation);
 
 			r.setSupportedProfile(
 					profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(), Collections.emptyList()));
@@ -514,12 +512,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		return Arrays.stream(def.targetResourceTypes()).map(target -> target.getAnnotation(ResourceDef.class).name())
 				.map(target -> def.resourceType().getAnnotation(ResourceDef.class).name() + ":" + def.parameterName()
 						+ ":" + target);
-	}
-
-	private CapabilityStatementRestResourceOperationComponent createValidateOperation()
-	{
-		return createOperation("validate", "http://hl7.org/fhir/OperationDefinition/Resource-validate",
-				"The validate operation checks whether the attached content would be acceptable either generally, as a create, an update or as a delete to an existing resource. The action the server takes depends on the mode parameter");
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createSortParameter(

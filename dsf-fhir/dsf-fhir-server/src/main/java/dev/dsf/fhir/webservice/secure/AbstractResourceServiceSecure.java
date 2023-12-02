@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -690,39 +689,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					status -> audit.info("Search of {} for identity '{}' failed, status: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
-	}
-
-	@Override
-	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.postValidateNew(validate, parameters, uri, headers);
-	}
-
-	@Override
-	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.getValidateNew(validate, uri, headers);
-	}
-
-	@Override
-	public Response postValidateExisting(String validate, String id, Parameters parameters, UriInfo uri,
-			HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.postValidateExisting(validate, id, parameters, uri, headers);
-	}
-
-	@Override
-	public Response getValidateExisting(String validate, String id, UriInfo uri, HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.getValidateExisting(validate, id, uri, headers);
 	}
 
 	@Override

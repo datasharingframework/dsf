@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,20 +24,9 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
-import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.UrlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -47,9 +35,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationResult;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.dao.ResourceDao;
@@ -706,169 +691,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 							include.getIdElement().getValue());
 					return false;
 				});
-	}
-
-	private Optional<Resource> getResource(Parameters parameters, String parameterName)
-	{
-		return parameters.getParameter().stream().filter(p -> parameterName.equals(p.getName())).findFirst()
-				.map(ParametersParameterComponent::getResource);
-	}
-
-	private OperationOutcome createValidationOutcomeError(List<SingleValidationMessage> messages)
-	{
-		OperationOutcome outcome = new OperationOutcome();
-		List<OperationOutcomeIssueComponent> issues = messages.stream().map(vm -> new OperationOutcomeIssueComponent()
-				.setSeverity(toSeverity(vm.getSeverity())).setCode(IssueType.STRUCTURE).setDiagnostics(vm.getMessage()))
-				.collect(Collectors.toList());
-		outcome.setIssue(issues);
-		return outcome;
-	}
-
-	private IssueSeverity toSeverity(ResultSeverityEnum resultSeverity)
-	{
-		switch (resultSeverity)
-		{
-			case ERROR:
-				return IssueSeverity.ERROR;
-			case FATAL:
-				return IssueSeverity.FATAL;
-			case INFORMATION:
-				return IssueSeverity.INFORMATION;
-			case WARNING:
-				return IssueSeverity.WARNING;
-			default:
-				return IssueSeverity.NULL;
-		}
-	}
-
-	private OperationOutcome createValidationOutcomeOk(List<SingleValidationMessage> messages, List<String> profiles)
-	{
-		OperationOutcome outcome = new OperationOutcome();
-
-		List<OperationOutcomeIssueComponent> issues = messages.stream().map(vm -> new OperationOutcomeIssueComponent()
-				.setSeverity(toSeverity(vm.getSeverity())).setCode(IssueType.STRUCTURE).setDiagnostics(vm.getMessage()))
-				.collect(Collectors.toList());
-		outcome.setIssue(issues);
-
-		OperationOutcomeIssueComponent ok = new OperationOutcomeIssueComponent().setSeverity(IssueSeverity.INFORMATION)
-				.setCode(IssueType.INFORMATIONAL)
-				.setDiagnostics("Resource validated" + (profiles.isEmpty() ? ""
-						: " with profile" + (profiles.size() > 1 ? "s " : " ")
-								+ profiles.stream().collect(Collectors.joining(", "))));
-		outcome.addIssue(ok);
-
-		return outcome;
-	}
-
-	@Override
-	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
-	{
-		Optional<Resource> resource = getResource(parameters, "resource");
-		if (resource.isEmpty())
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome, hint post with id url?
-
-		Type mode = parameters.getParameter("mode");
-		if (!(mode instanceof CodeType))
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-
-		Type profile = parameters.getParameter("profile");
-		if (!(profile instanceof UriType))
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-
-		// TODO handle mode and profile parameters
-
-		// ValidationResult validationResult = validator.validate(resource.get());
-
-		// TODO create return values
-
-		return Response.ok().build();
-	}
-
-	@Override
-	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
-	{
-		// MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-		//
-		// String mode = queryParameters.getFirst("mode");
-		// String profile = queryParameters.getFirst("profile");
-
-		// mode = create
-
-		// TODO Auto-generated method stub
-		return Response.ok().build();
-	}
-
-	@Override
-	public Response postValidateExisting(String validate, String id, Parameters parameters, UriInfo uri,
-			HttpHeaders headers)
-	{
-		if (getResource(parameters, "resource").isPresent())
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-
-		Type mode = parameters.getParameter("mode");
-		if (!(mode instanceof CodeType) || !(mode instanceof StringType))
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-		if (!"profile".equals(((StringType) mode).getValue()))
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-
-		Type profile = parameters.getParameter("profile");
-		if (!(profile instanceof UriType) || !(mode instanceof UrlType) || !(mode instanceof CanonicalType))
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
-
-		UriType profileUri = (UriType) profile;
-
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
-
-		R resource = read.get();
-		resource.getMeta().setProfile(Collections.singletonList(new CanonicalType(profileUri.getValue())));
-
-		ValidationResult result = validator.validate(resource);
-
-		if (result.isSuccessful())
-			return responseGenerator.response(Status.OK,
-					createValidationOutcomeOk(result.getMessages(), Collections.singletonList(profileUri.getValue())),
-					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
-		else
-			return responseGenerator.response(Status.OK, createValidationOutcomeError(result.getMessages()),
-					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
-	}
-
-	@Override
-	public Response getValidateExisting(String validate, String id, UriInfo uri, HttpHeaders headers)
-	{
-		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-
-		String mode = queryParameters.getFirst("mode");
-		if (mode == null)
-			mode = "profile";
-		String profile = queryParameters.getFirst("profile");
-
-		if ("profile".equals(mode))
-		{
-			Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-					() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
-
-			R resource = read.get();
-			if (profile != null)
-				resource.getMeta().setProfile(Collections.singletonList(new CanonicalType(profile)));
-
-			ValidationResult result = validator.validate(resource);
-
-			if (result.isSuccessful())
-				return responseGenerator.response(Status.OK,
-						createValidationOutcomeOk(result.getMessages(),
-								resource.getMeta().getProfile().stream().map(t -> t.getValue())
-										.collect(Collectors.toList())),
-						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
-			else
-				return responseGenerator.response(Status.OK, createValidationOutcomeError(result.getMessages()),
-						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
-		}
-		else if ("delete".equals(mode))
-			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO mode = delete
-		else
-			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO return OperationOutcome
 	}
 
 	@Override
