@@ -47,7 +47,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 				logger.debug("Websocket connection failed", exception);
 			}
 
-			return true;
+			return !closed;
 		}
 
 		private String getMessages(Exception e)
