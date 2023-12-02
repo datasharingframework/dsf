@@ -103,7 +103,7 @@ public class ExceptionHandler
 		logger.debug("Error while executing transaction bundle", e);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
-				"Error while executing transaction");
+				"Error while executing transaction bundle");
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
@@ -113,7 +113,7 @@ public class ExceptionHandler
 		logger.debug("Error while executing batch bundle element", e);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
-				"Error while executing batch element");
+				"Error while executing batch bundle element");
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
