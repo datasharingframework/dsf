@@ -202,11 +202,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			this.searchRevIncludeParameterFactories.addAll(searchRevIncludeParameterFactories);
 
 		resourceIdFactory = new SearchQueryParameterFactory<>(ResourceId.PARAMETER_NAME,
-				() -> new ResourceId<>(resourceIdColumn), null, null, null);
+				() -> new ResourceId<>(resourceIdColumn));
 		resourceLastUpdatedFactory = new SearchQueryParameterFactory<>(ResourceLastUpdated.PARAMETER_NAME,
-				() -> new ResourceLastUpdated<>(resourceColumn), null, null, null);
+				() -> new ResourceLastUpdated<>(resourceColumn));
 		resourceProfileFactory = new SearchQueryParameterFactory<>(ResourceProfile.PARAMETER_NAME,
-				() -> new ResourceProfile<>(resourceColumn), ResourceProfile.getNameModifiers(), null, null);
+				() -> new ResourceProfile<>(resourceColumn), ResourceProfile.getNameModifiers());
 	}
 
 	@Override
