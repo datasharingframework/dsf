@@ -4,15 +4,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Resource;
 
-public abstract class ResourceHtmlGenerator
+public abstract class ResourceHtmlGenerator extends AbstractHtmlAdapter
 {
-	protected static final SimpleDateFormat DATE_TIME_DISPLAY_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
 	protected String getServerBaseUrlPath(String serverBaseUrl)
 	{
 		try
@@ -39,8 +36,8 @@ public abstract class ResourceHtmlGenerator
 
 		if (resource.getMeta().hasLastUpdated())
 		{
-			writeRowWithAdditionalRowClasses("Last Updated",
-					DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated()), "last-updated", out);
+			writeRowWithAdditionalRowClasses("Last Updated", formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT),
+					"last-updated", out);
 		}
 
 		out.write("</div>\n");
