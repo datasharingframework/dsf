@@ -38,17 +38,17 @@ public class StructureDefinitionAuthorizationRule
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			StructureDefinition newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			StructureDefinition newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, StructureDefinition newResource)
+	private Optional<String> newResourceOk(Connection connection, StructureDefinition newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

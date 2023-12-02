@@ -15,7 +15,7 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 {
 	private static final Logger logger = LoggerFactory.getLogger(ReferenceCleanerImpl.class);
 
-	private ReferenceExtractor referenceExtractor;
+	private final ReferenceExtractor referenceExtractor;
 
 	public ReferenceCleanerImpl(ReferenceExtractor referenceExtractor)
 	{

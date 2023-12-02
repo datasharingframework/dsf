@@ -66,9 +66,6 @@ public class NamingSystemName extends AbstractStringParameter<NamingSystem>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Endpoint))
 			return false;
 

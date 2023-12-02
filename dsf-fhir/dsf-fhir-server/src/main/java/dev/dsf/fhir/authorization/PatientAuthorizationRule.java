@@ -29,16 +29,16 @@ public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<P
 	@Override
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Patient newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Patient newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Patient newResource)
+	private Optional<String> newResourceOk(Connection connection, Patient newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

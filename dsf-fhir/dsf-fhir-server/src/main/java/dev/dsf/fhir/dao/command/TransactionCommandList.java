@@ -45,7 +45,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 	@Override
 	public Bundle execute() throws WebApplicationException
 	{
-		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
+		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) (commands.size() / 0.75) + 1);
 		try
 		{
 			TransactionEventHandler transactionEventHandler;

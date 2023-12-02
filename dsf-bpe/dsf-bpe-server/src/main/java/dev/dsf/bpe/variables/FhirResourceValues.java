@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 public final class FhirResourceValues
 {
-	public static interface FhirResourceValue extends PrimitiveValue<Resource>
+	public interface FhirResourceValue extends PrimitiveValue<Resource>
 	{
 	}
 

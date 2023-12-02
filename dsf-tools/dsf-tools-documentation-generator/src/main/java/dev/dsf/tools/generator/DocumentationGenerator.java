@@ -253,7 +253,8 @@ public class DocumentationGenerator extends AbstractMojo
 			String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
 			String example = getDocumentationStringMonospace("Example", documentation.example());
 
-			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
+
+			String defaultValue = valueSplit.length > 1 && !"null".equals(valueSplit[1])
 					? getDocumentationStringMonospace("Default", valueSplit[1])
 					: "";
 
@@ -287,7 +288,7 @@ public class DocumentationGenerator extends AbstractMojo
 			String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
 			String example = getDocumentationStringMonospace("Example", documentation.example());
 
-			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
+			String defaultValue = valueSplit.length > 1 && !"null".equals(valueSplit[1])
 					? getDocumentationStringMonospace("Default", valueSplit[1])
 					: "";
 

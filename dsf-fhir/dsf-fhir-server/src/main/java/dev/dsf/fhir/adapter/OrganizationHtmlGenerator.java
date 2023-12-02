@@ -92,9 +92,9 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 
 				if (contact.hasName())
 					writeRow("Name",
-							(contact.getName().getNameAsSingleString() != null
+							contact.getName().getNameAsSingleString() != null
 									? contact.getName().getNameAsSingleString()
-									: ""),
+									: "",
 							out);
 
 				if (contact.hasAddress())
@@ -135,11 +135,11 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 
 			if (eMail.isPresent())
 				writeRowWithAdditionalRowClasses("eMail", eMail.get().getValue(),
-						(phone.isPresent() ? "contact-element-50 contact-element-margin" : "contact-element-100"), out);
+						phone.isPresent() ? "contact-element-50 contact-element-margin" : "contact-element-100", out);
 
 			if (phone.isPresent())
 				writeRowWithAdditionalRowClasses("Phone", phone.get().getValue(),
-						(eMail.isPresent() ? "contact-element-50" : "contact-element-100"), out);
+						eMail.isPresent() ? "contact-element-50" : "contact-element-100", out);
 
 			out.write("</div>\n");
 		}

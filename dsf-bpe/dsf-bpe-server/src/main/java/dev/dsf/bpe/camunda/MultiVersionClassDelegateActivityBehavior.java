@@ -43,11 +43,9 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 			return new ServiceTaskJavaDelegateActivityBehavior(d);
 
 		else
-		{
 			throw LOG.missingDelegateParentClassException(delegateInstance.getClass().getName(),
 					JavaDelegate.class.getName(), ActivityBehavior.class.getName());
-		}
-	};
+	}
 
 	private Object instantiateDelegate(ProcessIdAndVersion processKeyAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations)

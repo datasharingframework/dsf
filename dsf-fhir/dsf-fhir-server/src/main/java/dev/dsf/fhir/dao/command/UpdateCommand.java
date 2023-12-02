@@ -203,7 +203,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
 					&& (!resource.getIdElement().hasResourceType()
 							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
-					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+					&& dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart()))
 			{
 				idTranslationTable.put(entry.getFullUrl(),
 						new IdType(resource.getResourceType().toString(), dbResource.getIdElement().getIdPart()));
@@ -236,8 +236,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			updateById(idTranslationTable, connection, validationHelper, componentes.getPathSegments().get(0),
 					componentes.getPathSegments().get(1));
 		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
-			updateByCondition(idTranslationTable, connection, validationHelper, componentes.getPathSegments().get(0),
-					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
+			updateByCondition(idTranslationTable, connection, validationHelper, componentes.getPathSegments().get(0));
 		else
 			throw new WebApplicationException(
 					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
@@ -305,8 +304,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	private void updateByCondition(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, String resourceTypeName, Map<String, List<String>> queryParameters)
-			throws SQLException
+			ValidationHelper validationHelper, String resourceTypeName) throws SQLException
 	{
 
 		boolean foundByCondition = addMissingIdToTranslationTableAndCheckConditionFindsResource(idTranslationTable,

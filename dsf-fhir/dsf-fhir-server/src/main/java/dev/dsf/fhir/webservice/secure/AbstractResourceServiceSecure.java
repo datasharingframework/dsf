@@ -496,7 +496,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
 					&& (!resource.getIdElement().hasResourceType()
 							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
-					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+					&& dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart()))
 			{
 				// more security checks and audit log in update method
 				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);

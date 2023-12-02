@@ -116,7 +116,7 @@ public final class JettyServer
 		};
 	}
 
-	public static final Function<Server, ServerConnector> httpConnector(String host, int port,
+	public static Function<Server, ServerConnector> httpConnector(String host, int port,
 			String clientCertificateHeaderName)
 	{
 		return server ->
@@ -131,7 +131,7 @@ public final class JettyServer
 		};
 	}
 
-	public static final Function<Server, ServerConnector> httpConnector(ServerSocketChannel channel,
+	public static Function<Server, ServerConnector> httpConnector(ServerSocketChannel channel,
 			String clientCertificateHeaderName)
 	{
 		return server ->
@@ -249,8 +249,7 @@ public final class JettyServer
 	public JettyServer(Function<Server, ServerConnector> apiConnectorProvider,
 			Function<Server, ServerConnector> statusConnectorProvider, String mavenServerModuleName, String contextPath,
 			List<Class<? extends ServletContainerInitializer>> servletContainerInitializers,
-			Map<String, String> initParameters, KeyStore clientTrustStore,
-			BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer)
+			Map<String, String> initParameters, BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer)
 	{
 		server = new Server(threadPool());
 		apiConnector = apiConnectorProvider.apply(server);
@@ -317,14 +316,14 @@ public final class JettyServer
 		{
 			@Override
 			protected void writeErrorPage(jakarta.servlet.http.HttpServletRequest request, java.io.Writer writer,
-					int code, String message, boolean showStacks) throws java.io.IOException
+					int code, String message, boolean showStacks) throws IOException
 			{
 				logger.warn("Error {}: {}", code, message);
 			}
 		};
 	}
 
-	public final void start()
+	public void start()
 	{
 		Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
@@ -351,7 +350,7 @@ public final class JettyServer
 		}
 	}
 
-	public final void stop()
+	public void stop()
 	{
 		logger.info("Stopping jetty server ...");
 		try
@@ -367,7 +366,7 @@ public final class JettyServer
 	/**
 	 * @return <code>null</code> if server not started or web application failed to start
 	 */
-	public final ServletContext getServletContext()
+	public ServletContext getServletContext()
 	{
 		return webAppContext == null ? null : webAppContext.getServletContext();
 	}

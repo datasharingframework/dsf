@@ -6,7 +6,7 @@ public enum PreferHandlingType
 
 	private final String headerValue;
 
-	private PreferHandlingType(String headerValue)
+	PreferHandlingType(String headerValue)
 	{
 		this.headerValue = headerValue;
 	}

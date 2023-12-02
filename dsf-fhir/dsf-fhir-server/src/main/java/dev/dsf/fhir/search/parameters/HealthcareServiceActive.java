@@ -44,9 +44,6 @@ public class HealthcareServiceActive extends AbstractBooleanParameter<Healthcare
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof HealthcareService))
 			return false;
 

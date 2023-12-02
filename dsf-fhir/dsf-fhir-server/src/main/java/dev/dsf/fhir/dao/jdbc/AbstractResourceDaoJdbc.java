@@ -69,10 +69,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 	private static final class ResourceDistinctById
 	{
-		private final IdType id;
-		private final Resource resource;
+		final IdType id;
+		final Resource resource;
 
-		public ResourceDistinctById(IdType id, Resource resource)
+		ResourceDistinctById(IdType id, Resource resource)
 		{
 			this.id = id;
 			this.resource = resource;
@@ -170,14 +170,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,
 			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
-		this(dataSource, permanentDeleteDataSource, fhirContext, resourceType, resourceTable, resourceColumn,
-				resourceIdColumn, new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable,
-						resourceIdColumn, resourceColumn),
+		this(dataSource, permanentDeleteDataSource, resourceType, resourceTable, resourceColumn, resourceIdColumn,
+				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
+						resourceColumn),
 				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
-	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
-			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
+	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, Class<R> resourceType,
+			String resourceTable, String resourceColumn, String resourceIdColumn,
 			PreparedStatementFactory<R> preparedStatementFactory,
 			Function<Identity, SearchQueryIdentityFilter> userFilter,
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,

@@ -190,7 +190,7 @@ public abstract class InputHtmlGenerator
 	{
 		out.write("<div class=\"input-group\">\n");
 		writeInput(type, value, elementName, elementIndex, Optional.empty(), writable, out);
-		writePlaceholderButton(elementName, value, writable, out);
+		writePlaceholderButton(writable, out);
 		out.write("</div>\n");
 	}
 
@@ -199,13 +199,13 @@ public abstract class InputHtmlGenerator
 	{
 		out.write("<div class=\"input-group\">\n");
 		writeInput("url", system, elementName + "-system", elementIndex, Optional.empty(), writable, out);
-		writePlaceholderButton(elementName + "-system", system, writable, out);
+		writePlaceholderButton(writable, out);
 		out.write("</div>\n");
 
 		out.write("<div class=\"input-group\">\n");
 		writeInput("text", code, elementName + "-code", elementIndex, Optional.of("identifier-coding-code"), writable,
 				out);
-		writePlaceholderButton(elementName + "-code", code, writable, out);
+		writePlaceholderButton(writable, out);
 		out.write("</div>\n");
 	}
 
@@ -217,8 +217,7 @@ public abstract class InputHtmlGenerator
 				+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
 	}
 
-	private void writePlaceholderButton(String elementName, String value, boolean writable, OutputStreamWriter out)
-			throws IOException
+	private void writePlaceholderButton(boolean writable, OutputStreamWriter out) throws IOException
 	{
 		if (writable)
 		{

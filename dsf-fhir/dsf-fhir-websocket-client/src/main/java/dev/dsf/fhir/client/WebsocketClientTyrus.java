@@ -172,7 +172,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 
 		ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator()
 		{
-			public void beforeRequest(java.util.Map<String, java.util.List<String>> headers)
+			public void beforeRequest(Map<String, java.util.List<String>> headers)
 			{
 				headers.put(HttpHeaders.USER_AGENT, Collections.singletonList(userAgentValue));
 			}

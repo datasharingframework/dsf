@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -33,7 +32,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = QuestionnaireResponseSubject.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/QuestionnaireResponse-subject", type = SearchParamType.REFERENCE, documentation = "The subject of the questionnaire response")
 public class QuestionnaireResponseSubject extends AbstractReferenceParameter<QuestionnaireResponse>
 {
-	public static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
+	private static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
 	public static final String PARAMETER_NAME = "subject";
 
 	// TODO if needed, modify for Reference(Any), see also doResolveReferencesForMatching, matches, getIncludeSql
@@ -174,10 +173,7 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Endpoint))
+		if (!(resource instanceof QuestionnaireResponse))
 			return false;
 
 		QuestionnaireResponse qr = (QuestionnaireResponse) resource;

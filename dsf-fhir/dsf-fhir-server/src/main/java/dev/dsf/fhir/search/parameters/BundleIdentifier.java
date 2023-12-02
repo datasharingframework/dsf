@@ -18,7 +18,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 {
 	public static final String PARAMETER_NAME = "identifier";
-	public static final String RESOURCE_COLUMN = "bundle";
+	private static final String RESOURCE_COLUMN = "bundle";
 
 	public BundleIdentifier()
 	{
@@ -92,9 +92,6 @@ public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Bundle))
 			return false;
 

@@ -22,7 +22,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 {
 	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
+		super(dataSource, permanentDeleteDataSource, Binary.class, "binaries", "binary_json", "binary_id",
 				new PreparedStatementFactoryBinary(fhirContext), BinaryIdentityFilter::new,
 				Arrays.asList(factory(BinaryContentType.PARAMETER_NAME, BinaryContentType::new,
 						BinaryContentType.getNameModifiers())),

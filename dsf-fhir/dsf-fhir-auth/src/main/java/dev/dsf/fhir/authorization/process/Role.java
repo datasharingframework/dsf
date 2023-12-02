@@ -347,11 +347,10 @@ public class Role implements Recipient, Requester
 	{
 		if (coding != null && coding.hasSystem()
 				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM.equals(coding.getSystem())
-				&& coding.hasCode())
+				&& coding.hasCode()
+				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE.equals(coding.getCode()))
 		{
-			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE.equals(coding.getCode()))
-				return from(true, coding, organizationWithIdentifierExists, organizationRoleExists)
-						.map(r -> (Recipient) r);
+			return from(true, coding, organizationWithIdentifierExists, organizationRoleExists).map(r -> (Recipient) r);
 		}
 
 		return Optional.empty();
@@ -366,6 +365,7 @@ public class Role implements Recipient, Requester
 					.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE
 							.equals(e.getUrl()))
 					.collect(Collectors.toList());
+
 			if (parentOrganizationRoles.size() == 1)
 			{
 				Extension parentOrganizationRole = parentOrganizationRoles.get(0);
@@ -379,6 +379,7 @@ public class Role implements Recipient, Requester
 						.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE
 								.equals(e.getUrl()))
 						.collect(Collectors.toList());
+
 				if (parentOrganizations.size() == 1 && organizationRoles.size() == 1)
 				{
 					Extension parentOrganization = parentOrganizations.get(0);
@@ -414,6 +415,7 @@ public class Role implements Recipient, Requester
 					.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER
 							.equals(e.getUrl()))
 					.collect(Collectors.toList());
+
 			if (parentOrganizationRolePractitioners.size() == 1)
 			{
 				Extension parentOrganizationRolePractitioner = parentOrganizationRolePractitioners.get(0);
@@ -432,6 +434,7 @@ public class Role implements Recipient, Requester
 						.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER_PRACTITIONER_ROLE
 								.equals(e.getUrl()))
 						.collect(Collectors.toList());
+
 				if (parentOrganizations.size() == 1 && organizationRoles.size() == 1 && practitionerRoles.size() == 1)
 				{
 					Extension parentOrganization = parentOrganizations.get(0);

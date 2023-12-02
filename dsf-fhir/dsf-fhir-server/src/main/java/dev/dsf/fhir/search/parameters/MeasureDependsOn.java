@@ -22,9 +22,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractCanonicalReferenceParameter;
 @SearchParameterDefinition(name = MeasureDependsOn.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Measure-depends-on", type = SearchParamType.REFERENCE, documentation = "What resource is being referenced")
 public class MeasureDependsOn extends AbstractCanonicalReferenceParameter<Measure>
 {
-	public static final String RESOURCE_TYPE_NAME = "Measure";
+	private static final String RESOURCE_TYPE_NAME = "Measure";
 	public static final String PARAMETER_NAME = "depends-on";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Library";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Library";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -81,9 +81,6 @@ public class MeasureDependsOn extends AbstractCanonicalReferenceParameter<Measur
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Measure))
 			return false;
 

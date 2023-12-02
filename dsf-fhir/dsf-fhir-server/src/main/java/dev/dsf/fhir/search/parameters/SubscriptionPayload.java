@@ -20,7 +20,7 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "payload";
-	public static final String RESOURCE_COLUMN = "subscription";
+	private static final String RESOURCE_COLUMN = "subscription";
 
 	private String payloadMimeType;
 
@@ -73,9 +73,6 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Subscription))
 			return false;
 

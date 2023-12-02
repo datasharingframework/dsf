@@ -42,7 +42,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 
 	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
 
-	public AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
+	protected AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
 			FhirContext fhirContext, String resourceTable, String resourceColumn, String resourceIdColumn,
 			Function<Identity, SearchQueryIdentityFilter> userFilter)
 	{

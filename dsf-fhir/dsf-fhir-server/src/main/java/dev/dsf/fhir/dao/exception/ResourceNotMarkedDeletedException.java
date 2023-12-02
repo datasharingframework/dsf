@@ -1,6 +1,6 @@
 package dev.dsf.fhir.dao.exception;
 
-public class ResourceNotMarkedDeletedException extends Exception
+public final class ResourceNotMarkedDeletedException extends Exception
 {
 	private static final long serialVersionUID = 1L;
 

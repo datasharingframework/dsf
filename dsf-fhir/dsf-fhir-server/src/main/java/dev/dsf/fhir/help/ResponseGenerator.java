@@ -941,7 +941,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	private IssueSeverity convert(org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity severity)
+	private IssueSeverity convert(ValidationMessage.IssueSeverity severity)
 	{
 		switch (severity)
 		{
@@ -960,7 +960,7 @@ public class ResponseGenerator
 		}
 	}
 
-	private IssueType convert(org.hl7.fhir.utilities.validation.ValidationMessage.IssueType type)
+	private IssueType convert(ValidationMessage.IssueType type)
 	{
 		switch (type)
 		{

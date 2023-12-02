@@ -45,17 +45,17 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			Subscription newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			Subscription newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Subscription newResource)
+	private Optional<String> newResourceOk(Connection connection, Subscription newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

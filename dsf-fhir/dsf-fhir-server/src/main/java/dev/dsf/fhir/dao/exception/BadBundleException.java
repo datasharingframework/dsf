@@ -1,6 +1,6 @@
 package dev.dsf.fhir.dao.exception;
 
-public class BadBundleException extends RuntimeException
+public final class BadBundleException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 

@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Patient-identifier", type = SearchParamType.TOKEN, documentation = "A patient identifier")
 public class PatientIdentifier extends AbstractIdentifierParameter<Patient>
 {
-	public static final String RESOURCE_COLUMN = "patient";
+	private static final String RESOURCE_COLUMN = "patient";
 
 	public PatientIdentifier()
 	{
@@ -20,9 +20,6 @@ public class PatientIdentifier extends AbstractIdentifierParameter<Patient>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Patient))
 			return false;
 

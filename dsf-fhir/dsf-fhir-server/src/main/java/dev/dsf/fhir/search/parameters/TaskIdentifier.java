@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-identifier", type = SearchParamType.TOKEN, documentation = "Search for a task instance by its business identifier")
 public class TaskIdentifier extends AbstractIdentifierParameter<Task>
 {
-	public static final String RESOURCE_COLUMN = "task";
+	private static final String RESOURCE_COLUMN = "task";
 
 	public TaskIdentifier()
 	{
@@ -20,9 +20,6 @@ public class TaskIdentifier extends AbstractIdentifierParameter<Task>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Task))
 			return false;
 

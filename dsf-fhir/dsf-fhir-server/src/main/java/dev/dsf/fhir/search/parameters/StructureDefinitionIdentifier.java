@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/conformance-identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the structure definition")
 public class StructureDefinitionIdentifier extends AbstractIdentifierParameter<StructureDefinition>
 {
-	public static final String RESOURCE_COLUMN = "structure_definition";
+	private static final String RESOURCE_COLUMN = "structure_definition";
 
 	public StructureDefinitionIdentifier()
 	{
@@ -25,9 +25,6 @@ public class StructureDefinitionIdentifier extends AbstractIdentifierParameter<S
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof StructureDefinition))
 			return false;
 

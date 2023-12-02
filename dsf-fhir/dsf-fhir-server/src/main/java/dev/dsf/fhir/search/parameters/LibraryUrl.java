@@ -7,10 +7,10 @@ import org.hl7.fhir.r4.model.Resource;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractUrlAndVersionParameter;
 
-@SearchParameterDefinition(name = LibraryUrl.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Library-url", type = SearchParamType.URI, documentation = "The uri that identifies the library")
+@SearchParameterDefinition(name = AbstractUrlAndVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Library-url", type = SearchParamType.URI, documentation = "The uri that identifies the library")
 public class LibraryUrl extends AbstractUrlAndVersionParameter<Library>
 {
-	public static final String RESOURCE_COLUMN = "library";
+	private static final String RESOURCE_COLUMN = "library";
 
 	public LibraryUrl()
 	{

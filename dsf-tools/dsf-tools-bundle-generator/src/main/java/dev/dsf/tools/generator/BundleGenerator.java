@@ -202,6 +202,7 @@ public class BundleGenerator
 			if (e.getResource() == null)
 				return Integer.MIN_VALUE;
 			else
+			{
 				switch (e.getResource().getClass().getAnnotation(ResourceDef.class).name())
 				{
 					case "CodeSystem":
@@ -218,6 +219,7 @@ public class BundleGenerator
 					default:
 						return Integer.MAX_VALUE;
 				}
+			}
 		};
 	}
 

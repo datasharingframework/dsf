@@ -50,8 +50,7 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 	}
 
 	@Override
-	public List<Subscription> readByStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus status)
-			throws SQLException
+	public List<Subscription> readByStatus(Subscription.SubscriptionStatus status) throws SQLException
 	{
 		if (status == null)
 			return Collections.emptyList();

@@ -167,7 +167,7 @@ public final class ProcessesResource
 						&& ProcessState.RETIRED.equals(getNewProcessState()));
 	}
 
-	public BundleEntryComponent toBundleEntry(String baseUrl)
+	public BundleEntryComponent toBundleEntry()
 	{
 		switch (getOldProcessState())
 		{
@@ -176,11 +176,11 @@ public final class ProcessesResource
 			case NEW:
 				return fromNew();
 			case ACTIVE:
-				return fromActive(baseUrl);
+				return fromActive();
 			case DRAFT:
-				return fromDraft(baseUrl);
+				return fromDraft();
 			case RETIRED:
-				return fromRetired(baseUrl);
+				return fromRetired();
 			case EXCLUDED:
 				return fromExcluded();
 			default:
@@ -219,14 +219,14 @@ public final class ProcessesResource
 		}
 	}
 
-	private BundleEntryComponent fromActive(String baseUrl)
+	private BundleEntryComponent fromActive()
 	{
 		switch (getNewProcessState())
 		{
 			case DRAFT:
-				return updateToDraft(baseUrl);
+				return updateToDraft();
 			case RETIRED:
-				return updateToRetired(baseUrl);
+				return updateToRetired();
 			case EXCLUDED:
 				return delete();
 			default:
@@ -235,16 +235,16 @@ public final class ProcessesResource
 		}
 	}
 
-	private BundleEntryComponent fromDraft(String baseUrl)
+	private BundleEntryComponent fromDraft()
 	{
 		switch (getNewProcessState())
 		{
 			case ACTIVE:
-				return updateToActive(baseUrl);
+				return updateToActive();
 			case DRAFT:
-				return updateToDraft(baseUrl);
+				return updateToDraft();
 			case RETIRED:
-				return updateToRetired(baseUrl);
+				return updateToRetired();
 			case EXCLUDED:
 				return delete();
 			default:
@@ -253,14 +253,14 @@ public final class ProcessesResource
 		}
 	}
 
-	private BundleEntryComponent fromRetired(String baseUrl)
+	private BundleEntryComponent fromRetired()
 	{
 		switch (getNewProcessState())
 		{
 			case ACTIVE:
-				return updateToActive(baseUrl);
+				return updateToActive();
 			case DRAFT:
-				return updateToDraft(baseUrl);
+				return updateToDraft();
 			case EXCLUDED:
 				return delete();
 			default:
@@ -323,31 +323,31 @@ public final class ProcessesResource
 		return entry;
 	}
 
-	private BundleEntryComponent updateToActive(String baseUrl)
+	private BundleEntryComponent updateToActive()
 	{
 		if (getResource() instanceof MetadataResource m)
 			m.setStatus(PublicationStatus.ACTIVE);
 
-		return update(baseUrl);
+		return update();
 	}
 
-	private BundleEntryComponent updateToDraft(String baseUrl)
+	private BundleEntryComponent updateToDraft()
 	{
 		if (getResource() instanceof MetadataResource m)
 			m.setStatus(PublicationStatus.DRAFT);
 
-		return update(baseUrl);
+		return update();
 	}
 
-	private BundleEntryComponent updateToRetired(String baseUrl)
+	private BundleEntryComponent updateToRetired()
 	{
 		if (getResource() instanceof MetadataResource m)
 			m.setStatus(PublicationStatus.RETIRED);
 
-		return update(baseUrl);
+		return update();
 	}
 
-	private BundleEntryComponent update(String baseUrl)
+	private BundleEntryComponent update()
 	{
 		BundleEntryComponent entry = new BundleEntryComponent();
 		entry.setResource(getResource());

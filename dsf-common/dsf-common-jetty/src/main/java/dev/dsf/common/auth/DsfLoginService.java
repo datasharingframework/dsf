@@ -19,7 +19,7 @@ import jakarta.servlet.ServletRequest;
 
 public class DsfLoginService implements LoginService
 {
-	private final class UserIdentityImpl implements UserIdentity
+	private static final class UserIdentityImpl implements UserIdentity
 	{
 		private final Principal principal;
 

@@ -10,7 +10,7 @@ import org.camunda.bpm.engine.variable.value.TypedValue;
 
 public final class TargetsValues
 {
-	public static interface TargetsValue extends PrimitiveValue<TargetsImpl>
+	public interface TargetsValue extends PrimitiveValue<TargetsImpl>
 	{
 	}
 

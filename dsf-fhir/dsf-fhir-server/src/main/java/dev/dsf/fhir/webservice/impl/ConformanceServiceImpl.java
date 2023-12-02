@@ -187,7 +187,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		final StructureDefinition structureDefinition;
 		final String url;
 
-		public StructureDefinitionDistinctByUrl(StructureDefinition structureDefinition)
+		StructureDefinitionDistinctByUrl(StructureDefinition structureDefinition)
 		{
 			this.structureDefinition = structureDefinition;
 			this.url = structureDefinition.getUrl();

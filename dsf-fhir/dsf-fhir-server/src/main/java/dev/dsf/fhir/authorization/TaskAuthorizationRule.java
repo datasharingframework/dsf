@@ -724,8 +724,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 							oldResourceId, oldResourceVersion,
 							oldResource.getStatus() != null ? oldResource.getStatus().toCode() : null,
 							newResource.getStatus() != null ? newResource.getStatus().toCode() : null,
-							identity.getName(), Stream.of(Stream.of(TaskStatus.DRAFT, TaskStatus.DRAFT),
-									// Stream.of(TaskStatus.DRAFT, TaskStatus.REQUESTED),
+							identity.getName(),
+							Stream.of(Stream.of(TaskStatus.DRAFT, TaskStatus.DRAFT),
 									Stream.of(TaskStatus.REQUESTED, TaskStatus.INPROGRESS),
 									Stream.of(TaskStatus.INPROGRESS, TaskStatus.COMPLETED),
 									Stream.of(TaskStatus.INPROGRESS, TaskStatus.FAILED))

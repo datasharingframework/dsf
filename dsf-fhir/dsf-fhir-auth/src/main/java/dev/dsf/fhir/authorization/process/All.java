@@ -220,10 +220,10 @@ public class All implements Recipient, Requester
 	{
 		if (coding != null && coding.hasSystem()
 				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM.equals(coding.getSystem())
-				&& coding.hasCode())
+				&& coding.hasCode()
+				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL.equals(coding.getCode()))
 		{
-			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL.equals(coding.getCode()))
-				return Optional.of(new All(true, null, null));
+			return Optional.of(new All(true, null, null));
 			// remote not allowed for recipient
 		}
 

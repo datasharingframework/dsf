@@ -35,7 +35,7 @@ public class RoleConfig
 	private static final String EMAIL_PATTERN_STRING = "^[\\w!#$%&'*+/=?`{\\|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{\\|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
 	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_PATTERN_STRING);
 
-	public class Mapping
+	public static final class Mapping
 	{
 		private final String name;
 
@@ -169,6 +169,7 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_EMAIL:
 											emails = getValues(property.getValue()).stream().map(value ->
 											{
@@ -189,6 +190,7 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_TOKEN_ROLE:
 											tokenRoles = getValues(property.getValue()).stream().map(value ->
 											{
@@ -202,6 +204,7 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_TOKEN_GROUP:
 											tokenGroups = getValues(property.getValue()).stream().map(value ->
 											{
@@ -215,6 +218,7 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_DSF_ROLE:
 											dsfRoles = getValues(property.getValue()).stream().map(value ->
 											{
@@ -233,6 +237,7 @@ public class RoleConfig
 												return dsfRole;
 											}).filter(r -> r != null).toList();
 											break;
+
 										case PROPERTY_PRACTITIONER_ROLE:
 											practitionerRoles = getValues(property.getValue()).stream().map(value ->
 											{
@@ -253,6 +258,7 @@ public class RoleConfig
 												return coding;
 											}).filter(r -> r != null).toList();
 											break;
+
 										default:
 											logger.warn(
 													"Unknown role config property '{}' expected one of {}, ignoring property in rule '{}'",

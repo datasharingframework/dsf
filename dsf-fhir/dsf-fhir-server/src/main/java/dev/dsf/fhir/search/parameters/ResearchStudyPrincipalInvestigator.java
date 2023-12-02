@@ -31,9 +31,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = ResearchStudyPrincipalInvestigator.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ResearchStudy-principalinvestigator", type = SearchParamType.REFERENCE, documentation = "Researcher who oversees multiple aspects of the study")
 public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParameter<ResearchStudy>
 {
-	public static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
 	public static final String PARAMETER_NAME = "principalinvestigator";
-	public static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "PractitionerRole" };
+	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "PractitionerRole" };
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -164,9 +164,6 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof ResearchStudy))
 			return false;
 

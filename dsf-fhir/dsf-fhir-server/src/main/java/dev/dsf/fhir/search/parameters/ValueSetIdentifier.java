@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/conformance-identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the value set")
 public class ValueSetIdentifier extends AbstractIdentifierParameter<ValueSet>
 {
-	public static final String RESOURCE_COLUMN = "value_set";
+	private static final String RESOURCE_COLUMN = "value_set";
 
 	public ValueSetIdentifier()
 	{
@@ -20,9 +20,6 @@ public class ValueSetIdentifier extends AbstractIdentifierParameter<ValueSet>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof ValueSet))
 			return false;
 

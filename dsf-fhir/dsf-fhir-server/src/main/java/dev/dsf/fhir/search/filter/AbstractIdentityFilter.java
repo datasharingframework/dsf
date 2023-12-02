@@ -9,7 +9,7 @@ abstract class AbstractIdentityFilter implements SearchQueryIdentityFilter
 	protected final String resourceTable;
 	protected final String resourceIdColumn;
 
-	public AbstractIdentityFilter(Identity identity, String resourceTable, String resourceIdColumn)
+	AbstractIdentityFilter(Identity identity, String resourceTable, String resourceIdColumn)
 	{
 		this.identity = identity;
 		this.resourceTable = resourceTable;

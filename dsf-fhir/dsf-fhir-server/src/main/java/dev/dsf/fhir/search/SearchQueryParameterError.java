@@ -2,7 +2,7 @@ package dev.dsf.fhir.search;
 
 public class SearchQueryParameterError
 {
-	public static enum SearchQueryParameterErrorType
+	public enum SearchQueryParameterErrorType
 	{
 		UNSUPPORTED_PARAMETER, UNSUPPORTED_NUMBER_OF_VALUES, UNPARSABLE_VALUE
 	}

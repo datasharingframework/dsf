@@ -67,7 +67,7 @@ public class CertificateGenerator
 
 	private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
 
-	private static enum CertificateType
+	private enum CertificateType
 	{
 		CLIENT, SERVER
 	}
@@ -81,7 +81,7 @@ public class CertificateGenerator
 
 		private final byte[] certificateSha512Thumbprint;
 
-		CertificateFiles(String commonName, KeyPair keyPair, Path keyPairPrivateKeyFile, X509Certificate certificate,
+		CertificateFiles(String commonName, KeyPair keyPair, X509Certificate certificate,
 				byte[] certificateSha512Thumbprint)
 		{
 			this.commonName = commonName;
@@ -266,16 +266,15 @@ public class CertificateGenerator
 				certificateType, keyPair, commonName, dnsNames);
 
 		Path certificatePemFile = createFolderIfNotExists(getCertPemPath(commonName));
-		X509Certificate certificate = signOrReadCertificate(certificatePemFile, certificateRequest,
-				keyPair.getPrivate(), commonName, certificateType);
+		X509Certificate certificate = signOrReadCertificate(certificatePemFile, certificateRequest, commonName,
+				certificateType);
 
-		return new CertificateFiles(commonName, keyPair, privateKeyFile, certificate,
+		return new CertificateFiles(commonName, keyPair, certificate,
 				calculateSha512CertificateThumbprint(certificate));
 	}
 
 	private X509Certificate signOrReadCertificate(Path certificateFile,
-			JcaPKCS10CertificationRequest certificateRequest, PrivateKey privateKey, String commonName,
-			CertificateType certificateType)
+			JcaPKCS10CertificationRequest certificateRequest, String commonName, CertificateType certificateType)
 	{
 		if (Files.isReadable(certificateFile))
 		{

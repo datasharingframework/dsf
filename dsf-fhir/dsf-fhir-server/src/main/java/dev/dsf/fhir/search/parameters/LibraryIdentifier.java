@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Library-identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the library")
 public class LibraryIdentifier extends AbstractIdentifierParameter<Library>
 {
-	public static final String RESOURCE_COLUMN = "library";
+	private static final String RESOURCE_COLUMN = "library";
 
 	public LibraryIdentifier()
 	{
@@ -20,9 +20,6 @@ public class LibraryIdentifier extends AbstractIdentifierParameter<Library>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Library))
 			return false;
 

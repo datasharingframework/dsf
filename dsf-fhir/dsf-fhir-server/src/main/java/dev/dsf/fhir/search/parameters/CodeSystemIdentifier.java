@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/conformance-identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the code system")
 public class CodeSystemIdentifier extends AbstractIdentifierParameter<CodeSystem>
 {
-	public static final String RESOURCE_COLUMN = "code_system";
+	private static final String RESOURCE_COLUMN = "code_system";
 
 	public CodeSystemIdentifier()
 	{
@@ -20,9 +20,6 @@ public class CodeSystemIdentifier extends AbstractIdentifierParameter<CodeSystem
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof CodeSystem))
 			return false;
 

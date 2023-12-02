@@ -65,9 +65,6 @@ public class ActivityDefinitionName extends AbstractStringParameter<ActivityDefi
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof ActivityDefinition))
 			return false;
 

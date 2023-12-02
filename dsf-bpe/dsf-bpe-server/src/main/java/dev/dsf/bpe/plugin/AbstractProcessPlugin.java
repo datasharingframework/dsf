@@ -579,6 +579,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 					.toArray(Class<?>[]::new));
 			context.setEnvironment(environment);
 			context.refresh();
+
 			return context;
 		}
 		catch (BeanCreationException e)
@@ -615,6 +616,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			{
 				logger.warn("Ignoring BPMN model {} from process plugin {}-{}: Filename not ending in '{}'", file,
 						getDefinitionName(), getDefinitionVersion(), BPMN_SUFFIX);
+
 				return null;
 			}
 
@@ -632,6 +634,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 					logger.warn(
 							"Ignoring BPMN model {} from process plugin {}-{}: File not readable, process plugin class loader getResourceAsStream returned null",
 							file, getDefinitionName(), getDefinitionVersion());
+
 					return null;
 				}
 
@@ -914,6 +917,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 		try
 		{
 			ClassLoader classLoader = getProcessPluginClassLoader();
+
 			return classLoader.loadClass(className);
 		}
 		catch (ClassNotFoundException e)
@@ -922,6 +926,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 					className, processKeyAndVersion.toString(), elementId);
 			logger.debug("{} '{}' defined in process {}, element {} not found", expectedInterface.getSimpleName(),
 					className, processKeyAndVersion.toString(), elementId, e);
+
 			return null;
 		}
 	}
@@ -934,12 +939,14 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 		{
 			logger.warn("Unable to find prototype bean of type {} for element {} in process {}", serviceClass.getName(),
 					elementId, processKeyAndVersion.toString());
+
 			return false;
 		}
 		else if (beanNames.length > 1)
 		{
 			logger.warn("Unable to find unique prototype bean of type {} for element {} in process {}, found {}",
 					serviceClass.getName(), elementId, processKeyAndVersion.toString(), beanNames.length);
+
 			return false;
 		}
 		else
@@ -986,6 +993,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			{
 				logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Filename not ending in '{}' or '{}'",
 						file, getDefinitionName(), getDefinitionVersion(), JSON_SUFFIX, XML_SUFFIX);
+
 				return null;
 			}
 
@@ -1043,6 +1051,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 					logger.warn(
 							"Ignoring FHIR resource {} from process plugin {}-{}: Not a ActivityDefinition, CodeSystem, Library, Measure, NamingSystem, Questionnaire, StructureDefinition, Task or ValueSet",
 							file, getDefinitionName(), getDefinitionVersion());
+
 					return null;
 				}
 			}
@@ -1310,6 +1319,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 						"Ignoring BPMN model {} from process plugin {}-{}: No FHIR metadata resources found for process-id '{}'",
 						model.getFile(), getDefinitionName(), getDefinitionVersion(),
 						model.getProcessIdAndVersion().getId());
+
 				return false;
 			}
 
@@ -1322,6 +1332,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 						"Ignoring BPMN model {} from process plugin {}-{}: No ActivityDefinition found for process-id '{}'",
 						model.getFile(), getDefinitionName(), getDefinitionVersion(),
 						model.getProcessIdAndVersion().getId());
+
 				return false;
 			}
 
@@ -1339,6 +1350,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 							"Ignoring BPMN model {} from process plugin {}-{}: Found ActivityDefinition.url does not match process id (url: '{}' vs. process-id '{}')",
 							model.getFile(), getDefinitionName(), getDefinitionVersion(), url,
 							model.getProcessIdAndVersion().getId());
+
 					return false;
 				}
 			}
@@ -1372,7 +1384,7 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			ProcessIdAndVersion expectedProcessIdAndVersion, FileAndResource fileAndResource)
 	{
 		String instantiatesCanonical = ((Task) fileAndResource.getResource()).getInstantiatesCanonical();
-		String identifierValue = TaskIdentifier.findFirst(((Task) fileAndResource.getResource()))
+		String identifierValue = TaskIdentifier.findFirst((Task) fileAndResource.getResource())
 				.map(Identifier::getValue).get();
 
 		Matcher instantiatesCanonicalMatcher = INSTANTIATES_CANONICAL_PATTERN.matcher(instantiatesCanonical);

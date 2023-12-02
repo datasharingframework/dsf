@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractVersionParameter;
 @SearchParameterDefinition(name = AbstractVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Questionnaire-version", type = SearchParamType.TOKEN, documentation = "The business version of the questionnaire")
 public class QuestionnaireVersion extends AbstractVersionParameter<Questionnaire>
 {
-	public static final String RESOURCE_COLUMN = "questionnaire";
+	private static final String RESOURCE_COLUMN = "questionnaire";
 
 	public QuestionnaireVersion()
 	{

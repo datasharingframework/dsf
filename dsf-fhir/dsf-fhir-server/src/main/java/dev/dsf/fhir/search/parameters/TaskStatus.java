@@ -22,9 +22,9 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class TaskStatus extends AbstractTokenParameter<Task>
 {
 	public static final String PARAMETER_NAME = "status";
-	public static final String RESOURCE_COLUMN = "task";
+	private static final String RESOURCE_COLUMN = "task";
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus status;
+	private Task.TaskStatus status;
 
 	public TaskStatus()
 	{
@@ -41,15 +41,15 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(List<? super SearchQueryParameterError> errors,
-			String status, String queryParameterValue)
+	private Task.TaskStatus toStatus(List<? super SearchQueryParameterError> errors, String status,
+			String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
 
 		try
 		{
-			return org.hl7.fhir.r4.model.Task.TaskStatus.fromCode(status);
+			return Task.TaskStatus.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
@@ -93,9 +93,6 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Task))
 			return false;
 

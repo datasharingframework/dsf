@@ -13,15 +13,14 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import dev.dsf.fhir.search.parameters.basic.TokenValueAndSearchType;
 
-@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/clinical-identifier", type = SearchParamType.TOKEN, documentation = "Identifies this document reference across multiple systems")
+@SearchParameterDefinition(name = DocumentReferenceIdentifier.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/clinical-identifier", type = SearchParamType.TOKEN, documentation = "Identifies this document reference across multiple systems")
 public class DocumentReferenceIdentifier extends AbstractTokenParameter<DocumentReference>
 {
 	public static final String PARAMETER_NAME = "identifier";
-	public static final String RESOURCE_COLUMN = "document_reference";
+	private static final String RESOURCE_COLUMN = "document_reference";
 
 	public DocumentReferenceIdentifier()
 	{
@@ -126,9 +125,6 @@ public class DocumentReferenceIdentifier extends AbstractTokenParameter<Document
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof DocumentReference))
 			return false;
 

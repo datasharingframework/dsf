@@ -36,16 +36,16 @@ public class CodeSystemAuthorizationRule extends AbstractMetaTagAuthorizationRul
 	@Override
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, CodeSystem newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, CodeSystem newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, CodeSystem newResource)
+	private Optional<String> newResourceOk(Connection connection, CodeSystem newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

@@ -10,8 +10,7 @@ import dev.dsf.fhir.authentication.FhirServerRole;
 
 abstract class AbstractMetaTagAuthorizationRoleIdentityFilter extends AbstractIdentityFilter
 {
-	public AbstractMetaTagAuthorizationRoleIdentityFilter(Identity identity, String resourceTable,
-			String resourceIdColumn)
+	AbstractMetaTagAuthorizationRoleIdentityFilter(Identity identity, String resourceTable, String resourceIdColumn)
 	{
 		super(identity, resourceTable, resourceIdColumn);
 	}

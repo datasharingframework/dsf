@@ -142,8 +142,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		Bundle batchBundle = new Bundle();
 		batchBundle.setType(BundleType.BATCH);
 
-		List<BundleEntryComponent> entries = resourceValues.stream()
-				.map(r -> r.toBundleEntry(localWebserviceClient.getBaseUrl())).collect(Collectors.toList());
+		List<BundleEntryComponent> entries = resourceValues.stream().map(ProcessesResource::toBundleEntry).toList();
 		batchBundle.setEntry(entries);
 
 		try
@@ -262,7 +261,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 						resource.getSearchBundleEntryUrl(), entry.getResponse().getStatus());
 			}
 			else if (!entry.hasResource() || !(entry.getResource() instanceof Bundle b)
-					|| !(BundleType.SEARCHSET.equals(b.getType())))
+					|| !BundleType.SEARCHSET.equals(b.getType()))
 			{
 				logger.warn("Response for {} not a searchset Bundle, missing resource will not be added",
 						resource.getSearchBundleEntryUrl());

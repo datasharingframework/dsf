@@ -21,7 +21,7 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	public @interface SearchParameterDefinition
+	@interface SearchParameterDefinition
 	{
 		String name();
 

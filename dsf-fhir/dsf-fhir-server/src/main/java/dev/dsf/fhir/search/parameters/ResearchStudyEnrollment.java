@@ -28,9 +28,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://dsf.dev/fhir/SearchParameter/ResearchStudy-enrollment", type = SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
-	public static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
 	public static final String PARAMETER_NAME = "enrollment";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Group";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Group";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -146,9 +146,6 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof ResearchStudy))
 			return false;
 

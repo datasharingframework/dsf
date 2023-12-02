@@ -29,16 +29,16 @@ public class BundleAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bu
 	@Override
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Bundle newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Bundle newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Bundle newResource)
+	private Optional<String> newResourceOk(Connection connection, Bundle newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

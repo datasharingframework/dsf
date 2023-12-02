@@ -45,7 +45,6 @@ public class HttpClientWithGetRetry extends HttpClient
 		}
 		catch (InterruptedException | ExecutionException | TimeoutException | RuntimeException e)
 		{
-
 			Throwable cause = e;
 			while (!(cause instanceof ConnectException) && cause.getCause() != null)
 				cause = cause.getCause();

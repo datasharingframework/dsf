@@ -1,7 +1,5 @@
 package dev.dsf.fhir.search.parameters;
 
-import static dev.dsf.fhir.search.parameters.OrganizationAffiliationRole.PARAMETER_NAME;
-
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -14,11 +12,11 @@ import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 
-@SearchParameterDefinition(name = PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/OrganizationAffiliation-role", type = SearchParamType.TOKEN, documentation = "Definition of the role the participatingOrganization plays")
+@SearchParameterDefinition(name = OrganizationAffiliationRole.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/OrganizationAffiliation-role", type = SearchParamType.TOKEN, documentation = "Definition of the role the participatingOrganization plays")
 public class OrganizationAffiliationRole extends AbstractTokenParameter<OrganizationAffiliation>
 {
 	public static final String PARAMETER_NAME = "role";
-	public static final String RESOURCE_COLUMN = "organization_affiliation";
+	private static final String RESOURCE_COLUMN = "organization_affiliation";
 
 	public OrganizationAffiliationRole()
 	{
@@ -91,9 +89,6 @@ public class OrganizationAffiliationRole extends AbstractTokenParameter<Organiza
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof OrganizationAffiliation))
 			return false;
 

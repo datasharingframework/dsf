@@ -492,9 +492,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 						return new IdType(c.getResponse().getLocation()).getResourceType();
 				}).findFirst();
 		}
-		else if (resource instanceof Resource)
-			return Optional.of(resource.getClass().getAnnotation(ResourceDef.class).name());
 		else
-			return Optional.empty();
+			return Optional.of(resource.getClass().getAnnotation(ResourceDef.class).name());
 	}
 }

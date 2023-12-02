@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class ConfigGenerator
 		{
 			// making sure entries are sorted when storing properties
 			@Override
-			public Set<java.util.Map.Entry<Object, Object>> entrySet()
+			public Set<Entry<Object, Object>> entrySet()
 			{
 				return Collections.synchronizedSet(
 						super.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().toString()))

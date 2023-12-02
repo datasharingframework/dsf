@@ -34,12 +34,12 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationSupportWithCache.class);
 
-	private final class CacheEntry<R extends Resource>
+	private static final class CacheEntry<R extends Resource>
 	{
-		private final Supplier<R> resourceSupplier;
-		private SoftReference<R> ref;
+		final Supplier<R> resourceSupplier;
+		SoftReference<R> ref;
 
-		public CacheEntry(R resource, Supplier<R> resourceSupplier)
+		CacheEntry(R resource, Supplier<R> resourceSupplier)
 		{
 			this.ref = new SoftReference<>(resource);
 			this.resourceSupplier = resourceSupplier;
@@ -53,9 +53,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		public R get()
 		{
 			if (ref == null || ref.get() == null)
-			{
 				ref = read();
-			}
 
 			return ref.get();
 		}

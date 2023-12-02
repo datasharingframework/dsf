@@ -44,16 +44,16 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	@Override
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Endpoint newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Endpoint newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Endpoint newResource)
+	private Optional<String> newResourceOk(Connection connection, Endpoint newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

@@ -233,8 +233,7 @@ public abstract class AbstractJettyConfig
 						Collectors.toMap(e -> Objects.toString(e.getKey()), e -> Objects.toString(e.getValue())));
 
 		return new JettyServer(apiConnector(), statusConnector(), mavenServerModuleName(), contextPath,
-				servletContainerInitializers(), initParameters, clientCertificateTrustStore(),
-				this::configureSecurityHandler);
+				servletContainerInitializers(), initParameters, this::configureSecurityHandler);
 	}
 
 	private KeyStore serverCertificateKeyStore(char[] keyStorePassword)

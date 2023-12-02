@@ -71,9 +71,6 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!instanceOf(resource))
 			return false;
 

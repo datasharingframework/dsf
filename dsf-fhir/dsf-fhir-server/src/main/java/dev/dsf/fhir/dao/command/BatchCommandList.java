@@ -86,7 +86,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				connection.setTransactionIsolation(initialTransactionIsolationLevel);
 			}
 
-			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
+			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) (commands.size() / 0.75) + 1);
 
 			commands.forEach(postExecute(connection, caughtExceptions, results));
 			caughtExceptions.forEach((k, v) -> results.put(k, toEntry(v)));

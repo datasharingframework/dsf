@@ -246,7 +246,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		};
 
 		JettyServer server = new JettyServer(apiConnector, statusConnector, "dsf-fhir-server", CONTEXT_PATH,
-				servletContainerInitializers, initParameters, caCertificate, securityHandlerConfigurer);
+				servletContainerInitializers, initParameters, securityHandlerConfigurer);
 
 		server.start();
 

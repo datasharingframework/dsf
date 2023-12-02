@@ -274,10 +274,10 @@ public class Organization implements Recipient, Requester
 	{
 		if (coding != null && coding.hasSystem()
 				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM.equals(coding.getSystem())
-				&& coding.hasCode())
+				&& coding.hasCode()
+				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION.equals(coding.getCode()))
 		{
-			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ORGANIZATION.equals(coding.getCode()))
-				return from(true, coding, organizationWithIdentifierExists).map(r -> (Recipient) r);
+			return from(true, coding, organizationWithIdentifierExists).map(r -> (Recipient) r);
 		}
 
 		return Optional.empty();

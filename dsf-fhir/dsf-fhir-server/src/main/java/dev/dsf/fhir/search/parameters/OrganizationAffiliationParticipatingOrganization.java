@@ -29,9 +29,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 public class OrganizationAffiliationParticipatingOrganization
 		extends AbstractReferenceParameter<OrganizationAffiliation>
 {
-	public static final String RESOURCE_TYPE_NAME = "OrganizationAffiliation";
+	private static final String RESOURCE_TYPE_NAME = "OrganizationAffiliation";
 	public static final String PARAMETER_NAME = "participating-organization";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -146,9 +146,6 @@ public class OrganizationAffiliationParticipatingOrganization
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof OrganizationAffiliation))
 			return false;
 

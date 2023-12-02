@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Location-identifier", type = SearchParamType.TOKEN, documentation = "An identifier for the location")
 public class LocationIdentifier extends AbstractIdentifierParameter<Location>
 {
-	public static final String RESOURCE_COLUMN = "location";
+	private static final String RESOURCE_COLUMN = "location";
 
 	public LocationIdentifier()
 	{
@@ -20,9 +20,6 @@ public class LocationIdentifier extends AbstractIdentifierParameter<Location>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Location))
 			return false;
 

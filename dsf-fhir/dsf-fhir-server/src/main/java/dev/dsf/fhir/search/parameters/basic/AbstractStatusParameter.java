@@ -94,9 +94,6 @@ public class AbstractStatusParameter<R extends MetadataResource> extends Abstrac
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!resourceType.isInstance(resource))
 			return false;
 

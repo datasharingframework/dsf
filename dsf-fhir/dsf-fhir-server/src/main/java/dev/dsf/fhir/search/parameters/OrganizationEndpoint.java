@@ -28,9 +28,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = OrganizationEndpoint.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-endpoint", type = SearchParamType.REFERENCE, documentation = "Technical endpoints providing access to services operated for the organization")
 public class OrganizationEndpoint extends AbstractReferenceParameter<Organization>
 {
-	public static final String RESOURCE_TYPE_NAME = "Organization";
+	private static final String RESOURCE_TYPE_NAME = "Organization";
 	public static final String PARAMETER_NAME = "endpoint";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Endpoint";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Endpoint";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -146,9 +146,6 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Organization))
 			return false;
 

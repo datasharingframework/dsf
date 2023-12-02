@@ -28,9 +28,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = PractitionerRolePractitioner.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-practitioner", type = SearchParamType.REFERENCE, documentation = "Practitioner that is able to provide the defined services for the organization")
 public class PractitionerRolePractitioner extends AbstractReferenceParameter<PractitionerRole>
 {
-	public static final String RESOURCE_TYPE_NAME = "PractitionerRole";
+	private static final String RESOURCE_TYPE_NAME = "PractitionerRole";
 	public static final String PARAMETER_NAME = "practitioner";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Practitioner";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Practitioner";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -145,9 +145,6 @@ public class PractitionerRolePractitioner extends AbstractReferenceParameter<Pra
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof PractitionerRole))
 			return false;
 

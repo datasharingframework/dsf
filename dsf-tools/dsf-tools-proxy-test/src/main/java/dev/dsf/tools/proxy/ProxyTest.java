@@ -6,9 +6,13 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProxyTest
+public final class ProxyTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProxyTest.class);
+
+	private ProxyTest()
+	{
+	}
 
 	public static void main(String[] args)
 	{
@@ -22,7 +26,7 @@ public class ProxyTest
 					args.length > 2 ? args[2] : null, passwd);
 			client.testBaseUrl();
 
-			java.util.Arrays.fill(passwd, ' ');
+			Arrays.fill(passwd, ' ');
 		}
 		else
 			logger.info("null");
