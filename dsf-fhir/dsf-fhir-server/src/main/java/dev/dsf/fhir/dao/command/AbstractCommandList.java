@@ -40,7 +40,7 @@ class AbstractCommandList
 
 	private static boolean hasModifyingCommands(List<? extends Command> commands)
 	{
-		return commands.stream().anyMatch(c -> c instanceof ModifyingCommand);
+		return commands != null && commands.stream().anyMatch(c -> c instanceof ModifyingCommand);
 	}
 
 	protected void auditLogResult(Command command, BundleEntryComponent result)
