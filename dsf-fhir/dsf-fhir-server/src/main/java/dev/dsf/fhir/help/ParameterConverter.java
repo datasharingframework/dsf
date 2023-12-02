@@ -2,7 +2,6 @@ package dev.dsf.fhir.help;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,10 +33,10 @@ public class ParameterConverter
 
 	public static final String HTML_FORMAT = "html";
 	public static final String JSON_FORMAT = "json";
-	public static final List<String> JSON_FORMATS = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
+	public static final List<String> JSON_FORMATS = List.of(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
 			MediaType.APPLICATION_JSON);
 	public static final String XML_FORMAT = "xml";
-	public static final List<String> XML_FORMATS = Arrays.asList(Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW,
+	public static final List<String> XML_FORMATS = List.of(Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW,
 			MediaType.APPLICATION_XML, MediaType.TEXT_XML);
 
 	private final ExceptionHandler exceptionHandler;
