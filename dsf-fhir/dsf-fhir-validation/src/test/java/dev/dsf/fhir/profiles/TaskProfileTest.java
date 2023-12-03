@@ -10,6 +10,8 @@ import java.util.UUID;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskIntent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,8 +30,9 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-task-base-1.0.0.xml"), List.of("dsf-bpmn-message-1.0.0.xml"),
-			List.of("dsf-bpmn-message-1.0.0.xml"));
+			List.of("dsf-task-base-1.0.0.xml", "dsf-task-test.xml"),
+			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml"),
+			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -145,5 +148,31 @@ public class TaskProfileTest
 				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
 		return result;
+	}
+
+	@Test
+	public void testTaskValidationWithAdditionalInputNotInDsfBaseTask()
+	{
+		Task task = new Task();
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-test");
+		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/test|1.4");
+		task.setStatus(TaskStatus.REQUESTED);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+
+		task.addInput().setValue(new StringType("test")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType("some-test-string")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/test").setCode("string-example");
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 }
