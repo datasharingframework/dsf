@@ -428,7 +428,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return (Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName));
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(
+					(Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName)));
 		else
 			throw handleError(response);
 	}
@@ -476,7 +478,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(resourceType);
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
 		else if (oldValue != null && oldValue.hasMeta()
 				&& (oldValue.getMeta().hasVersionId() || oldValue.getMeta().hasLastUpdated())
 				&& Status.NOT_MODIFIED.getStatusCode() == response.getStatus())
