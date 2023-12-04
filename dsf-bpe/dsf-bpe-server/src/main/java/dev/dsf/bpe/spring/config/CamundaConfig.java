@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.jobexecutor.DefaultJobExecutor;
+import org.camunda.bpm.engine.impl.persistence.StrongUuidGenerator;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.postgresql.Driver;
@@ -132,6 +133,8 @@ public class CamundaConfig
 		jobExecutor.setQueueSize(propertiesConfig.getProcessEngineJobExecutorQueueSize());
 		jobExecutor.setMaxPoolSize(propertiesConfig.getProcessEngineJobExecutorMaxPoolSize());
 		c.setJobExecutor(jobExecutor);
+
+		c.setIdGenerator(new StrongUuidGenerator());
 
 		return c;
 	}
