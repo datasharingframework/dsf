@@ -37,7 +37,6 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.DocumentReferenceDao;
 import dev.dsf.fhir.dao.OrganizationDao;
@@ -2859,15 +2858,11 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateLargeBinaryFhirJsonResource1() throws Exception
 	{
-
 		Binary binary = new Binary();
 		binary.setContentType(MediaType.APPLICATION_JSON);
 		// set to be smaller than 20000000 characters
 		binary.setData(("{\"data\": \"" + "a".repeat(14999826) + "\"}").getBytes());
 		getReadAccessHelper().addAll(binary);
-
-		String s = FhirContext.forR4().newJsonParser().encodeResourceToString(binary);
-
 
 		getWebserviceClient().create(binary);
 	}
@@ -2875,15 +2870,11 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateLargeBinaryFhirJsonResource2() throws Exception
 	{
-
 		Binary binary = new Binary();
 		binary.setContentType(MediaType.APPLICATION_JSON);
 		// set to be larger than 20000000 characters
 		binary.setData(("{\"data\": \"" + "a".repeat(14999999) + "\"}").getBytes());
 		getReadAccessHelper().addAll(binary);
-
-		String s = FhirContext.forR4().newJsonParser().encodeResourceToString(binary);
-
 
 		getWebserviceClient().create(binary);
 	}
