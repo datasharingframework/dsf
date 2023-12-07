@@ -13,16 +13,13 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 @Configuration
 public class FhirConfig
 {
-
-	static
-	{
-		StreamReadConstraints.overrideDefaultStreamReadConstraints(
-				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
-	}
-
 	@Bean
 	public FhirContext fhirContext()
 	{
+		// TODO remove workaround after upgrading to HAPI 6.8+, see https://github.com/hapifhir/hapi-fhir/issues/5205
+		StreamReadConstraints.overrideDefaultStreamReadConstraints(
+				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
+
 		FhirContext context = FhirContext.forR4();
 		HapiLocalizer localizer = new HapiLocalizer()
 		{
