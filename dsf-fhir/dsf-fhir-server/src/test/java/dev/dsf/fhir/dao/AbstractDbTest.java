@@ -6,12 +6,18 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
+
 public abstract class AbstractDbTest
 {
 	static
 	{
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
+
+		// TODO remove workaround after upgrading to HAPI 6.8+, see https://github.com/hapifhir/hapi-fhir/issues/5205
+		StreamReadConstraints.overrideDefaultStreamReadConstraints(
+				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
 	}
 
 	protected static final String CHANGE_LOG_FILE = "db/db.changelog.xml";
