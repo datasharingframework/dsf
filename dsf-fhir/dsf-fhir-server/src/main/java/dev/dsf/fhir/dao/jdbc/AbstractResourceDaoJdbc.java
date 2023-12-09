@@ -420,17 +420,24 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				if (result.next())
 				{
 					LocalDateTime deleted = preparedStatementFactory.getReadByIdVersionDeleted(result);
-					long lastVersion = preparedStatementFactory.getReadByIdVersionVersion(result);
-					if (lastVersion + 1 == version)
+					long readVersion = preparedStatementFactory.getReadByIdVersionVersion(result);
+					if (deleted == null && readVersion != version)
+					{
+						logger.debug("{} with IdPart {} and Version {} not found", resourceTypeName, uuid, version);
+						return Optional.empty();
+					}
+					else if (deleted != null && readVersion + 1 == version)
 					{
 						logger.debug(
 								"{} with IdPart {} and Version {} found, but marked as deleted (delete history entry)",
 								resourceTypeName, uuid, version);
-						throw newResourceDeletedException(uuid, deleted, lastVersion);
+						throw newResourceDeletedException(uuid, deleted, readVersion);
 					}
-
-					logger.debug("{} with IdPart {} and Version {} found", resourceTypeName, uuid, version);
-					return Optional.of(preparedStatementFactory.getReadByIdAndVersionResource(result));
+					else
+					{
+						logger.debug("{} with IdPart {} and Version {} found", resourceTypeName, uuid, version);
+						return Optional.of(preparedStatementFactory.getReadByIdAndVersionResource(result));
+					}
 				}
 				else
 				{
