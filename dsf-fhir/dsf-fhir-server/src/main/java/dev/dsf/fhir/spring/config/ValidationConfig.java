@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import dev.dsf.fhir.dao.command.ValidationHelper;
@@ -45,7 +44,7 @@ public class ValidationConfig
 
 	private ValidationSupportChain validationSupportChain(IValidationSupport dbSupport)
 	{
-		DefaultProfileValidationSupport dpvs = new DefaultProfileValidationSupport(FhirContext.forR4());
+		DefaultProfileValidationSupport dpvs = new DefaultProfileValidationSupport(fhirConfig.fhirContext());
 		dpvs.fetchCodeSystem(""); // FIXME HAPI bug workaround, to initialize
 		dpvs.fetchAllStructureDefinitions(); // FIXME HAPI bug workaround, to initialize
 

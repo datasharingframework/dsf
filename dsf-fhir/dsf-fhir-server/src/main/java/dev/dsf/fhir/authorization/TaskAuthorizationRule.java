@@ -53,15 +53,18 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	private static final String NAMING_SYSTEM_TASK_IDENTIFIER = "http://dsf.dev/sid/task-identifier";
 
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
+	private final FhirContext fhirContext;
 
 	public TaskAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
-			ParameterConverter parameterConverter, ProcessAuthorizationHelper processAuthorizationHelper)
+			ParameterConverter parameterConverter, ProcessAuthorizationHelper processAuthorizationHelper,
+			FhirContext fhirContext)
 	{
 		super(Task.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
 				parameterConverter);
 
 		this.processAuthorizationHelper = processAuthorizationHelper;
+		this.fhirContext = fhirContext;
 	}
 
 	@Override
@@ -70,6 +73,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(processAuthorizationHelper, "processAuthorizationHelper");
+		Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
 	@Override
@@ -834,9 +838,9 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			return Optional.empty();
 		else
 		{
-			logger.debug("Old Task: {}", FhirContext.forR4().newJsonParser().setStripVersionsFromReferences(false)
+			logger.debug("Old Task: {}", fhirContext.newJsonParser().setStripVersionsFromReferences(false)
 					.encodeResourceToString(oldResource));
-			logger.debug("New Task: {}", FhirContext.forR4().newJsonParser().setStripVersionsFromReferences(false)
+			logger.debug("New Task: {}", fhirContext.newJsonParser().setStripVersionsFromReferences(false)
 					.encodeResourceToString(newResource));
 
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
