@@ -186,7 +186,8 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing DB", e);
+			logger.debug("Error while accessing DB", e);
+			logger.error("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -350,7 +351,10 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while sending event to remote with session id {}", sessionAndRemote.sessionId);
+			logger.debug("Error while sending event to remote with session id {}: {} - {}", sessionAndRemote.sessionId,
+					e);
+			logger.warn("Error while sending event to remote with session id {}: {} - {}", sessionAndRemote.sessionId,
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 

@@ -116,6 +116,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for Endpoint: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException("Unable to search for Endpoint: Unsupported query parameters");
 		}
 
@@ -126,7 +127,9 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for Endpoint", e);
+			logger.debug("Unable to search for Endpoint", e);
+			logger.warn("Unable to search for Endpoint: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for Endpoint", e);
 		}
 	}
@@ -142,6 +145,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for Endpoint: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException("Unable to search for Endpoint: Unsupported query parameters");
 		}
 
@@ -152,7 +156,9 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for Endpoint", e);
+			logger.debug("Unable to search for Endpoint", e);
+			logger.warn("Unable to search for Endpoint: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for Endpoint", e);
 		}
 	}

@@ -372,7 +372,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while handling resource updated event", e);
+			logger.debug("Error while handling resource updated event", e);
+			logger.warn("Error while handling resource updated event: {} - {}", e.getClass().getName(), e.getMessage());
 		}
 
 		IdType location = updatedResourceWithResolvedReferences.getIdElement().withServerBase(serverBase,
@@ -413,7 +414,9 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 		catch (ResourceNotFoundException | SQLException | ResourceDeletedException e)
 		{
-			logger.warn("Error while reading resource from db", e);
+			logger.debug("Error while reading resource from db", e);
+			logger.warn("Error while reading resource from db: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

@@ -255,9 +255,9 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		}
 		catch (Exception e)
 		{
+			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
 			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
 					e.getClass().getName(), e.getMessage());
-			logger.error("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
 		}
 	}
 }

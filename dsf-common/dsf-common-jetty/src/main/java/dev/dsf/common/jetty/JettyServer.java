@@ -110,7 +110,9 @@ public final class JettyServer
 			}
 			catch (IOException e)
 			{
-				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				logger.debug("Unable to open server socket channel", e);
+				logger.warn("Unable to open server socket channel: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		};
@@ -147,7 +149,9 @@ public final class JettyServer
 			}
 			catch (IOException e)
 			{
-				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				logger.debug("Unable to open server socket channel", e);
+				logger.warn("Unable to open server socket channel: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		};
@@ -171,7 +175,9 @@ public final class JettyServer
 			}
 			catch (IOException e)
 			{
-				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				logger.debug("Unable to open server socket channel", e);
+				logger.warn("Unable to open server socket channel: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		};
@@ -236,7 +242,9 @@ public final class JettyServer
 		}
 		catch (KeyStoreException e)
 		{
-			logger.warn("Error while printing trust store / key store config", e);
+			logger.debug("Error while printing trust store / key store config", e);
+			logger.warn("Error while printing trust store / key store config: {} - {}", e.getClass().getName(),
+					e.getMessage());
 		}
 	}
 
@@ -318,7 +326,7 @@ public final class JettyServer
 			protected void writeErrorPage(jakarta.servlet.http.HttpServletRequest request, java.io.Writer writer,
 					int code, String message, boolean showStacks) throws IOException
 			{
-				logger.warn("Error {}: {}", code, message);
+				logger.info("Error {}: {}", code, message);
 			}
 		};
 	}

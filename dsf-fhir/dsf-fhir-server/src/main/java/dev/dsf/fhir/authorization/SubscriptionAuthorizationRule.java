@@ -138,6 +138,7 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for Subscription: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException("Unable to search for Subscription: Unsupported query parameters");
 		}
 
@@ -148,7 +149,9 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for Subscription", e);
+			logger.debug("Unable to search for Subscription", e);
+			logger.warn("Unable to search for Subscription: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for Subscription", e);
 		}
 	}

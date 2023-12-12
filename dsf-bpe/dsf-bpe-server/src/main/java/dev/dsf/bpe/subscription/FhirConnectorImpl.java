@@ -107,9 +107,9 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 		}
 		catch (Exception e)
 		{
+			logger.debug("Error while retrieving {} websocket subscription", resourceName, e);
 			logger.warn("Error while retrieving {} websocket subscription: {} - {}", resourceName,
 					e.getClass().getName(), e.getMessage());
-			logger.debug("Error while retrieving {} websocket subscription", resourceName, e);
 
 			throw e;
 		}
@@ -216,9 +216,9 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 		}
 		catch (Exception e)
 		{
+			logger.debug("Error while downloading new {} resources", resourceName, e);
 			logger.warn("Error while downloading new {} resources: {} - {}", resourceName, e.getClass().getName(),
 					e.getMessage());
-			logger.debug("Error while downloading new {} resources", resourceName, e);
 
 			throw e;
 		}
@@ -243,13 +243,14 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 
 			logger.info("Connecting {} websocket to local DSF FHIR server, subscription: {} ...", resourceName,
 					subscription.getIdElement().getIdPart());
+
 			client.connect();
 		}
 		catch (Exception e)
 		{
+			logger.debug("Unable to connect {} websocket to local DSF FHIR server", resourceName, e);
 			logger.warn("Unable to connect {} websocket to local DSF FHIR server: {} - {}", resourceName,
 					e.getClass().getName(), e.getMessage());
-			logger.debug("Unable to connect {} websocket to local DSF FHIR server", resourceName, e);
 
 			throw e;
 		}
@@ -257,6 +258,8 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 
 	private Void onError(Throwable t)
 	{
+		// no debug log, exception previously logged by retrieveWebsocketSubscription, loadNewResources and
+		// connectWebsocket methods
 		logger.error("Error while loading existing {} resources and connecting websocket: {} - {}", resourceName,
 				t.getClass().getName(), t.getMessage());
 

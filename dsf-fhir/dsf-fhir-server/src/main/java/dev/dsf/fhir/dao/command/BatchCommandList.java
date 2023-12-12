@@ -154,10 +154,10 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running pre-execute of command {} for entry at index {}: {} - {}",
-						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
 				logger.debug("Error while running pre-execute of command {} for entry at index {}",
 						command.getClass().getName(), command.getIndex(), e);
+				logger.warn("Error while running pre-execute of command {} for entry at index {}: {} - {}",
+						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
 
 				caughtExceptions.put(command.getIndex(), e);
 			}
@@ -190,10 +190,10 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {} - {}",
-						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
 				logger.debug("Error while executing command {}, rolling back transaction for entry at index {}",
 						command.getClass().getName(), command.getIndex(), e);
+				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {} - {}",
+						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
 
 				caughtExceptions.put(command.getIndex(), e);
 
@@ -204,12 +204,12 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				}
 				catch (SQLException e1)
 				{
-					logger.warn(
-							"Error while executing command {}, error while rolling back transaction for entry at index {}: {} - {}",
-							command.getClass().getName(), command.getIndex(), e1.getClass().getName(), e1.getMessage());
 					logger.debug(
 							"Error while executing command {}, error while rolling back transaction for entry at index {}",
 							command.getClass().getName(), command.getIndex(), e1);
+					logger.warn(
+							"Error while executing command {}, error while rolling back transaction for entry at index {}: {} - {}",
+							command.getClass().getName(), command.getIndex(), e1.getClass().getName(), e1.getMessage());
 
 					caughtExceptions.put(command.getIndex(), e1);
 				}
@@ -242,10 +242,10 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running post-execute of command {} for entry at index {}: {} - {}",
-						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
 				logger.debug("Error while running post-execute of command {} for entry at index {}",
 						command.getClass().getName(), command.getIndex(), e);
+				logger.warn("Error while running post-execute of command {} for entry at index {}: {} - {}",
+						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
 
 				caughtExceptions.put(command.getIndex(), e);
 			}

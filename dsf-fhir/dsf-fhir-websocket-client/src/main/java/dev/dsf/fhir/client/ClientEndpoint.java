@@ -63,9 +63,9 @@ public class ClientEndpoint extends Endpoint
 					}
 					catch (Throwable e)
 					{
+						logger.debug("Error while handling message, session {}", session.getId(), e);
 						logger.error("Error while handling message, session {}: {} - {}", session.getId(),
 								e.getClass().getName(), e.getMessage());
-						logger.debug("Error while handling message, session {}", session.getId(), e);
 					}
 				}
 			}
@@ -94,9 +94,9 @@ public class ClientEndpoint extends Endpoint
 			logger.info("Websocket closed with error, session {}: unknown error", session.getId());
 		else
 		{
+			logger.debug("Websocket closed with error, session {}", session.getId(), throwable);
 			logger.warn("Websocket closed with error, session {}: {} - {}", session.getId(),
 					throwable.getClass().getName(), throwable.getMessage());
-			logger.debug("Websocket closed with error, session {}", session.getId(), throwable);
 		}
 	}
 

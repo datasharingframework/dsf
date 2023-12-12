@@ -67,9 +67,9 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 			}
 			catch (IOException e)
 			{
+				logger.debug("Error while closing websocket, session {}", session.getId(), e);
 				logger.warn("Error while closing websocket, session {}: {} - {}", session.getId(),
 						e.getClass().getName(), e.getMessage());
-				logger.debug("Error while closing websocket, session {}", session.getId(), e);
 			}
 
 			return;
@@ -129,9 +129,9 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 		}
 		catch (IllegalArgumentException | IOException e)
 		{
+			logger.debug("Error while sending ping frame, session {}", session.getId(), e);
 			logger.warn("Error while sending ping frame, session {}: {} - {}", session.getId(), e.getClass().getName(),
 					e.getMessage());
-			logger.debug("Error while sending ping frame, session {}", session.getId(), e);
 		}
 	}
 
@@ -154,9 +154,9 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 			logger.info("Websocket closed with error, session {}: unknown error", session.getId());
 		else
 		{
+			logger.debug("Websocket closed with error, session {}", session.getId(), throwable);
 			logger.info("Websocket closed with error, session {}: {} - {}", session.getId(),
 					throwable.getClass().getName(), getMessages(throwable));
-			logger.debug("Websocket closed with error, session {}", session.getId(), throwable);
 		}
 	}
 

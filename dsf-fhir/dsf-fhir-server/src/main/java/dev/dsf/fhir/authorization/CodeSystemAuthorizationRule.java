@@ -93,7 +93,9 @@ public class CodeSystemAuthorizationRule extends AbstractMetaTagAuthorizationRul
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for CodeSystem", e);
+			logger.debug("Error while searching for CodeSystem", e);
+			logger.warn("Error while searching for CodeSystem: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return false;
 		}
 	}

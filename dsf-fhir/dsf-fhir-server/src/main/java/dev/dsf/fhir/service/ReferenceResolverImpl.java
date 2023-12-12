@@ -238,11 +238,11 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 			catch (Exception e)
 			{
+				logger.debug("Literal external reference {} could not be resolved on remote server {}",
+						reference.getReference().getReference(), remoteServerBase, e);
 				logger.error("Literal external reference {} could not be resolved on remote server {}: {} - {}",
 						reference.getReference().getReference(), remoteServerBase, e.getClass().getName(),
 						e.getMessage());
-				logger.debug("Literal external reference {} could not be resolved on remote server {}",
-						reference.getReference().getReference(), remoteServerBase, e);
 
 				return Optional.empty();
 			}
@@ -489,10 +489,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 			catch (Exception e)
 			{
-				logger.error("Literal external reference {} could not be resolved on remote server {}: {} - {}",
-						referenceValue, remoteServerBase, e.getClass().getName(), e.getMessage());
 				logger.debug("Literal external reference {} could not be resolved on remote server {}", referenceValue,
 						remoteServerBase, e);
+				logger.error("Literal external reference {} could not be resolved on remote server {}: {} - {}",
+						referenceValue, remoteServerBase, e.getClass().getName(), e.getMessage());
 
 				return Optional.of(responseGenerator.referenceTargetCouldNotBeResolvedOnRemote(bundleIndex, resource,
 						reference, remoteServerBase));

@@ -84,7 +84,9 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error loading process plugins", e);
+			logger.debug("Error loading process plugins", e);
+			logger.warn("Error loading process plugins: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -132,8 +134,10 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		}
 		catch (Exception e)
 		{
-			logger.warn("Ignoring {}: Unable to load process plugin {} - {}", jar.toString(), e.getClass().getName(),
+			logger.debug("Ignoring {}: Unable to load process plugin", jar.toString(), e);
+			logger.warn("Ignoring {}: Unable to load process plugin: {} - {}", jar.toString(), e.getClass().getName(),
 					e.getMessage());
+
 			return null;
 		}
 	}

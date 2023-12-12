@@ -422,7 +422,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		}
 		catch (DateTimeParseException e)
 		{
-			logger.warn("Not a RFC-1123 date", e);
+			logger.debug("Not a RFC-1123 date", e);
+			logger.warn("Not a RFC-1123 date: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return Optional.empty();
 		}
 	}

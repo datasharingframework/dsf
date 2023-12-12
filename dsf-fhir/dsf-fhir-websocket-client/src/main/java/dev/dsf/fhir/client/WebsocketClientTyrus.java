@@ -151,16 +151,19 @@ public class WebsocketClientTyrus implements WebsocketClient
 		try
 		{
 			logger.debug("Connecting to websocket {} and waiting for connection", wsUri);
+
 			connection = manager.connectToServer(endpoint, config, wsUri);
 		}
 		catch (DeploymentException e)
 		{
-			logger.warn("Error while connecting to server", e);
+			logger.debug("Error while connecting to server", e);
+
 			throw new RuntimeException(e);
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error while connecting to server", e);
+			logger.debug("Error while connecting to server", e);
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -194,7 +197,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error while closing websocket", e);
+			logger.debug("Error while closing websocket", e);
+			logger.warn("Error while closing websocket: {} - {}", e.getClass().getName(), e.getMessage());
 		}
 
 		manager.shutdown();

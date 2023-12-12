@@ -51,8 +51,9 @@ public class HttpClientWithGetRetry extends HttpClient
 
 			if (cause instanceof ConnectException && times > 1)
 			{
-				logger.warn("Error while accessing {}: {}", uri == null ? "null" : uri.toString(), e.getMessage());
-				logger.warn("ConnectException: trying again in 5s");
+				logger.debug("Error while accessing {}, trying again in 5s", uri == null ? "null" : uri.toString(), e);
+				logger.warn("Error while accessing {}, trying again in 5s: {} - {}",
+						uri == null ? "null" : uri.toString(), e.getClass().getName(), e.getMessage());
 				try
 				{
 					Thread.sleep(5000);
@@ -65,8 +66,9 @@ public class HttpClientWithGetRetry extends HttpClient
 			}
 			else if (cause instanceof UnknownHostException && times > 1)
 			{
-				logger.warn("Error while accessing {}: {}", uri == null ? "null" : uri.toString(), e.getMessage());
-				logger.warn("UnknownHostException: trying again in 10s");
+				logger.debug("Error while accessing {}, trying again in 10s", uri == null ? "null" : uri.toString(), e);
+				logger.warn("Error while accessing {}, trying again in 10s: {} - {}",
+						uri == null ? "null" : uri.toString(), e.getClass().getName(), e.getMessage());
 				try
 				{
 					Thread.sleep(10_000);
@@ -79,7 +81,10 @@ public class HttpClientWithGetRetry extends HttpClient
 			}
 			else
 			{
-				logger.error("Error while accessing {}: {}", uri == null ? "null" : uri.toString(), e.getMessage());
+				logger.debug("Error while accessing {}", uri == null ? "null" : uri.toString(), e);
+				logger.warn("Error while accessing {}: {} - {}", uri == null ? "null" : uri.toString(),
+						e.getClass().getName(), e.getMessage());
+
 				throw e;
 			}
 		}

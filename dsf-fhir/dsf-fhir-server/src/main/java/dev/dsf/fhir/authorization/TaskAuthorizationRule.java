@@ -86,12 +86,14 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					{
 						logger.info("Create of Task authorized for local organization identity '{}', Task.status draft",
 								identity.getName());
+
 						return Optional.of("Local identity, Task.status draft");
 					}
 					else
 					{
 						logger.warn("Create of Task unauthorized for identity '{}', Task.status draft, {}",
 								identity.getName(), errors.get());
+
 						return Optional.empty();
 					}
 				}
@@ -100,6 +102,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					logger.warn(
 							"Create of Task unauthorized for identity '{}', Task.status draft, not allowed for non local organization identity",
 							identity.getName());
+
 					return Optional.empty();
 				}
 			}
@@ -113,6 +116,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						logger.info(
 								"Create of Task authorized for identity '{}', Task.status requested, process allowed for current identity",
 								identity.getName());
+
 						return Optional.of(
 								"Local or remote identity, Task.status requested, Task.requester current identity's organization, Task.restriction.recipient local organization, "
 										+ "process with instantiatesCanonical and message-name allowed for current identity, Task defines needed profile");
@@ -122,6 +126,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						logger.warn(
 								"Create of Task unauthorized for identity '{}', Task.status requested, process with instantiatesCanonical, message-name, requester or recipient not allowed",
 								identity.getName());
+
 						return Optional.empty();
 					}
 				}
@@ -129,6 +134,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				{
 					logger.warn("Create of Task unauthorized for identity '{}', Task.status requested, {}",
 							identity.getName(), errors.get());
+
 					return Optional.empty();
 				}
 			}
@@ -136,6 +142,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			{
 				logger.warn("Create of Task unauthorized for identity '{}', Task.status not {} and not {}",
 						identity.getName(), TaskStatus.DRAFT.toCode(), TaskStatus.REQUESTED.toCode());
+
 				return Optional.empty();
 			}
 		}
@@ -143,6 +150,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		{
 			logger.warn("Create of Task unauthorized for identity '{}', no role {}", identity.getName(),
 					FhirServerRole.CREATE);
+
 			return Optional.empty();
 		}
 	}
@@ -393,6 +401,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		if (recipientOpt.isEmpty())
 		{
 			logger.warn("Local organization does not exist");
+
 			return false;
 		}
 
@@ -412,6 +421,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				{
 					logger.warn("No ActivityDefinition with process-url '{}' and process-version '{}'", processUrl,
 							processVersion);
+
 					return false;
 				}
 				else
@@ -446,13 +456,16 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Error while reading ActivityDefinitions", e);
+				logger.debug("Error while reading ActivityDefinitions", e);
+				logger.warn("Error while reading ActivityDefinitions: {} - {}", e.getClass().getName(), e.getMessage());
+
 				return false;
 			}
 		}
 		else
 		{
 			logger.warn("Task.instantiatesCanonical not matching {} pattern", INSTANTIATES_CANONICAL_PATTERN_STRING);
+
 			return false;
 		}
 	}
@@ -463,6 +476,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		if (recipientOpt.isEmpty())
 		{
 			logger.warn("Local organization does not exist");
+
 			return false;
 		}
 
@@ -482,6 +496,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				{
 					logger.warn("No ActivityDefinition with process-url '{}' and process-version '{}'", processUrl,
 							processVersion);
+
 					return false;
 				}
 				else
@@ -507,13 +522,16 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Error while reading ActivityDefinitions", e);
+				logger.debug("Error while reading ActivityDefinitions", e);
+				logger.warn("Error while reading ActivityDefinitions: {} - {}", e.getClass().getName(), e.getMessage());
+
 				return false;
 			}
 		}
 		else
 		{
 			logger.warn("Task.instantiatesCanonical not matching {} pattern", INSTANTIATES_CANONICAL_PATTERN_STRING);
+
 			return false;
 		}
 	}
@@ -533,6 +551,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				logger.info(
 						"Read of Task/{}/_history/{} authorized for identity '{}', Task.requester reference could be resolved and current identity part of referenced organization",
 						resourceId, resourceVersion, identity.getName());
+
 				return Optional.of("Task.requester resolved and identity part of referenced organization");
 			}
 			else if (identity.isLocalIdentity() && isCurrentIdentityPartOfReferencedOrganization(connection, identity,
@@ -541,6 +560,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				logger.info(
 						"Read of Task/{}/_history/{} authorized for identity '{}', Task.restriction.recipient reference could be resolved and current identity part of referenced organization",
 						resourceId, resourceVersion, identity.getName());
+
 				return Optional
 						.of("Task.restriction.recipient resolved and local identity part of referenced organization");
 			}
@@ -549,6 +569,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				logger.warn(
 						"Read of Task/{}/_history/{} unauthorized for identity '{}', Task.requester or Task.restriction.recipient references could not be resolved or current identity not part of referenced organizations",
 						resourceId, resourceVersion, identity.getName());
+
 				return Optional.empty();
 			}
 		}
@@ -556,6 +577,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		{
 			logger.warn("Read of Task/{}/_history/{} unauthorized for identity '{}', no role {}", resourceId,
 					resourceVersion, identity.getName(), FhirServerRole.READ);
+
 			return Optional.empty();
 		}
 	}
@@ -582,6 +604,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						logger.info("Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}'",
 								oldResourceId, oldResourceVersion, TaskStatus.DRAFT.toCode(), TaskStatus.DRAFT.toCode(),
 								identity.getName());
+
 						return Optional.of("Local identity, old Task.status draft, new Task.status draft");
 					}
 					else
@@ -589,6 +612,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						logger.warn("Update of Task/{}/_history/{} ({} -> {}) unauthorized for identity '{}', {}",
 								oldResourceId, oldResourceVersion, TaskStatus.DRAFT.toCode(), TaskStatus.DRAFT.toCode(),
 								identity.getName(), errors.get());
+
 						return Optional.empty();
 					}
 				}
@@ -612,6 +636,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 										"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status requested, new Task.status in-progress, process allowed for current identity",
 										oldResourceId, oldResourceVersion, TaskStatus.REQUESTED.toCode(),
 										TaskStatus.INPROGRESS.toCode(), identity.getName());
+
 								return Optional.of(
 										"Local identity, Task.status in-progress, Task.restriction.recipient local organization, process with instantiatesCanonical and message-name allowed for current identity"
 												+ ", Task defines needed profile, Task.instantiatesCanonical not modified, Task.requester not modified, Task.restriction not modified, Task.input not modified"
@@ -623,6 +648,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 										"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', Task.output not expected",
 										oldResourceId, oldResourceVersion, TaskStatus.REQUESTED.toCode(),
 										TaskStatus.INPROGRESS.toCode(), identity.getName());
+
 								return Optional.empty();
 							}
 						}
@@ -632,6 +658,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 									"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', process with instantiatesCanonical, message-name, requester or recipient not allowed",
 									oldResourceId, oldResourceVersion, TaskStatus.REQUESTED.toCode(),
 									TaskStatus.INPROGRESS.toCode(), identity.getName());
+
 							return Optional.empty();
 						}
 					}
@@ -641,6 +668,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
 								oldResourceId, oldResourceVersion, TaskStatus.REQUESTED.toCode(),
 								TaskStatus.INPROGRESS.toCode(), identity.getName(), same.get());
+
 						return Optional.empty();
 					}
 				}
@@ -658,6 +686,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 									"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status in-progress, new Task.status completed, process allowed for current identity",
 									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
 									TaskStatus.COMPLETED.toCode(), identity.getName());
+
 							return Optional.of(
 									"Local identity, Task.status completed, Task.restriction.recipient local organization, process with instantiatesCanonical and message-name allowed for current identity"
 											+ ", Task defines needed profile, Task.instantiatesCanonical not modified, Task.requester not modified, Task.restriction not modified, Task.input not modified");
@@ -668,6 +697,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 									"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', process with instantiatesCanonical, message-name, requester or recipient not allowed",
 									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
 									TaskStatus.COMPLETED.toCode(), identity.getName());
+
 							return Optional.empty();
 						}
 					}
@@ -677,6 +707,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
 								oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
 								TaskStatus.COMPLETED.toCode(), identity.getName(), same.get());
+
 						return Optional.empty();
 					}
 				}
@@ -694,6 +725,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 									"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status in-progress, new Task.status failed, process allowed for current identity",
 									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
 									TaskStatus.FAILED.toCode(), identity.getName());
+
 							return Optional.of(
 									"Local identity, Task.status failed, Task.restriction.recipient local organization, process with instantiatesCanonical and message-name allowed for current identity"
 											+ ", Task defines needed profile, Task.instantiatesCanonical not modified, Task.requester not modified, Task.restriction not modified, Task.input not modified");
@@ -704,6 +736,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 									"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', process with instantiatesCanonical, message-name, requester or recipient not allowed",
 									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
 									TaskStatus.FAILED.toCode(), identity.getName());
+
 							return Optional.empty();
 						}
 					}
@@ -713,6 +746,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
 								oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
 								TaskStatus.FAILED.toCode(), identity.getName(), same.get());
+
 						return Optional.empty();
 					}
 				}
@@ -731,6 +765,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 									Stream.of(TaskStatus.INPROGRESS, TaskStatus.FAILED))
 									.map(s -> s.map(TaskStatus::toCode).collect(Collectors.joining("->")))
 									.collect(Collectors.joining(", ", "[", "]")));
+
 					return Optional.empty();
 				}
 			}
@@ -738,6 +773,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			{
 				logger.warn("Update of Task/{}/_history/{} unauthorized for non local organization identity '{}'",
 						oldResourceId, oldResourceVersion, identity.getName());
+
 				return Optional.empty();
 			}
 		}
@@ -745,6 +781,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		{
 			logger.warn("Update of Task/{}/_history/{} unauthorized for identity '{}', no role {}", oldResourceId,
 					oldResourceVersion, identity.getName(), FhirServerRole.UPDATE);
+
 			return Optional.empty();
 		}
 	}
@@ -801,6 +838,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					.encodeResourceToString(oldResource));
 			logger.debug("New Task: {}", FhirContext.forR4().newJsonParser().setStripVersionsFromReferences(false)
 					.encodeResourceToString(newResource));
+
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 		}
 	}
@@ -831,6 +869,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				{
 					logger.info("Delete of Task/{}/_history/{} authorized for local identity '{}', Task.status draft",
 							oldResourceId, oldResourceVersion, identity.getName());
+
 					return Optional.of("Local identity, Task.status draft");
 				}
 				else
@@ -838,6 +877,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					logger.warn(
 							"Delete of Task/{}/_history/{} unauthorized for local identity '{}', Task.status not draft",
 							oldResourceId, oldResourceVersion, identity.getName());
+
 					return Optional.empty();
 				}
 			}
@@ -845,6 +885,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			{
 				logger.warn("Delete of Task/{}/_history/{} unauthorized for non local organization identity '{}'",
 						oldResourceId, oldResourceVersion, identity.getName());
+
 				return Optional.empty();
 			}
 		}
@@ -852,6 +893,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		{
 			logger.warn("Delete of Task/{}/_history/{} unauthorized for identity '{}', no role {}", oldResourceId,
 					oldResourceVersion, identity.getName(), FhirServerRole.DELETE);
+
 			return Optional.empty();
 		}
 	}

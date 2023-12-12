@@ -120,7 +120,10 @@ public class ActivityDefinitionAuthorizationRule
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for ActivityDefinition", e);
+			logger.debug("Error while searching for ActivityDefinition", e);
+			logger.warn("Error while searching for ActivityDefinition: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			return false;
 		}
 	}

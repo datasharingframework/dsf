@@ -93,7 +93,9 @@ public class ValueSetAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for ValueSet", e);
+			logger.debug("Error while searching for ValueSet", e);
+			logger.warn("Error while searching for ValueSet: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return false;
 		}
 	}

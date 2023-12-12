@@ -96,7 +96,10 @@ public class StructureDefinitionAuthorizationRule
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for StructureDefinition", e);
+			logger.debug("Error while searching for StructureDefinition", e);
+			logger.warn("Error while searching for StructureDefinition: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			return false;
 		}
 	}

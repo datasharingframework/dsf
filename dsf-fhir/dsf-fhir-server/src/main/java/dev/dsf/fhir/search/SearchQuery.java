@@ -442,7 +442,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while modifying prepared statement '{}': {}", statement.toString(), e.getMessage());
+			logger.debug("Error while modifying prepared statement '{}'", statement.toString(), e);
 			throw e;
 		}
 	}

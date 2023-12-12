@@ -51,7 +51,9 @@ public class EventResourceHandlerImpl<R extends Resource> implements EventResour
 		}
 		catch (SQLException e)
 		{
+			logger.debug("Unable to write last event time to db", e);
 			logger.warn("Unable to write last event time to db: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

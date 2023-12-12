@@ -123,10 +123,10 @@ public class StructureDefinitionServiceImpl extends
 				}
 				catch (Exception e)
 				{
-					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
-							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 					logger.debug("Error while generating snapshot for StructureDefinition with id {}",
 							postResource.getIdElement().getIdPart(), e);
+					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
+							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 				}
 			}
 		};
@@ -156,10 +156,10 @@ public class StructureDefinitionServiceImpl extends
 				}
 				catch (Exception e)
 				{
-					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
-							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 					logger.debug("Error while generating snapshot for StructureDefinition with id {}",
 							postResource.getIdElement().getIdPart(), e);
+					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
+							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 				}
 			}
 		};

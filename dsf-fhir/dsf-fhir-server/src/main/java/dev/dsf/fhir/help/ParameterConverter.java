@@ -233,12 +233,15 @@ public class ParameterConverter
 			else
 			{
 				logger.warn("{} not a weak ETag", eTag.getValue());
+
 				return Optional.empty();
 			}
 		}
 		catch (IllegalArgumentException e)
 		{
-			logger.warn("Unable to parse ETag value", e);
+			logger.debug("Unable to parse ETag value", e);
+			logger.warn("Unable to parse ETag value: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return Optional.empty();
 		}
 	}
@@ -274,7 +277,9 @@ public class ParameterConverter
 		}
 		catch (NumberFormatException e)
 		{
-			logger.warn("Version not a Long value", e);
+			logger.debug("Version not a Long value", e);
+			logger.warn("Version not a Long value: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return Optional.empty();
 		}
 	}

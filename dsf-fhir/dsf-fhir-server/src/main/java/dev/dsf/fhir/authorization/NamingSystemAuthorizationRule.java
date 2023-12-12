@@ -116,7 +116,9 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for NamingSystem", e);
+			logger.debug("Error while searching for NamingSystem", e);
+			logger.warn("Error while searching for NamingSystem: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return false;
 		}
 	}
@@ -131,7 +133,9 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Error while searching for NamingSystem", e);
+				logger.debug("Error while searching for NamingSystem", e);
+				logger.warn("Error while searching for NamingSystem: {} - {}", e.getClass().getName(), e.getMessage());
+
 				return false;
 			}
 		};

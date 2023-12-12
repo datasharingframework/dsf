@@ -584,19 +584,19 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 		}
 		catch (BeanCreationException e)
 		{
-			logger.error("Unable to create spring application context for process plugin {}-{}: {} - {}",
-					getDefinitionName(), getDefinitionVersion(), e.getClass().getSimpleName(), e.getMessage());
 			logger.debug("Unable to create spring application context for process plugin {}-{}, bean with error {}",
 					getDefinitionName(), getDefinitionVersion(), e.getBeanName(), e);
+			logger.error("Unable to create spring application context for process plugin {}-{}: {} - {}",
+					getDefinitionName(), getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 
 			return null;
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to create spring application context for process plugin {}-{}: {} - {}",
-					getDefinitionName(), getDefinitionVersion(), e.getClass().getSimpleName(), e.getMessage());
 			logger.debug("Unable to create spring application context for process plugin {}-{}", getDefinitionName(),
 					getDefinitionVersion(), e);
+			logger.error("Unable to create spring application context for process plugin {}-{}: {} - {}",
+					getDefinitionName(), getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 
 			return null;
 		}
@@ -702,10 +702,10 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			}
 			catch (IOException e)
 			{
-				logger.warn("Ignoring BPMN model {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
-						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 				logger.debug("Ignoring BPMN model {} from process plugin {}-{}", file, getDefinitionName(),
 						getDefinitionVersion(), e);
+				logger.warn("Ignoring BPMN model {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
+						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 
 				return null;
 			}
@@ -736,9 +736,9 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 		}
 		catch (Exception e)
 		{
+			logger.debug("BPMN file {} not valid", fileAndModel.getFile(), e);
 			logger.warn("BPMN file {} not valid: {} - {}", fileAndModel.getFile(), e.getClass().getName(),
 					e.getMessage());
-			logger.debug("BPMN file {} not valid", fileAndModel.getFile(), e);
 
 			return false;
 		}
@@ -922,10 +922,11 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 		}
 		catch (ClassNotFoundException e)
 		{
-			logger.warn("{} '{}' defined in process {}, element {} not found", expectedInterface.getSimpleName(),
-					className, processKeyAndVersion.toString(), elementId);
 			logger.debug("{} '{}' defined in process {}, element {} not found", expectedInterface.getSimpleName(),
 					className, processKeyAndVersion.toString(), elementId, e);
+			logger.warn("{} '{}' defined in process {}, element {} not found: {} - {}",
+					expectedInterface.getSimpleName(), className, processKeyAndVersion.toString(), elementId,
+					e.getClass().getName(), e.getMessage());
 
 			return null;
 		}
@@ -1057,10 +1058,10 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			}
 			catch (IOException e)
 			{
-				logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
-						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 				logger.debug("Ignoring FHIR resource {} from process plugin {}-{}", file, getDefinitionName(),
 						getDefinitionVersion(), e);
+				logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
+						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 
 				return null;
 			}

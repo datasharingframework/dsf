@@ -49,11 +49,11 @@ public class DeleteStructureDefinitionCommand extends DeleteCommand
 		}
 		catch (SQLException | ResourceNotFoundException e)
 		{
+			logger.debug("Error while deleting StructureDefinition snaphost for id {}, exception will be ignored",
+					uuid.toString(), e);
 			logger.warn(
 					"Error while deleting StructureDefinition snaphost for id {}, exception will be ignored: {} - {}",
 					uuid.toString(), e.getClass().getName(), e.getMessage());
-			logger.debug("Error while deleting StructureDefinition snaphost for id {}, exception will be ignored",
-					uuid.toString(), e);
 		}
 
 		return deleted;

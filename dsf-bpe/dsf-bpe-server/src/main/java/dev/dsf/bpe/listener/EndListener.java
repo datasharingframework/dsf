@@ -78,9 +78,9 @@ public class EndListener extends AbstractListener implements ExecutionListener
 		}
 		catch (Exception e)
 		{
+			logger.debug("Unable to update Task {}", getLocalVersionlessAbsoluteUrl(task), e);
 			logger.error("Unable to update Task {}: {} - {}", getLocalVersionlessAbsoluteUrl(task),
 					e.getClass().getName(), e.getMessage());
-			logger.debug("Unable to update Task {}", getLocalVersionlessAbsoluteUrl(task), e);
 		}
 	}
 

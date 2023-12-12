@@ -203,6 +203,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 				exceptionMessage = statusInfo.getStatusCode() + " " + statusInfo.getReasonPhrase();
 			}
 
+			logger.debug("Error while sending Task", e);
 			String errorMessage = "Task " + instantiatesCanonical + " send failed [recipient: "
 					+ target.getOrganizationIdentifierValue() + ", endpoint: " + target.getEndpointIdentifierValue()
 					+ ", businessKey: " + businessKey
@@ -210,7 +211,6 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 					+ ", message: " + messageName + ", error: " + e.getClass().getName() + " - " + exceptionMessage
 					+ "]";
 			logger.warn(errorMessage);
-			logger.debug("Error while sending Task", e);
 
 			if (execution.getBpmnModelElementInstance() instanceof IntermediateThrowEvent)
 				handleIntermediateThrowEventError(execution, variables, e, errorMessage);
@@ -342,9 +342,9 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		}
 		catch (Exception e)
 		{
+			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
 			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
 					e.getClass().getName(), e.getMessage());
-			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
 		}
 	}
 

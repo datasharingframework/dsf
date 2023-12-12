@@ -161,6 +161,7 @@ public class OrganizationAffiliationAuthorizationRule
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for OrganizationAffiliation: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException(
 					"Unable to search for OrganizationAffiliation: Unsupported query parameters");
 		}
@@ -172,7 +173,10 @@ public class OrganizationAffiliationAuthorizationRule
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for OrganizationAffiliation", e);
+			logger.debug("Unable to search for OrganizationAffiliation", e);
+			logger.warn("Unable to search for OrganizationAffiliation: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			throw new RuntimeException("Unable to search for OrganizationAffiliation", e);
 		}
 	}
@@ -211,7 +215,10 @@ public class OrganizationAffiliationAuthorizationRule
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Unable to search for OrganizationAffiliation", e);
+				logger.debug("Unable to search for OrganizationAffiliation", e);
+				logger.warn("Unable to search for OrganizationAffiliation: {} - {}", e.getClass().getName(),
+						e.getMessage());
+
 				throw new RuntimeException("Unable to search for OrganizationAffiliation", e);
 			}
 		};

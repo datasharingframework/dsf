@@ -166,17 +166,23 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 				}
 				catch (SQLException e)
 				{
-					logger.error("Error while adding process plugin resource to the db", e);
+					logger.debug("Error while adding process plugin resource to the db", e);
+					logger.warn("Error while adding process plugin resource to the db: {} - {}", e.getClass().getName(),
+							e.getMessage());
+
 					throw new RuntimeException(e);
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while executing process plugins resource bundle: {}", e.getMessage());
+			logger.debug("Error while executing process plugins resource bundle", e);
+			logger.warn("Error while executing process plugins resource bundle: {} - {}", e.getClass().getName(),
+					e.getMessage());
 			logger.warn(
 					"Resources in FHIR server may not be consistent, please check resources and execute the following bundle if necessary: {}",
 					fhirContext.newJsonParser().encodeResourceToString(batchBundle));
+
 			throw e;
 		}
 	}
@@ -388,7 +394,10 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while retrieving resource infos from db", e);
+			logger.debug("Error while retrieving resource infos from db", e);
+			logger.warn("Error while retrieving resource infos from db: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

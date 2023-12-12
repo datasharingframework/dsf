@@ -281,6 +281,7 @@ public class SmtpMailService implements MailService, InitializingBean
 		}
 		catch (AddressException e)
 		{
+			logger.debug("Unable to create {} from {}", InternetAddress.class.getName(), fromAddress, e);
 			logger.warn("Unable to create {} from {}: {} - {}", InternetAddress.class.getName(), fromAddress,
 					e.getClass().getName(), e.getMessage());
 
@@ -347,7 +348,9 @@ public class SmtpMailService implements MailService, InitializingBean
 		}
 		catch (UnrecoverableKeyException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException e)
 		{
+			logger.debug("Unable to create custom ssl socket factory", e);
 			logger.warn("Unable to create custom ssl socket factory: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -535,7 +538,9 @@ public class SmtpMailService implements MailService, InitializingBean
 		}
 		catch (MessagingException e)
 		{
+			logger.debug("Unable to send message", e);
 			logger.warn("Unable to send message: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

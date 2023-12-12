@@ -148,7 +148,9 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 }

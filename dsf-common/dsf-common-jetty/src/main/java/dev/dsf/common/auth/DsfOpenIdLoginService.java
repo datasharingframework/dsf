@@ -36,7 +36,9 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 		}
 		catch (Throwable e)
 		{
-			logger.warn("Unable to redeem auth code", e);
+			logger.debug("Unable to redeem auth code", e);
+			logger.warn("Unable to redeem auth code: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return null;
 		}
 
