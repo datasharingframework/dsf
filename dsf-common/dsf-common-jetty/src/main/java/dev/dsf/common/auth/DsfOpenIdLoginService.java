@@ -34,7 +34,7 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 		{
 			openIdCredentials.redeemAuthCode(configuration);
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
 			logger.debug("Unable to redeem auth code", e);
 			logger.warn("Unable to redeem auth code: {} - {}", e.getClass().getName(), e.getMessage());
