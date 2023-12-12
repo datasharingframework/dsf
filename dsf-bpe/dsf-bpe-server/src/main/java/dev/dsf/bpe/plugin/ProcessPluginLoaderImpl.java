@@ -25,7 +25,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ProcessPluginLoaderImpl implements ProcessPluginLoader, InitializingBean
 {
-	public static final String FILE_DRAFT_SUFFIX = "-SNAPSHOT.jar";
+	public static final String SNAPSHOT_FILE_SUFFIX = "-SNAPSHOT.jar";
+	public static final String MILESTONE_FILE_PATTERN = ".*-M[0-9]+.jar";
+	public static final String RELEASE_CANDIDATE_FILE_PATTERN = ".*-RC[0-9]+.jar";
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginLoaderImpl.class);
 
@@ -118,7 +120,12 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 			if (definitions.size() != 1)
 				return null;
 
-			boolean draft = jar.getFileName().toString().endsWith(FILE_DRAFT_SUFFIX);
+			boolean isSnapshot = jar.getFileName().toString().endsWith(SNAPSHOT_FILE_SUFFIX);
+			boolean isMilestone = jar.getFileName().toString().matches(MILESTONE_FILE_PATTERN);
+			boolean isReleaseCandidate = jar.getFileName().toString().matches(RELEASE_CANDIDATE_FILE_PATTERN);
+
+			boolean draft = isSnapshot || isMilestone || isReleaseCandidate;
+
 			return factory.createProcessPlugin(definitions.get(0).get(), draft, jar, classLoader, fhirContext,
 					environment);
 		}
