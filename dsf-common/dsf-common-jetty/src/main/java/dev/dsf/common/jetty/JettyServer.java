@@ -1,6 +1,7 @@
 package dev.dsf.common.jetty;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import de.rwh.utils.crypto.CertificateHelper;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 public final class JettyServer
 {
@@ -323,8 +325,8 @@ public final class JettyServer
 		return new ErrorHandler()
 		{
 			@Override
-			protected void writeErrorPage(jakarta.servlet.http.HttpServletRequest request, java.io.Writer writer,
-					int code, String message, boolean showStacks) throws IOException
+			protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message,
+					boolean showStacks) throws IOException
 			{
 				logger.info("Error {}: {}", code, message);
 			}
