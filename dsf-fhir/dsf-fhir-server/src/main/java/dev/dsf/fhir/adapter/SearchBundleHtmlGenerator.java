@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.glassfish.jersey.uri.UriComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
@@ -52,26 +53,31 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME = "message-name";
 	private static final String CODE_SYSTEM_BPMN_MESSAGE_BUSINESS_KEY = "business-key";
 	private static final String CODE_SYSTEM_ORGANIZATION_ROLE = "http://dsf.dev/fhir/CodeSystem/organization-role";
+	private static final String EXTENSION_PROCESS_AUTHORIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization";
+	private static final String EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME = "message-name";
 	private static final String NAMING_SYSTEM_ENDPOINT_IDENTIFIER = "http://dsf.dev/sid/endpoint-identifier";
 	private static final String NAMING_SYSTEM_ORGANIZATION_IDENTIFIER = "http://dsf.dev/sid/organization-identifier";
 	private static final String NAMING_SYSTEM_TASK_IDENTIFIER = "http://dsf.dev/sid/task-identifier";
 
-	private final String taskRessourcePath;
-	private final String questionnaireResponseRessourcePath;
+	private final String activityDefinitionResourcePath;
+	private final String endpointResourcePath;
 	private final String organizationResourcePath;
 	private final String organizationAffiliationResourcePath;
-	private final String endpointResourcePath;
+	private final String questionnaireResponseRessourcePath;
+	private final String taskRessourcePath;
 
 	private final int defaultPageCount;
 
 	public SearchBundleHtmlGenerator(String serverBaseUrl, int defaultPageCount)
 	{
 		String serverBaseUrlPath = getServerBaseUrlPath(serverBaseUrl);
-		taskRessourcePath = serverBaseUrlPath + "/" + ResourceType.Task.name();
-		questionnaireResponseRessourcePath = serverBaseUrlPath + "/" + ResourceType.QuestionnaireResponse.name();
+
+		activityDefinitionResourcePath = serverBaseUrlPath + "/" + ResourceType.ActivityDefinition.name();
+		endpointResourcePath = serverBaseUrlPath + "/" + ResourceType.Endpoint.name();
 		organizationResourcePath = serverBaseUrlPath + "/" + ResourceType.Organization.name();
 		organizationAffiliationResourcePath = serverBaseUrlPath + "/" + ResourceType.OrganizationAffiliation.name();
-		endpointResourcePath = serverBaseUrlPath + "/" + ResourceType.Endpoint.name();
+		questionnaireResponseRessourcePath = serverBaseUrlPath + "/" + ResourceType.QuestionnaireResponse.name();
+		taskRessourcePath = serverBaseUrlPath + "/" + ResourceType.Task.name();
 
 		this.defaultPageCount = defaultPageCount;
 	}
@@ -98,11 +104,12 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 	public boolean isResourceSupported(URI resourceUri, Resource resource)
 	{
 		return resource != null && resource instanceof Bundle
-				&& (taskRessourcePath.equals(resourceUri.getPath())
-						|| questionnaireResponseRessourcePath.equals(resourceUri.getPath())
+				&& (activityDefinitionResourcePath.equals(resourceUri.getPath())
+						|| endpointResourcePath.equals(resourceUri.getPath())
 						|| organizationResourcePath.equals(resourceUri.getPath())
 						|| organizationAffiliationResourcePath.equals(resourceUri.getPath())
-						|| endpointResourcePath.equals(resourceUri.getPath()));
+						|| questionnaireResponseRessourcePath.equals(resourceUri.getPath())
+						|| taskRessourcePath.equals(resourceUri.getPath()));
 	}
 
 	@Override
@@ -215,28 +222,30 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 
 	private String getHeader(URI uri)
 	{
-		if (taskRessourcePath.equals(uri.getPath()))
-			return getTaskHeader();
-		else if (questionnaireResponseRessourcePath.equals(uri.getPath()))
-			return getQuestionnaireResponseHeader();
+		if (activityDefinitionResourcePath.equals(uri.getPath()))
+			return getActivityDefinitionHeader();
+		else if (endpointResourcePath.equals(uri.getPath()))
+			return getEndpointHeader();
 		else if (organizationResourcePath.equals(uri.getPath()))
 			return getOrganizationHeader();
 		else if (organizationAffiliationResourcePath.equals(uri.getPath()))
 			return getOrganizationAffiliationHeader();
-		else if (endpointResourcePath.equals(uri.getPath()))
-			return getEndpointHeader();
+		else if (questionnaireResponseRessourcePath.equals(uri.getPath()))
+			return getQuestionnaireResponseHeader();
+		else if (taskRessourcePath.equals(uri.getPath()))
+			return getTaskHeader();
 		else
 			throw new IllegalArgumentException("Unexpected resource path: " + uri.getPath());
 	}
 
-	private String getTaskHeader()
+	private String getActivityDefinitionHeader()
 	{
-		return "<tr><th>ID</th><th>Status</th><th>Process</th><th>Message-Name</th><th>Requester</th><th>Business-Key / Identifier</th><th>Last Updated</th></tr>";
+		return "<tr><th>ID</th><th>Status</th><th>Title</th><th>Publisher</th><th>Message Names</th><th>Last Updated</th></tr>";
 	}
 
-	private String getQuestionnaireResponseHeader()
+	private String getEndpointHeader()
 	{
-		return "<tr><th>ID</th><th>Status</th><th>Questionnaire</th><th>Business-Key</th><th>Last Updated</th></tr>";
+		return "<tr><th>ID</th><th>Status</th><th>Identifier</th><th>Name</th><th>Address</th><th>Managing Organization</th><th>Last Updated</th></tr>";
 	}
 
 	private String getOrganizationHeader()
@@ -249,23 +258,30 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		return "<tr><th>ID</th><th>Active</th><th>Parent Organization</th><th>Participating Organization</th><th>Role</th><th>Endpoint</th><th>Last Updated</th></tr>";
 	}
 
-	private String getEndpointHeader()
+	private String getQuestionnaireResponseHeader()
 	{
-		return "<tr><th>ID</th><th>Status</th><th>Identifier</th><th>Name</th><th>Address</th><th>Managing Organization</th><th>Last Updated</th></tr>";
+		return "<tr><th>ID</th><th>Status</th><th>Questionnaire</th><th>Business-Key</th><th>Last Updated</th></tr>";
+	}
+
+	private String getTaskHeader()
+	{
+		return "<tr><th>ID</th><th>Status</th><th>Process</th><th>Message-Name</th><th>Requester</th><th>Business-Key / Identifier</th><th>Last Updated</th></tr>";
 	}
 
 	private String getRow(Resource resource)
 	{
-		if (resource instanceof Task t)
-			return getTaskRow(t);
-		else if (resource instanceof QuestionnaireResponse qr)
-			return getQuestionnaireResponseRow(qr);
+		if (resource instanceof ActivityDefinition a)
+			return getActivityDefinitionRow(a);
+		else if (resource instanceof Endpoint e)
+			return getEndpointRow(e);
 		else if (resource instanceof Organization o)
 			return getOrganizationRow(o);
 		else if (resource instanceof OrganizationAffiliation oa)
 			return getOrganizationAffiliationRow(oa);
-		else if (resource instanceof Endpoint e)
-			return getEndpointRow(e);
+		else if (resource instanceof QuestionnaireResponse qr)
+			return getQuestionnaireResponseRow(qr);
+		else if (resource instanceof Task t)
+			return getTaskRow(t);
 		else
 			throw new IllegalArgumentException("Unexpected resource type: " + resource.getResourceType().name());
 	}
@@ -323,6 +339,25 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 			return "";
 		else
 			return DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated());
+	}
+
+	private String getActivityDefinitionRow(ActivityDefinition resource)
+	{
+		List<String> messageNames = resource.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION).stream()
+				.flatMap(e -> e.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME).stream())
+				.filter(e -> e.getValue() instanceof StringType).map(e -> ((StringType) e.getValue()).getValue())
+				.toList();
+
+		String combinedMessageNames = (messageNames.size() > 2)
+				? String.join(", ", messageNames.subList(0, 2)) + ", ..."
+				: String.join(", ", messageNames);
+
+		return "<td status=\"" + (resource.hasStatus() ? resource.getStatus().toCode() : "") + "\" class=\"id-value\">"
+				+ createResourceLink(resource) + "</td><td>"
+				+ (resource.hasStatus() ? resource.getStatus().toCode() : "") + "</td><td>"
+				+ (resource.hasTitle() ? resource.getTitle() : "") + "</td><td>"
+				+ (resource.hasPublisher() ? resource.getPublisher() : "") + "</td><td>" + combinedMessageNames
+				+ "</td><td>" + toLastUpdated(resource) + "</td>";
 	}
 
 	private String getTaskRow(Task resource)
