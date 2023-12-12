@@ -47,7 +47,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 			updateIfInprogress(task);
 			boolean subProcess = execution.getParentId() != null
 					&& !execution.getParentId().equals(execution.getProcessInstanceId());
-			logEnd(logger, subProcess, task, subProcess ? variables.getStartTask() : null);
+			logEnd(subProcess, task, subProcess ? variables.getStartTask() : null);
 		}
 
 		variables.onEnd();
@@ -84,7 +84,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 		}
 	}
 
-	private void logEnd(Logger logger, boolean subProcess, Task endTask, Task mainTask)
+	private void logEnd(boolean subProcess, Task endTask, Task mainTask)
 	{
 		String processUrl = endTask.getInstantiatesCanonical();
 		String businessKey = getFirstInputParameter(endTask, BpmnMessage.businessKey());
