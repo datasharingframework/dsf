@@ -120,9 +120,10 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 			if (definitions.size() != 1)
 				return null;
 
-			boolean isSnapshot = jar.getFileName().toString().endsWith(SNAPSHOT_FILE_SUFFIX);
-			boolean isMilestone = jar.getFileName().toString().matches(MILESTONE_FILE_PATTERN);
-			boolean isReleaseCandidate = jar.getFileName().toString().matches(RELEASE_CANDIDATE_FILE_PATTERN);
+			String filename = jar.getFileName().toString();
+			boolean isSnapshot = filename.endsWith(SNAPSHOT_FILE_SUFFIX);
+			boolean isMilestone = filename.matches(MILESTONE_FILE_PATTERN);
+			boolean isReleaseCandidate = filename.matches(RELEASE_CANDIDATE_FILE_PATTERN);
 
 			boolean draft = isSnapshot || isMilestone || isReleaseCandidate;
 
