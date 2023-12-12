@@ -130,12 +130,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 		if (targets == null)
 			execution.setVariable(BpmnExecutionVariables.TARGETS, null);
 
-		else if (!(targets instanceof TargetsImpl))
-			throw new IllegalArgumentException(
-					"Given targets implementing class " + targets.getClass().getName() + " not supported");
+		else if (targets instanceof TargetsImpl t)
+			execution.setVariable(BpmnExecutionVariables.TARGETS, TargetsValues.create(t));
 
 		else
-			execution.setVariable(BpmnExecutionVariables.TARGETS, TargetsValues.create((TargetsImpl) targets));
+			throw new IllegalArgumentException(
+					"Given targets implementing class " + targets.getClass().getName() + " not supported");
 	}
 
 	@Override
