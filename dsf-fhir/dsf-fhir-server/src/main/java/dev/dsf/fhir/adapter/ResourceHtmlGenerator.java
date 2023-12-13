@@ -2,26 +2,12 @@ package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Resource;
 
 public abstract class ResourceHtmlGenerator extends AbstractHtmlAdapter
 {
-	protected String getServerBaseUrlPath(String serverBaseUrl)
-	{
-		try
-		{
-			return new URL(serverBaseUrl).getPath();
-		}
-		catch (MalformedURLException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
 	protected void writeMeta(Resource resource, OutputStreamWriter out) throws IOException
 	{
 		writeSectionHeader("Meta", out);
@@ -31,13 +17,15 @@ public abstract class ResourceHtmlGenerator extends AbstractHtmlAdapter
 		{
 			List<String> profiles = resource.getMeta().getProfile().stream()
 					.map(p -> p.getValue().replaceAll("\\|", " \\| ")).toList();
-			writeRowWithListAndAdditionalRowClasses("Profiles", profiles, "profiles", out);
+			writeRowWithListAndAdditionalRowClasses("Profiles", profiles,
+					resource.getMeta().hasLastUpdated() ? "flex-element-67 flex-element-margin" : "flex-element-100",
+					out);
 		}
 
 		if (resource.getMeta().hasLastUpdated())
 		{
 			writeRowWithAdditionalRowClasses("Last Updated", formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT),
-					"last-updated", out);
+					resource.getMeta().hasProfile() ? "flex-element-33 flex-element-margin" : "flex-element-100", out);
 		}
 
 		out.write("</div>\n");

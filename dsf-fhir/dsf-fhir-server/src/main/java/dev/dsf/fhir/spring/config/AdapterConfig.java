@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.dsf.fhir.adapter.ActivityDefinitionHtmlGenerator;
 import dev.dsf.fhir.adapter.EndpointHtmlGenerator;
 import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.adapter.HtmlFhirAdapter;
@@ -34,9 +35,10 @@ public class AdapterConfig
 	public HtmlFhirAdapter htmlFhirAdapter()
 	{
 		return new HtmlFhirAdapter(propertiesConfig.getServerBaseUrl(), fhirConfig.fhirContext(),
-				List.of(new EndpointHtmlGenerator(), new OrganizationHtmlGenerator(),
-						new OrganizationAffiliationHtmlGenerator(), new QuestionnaireResponseHtmlGenerator(),
-						new TaskHtmlGenerator(), new SearchBundleHtmlGenerator(propertiesConfig.getServerBaseUrl(),
-								propertiesConfig.getDefaultPageCount())));
+				List.of(new ActivityDefinitionHtmlGenerator(), new EndpointHtmlGenerator(),
+						new OrganizationHtmlGenerator(), new OrganizationAffiliationHtmlGenerator(),
+						new QuestionnaireResponseHtmlGenerator(),
+						new SearchBundleHtmlGenerator(propertiesConfig.getServerBaseUrl(),
+								propertiesConfig.getDefaultPageCount()), new TaskHtmlGenerator()));
 	}
 }

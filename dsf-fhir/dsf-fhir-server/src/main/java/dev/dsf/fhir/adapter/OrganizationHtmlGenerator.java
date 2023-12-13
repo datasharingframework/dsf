@@ -82,20 +82,18 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 		List<OrganizationContactComponent> contacts = resource.getContact();
 		for (OrganizationContactComponent contact : contacts)
 		{
-			boolean isAdmin = contact.getPurpose().getCoding().stream()
-					.anyMatch(c -> CODE_SYSTEM_CONTACT_TYPE.equals(c.getSystem())
-							&& CODE_SYSTEM_CONTACT_TYPE_VALUE_ADMIN.equals(c.getCode()));
+			boolean isAdmin = contact.getPurpose().getCoding().stream().anyMatch(
+					c -> CODE_SYSTEM_CONTACT_TYPE.equals(c.getSystem()) && CODE_SYSTEM_CONTACT_TYPE_VALUE_ADMIN.equals(
+							c.getCode()));
 
 			if (isAdmin && (contact.hasName() || contact.hasAddress() || contact.hasTelecom()))
 			{
 				writeSectionHeader("Admin Contact", out);
 
 				if (contact.hasName())
-					writeRow("Name",
-							contact.getName().getNameAsSingleString() != null
-									? contact.getName().getNameAsSingleString()
-									: "",
-							out);
+					writeRow("Name", contact.getName().getNameAsSingleString() != null ?
+							contact.getName().getNameAsSingleString() :
+							"", out);
 
 				if (contact.hasAddress())
 					writeRowWithAddress(resource.getAddressFirstRep(), out);
@@ -131,15 +129,15 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 
 		if (eMail.isPresent() || phone.isPresent())
 		{
-			out.write("<div class=\"contact\">\n");
+			out.write("<div class=\"flex-element\">\n");
 
 			if (eMail.isPresent())
 				writeRowWithAdditionalRowClasses("eMail", eMail.get().getValue(),
-						phone.isPresent() ? "contact-element-50 contact-element-margin" : "contact-element-100", out);
+						phone.isPresent() ? "flex-element-50 flex-element-margin" : "flex-element-100", out);
 
 			if (phone.isPresent())
 				writeRowWithAdditionalRowClasses("Phone", phone.get().getValue(),
-						eMail.isPresent() ? "contact-element-50" : "contact-element-100", out);
+						eMail.isPresent() ? "flex-element-50" : "flex-element-100", out);
 
 			out.write("</div>\n");
 		}

@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 
 public class ActivityDefinitionHtmlGenerator extends ResourceHtmlGenerator implements HtmlGenerator<ActivityDefinition>
 {
@@ -56,47 +60,124 @@ public class ActivityDefinitionHtmlGenerator extends ResourceHtmlGenerator imple
 
 		if (!processAuthorizations.isEmpty())
 		{
-			writeSectionHeader("Process Authorization", out);
-
-			for (Extension extension : processAuthorizations)
+			for (int i = 0; i < processAuthorizations.size(); i++)
 			{
-				writeProcessAuthorizationRow(extension, out);
+				writeProcessAuthorizationRow(processAuthorizations.get(i),
+						"Authorization" + (processAuthorizations.size() > 1 ? " " + (i + 1) : ""), out);
 			}
 		}
 
 		out.write("</div>\n");
 	}
 
-	private void writeProcessAuthorizationRow(Extension extension, OutputStreamWriter out) throws IOException
+	private void writeProcessAuthorizationRow(Extension extension, String header, OutputStreamWriter out)
+			throws IOException
 	{
 		Optional<String> taskProfile = extension.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE)
-				.stream().filter(e -> e.getValue() instanceof StringType)
-				.map(e -> ((StringType) e.getValue()).getValue()).findFirst();
+				.stream().filter(e -> e.getValue() instanceof CanonicalType)
+				.map(e -> String.join(" | ", ((CanonicalType) e.getValue()).getValue().split("\\|"))).findFirst();
 
 		Optional<String> messageName = extension.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME)
 				.stream().filter(e -> e.getValue() instanceof StringType)
 				.map(e -> ((StringType) e.getValue()).getValue()).findFirst();
 
-		if (taskProfile.isPresent())
+		if (taskProfile.isPresent() || messageName.isPresent())
 		{
-			writeRowWithAdditionalTextClasses("Task Profile", taskProfile.get(), messageName.isPresent() ? "66" : "",
-					out);
+			writeSectionHeader(header, out);
+			out.write("<div class=\"flex-element\">\n");
+
+			if (messageName.isPresent())
+			{
+				writeRowWithAdditionalRowClasses("Message Name", messageName.get(),
+						taskProfile.isPresent() ? "flex-element-33 flex-element-margin" : "flex-element-100", out);
+			}
+
+			if (taskProfile.isPresent())
+			{
+				writeRowWithAdditionalRowClasses("Task Profile", taskProfile.get(),
+						messageName.isPresent() ? "flex-element-67" : "flex-element-100", out);
+			}
+
+			out.write("</div>\n");
 		}
 
-		if (messageName.isPresent())
+		List<Coding> requester = extension.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_REQUESTER).stream()
+				.filter(e -> e.getValue() instanceof Coding).map(e -> ((Coding) e.getValue())).toList();
+		writeAuthorizationFor(requester, "Requester", out);
+
+		List<Coding> recipient = extension.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT).stream()
+				.filter(e -> e.getValue() instanceof Coding).map(e -> ((Coding) e.getValue())).toList();
+		writeAuthorizationFor(recipient, "Recipient", out);
+	}
+
+	private void writeAuthorizationFor(List<Coding> authorization, String header, OutputStreamWriter out)
+			throws IOException
+	{
+		for (int i = 0; i < authorization.size(); i++)
 		{
-			writeRowWithAdditionalRowClasses("Message Name", messageName.get(), taskProfile.isPresent() ? "33" : "",
-					out);
+			out.write("<div class=\"row authorization\">\n");
+			out.write("<h3>" + header + (authorization.size() > 1 ? " " + (i + 1) : "") + "</h4>\n");
+
+			Coding authorizationCode = authorization.get(i);
+			writeRowWithAdditionalRowClasses("Authorization Type",
+					authorizationCode.getSystem() + " | <b>" + authorizationCode.getCode() + "</b>", "nested-row", out);
+
+			writeCoding("Practitioner", authorizationCode,
+					"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-practitioner", out);
+			writeIdentifier("Organization", authorizationCode,
+					"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization", out);
+
+			List<Extension> authorizationOrganizationPractitioner = authorizationCode.getExtensionsByUrl(
+					"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization-practitioner");
+			for (Extension extension : authorizationOrganizationPractitioner)
+			{
+				writeIdentifier("Organization", extension, "organization", out);
+				writeCoding("Practitioner Role", extension, "practitioner-role", out);
+			}
+
+			List<Extension> authorizationParentOrganizationRole = authorizationCode.getExtensionsByUrl(
+					"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role");
+			for (Extension extension : authorizationParentOrganizationRole)
+			{
+				writeIdentifier("Parent Organization", extension, "parent-organization", out);
+				writeCoding("Organization Role", extension, "organization-role", out);
+			}
+
+			List<Extension> authorizationParentOrganizationPractitionerRole = authorizationCode.getExtensionsByUrl(
+					"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role-practitioner");
+			for (Extension extension : authorizationParentOrganizationPractitionerRole)
+			{
+				writeIdentifier("Parent Organization", extension, "parent-organization", out);
+				writeCoding("Organization Role", extension, "organization-role", out);
+				writeCoding("Practitioner Role", extension, "practitioner-role", out);
+			}
+
+			out.write("</div>\n");
 		}
+	}
 
-		extension.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_REQUESTER);
-		extension.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT);
+	private void writeCoding(String label, Type type, String url, OutputStreamWriter out) throws IOException
+	{
+		Optional<Coding> coding = type.getExtension().stream().filter(e -> url.equals(e.getUrl()))
+				.filter(e -> e.getValue() instanceof Coding).map(e -> ((Coding) e.getValue())).findFirst();
 
-		// TODO:
-		// task-profile
-		// message-name
-		// requestor role
-		// recipient role
+		if (coding.isPresent())
+		{
+			writeRowWithAdditionalRowClasses(label,
+					coding.get().getSystem() + " | <b>" + coding.get().getCode() + "</b>", "nested-row", out);
+		}
+	}
+
+	private void writeIdentifier(String label, Type type, String url, OutputStreamWriter out) throws IOException
+	{
+		Optional<Identifier> identifier = type.getExtension().stream().filter(e -> url.equals(e.getUrl()))
+				.filter(e -> e.getValue() instanceof Identifier).map(e -> ((Identifier) e.getValue())).findFirst();
+
+		if (identifier.isPresent())
+		{
+			writeRowWithAdditionalRowClasses(label,
+					identifier.get().getSystem() + " | <b>" + identifier.get().getValue() + "</b>", "nested-row", out);
+		}
 	}
 
 	@Override
