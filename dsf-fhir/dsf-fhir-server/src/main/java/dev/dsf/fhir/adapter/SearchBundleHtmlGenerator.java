@@ -238,7 +238,7 @@ public class SearchBundleHtmlGenerator extends AbstractHtmlAdapter implements Ht
 
 	private String getActivityDefinitionHeader()
 	{
-		return "<tr><th>ID</th><th>Status</th><th>Title</th><th>Publisher</th><th>Message Names</th><th>Last Updated</th></tr>";
+		return "<tr><th>ID</th><th>Status</th><th>Title</th><th>Url & Version</th><th>Message Names</th><th>Last Updated</th></tr>";
 	}
 
 	private String getEndpointHeader()
@@ -333,6 +333,19 @@ public class SearchBundleHtmlGenerator extends AbstractHtmlAdapter implements Ht
 
 	private String getActivityDefinitionRow(ActivityDefinition resource)
 	{
+		String domain = "", processName = "", processVersion = "";
+		if (resource.getUrl() != null && !resource.getUrl().isBlank())
+		{
+			Matcher matcher = INSTANTIATES_CANONICAL_PATTERN
+					.matcher(resource.getUrl() + (resource.hasVersion() ? "|" + resource.getVersion() : ""));
+			if (matcher.matches())
+			{
+				domain = matcher.group("domain");
+				processName = matcher.group("processName");
+				processVersion = matcher.group("processVersion");
+			}
+		}
+
 		List<String> messageNames = resource.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION).stream()
 				.flatMap(e -> e.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME).stream())
 				.filter(e -> e.getValue() instanceof StringType).map(e -> ((StringType) e.getValue()).getValue())
@@ -345,9 +358,9 @@ public class SearchBundleHtmlGenerator extends AbstractHtmlAdapter implements Ht
 		return "<td status=\"" + (resource.hasStatus() ? resource.getStatus().toCode() : "") + "\" class=\"id-value\">"
 				+ createResourceLink(resource) + "</td><td>"
 				+ (resource.hasStatus() ? resource.getStatus().toCode() : "") + "</td><td>"
-				+ (resource.hasTitle() ? resource.getTitle() : "") + "</td><td>"
-				+ (resource.hasPublisher() ? resource.getPublisher() : "") + "</td><td>" + combinedMessageNames
-				+ "</td><td>" + formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT) + "</td>";
+				+ (resource.hasTitle() ? resource.getTitle() : "") + "</td><td>" + domain + " | " + processName + " | "
+				+ processVersion + "</td><td>" + combinedMessageNames + "</td><td>"
+				+ formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT) + "</td>";
 	}
 
 	private String getTaskRow(Task resource)
