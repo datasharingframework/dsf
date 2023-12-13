@@ -238,12 +238,12 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 			catch (Exception e)
 			{
-				logger.error("Literal external reference {} could not be resolved on remote server {}: {}",
-						reference.getReference().getReference(), remoteServerBase, e.getMessage());
+				logger.debug("Literal external reference {} could not be resolved on remote server {}",
+						reference.getReference().getReference(), remoteServerBase, e);
+				logger.error("Literal external reference {} could not be resolved on remote server {}: {} - {}",
+						reference.getReference().getReference(), remoteServerBase, e.getClass().getName(),
+						e.getMessage());
 
-				if (logger.isDebugEnabled())
-					logger.debug("Literal external reference " + reference.getReference().getReference()
-							+ " could not be resolved on remote server " + remoteServerBase, e);
 				return Optional.empty();
 			}
 		}
@@ -372,6 +372,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 						UriComponentsBuilder.newInstance().path(referenceTargetDao.getResourceTypeName())
 								.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
 						resourceReference.getLocation());
+
 			return Optional.empty();
 		}
 		else if (result.getTotal() == 1)
@@ -488,12 +489,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 			catch (Exception e)
 			{
-				logger.error("Literal external reference {} could not be resolved on remote server {}: {}",
-						referenceValue, remoteServerBase, e.getMessage());
-
-				if (logger.isDebugEnabled())
-					logger.debug("Literal external reference " + referenceValue
-							+ " could not be resolved on remote server " + remoteServerBase, e);
+				logger.debug("Literal external reference {} could not be resolved on remote server {}", referenceValue,
+						remoteServerBase, e);
+				logger.error("Literal external reference {} could not be resolved on remote server {}: {} - {}",
+						referenceValue, remoteServerBase, e.getClass().getName(), e.getMessage());
 
 				return Optional.of(responseGenerator.referenceTargetCouldNotBeResolvedOnRemote(bundleIndex, resource,
 						reference, remoteServerBase));

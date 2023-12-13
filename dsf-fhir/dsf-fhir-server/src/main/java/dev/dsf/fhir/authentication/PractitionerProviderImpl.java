@@ -70,7 +70,9 @@ public class PractitionerProviderImpl extends AbstractProvider implements Practi
 		}
 		catch (CertificateEncodingException e)
 		{
+			logger.debug("Unable to get X500Name from certificate", e);
 			logger.warn("Unable to get X500Name from certificate: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return Optional.empty();
 		}
 	}

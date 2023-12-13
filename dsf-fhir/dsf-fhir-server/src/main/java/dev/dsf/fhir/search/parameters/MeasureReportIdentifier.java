@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/MeasureReport-identifier", type = SearchParamType.TOKEN, documentation = "External identifier of the measure report to be returned")
 public class MeasureReportIdentifier extends AbstractIdentifierParameter<MeasureReport>
 {
-	public static final String RESOURCE_COLUMN = "measure_report";
+	private static final String RESOURCE_COLUMN = "measure_report";
 
 	public MeasureReportIdentifier()
 	{
@@ -20,9 +20,6 @@ public class MeasureReportIdentifier extends AbstractIdentifierParameter<Measure
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof MeasureReport))
 			return false;
 

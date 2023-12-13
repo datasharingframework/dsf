@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
 
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Resource;
@@ -66,22 +65,19 @@ public class NamingSystemName extends AbstractStringParameter<NamingSystem>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Endpoint))
+		if (!(resource instanceof NamingSystem))
 			return false;
 
-		Endpoint e = (Endpoint) resource;
+		NamingSystem n = (NamingSystem) resource;
 
 		switch (valueAndType.type)
 		{
 			case STARTS_WITH:
-				return e.getName() != null && e.getName().toLowerCase().startsWith(valueAndType.value.toLowerCase());
+				return n.getName() != null && n.getName().toLowerCase().startsWith(valueAndType.value.toLowerCase());
 			case CONTAINS:
-				return e.getName() != null && e.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
+				return n.getName() != null && n.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
 			case EXACT:
-				return Objects.equals(e.getName(), valueAndType.value);
+				return Objects.equals(n.getName(), valueAndType.value);
 			default:
 				throw notDefined();
 		}

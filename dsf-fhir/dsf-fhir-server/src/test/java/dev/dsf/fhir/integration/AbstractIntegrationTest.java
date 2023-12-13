@@ -246,7 +246,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		};
 
 		JettyServer server = new JettyServer(apiConnector, statusConnector, "dsf-fhir-server", CONTEXT_PATH,
-				servletContainerInitializers, initParameters, caCertificate, securityHandlerConfigurer);
+				servletContainerInitializers, initParameters, securityHandlerConfigurer);
 
 		server.start();
 
@@ -262,7 +262,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while reading bundle from " + bundleTemplateFile.toString(), e);
+			logger.error("Error while reading bundle from {}", bundleTemplateFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -276,7 +276,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while writing bundle to " + bundleFile.toString(), e);
+			logger.error("Error while writing bundle to {}", bundleFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}

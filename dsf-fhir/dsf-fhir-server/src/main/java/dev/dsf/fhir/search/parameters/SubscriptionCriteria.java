@@ -45,9 +45,6 @@ public class SubscriptionCriteria extends AbstractStringParameter<Subscription>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Subscription))
 			return false;
 

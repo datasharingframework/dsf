@@ -58,8 +58,8 @@ public class All implements Recipient, Requester
 
 	private Set<Coding> getPractitionerRoles(Identity identity)
 	{
-		if (identity instanceof PractitionerIdentity)
-			return ((PractitionerIdentity) identity).getPractionerRoles();
+		if (identity instanceof PractitionerIdentity p)
+			return p.getPractionerRoles();
 		else
 			return Collections.emptySet();
 	}
@@ -130,7 +130,7 @@ public class All implements Recipient, Requester
 	private boolean matches(Extension extension, String url)
 	{
 		return extension != null && url.equals(extension.getUrl()) && extension.hasValue()
-				&& extension.getValue() instanceof Coding && matches((Coding) extension.getValue());
+				&& extension.getValue() instanceof Coding value && matches(value);
 	}
 
 	private boolean hasMatchingPractitionerExtension(List<Extension> extensions)
@@ -142,8 +142,8 @@ public class All implements Recipient, Requester
 	private boolean practitionerExtensionMatches(Extension extension)
 	{
 		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PRACTITIONER.equals(extension.getUrl())
-				&& extension.hasValue() && extension.getValue() instanceof Coding
-				&& practitionerRoleMatches((Coding) extension.getValue());
+				&& extension.hasValue() && extension.getValue() instanceof Coding value
+				&& practitionerRoleMatches(value);
 	}
 
 	private boolean practitionerRoleMatches(Coding coding)
@@ -205,13 +205,10 @@ public class All implements Recipient, Requester
 			if (practitionerRoles.size() == 1)
 			{
 				Extension practitionerRole = practitionerRoles.get(0);
-				if (practitionerRole.hasValue() && practitionerRole.getValue() instanceof Coding)
+				if (practitionerRole.hasValue() && practitionerRole.getValue() instanceof Coding value
+						&& value.hasSystem() && value.hasCode() && practitionerRoleExists.test(coding))
 				{
-					Coding practitionerRoleCoding = (Coding) practitionerRole.getValue();
-					if (practitionerRoleCoding.hasSystem() && practitionerRoleCoding.hasCode()
-							&& practitionerRoleExists.test(coding))
-						return Optional.of(
-								new All(true, practitionerRoleCoding.getSystem(), practitionerRoleCoding.getCode()));
+					return Optional.of(new All(true, value.getSystem(), value.getCode()));
 				}
 			}
 		}
@@ -223,10 +220,10 @@ public class All implements Recipient, Requester
 	{
 		if (coding != null && coding.hasSystem()
 				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_SYSTEM.equals(coding.getSystem())
-				&& coding.hasCode())
+				&& coding.hasCode()
+				&& ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL.equals(coding.getCode()))
 		{
-			if (ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL.equals(coding.getCode()))
-				return Optional.of(new All(true, null, null));
+			return Optional.of(new All(true, null, null));
 			// remote not allowed for recipient
 		}
 

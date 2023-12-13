@@ -182,7 +182,7 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 		{
 			logger.debug(
 					"Inclusion of {}/{}/_history/{} denied for identity '{} via bundle at index {}: read not allowed",
-					resourceTypeName, resourceId, resourceVersion, index, identity.getName(), index);
+					resourceTypeName, resourceId, resourceVersion, identity.getName(), index);
 			return false;
 		});
 	}

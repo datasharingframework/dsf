@@ -31,9 +31,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = ResearchStudyPrincipalInvestigator.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ResearchStudy-principalinvestigator", type = SearchParamType.REFERENCE, documentation = "Researcher who oversees multiple aspects of the study")
 public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParameter<ResearchStudy>
 {
-	public static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
 	public static final String PARAMETER_NAME = "principalinvestigator";
-	public static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "PractitionerRole" };
+	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "PractitionerRole" };
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -164,9 +164,6 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof ResearchStudy))
 			return false;
 
@@ -174,15 +171,13 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (r.getPrincipalInvestigator().getResource() instanceof Practitioner)
+			if (r.getPrincipalInvestigator().getResource() instanceof Practitioner p)
 			{
-				Practitioner p = (Practitioner) r.getPrincipalInvestigator().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}
-			else if (r.getPrincipalInvestigator().getResource() instanceof PractitionerRole)
+			else if (r.getPrincipalInvestigator().getResource() instanceof PractitionerRole p)
 			{
-				PractitionerRole p = (PractitionerRole) r.getPrincipalInvestigator().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

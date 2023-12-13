@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractVersionParameter;
 @SearchParameterDefinition(name = AbstractVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/StructureDefinition-version", type = SearchParamType.TOKEN, documentation = "The business version of the structure definition")
 public class StructureDefinitionVersion extends AbstractVersionParameter<StructureDefinition>
 {
-	public static final String RESOURCE_COLUMN = "structure_definition";
+	private static final String RESOURCE_COLUMN = "structure_definition";
 
 	public StructureDefinitionVersion()
 	{

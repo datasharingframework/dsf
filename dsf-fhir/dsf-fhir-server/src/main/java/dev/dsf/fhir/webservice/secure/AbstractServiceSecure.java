@@ -59,11 +59,10 @@ public abstract class AbstractServiceSecure<S extends BasicService> extends Abst
 			logger.debug("Current organization identity '{}', dsf-roles '{}'", identity.getName(),
 					identity.getDsfRoles());
 		}
-		else if (identity instanceof PractitionerIdentity)
+		else if (identity instanceof PractitionerIdentity practitioner)
 		{
-			PractitionerIdentity practitionerIdentity = (PractitionerIdentity) identity;
 			logger.debug("Current practitioner identity '{}', dsf-roles '{}', practitioner-roles '{}'",
-					identity.getName(), identity.getDsfRoles(), practitionerIdentity.getPractionerRoles().stream()
+					identity.getName(), identity.getDsfRoles(), practitioner.getPractionerRoles().stream()
 							.map(c -> c.getSystem() + "|" + c.getCode()).collect(Collectors.joining(", ", "[", "]")));
 		}
 	}

@@ -30,17 +30,17 @@ public class PractitionerAuthorizationRule extends AbstractMetaTagAuthorizationR
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			Practitioner newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			Practitioner newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Practitioner newResource)
+	private Optional<String> newResourceOk(Connection connection, Practitioner newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

@@ -920,24 +920,28 @@ public class ResponseGenerator
 	public Response unableToGenerateSnapshot(StructureDefinition resource, Integer bundleIndex,
 			List<ValidationMessage> messages)
 	{
+		String messagesLogString = messages == null ? ""
+				: messages.stream().map(ValidationMessage::getDisplay).collect(Collectors.joining(", ", ": [", "]"));
+
 		if (bundleIndex == null)
 			logger.warn(
-					"Unable to generate StructureDefinition snapshot for profile with url {}, version {} and id {}: {}",
-					resource.getUrl(), resource.getVersion(), resource.getId());
+					"Unable to generate StructureDefinition snapshot for profile with url {}, version {} and id {}{}",
+					resource.getUrl(), resource.getVersion(), resource.getId(), messagesLogString);
 		else
 			logger.warn(
-					"Unable to generate StructureDefinition snapshot for profile with url {}, version {} and id {} at bundle index {}: {}",
-					resource.getUrl(), resource.getVersion(), resource.getId(), bundleIndex);
+					"Unable to generate StructureDefinition snapshot for profile with url {}, version {} and id {} at bundle index {}{}",
+					resource.getUrl(), resource.getVersion(), resource.getId(), bundleIndex, messagesLogString);
 
 		OperationOutcome outcome = new OperationOutcome();
 
-		messages.forEach(m -> outcome.addIssue().setSeverity(convert(m.getLevel())).setCode(convert(m.getType()))
-				.setDiagnostics(m.summary()));
+		if (messages != null)
+			messages.forEach(m -> outcome.addIssue().setSeverity(convert(m.getLevel())).setCode(convert(m.getType()))
+					.setDiagnostics(m.summary()));
 
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	private IssueSeverity convert(org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity severity)
+	private IssueSeverity convert(ValidationMessage.IssueSeverity severity)
 	{
 		switch (severity)
 		{
@@ -956,7 +960,7 @@ public class ResponseGenerator
 		}
 	}
 
-	private IssueType convert(org.hl7.fhir.utilities.validation.ValidationMessage.IssueType type)
+	private IssueType convert(ValidationMessage.IssueType type)
 	{
 		switch (type)
 		{

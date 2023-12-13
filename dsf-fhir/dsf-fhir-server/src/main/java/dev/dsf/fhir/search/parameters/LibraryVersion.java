@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractVersionParameter;
 @SearchParameterDefinition(name = AbstractVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Library-version", type = SearchParamType.TOKEN, documentation = "The business version of the library")
 public class LibraryVersion extends AbstractVersionParameter<Library>
 {
-	public static final String RESOURCE_COLUMN = "library";
+	private static final String RESOURCE_COLUMN = "library";
 
 	public LibraryVersion()
 	{

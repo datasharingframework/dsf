@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-identifier", type = SearchParamType.TOKEN, documentation = "A practitioner's Identifier")
 public class PractitionerRoleIdentifier extends AbstractIdentifierParameter<PractitionerRole>
 {
-	public static final String RESOURCE_COLUMN = "practitioner_role";
+	private static final String RESOURCE_COLUMN = "practitioner_role";
 
 	public PractitionerRoleIdentifier()
 	{
@@ -20,9 +20,6 @@ public class PractitionerRoleIdentifier extends AbstractIdentifierParameter<Prac
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof PractitionerRole))
 			return false;
 

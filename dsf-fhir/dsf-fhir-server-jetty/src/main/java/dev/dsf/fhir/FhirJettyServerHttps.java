@@ -9,7 +9,7 @@ import dev.dsf.fhir.config.FhirDbMigratorConfig;
 import dev.dsf.fhir.config.FhirHttpsJettyConfig;
 import dev.dsf.tools.db.DbMigrator;
 
-public class FhirJettyServerHttps
+public final class FhirJettyServerHttps
 {
 	static
 	{
@@ -17,6 +17,10 @@ public class FhirJettyServerHttps
 		SLF4JBridgeHandler.install();
 
 		Log4jInitializer.initializeLog4j();
+	}
+
+	private FhirJettyServerHttps()
+	{
 	}
 
 	public static void main(String[] args)

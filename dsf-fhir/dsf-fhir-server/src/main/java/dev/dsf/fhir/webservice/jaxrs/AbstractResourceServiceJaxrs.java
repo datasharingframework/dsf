@@ -1,6 +1,5 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,66 +156,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 		logger.trace("GET {}", uri.getRequestUri().toString());
 
 		return delegate.search(uri, headers);
-	}
-
-	@POST
-	@Path("/{validate : [$]validate(/)?}")
-	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
-			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
-	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
-			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
-	@Override
-	public Response postValidateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri,
-			@Context HttpHeaders headers)
-	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
-		return delegate.postValidateNew(validate, parameters, uri, headers);
-	}
-
-	@GET
-	@Path("/{validate : [$]validate(/)?}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
-			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
-	@Override
-	public Response getValidateNew(@PathParam("validate") String validate, @Context UriInfo uri,
-			@Context HttpHeaders headers)
-	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
-		return delegate.getValidateNew(validate, uri, headers);
-	}
-
-	@POST
-	@Path("/{id}/{validate : [$]validate(/)?}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
-			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
-	@Override
-	public Response postValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
-			Parameters parameters, @Context UriInfo uri, @Context HttpHeaders headers)
-	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
-		return delegate.postValidateExisting(validatePath, id, parameters, uri, headers);
-	}
-
-	@GET
-	@Path("/{id}/{validate : [$]validate(/)?}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
-			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
-	@Override
-	public Response getValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
-			@Context UriInfo uri, @Context HttpHeaders headers)
-	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
-		return delegate.getValidateExisting(validatePath, id, uri, headers);
 	}
 
 	@POST

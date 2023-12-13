@@ -56,7 +56,7 @@ public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Bi
 		if (uri.getQueryParameters().containsKey(Constants.PARAM_FORMAT))
 			return super.getMediaTypeForRead(uri, headers);
 		else
-			return getMediaType(uri, headers);
+			return getMediaType(headers);
 	}
 
 	@Override
@@ -65,10 +65,10 @@ public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Bi
 		if (uri.getQueryParameters().containsKey(Constants.PARAM_FORMAT))
 			return super.getMediaTypeForVRead(uri, headers);
 		else
-			return getMediaType(uri, headers);
+			return getMediaType(headers);
 	}
 
-	private MediaType getMediaType(UriInfo uri, HttpHeaders headers)
+	private MediaType getMediaType(HttpHeaders headers)
 	{
 		List<MediaType> types = headers.getAcceptableMediaTypes();
 		return types == null ? null : types.get(0);

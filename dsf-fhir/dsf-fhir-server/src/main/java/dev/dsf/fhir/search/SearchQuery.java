@@ -42,7 +42,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	public static final String[] STANDARD_PARAMETERS = { PARAMETER_SORT, PARAMETER_INCLUDE, PARAMETER_REVINCLUDE,
 			PARAMETER_PAGE, PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY, PARAMETER_SUMMARY };
 
-	public static final String[] SINGLE_VALUE_PARAMETERS = { PARAMETER_SORT, PARAMETER_PAGE, PARAMETER_COUNT,
+	private static final String[] SINGLE_VALUE_PARAMETERS = { PARAMETER_SORT, PARAMETER_PAGE, PARAMETER_COUNT,
 			PARAMETER_FORMAT, PARAMETER_PRETTY, PARAMETER_SUMMARY };
 
 	public static class SearchQueryBuilder<R extends Resource>
@@ -404,7 +404,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	{
 		String countQueryMain = "SELECT count(*) FROM current_" + resourceTable;
 
-		return countQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "");
+		return countQueryMain + (!filterQuery.isEmpty() ? " WHERE " + filterQuery : "");
 	}
 
 	@Override
@@ -413,7 +413,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		String searchQueryMain = "SELECT " + resourceColumn + includeSql + revIncludeSql + " FROM current_"
 				+ resourceTable;
 
-		return searchQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "") + sortSql
+		return searchQueryMain + (!filterQuery.isEmpty() ? " WHERE " + filterQuery : "") + sortSql
 				+ pageAndCount.getSql();
 	}
 
@@ -442,7 +442,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while modifying prepared statement '{}': {}", statement.toString(), e.getMessage());
+			logger.debug("Error while modifying prepared statement '{}'", statement.toString(), e);
 			throw e;
 		}
 	}

@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Group-identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the group")
 public class GroupIdentifier extends AbstractIdentifierParameter<Group>
 {
-	public static final String RESOURCE_COLUMN = "group_json";
+	private static final String RESOURCE_COLUMN = "group_json";
 
 	public GroupIdentifier()
 	{
@@ -20,9 +20,6 @@ public class GroupIdentifier extends AbstractIdentifierParameter<Group>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Group))
 			return false;
 

@@ -206,11 +206,12 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while executing {} bean {} for process plugin {}, {} - {}",
+				logger.debug("Error while executing {} bean {} for process plugin {}",
+						ProcessPluginDeploymentStateListener.class.getName(), entry.getKey(),
+						plugin.getJarFile().toString(), e);
+				logger.warn("Error while executing {} bean {} for process plugin {}: {} - {}",
 						ProcessPluginDeploymentStateListener.class.getName(), entry.getKey(),
 						plugin.getJarFile().toString(), e.getClass().getName(), e.getMessage());
-				logger.debug("Error while executing " + ProcessPluginDeploymentStateListener.class.getName() + " bean "
-						+ entry.getKey() + " for process plugin " + plugin.getJarFile().toString(), e);
 			}
 		};
 	}

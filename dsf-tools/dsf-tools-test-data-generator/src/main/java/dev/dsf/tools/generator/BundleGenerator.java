@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,7 +46,7 @@ public class BundleGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while reading bundle from " + bundleTemplateFile.toString(), e);
+			logger.error("Error while reading bundle from {}", bundleTemplateFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -53,13 +54,13 @@ public class BundleGenerator
 	private void writeBundle(Path bundleFile, Bundle bundle)
 	{
 		try (OutputStream out = Files.newOutputStream(bundleFile);
-				OutputStreamWriter writer = new OutputStreamWriter(out))
+				OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8))
 		{
 			newXmlParser().encodeResourceToWriter(bundle, writer);
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while writing bundle to " + bundleFile.toString(), e);
+			logger.error("Error while writing bundle to {}", bundleFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}

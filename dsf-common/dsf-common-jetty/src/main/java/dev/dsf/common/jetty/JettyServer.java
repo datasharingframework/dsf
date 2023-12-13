@@ -1,6 +1,7 @@
 package dev.dsf.common.jetty;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import de.rwh.utils.crypto.CertificateHelper;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 public final class JettyServer
 {
@@ -110,13 +112,15 @@ public final class JettyServer
 			}
 			catch (IOException e)
 			{
-				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				logger.debug("Unable to open server socket channel", e);
+				logger.warn("Unable to open server socket channel: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		};
 	}
 
-	public static final Function<Server, ServerConnector> httpConnector(String host, int port,
+	public static Function<Server, ServerConnector> httpConnector(String host, int port,
 			String clientCertificateHeaderName)
 	{
 		return server ->
@@ -131,7 +135,7 @@ public final class JettyServer
 		};
 	}
 
-	public static final Function<Server, ServerConnector> httpConnector(ServerSocketChannel channel,
+	public static Function<Server, ServerConnector> httpConnector(ServerSocketChannel channel,
 			String clientCertificateHeaderName)
 	{
 		return server ->
@@ -147,7 +151,9 @@ public final class JettyServer
 			}
 			catch (IOException e)
 			{
-				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				logger.debug("Unable to open server socket channel", e);
+				logger.warn("Unable to open server socket channel: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		};
@@ -171,7 +177,9 @@ public final class JettyServer
 			}
 			catch (IOException e)
 			{
-				logger.warn("Unable to open server socket channel: {}", e.getMessage());
+				logger.debug("Unable to open server socket channel", e);
+				logger.warn("Unable to open server socket channel: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		};
@@ -236,7 +244,9 @@ public final class JettyServer
 		}
 		catch (KeyStoreException e)
 		{
-			logger.warn("Error while printing trust store / key store config", e);
+			logger.debug("Error while printing trust store / key store config", e);
+			logger.warn("Error while printing trust store / key store config: {} - {}", e.getClass().getName(),
+					e.getMessage());
 		}
 	}
 
@@ -249,8 +259,7 @@ public final class JettyServer
 	public JettyServer(Function<Server, ServerConnector> apiConnectorProvider,
 			Function<Server, ServerConnector> statusConnectorProvider, String mavenServerModuleName, String contextPath,
 			List<Class<? extends ServletContainerInitializer>> servletContainerInitializers,
-			Map<String, String> initParameters, KeyStore clientTrustStore,
-			BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer)
+			Map<String, String> initParameters, BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer)
 	{
 		server = new Server(threadPool());
 		apiConnector = apiConnectorProvider.apply(server);
@@ -316,15 +325,15 @@ public final class JettyServer
 		return new ErrorHandler()
 		{
 			@Override
-			protected void writeErrorPage(jakarta.servlet.http.HttpServletRequest request, java.io.Writer writer,
-					int code, String message, boolean showStacks) throws java.io.IOException
+			protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message,
+					boolean showStacks) throws IOException
 			{
-				logger.warn("Error {}: {}", code, message);
+				logger.info("Error {}: {}", code, message);
 			}
 		};
 	}
 
-	public final void start()
+	public void start()
 	{
 		Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
@@ -344,14 +353,14 @@ public final class JettyServer
 				e.addSuppressed(e1);
 			}
 
-			if (e instanceof RuntimeException)
-				throw (RuntimeException) e;
+			if (e instanceof RuntimeException r)
+				throw r;
 			else
 				throw new RuntimeException(e);
 		}
 	}
 
-	public final void stop()
+	public void stop()
 	{
 		logger.info("Stopping jetty server ...");
 		try
@@ -367,7 +376,7 @@ public final class JettyServer
 	/**
 	 * @return <code>null</code> if server not started or web application failed to start
 	 */
-	public final ServletContext getServletContext()
+	public ServletContext getServletContext()
 	{
 		return webAppContext == null ? null : webAppContext.getServletContext();
 	}

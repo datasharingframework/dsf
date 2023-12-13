@@ -50,20 +50,20 @@ public class ActivityDefinitionAuthorizationRule
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForCreate(Connection connection, Identity user,
+	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			ActivityDefinition newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
-	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity user,
+	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			ActivityDefinition newResource)
 	{
-		return newResourceOk(connection, user, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, ActivityDefinition newResource)
+	private Optional<String> newResourceOk(Connection connection, ActivityDefinition newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -120,7 +120,10 @@ public class ActivityDefinitionAuthorizationRule
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for ActivityDefinition", e);
+			logger.debug("Error while searching for ActivityDefinition", e);
+			logger.warn("Error while searching for ActivityDefinition: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			return false;
 		}
 	}

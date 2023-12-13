@@ -68,6 +68,6 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 
 	private void logResult(BundleEntryComponent entry)
 	{
-		logger.info("{} {}", entry.getResponse().getLocation(), entry.getResponse().getStatus());
+		logger.info("Result: {} {}", entry.getResponse().getLocation(), entry.getResponse().getStatus());
 	}
 }

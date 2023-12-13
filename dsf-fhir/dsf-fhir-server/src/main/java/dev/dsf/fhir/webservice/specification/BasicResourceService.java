@@ -1,6 +1,5 @@
 package dev.dsf.fhir.webservice.specification;
 
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.webservice.base.BasicService;
@@ -125,15 +124,6 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	 *         <a href="https://www.hl7.org/fhir/http.html#search">https://www.hl7.org/fhir/http.html#search</a>
 	 */
 	Response search(UriInfo uri, HttpHeaders headers);
-
-	Response postValidateNew(String validatePath, Parameters parameters, UriInfo uri, HttpHeaders headers);
-
-	Response getValidateNew(String validatePath, UriInfo uri, HttpHeaders headers);
-
-	Response postValidateExisting(String validatePath, String id, Parameters parameters, UriInfo uri,
-			HttpHeaders headers);
-
-	Response getValidateExisting(String validatePath, String id, UriInfo uri, HttpHeaders headers);
 
 	Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers);
 }

@@ -60,7 +60,10 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while retrieving process states from db", e);
+			logger.debug("Error while retrieving process states from db", e);
+			logger.warn("Error while retrieving process states from db: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -98,7 +101,7 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 
 			newProcessStates.put(process, newState);
 
-			logger.debug("{}: {} -> {}", process.toString(), oldState, newState);
+			logger.debug("Process {} state change: {} -> {}", process.toString(), oldState, newState);
 
 			// NEW -> ACTIVE : - (new process active by default)
 			// NEW -> DRAFT : - (new process active by default)
@@ -159,7 +162,9 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while updating process states in db", e);
+			logger.debug("Error while updating process states in db", e);
+			logger.warn("Error while updating process states in db: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

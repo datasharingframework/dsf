@@ -9,7 +9,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractStatusParameter;
 @SearchParameterDefinition(name = AbstractStatusParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ValueSet-status", type = SearchParamType.TOKEN, documentation = "The current status of the value set")
 public class ValueSetStatus extends AbstractStatusParameter<ValueSet>
 {
-	public static final String RESOURCE_COLUMN = "value_set";
+	private static final String RESOURCE_COLUMN = "value_set";
 
 	public ValueSetStatus()
 	{

@@ -32,11 +32,12 @@ public class InitialDataMigratorImpl implements InitialDataMigrator
 				logger.debug("Executing initial data migration job: {}", job.getClass().getName());
 				job.execute();
 			}
-			catch (Exception exception)
+			catch (Exception e)
 			{
-				logger.warn("Initial data migration job '{}' failed with error: {}", job.getClass().getName(),
-						exception.getMessage());
-				throw new RuntimeException(exception);
+				logger.debug("Initial data migration job '{}' failed with error: {}", job.getClass().getName(), e);
+				logger.warn("Initial data migration job '{}' failed with error: {} - {}", job.getClass().getName(),
+						e.getClass().getName(), e.getMessage());
+				throw new RuntimeException(e);
 			}
 		}
 

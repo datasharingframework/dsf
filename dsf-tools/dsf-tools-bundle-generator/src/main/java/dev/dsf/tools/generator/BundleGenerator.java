@@ -202,6 +202,7 @@ public class BundleGenerator
 			if (e.getResource() == null)
 				return Integer.MIN_VALUE;
 			else
+			{
 				switch (e.getResource().getClass().getAnnotation(ResourceDef.class).name())
 				{
 					case "CodeSystem":
@@ -218,6 +219,7 @@ public class BundleGenerator
 					default:
 						return Integer.MAX_VALUE;
 				}
+			}
 		};
 	}
 
@@ -236,34 +238,18 @@ public class BundleGenerator
 	{
 		return (BundleEntryComponent e) ->
 		{
-
 			if (e.getResource() == null)
 				return "";
-			else if (e.getResource() instanceof CodeSystem)
-			{
-				CodeSystem cs = (CodeSystem) e.getResource();
-				return cs.getUrl() + "|" + cs.getVersion();
-			}
-			else if (e.getResource() instanceof NamingSystem)
-			{
-				NamingSystem ns = (NamingSystem) e.getResource();
-				return ns.getName();
-			}
-			else if (e.getResource() instanceof ValueSet)
-			{
-				ValueSet vs = (ValueSet) e.getResource();
-				return vs.getUrl() + "|" + vs.getVersion();
-			}
-			else if (e.getResource() instanceof StructureDefinition)
-			{
-				StructureDefinition sd = (StructureDefinition) e.getResource();
-				return sd.getUrl() + "|" + sd.getVersion();
-			}
-			else if (e.getResource() instanceof Subscription)
-			{
-				Subscription s = (Subscription) e.getResource();
+			else if (e.getResource() instanceof CodeSystem c)
+				return c.getUrl() + "|" + c.getVersion();
+			else if (e.getResource() instanceof NamingSystem n)
+				return n.getName();
+			else if (e.getResource() instanceof ValueSet v)
+				return v.getUrl() + "|" + v.getVersion();
+			else if (e.getResource() instanceof StructureDefinition s)
+				return s.getUrl() + "|" + s.getVersion();
+			else if (e.getResource() instanceof Subscription s)
 				return s.getReason();
-			}
 			else
 				return "";
 		};
@@ -304,7 +290,7 @@ public class BundleGenerator
 			Bundle bundle;
 			try
 			{
-				logger.info("Generating bundle at " + bundleGenerator.getBundleFilename() + " ...");
+				logger.info("Generating bundle at {} ...", bundleGenerator.getBundleFilename());
 				bundle = bundleGenerator.generateBundle();
 			}
 			catch (IOException e)
@@ -324,7 +310,7 @@ public class BundleGenerator
 			try
 			{
 				bundleGenerator.saveBundle(bundle);
-				logger.info("Bundle saved at " + bundleGenerator.getBundleFilename());
+				logger.info("Bundle saved at {}", bundleGenerator.getBundleFilename());
 			}
 			catch (IOException e)
 			{

@@ -95,7 +95,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		}
 		catch (Exception exception)
 		{
-			logger.debug("Error while executing user task listener " + getClass().getName(), exception);
+			logger.debug("Error while executing user task listener {}", getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
@@ -255,7 +255,9 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to update Task " + api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 }

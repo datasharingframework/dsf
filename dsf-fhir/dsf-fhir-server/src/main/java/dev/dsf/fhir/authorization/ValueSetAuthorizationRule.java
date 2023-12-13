@@ -36,16 +36,16 @@ public class ValueSetAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	@Override
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, ValueSet newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, ValueSet newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, ValueSet newResource)
+	private Optional<String> newResourceOk(Connection connection, ValueSet newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -93,7 +93,9 @@ public class ValueSetAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for ValueSet", e);
+			logger.debug("Error while searching for ValueSet", e);
+			logger.warn("Error while searching for ValueSet: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return false;
 		}
 	}

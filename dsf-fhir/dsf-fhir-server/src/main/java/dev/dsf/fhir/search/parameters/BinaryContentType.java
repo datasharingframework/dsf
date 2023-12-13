@@ -20,7 +20,7 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class BinaryContentType extends AbstractTokenParameter<Binary>
 {
 	public static final String PARAMETER_NAME = "contentType";
-	public static final String RESOURCE_COLUMN = "binary_json";
+	private static final String RESOURCE_COLUMN = "binary_json";
 
 	private CodeType contentType;
 
@@ -81,9 +81,6 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Binary))
 			return false;
 

@@ -54,15 +54,12 @@ public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExe
 	{
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
-		if (delegateInstance instanceof ExecutionListener)
-		{
-			return (ExecutionListener) delegateInstance;
-		}
+		if (delegateInstance instanceof ExecutionListener l)
+			return l;
+
 		else
-		{
 			throw new ProcessEngineException(
 					delegateInstance.getClass().getName() + " doesn't implement " + ExecutionListener.class);
-		}
 	}
 
 	private Object instantiateDelegate(ProcessIdAndVersion processKeyAndVersion, String className,

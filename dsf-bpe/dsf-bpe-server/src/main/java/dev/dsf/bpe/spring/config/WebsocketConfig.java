@@ -52,7 +52,7 @@ public class WebsocketConfig
 	@Bean
 	public FhirConnector fhirConnectorTask()
 	{
-		return new FhirConnectorImpl<>("Task", fhirClientConfig.clientProvider(), taskSubscriptionHandlerFactory(),
+		return new FhirConnectorImpl<>(Task.class, fhirClientConfig.clientProvider(), taskSubscriptionHandlerFactory(),
 				fhirConfig.fhirContext(), propertiesConfig.getTaskSubscriptionSearchParameter(),
 				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());
 	}
@@ -74,7 +74,7 @@ public class WebsocketConfig
 	@Bean
 	public FhirConnector fhirConnectorQuestionnaireResponse()
 	{
-		return new FhirConnectorImpl<>("QuestionnaireResponse", fhirClientConfig.clientProvider(),
+		return new FhirConnectorImpl<>(QuestionnaireResponse.class, fhirClientConfig.clientProvider(),
 				questionnaireResponseSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
 				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());

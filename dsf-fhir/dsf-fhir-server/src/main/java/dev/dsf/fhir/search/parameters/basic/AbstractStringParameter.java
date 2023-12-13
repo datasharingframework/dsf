@@ -8,13 +8,13 @@ import dev.dsf.fhir.search.SearchQueryParameterError;
 
 public abstract class AbstractStringParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
-	public static enum StringSearchType
+	protected enum StringSearchType
 	{
 		STARTS_WITH(""), EXACT(":exact"), CONTAINS(":contains");
 
 		public final String modifier;
 
-		private StringSearchType(String modifier)
+		StringSearchType(String modifier)
 		{
 			this.modifier = modifier;
 		}

@@ -40,17 +40,17 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			NamingSystem newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			NamingSystem newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, NamingSystem newResource)
+	private Optional<String> newResourceOk(Connection connection, NamingSystem newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -116,7 +116,9 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while searching for NamingSystem", e);
+			logger.debug("Error while searching for NamingSystem", e);
+			logger.warn("Error while searching for NamingSystem: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return false;
 		}
 	}
@@ -131,7 +133,9 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Error while searching for NamingSystem", e);
+				logger.debug("Error while searching for NamingSystem", e);
+				logger.warn("Error while searching for NamingSystem: {} - {}", e.getClass().getName(), e.getMessage());
+
 				return false;
 			}
 		};

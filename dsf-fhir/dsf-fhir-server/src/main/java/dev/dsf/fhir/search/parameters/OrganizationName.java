@@ -69,9 +69,6 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Organization))
 			return false;
 

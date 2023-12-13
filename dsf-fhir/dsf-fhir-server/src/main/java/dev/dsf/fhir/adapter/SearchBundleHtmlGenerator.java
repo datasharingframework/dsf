@@ -5,7 +5,6 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -41,9 +40,8 @@ import org.springframework.web.util.HtmlUtils;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 
-public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements HtmlGenerator<Bundle>
+public class SearchBundleHtmlGenerator extends AbstractHtmlAdapter implements HtmlGenerator<Bundle>
 {
-	private static final SimpleDateFormat DATE_TIME_DISPLAY_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9]{1,63}|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
 			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
 	private static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
@@ -333,14 +331,6 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		}
 	}
 
-	private String toLastUpdated(Resource resource)
-	{
-		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasLastUpdated())
-			return "";
-		else
-			return DATE_TIME_DISPLAY_FORMAT.format(resource.getMeta().getLastUpdated());
-	}
-
 	private String getActivityDefinitionRow(ActivityDefinition resource)
 	{
 		List<String> messageNames = resource.getExtensionsByUrl(EXTENSION_PROCESS_AUTHORIZATION).stream()
@@ -357,7 +347,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 				+ (resource.hasStatus() ? resource.getStatus().toCode() : "") + "</td><td>"
 				+ (resource.hasTitle() ? resource.getTitle() : "") + "</td><td>"
 				+ (resource.hasPublisher() ? resource.getPublisher() : "") + "</td><td>" + combinedMessageNames
-				+ "</td><td>" + toLastUpdated(resource) + "</td>";
+				+ "</td><td>" + formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT) + "</td>";
 	}
 
 	private String getTaskRow(Task resource)
@@ -399,7 +389,8 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 								? resource.getRequester().getIdentifier().getValue()
 								: "")
 				+ "</td><td " + (TaskStatus.DRAFT.equals(resource.getStatus()) ? "" : "class=\"id-value\"") + ">"
-				+ businessKeyOrIdentifier + "</td><td>" + toLastUpdated(resource) + "</td>";
+				+ businessKeyOrIdentifier + "</td><td>" + formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT)
+				+ "</td>";
 	}
 
 	private Predicate<ParameterComponent> isStringParam(String system, String code)
@@ -421,7 +412,8 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 				+ createResourceLink(resource) + "</td><td>"
 				+ (resource.hasStatus() ? resource.getStatus().toCode() : "") + "</td><td>"
 				+ (resource.hasQuestionnaire() ? resource.getQuestionnaire().replaceAll("\\|", " \\| ") : "")
-				+ "</td><td class=\"id-value\">" + businessKey + "</td><td>" + toLastUpdated(resource) + "</td>";
+				+ "</td><td class=\"id-value\">" + businessKey + "</td><td>"
+				+ formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT) + "</td>";
 	}
 
 	private <D extends DomainResource> String getIdentifierValues(D resource, Function<D, Boolean> hasIdentifier,
@@ -449,7 +441,8 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 		return "<td class=\"id-value\" active=\"" + (resource.hasActive() ? resource.getActive() : "") + "\">"
 				+ createResourceLink(resource) + "</td><td>" + (resource.hasActive() ? resource.getActive() : "")
 				+ "</td><td>" + identifier + "</td><td>" + name + "</td><td class=\"id-value\">"
-				+ createResourceLink(resource.getEndpoint()) + "</td><td>" + toLastUpdated(resource) + "</td>";
+				+ createResourceLink(resource.getEndpoint()) + "</td><td>"
+				+ formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT) + "</td>";
 	}
 
 	private String getOrganizationAffiliationRow(OrganizationAffiliation resource)
@@ -463,7 +456,7 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 				+ "</td><td class=\"id-value\">" + createResourceLink(resource.getOrganization())
 				+ "</td><td class=\"id-value\">" + createResourceLink(resource.getParticipatingOrganization())
 				+ "</td><td>" + role + "</td><td class=\"id-value\">" + createResourceLink(resource.getEndpoint())
-				+ "</td><td>" + toLastUpdated(resource) + "</td>";
+				+ "</td><td>" + formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT) + "</td>";
 	}
 
 	private String getEndpointRow(Endpoint resource)
@@ -477,6 +470,6 @@ public class SearchBundleHtmlGenerator extends InputHtmlGenerator implements Htm
 				+ (resource.hasStatus() ? resource.getStatus().toCode() : "") + "</td><td>" + identifier + "</td><td>"
 				+ name + "</td><td>" + (resource.hasAddress() ? resource.getAddress() : "")
 				+ "</td><td class=\"id-value\">" + createResourceLink(resource.getManagingOrganization()) + "</td><td>"
-				+ toLastUpdated(resource) + "</td>";
+				+ formatLastUpdated(resource, DATE_TIME_DISPLAY_FORMAT) + "</td>";
 	}
 }

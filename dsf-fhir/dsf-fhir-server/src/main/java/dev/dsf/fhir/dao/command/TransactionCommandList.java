@@ -45,7 +45,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 	@Override
 	public Bundle execute() throws WebApplicationException
 	{
-		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
+		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) (commands.size() / 0.75) + 1);
 		try
 		{
 			TransactionEventHandler transactionEventHandler;
@@ -74,8 +74,12 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (Exception e)
 					{
-						logger.warn("Error while running pre-execute of command " + c.getClass().getSimpleName()
-								+ " for entry at index " + c.getIndex() + ", abborting transaction", e);
+						logger.debug(
+								"Error while running pre-execute of command {} for entry at index {}, abborting transaction",
+								c.getClass().getSimpleName(), c.getIndex(), e);
+						logger.warn(
+								"Error while running pre-execute of command {} for entry at index {}, abborting transaction: {} - {}",
+								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
 
 						try
 						{
@@ -84,7 +88,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						}
 						catch (Exception e1)
 						{
-							logger.warn("Error while writing to audit log", e1);
+							logger.debug("Error while writing to audit log", e1);
+							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
+									e1.getMessage());
 						}
 
 						throw e;
@@ -101,9 +107,11 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (Exception e)
 					{
-						logger.warn("Error while executing command " + c.getClass().getSimpleName()
-								+ " for entry at index " + c.getIndex() + ", rolling back transaction: {}",
-								e.getMessage());
+						logger.debug("Error while executing command {} for entry at index {}, rolling back transaction",
+								c.getClass().getSimpleName(), c.getIndex(), e);
+						logger.warn(
+								"Error while executing command {} for entry at index {}, rolling back transaction: {} - {}",
+								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
 
 						if (hasModifyingCommands)
 						{
@@ -118,7 +126,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						}
 						catch (Exception e1)
 						{
-							logger.warn("Error while writing to audit log", e1);
+							logger.debug("Error while writing to audit log", e1);
+							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
+									e1.getMessage());
 						}
 
 						throw e;
@@ -136,8 +146,12 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (Exception e)
 					{
-						logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
-								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
+						logger.debug(
+								"Error while running post-execute of command {} for entry at index {}, rolling back transaction",
+								c.getClass().getSimpleName(), c.getIndex(), e);
+						logger.warn(
+								"Error while running post-execute of command {} for entry at index {}, rolling back transaction: {} - {}",
+								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
 
 						if (hasModifyingCommands)
 						{
@@ -152,7 +166,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						}
 						catch (Exception e1)
 						{
-							logger.warn("Error while writing to audit log", e1);
+							logger.debug("Error while writing to audit log", e1);
+							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
+									e1.getMessage());
 						}
 
 						throw e;
@@ -173,7 +189,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while handling events", e);
+				logger.debug("Error while handling events", e);
+				logger.warn("Error while handling events: {} - {}", e.getClass().getName(), e.getMessage());
 			}
 
 			try
@@ -187,7 +204,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while writing to audit log", e);
+				logger.debug("Error while writing to audit log", e);
+				logger.warn("Error while writing to audit log: {} - {}", e.getClass().getName(), e.getMessage());
 			}
 
 			Bundle result = new Bundle();

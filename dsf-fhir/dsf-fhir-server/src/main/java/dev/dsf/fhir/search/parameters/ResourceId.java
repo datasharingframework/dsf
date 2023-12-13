@@ -119,10 +119,7 @@ public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (isDefined())
-			return Objects.equals(resource.getId(), id.toString());
-		else
-			throw notDefined();
+		return Objects.equals(resource.getId(), id.toString());
 	}
 
 	@Override

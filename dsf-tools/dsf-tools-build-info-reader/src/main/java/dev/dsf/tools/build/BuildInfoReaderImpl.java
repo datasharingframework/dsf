@@ -39,7 +39,9 @@ public class BuildInfoReaderImpl implements BuildInfoReader
 			}
 			catch (IOException e)
 			{
-				logger.warn("Error while reading version properties", e);
+				logger.debug("Error while reading version properties", e);
+				logger.warn("Error while reading version properties: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		}

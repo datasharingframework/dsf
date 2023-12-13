@@ -106,7 +106,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing database", e);
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -120,7 +122,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing database", e);
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -138,7 +142,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing database", e);
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -152,7 +158,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing database", e);
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -166,7 +174,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing database", e);
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -186,6 +196,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for Organization: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException("Unable to search for Organization: Unsupported query parameters.");
 		}
 
@@ -196,7 +207,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for Organization", e);
+			logger.debug("Unable to search for Organization", e);
+			logger.warn("Unable to search for Organization: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for Organization", e);
 		}
 	}
@@ -217,6 +230,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for CodeSystem: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException("Unable to search for CodeSystem: Unsupported query parameters");
 		}
 
@@ -227,7 +241,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for CodeSystem", e);
+			logger.debug("Unable to search for CodeSystem", e);
+			logger.warn("Unable to search for CodeSystem: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for CodeSystem", e);
 		}
 	}
@@ -258,6 +274,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		if (reference == null)
 		{
 			logger.warn("Null reference while checking if user part of referenced organization");
+
 			return false;
 		}
 		else
@@ -269,6 +286,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			{
 				logger.warn("Reference of type {} not supported while checking if user part of referenced organization",
 						type);
+
 				return false;
 			}
 
@@ -289,6 +307,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			{
 				logger.warn(
 						"Reference to organization could not be resolved while checking if user part of referenced organization");
+
 				return false;
 			}
 		}
@@ -332,7 +351,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing database", e);
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -343,12 +364,14 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		if (identity.hasDsfRole(FhirServerRole.SEARCH))
 		{
 			logger.info("Search of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
+
 			return Optional.of("Identity has role " + FhirServerRole.SEARCH);
 		}
 		else
 		{
 			logger.warn("Search of {} unauthorized for identity '{}', no role {}", getResourceTypeName(),
 					identity.getName(), FhirServerRole.SEARCH);
+
 			return Optional.empty();
 		}
 	}
@@ -359,12 +382,14 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		if (identity.hasDsfRole(FhirServerRole.HISTORY))
 		{
 			logger.info("History of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
+
 			return Optional.of("Identity has role " + FhirServerRole.HISTORY);
 		}
 		else
 		{
 			logger.warn("History of {} unauthorized for identity '{}', no role {}", getResourceTypeName(),
 					identity.getName(), FhirServerRole.HISTORY);
+
 			return Optional.empty();
 		}
 	}
@@ -380,6 +405,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		{
 			logger.info("Permanent delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),
 					resourceId, resourceVersion, identity.getName());
+
 			return Optional.of("Identity is local identity and has role " + FhirServerRole.PERMANENT_DELETE);
 		}
 		else
@@ -388,6 +414,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 					"Permanent delete of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
 					getResourceTypeName(), resourceId, resourceVersion, identity.getName(),
 					FhirServerRole.PERMANENT_DELETE);
+
 			return Optional.empty();
 		}
 	}

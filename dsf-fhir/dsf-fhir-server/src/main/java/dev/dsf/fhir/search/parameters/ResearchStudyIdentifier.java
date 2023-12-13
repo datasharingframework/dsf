@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ResearchStudy-identifier", type = SearchParamType.TOKEN, documentation = "Business Identifier for study")
 public class ResearchStudyIdentifier extends AbstractIdentifierParameter<ResearchStudy>
 {
-	public static final String RESOURCE_COLUMN = "research_study";
+	private static final String RESOURCE_COLUMN = "research_study";
 
 	public ResearchStudyIdentifier()
 	{
@@ -20,9 +20,6 @@ public class ResearchStudyIdentifier extends AbstractIdentifierParameter<Researc
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof ResearchStudy))
 			return false;
 

@@ -58,6 +58,7 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 		if (certificates == null || certificates.length <= 0)
 		{
 			logger.warn("X509Certificate could not be retrieved, sending unauthorized");
+
 			return Authentication.UNAUTHENTICATED;
 		}
 
@@ -67,8 +68,10 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 		}
 		catch (CertificateException e)
 		{
+			logger.debug("Unable to validate client certificates, sending unauthorized", e);
 			logger.warn("Unable to validate client certificates, sending unauthorized: {} - {}", e.getClass().getName(),
 					e.getMessage());
+
 			return Authentication.UNAUTHENTICATED;
 		}
 
@@ -76,6 +79,7 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 		if (user == null)
 		{
 			logger.warn("User '{}' not found, sending unauthorized", getSubjectDn(certificates));
+
 			return Authentication.UNAUTHENTICATED;
 		}
 
@@ -95,7 +99,9 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 		}
 		catch (NoSuchAlgorithmException | KeyStoreException e)
 		{
+			logger.debug("Unable to create trust manager", e);
 			logger.warn("Unable to create trust manager: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -109,7 +115,9 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 		}
 		catch (KeyStoreException | InvalidAlgorithmParameterException e)
 		{
+			logger.debug("Unable to extract trust anchors", e);
 			logger.warn("Unable to extract trust anchors: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

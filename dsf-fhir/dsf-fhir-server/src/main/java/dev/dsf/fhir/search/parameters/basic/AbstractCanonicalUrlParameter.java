@@ -9,13 +9,13 @@ import dev.dsf.fhir.search.SearchQueryParameterError;
 
 public abstract class AbstractCanonicalUrlParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
-	public static enum UriSearchType
+	protected enum UriSearchType
 	{
 		PRECISE(""), BELOW(":below"); // TODO, ABOVE(":above");
 
 		public final String modifier;
 
-		private UriSearchType(String modifier)
+		UriSearchType(String modifier)
 		{
 			this.modifier = modifier;
 		}
@@ -94,6 +94,6 @@ public abstract class AbstractCanonicalUrlParameter<R extends Resource> extends 
 	@Override
 	public String getBundleUriQueryParameterValue()
 	{
-		return valueAndType.url + (hasVersion() ? ("|" + valueAndType.version) : "");
+		return valueAndType.url + (hasVersion() ? "|" + valueAndType.version : "");
 	}
 }

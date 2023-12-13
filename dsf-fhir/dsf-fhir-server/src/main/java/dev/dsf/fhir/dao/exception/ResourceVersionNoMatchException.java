@@ -1,6 +1,6 @@
 package dev.dsf.fhir.dao.exception;
 
-public class ResourceVersionNoMatchException extends Exception
+public final class ResourceVersionNoMatchException extends Exception
 {
 	private static final long serialVersionUID = 1L;
 
