@@ -44,8 +44,7 @@ public class ActivityDefinitionHtmlGenerator extends ResourceHtmlGenerator imple
 		writeSectionHeader("Activity Definition", out);
 
 		if (resource.hasUrl())
-			writeRow("Url" + (resource.hasVersion() ? " & Version" : ""),
-					resource.getUrl() + (resource.hasVersion() ? " | " + resource.getVersion() : ""), out);
+			writeRow("Process", resource.getUrl() + (resource.hasVersion() ? " | " + resource.getVersion() : ""), out);
 
 		if (resource.hasTitle())
 			writeRow("Title", resource.getTitle(), out);
@@ -95,7 +94,7 @@ public class ActivityDefinitionHtmlGenerator extends ResourceHtmlGenerator imple
 
 			if (messageName.isPresent())
 			{
-				writeRowWithAdditionalRowClasses("Message Name", messageName.get(),
+				writeRowWithAdditionalRowClasses("Message-Name", messageName.get(),
 						taskProfile.isPresent() ? "flex-element-33 flex-element-margin" : "flex-element-100", out);
 			}
 

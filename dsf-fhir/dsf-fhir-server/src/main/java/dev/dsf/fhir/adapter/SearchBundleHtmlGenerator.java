@@ -238,7 +238,7 @@ public class SearchBundleHtmlGenerator extends AbstractHtmlAdapter implements Ht
 
 	private String getActivityDefinitionHeader()
 	{
-		return "<tr><th>ID</th><th>Status</th><th>Title</th><th>Url & Version</th><th>Message Names</th><th>Last Updated</th></tr>";
+		return "<tr><th>ID</th><th>Status</th><th>Title</th><th>Process</th><th>Message-Names</th><th>Last Updated</th></tr>";
 	}
 
 	private String getEndpointHeader()
