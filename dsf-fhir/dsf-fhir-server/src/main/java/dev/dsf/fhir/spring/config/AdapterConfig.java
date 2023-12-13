@@ -39,6 +39,7 @@ public class AdapterConfig
 						new OrganizationHtmlGenerator(), new OrganizationAffiliationHtmlGenerator(),
 						new QuestionnaireResponseHtmlGenerator(),
 						new SearchBundleHtmlGenerator(propertiesConfig.getServerBaseUrl(),
-								propertiesConfig.getDefaultPageCount()), new TaskHtmlGenerator()));
+								propertiesConfig.getDefaultPageCount()),
+						new TaskHtmlGenerator()));
 	}
 }

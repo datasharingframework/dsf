@@ -43,11 +43,18 @@ public class ActivityDefinitionHtmlGenerator extends ResourceHtmlGenerator imple
 
 		writeSectionHeader("Activity Definition", out);
 
+		if (resource.hasUrl())
+			writeRow("Url" + (resource.hasVersion() ? " & Version" : ""),
+					resource.getUrl() + (resource.hasVersion() ? " | " + resource.getVersion() : ""), out);
+
 		if (resource.hasTitle())
 			writeRow("Title", resource.getTitle(), out);
 
 		if (resource.hasSubtitle())
 			writeRow("Subtitle", resource.getSubtitle(), out);
+
+		if (resource.hasDescription())
+			writeRow("Description", resource.getDescription(), out);
 
 		if (resource.hasPublisher())
 			writeRow("Publisher", resource.getPublisher(), out);

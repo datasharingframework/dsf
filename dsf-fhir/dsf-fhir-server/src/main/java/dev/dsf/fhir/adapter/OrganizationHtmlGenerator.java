@@ -82,18 +82,20 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 		List<OrganizationContactComponent> contacts = resource.getContact();
 		for (OrganizationContactComponent contact : contacts)
 		{
-			boolean isAdmin = contact.getPurpose().getCoding().stream().anyMatch(
-					c -> CODE_SYSTEM_CONTACT_TYPE.equals(c.getSystem()) && CODE_SYSTEM_CONTACT_TYPE_VALUE_ADMIN.equals(
-							c.getCode()));
+			boolean isAdmin = contact.getPurpose().getCoding().stream()
+					.anyMatch(c -> CODE_SYSTEM_CONTACT_TYPE.equals(c.getSystem())
+							&& CODE_SYSTEM_CONTACT_TYPE_VALUE_ADMIN.equals(c.getCode()));
 
 			if (isAdmin && (contact.hasName() || contact.hasAddress() || contact.hasTelecom()))
 			{
 				writeSectionHeader("Admin Contact", out);
 
 				if (contact.hasName())
-					writeRow("Name", contact.getName().getNameAsSingleString() != null ?
-							contact.getName().getNameAsSingleString() :
-							"", out);
+					writeRow("Name",
+							contact.getName().getNameAsSingleString() != null
+									? contact.getName().getNameAsSingleString()
+									: "",
+							out);
 
 				if (contact.hasAddress())
 					writeRowWithAddress(resource.getAddressFirstRep(), out);
