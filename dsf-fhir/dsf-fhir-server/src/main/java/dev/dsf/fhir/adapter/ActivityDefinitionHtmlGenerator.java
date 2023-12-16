@@ -122,7 +122,7 @@ public class ActivityDefinitionHtmlGenerator extends ResourceHtmlGenerator imple
 		for (int i = 0; i < authorization.size(); i++)
 		{
 			out.write("<div class=\"row authorization\">\n");
-			out.write("<h3>" + header + (authorization.size() > 1 ? " " + (i + 1) : "") + "</h4>\n");
+			out.write("<h3>" + header + (authorization.size() > 1 ? " " + (i + 1) : "") + "</h3>\n");
 
 			Coding authorizationCode = authorization.get(i);
 			writeRowWithAdditionalRowClasses("Authorization Type",
