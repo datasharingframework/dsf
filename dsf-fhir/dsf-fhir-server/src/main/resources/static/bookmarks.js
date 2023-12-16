@@ -130,7 +130,7 @@ function getBasePath() {
 function getInitialBookmarks() {
 	return {
 		'_misc': ['metadata'],
-		'ActivityDefinition': ['ActivityDefinition'],
+		'ActivityDefinition': ['ActivityDefinition', "ActivityDefinition?_sort=status,url,version"],
 		'CodeSystem': ['CodeSystem'],
 		'Endpoint': ['Endpoint'],
 		'NamingSystem': ['NamingSystem'],

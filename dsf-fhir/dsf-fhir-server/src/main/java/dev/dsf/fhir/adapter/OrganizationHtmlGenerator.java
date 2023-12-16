@@ -131,15 +131,15 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 
 		if (eMail.isPresent() || phone.isPresent())
 		{
-			out.write("<div class=\"contact\">\n");
+			out.write("<div class=\"flex-element\">\n");
 
 			if (eMail.isPresent())
 				writeRowWithAdditionalRowClasses("eMail", eMail.get().getValue(),
-						phone.isPresent() ? "contact-element-50 contact-element-margin" : "contact-element-100", out);
+						phone.isPresent() ? "flex-element-50 flex-element-margin" : "flex-element-100", out);
 
 			if (phone.isPresent())
 				writeRowWithAdditionalRowClasses("Phone", phone.get().getValue(),
-						eMail.isPresent() ? "contact-element-50" : "contact-element-100", out);
+						eMail.isPresent() ? "flex-element-50" : "flex-element-100", out);
 
 			out.write("</div>\n");
 		}
