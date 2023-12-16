@@ -47,17 +47,17 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			Organization newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			Organization newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Organization newResource)
+	private Optional<String> newResourceOk(Connection connection, Organization newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -81,9 +81,8 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 		{
 			if (!newResource.getExtension().stream().filter(Extension::hasUrl)
 					.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
-					.allMatch(e -> e.hasValue() && e.getValue() instanceof StringType
-							&& EXTENSION_THUMBPRINT_VALUE_PATTERN.matcher(((StringType) e.getValue()).getValue())
-									.matches()))
+					.allMatch(e -> e.hasValue() && e.getValue() instanceof StringType value
+							&& EXTENSION_THUMBPRINT_VALUE_PATTERN.matcher(value.getValue()).matches()))
 			{
 				errors.add("Organization with '" + EXTENSION_THUMBPRINT_URL + "' has value not matching pattern: "
 						+ EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING);
@@ -135,7 +134,9 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for Organization", e);
+			logger.debug("Unable to search for Organization", e);
+			logger.warn("Unable to search for Organization: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for OrganizationAffiliation", e);
 		}
 	}

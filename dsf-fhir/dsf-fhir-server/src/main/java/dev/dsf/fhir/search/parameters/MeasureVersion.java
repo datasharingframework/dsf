@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractVersionParameter;
 @SearchParameterDefinition(name = AbstractVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Measure-version", type = SearchParamType.TOKEN, documentation = "The business version of the measure")
 public class MeasureVersion extends AbstractVersionParameter<Measure>
 {
-	public static final String RESOURCE_COLUMN = "measure";
+	private static final String RESOURCE_COLUMN = "measure";
 
 	public MeasureVersion()
 	{

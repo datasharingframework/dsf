@@ -351,8 +351,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private boolean isValidExtensionReadAccesOrganization(Extension extension,
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
-		return extension.hasValue() && extension.getValue() instanceof Identifier
-				&& isValidOrganizationIdentifier((Identifier) extension.getValue(), organizationWithIdentifierExists);
+		return extension.hasValue() && extension.getValue() instanceof Identifier value
+				&& isValidOrganizationIdentifier(value, organizationWithIdentifierExists);
 	}
 
 	private boolean isValidOrganizationIdentifier(Identifier identifier,
@@ -390,15 +390,15 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
 		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION.equals(e.getUrl())
-				&& e.hasValue() && e.getValue() instanceof Identifier
-				&& isValidOrganizationIdentifier((Identifier) e.getValue(), organizationWithIdentifierExists);
+				&& e.hasValue() && e.getValue() instanceof Identifier value
+				&& isValidOrganizationIdentifier(value, organizationWithIdentifierExists);
 	}
 
 	private boolean isValidExtensionReadAccessParentOrganizationMemberRoleRole(Extension e,
 			Predicate<Coding> roleExists)
 	{
 		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE.equals(e.getUrl())
-				&& e.hasValue() && e.getValue() instanceof Coding && isValidRole((Coding) e.getValue(), roleExists);
+				&& e.hasValue() && e.getValue() instanceof Coding value && isValidRole(value, roleExists);
 	}
 
 	private boolean isValidRole(Coding coding, Predicate<Coding> roleExists)

@@ -26,7 +26,21 @@ public final class SearchQueryParameterFactory<R extends Resource>
 	 */
 	public SearchQueryParameterFactory(String name, Supplier<SearchQueryParameter<R>> supplier)
 	{
-		this(name, supplier, null, null, null);
+		this(name, supplier, null);
+	}
+
+	/**
+	 * @param name
+	 *            not <code>null</code>
+	 * @param supplier
+	 *            not <code>null</code>
+	 * @param nameModifiers
+	 *            may be <code>null</code>
+	 */
+	public SearchQueryParameterFactory(String name, Supplier<SearchQueryParameter<R>> supplier,
+			List<String> nameModifiers)
+	{
+		this(name, supplier, nameModifiers, null, null);
 	}
 
 	/**

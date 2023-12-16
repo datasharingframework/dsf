@@ -16,7 +16,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/QuestionnaireResponse-identifier", type = SearchParamType.TOKEN, documentation = "The unique identifier for the questionnaire response")
 public class QuestionnaireResponseIdentifier extends AbstractIdentifierParameter<QuestionnaireResponse>
 {
-	public static final String RESOURCE_COLUMN = "questionnaire_response";
+	private static final String RESOURCE_COLUMN = "questionnaire_response";
 
 	public QuestionnaireResponseIdentifier()
 	{
@@ -88,9 +88,6 @@ public class QuestionnaireResponseIdentifier extends AbstractIdentifierParameter
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof QuestionnaireResponse))
 			return false;
 

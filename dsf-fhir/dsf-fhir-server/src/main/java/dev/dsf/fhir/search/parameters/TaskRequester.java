@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -34,9 +33,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
 public class TaskRequester extends AbstractReferenceParameter<Task>
 {
-	public static final String RESOURCE_TYPE_NAME = "Task";
+	private static final String RESOURCE_TYPE_NAME = "Task";
 	public static final String PARAMETER_NAME = "requester";
-	public static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
+	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
 			"PractitionerRole" };
 	// TODO add Device, RelatedPerson if supported, see also doResolveReferencesForMatching, matches, getIncludeSql
 
@@ -178,37 +177,30 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Endpoint))
+		if (!(resource instanceof Task))
 			return false;
 
 		Task t = (Task) resource;
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (t.getRequester().getResource() instanceof Practitioner)
+			if (t.getRequester().getResource() instanceof Practitioner p)
 			{
-				Practitioner p = (Practitioner) t.getRequester().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}
-			else if (t.getRequester().getResource() instanceof Organization)
+			else if (t.getRequester().getResource() instanceof Organization o)
 			{
-				Organization o = (Organization) t.getRequester().getResource();
 				return o.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}
-			else if (t.getRequester().getResource() instanceof Patient)
+			else if (t.getRequester().getResource() instanceof Patient p)
 			{
-				Patient p = (Patient) t.getRequester().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}
-			else if (t.getRequester().getResource() instanceof PractitionerRole)
+			else if (t.getRequester().getResource() instanceof PractitionerRole p)
 			{
-				PractitionerRole p = (PractitionerRole) t.getRequester().getResource();
 				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

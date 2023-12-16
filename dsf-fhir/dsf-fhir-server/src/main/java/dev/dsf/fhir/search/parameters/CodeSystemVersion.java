@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractVersionParameter;
 @SearchParameterDefinition(name = AbstractVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem-version", type = SearchParamType.TOKEN, documentation = "The business version of the code system")
 public class CodeSystemVersion extends AbstractVersionParameter<CodeSystem>
 {
-	public static final String RESOURCE_COLUMN = "code_system";
+	private static final String RESOURCE_COLUMN = "code_system";
 
 	public CodeSystemVersion()
 	{

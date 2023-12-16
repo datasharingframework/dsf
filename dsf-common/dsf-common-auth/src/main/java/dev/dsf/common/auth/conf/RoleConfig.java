@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class RoleConfig
 	private static final String EMAIL_PATTERN_STRING = "^[\\w!#$%&'*+/=?`{\\|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{\\|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
 	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_PATTERN_STRING);
 
-	public class Mapping
+	public static final class Mapping
 	{
 		private final String name;
 
@@ -127,36 +128,29 @@ public class RoleConfig
 	public RoleConfig(Object config, Function<String, DsfRole> dsfRoleFactory,
 			Function<String, Coding> practitionerRoleFactory)
 	{
-		if (config != null && config instanceof List)
+		if (config != null && config instanceof List<?> l)
 		{
-			@SuppressWarnings("unchecked")
-			List<Object> cList = (List<Object>) config;
-			cList.forEach(mapping ->
+			l.forEach(mapping ->
 			{
-				if (mapping != null && mapping instanceof Map)
+				if (mapping != null && mapping instanceof Map<?, ?> m)
 				{
-					@SuppressWarnings("unchecked")
-					Map<Object, Object> m = (Map<Object, Object>) mapping;
 					m.forEach((mappingKey, mappingValues) ->
 					{
 						if (mappingKey != null && mappingKey instanceof String && mappingValues != null
-								&& mappingValues instanceof Map)
+								&& mappingValues instanceof Map<?, ?> v)
 						{
-							@SuppressWarnings("unchecked")
-							Map<Object, Object> properties = (Map<Object, Object>) mappingValues;
-
-							// Map<String, Object>
 							List<String> thumbprints = null, emails = null, tokenRoles = null, tokenGroups = null;
 							List<DsfRole> dsfRoles = null;
 							List<Coding> practitionerRoles = null;
-							for (Entry<Object, Object> p : properties.entrySet())
+
+							for (Entry<?, ?> property : v.entrySet())
 							{
-								if (p.getKey() != null && p.getKey() instanceof String)
+								if (property.getKey() != null && property.getKey() instanceof String key)
 								{
-									switch ((String) p.getKey())
+									switch (key)
 									{
 										case PROPERTY_THUMBPRINT:
-											thumbprints = getValues(p.getValue()).stream().map(value ->
+											thumbprints = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -175,8 +169,9 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_EMAIL:
-											emails = getValues(p.getValue()).stream().map(value ->
+											emails = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -195,8 +190,9 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_TOKEN_ROLE:
-											tokenRoles = getValues(p.getValue()).stream().map(value ->
+											tokenRoles = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -208,8 +204,9 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_TOKEN_GROUP:
-											tokenGroups = getValues(p.getValue()).stream().map(value ->
+											tokenGroups = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -221,8 +218,9 @@ public class RoleConfig
 													return value.trim();
 											}).filter(g -> g != null).toList();
 											break;
+
 										case PROPERTY_DSF_ROLE:
-											dsfRoles = getValues(p.getValue()).stream().map(value ->
+											dsfRoles = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -239,8 +237,9 @@ public class RoleConfig
 												return dsfRole;
 											}).filter(r -> r != null).toList();
 											break;
+
 										case PROPERTY_PRACTITIONER_ROLE:
-											practitionerRoles = getValues(p.getValue()).stream().map(value ->
+											practitionerRoles = getValues(property.getValue()).stream().map(value ->
 											{
 												if (value == null || value.isBlank())
 												{
@@ -259,10 +258,11 @@ public class RoleConfig
 												return coding;
 											}).filter(r -> r != null).toList();
 											break;
+
 										default:
 											logger.warn(
 													"Unknown role config property '{}' expected one of {}, ignoring property in rule '{}'",
-													p.getKey(), PROPERTIES, mappingKey);
+													property.getKey(), PROPERTIES, mappingKey);
 									}
 								}
 							}
@@ -273,10 +273,10 @@ public class RoleConfig
 						else if (mappingKey != null && mappingKey instanceof String
 								&& (mappingValues == null || !(mappingValues instanceof Map)))
 						{
-							logger.warn("Ignoring invalud rule '{}'", mappingKey);
+							logger.warn("Ignoring invalid rule '{}', no value specified or value not map", mappingKey);
 						}
 						else
-							logger.warn("Ignoring invalud rule '{}'", mappingKey);
+							logger.warn("Ignoring invalid rule '{}'", Objects.toString(mappingKey));
 					});
 				}
 				else
@@ -288,10 +288,10 @@ public class RoleConfig
 	@SuppressWarnings("unchecked")
 	private static List<String> getValues(Object o)
 	{
-		if (o instanceof String)
-			return Collections.singletonList((String) o);
-		else if (o instanceof List)
-			return ((List<String>) o);
+		if (o instanceof String s)
+			return Collections.singletonList(s);
+		else if (o instanceof List l)
+			return l;
 		else
 			return Collections.emptyList();
 	}

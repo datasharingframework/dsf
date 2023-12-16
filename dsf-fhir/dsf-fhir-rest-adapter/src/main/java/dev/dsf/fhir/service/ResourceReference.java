@@ -1,22 +1,5 @@
 package dev.dsf.fhir.service;
 
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_CONDITIONAL_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_TEMPORARY_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_UNKNOWN_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.CONDITIONAL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_EXTERNAL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_INTERNAL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.LOGICAL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.TEMPORARY;
-import static dev.dsf.fhir.service.ResourceReference.ReferenceType.UNKNOWN;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -95,7 +78,7 @@ public class ResourceReference
 					+ "|SupplyDelivery|SupplyRequest|Task|TerminologyCapabilities|TestReport|TestScript|ValueSet"
 					+ "|VerificationResult|VisionPrescription)" + "(?<query>\\?.*)");
 
-	public static enum ReferenceType
+	public enum ReferenceType
 	{
 		/**
 		 * temporary reference starting with <code>urn:uuid:</code>
@@ -279,24 +262,24 @@ public class ResourceReference
 			{
 				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(relatedArtifact.getUrl());
 				if (tempIdRefMatcher.matches())
-					return RELATED_ARTEFACT_TEMPORARY_URL;
+					return ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
 
 				Matcher idRefMatcher = ID_PATTERN.matcher(relatedArtifact.getUrl());
 				if (idRefMatcher.matches())
 				{
 					IdType id = new IdType(relatedArtifact.getUrl());
 					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
-						return RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
+						return ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
 					else
-						return RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
+						return ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
 				}
 
 				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(relatedArtifact.getUrl());
 				if (conditionalRefMatcher.matches())
-					return RELATED_ARTEFACT_CONDITIONAL_URL;
+					return ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
 			}
 
-			return RELATED_ARTEFACT_UNKNOWN_URL;
+			return ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL;
 		}
 		else if (attachment != null)
 		{
@@ -304,24 +287,24 @@ public class ResourceReference
 			{
 				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(attachment.getUrl());
 				if (tempIdRefMatcher.matches())
-					return ATTACHMENT_TEMPORARY_URL;
+					return ReferenceType.ATTACHMENT_TEMPORARY_URL;
 
 				Matcher idRefMatcher = ID_PATTERN.matcher(attachment.getUrl());
 				if (idRefMatcher.matches())
 				{
 					IdType id = new IdType(attachment.getUrl());
 					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
-						return ATTACHMENT_LITERAL_INTERNAL_URL;
+						return ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL;
 					else
-						return ATTACHMENT_LITERAL_EXTERNAL_URL;
+						return ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL;
 				}
 
 				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(attachment.getUrl());
 				if (conditionalRefMatcher.matches())
-					return ATTACHMENT_CONDITIONAL_URL;
+					return ReferenceType.ATTACHMENT_CONDITIONAL_URL;
 			}
 
-			return ATTACHMENT_UNKNOWN_URL;
+			return ReferenceType.ATTACHMENT_UNKNOWN_URL;
 		}
 		else if (reference != null)
 		{
@@ -329,29 +312,29 @@ public class ResourceReference
 			{
 				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(reference.getReference());
 				if (tempIdRefMatcher.matches())
-					return TEMPORARY;
+					return ReferenceType.TEMPORARY;
 
 				Matcher idRefMatcher = ID_PATTERN.matcher(reference.getReference());
 				if (idRefMatcher.matches())
 				{
 					IdType id = new IdType(reference.getReference());
 					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
-						return LITERAL_INTERNAL;
+						return ReferenceType.LITERAL_INTERNAL;
 					else
-						return LITERAL_EXTERNAL;
+						return ReferenceType.LITERAL_EXTERNAL;
 				}
 
 				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(reference.getReference());
 				if (conditionalRefMatcher.matches())
-					return CONDITIONAL;
+					return ReferenceType.CONDITIONAL;
 			}
 			else if (reference.hasType() && reference.hasIdentifier() && reference.getIdentifier().hasSystem()
 					&& reference.getIdentifier().hasValue())
 			{
-				return LOGICAL;
+				return ReferenceType.LOGICAL;
 			}
 
-			return UNKNOWN;
+			return ReferenceType.UNKNOWN;
 		}
 		else
 			throw new IllegalStateException("Either reference or relatedArtifact expected");
@@ -373,8 +356,8 @@ public class ResourceReference
 	{
 		Objects.requireNonNull(localServerBase, "localServerBase");
 
-		if (EnumSet.of(LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL)
-				.contains(getType(localServerBase)))
+		if (EnumSet.of(ReferenceType.LITERAL_EXTERNAL, ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL,
+				ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL).contains(getType(localServerBase)))
 			return new IdType(getValue()).getBaseUrl();
 		else
 			return "";

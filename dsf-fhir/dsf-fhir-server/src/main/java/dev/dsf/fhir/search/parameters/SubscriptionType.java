@@ -10,6 +10,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -22,9 +23,9 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class SubscriptionType extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "type";
-	public static final String RESOURCE_COLUMN = "subscription";
+	private static final String RESOURCE_COLUMN = "subscription";
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType channelType;
+	private SubscriptionChannelType channelType;
 
 	public SubscriptionType()
 	{
@@ -41,15 +42,15 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 			channelType = toChannelType(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType toChannelType(
-			List<? super SearchQueryParameterError> errors, String status, String queryParameterValue)
+	private SubscriptionChannelType toChannelType(List<? super SearchQueryParameterError> errors, String status,
+			String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
 
 		try
 		{
-			return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(status);
+			return SubscriptionChannelType.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
@@ -93,9 +94,6 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Subscription))
 			return false;
 

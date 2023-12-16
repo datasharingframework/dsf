@@ -137,7 +137,7 @@ public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 		}
 		catch (URISyntaxException e)
 		{
-			logger.debug("Given targetUrl '{}' is malformed, {}", targetUrl, e.getMessage());
+			logger.debug("Given targetUrl '{}' is malformed: {}", targetUrl, e.getMessage());
 			return false;
 		}
 	}

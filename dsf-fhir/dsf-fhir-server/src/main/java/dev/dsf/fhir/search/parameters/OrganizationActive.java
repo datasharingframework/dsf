@@ -44,9 +44,6 @@ public class OrganizationActive extends AbstractBooleanParameter<Organization>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Organization))
 			return false;
 

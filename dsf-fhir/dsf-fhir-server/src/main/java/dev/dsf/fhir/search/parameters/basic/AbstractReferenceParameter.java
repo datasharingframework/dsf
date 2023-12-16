@@ -21,14 +21,14 @@ import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorTy
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 		implements SearchQueryIncludeParameter<R>
 {
-	public static final String PARAMETER_NAME_IDENTIFIER_MODIFIER = ":identifier";
+	private static final String PARAMETER_NAME_IDENTIFIER_MODIFIER = ":identifier";
 
 	public static List<String> getNameModifiers()
 	{
 		return Collections.singletonList(PARAMETER_NAME_IDENTIFIER_MODIFIER);
 	}
 
-	protected static enum ReferenceSearchType
+	protected enum ReferenceSearchType
 	{
 		ID, TYPE_AND_ID, RESOURCE_NAME_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID, URL, IDENTIFIER
 	}

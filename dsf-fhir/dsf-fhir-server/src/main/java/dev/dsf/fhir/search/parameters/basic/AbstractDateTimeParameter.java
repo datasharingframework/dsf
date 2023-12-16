@@ -23,21 +23,21 @@ import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorTy
 
 public abstract class AbstractDateTimeParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
-	public static enum DateTimeSearchType
+	protected enum DateTimeSearchType
 	{
 		EQ("eq", "="), NE("ne", "<>"), GT("gt", ">"), LT("lt", "<"), GE("ge", ">="), LE("le", "<=");
 
 		public final String prefix;
 		public final String operator;
 
-		private DateTimeSearchType(String prefix, String operator)
+		DateTimeSearchType(String prefix, String operator)
 		{
 			this.prefix = prefix;
 			this.operator = operator;
 		}
 	}
 
-	protected static enum DateTimeType
+	protected enum DateTimeType
 	{
 		ZONED_DATE_TIME, LOCAL_DATE, YEAR_PERIOD, YEAR_MONTH_PERIOD;
 	}
@@ -282,9 +282,6 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		ZonedDateTime lastUpdated = toZonedDateTime(resource.getMeta().getLastUpdated());
 		return lastUpdated != null && matches(lastUpdated, valueAndType);
 	}

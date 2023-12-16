@@ -30,17 +30,17 @@ public class QuestionnaireAuthorizationRule extends AbstractMetaTagAuthorization
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			Questionnaire newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			Questionnaire newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Questionnaire newResource)
+	private Optional<String> newResourceOk(Connection connection, Questionnaire newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

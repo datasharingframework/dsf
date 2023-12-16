@@ -60,8 +60,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 		out.write("<ul class=\"info-list\">\n");
 		out.write("<li><b>ID / Version:</b> " + (task.getIdElement() == null ? "" : task.getIdElement().getIdPart())
 				+ " / " + (task.getIdElement() == null ? "" : task.getIdElement().getVersionIdPart()) + "</li>\n");
-		out.write("<li><b>Last Updated:</b> " + (task.getMeta().getLastUpdated() == null ? ""
-				: DATE_TIME_DISPLAY_FORMAT.format(task.getMeta().getLastUpdated())) + "</li>\n");
+		out.write("<li><b>Last Updated:</b> " + formatLastUpdated(task, DATE_TIME_DISPLAY_FORMAT) + "</li>\n");
 		out.write("<li><b>Status:</b> " + (task.getStatus() == null ? "" : task.getStatus().toCode()) + "</li>\n");
 		out.write("<li><b>Process:</b> <a href=\"ActivityDefinition?url="
 				+ (task.getInstantiatesCanonical() == null ? "" : task.getInstantiatesCanonical()) + "\">"
@@ -94,7 +93,7 @@ public class TaskHtmlGenerator extends InputHtmlGenerator implements HtmlGenerat
 				+ "\"></input>\n");
 		out.write("</div>\n");
 
-		String authoredOn = DATE_TIME_FORMAT.format(task.getAuthoredOn());
+		String authoredOn = format(task.getAuthoredOn(), DATE_TIME_FORMAT);
 		out.write("<div class=\"row " + (draft ? "invisible" : "") + "\" name=\"authored-on-row\">\n");
 		out.write("<label class=\"row-label\">authored-on</label>\n");
 		out.write("<input type=\"datetime-local\" name=\"authored-on\" "

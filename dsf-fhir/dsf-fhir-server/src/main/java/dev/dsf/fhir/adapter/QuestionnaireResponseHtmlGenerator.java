@@ -57,9 +57,7 @@ public class QuestionnaireResponseHtmlGenerator extends InputHtmlGenerator
 				+ " / " + (questionnaireResponse.getIdElement() == null ? ""
 						: questionnaireResponse.getIdElement().getVersionIdPart())
 				+ "</li>\n");
-		out.write("<li><b>Last Updated:</b> "
-				+ (questionnaireResponse.getMeta().getLastUpdated() == null ? ""
-						: DATE_TIME_DISPLAY_FORMAT.format(questionnaireResponse.getMeta().getLastUpdated()))
+		out.write("<li><b>Last Updated:</b> " + formatLastUpdated(questionnaireResponse, DATE_TIME_DISPLAY_FORMAT)
 				+ "</li>\n");
 		out.write("<li><b>Status:</b> "
 				+ (questionnaireResponse.getStatus() == null ? "" : questionnaireResponse.getStatus().toCode())

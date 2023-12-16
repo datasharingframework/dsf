@@ -135,14 +135,13 @@ public class FallbackSerializerFactoryImpl implements FallbackSerializerFactory
 			return null;
 	}
 
-	@SuppressWarnings("rawtypes")
 	private String getName(TypedValue value)
 	{
 		if (value == null)
 			return null;
 
-		if (value instanceof PrimitiveValue)
-			return ((PrimitiveValue) value).getType().getJavaType().getName();
+		if (value instanceof PrimitiveValue p)
+			return p.getType().getJavaType().getName();
 		else if (value.getValue() != null)
 			return value.getClass().getName();
 		else if (value.getType() != null)

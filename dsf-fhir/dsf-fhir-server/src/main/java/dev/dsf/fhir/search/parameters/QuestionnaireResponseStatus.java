@@ -22,7 +22,7 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class QuestionnaireResponseStatus extends AbstractTokenParameter<QuestionnaireResponse>
 {
 	public static final String PARAMETER_NAME = "status";
-	public static final String RESOURCE_COLUMN = "questionnaire_response";
+	private static final String RESOURCE_COLUMN = "questionnaire_response";
 
 	private QuestionnaireResponse.QuestionnaireResponseStatus status;
 
@@ -94,9 +94,6 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof QuestionnaireResponse))
 			return false;
 

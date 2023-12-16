@@ -9,7 +9,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractStatusParameter;
 @SearchParameterDefinition(name = AbstractStatusParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Measure-status", type = SearchParamType.TOKEN, documentation = "The current status of the measure")
 public class MeasureStatus extends AbstractStatusParameter<Measure>
 {
-	public static final String RESOURCE_COLUMN = "measure";
+	private static final String RESOURCE_COLUMN = "measure";
 
 	public MeasureStatus()
 	{

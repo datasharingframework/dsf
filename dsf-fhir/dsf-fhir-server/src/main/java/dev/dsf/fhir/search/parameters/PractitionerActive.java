@@ -44,9 +44,6 @@ public class PractitionerActive extends AbstractBooleanParameter<Practitioner>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Practitioner))
 			return false;
 

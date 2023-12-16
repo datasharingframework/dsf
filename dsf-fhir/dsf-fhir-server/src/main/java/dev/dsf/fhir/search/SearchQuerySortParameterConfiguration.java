@@ -2,14 +2,14 @@ package dev.dsf.fhir.search;
 
 public class SearchQuerySortParameterConfiguration
 {
-	public static enum SortDirection
+	public enum SortDirection
 	{
 		ASC("", ""), DESC(" DESC", "-");
 
 		private final String sqlModifier;
 		private final String urlModifier;
 
-		private SortDirection(String sqlModifier, String urlModifier)
+		SortDirection(String sqlModifier, String urlModifier)
 		{
 			this.sqlModifier = sqlModifier;
 			this.urlModifier = urlModifier;

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hl7.fhir.r4.model.IdType;
 
-public class ResourceDeletedException extends Exception
+public final class ResourceDeletedException extends Exception
 {
 	private static final long serialVersionUID = 1L;
 

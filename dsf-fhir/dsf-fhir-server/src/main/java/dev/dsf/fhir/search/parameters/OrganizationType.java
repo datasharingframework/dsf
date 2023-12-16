@@ -1,7 +1,5 @@
 package dev.dsf.fhir.search.parameters;
 
-import static dev.dsf.fhir.search.parameters.OrganizationType.PARAMETER_NAME;
-
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -14,11 +12,11 @@ import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 
-@SearchParameterDefinition(name = PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-type", type = SearchParamType.TOKEN, documentation = "A code for the type of organization")
+@SearchParameterDefinition(name = OrganizationType.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-type", type = SearchParamType.TOKEN, documentation = "A code for the type of organization")
 public class OrganizationType extends AbstractTokenParameter<Organization>
 {
 	public static final String PARAMETER_NAME = "type";
-	public static final String RESOURCE_COLUMN = "organization";
+	private static final String RESOURCE_COLUMN = "organization";
 
 	public OrganizationType()
 	{
@@ -91,9 +89,6 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Organization))
 			return false;
 

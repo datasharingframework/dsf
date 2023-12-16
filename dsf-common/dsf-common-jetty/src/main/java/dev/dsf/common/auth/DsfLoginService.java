@@ -19,7 +19,7 @@ import jakarta.servlet.ServletRequest;
 
 public class DsfLoginService implements LoginService
 {
-	private final class UserIdentityImpl implements UserIdentity
+	private static final class UserIdentityImpl implements UserIdentity
 	{
 		private final Principal principal;
 
@@ -72,12 +72,12 @@ public class DsfLoginService implements LoginService
 			return null;
 
 		Principal principal = null;
-		if (credentials instanceof X509Certificate[])
-			principal = identityProvider.getIdentity((X509Certificate[]) credentials);
-		else if (credentials instanceof OpenIdCredentials)
-			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl((OpenIdCredentials) credentials));
-		else if (credentials instanceof String)
-			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl((String) credentials));
+		if (credentials instanceof X509Certificate[] c)
+			principal = identityProvider.getIdentity(c);
+		else if (credentials instanceof OpenIdCredentials o)
+			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl(o));
+		else if (credentials instanceof String s)
+			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl(s));
 
 		if (principal == null)
 			return null;

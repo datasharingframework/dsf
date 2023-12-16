@@ -44,16 +44,16 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	@Override
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity, Endpoint newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity, Endpoint newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, Endpoint newResource)
+	private Optional<String> newResourceOk(Connection connection, Endpoint newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -116,6 +116,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for Endpoint: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException("Unable to search for Endpoint: Unsupported query parameters");
 		}
 
@@ -126,7 +127,9 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for Endpoint", e);
+			logger.debug("Unable to search for Endpoint", e);
+			logger.warn("Unable to search for Endpoint: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for Endpoint", e);
 		}
 	}
@@ -142,6 +145,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for Endpoint: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException("Unable to search for Endpoint: Unsupported query parameters");
 		}
 
@@ -152,7 +156,9 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for Endpoint", e);
+			logger.debug("Unable to search for Endpoint", e);
+			logger.warn("Unable to search for Endpoint: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException("Unable to search for Endpoint", e);
 		}
 	}

@@ -19,7 +19,7 @@ import jakarta.ws.rs.core.UriInfo;
 
 public class RootServiceSecure extends AbstractServiceSecure<RootService> implements RootService
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
+	private static final Logger logger = LoggerFactory.getLogger(RootServiceSecure.class);
 
 	private final AuthorizationRule<Resource> authorizationRule;
 

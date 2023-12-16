@@ -6,7 +6,7 @@ public enum PreferReturnType
 
 	private final String headerValue;
 
-	private PreferReturnType(String headerValue)
+	PreferReturnType(String headerValue)
 	{
 		this.headerValue = headerValue;
 	}

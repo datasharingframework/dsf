@@ -2,7 +2,6 @@ package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,12 +22,8 @@ import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 
-public abstract class InputHtmlGenerator
+public abstract class InputHtmlGenerator extends AbstractHtmlAdapter
 {
-	protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-	protected static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	protected static final SimpleDateFormat DATE_TIME_DISPLAY_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
 	protected void writeDisplayRow(String text, String elementName, boolean display, OutputStreamWriter out)
 			throws IOException
 	{
@@ -116,7 +111,7 @@ public abstract class InputHtmlGenerator
 			}
 			else if (type instanceof DateType d)
 			{
-				String date = d.hasValue() ? DATE_FORMAT.format(d.getValue()) : "";
+				String date = d.hasValue() ? format(d.getValue(), DATE_FORMAT) : "";
 				writeInputFieldValueInput("date", date, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof TimeType t)
@@ -126,12 +121,12 @@ public abstract class InputHtmlGenerator
 			}
 			else if (type instanceof DateTimeType dt)
 			{
-				String dateTime = dt.hasValue() ? DATE_TIME_FORMAT.format(dt.getValue()) : "";
+				String dateTime = dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : "";
 				writeInputFieldValueInput("datetime-local", dateTime, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof InstantType i)
 			{
-				String dateTime = i.hasValue() ? DATE_TIME_FORMAT.format(i.getValue()) : "";
+				String dateTime = i.hasValue() ? format(i.getValue(), DATE_TIME_FORMAT) : "";
 				writeInputFieldValueInput("datetime-local", dateTime, elementName, elementIndex, writable, out);
 			}
 			else if (type instanceof UriType u)
@@ -190,7 +185,7 @@ public abstract class InputHtmlGenerator
 	{
 		out.write("<div class=\"input-group\">\n");
 		writeInput(type, value, elementName, elementIndex, Optional.empty(), writable, out);
-		writePlaceholderButton(elementName, value, writable, out);
+		writePlaceholderButton(writable, out);
 		out.write("</div>\n");
 	}
 
@@ -199,13 +194,13 @@ public abstract class InputHtmlGenerator
 	{
 		out.write("<div class=\"input-group\">\n");
 		writeInput("url", system, elementName + "-system", elementIndex, Optional.empty(), writable, out);
-		writePlaceholderButton(elementName + "-system", system, writable, out);
+		writePlaceholderButton(writable, out);
 		out.write("</div>\n");
 
 		out.write("<div class=\"input-group\">\n");
 		writeInput("text", code, elementName + "-code", elementIndex, Optional.of("identifier-coding-code"), writable,
 				out);
-		writePlaceholderButton(elementName + "-code", code, writable, out);
+		writePlaceholderButton(writable, out);
 		out.write("</div>\n");
 	}
 
@@ -217,8 +212,7 @@ public abstract class InputHtmlGenerator
 				+ (writable ? "placeholder=\"" + value + "\"" : "value=\"" + value + "\"") + "></input>\n");
 	}
 
-	private void writePlaceholderButton(String elementName, String value, boolean writable, OutputStreamWriter out)
-			throws IOException
+	private void writePlaceholderButton(boolean writable, OutputStreamWriter out) throws IOException
 	{
 		if (writable)
 		{

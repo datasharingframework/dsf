@@ -36,7 +36,7 @@ public class IncludeParts
 	public String toBundleUriQueryParameterValue()
 	{
 		return getSourceResourceTypeName() + ":" + getSearchParameterName()
-				+ (getTargetResourceTypeName() != null ? (":" + getTargetResourceTypeName()) : "");
+				+ (getTargetResourceTypeName() != null ? ":" + getTargetResourceTypeName() : "");
 	}
 
 	public String getSourceResourceTypeName()

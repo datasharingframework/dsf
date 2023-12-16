@@ -7,10 +7,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractUrlAndVersionParameter;
 
-@SearchParameterDefinition(name = ValueSetUrl.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ValueSet-url", type = SearchParamType.URI, documentation = "The uri that identifies the value set")
+@SearchParameterDefinition(name = AbstractUrlAndVersionParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ValueSet-url", type = SearchParamType.URI, documentation = "The uri that identifies the value set")
 public class ValueSetUrl extends AbstractUrlAndVersionParameter<ValueSet>
 {
-	public static final String RESOURCE_COLUMN = "value_set";
+	private static final String RESOURCE_COLUMN = "value_set";
 
 	public ValueSetUrl()
 	{

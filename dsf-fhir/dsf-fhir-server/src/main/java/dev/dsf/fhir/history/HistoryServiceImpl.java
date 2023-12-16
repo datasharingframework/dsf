@@ -91,7 +91,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		int effectivePage = page == null ? 1 : page;
 
 		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
-		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
+		int effectiveCount = count == null || count < 0 ? defaultPageCount : count;
 
 		PageAndCount pageAndCount = new PageAndCount(effectivePage, effectiveCount);
 

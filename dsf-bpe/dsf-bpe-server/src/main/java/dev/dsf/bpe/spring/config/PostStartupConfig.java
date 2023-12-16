@@ -28,11 +28,10 @@ public class PostStartupConfig
 		pluginConfig.processPluginManager().loadAndDeployPlugins();
 		logger.info("Deploying process plugins [Done]");
 
-		logger.info("Staring process engine ...");
+		logger.info("Starting process engine ...");
 		camundaConfig.processEngineConfiguration().getJobExecutor().start();
-		logger.info("Staring process engine [Done]");
+		logger.info("Starting process engine [Done]");
 
-		logger.info("Connecting to websockets ...");
 		fhirConfig.fhirConnectorTask().connect();
 		fhirConfig.fhirConnectorQuestionnaireResponse().connect();
 		// websocket connect is an async operation

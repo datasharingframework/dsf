@@ -28,9 +28,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = PractitionerRoleOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-organization", type = SearchParamType.REFERENCE, documentation = "The identity of the organization the practitioner represents / acts on behalf of")
 public class PractitionerRoleOrganization extends AbstractReferenceParameter<PractitionerRole>
 {
-	public static final String RESOURCE_TYPE_NAME = "PractitionerRole";
+	private static final String RESOURCE_TYPE_NAME = "PractitionerRole";
 	public static final String PARAMETER_NAME = "organization";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -145,9 +145,6 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof PractitionerRole))
 			return false;
 
@@ -155,9 +152,8 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (pR.getOrganization().getResource() instanceof Organization)
+			if (pR.getOrganization().getResource() instanceof Organization o)
 			{
-				Organization o = (Organization) pR.getOrganization().getResource();
 				return o.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}

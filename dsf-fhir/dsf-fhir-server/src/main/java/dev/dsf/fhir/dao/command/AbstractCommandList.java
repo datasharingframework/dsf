@@ -40,7 +40,7 @@ class AbstractCommandList
 
 	private static boolean hasModifyingCommands(List<? extends Command> commands)
 	{
-		return commands.stream().anyMatch(c -> c instanceof ModifyingCommand);
+		return commands != null && commands.stream().anyMatch(c -> c instanceof ModifyingCommand);
 	}
 
 	protected void auditLogResult(Command command, BundleEntryComponent result)
@@ -91,11 +91,10 @@ class AbstractCommandList
 			audit.info("Update of {} for identity '{}' via bundle at index {} abborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
-		else if (command instanceof ReadCommand)
+		else if (command instanceof ReadCommand r)
 		{
-			audit.info("{} of {} for identity '{}' via bundle at index {} abborted",
-					((ReadCommand) command).isSearch() ? "Search" : "Read", command.getResourceTypeName(),
-					command.getIdentity().getName(), command.getIndex());
+			audit.info("{} of {} for identity '{}' via bundle at index {} abborted", r.isSearch() ? "Search" : "Read",
+					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex());
 		}
 	}
 
@@ -117,8 +116,8 @@ class AbstractCommandList
 		var entry = new BundleEntryComponent();
 		var response = entry.getResponse();
 
-		if (!(exception instanceof WebApplicationException)
-				|| !(((WebApplicationException) exception).getResponse().getEntity() instanceof OperationOutcome))
+		if (!(exception instanceof WebApplicationException w)
+				|| !(w.getResponse().getEntity() instanceof OperationOutcome))
 		{
 			exception = exceptionHandler.internalServerErrorBundleBatch(exception);
 		}

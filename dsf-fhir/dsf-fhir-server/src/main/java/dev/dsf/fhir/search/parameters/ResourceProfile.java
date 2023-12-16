@@ -64,9 +64,6 @@ public class ResourceProfile<R extends Resource> extends AbstractCanonicalUrlPar
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		switch (valueAndType.type)
 		{
 			case PRECISE:
@@ -94,9 +91,6 @@ public class ResourceProfile<R extends Resource> extends AbstractCanonicalUrlPar
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		switch (valueAndType.type)
 		{
 			case PRECISE:

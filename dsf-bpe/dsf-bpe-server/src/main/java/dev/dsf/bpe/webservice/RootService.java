@@ -58,11 +58,8 @@ public class RootService
 	private String getDisplayName(SecurityContext securityContext)
 	{
 		Principal userPrincipal = securityContext.getUserPrincipal();
-		if (userPrincipal != null && userPrincipal instanceof Identity)
-		{
-			Identity identity = (Identity) userPrincipal;
+		if (userPrincipal != null && userPrincipal instanceof Identity identity)
 			return identity.getDisplayName();
-		}
 		else
 			return "?";
 

@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-identifier", type = SearchParamType.TOKEN, documentation = "Identifies this endpoint across multiple systems")
 public class EndpointIdentifier extends AbstractIdentifierParameter<Endpoint>
 {
-	public static final String RESOURCE_COLUMN = "endpoint";
+	private static final String RESOURCE_COLUMN = "endpoint";
 
 	public EndpointIdentifier()
 	{
@@ -20,9 +20,6 @@ public class EndpointIdentifier extends AbstractIdentifierParameter<Endpoint>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Endpoint))
 			return false;
 

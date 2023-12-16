@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import de.rwh.utils.crypto.CertificateAuthority;
 import dev.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 
-public class TestDataGenerator
+public final class TestDataGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(TestDataGenerator.class);
 
@@ -21,6 +21,10 @@ public class TestDataGenerator
 	static
 	{
 		CertificateAuthority.registerBouncyCastleProvider();
+	}
+
+	private TestDataGenerator()
+	{
 	}
 
 	public static void main(String[] args)

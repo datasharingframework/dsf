@@ -128,7 +128,9 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while accessing DB", e);
+			logger.debug("Error while accessing DB", e);
+			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

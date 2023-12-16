@@ -210,7 +210,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		referenceExtractor.getReferences(resource).filter(checkReference)
 				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
 				{
-					Optional<OperationOutcome> outcome = checkReference(idTranslationTable, connection, ref);
+					Optional<OperationOutcome> outcome = checkReference(ref, connection);
 					if (outcome.isPresent())
 					{
 						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
@@ -219,8 +219,8 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 				});
 	}
 
-	private Optional<OperationOutcome> checkReference(Map<String, IdType> idTranslationTable, Connection connection,
-			ResourceReference reference) throws WebApplicationException
+	private Optional<OperationOutcome> checkReference(ResourceReference reference, Connection connection)
+			throws WebApplicationException
 	{
 		ReferenceType type = reference.getType(serverBase);
 		switch (type)

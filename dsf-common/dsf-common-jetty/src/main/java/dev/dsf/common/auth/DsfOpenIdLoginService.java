@@ -34,9 +34,11 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 		{
 			openIdCredentials.redeemAuthCode(configuration);
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
-			logger.warn("Unable to redeem auth code", e);
+			logger.debug("Unable to redeem auth code", e);
+			logger.warn("Unable to redeem auth code: {} - {}", e.getClass().getName(), e.getMessage());
+
 			return null;
 		}
 
@@ -46,10 +48,8 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 	@Override
 	public boolean validate(UserIdentity user)
 	{
-		if (!(user.getUserPrincipal() instanceof PractitionerIdentity))
+		if (!(user.getUserPrincipal() instanceof PractitionerIdentity identity))
 			return false;
-
-		PractitionerIdentity identity = (PractitionerIdentity) user.getUserPrincipal();
 
 		if (identity.getCredentials().isEmpty())
 		{

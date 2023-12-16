@@ -127,11 +127,11 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 					.getDao(resource.getClass());
 
-			if (resource instanceof StructureDefinition)
+			if (resource instanceof StructureDefinition s)
 				return new CreateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
-						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-						referenceCleaner, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
+						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
 			else
 				return dao.map(d -> new CreateCommand<R, ResourceDao<R>>(index, identity, returnType, bundle, entry,
 						serverBase, authorizationHelper, resource, d, exceptionHandler, parameterConverter,
@@ -155,11 +155,11 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 					.getDao(resource.getClass());
 
-			if (resource instanceof StructureDefinition)
+			if (resource instanceof StructureDefinition s)
 				return new UpdateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
-						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-						referenceCleaner, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
+						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
 			else
 				return dao.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, identity, returnType, bundle, entry,
 						serverBase, authorizationHelper, resource, d, exceptionHandler, parameterConverter,

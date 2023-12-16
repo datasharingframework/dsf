@@ -69,10 +69,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 	private static final class ResourceDistinctById
 	{
-		private final IdType id;
-		private final Resource resource;
+		final IdType id;
+		final Resource resource;
 
-		public ResourceDistinctById(IdType id, Resource resource)
+		ResourceDistinctById(IdType id, Resource resource)
 		{
 			this.id = id;
 			this.resource = resource;
@@ -170,14 +170,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,
 			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
-		this(dataSource, permanentDeleteDataSource, fhirContext, resourceType, resourceTable, resourceColumn,
-				resourceIdColumn, new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable,
-						resourceIdColumn, resourceColumn),
+		this(dataSource, permanentDeleteDataSource, resourceType, resourceTable, resourceColumn, resourceIdColumn,
+				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
+						resourceColumn),
 				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
-	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
-			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
+	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, Class<R> resourceType,
+			String resourceTable, String resourceColumn, String resourceIdColumn,
 			PreparedStatementFactory<R> preparedStatementFactory,
 			Function<Identity, SearchQueryIdentityFilter> userFilter,
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,
@@ -202,11 +202,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			this.searchRevIncludeParameterFactories.addAll(searchRevIncludeParameterFactories);
 
 		resourceIdFactory = new SearchQueryParameterFactory<>(ResourceId.PARAMETER_NAME,
-				() -> new ResourceId<>(resourceIdColumn), null, null, null);
+				() -> new ResourceId<>(resourceIdColumn));
 		resourceLastUpdatedFactory = new SearchQueryParameterFactory<>(ResourceLastUpdated.PARAMETER_NAME,
-				() -> new ResourceLastUpdated<>(resourceColumn), null, null, null);
+				() -> new ResourceLastUpdated<>(resourceColumn));
 		resourceProfileFactory = new SearchQueryParameterFactory<>(ResourceProfile.PARAMETER_NAME,
-				() -> new ResourceProfile<>(resourceColumn), ResourceProfile.getNameModifiers(), null, null);
+				() -> new ResourceProfile<>(resourceColumn), ResourceProfile.getNameModifiers());
 	}
 
 	@Override
@@ -902,10 +902,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			JsonElement jsonElement = it.next();
 			IBaseResource resource = preparedStatementFactory.getJsonParser().parseResource(jsonElement.toString());
-			if (resource instanceof Resource)
+			if (resource instanceof Resource r)
 			{
-				query.modifyIncludeResource((Resource) resource, columnIndex, connection);
-				includeResources.add((Resource) resource);
+				query.modifyIncludeResource(r, columnIndex, connection);
+				includeResources.add(r);
 			}
 			else
 				logger.warn("parsed resouce of type {} not instance of {}, ignoring include resource",

@@ -27,7 +27,7 @@ public class EndpointHtmlGenerator extends ResourceHtmlGenerator implements Html
 		out.write("</div>\n");
 
 		writeMeta(resource, out);
-		writeRow("Status", (resource.hasStatus() ? resource.getStatus().toCode() : ""), out);
+		writeRow("Status", resource.hasStatus() ? resource.getStatus().toCode() : "", out);
 
 		writeSectionHeader("Endpoint", out);
 

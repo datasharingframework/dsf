@@ -211,7 +211,8 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while handling resource deleted event", e);
+			logger.debug("Error while handling resource deleted event", e);
+			logger.warn("Error while handling resource deleted event: {} - {}", e.getClass().getName(), e.getMessage());
 		}
 
 		BundleEntryComponent resultEntry = new BundleEntryComponent();

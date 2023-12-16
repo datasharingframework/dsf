@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/HealthcareService-identifier", type = SearchParamType.TOKEN, documentation = "External identifiers for this item")
 public class HealthcareServiceIdentifier extends AbstractIdentifierParameter<HealthcareService>
 {
-	public static final String RESOURCE_COLUMN = "healthcare_service";
+	private static final String RESOURCE_COLUMN = "healthcare_service";
 
 	public HealthcareServiceIdentifier()
 	{
@@ -20,9 +20,6 @@ public class HealthcareServiceIdentifier extends AbstractIdentifierParameter<Hea
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof HealthcareService))
 			return false;
 

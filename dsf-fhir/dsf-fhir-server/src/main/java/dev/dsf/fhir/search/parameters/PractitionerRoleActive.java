@@ -12,7 +12,7 @@ import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractBooleanParameter;
 
-@SearchParameterDefinition(name = PractitionerActive.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-active", type = SearchParamType.TOKEN, documentation = "Whether this practitioner role record is in active use [true|false]")
+@SearchParameterDefinition(name = PractitionerRoleActive.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-active", type = SearchParamType.TOKEN, documentation = "Whether this practitioner role record is in active use [true|false]")
 public class PractitionerRoleActive extends AbstractBooleanParameter<PractitionerRole>
 {
 	public static final String PARAMETER_NAME = "active";
@@ -44,9 +44,6 @@ public class PractitionerRoleActive extends AbstractBooleanParameter<Practitione
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof PractitionerRole))
 			return false;
 

@@ -75,7 +75,7 @@ public class CommandConfig
 		SnapshotGenerator snapshotGenerator = new SnapshotGeneratorImpl(fhirConfig.fhirContext(), validationSupport);
 
 		TransactionEventHandler transactionEventHandler = new TransactionEventHandler(eventConfig.eventManager(),
-				validationSupport instanceof EventHandler ? (EventHandler) validationSupport : null);
+				validationSupport instanceof EventHandler h ? h : null);
 
 		return new TransactionResources(validationHelper, snapshotGenerator, transactionEventHandler);
 	}

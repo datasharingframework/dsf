@@ -6,7 +6,7 @@ public enum ProcessState
 
 	private final int priority;
 
-	private ProcessState(int priority)
+	ProcessState(int priority)
 	{
 		this.priority = priority;
 	}

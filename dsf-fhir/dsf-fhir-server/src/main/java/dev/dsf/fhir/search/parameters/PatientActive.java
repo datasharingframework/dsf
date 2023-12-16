@@ -44,9 +44,6 @@ public class PatientActive extends AbstractBooleanParameter<Patient>
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof Patient))
 			return false;
 

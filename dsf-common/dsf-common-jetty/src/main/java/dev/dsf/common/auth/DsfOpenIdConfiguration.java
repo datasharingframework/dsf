@@ -80,7 +80,7 @@ public class DsfOpenIdConfiguration extends OpenIdConfiguration
 						return key.get();
 					else
 					{
-						logger.warn("Unable to retrieve key with id " + kid);
+						logger.warn("Unable to retrieve key with id {}", kid);
 						return null;
 					}
 				}
@@ -100,7 +100,9 @@ public class DsfOpenIdConfiguration extends OpenIdConfiguration
 		}
 		catch (InterruptedException | ExecutionException | TimeoutException e)
 		{
+			logger.debug("Unable to retrieve keys from {}: {} - {}", jwksUri, e);
 			logger.warn("Unable to retrieve keys from {}: {} - {}", jwksUri, e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

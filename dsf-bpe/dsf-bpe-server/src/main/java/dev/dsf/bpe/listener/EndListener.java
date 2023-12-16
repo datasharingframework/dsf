@@ -47,7 +47,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 			updateIfInprogress(task);
 			boolean subProcess = execution.getParentId() != null
 					&& !execution.getParentId().equals(execution.getProcessInstanceId());
-			logEnd(logger, subProcess, task, subProcess ? variables.getStartTask() : null);
+			logEnd(subProcess, task, subProcess ? variables.getStartTask() : null);
 		}
 
 		variables.onEnd();
@@ -78,11 +78,13 @@ public class EndListener extends AbstractListener implements ExecutionListener
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to update Task " + getLocalVersionlessAbsoluteUrl(task), e);
+			logger.debug("Unable to update Task {}", getLocalVersionlessAbsoluteUrl(task), e);
+			logger.error("Unable to update Task {}: {} - {}", getLocalVersionlessAbsoluteUrl(task),
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 
-	private void logEnd(Logger logger, boolean subProcess, Task endTask, Task mainTask)
+	private void logEnd(boolean subProcess, Task endTask, Task mainTask)
 	{
 		String processUrl = endTask.getInstantiatesCanonical();
 		String businessKey = getFirstInputParameter(endTask, BpmnMessage.businessKey());
@@ -111,7 +113,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey);
 			else
 				logger.info("Process {} finished at {} [task: {}, requester: {}, business-key: {}]", processUrl,
-						getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey);
+						getCurrentTime(), endTaskUrl, requester, businessKey);
 		}
 	}
 }

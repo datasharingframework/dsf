@@ -10,7 +10,7 @@ import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition-identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the activity definition")
 public class ActivityDefinitionIdentifier extends AbstractIdentifierParameter<ActivityDefinition>
 {
-	public static final String RESOURCE_COLUMN = "activity_definition";
+	private static final String RESOURCE_COLUMN = "activity_definition";
 
 	public ActivityDefinitionIdentifier()
 	{
@@ -20,9 +20,6 @@ public class ActivityDefinitionIdentifier extends AbstractIdentifierParameter<Ac
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		if (!(resource instanceof ActivityDefinition))
 			return false;
 

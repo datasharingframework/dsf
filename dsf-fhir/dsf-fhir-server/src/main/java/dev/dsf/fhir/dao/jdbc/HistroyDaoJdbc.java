@@ -156,8 +156,8 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 
 	private void modifyResource(Resource resource, Connection connection) throws SQLException
 	{
-		if (resource instanceof Binary)
-			binaryDao.modifySearchResultResource((Binary) resource, connection);
+		if (resource instanceof Binary b)
+			binaryDao.modifySearchResultResource(b, connection);
 	}
 
 	private PGobject uuidToPgObject(UUID uuid)

@@ -24,7 +24,6 @@ import dev.dsf.bpe.v1.variables.Variables;
 import dev.dsf.bpe.variables.FhirResourceValues.FhirResourceValue;
 import dev.dsf.bpe.variables.FhirResourcesListValues.FhirResourcesListValue;
 import dev.dsf.bpe.variables.TargetValues.TargetValue;
-import dev.dsf.bpe.variables.TargetsValues.TargetsValue;
 
 public class VariablesImpl implements Variables, ListenerVariables
 {
@@ -129,17 +128,14 @@ public class VariablesImpl implements Variables, ListenerVariables
 	public void setTargets(Targets targets) throws IllegalArgumentException
 	{
 		if (targets == null)
-		{
 			execution.setVariable(BpmnExecutionVariables.TARGETS, null);
-			return;
-		}
 
-		if (!(targets instanceof TargetsImpl))
+		else if (targets instanceof TargetsImpl t)
+			execution.setVariable(BpmnExecutionVariables.TARGETS, TargetsValues.create(t));
+
+		else
 			throw new IllegalArgumentException(
 					"Given targets implementing class " + targets.getClass().getName() + " not supported");
-
-		TargetsValue variable = targets == null ? null : TargetsValues.create((TargetsImpl) targets);
-		execution.setVariable(BpmnExecutionVariables.TARGETS, variable);
 	}
 
 	@Override

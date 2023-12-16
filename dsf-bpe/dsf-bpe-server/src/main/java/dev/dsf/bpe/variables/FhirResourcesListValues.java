@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 public final class FhirResourcesListValues
 {
-	public static interface FhirResourcesListValue extends PrimitiveValue<FhirResourcesList>
+	public interface FhirResourcesListValue extends PrimitiveValue<FhirResourcesList>
 	{
 		@SuppressWarnings("unchecked")
 		default <R extends Resource> List<R> getFhirResources()
