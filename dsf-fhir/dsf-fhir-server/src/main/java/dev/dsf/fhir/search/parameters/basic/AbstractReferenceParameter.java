@@ -173,16 +173,14 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		}
 	}
 
-	private final Class<R> resourceType;
 	private final List<String> targetResourceTypeNames;
 
 	protected ReferenceValueAndSearchType valueAndType;
 
 	public AbstractReferenceParameter(Class<R> resourceType, String parameterName, String... targetResourceTypeNames)
 	{
-		super(parameterName);
+		super(resourceType, parameterName);
 
-		this.resourceType = resourceType;
 		this.targetResourceTypeNames = Arrays.asList(targetResourceTypeNames);
 	}
 
@@ -208,8 +206,6 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 			case ID, URL, RESOURCE_NAME_AND_ID -> parameterName;
 			case TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID -> parameterName + ":" + valueAndType.resourceName;
 			case IDENTIFIER -> parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER;
-			default -> throw new IllegalArgumentException(
-					"Unexpected " + ReferenceSearchType.class.getName() + " value: " + valueAndType.type);
 		};
 	}
 
@@ -228,11 +224,7 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 				case CODE_AND_SYSTEM -> valueAndType.identifier.systemValue + "|" + valueAndType.identifier.codeValue;
 				case CODE_AND_NO_SYSTEM_PROPERTY -> "|" + valueAndType.identifier.codeValue;
 				case SYSTEM -> valueAndType.identifier.systemValue + "|";
-				default -> throw new IllegalArgumentException(
-						"Unexpected " + TokenSearchType.class.getName() + " value: " + valueAndType.identifier.type);
 			};
-			default -> throw new IllegalArgumentException(
-					"Unexpected " + ReferenceSearchType.class.getName() + " value: " + valueAndType.type);
 		};
 	}
 

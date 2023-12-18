@@ -1,6 +1,6 @@
 package dev.dsf.fhir.hapi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.UUID;
 

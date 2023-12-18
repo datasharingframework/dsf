@@ -8,7 +8,6 @@ import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
@@ -22,13 +21,12 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class TaskStatus extends AbstractTokenParameter<Task>
 {
 	public static final String PARAMETER_NAME = "status";
-	private static final String RESOURCE_COLUMN = "task";
 
 	private Task.TaskStatus status;
 
 	public TaskStatus()
 	{
-		super(PARAMETER_NAME);
+		super(Task.class, PARAMETER_NAME);
 	}
 
 	@Override
@@ -66,9 +64,15 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return "task->>'status' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return "task->>'status' <> ?";
 	}
 
 	@Override
@@ -91,20 +95,14 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Task resource)
 	{
-		if (!(resource instanceof Task))
-			return false;
-
-		if (valueAndType.negated)
-			return !Objects.equals(((Task) resource).getStatus(), status);
-		else
-			return Objects.equals(((Task) resource).getStatus(), status);
+		return valueAndType.negated ^ (resource.hasStatus() && Objects.equals(resource.getStatus(), status));
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
+		return "task->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }

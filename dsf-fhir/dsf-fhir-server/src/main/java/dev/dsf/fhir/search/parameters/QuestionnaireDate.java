@@ -13,6 +13,7 @@ public class QuestionnaireDate extends AbstractDateTimeParameter<Questionnaire>
 
 	public QuestionnaireDate()
 	{
-		super(PARAMETER_NAME, "questionnaire->>'date'");
+		super(Questionnaire.class, PARAMETER_NAME, "questionnaire->>'date'",
+				fromDateTime(Questionnaire::hasDateElement, Questionnaire::getDateElement));
 	}
 }

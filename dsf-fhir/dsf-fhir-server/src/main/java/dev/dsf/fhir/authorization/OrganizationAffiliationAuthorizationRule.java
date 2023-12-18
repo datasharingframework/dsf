@@ -57,7 +57,7 @@ public class OrganizationAffiliationAuthorizationRule
 
 	private Optional<String> newResourceOk(Connection connection, OrganizationAffiliation newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasOrganization())
 		{

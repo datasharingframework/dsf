@@ -28,7 +28,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
 import liquibase.ui.LoggerUIService;
 
 public final class DbMigrator
@@ -148,11 +147,7 @@ public final class DbMigrator
 					logger.warn("Error while accessing db: {}", e.getMessage());
 					throw new DbMigratorExceptions(e);
 				}
-				catch (LiquibaseException e)
-				{
-					logger.warn("Error while running liquibase: {}", e.getMessage());
-					throw new DbMigratorExceptions(e);
-				}
+				// no special case for LiquibaseException
 				catch (Exception e)
 				{
 					logger.warn("Error while running liquibase: {}", e.getMessage());

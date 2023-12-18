@@ -13,6 +13,7 @@ public class TaskAuthoredOn extends AbstractDateTimeParameter<Task>
 
 	public TaskAuthoredOn()
 	{
-		super(PARAMETER_NAME, "task->>'authoredOn'");
+		super(Task.class, PARAMETER_NAME, "task->>'authoredOn'",
+				fromDateTime(Task::hasAuthoredOnElement, Task::getAuthoredOnElement));
 	}
 }

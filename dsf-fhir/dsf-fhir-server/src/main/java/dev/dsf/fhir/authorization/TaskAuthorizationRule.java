@@ -175,7 +175,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	 */
 	private Optional<String> requestedTaskOk(Connection connection, Identity identity, Task newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.getIdentifier().stream().anyMatch(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem())))
 		{
@@ -282,7 +282,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	 */
 	private Optional<String> draftTaskOk(Connection connection, Identity identity, Task newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.getIdentifier().stream().noneMatch(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem())))
 		{
@@ -395,7 +395,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						.anyMatch(c -> CODE_SYSTEM_BPMN_MESSAGE.equals(c.getSystem())
 								&& CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME.equals(c.getCode())))
 				.filter(ParameterComponent::hasValue).filter(i -> i.getValue() instanceof StringType)
-				.map(ParameterComponent::getValue).map(v -> (StringType) v).map(t -> t.getValueAsString())
+				.map(ParameterComponent::getValue).map(v -> (StringType) v).map(StringType::getValueAsString)
 				.filter(s -> !s.isBlank());
 	}
 
@@ -792,7 +792,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 	private Optional<String> reasonNotSame(Task oldResource, Task newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 		if (!oldResource.getRequester().equalsDeep(newResource.getRequester()))
 		{
 			errors.add("Task.requester");

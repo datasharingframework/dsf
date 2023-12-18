@@ -59,7 +59,7 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 
 	private Optional<String> newResourceOk(Connection connection, Organization newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasIdentifier())
 		{
@@ -151,11 +151,11 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 	private boolean isIdentifierSame(Organization oldResource, Organization newResource)
 	{
 		String oldIdentifierValue = oldResource.getIdentifier().stream()
-				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst()
+				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(Identifier::getValue).findFirst()
 				.orElseThrow();
 
 		String newIdentifierValue = newResource.getIdentifier().stream()
-				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst()
+				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(Identifier::getValue).findFirst()
 				.orElseThrow();
 
 		return oldIdentifierValue.equals(newIdentifierValue);

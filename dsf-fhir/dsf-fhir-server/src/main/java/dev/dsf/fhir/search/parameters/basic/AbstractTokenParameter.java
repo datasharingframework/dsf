@@ -2,6 +2,7 @@ package dev.dsf.fhir.search.parameters.basic;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -18,9 +19,9 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 
 	protected TokenValueAndSearchType valueAndType;
 
-	public AbstractTokenParameter(String parameterName)
+	public AbstractTokenParameter(Class<R> resourceType, String parameterName)
 	{
-		super(parameterName);
+		super(resourceType, parameterName);
 	}
 
 	@Override
@@ -37,6 +38,16 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 	}
 
 	@Override
+	public final String getFilterQuery()
+	{
+		return valueAndType.negated ? getNegatedFilterQuery() : getPositiveFilterQuery();
+	}
+
+	protected abstract String getNegatedFilterQuery();
+
+	protected abstract String getPositiveFilterQuery();
+
+	@Override
 	public String getBundleUriQueryParameterName()
 	{
 		return valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName;
@@ -51,27 +62,29 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 			case CODE_AND_SYSTEM -> valueAndType.systemValue + "|" + valueAndType.codeValue;
 			case CODE_AND_NO_SYSTEM_PROPERTY -> "|" + valueAndType.codeValue;
 			case SYSTEM -> valueAndType.systemValue + "|";
-			default -> throw new IllegalArgumentException(
-					"Unexpected " + TokenSearchType.class.getName() + " value: " + valueAndType.type);
 		};
 	}
 
 	protected boolean codingMatches(List<CodeableConcept> codes)
 	{
-		return codes.stream().flatMap(c -> c.getCoding().stream())
-				.anyMatch(c -> valueAndType.negated ? !codingMatches(valueAndType, c) : codingMatches(valueAndType, c));
+		return codes.stream().filter(CodeableConcept::hasCoding).map(CodeableConcept::getCoding).flatMap(List::stream)
+				.filter(Coding::hasCode).anyMatch(codingMatches(valueAndType));
 	}
 
-	public static boolean codingMatches(TokenValueAndSearchType valueAndType, Coding coding)
+	private Predicate<Coding> codingMatches(TokenValueAndSearchType valueAndType)
 	{
-		return switch (valueAndType.type)
+		return coding -> valueAndType.negated ^ switch (valueAndType.type)
 		{
-			case CODE -> Objects.equals(valueAndType.codeValue, coding.getCode());
-			case CODE_AND_SYSTEM -> Objects.equals(valueAndType.codeValue, coding.getCode())
-					&& Objects.equals(valueAndType.systemValue, coding.getSystem());
-			case CODE_AND_NO_SYSTEM_PROPERTY -> Objects.equals(valueAndType.codeValue, coding.getCode())
-					&& (coding.getSystem() == null || coding.getSystem().isBlank());
-			case SYSTEM -> Objects.equals(valueAndType.systemValue, coding.getSystem());
+			case CODE -> coding.hasCode() && Objects.equals(valueAndType.codeValue, coding.getCode());
+
+			case CODE_AND_SYSTEM -> coding.hasCode() && Objects.equals(valueAndType.codeValue, coding.getCode())
+					&& coding.hasSystem() && Objects.equals(valueAndType.systemValue, coding.getSystem());
+
+			case CODE_AND_NO_SYSTEM_PROPERTY ->
+				coding.hasCode() && Objects.equals(valueAndType.codeValue, coding.getCode()) && !coding.hasSystem();
+
+			case SYSTEM -> coding.hasSystem() && Objects.equals(valueAndType.systemValue, coding.getSystem());
+
 			default -> false;
 		};
 	}

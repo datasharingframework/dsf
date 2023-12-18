@@ -46,33 +46,22 @@ public class OrganizationAffiliationEndpoint extends AbstractReferenceParameter<
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "? IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') AS reference)";
-
-			case IDENTIFIER:
+			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"? IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') AS reference)";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return "(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
-								+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
-								+ " ) AS identifiers) @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
-								+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
-								+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM ->
+					"(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
+							+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
+							+ " ) AS identifiers) @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY ->
+					"(SELECT count(*) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
+							+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
+							+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -145,34 +134,25 @@ public class OrganizationAffiliationEndpoint extends AbstractReferenceParameter<
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(OrganizationAffiliation resource)
 	{
-		if (!(resource instanceof OrganizationAffiliation))
-			return false;
-
-		OrganizationAffiliation oA = (OrganizationAffiliation) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			return oA.getEndpoint().stream().map(Reference::getResource).filter(r -> r instanceof Endpoint)
-					.flatMap(r -> ((Endpoint) r).getIdentifier().stream())
-					.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+			return resource.getEndpoint().stream().map(Reference::getResource).filter(r -> r instanceof Endpoint)
+					.map(r -> (Endpoint) r).map(Endpoint::getIdentifier).flatMap(List::stream)
+					.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
 		}
 		else
 		{
-			return oA.getEndpoint().stream().map(Reference::getReference).anyMatch(ref ->
+			return resource.getEndpoint().stream().map(Reference::getReference).anyMatch(ref ->
 			{
-				switch (valueAndType.type)
+				return switch (valueAndType.type)
 				{
-					case ID:
-						return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-					case RESOURCE_NAME_AND_ID:
-						return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-					case URL:
-						return ref.equals(valueAndType.url);
-					default:
-						return false;
-				}
+					case ID -> ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
+					case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+					case URL -> ref.equals(valueAndType.url);
+					default -> false;
+				};
 			});
 		}
 	}

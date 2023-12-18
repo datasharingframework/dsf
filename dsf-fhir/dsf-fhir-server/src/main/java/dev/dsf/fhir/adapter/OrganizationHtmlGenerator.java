@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Organization.OrganizationContactComponent;
 import org.hl7.fhir.r4.model.Reference;
@@ -59,9 +60,9 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 		}
 
 		List<String> thumbprints = resource.getExtension().stream()
-				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()) && e.hasValue()).map(e -> e.getValue())
-				.filter(t -> t instanceof StringType).map(t -> (StringType) t).filter(s -> s.hasValue())
-				.map(s -> s.getValue()).toList();
+				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()) && e.hasValue()).map(Extension::getValue)
+				.filter(t -> t instanceof StringType).map(t -> (StringType) t).filter(StringType::hasValue)
+				.map(StringType::getValue).toList();
 		if (!thumbprints.isEmpty())
 		{
 			writeRowWithList("Thumbprints", thumbprints, out);

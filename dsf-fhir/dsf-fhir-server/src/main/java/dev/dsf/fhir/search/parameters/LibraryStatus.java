@@ -9,10 +9,8 @@ import dev.dsf.fhir.search.parameters.basic.AbstractStatusParameter;
 @SearchParameterDefinition(name = AbstractStatusParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Library-status", type = SearchParamType.TOKEN, documentation = "The current status of the library")
 public class LibraryStatus extends AbstractStatusParameter<Library>
 {
-	private static final String RESOURCE_COLUMN = "library";
-
 	public LibraryStatus()
 	{
-		super(RESOURCE_COLUMN, Library.class);
+		super(Library.class, "library");
 	}
 }

@@ -40,7 +40,7 @@ public class ProvenanceAuthorizationRule extends AbstractMetaTagAuthorizationRul
 
 	private Optional<String> newResourceOk(Connection connection, Provenance newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

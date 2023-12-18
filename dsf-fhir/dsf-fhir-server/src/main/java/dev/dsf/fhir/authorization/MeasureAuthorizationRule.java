@@ -40,7 +40,7 @@ public class MeasureAuthorizationRule extends AbstractMetaTagAuthorizationRule<M
 
 	private Optional<String> newResourceOk(Connection connection, Measure newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

@@ -5,6 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
@@ -15,37 +18,75 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 {
 	public static final String PARAMETER_NAME = "identifier";
 
-	private final String resourceColumn;
+	protected final String resourceColumn;
 
-	public AbstractIdentifierParameter(String resourceColumn)
+	private final BiPredicate<TokenValueAndSearchType, R> identifierMatches;
+
+	public AbstractIdentifierParameter(Class<R> resourceType, String resourceColumn,
+			BiPredicate<TokenValueAndSearchType, R> identifierMatches)
 	{
-		super(PARAMETER_NAME);
+		super(resourceType, PARAMETER_NAME);
 
 		this.resourceColumn = resourceColumn;
+		this.identifierMatches = identifierMatches;
+	}
+
+	protected static <R extends Resource> BiPredicate<TokenValueAndSearchType, R> listMatcher(
+			Predicate<R> hasIdentifier, Function<R, List<Identifier>> getIdentifiers)
+	{
+		return (v, r) -> hasIdentifier.test(r) && getIdentifiers.apply(r).stream().anyMatch(identifierMatches(v));
+	}
+
+	protected static <R extends Resource> BiPredicate<TokenValueAndSearchType, R> singleMatcher(
+			Predicate<R> hasIdentifier, Function<R, Identifier> getIdentifier)
+	{
+		return (v, r) -> hasIdentifier.test(r) && identifierMatches(v, getIdentifier.apply(r));
+	}
+
+	public static Predicate<Identifier> identifierMatches(TokenValueAndSearchType valueAndType)
+	{
+		return i -> identifierMatches(valueAndType, i);
+	}
+
+	public static boolean identifierMatches(TokenValueAndSearchType valueAndType, Identifier identifier)
+	{
+		return valueAndType.negated ^ switch (valueAndType.type)
+		{
+			case CODE -> identifier.hasValue() && Objects.equals(valueAndType.codeValue, identifier.getValue());
+
+			case CODE_AND_SYSTEM ->
+				identifier.hasValue() && Objects.equals(valueAndType.codeValue, identifier.getValue())
+						&& identifier.hasSystem() && Objects.equals(valueAndType.systemValue, identifier.getSystem());
+
+			case CODE_AND_NO_SYSTEM_PROPERTY -> identifier.hasValue()
+					&& Objects.equals(valueAndType.codeValue, identifier.getValue()) && !identifier.hasSystem();
+
+			case SYSTEM -> Objects.equals(valueAndType.systemValue, identifier.getSystem());
+
+			default -> false;
+		};
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case CODE:
-			case CODE_AND_SYSTEM:
-			case SYSTEM:
-				if (valueAndType.negated)
-					return "NOT (" + resourceColumn + "->'identifier' @> ?::jsonb)";
-				else
-					return resourceColumn + "->'identifier' @> ?::jsonb";
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				if (valueAndType.negated)
-					return "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
-							+ "->'identifier') identifier WHERE identifier->>'value' <> ? OR (identifier ?? 'system')) > 0";
-				else
-					return "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
-							+ "->'identifier') identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-			default:
-				return "";
-		}
+			case CODE, CODE_AND_SYSTEM, SYSTEM -> resourceColumn + "->'identifier' @> ?::jsonb";
+			case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
+					+ "->'identifier') identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+		};
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return switch (valueAndType.type)
+		{
+			case CODE, CODE_AND_SYSTEM, SYSTEM -> "NOT (" + resourceColumn + "->'identifier' @> ?::jsonb)";
+			case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
+					+ "->'identifier') identifier WHERE identifier->>'value' <> ? OR (identifier ?? 'system')) > 0";
+		};
 	}
 
 	@Override
@@ -76,35 +117,16 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 		}
 	}
 
-	protected final boolean identifierMatches(List<Identifier> identifiers)
-	{
-		return identifiers.stream().anyMatch(
-				i -> valueAndType.negated ? !identifierMatches(valueAndType, i) : identifierMatches(valueAndType, i));
-	}
-
-	public static boolean identifierMatches(TokenValueAndSearchType valueAndType, Identifier identifier)
-	{
-		switch (valueAndType.type)
-		{
-			case CODE:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue());
-			case CODE_AND_SYSTEM:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue())
-						&& Objects.equals(valueAndType.systemValue, identifier.getSystem());
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue())
-						&& (identifier.getSystem() == null || identifier.getSystem().isBlank());
-			case SYSTEM:
-				return Objects.equals(valueAndType.systemValue, identifier.getSystem());
-			default:
-				return false;
-		}
-	}
-
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
 		return "(SELECT string_agg((identifier->>'system')::text || (identifier->>'value')::text, ' ') FROM jsonb_array_elements("
 				+ resourceColumn + "->'identifier') identifier)" + sortDirectionWithSpacePrefix;
+	}
+
+	@Override
+	protected boolean resourceMatches(R resource)
+	{
+		return identifierMatches.test(valueAndType, resource);
 	}
 }

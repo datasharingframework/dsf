@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -25,7 +26,7 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 	{
 		this.context = context;
 
-		bundle.getEntry().stream().map(e -> e.getResource())
+		bundle.getEntry().stream().map(BundleEntryComponent::getResource)
 				.filter(r -> r instanceof StructureDefinition || r instanceof CodeSystem || r instanceof ValueSet)
 				.forEach(r ->
 				{

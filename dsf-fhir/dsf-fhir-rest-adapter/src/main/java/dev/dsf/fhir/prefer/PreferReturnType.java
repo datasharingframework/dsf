@@ -16,16 +16,13 @@ public enum PreferReturnType
 		if (prefer == null)
 			return REPRESENTATION;
 
-		switch (prefer)
+		return switch (prefer)
 		{
-			case "return=minimal":
-				return MINIMAL;
-			case "return=OperationOutcome":
-				return OPERATION_OUTCOME;
-			case "return=representation":
-			default:
-				return REPRESENTATION;
-		}
+			case "return=minimal" -> MINIMAL;
+			case "return=OperationOutcome" -> OPERATION_OUTCOME;
+			case "return=representation" -> REPRESENTATION;
+			default -> REPRESENTATION;
+		};
 	}
 
 	public String getHeaderValue()

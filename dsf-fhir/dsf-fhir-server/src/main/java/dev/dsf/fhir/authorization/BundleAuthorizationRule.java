@@ -40,7 +40,7 @@ public class BundleAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bu
 
 	private Optional<String> newResourceOk(Connection connection, Bundle newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

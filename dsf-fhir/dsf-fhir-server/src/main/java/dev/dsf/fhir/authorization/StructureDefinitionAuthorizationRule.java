@@ -50,7 +50,7 @@ public class StructureDefinitionAuthorizationRule
 
 	private Optional<String> newResourceOk(Connection connection, StructureDefinition newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasStatus())
 		{

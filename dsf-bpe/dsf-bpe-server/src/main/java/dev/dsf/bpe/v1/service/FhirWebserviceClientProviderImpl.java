@@ -9,7 +9,7 @@ import dev.dsf.fhir.client.FhirWebserviceClient;
 
 public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientProvider, InitializingBean
 {
-	private FhirClientProvider delegate;
+	private final FhirClientProvider delegate;
 
 	public FhirWebserviceClientProviderImpl(FhirClientProvider delegate)
 	{

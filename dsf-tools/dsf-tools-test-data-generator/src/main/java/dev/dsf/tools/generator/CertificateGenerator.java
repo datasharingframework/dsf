@@ -298,15 +298,11 @@ public class CertificateGenerator
 	{
 		try
 		{
-			switch (certificateType)
+			return switch (certificateType)
 			{
-				case CLIENT:
-					return ca.signWebClientCertificate(certificateRequest);
-				case SERVER:
-					return ca.signWebServerCertificate(certificateRequest);
-				default:
-					throw new RuntimeException("Unknown certificate type " + certificateType);
-			}
+				case CLIENT -> ca.signWebClientCertificate(certificateRequest);
+				case SERVER -> ca.signWebServerCertificate(certificateRequest);
+			};
 		}
 		catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | OperatorCreationException
 				| CertificateException | IllegalStateException | IOException e)
@@ -346,16 +342,12 @@ public class CertificateGenerator
 	{
 		try
 		{
-			switch (certificateType)
+			return switch (certificateType)
 			{
-				case CLIENT:
-					return CertificationRequestBuilder.createClientCertificationRequest(subject, keyPair);
-				case SERVER:
-					return CertificationRequestBuilder.createServerCertificationRequest(subject, keyPair, null,
-							dnsNames);
-				default:
-					throw new RuntimeException("Unknown certificate type " + certificateType);
-			}
+				case CLIENT -> CertificationRequestBuilder.createClientCertificationRequest(subject, keyPair);
+				case SERVER ->
+					CertificationRequestBuilder.createServerCertificationRequest(subject, keyPair, null, dnsNames);
+			};
 		}
 		catch (NoSuchAlgorithmException | OperatorCreationException | IllegalStateException | IOException e)
 		{

@@ -43,7 +43,7 @@ public class DocumentReferenceAuthorizationRule
 
 	private Optional<String> newResourceOk(Connection connection, DocumentReference newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

@@ -1,91 +1,16 @@
 package dev.dsf.fhir.search.parameters;
 
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Objects;
-
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.NamingSystem;
-import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import dev.dsf.fhir.search.parameters.basic.AbstractStringParameter;
+import dev.dsf.fhir.search.parameters.basic.AbstractNameParameter;
 
-@SearchParameterDefinition(name = NamingSystemName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/NamingSystem-name", type = SearchParamType.STRING, documentation = "A name that this NamingSystem can be identified by")
-public class NamingSystemName extends AbstractStringParameter<NamingSystem>
+@SearchParameterDefinition(name = AbstractNameParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/conformance-name", type = SearchParamType.STRING, documentation = "Computationally friendly name of the naming system")
+public class NamingSystemName extends AbstractNameParameter<NamingSystem>
 {
-	public static final String PARAMETER_NAME = "name";
-
 	public NamingSystemName()
 	{
-		super(PARAMETER_NAME);
-	}
-
-	@Override
-	public String getFilterQuery()
-	{
-		switch (valueAndType.type)
-		{
-			case STARTS_WITH:
-			case CONTAINS:
-				return "lower(naming_system->>'name') LIKE ?";
-			case EXACT:
-				return "naming_system->>'name' = ?";
-			default:
-				return "";
-		}
-	}
-
-	@Override
-	public int getSqlParameterCount()
-	{
-		return 1;
-	}
-
-	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
-	{
-		switch (valueAndType.type)
-		{
-			case STARTS_WITH:
-				statement.setString(parameterIndex, valueAndType.value.toLowerCase() + "%");
-				return;
-			case CONTAINS:
-				statement.setString(parameterIndex, "%" + valueAndType.value.toLowerCase() + "%");
-				return;
-			case EXACT:
-				statement.setString(parameterIndex, valueAndType.value);
-				return;
-		}
-	}
-
-	@Override
-	public boolean matches(Resource resource)
-	{
-		if (!(resource instanceof NamingSystem))
-			return false;
-
-		NamingSystem n = (NamingSystem) resource;
-
-		switch (valueAndType.type)
-		{
-			case STARTS_WITH:
-				return n.getName() != null && n.getName().toLowerCase().startsWith(valueAndType.value.toLowerCase());
-			case CONTAINS:
-				return n.getName() != null && n.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
-			case EXACT:
-				return Objects.equals(n.getName(), valueAndType.value);
-			default:
-				throw notDefined();
-		}
-	}
-
-	@Override
-	protected String getSortSql(String sortDirectionWithSpacePrefix)
-	{
-		return "naming_system->>'name'" + sortDirectionWithSpacePrefix;
+		super(NamingSystem.class, "naming_system", NamingSystem::hasName, NamingSystem::getName);
 	}
 }

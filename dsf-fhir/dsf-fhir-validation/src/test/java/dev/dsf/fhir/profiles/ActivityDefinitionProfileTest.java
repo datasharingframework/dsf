@@ -52,7 +52,7 @@ public class ActivityDefinitionProfileTest
 					"dsf-practitioner-role-1.0.0.xml", "dsf-process-authorization-recipient-1.0.0.xml",
 					"dsf-process-authorization-requester-1.0.0.xml"));
 
-	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
+	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
 	private ActivityDefinition createActivityDefinition()

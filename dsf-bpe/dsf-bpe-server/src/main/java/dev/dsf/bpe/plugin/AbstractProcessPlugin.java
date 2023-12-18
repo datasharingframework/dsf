@@ -803,23 +803,19 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 
 		// user tasks: task listeners
 		boolean userTasksTaskListenersOk = parent.getChildElementsByType(UserTask.class).stream()
-				.filter(Objects::nonNull).allMatch(t ->
-				{
-					return t.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
-							.flatMap(e -> e.getChildElementsByType(CamundaTaskListener.class).stream())
-							.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, t.getId(),
-									l.getCamundaClass(), TaskListener.class, applicationContext));
-				});
+				.filter(Objects::nonNull)
+				.allMatch(t -> t.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
+						.flatMap(e -> e.getChildElementsByType(CamundaTaskListener.class).stream())
+						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, t.getId(), l.getCamundaClass(),
+								TaskListener.class, applicationContext)));
 
 		// all elements: execution listeners
 		boolean allElementsExecutionListenersOk = parent.getChildElementsByType(FlowNode.class).stream()
-				.filter(Objects::nonNull).allMatch(n ->
-				{
-					return n.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
-							.flatMap(e -> e.getChildElementsByType(CamundaExecutionListener.class).stream())
-							.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, n.getId(),
-									l.getCamundaClass(), ExecutionListener.class, applicationContext));
-				});
+				.filter(Objects::nonNull)
+				.allMatch(n -> n.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
+						.flatMap(e -> e.getChildElementsByType(CamundaExecutionListener.class).stream())
+						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, n.getId(), l.getCamundaClass(),
+								ExecutionListener.class, applicationContext)));
 
 		// intermediate message throw events
 		boolean intermediateMessageThrowEventsOk = parent.getChildElementsByType(IntermediateThrowEvent.class).stream()
@@ -835,16 +831,12 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 
 		// message end events
 		boolean endEventsOk = parent.getChildElementsByType(EndEvent.class).stream().filter(Objects::nonNull)
-				.allMatch(e ->
-				{
-					return e.getEventDefinitions().stream().filter(Objects::nonNull)
-							.filter(def -> def instanceof MessageEventDefinition)
-							.map(def -> (MessageEventDefinition) def)
-							.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(),
-									JavaDelegate.class, applicationContext)
-									&& taskFieldsAvailable(process, "MessageEndEvent", e.getId(),
-											def.getExtensionElements()));
-				});
+				.allMatch(e -> e.getEventDefinitions().stream().filter(Objects::nonNull)
+						.filter(def -> def instanceof MessageEventDefinition).map(def -> (MessageEventDefinition) def)
+						.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(), JavaDelegate.class,
+								applicationContext)
+								&& taskFieldsAvailable(process, "MessageEndEvent", e.getId(),
+										def.getExtensionElements())));
 
 		// sub processes
 		boolean subProcessesOk = parent.getChildElementsByType(SubProcess.class).stream().filter(Objects::nonNull)

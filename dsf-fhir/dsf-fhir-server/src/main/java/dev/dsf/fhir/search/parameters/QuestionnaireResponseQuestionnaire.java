@@ -70,14 +70,9 @@ public class QuestionnaireResponseQuestionnaire extends AbstractCanonicalReferen
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(QuestionnaireResponse resource)
 	{
-		if (!(resource instanceof QuestionnaireResponse))
-			return false;
-
-		QuestionnaireResponse qr = (QuestionnaireResponse) resource;
-
-		return qr.getQuestionnaire().equals(valueAndType.url);
+		return resource.hasQuestionnaire() && resource.getQuestionnaire().equals(valueAndType.url);
 	}
 
 	@Override

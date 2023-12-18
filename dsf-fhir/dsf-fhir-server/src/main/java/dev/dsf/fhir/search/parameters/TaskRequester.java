@@ -62,32 +62,19 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-				// testing all TargetResourceTypeName/ID combinations
-				return "task->'requester'->>'reference' = ANY (?)";
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "task->'requester'->>'reference' = ?";
-			case IDENTIFIER:
+			// testing all TargetResourceTypeName/ID combinations
+			case ID -> "task->'requester'->>'reference' = ANY (?)";
+			case RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"task->'requester'->>'reference' = ?";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
-								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
+						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -175,55 +162,42 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Task resource)
 	{
-		if (!(resource instanceof Task))
-			return false;
-
-		Task t = (Task) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (t.getRequester().getResource() instanceof Practitioner p)
-			{
+			if (resource.getRequester().getResource() instanceof Practitioner p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (t.getRequester().getResource() instanceof Organization o)
-			{
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getRequester().getResource() instanceof Organization o)
 				return o.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (t.getRequester().getResource() instanceof Patient p)
-			{
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getRequester().getResource() instanceof Patient p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (t.getRequester().getResource() instanceof PractitionerRole p)
-			{
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getRequester().getResource() instanceof PractitionerRole p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
 			else
 				return false;
 		}
 		else
 		{
-			String ref = t.getRequester().getReference();
-			switch (valueAndType.type)
+			String ref = resource.getRequester().getReference();
+			return switch (valueAndType.type)
 			{
-				case ID:
-					return ref.equals("Practitioner" + "/" + valueAndType.id)
-							|| ref.equals("Organization" + "/" + valueAndType.id)
-							|| ref.equals("Patient" + "/" + valueAndType.id)
-							|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
-				case RESOURCE_NAME_AND_ID:
-					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-				case URL:
-					return ref.equals(valueAndType.url);
-				default:
-					return false;
-			}
+				case ID -> ref.equals("Practitioner" + "/" + valueAndType.id)
+						|| ref.equals("Organization" + "/" + valueAndType.id)
+						|| ref.equals("Patient" + "/" + valueAndType.id)
+						|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
+				case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+				case URL -> ref.equals(valueAndType.url);
+				default -> false;
+			};
 		}
 	}
 
@@ -240,23 +214,24 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
 				&& Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
 						.anyMatch(n -> n.equals(includeParts.getTargetResourceTypeName())))
-			switch (includeParts.getTargetResourceTypeName())
+
+			return switch (includeParts.getTargetResourceTypeName())
 			{
-				case "Practitioner":
-					return "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-							+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference') AS practitioners";
-				case "Organization":
-					return "(SELECT jsonb_build_array(organization) FROM current_organizations"
-							+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference') AS organizations";
-				case "Patient":
-					return "(SELECT jsonb_build_array(patient) FROM current_patients"
-							+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference') AS patients";
-				case "PractitionerRole":
-					return "(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
+				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
+						+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference') AS practitioners";
+
+				case "Organization" -> "(SELECT jsonb_build_array(organization) FROM current_organizations"
+						+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference') AS organizations";
+
+				case "Patient" -> "(SELECT jsonb_build_array(patient) FROM current_patients"
+						+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference') AS patients";
+
+				case "PractitionerRole" ->
+					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
 							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference') AS practitioner_roles";
-				default:
-					return null;
-			}
+
+				default -> null;
+			};
 		else
 			return null;
 	}

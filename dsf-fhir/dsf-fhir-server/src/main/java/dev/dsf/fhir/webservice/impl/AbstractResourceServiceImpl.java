@@ -117,6 +117,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.historyService = historyService;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(path, "path");
@@ -256,27 +257,24 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private Optional<OperationOutcome> checkReference(Resource resource, Connection connection,
 			ResourceReference reference) throws WebApplicationException
 	{
-		ReferenceType type = reference.getType(serverBase);
-		switch (type)
+		return switch (reference.getType(serverBase))
 		{
-			case LITERAL_INTERNAL:
-			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
-			case ATTACHMENT_LITERAL_INTERNAL_URL:
-				return referenceResolver.checkLiteralInternalReference(resource, reference, connection);
-			case LITERAL_EXTERNAL:
-			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
-			case ATTACHMENT_LITERAL_EXTERNAL_URL:
-				return referenceResolver.checkLiteralExternalReference(resource, reference);
-			case LOGICAL:
-				return referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
-			// unknown urls to non FHIR servers in related artifacts must not be checked
-			case RELATED_ARTEFACT_UNKNOWN_URL:
-			case ATTACHMENT_UNKNOWN_URL:
-				return Optional.empty();
-			case UNKNOWN:
-			default:
-				return Optional.of(responseGenerator.unknownReference(resource, reference));
-		}
+			case LITERAL_INTERNAL, RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL ->
+				referenceResolver.checkLiteralInternalReference(resource, reference, connection);
+
+			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+				referenceResolver.checkLiteralExternalReference(resource, reference);
+
+			case LOGICAL ->
+				referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
+
+			// unknown URLs to non FHIR servers in related artifacts must not be checked
+			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
+
+			case UNKNOWN -> Optional.of(responseGenerator.unknownReference(resource, reference));
+
+			default -> Optional.of(responseGenerator.unknownReference(resource, reference));
+		};
 	}
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
@@ -665,7 +663,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private PartialResult<R> filterIncludeResources(PartialResult<R> result)
 	{
 		List<Resource> includes = filterIncludeResources(result.getIncludes());
-		return new PartialResult<R>(result.getTotal(), result.getPageAndCount(), result.getPartialResult(), includes);
+		return new PartialResult<>(result.getTotal(), result.getPageAndCount(), result.getPartialResult(), includes);
 	}
 
 	private List<Resource> filterIncludeResources(List<Resource> includes)

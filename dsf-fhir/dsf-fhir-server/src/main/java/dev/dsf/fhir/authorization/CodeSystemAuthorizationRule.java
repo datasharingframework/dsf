@@ -47,7 +47,7 @@ public class CodeSystemAuthorizationRule extends AbstractMetaTagAuthorizationRul
 
 	private Optional<String> newResourceOk(Connection connection, CodeSystem newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasStatus())
 		{

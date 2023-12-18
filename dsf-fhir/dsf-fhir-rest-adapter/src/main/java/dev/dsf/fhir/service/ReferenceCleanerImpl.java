@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
@@ -51,7 +52,7 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 			return null;
 
 		if (resource instanceof Bundle b)
-			b.getEntry().stream().map(e -> e.getResource()).forEach(this::fixBundleEntry);
+			b.getEntry().stream().map(BundleEntryComponent::getResource).forEach(this::fixBundleEntry);
 
 		return resource;
 	}

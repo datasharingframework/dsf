@@ -271,17 +271,13 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 		if (payload == null)
 			return EventType.PING;
 
-		switch (payload)
+		return switch (payload)
 		{
-			case Constants.CT_FHIR_JSON:
-			case Constants.CT_FHIR_JSON_NEW:
-				return EventType.JSON;
-			case Constants.CT_FHIR_XML:
-			case Constants.CT_FHIR_XML_NEW:
-				return EventType.XML;
-			default:
-				throw new RuntimeException("Unsupportet subscription.payload " + payload);
-		}
+			case Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW -> EventType.JSON;
+			case Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW -> EventType.XML;
+
+			default -> throw new RuntimeException("Unsupportet subscription.payload " + payload);
+		};
 	}
 
 	@EventListener({ ContextClosedEvent.class })
@@ -301,31 +297,32 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 		client.setPingHandler(ping -> pingHandler.onPing(ping, subscriptionIdPart, searchCriteriaQueryParameters));
 	}
 
-	@SuppressWarnings("unchecked")
 	private void setResourceEventHandler(WebsocketClient client, EventType eventType)
 	{
 		EventResourceHandler<R> eventHandler = subscriptionHandlerFactory.createEventResourceHandler();
-		client.setResourceHandler(r -> eventHandler.onResource((R) r), createParserFactory(eventType, fhirContext));
+		client.setResourceHandler(r -> eventHandler.onResource(resourceType.cast(r)), createParserFactory(eventType));
 	}
 
-	private Supplier<IParser> createParserFactory(EventType eventType, FhirContext fhirContext)
+	private Supplier<IParser> createParserFactory(EventType eventType)
 	{
-		switch (eventType)
+		return switch (eventType)
 		{
-			case XML:
-				return () -> configureParser(fhirContext.newXmlParser());
-			case JSON:
-				return () -> configureParser(fhirContext.newJsonParser());
-			default:
-				throw new RuntimeException("EventType " + eventType + " not supported");
-		}
+			case XML -> configureParser(fhirContext::newXmlParser);
+			case JSON -> configureParser(fhirContext::newJsonParser);
+
+			default -> throw new RuntimeException("EventType " + eventType + " not supported");
+		};
 	}
 
-	private IParser configureParser(IParser p)
+	private Supplier<IParser> configureParser(Supplier<IParser> supplier)
 	{
-		p.setStripVersionsFromReferences(false);
-		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		return () ->
+		{
+			IParser p = supplier.get();
+			p.setStripVersionsFromReferences(false);
+			p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 
-		return p;
+			return p;
+		};
 	}
 }

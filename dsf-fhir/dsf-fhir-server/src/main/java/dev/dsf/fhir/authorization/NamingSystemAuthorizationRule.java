@@ -52,7 +52,7 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 
 	private Optional<String> newResourceOk(Connection connection, NamingSystem newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasStatus())
 		{

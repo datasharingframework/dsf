@@ -13,6 +13,7 @@ public class ValueSetDate extends AbstractDateTimeParameter<ValueSet>
 
 	public ValueSetDate()
 	{
-		super(PARAMETER_NAME, "value_set->>'date'");
+		super(ValueSet.class, PARAMETER_NAME, "value_set->>'date'",
+				fromDateTime(ValueSet::hasDateElement, ValueSet::getDateElement));
 	}
 }

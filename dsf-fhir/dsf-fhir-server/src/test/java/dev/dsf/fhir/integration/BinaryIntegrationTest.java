@@ -2356,7 +2356,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(searchBundle.getEntry().stream()
 				.allMatch(c -> c.getResource() != null && c.getResource() instanceof Binary));
 
-		String actualIds = searchBundle.getEntry().stream().map(c -> c.getResource())
+		String actualIds = searchBundle.getEntry().stream().map(BundleEntryComponent::getResource)
 				.map(r -> "Binary/" + r.getIdElement().getIdPart() + "/_history/" + r.getMeta().getVersionId()).sorted()
 				.collect(Collectors.joining(", "));
 		String expectedIds = Arrays.asList(b1, b2, b3, b4).stream().map(b -> b.getIdElement().getValueAsString())
@@ -2425,7 +2425,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(searchBundle.getEntry().stream()
 				.allMatch(c -> c.getResource() != null && c.getResource() instanceof Binary));
 
-		String actualIds = searchBundle.getEntry().stream().map(c -> c.getResource())
+		String actualIds = searchBundle.getEntry().stream().map(BundleEntryComponent::getResource)
 				.map(r -> "Binary/" + r.getIdElement().getIdPart() + "/_history/" + r.getMeta().getVersionId()).sorted()
 				.collect(Collectors.joining(", "));
 		String expectedIds = Arrays.asList(b2, b3, b5).stream().map(b -> b.getIdElement().getValueAsString()).sorted()

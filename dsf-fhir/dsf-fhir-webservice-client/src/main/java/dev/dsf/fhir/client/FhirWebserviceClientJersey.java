@@ -112,8 +112,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	private String toString(OperationOutcome outcome)
 	{
-		return outcome == null ? ""
-				: outcome.getIssue().stream().map(i -> toString(i)).collect(Collectors.joining("\n"));
+		return outcome == null ? "" : outcome.getIssue().stream().map(this::toString).collect(Collectors.joining("\n"));
 	}
 
 	private String toString(OperationOutcomeIssueComponent issue)
@@ -133,19 +132,19 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	private PreferReturn toPreferReturn(PreferReturnType returnType, Class<? extends Resource> resourceType,
 			Response response)
 	{
-		switch (returnType)
+		return switch (returnType)
 		{
-			case REPRESENTATION:
+			case REPRESENTATION ->
+			{
 				// TODO remove workaround if HAPI bug fixed
 				Resource resource = referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
-				return PreferReturn.resource(resource);
-			case MINIMAL:
-				return PreferReturn.minimal(response.getLocation());
-			case OPERATION_OUTCOME:
-				return PreferReturn.outcome(response.readEntity(OperationOutcome.class));
-			default:
+				yield PreferReturn.resource(resource);
+			}
+			case MINIMAL -> PreferReturn.minimal(response.getLocation());
+			case OPERATION_OUTCOME -> PreferReturn.outcome(response.readEntity(OperationOutcome.class));
+			default ->
 				throw new RuntimeException(PreferReturn.class.getName() + " value " + returnType + " not supported");
-		}
+		};
 	}
 
 	@Override

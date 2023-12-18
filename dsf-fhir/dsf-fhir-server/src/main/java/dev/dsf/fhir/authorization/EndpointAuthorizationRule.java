@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 
 	private Optional<String> newResourceOk(Connection connection, Endpoint newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasIdentifier())
 		{
@@ -100,7 +101,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	{
 		String identifierValue = newResource.getIdentifier().stream()
 				.filter(i -> i.hasSystem() && i.hasValue() && ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem()))
-				.map(i -> i.getValue()).findFirst().orElseThrow();
+				.map(Identifier::getValue).findFirst().orElseThrow();
 
 		return endpointWithAddressExists(connection, newResource.getAddress())
 				|| endpointWithIdentifierExists(connection, identifierValue);
@@ -167,10 +168,10 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	protected boolean modificationsOk(Connection connection, Endpoint oldResource, Endpoint newResource)
 	{
 		String oldIdentifierValue = oldResource.getIdentifier().stream()
-				.filter(i -> ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst()
+				.filter(i -> ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(Identifier::getValue).findFirst()
 				.orElseThrow();
 		String newIdentifierValue = newResource.getIdentifier().stream()
-				.filter(i -> ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst()
+				.filter(i -> ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem())).map(Identifier::getValue).findFirst()
 				.orElseThrow();
 
 		return oldResource.getAddress().equals(newResource.getAddress())

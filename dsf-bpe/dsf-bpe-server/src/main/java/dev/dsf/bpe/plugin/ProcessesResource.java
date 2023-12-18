@@ -169,120 +169,93 @@ public final class ProcessesResource
 
 	public BundleEntryComponent toBundleEntry()
 	{
-		switch (getOldProcessState())
+		return switch (getOldProcessState())
 		{
-			case MISSING:
-				return fromMissing();
-			case NEW:
-				return fromNew();
-			case ACTIVE:
-				return fromActive();
-			case DRAFT:
-				return fromDraft();
-			case RETIRED:
-				return fromRetired();
-			case EXCLUDED:
-				return fromExcluded();
-			default:
-				throw new RuntimeException(
-						ProcessState.class.getSimpleName() + " " + getOldProcessState() + " not supported");
-		}
+			case MISSING -> fromMissing();
+			case NEW -> fromNew();
+			case ACTIVE -> fromActive();
+			case DRAFT -> fromDraft();
+			case RETIRED -> fromRetired();
+			case EXCLUDED -> fromExcluded();
+		};
 	}
 
 	private BundleEntryComponent fromMissing()
 	{
-		switch (getNewProcessState())
+		return switch (getNewProcessState())
 		{
-			case ACTIVE:
-				return createAsActive();
-			case RETIRED:
-				return createAsRetired();
-			default:
-				throw new RuntimeException(
-						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
-		}
+			case ACTIVE -> createAsActive();
+			case RETIRED -> createAsRetired();
+
+			default -> throw new RuntimeException(
+					"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+		};
 	}
 
 	private BundleEntryComponent fromNew()
 	{
-		switch (getNewProcessState())
+		return switch (getNewProcessState())
 		{
-			case ACTIVE:
-				return createAsActive();
-			case DRAFT:
-				return createAsDraft();
-			case RETIRED:
-				return createAsRetired();
-			default:
-				throw new RuntimeException(
-						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
-		}
+			case ACTIVE -> createAsActive();
+			case DRAFT -> createAsDraft();
+			case RETIRED -> createAsRetired();
+
+			default -> throw new RuntimeException(
+					"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+		};
 	}
 
 	private BundleEntryComponent fromActive()
 	{
-		switch (getNewProcessState())
+		return switch (getNewProcessState())
 		{
-			case DRAFT:
-				return updateToDraft();
-			case RETIRED:
-				return updateToRetired();
-			case EXCLUDED:
-				return delete();
-			default:
-				throw new RuntimeException(
-						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
-		}
+			case DRAFT -> updateToDraft();
+			case RETIRED -> updateToRetired();
+			case EXCLUDED -> delete();
+
+			default -> throw new RuntimeException(
+					"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+		};
 	}
 
 	private BundleEntryComponent fromDraft()
 	{
-		switch (getNewProcessState())
+		return switch (getNewProcessState())
 		{
-			case ACTIVE:
-				return updateToActive();
-			case DRAFT:
-				return updateToDraft();
-			case RETIRED:
-				return updateToRetired();
-			case EXCLUDED:
-				return delete();
-			default:
-				throw new RuntimeException(
-						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
-		}
+			case ACTIVE -> updateToActive();
+			case DRAFT -> updateToDraft();
+			case RETIRED -> updateToRetired();
+			case EXCLUDED -> delete();
+
+			default -> throw new RuntimeException(
+					"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+		};
 	}
 
 	private BundleEntryComponent fromRetired()
 	{
-		switch (getNewProcessState())
+		return switch (getNewProcessState())
 		{
-			case ACTIVE:
-				return updateToActive();
-			case DRAFT:
-				return updateToDraft();
-			case EXCLUDED:
-				return delete();
-			default:
-				throw new RuntimeException(
-						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
-		}
+			case ACTIVE -> updateToActive();
+			case DRAFT -> updateToDraft();
+			case EXCLUDED -> delete();
+
+			default -> throw new RuntimeException(
+					"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+		};
 	}
 
 	private BundleEntryComponent fromExcluded()
 	{
-		switch (getNewProcessState())
+		return switch (getNewProcessState())
 		{
-			case ACTIVE:
-				return createAsActive();
-			case DRAFT:
-				return createAsDraft();
-			case RETIRED:
-				return createAsRetired();
-			default:
-				throw new RuntimeException(
-						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
-		}
+			case ACTIVE -> createAsActive();
+			case DRAFT -> createAsDraft();
+			case RETIRED -> createAsRetired();
+
+			default -> throw new RuntimeException(
+					"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+		};
 	}
 
 	private BundleEntryComponent createAsActive()
@@ -373,108 +346,81 @@ public final class ProcessesResource
 
 	public List<String> getExpectedStatus()
 	{
-		switch (getOldProcessState())
+		return switch (getOldProcessState())
 		{
-			case MISSING:
-				switch (getNewProcessState())
-				{
-					case ACTIVE:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					case RETIRED:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					default:
-						throw new RuntimeException("State change " + getOldProcessState() + " -> "
-								+ getNewProcessState() + " not supported");
-				}
-			case NEW:
-				switch (getNewProcessState())
-				{
-					case ACTIVE:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					case DRAFT:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					case RETIRED:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					default:
-						throw new RuntimeException("State change " + getOldProcessState() + " -> "
-								+ getNewProcessState() + " not supported");
-				}
-			case ACTIVE:
-				switch (getNewProcessState())
-				{
-					case DRAFT:
-						// standard update with resource id
-						return Collections.singletonList("200");
-					case RETIRED:
-						// standard update with resource id
-						return Collections.singletonList("200");
-					case EXCLUDED:
-						// standard delete with resource id
-						return Arrays.asList("200", "204");
-					default:
-						throw new RuntimeException("State change " + getOldProcessState() + " -> "
-								+ getNewProcessState() + " not supported");
-				}
-			case DRAFT:
-				switch (getNewProcessState())
-				{
-					case ACTIVE:
-						// standard update with resource id
-						return Collections.singletonList("200");
-					case DRAFT:
-						// standard update with resource id
-						return Collections.singletonList("200");
-					case RETIRED:
-						// standard update with resource id
-						return Collections.singletonList("200");
-					case EXCLUDED:
-						// standard delete with resource id
-						return Arrays.asList("200", "204");
-					default:
-						throw new RuntimeException("State change " + getOldProcessState() + " -> "
-								+ getNewProcessState() + " not supported");
-				}
-			case RETIRED:
-				switch (getNewProcessState())
-				{
-					case ACTIVE:
-						// standard update with resource id
-						return Collections.singletonList("200");
-					case DRAFT:
-						// standard update with resource id
-						return Collections.singletonList("200");
-					case EXCLUDED:
-						// standard delete with resource id
-						return Arrays.asList("200", "204");
-					default:
-						throw new RuntimeException("State change " + getOldProcessState() + " -> "
-								+ getNewProcessState() + " not supported");
-				}
-			case EXCLUDED:
-				switch (getNewProcessState())
-				{
-					case ACTIVE:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					case DRAFT:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					case RETIRED:
-						// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-						return Arrays.asList("200", "201");
-					default:
-						throw new RuntimeException("State change " + getOldProcessState() + " -> "
-								+ getNewProcessState() + " not supported");
-				}
-			default:
-				throw new RuntimeException(
-						ProcessState.class.getSimpleName() + " " + getOldProcessState() + " not supported");
-		}
+			case MISSING -> switch (getNewProcessState())
+			{
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case ACTIVE -> Arrays.asList("200", "201");
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case RETIRED -> Arrays.asList("200", "201");
+
+				default -> throw new RuntimeException(
+						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+			};
+			case NEW -> switch (getNewProcessState())
+			{
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case ACTIVE -> Arrays.asList("200", "201");
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case DRAFT -> Arrays.asList("200", "201");
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case RETIRED -> Arrays.asList("200", "201");
+
+				default -> throw new RuntimeException(
+						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+			};
+			case ACTIVE -> switch (getNewProcessState())
+			{
+				// standard update with resource id
+				case DRAFT -> Collections.singletonList("200");
+				// standard update with resource id
+				case RETIRED -> Collections.singletonList("200");
+				// standard delete with resource id
+				case EXCLUDED -> Arrays.asList("200", "204");
+
+				default -> throw new RuntimeException(
+						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+			};
+			case DRAFT -> switch (getNewProcessState())
+			{
+				// standard update with resource id
+				case ACTIVE -> Collections.singletonList("200");
+				// standard update with resource id
+				case DRAFT -> Collections.singletonList("200");
+				// standard update with resource id
+				case RETIRED -> Collections.singletonList("200");
+				// standard delete with resource id
+				case EXCLUDED -> Arrays.asList("200", "204");
+
+				default -> throw new RuntimeException(
+						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+			};
+			case RETIRED -> switch (getNewProcessState())
+			{
+				// standard update with resource id
+				case ACTIVE -> Collections.singletonList("200");
+				// standard update with resource id
+				case DRAFT -> Collections.singletonList("200");
+				// standard delete with resource id
+				case EXCLUDED -> Arrays.asList("200", "204");
+
+				default -> throw new RuntimeException(
+						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+			};
+			case EXCLUDED -> switch (getNewProcessState())
+			{
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case ACTIVE -> Arrays.asList("200", "201");
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case DRAFT -> Arrays.asList("200", "201");
+				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
+				case RETIRED -> Arrays.asList("200", "201");
+
+				default -> throw new RuntimeException(
+						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
+			};
+		};
 	}
 
 	public BundleEntryComponent toSearchBundleEntryCount0()

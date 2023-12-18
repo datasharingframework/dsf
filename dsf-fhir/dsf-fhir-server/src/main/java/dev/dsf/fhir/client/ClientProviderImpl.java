@@ -26,7 +26,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 
 	private final int remoteReadTimeout;
 	private final int remoteConnectTimeout;
-	private ProxyConfig proxyConfig;
+	private final ProxyConfig proxyConfig;
 	private final boolean logRequests;
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;

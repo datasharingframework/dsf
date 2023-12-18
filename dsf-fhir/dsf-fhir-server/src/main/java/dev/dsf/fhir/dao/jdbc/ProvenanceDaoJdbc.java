@@ -1,6 +1,6 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.util.Collections;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -15,7 +15,7 @@ public class ProvenanceDaoJdbc extends AbstractResourceDaoJdbc<Provenance> imple
 	public ProvenanceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Provenance.class, "provenances", "provenance",
-				"provenance_id", ProvenanceIdentityFilter::new, Collections.emptyList(), Collections.emptyList());
+				"provenance_id", ProvenanceIdentityFilter::new, List.of(), List.of());
 	}
 
 	@Override

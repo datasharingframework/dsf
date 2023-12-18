@@ -11,8 +11,9 @@ public class ResourceLastUpdated<R extends Resource> extends AbstractDateTimePar
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 
-	public ResourceLastUpdated(String resourceColumn)
+	public ResourceLastUpdated(Class<R> resourceType, String resourceColumn)
 	{
-		super(PARAMETER_NAME, resourceColumn + "->'meta'->>'lastUpdated'");
+		super(resourceType, PARAMETER_NAME, resourceColumn + "->'meta'->>'lastUpdated'", fromInstant(
+				r -> r.hasMeta() && r.getMeta().hasLastUpdatedElement(), r -> r.getMeta().getLastUpdatedElement()));
 	}
 }

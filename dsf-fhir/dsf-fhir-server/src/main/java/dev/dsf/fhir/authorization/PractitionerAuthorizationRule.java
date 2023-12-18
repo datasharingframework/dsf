@@ -42,7 +42,7 @@ public class PractitionerAuthorizationRule extends AbstractMetaTagAuthorizationR
 
 	private Optional<String> newResourceOk(Connection connection, Practitioner newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

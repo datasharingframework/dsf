@@ -1,6 +1,8 @@
 package dev.dsf.fhir.hapi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Task;

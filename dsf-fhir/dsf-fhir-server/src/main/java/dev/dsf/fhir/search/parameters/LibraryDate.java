@@ -13,6 +13,7 @@ public class LibraryDate extends AbstractDateTimeParameter<Library>
 
 	public LibraryDate()
 	{
-		super(PARAMETER_NAME, "library->>'date'");
+		super(Library.class, PARAMETER_NAME, "library->>'date'",
+				fromDateTime(Library::hasDateElement, Library::getDateElement));
 	}
 }

@@ -24,7 +24,7 @@ public class DeleteStructureDefinitionCommand extends DeleteCommand
 {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteStructureDefinitionCommand.class);
 
-	private StructureDefinitionDao snapshotDao;
+	private final StructureDefinitionDao snapshotDao;
 
 	public DeleteStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,

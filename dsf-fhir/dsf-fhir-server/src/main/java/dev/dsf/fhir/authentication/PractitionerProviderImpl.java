@@ -102,9 +102,9 @@ public class PractitionerProviderImpl extends AbstractProvider implements Practi
 		String iss = credentials.getStringClaimOrDefault("iss", "");
 		String sub = credentials.getStringClaimOrDefault("sub", "");
 
-		Stream<String> surname = Stream.of((String) credentials.getStringClaimOrDefault("family_name", ""));
-		Stream<String> givenNames = Stream.of((String) credentials.getStringClaimOrDefault("given_name", ""));
-		Stream<String> emails = Stream.of((String) credentials.getStringClaimOrDefault("email", ""), toEmail(iss, sub));
+		Stream<String> surname = Stream.of(credentials.getStringClaimOrDefault("family_name", ""));
+		Stream<String> givenNames = Stream.of(credentials.getStringClaimOrDefault("given_name", ""));
+		Stream<String> emails = Stream.of(credentials.getStringClaimOrDefault("email", ""), toEmail(iss, sub));
 
 		return toPractitioner(surname, givenNames, emails);
 	}

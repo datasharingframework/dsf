@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -33,7 +33,7 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Organization.class, "organizations", "organization",
 				"organization_id", OrganizationIdentityFilter::new,
-				Arrays.asList(factory(OrganizationActive.PARAMETER_NAME, OrganizationActive::new),
+				List.of(factory(OrganizationActive.PARAMETER_NAME, OrganizationActive::new),
 						factory(OrganizationEndpoint.PARAMETER_NAME, OrganizationEndpoint::new,
 								OrganizationEndpoint.getNameModifiers(), OrganizationEndpoint::new,
 								OrganizationEndpoint.getIncludeParameterValues()),
@@ -43,9 +43,8 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 								OrganizationName.getNameModifiers()),
 						factory(OrganizationType.PARAMETER_NAME, OrganizationType::new,
 								OrganizationType.getNameModifiers())),
-				Arrays.asList(
-						factory(EndpointOrganizationRevInclude::new,
-								EndpointOrganizationRevInclude.getRevIncludeParameterValues()),
+				List.of(factory(EndpointOrganizationRevInclude::new,
+						EndpointOrganizationRevInclude.getRevIncludeParameterValues()),
 						factory(OrganizationAffiliationPrimaryOrganizationRevInclude::new,
 								OrganizationAffiliationPrimaryOrganizationRevInclude.getRevIncludeParameterValues()),
 						factory(OrganizationAffiliationParticipatingOrganizationRevInclude::new,

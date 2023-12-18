@@ -31,7 +31,7 @@ public class TaskProfileTest
 			List.of("dsf-task-base-1.0.0.xml"), List.of("dsf-bpmn-message-1.0.0.xml"),
 			List.of("dsf-bpmn-message-1.0.0.xml"));
 
-	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
+	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
 	@Test

@@ -203,22 +203,15 @@ public class BundleGenerator
 				return Integer.MIN_VALUE;
 			else
 			{
-				switch (e.getResource().getClass().getAnnotation(ResourceDef.class).name())
+				return switch (e.getResource().getClass().getAnnotation(ResourceDef.class).name())
 				{
-					case "CodeSystem":
-						return 1;
-					case "NamingSystem":
-						return 2;
-					case "ValueSet":
-						return 3;
-					case "StructureDefinition":
-						return 4;
-					case "Subscription":
-						return 5;
-
-					default:
-						return Integer.MAX_VALUE;
-				}
+					case "CodeSystem" -> 1;
+					case "NamingSystem" -> 2;
+					case "ValueSet" -> 3;
+					case "StructureDefinition" -> 4;
+					case "Subscription" -> 5;
+					default -> Integer.MAX_VALUE;
+				};
 			}
 		};
 	}
@@ -268,7 +261,7 @@ public class BundleGenerator
 	{
 		SnapshotGenerator generator = new SnapshotGenerator(fhirContext, validationSupport);
 
-		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof StructureDefinition)
+		bundle.getEntry().stream().map(BundleEntryComponent::getResource).filter(r -> r instanceof StructureDefinition)
 				.map(r -> (StructureDefinition) r).sorted(Comparator.comparing(StructureDefinition::getUrl).reversed())
 				.filter(s -> !s.hasSnapshot()).forEach(s -> generator.generateSnapshot(s));
 	}
@@ -277,8 +270,8 @@ public class BundleGenerator
 	{
 		ValueSetExpander valueSetExpander = new ValueSetExpander(fhirContext, validationSupport);
 
-		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof ValueSet).map(r -> (ValueSet) r)
-				.filter(v -> !v.hasExpansion()).forEach(v -> valueSetExpander.expand(v));
+		bundle.getEntry().stream().map(BundleEntryComponent::getResource).filter(r -> r instanceof ValueSet)
+				.map(r -> (ValueSet) r).filter(v -> !v.hasExpansion()).forEach(v -> valueSetExpander.expand(v));
 	}
 
 	public static void main(String[] args) throws Exception

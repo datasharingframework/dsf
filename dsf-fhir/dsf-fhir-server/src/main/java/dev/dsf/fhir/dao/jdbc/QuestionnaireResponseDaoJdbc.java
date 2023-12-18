@@ -1,7 +1,6 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -25,7 +24,7 @@ public class QuestionnaireResponseDaoJdbc extends AbstractResourceDaoJdbc<Questi
 		super(dataSource, permanentDeleteDataSource, fhirContext, QuestionnaireResponse.class,
 				"questionnaire_responses", "questionnaire_response", "questionnaire_response_id",
 				QuestionnaireResponseIdentityFilter::new,
-				Arrays.asList(factory(QuestionnaireResponseAuthored.PARAMETER_NAME, QuestionnaireResponseAuthored::new),
+				List.of(factory(QuestionnaireResponseAuthored.PARAMETER_NAME, QuestionnaireResponseAuthored::new),
 						factory(QuestionnaireResponseIdentifier.PARAMETER_NAME, QuestionnaireResponseIdentifier::new,
 								QuestionnaireResponseIdentifier.getNameModifiers()),
 						factory(QuestionnaireResponseQuestionnaire.PARAMETER_NAME,
@@ -38,7 +37,7 @@ public class QuestionnaireResponseDaoJdbc extends AbstractResourceDaoJdbc<Questi
 						factory(QuestionnaireResponseSubject.PARAMETER_NAME, QuestionnaireResponseSubject::new,
 								QuestionnaireResponseSubject.getNameModifiers(), QuestionnaireResponseSubject::new,
 								QuestionnaireResponseSubject.getIncludeParameterValues())),
-				Collections.emptyList());
+				List.of());
 	}
 
 	@Override

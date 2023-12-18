@@ -2,8 +2,7 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -15,6 +14,7 @@ import dev.dsf.fhir.dao.ValueSetDao;
 import dev.dsf.fhir.search.filter.ValueSetIdentityFilter;
 import dev.dsf.fhir.search.parameters.ValueSetDate;
 import dev.dsf.fhir.search.parameters.ValueSetIdentifier;
+import dev.dsf.fhir.search.parameters.ValueSetName;
 import dev.dsf.fhir.search.parameters.ValueSetStatus;
 import dev.dsf.fhir.search.parameters.ValueSetUrl;
 import dev.dsf.fhir.search.parameters.ValueSetVersion;
@@ -27,14 +27,15 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, ValueSet.class, "value_sets", "value_set",
 				"value_set_id", ValueSetIdentityFilter::new,
-				Arrays.asList(factory(ValueSetDate.PARAMETER_NAME, ValueSetDate::new),
+				List.of(factory(ValueSetDate.PARAMETER_NAME, ValueSetDate::new),
 						factory(ValueSetIdentifier.PARAMETER_NAME, ValueSetIdentifier::new,
 								ValueSetIdentifier.getNameModifiers()),
+						factory(ValueSetName.PARAMETER_NAME, ValueSetName::new, ValueSetName.getNameModifiers()),
 						factory(ValueSetStatus.PARAMETER_NAME, ValueSetStatus::new, ValueSetStatus.getNameModifiers()),
 						factory(ValueSetUrl.PARAMETER_NAME, ValueSetUrl::new, ValueSetUrl.getNameModifiers()),
 						factory(ValueSetVersion.PARAMETER_NAME, ValueSetVersion::new,
 								ValueSetVersion.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

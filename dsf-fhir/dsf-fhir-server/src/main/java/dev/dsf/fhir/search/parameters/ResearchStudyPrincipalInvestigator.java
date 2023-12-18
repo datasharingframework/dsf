@@ -54,31 +54,18 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-				return "research_study->'principalInvestigator'->>'reference' = ANY (?)";
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "research_study->'principalInvestigator'->>'reference' = ?";
-			case IDENTIFIER:
+			case ID -> "research_study->'principalInvestigator'->>'reference' = ANY (?)";
+			case RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"research_study->'principalInvestigator'->>'reference' = ?";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
-								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
+						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -162,43 +149,32 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(ResearchStudy resource)
 	{
-		if (!(resource instanceof ResearchStudy))
-			return false;
-
-		ResearchStudy r = (ResearchStudy) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (r.getPrincipalInvestigator().getResource() instanceof Practitioner p)
-			{
+			if (resource.getPrincipalInvestigator().getResource() instanceof Practitioner p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (r.getPrincipalInvestigator().getResource() instanceof PractitionerRole p)
-			{
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getPrincipalInvestigator().getResource() instanceof PractitionerRole p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
 			else
 				return false;
 		}
 		else
 		{
-			String ref = r.getPrincipalInvestigator().getReference();
-			switch (valueAndType.type)
+			String ref = resource.getPrincipalInvestigator().getReference();
+			return switch (valueAndType.type)
 			{
-				case ID:
-					return ref.equals("Practitioner" + "/" + valueAndType.id)
-							|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
-				case RESOURCE_NAME_AND_ID:
-					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-				case URL:
-					return ref.equals(valueAndType.url);
-				default:
-					return false;
-			}
+				case ID -> ref.equals("Practitioner" + "/" + valueAndType.id)
+						|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
+				case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+				case URL -> ref.equals(valueAndType.url);
+				default -> false;
+			};
 		}
 	}
 
@@ -215,17 +191,17 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
 				&& Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
 						.anyMatch(n -> n.equals(includeParts.getTargetResourceTypeName())))
-			switch (includeParts.getTargetResourceTypeName())
+			return switch (includeParts.getTargetResourceTypeName())
 			{
-				case "Practitioner":
-					return "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-							+ " WHERE concat('Practitioner/', practitioner->>'id') = research_study->'principalInvestigator'->>'reference') AS practitioners";
-				case "PractitionerRole":
-					return "(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
+				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
+						+ " WHERE concat('Practitioner/', practitioner->>'id') = research_study->'principalInvestigator'->>'reference') AS practitioners";
+
+				case "PractitionerRole" ->
+					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
 							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = research_study->'principalInvestigator'->>'reference') AS practitioner_roles";
-				default:
-					return null;
-			}
+
+				default -> null;
+			};
 		else
 			return null;
 	}

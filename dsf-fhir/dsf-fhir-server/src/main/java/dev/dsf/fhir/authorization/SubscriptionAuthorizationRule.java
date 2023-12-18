@@ -57,7 +57,7 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 
 	private Optional<String> newResourceOk(Connection connection, Subscription newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasChannel())
 		{

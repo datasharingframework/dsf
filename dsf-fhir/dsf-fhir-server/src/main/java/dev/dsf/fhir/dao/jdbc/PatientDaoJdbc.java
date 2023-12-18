@@ -1,7 +1,6 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -19,10 +18,10 @@ public class PatientDaoJdbc extends AbstractResourceDaoJdbc<Patient> implements 
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Patient.class, "patients", "patient", "patient_id",
 				PatientIdentityFilter::new,
-				Arrays.asList(factory(PatientActive.PARAMETER_NAME, PatientActive::new),
+				List.of(factory(PatientActive.PARAMETER_NAME, PatientActive::new),
 						factory(PatientIdentifier.PARAMETER_NAME, PatientIdentifier::new,
 								PatientIdentifier.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 	}
 
 	@Override

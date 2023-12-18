@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -79,14 +80,10 @@ public class MeasureDependsOn extends AbstractCanonicalReferenceParameter<Measur
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Measure resource)
 	{
-		if (!(resource instanceof Measure))
-			return false;
-
-		Measure o = (Measure) resource;
-
-		return o.getLibrary().stream().anyMatch(ref -> ref.equals(valueAndType.url));
+		return resource.hasLibrary() && resource.getLibrary().stream().filter(CanonicalType::hasValue)
+				.anyMatch(ref -> ref.equals(valueAndType.url));
 	}
 
 	@Override

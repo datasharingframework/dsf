@@ -315,9 +315,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 
 	protected final boolean isLocalOrganization(Organization organization)
 	{
-		if (organization == null)
-			return false;
-		if (!organization.hasIdElement())
+		if (organization == null || !organization.hasIdElement())
 			return false;
 
 		return organizationProvider.getLocalOrganization()

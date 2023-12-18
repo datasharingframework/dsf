@@ -210,7 +210,7 @@ public class ResponseGenerator
 		bundle.setType(BundleType.HISTORY);
 
 		if (!SummaryMode.COUNT.equals(summaryMode))
-			history.getEntries().stream().map(e -> toBundleEntryComponent(e)).forEach(bundle::addEntry);
+			history.getEntries().stream().map(this::toBundleEntryComponent).forEach(bundle::addEntry);
 
 		if (!errors.isEmpty())
 			bundle.addEntry(toBundleEntryComponent(toOperationOutcomeWarning(errors), SearchEntryMode.OUTCOME));
@@ -247,17 +247,13 @@ public class ResponseGenerator
 
 	private String toStatus(String method)
 	{
-		switch (method)
+		return switch (method)
 		{
-			case "POST":
-				return "201 Created";
-			case "PUT":
-				return "200 OK";
-			case "DELETE":
-				return "200 OK";
-			default:
-				throw new RuntimeException("Method " + method + " not supported");
-		}
+			case "POST" -> "201 Created";
+			case "PUT" -> "200 OK";
+			case "DELETE" -> "200 OK";
+			default -> throw new RuntimeException("Method " + method + " not supported");
+		};
 	}
 
 	private String toLocation(String resourceType, String id, String version)
@@ -943,94 +939,52 @@ public class ResponseGenerator
 
 	private IssueSeverity convert(ValidationMessage.IssueSeverity severity)
 	{
-		switch (severity)
+		return switch (severity)
 		{
-			case FATAL:
-				return IssueSeverity.FATAL;
-			case ERROR:
-				return IssueSeverity.ERROR;
-			case WARNING:
-				return IssueSeverity.WARNING;
-			case INFORMATION:
-				return IssueSeverity.INFORMATION;
-			case NULL:
-				return IssueSeverity.NULL;
-			default:
-				throw new RuntimeException("IssueSeverity " + severity + " not supported");
-		}
+			case FATAL -> IssueSeverity.FATAL;
+			case ERROR -> IssueSeverity.ERROR;
+			case WARNING -> IssueSeverity.WARNING;
+			case INFORMATION -> IssueSeverity.INFORMATION;
+			case NULL -> IssueSeverity.NULL;
+		};
 	}
 
 	private IssueType convert(ValidationMessage.IssueType type)
 	{
-		switch (type)
+		return switch (type)
 		{
-			case INVALID:
-				return IssueType.INVALID;
-			case STRUCTURE:
-				return IssueType.STRUCTURE;
-			case REQUIRED:
-				return IssueType.REQUIRED;
-			case VALUE:
-				return IssueType.VALUE;
-			case INVARIANT:
-				return IssueType.INVARIANT;
-			case SECURITY:
-				return IssueType.SECURITY;
-			case LOGIN:
-				return IssueType.LOGIN;
-			case UNKNOWN:
-				return IssueType.UNKNOWN;
-			case EXPIRED:
-				return IssueType.EXPIRED;
-			case FORBIDDEN:
-				return IssueType.FORBIDDEN;
-			case SUPPRESSED:
-				return IssueType.SUPPRESSED;
-			case PROCESSING:
-				return IssueType.PROCESSING;
-			case NOTSUPPORTED:
-				return IssueType.NOTSUPPORTED;
-			case DUPLICATE:
-				return IssueType.DUPLICATE;
-			case MULTIPLEMATCHES:
-				return IssueType.MULTIPLEMATCHES;
-			case NOTFOUND:
-				return IssueType.NOTFOUND;
-			case DELETED:
-				return IssueType.DELETED;
-			case TOOLONG:
-				return IssueType.TOOLONG;
-			case CODEINVALID:
-				return IssueType.CODEINVALID;
-			case EXTENSION:
-				return IssueType.EXTENSION;
-			case TOOCOSTLY:
-				return IssueType.TOOCOSTLY;
-			case BUSINESSRULE:
-				return IssueType.BUSINESSRULE;
-			case CONFLICT:
-				return IssueType.CONFLICT;
-			case TRANSIENT:
-				return IssueType.TRANSIENT;
-			case LOCKERROR:
-				return IssueType.LOCKERROR;
-			case NOSTORE:
-				return IssueType.NOSTORE;
-			case EXCEPTION:
-				return IssueType.EXCEPTION;
-			case TIMEOUT:
-				return IssueType.TIMEOUT;
-			case INCOMPLETE:
-				return IssueType.INCOMPLETE;
-			case THROTTLED:
-				return IssueType.THROTTLED;
-			case INFORMATIONAL:
-				return IssueType.INFORMATIONAL;
-			case NULL:
-				return IssueType.NULL;
-
-			default:
-				throw new RuntimeException("IssueType " + type + " not supported");
-		}
+			case INVALID -> IssueType.INVALID;
+			case STRUCTURE -> IssueType.STRUCTURE;
+			case REQUIRED -> IssueType.REQUIRED;
+			case VALUE -> IssueType.VALUE;
+			case INVARIANT -> IssueType.INVARIANT;
+			case SECURITY -> IssueType.SECURITY;
+			case LOGIN -> IssueType.LOGIN;
+			case UNKNOWN -> IssueType.UNKNOWN;
+			case EXPIRED -> IssueType.EXPIRED;
+			case FORBIDDEN -> IssueType.FORBIDDEN;
+			case SUPPRESSED -> IssueType.SUPPRESSED;
+			case PROCESSING -> IssueType.PROCESSING;
+			case NOTSUPPORTED -> IssueType.NOTSUPPORTED;
+			case DUPLICATE -> IssueType.DUPLICATE;
+			case MULTIPLEMATCHES -> IssueType.MULTIPLEMATCHES;
+			case NOTFOUND -> IssueType.NOTFOUND;
+			case DELETED -> IssueType.DELETED;
+			case TOOLONG -> IssueType.TOOLONG;
+			case CODEINVALID -> IssueType.CODEINVALID;
+			case EXTENSION -> IssueType.EXTENSION;
+			case TOOCOSTLY -> IssueType.TOOCOSTLY;
+			case BUSINESSRULE -> IssueType.BUSINESSRULE;
+			case CONFLICT -> IssueType.CONFLICT;
+			case TRANSIENT -> IssueType.TRANSIENT;
+			case LOCKERROR -> IssueType.LOCKERROR;
+			case NOSTORE -> IssueType.NOSTORE;
+			case EXCEPTION -> IssueType.EXCEPTION;
+			case TIMEOUT -> IssueType.TIMEOUT;
+			case INCOMPLETE -> IssueType.INCOMPLETE;
+			case THROTTLED -> IssueType.THROTTLED;
+			case INFORMATIONAL -> IssueType.INFORMATIONAL;
+			case NULL -> IssueType.NULL;
+		};
 	}
 }

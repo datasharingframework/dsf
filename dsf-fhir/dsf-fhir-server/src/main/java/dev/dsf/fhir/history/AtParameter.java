@@ -1,21 +1,20 @@
 package dev.dsf.fhir.history;
 
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 
-public class AtParameter extends AbstractDateTimeParameter<DomainResource>
+public class AtParameter extends AbstractDateTimeParameter<Resource>
 {
 	public static final String PARAMETER_NAME = "_at";
 
 	public AtParameter()
 	{
-		super(PARAMETER_NAME, "last_updated");
+		super(Resource.class, PARAMETER_NAME, "last_updated", null);
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Resource resource)
 	{
 		// Not implemented for history
 		throw new UnsupportedOperationException();

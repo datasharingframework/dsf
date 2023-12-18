@@ -40,7 +40,7 @@ public class GroupAuthorizationRule extends AbstractMetaTagAuthorizationRule<Gro
 
 	private Optional<String> newResourceOk(Connection connection, Group newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

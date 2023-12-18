@@ -42,7 +42,7 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			return null;
 		}
 
-		return loginService.login(openIdCredentials.getUserId(), (OpenIdCredentials) credentials, req);
+		return loginService.login(openIdCredentials.getUserId(), credentials, req);
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			return false;
 		}
 
-		long expiry = (Long) identity.getCredentials().get().getLongClaim("exp");
+		long expiry = identity.getCredentials().get().getLongClaim("exp");
 		long currentTimeSeconds = (long) (System.currentTimeMillis() / 1000F);
 		if (currentTimeSeconds > expiry)
 		{

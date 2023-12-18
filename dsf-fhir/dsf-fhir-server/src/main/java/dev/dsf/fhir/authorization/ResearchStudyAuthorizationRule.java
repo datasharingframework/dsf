@@ -42,7 +42,7 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 
 	private Optional<String> newResourceOk(Connection connection, ResearchStudy newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

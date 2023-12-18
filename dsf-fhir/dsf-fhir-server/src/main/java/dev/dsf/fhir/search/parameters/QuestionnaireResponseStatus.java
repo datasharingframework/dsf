@@ -9,7 +9,6 @@ import java.util.Objects;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -22,13 +21,12 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class QuestionnaireResponseStatus extends AbstractTokenParameter<QuestionnaireResponse>
 {
 	public static final String PARAMETER_NAME = "status";
-	private static final String RESOURCE_COLUMN = "questionnaire_response";
 
 	private QuestionnaireResponse.QuestionnaireResponseStatus status;
 
 	public QuestionnaireResponseStatus()
 	{
-		super(PARAMETER_NAME);
+		super(QuestionnaireResponse.class, PARAMETER_NAME);
 	}
 
 	@Override
@@ -66,9 +64,15 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return "questionnaire_response->>'status' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return "questionnaire_response->>'status' <> ?";
 	}
 
 	@Override
@@ -90,22 +94,15 @@ public class QuestionnaireResponseStatus extends AbstractTokenParameter<Question
 		return status.toCode();
 	}
 
-
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(QuestionnaireResponse resource)
 	{
-		if (!(resource instanceof QuestionnaireResponse))
-			return false;
-
-		if (valueAndType.negated)
-			return !Objects.equals(((QuestionnaireResponse) resource).getStatus(), status);
-		else
-			return Objects.equals(((QuestionnaireResponse) resource).getStatus(), status);
+		return valueAndType.negated ^ (resource.hasStatus() && Objects.equals(resource.getStatus(), status));
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
+		return "questionnaire_response->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }
