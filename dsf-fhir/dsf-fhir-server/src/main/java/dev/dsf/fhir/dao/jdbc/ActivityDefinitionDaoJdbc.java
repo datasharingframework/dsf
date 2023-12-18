@@ -5,8 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,7 +37,7 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, ActivityDefinition.class, "activity_definitions",
 				"activity_definition", "activity_definition_id", ActivityDefinitionIdentityFilter::new,
-				Arrays.asList(factory(ActivityDefinitionDate.PARAMETER_NAME, ActivityDefinitionDate::new),
+				List.of(factory(ActivityDefinitionDate.PARAMETER_NAME, ActivityDefinitionDate::new),
 						factory(ActivityDefinitionIdentifier.PARAMETER_NAME, ActivityDefinitionIdentifier::new),
 						factory(ActivityDefinitionName.PARAMETER_NAME, ActivityDefinitionName::new,
 								ActivityDefinitionName.getNameModifiers()),
@@ -48,7 +46,7 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 						factory(ActivityDefinitionUrl.PARAMETER_NAME, ActivityDefinitionUrl::new),
 						factory(ActivityDefinitionVersion.PARAMETER_NAME, ActivityDefinitionVersion::new,
 								ActivityDefinitionVersion.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

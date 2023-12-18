@@ -1,7 +1,6 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -19,11 +18,10 @@ public class LocationDaoJdbc extends AbstractResourceDaoJdbc<Location> implement
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Location.class, "locations", "location",
 				"location_id", LocationIdentityFilter::new,
-				Arrays.asList(
-						factory(LocationIdentifier.PARAMETER_NAME, LocationIdentifier::new,
-								LocationIdentifier.getNameModifiers()),
+				List.of(factory(LocationIdentifier.PARAMETER_NAME, LocationIdentifier::new,
+						LocationIdentifier.getNameModifiers()),
 						factory(LocationName.PARAMETER_NAME, LocationName::new, LocationName.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 	}
 
 	@Override

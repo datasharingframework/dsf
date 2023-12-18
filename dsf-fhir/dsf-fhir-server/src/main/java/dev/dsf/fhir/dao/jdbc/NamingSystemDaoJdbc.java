@@ -4,8 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,12 +29,12 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system",
 				"naming_system_id", NamingSystemIdentityFilter::new,
-				Arrays.asList(factory(NamingSystemDate.PARAMETER_NAME, NamingSystemDate::new),
+				List.of(factory(NamingSystemDate.PARAMETER_NAME, NamingSystemDate::new),
 						factory(NamingSystemName.PARAMETER_NAME, NamingSystemName::new,
 								NamingSystemName.getNameModifiers()),
 						factory(NamingSystemStatus.PARAMETER_NAME, NamingSystemStatus::new,
 								NamingSystemStatus.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 	}
 
 	@Override

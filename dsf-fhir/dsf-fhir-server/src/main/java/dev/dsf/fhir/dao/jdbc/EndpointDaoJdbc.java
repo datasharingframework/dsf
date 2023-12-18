@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -30,9 +30,8 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint",
 				"endpoint_id", EndpointIdentityFilter::new,
-				Arrays.asList(
-						factory(EndpointAddress.PARAMETER_NAME, EndpointAddress::new,
-								EndpointAddress.getNameModifiers()),
+				List.of(factory(EndpointAddress.PARAMETER_NAME, EndpointAddress::new,
+						EndpointAddress.getNameModifiers()),
 						factory(EndpointIdentifier.PARAMETER_NAME, EndpointIdentifier::new,
 								EndpointIdentifier.getNameModifiers()),
 						factory(EndpointName.PARAMETER_NAME, EndpointName::new, EndpointName.getNameModifiers()),
@@ -40,7 +39,7 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 								EndpointOrganization.getNameModifiers(), EndpointOrganization::new,
 								EndpointOrganization.getIncludeParameterValues()),
 						factory(EndpointStatus.PARAMETER_NAME, EndpointStatus::new, EndpointStatus.getNameModifiers())),
-				Arrays.asList(factory(OrganizationEndpointRevInclude::new,
+				List.of(factory(OrganizationEndpointRevInclude::new,
 						OrganizationEndpointRevInclude.getRevIncludeParameterValues())));
 	}
 

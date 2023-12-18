@@ -2,8 +2,7 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -29,7 +28,7 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Measure.class, "measures", "measure", "measure_id",
 				MeasureIdentityFilter::new,
-				Arrays.asList(factory(MeasureDate.PARAMETER_NAME, MeasureDate::new),
+				List.of(factory(MeasureDate.PARAMETER_NAME, MeasureDate::new),
 						factory(MeasureDependsOn.PARAMETER_NAME, MeasureDependsOn::new,
 								MeasureDependsOn.getNameModifiers(), MeasureDependsOn::new,
 								MeasureDependsOn.getIncludeParameterValues()),
@@ -39,7 +38,7 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 						factory(MeasureStatus.PARAMETER_NAME, MeasureStatus::new, MeasureStatus.getNameModifiers()),
 						factory(MeasureUrl.PARAMETER_NAME, MeasureUrl::new, MeasureUrl.getNameModifiers()),
 						factory(MeasureVersion.PARAMETER_NAME, MeasureVersion::new, MeasureVersion.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

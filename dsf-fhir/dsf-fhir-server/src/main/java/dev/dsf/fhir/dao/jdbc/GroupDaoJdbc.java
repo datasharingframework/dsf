@@ -1,6 +1,6 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.util.Arrays;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -18,9 +18,9 @@ public class GroupDaoJdbc extends AbstractResourceDaoJdbc<Group> implements Grou
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Group.class, "groups", "group_json", "group_id",
 				GroupIdentityFilter::new,
-				Arrays.asList(factory(GroupIdentifier.PARAMETER_NAME, GroupIdentifier::new,
+				List.of(factory(GroupIdentifier.PARAMETER_NAME, GroupIdentifier::new,
 						GroupIdentifier.getNameModifiers())),
-				Arrays.asList(factory(ResearchStudyEnrollmentRevInclude::new,
+				List.of(factory(ResearchStudyEnrollmentRevInclude::new,
 						ResearchStudyEnrollmentRevInclude.getRevIncludeParameterValues())));
 	}
 

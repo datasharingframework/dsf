@@ -2,8 +2,6 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -49,8 +47,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, StructureDefinition.class, resourceTable,
 				resourceColumn, resourceIdColumn, userFilter,
-				Arrays.asList(
-						factory(resourceColumn, StructureDefinitionDate.PARAMETER_NAME, StructureDefinitionDate::new),
+				List.of(factory(resourceColumn, StructureDefinitionDate.PARAMETER_NAME, StructureDefinitionDate::new),
 						factory(resourceColumn, StructureDefinitionIdentifier.PARAMETER_NAME,
 								StructureDefinitionIdentifier::new, StructureDefinitionIdentifier.getNameModifiers()),
 						factory(resourceColumn, StructureDefinitionName.PARAMETER_NAME, StructureDefinitionName::new,
@@ -61,7 +58,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 								StructureDefinitionUrl.getNameModifiers()),
 						factory(resourceColumn, StructureDefinitionVersion.PARAMETER_NAME,
 								StructureDefinitionVersion::new, StructureDefinitionVersion.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, resourceTable, resourceColumn);
 	}

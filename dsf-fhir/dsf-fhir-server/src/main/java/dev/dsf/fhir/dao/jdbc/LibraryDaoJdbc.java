@@ -2,8 +2,7 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -29,14 +28,14 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
 				LibraryIdentityFilter::new,
-				Arrays.asList(factory(LibraryDate.PARAMETER_NAME, LibraryDate::new),
+				List.of(factory(LibraryDate.PARAMETER_NAME, LibraryDate::new),
 						factory(LibraryIdentifier.PARAMETER_NAME, LibraryIdentifier::new,
 								LocationIdentifier.getNameModifiers()),
 						factory(LibraryName.PARAMETER_NAME, LibraryName::new, LibraryName.getNameModifiers()),
 						factory(LibraryStatus.PARAMETER_NAME, LibraryStatus::new, LibraryStatus.getNameModifiers()),
 						factory(LibraryUrl.PARAMETER_NAME, LibraryUrl::new, LibraryUrl.getNameModifiers()),
 						factory(LibraryVersion.PARAMETER_NAME, LibraryVersion::new, LibraryVersion.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
