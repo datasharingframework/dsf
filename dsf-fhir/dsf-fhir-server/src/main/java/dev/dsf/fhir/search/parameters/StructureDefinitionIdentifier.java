@@ -11,8 +11,7 @@ public class StructureDefinitionIdentifier extends AbstractIdentifierParameter<S
 {
 	public StructureDefinitionIdentifier()
 	{
-		super(StructureDefinition.class, "structure_definition",
-				listMatcher(StructureDefinition::hasIdentifier, StructureDefinition::getIdentifier));
+		this("structure_definition");
 	}
 
 	public StructureDefinitionIdentifier(String resourceColumn)
