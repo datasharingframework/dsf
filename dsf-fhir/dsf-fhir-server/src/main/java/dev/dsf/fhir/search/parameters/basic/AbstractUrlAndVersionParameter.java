@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
@@ -17,9 +16,9 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 
 	private final String resourceColumn;
 
-	public AbstractUrlAndVersionParameter(String resourceColumn)
+	public AbstractUrlAndVersionParameter(Class<R> resourceType, String resourceColumn)
 	{
-		super(PARAMETER_NAME);
+		super(resourceType, PARAMETER_NAME);
 
 		this.resourceColumn = resourceColumn;
 	}
@@ -29,15 +28,11 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 	{
 		String versionSubQuery = hasVersion() ? " AND " + resourceColumn + "->>'version' = ?" : "";
 
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case PRECISE:
-				return resourceColumn + "->>'url' = ?" + versionSubQuery;
-			case BELOW:
-				return resourceColumn + "->>'url' LIKE ?" + versionSubQuery;
-			default:
-				return "";
-		}
+			case PRECISE -> resourceColumn + "->>'url' = ?" + versionSubQuery;
+			case BELOW -> resourceColumn + "->>'url' LIKE ?" + versionSubQuery;
+		};
 	}
 
 	@Override
@@ -51,42 +46,35 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		if (subqueryParameterIndex == 1)
+		{
 			switch (valueAndType.type)
 			{
 				case PRECISE:
 					statement.setString(parameterIndex, valueAndType.url);
 					return;
+
 				case BELOW:
 					statement.setString(parameterIndex, valueAndType.url + "%");
 					return;
-				default:
-					return;
 			}
+		}
 		else if (subqueryParameterIndex == 2)
 			statement.setString(parameterIndex, valueAndType.version);
 	}
 
-	protected abstract boolean instanceOf(Resource resource);
-
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(R resource)
 	{
-		if (!instanceOf(resource))
-			return false;
-
-		MetadataResource mRes = (MetadataResource) resource;
-
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case PRECISE:
-				return Objects.equals(mRes.getUrl(), valueAndType.url)
-						&& (valueAndType.version == null || Objects.equals(mRes.getVersion(), valueAndType.version));
-			case BELOW:
-				return mRes.getUrl() != null && mRes.getUrl().startsWith(valueAndType.url)
-						&& (valueAndType.version == null || Objects.equals(mRes.getVersion(), valueAndType.version));
-			default:
-				throw notDefined();
-		}
+			case PRECISE -> resource.hasUrl() && Objects.equals(resource.getUrl(), valueAndType.url)
+					&& (valueAndType.version == null
+							|| (resource.hasVersion() && Objects.equals(resource.getVersion(), valueAndType.version)));
+
+			case BELOW ->
+				resource.hasUrl() && resource.getUrl().startsWith(valueAndType.url) && (valueAndType.version == null
+						|| (resource.hasVersion() && Objects.equals(resource.getVersion(), valueAndType.version)));
+		};
 	}
 
 	@Override

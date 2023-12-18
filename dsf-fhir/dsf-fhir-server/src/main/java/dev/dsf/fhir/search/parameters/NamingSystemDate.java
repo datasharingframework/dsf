@@ -13,6 +13,7 @@ public class NamingSystemDate extends AbstractDateTimeParameter<NamingSystem>
 
 	public NamingSystemDate()
 	{
-		super(PARAMETER_NAME, "naming_system->>'date'");
+		super(NamingSystem.class, PARAMETER_NAME, "naming_system->>'date'",
+				fromDateTime(NamingSystem::hasDateElement, NamingSystem::getDateElement));
 	}
 }

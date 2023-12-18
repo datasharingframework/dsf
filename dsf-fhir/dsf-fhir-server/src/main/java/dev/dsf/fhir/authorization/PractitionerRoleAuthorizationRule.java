@@ -43,7 +43,7 @@ public class PractitionerRoleAuthorizationRule
 
 	private Optional<String> newResourceOk(Connection connection, PractitionerRole newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasOrganization())
 		{

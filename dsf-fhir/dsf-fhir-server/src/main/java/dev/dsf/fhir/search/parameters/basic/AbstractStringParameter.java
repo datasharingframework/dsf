@@ -2,11 +2,11 @@ package dev.dsf.fhir.search.parameters.basic;
 
 import java.util.List;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
 
-public abstract class AbstractStringParameter<R extends DomainResource> extends AbstractSearchParameter<R>
+public abstract class AbstractStringParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
 	protected enum StringSearchType
 	{
@@ -39,9 +39,9 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 
 	protected StringValueAndSearchType valueAndType;
 
-	public AbstractStringParameter(String parameterName)
+	public AbstractStringParameter(Class<R> resourceType, String parameterName)
 	{
-		super(parameterName);
+		super(resourceType, parameterName);
 	}
 
 	@Override

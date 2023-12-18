@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class LastEventTimeDaoTest extends AbstractDaoTest
 {
-	private LastEventTimeDao dao = new LastEventTimeDaoJdbc(defaultDataSource, "test_type");
+	private final LastEventTimeDao dao = new LastEventTimeDaoJdbc(defaultDataSource, "test_type");
 
 	@Test
 	public void testReadEmpty() throws Exception

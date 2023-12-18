@@ -24,11 +24,12 @@ public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 	public static final String PARAMETER_NAME = "_id";
 
 	private final String resourceIdColumn;
+
 	private UUID id;
 
-	public ResourceId(String resourceIdColumn)
+	public ResourceId(Class<R> resourceType, String resourceIdColumn)
 	{
-		super(PARAMETER_NAME);
+		super(resourceType, PARAMETER_NAME);
 
 		this.resourceIdColumn = resourceIdColumn;
 	}
@@ -117,9 +118,10 @@ public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(R resource)
 	{
-		return Objects.equals(resource.getId(), id.toString());
+		return resource.hasIdElement() && resource.getIdElement().hasIdPart()
+				&& Objects.equals(resource.getIdElement().getIdPart(), id.toString());
 	}
 
 	@Override

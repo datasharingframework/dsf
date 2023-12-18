@@ -32,6 +32,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.web.util.HtmlUtils;
@@ -354,7 +355,8 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 								resource.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart()));
 		}
 		else if (resource instanceof Bundle b && !resource.getIdElement().hasIdPart())
-			return b.getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst().map(c -> c.getUrl());
+			return b.getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
+					.map(BundleLinkComponent::getUrl);
 		else
 			return Optional.empty();
 	}

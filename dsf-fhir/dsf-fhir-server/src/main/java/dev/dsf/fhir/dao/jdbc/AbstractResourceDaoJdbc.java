@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -81,10 +80,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		@Override
 		public int hashCode()
 		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((id == null) ? 0 : id.hashCode());
-			return result;
+			return Objects.hash(id);
 		}
 
 		@Override
@@ -92,19 +88,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			if (this == obj)
 				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
+			if (obj == null || getClass() != obj.getClass())
 				return false;
 			ResourceDistinctById other = (ResourceDistinctById) obj;
-			if (id == null)
-			{
-				if (other.id != null)
-					return false;
-			}
-			else if (!id.equals(other.id))
-				return false;
-			return true;
+			return Objects.equals(id, other.id);
 		}
 
 		public Resource getResource()
@@ -202,11 +189,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			this.searchRevIncludeParameterFactories.addAll(searchRevIncludeParameterFactories);
 
 		resourceIdFactory = new SearchQueryParameterFactory<>(ResourceId.PARAMETER_NAME,
-				() -> new ResourceId<>(resourceIdColumn));
+				() -> new ResourceId<>(resourceType, resourceIdColumn));
 		resourceLastUpdatedFactory = new SearchQueryParameterFactory<>(ResourceLastUpdated.PARAMETER_NAME,
-				() -> new ResourceLastUpdated<>(resourceColumn));
+				() -> new ResourceLastUpdated<>(resourceType, resourceColumn));
 		resourceProfileFactory = new SearchQueryParameterFactory<>(ResourceProfile.PARAMETER_NAME,
-				() -> new ResourceProfile<>(resourceColumn), ResourceProfile.getNameModifiers());
+				() -> new ResourceProfile<>(resourceType, resourceColumn), ResourceProfile.getNameModifiers());
 	}
 
 	@Override
@@ -896,11 +883,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			return;
 
 		JsonArray array = (JsonArray) JsonParser.parseString(json);
-
-		Iterator<JsonElement> it = array.iterator();
-		while (it.hasNext())
+		for (JsonElement jsonElement : array)
 		{
-			JsonElement jsonElement = it.next();
 			IBaseResource resource = preparedStatementFactory.getJsonParser().parseResource(jsonElement.toString());
 			if (resource instanceof Resource r)
 			{

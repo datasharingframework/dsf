@@ -896,7 +896,8 @@ public class WebserviceConfig
 	{
 		return new ConformanceServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter(),
-				validationConfig.validationSupport());
+				validationConfig.validationSupport(),
+				propertiesConfig.getOidcAuthorizationCodeFlowEnabled() || propertiesConfig.getOidcBearerTokenEnabled());
 	}
 
 	@Bean

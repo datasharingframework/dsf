@@ -6,7 +6,6 @@ import java.sql.SQLException;
 
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -16,39 +15,36 @@ import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 public class OrganizationAffiliationRole extends AbstractTokenParameter<OrganizationAffiliation>
 {
 	public static final String PARAMETER_NAME = "role";
-	private static final String RESOURCE_COLUMN = "organization_affiliation";
 
 	public OrganizationAffiliationRole()
 	{
-		super(PARAMETER_NAME);
+		super(OrganizationAffiliation.class, PARAMETER_NAME);
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case CODE:
-			case CODE_AND_SYSTEM:
-			case SYSTEM:
-				if (valueAndType.negated)
-					return "NOT ((SELECT jsonb_agg(coding) FROM jsonb_array_elements(" + RESOURCE_COLUMN
-							+ "->'code') AS code, jsonb_array_elements(code->'coding') AS coding) @> ?::jsonb)";
-				else
-					return "(SELECT jsonb_agg(coding) FROM jsonb_array_elements(" + RESOURCE_COLUMN
-							+ "->'code') AS code, jsonb_array_elements(code->'coding') AS coding) @> ?::jsonb";
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				if (valueAndType.negated)
-					return "(SELECT COUNT(*) FROM jsonb_array_elements(" + RESOURCE_COLUMN
-							+ "->'code') AS code, jsonb_array_elements(code->'coding') AS coding "
-							+ "WHERE coding->>'code' <> ? OR (coding ?? 'system')) > 0";
-				else
-					return "(SELECT COUNT(*) FROM jsonb_array_elements(" + RESOURCE_COLUMN
-							+ "->'code') AS code, jsonb_array_elements(code->'coding') AS coding "
-							+ "WHERE coding->>'code' = ? AND NOT (coding ?? 'system')) > 0";
-			default:
-				return "";
-		}
+			case CODE, CODE_AND_SYSTEM, SYSTEM ->
+				"(SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization_affiliation->'code') AS code, jsonb_array_elements(code->'coding') AS coding) @> ?::jsonb";
+			case CODE_AND_NO_SYSTEM_PROPERTY ->
+				"(SELECT COUNT(*) FROM jsonb_array_elements(organization_affiliation->'code') AS code, jsonb_array_elements(code->'coding') AS coding "
+						+ "WHERE coding->>'code' = ? AND NOT (coding ?? 'system')) > 0";
+		};
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return switch (valueAndType.type)
+		{
+			case CODE, CODE_AND_SYSTEM, SYSTEM ->
+				"NOT ((SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization_affiliation->'code') AS code, jsonb_array_elements(code->'coding') AS coding) @> ?::jsonb)";
+			case CODE_AND_NO_SYSTEM_PROPERTY ->
+				"(SELECT COUNT(*) FROM jsonb_array_elements(organization_affiliation->'code') AS code, jsonb_array_elements(code->'coding') AS coding "
+						+ "WHERE coding->>'code' <> ? OR (coding ?? 'system')) > 0";
+		};
 	}
 
 	@Override
@@ -66,13 +62,16 @@ public class OrganizationAffiliationRole extends AbstractTokenParameter<Organiza
 			case CODE:
 				statement.setString(parameterIndex, "[{\"code\": \"" + valueAndType.codeValue + "\"}]");
 				return;
+
 			case CODE_AND_SYSTEM:
 				statement.setString(parameterIndex, "[{\"code\": \"" + valueAndType.codeValue + "\", \"system\": \""
 						+ valueAndType.systemValue + "\"}]");
 				return;
+
 			case CODE_AND_NO_SYSTEM_PROPERTY:
 				statement.setString(parameterIndex, valueAndType.codeValue);
 				return;
+
 			case SYSTEM:
 				statement.setString(parameterIndex, "[{\"system\": \"" + valueAndType.systemValue + "\"}]");
 				return;
@@ -82,18 +81,13 @@ public class OrganizationAffiliationRole extends AbstractTokenParameter<Organiza
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(SELECT string_agg((coding->>'system')::text || (coding->>'code')::text, ' ') FROM jsonb_array_elements("
-				+ RESOURCE_COLUMN + "->'code'->'coding') coding)" + sortDirectionWithSpacePrefix;
+		return "(SELECT string_agg((coding->>'system')::text || (coding->>'code')::text, ' ') FROM jsonb_array_elements(organization_affiliation->'code'->'coding') coding)"
+				+ sortDirectionWithSpacePrefix;
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(OrganizationAffiliation resource)
 	{
-		if (!(resource instanceof OrganizationAffiliation))
-			return false;
-
-		OrganizationAffiliation a = (OrganizationAffiliation) resource;
-
-		return codingMatches(a.getCode());
+		return resource.hasCode() && codingMatches(resource.getCode());
 	}
 }

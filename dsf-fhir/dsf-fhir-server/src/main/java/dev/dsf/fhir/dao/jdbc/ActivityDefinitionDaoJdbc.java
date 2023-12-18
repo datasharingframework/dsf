@@ -50,7 +50,7 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 								ActivityDefinitionVersion.getNameModifiers())),
 				Collections.emptyList());
 
-		readByUrl = new ReadByUrlDaoJdbc<ActivityDefinition>(this::getDataSource, this::getResource, getResourceTable(),
+		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
 	}
 

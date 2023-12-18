@@ -9,7 +9,6 @@ import java.util.Objects;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -22,13 +21,12 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 {
 	public static final String PARAMETER_NAME = "status";
-	private static final String RESOURCE_COLUMN = "endpoint";
 
 	private Endpoint.EndpointStatus status;
 
 	public EndpointStatus()
 	{
-		super(PARAMETER_NAME);
+		super(Endpoint.class, PARAMETER_NAME);
 	}
 
 	@Override
@@ -66,9 +64,15 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return "endpoint->>'status' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return "endpoint->>'status' <> ?";
 	}
 
 	@Override
@@ -91,20 +95,14 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Endpoint resource)
 	{
-		if (!(resource instanceof Endpoint))
-			return false;
-
-		if (valueAndType.negated)
-			return !Objects.equals(((Endpoint) resource).getStatus(), status);
-		else
-			return Objects.equals(((Endpoint) resource).getStatus(), status);
+		return valueAndType.negated ^ (resource.hasStatus() && Objects.equals(resource.getStatus(), status));
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
+		return "endpoint->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }

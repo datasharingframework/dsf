@@ -16,6 +16,7 @@ import dev.dsf.fhir.search.filter.MeasureIdentityFilter;
 import dev.dsf.fhir.search.parameters.MeasureDate;
 import dev.dsf.fhir.search.parameters.MeasureDependsOn;
 import dev.dsf.fhir.search.parameters.MeasureIdentifier;
+import dev.dsf.fhir.search.parameters.MeasureName;
 import dev.dsf.fhir.search.parameters.MeasureStatus;
 import dev.dsf.fhir.search.parameters.MeasureUrl;
 import dev.dsf.fhir.search.parameters.MeasureVersion;
@@ -34,6 +35,7 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 								MeasureDependsOn.getIncludeParameterValues()),
 						factory(MeasureIdentifier.PARAMETER_NAME, MeasureIdentifier::new,
 								MeasureIdentifier.getNameModifiers()),
+						factory(MeasureName.PARAMETER_NAME, MeasureName::new, MeasureName.getNameModifiers()),
 						factory(MeasureStatus.PARAMETER_NAME, MeasureStatus::new, MeasureStatus.getNameModifiers()),
 						factory(MeasureUrl.PARAMETER_NAME, MeasureUrl::new, MeasureUrl.getNameModifiers()),
 						factory(MeasureVersion.PARAMETER_NAME, MeasureVersion::new, MeasureVersion.getNameModifiers())),

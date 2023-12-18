@@ -43,7 +43,7 @@ public class HealthcareServiceAuthorizationRule
 
 	private Optional<String> newResourceOk(Connection connection, HealthcareService newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

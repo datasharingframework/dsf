@@ -1,6 +1,6 @@
 package dev.dsf.fhir.hapi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;

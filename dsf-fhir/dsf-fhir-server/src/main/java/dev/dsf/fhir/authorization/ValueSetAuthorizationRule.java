@@ -47,7 +47,7 @@ public class ValueSetAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 
 	private Optional<String> newResourceOk(Connection connection, ValueSet newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasStatus())
 		{

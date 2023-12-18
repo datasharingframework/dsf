@@ -11,8 +11,8 @@ public interface HistoryService
 {
 	Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers);
 
-	Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resource);
+	Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resourceType);
 
-	Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resource,
+	Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resourceType,
 			String id);
 }

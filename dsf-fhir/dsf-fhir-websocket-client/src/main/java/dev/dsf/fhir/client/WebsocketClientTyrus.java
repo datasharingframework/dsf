@@ -154,13 +154,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 
 			connection = manager.connectToServer(endpoint, config, wsUri);
 		}
-		catch (DeploymentException e)
-		{
-			logger.debug("Error while connecting to server", e);
-
-			throw new RuntimeException(e);
-		}
-		catch (IOException e)
+		catch (DeploymentException | IOException e)
 		{
 			logger.debug("Error while connecting to server", e);
 
@@ -175,6 +169,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 
 		ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator()
 		{
+			@Override
 			public void beforeRequest(Map<String, java.util.List<String>> headers)
 			{
 				headers.put(HttpHeaders.USER_AGENT, Collections.singletonList(userAgentValue));

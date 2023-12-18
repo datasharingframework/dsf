@@ -68,6 +68,7 @@ public class DocumentationGenerator extends AbstractMojo
 	@Parameter(property = "workingPackages", required = true)
 	private List<String> workingPackages;
 
+	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
 		workingPackages.forEach(this::generateDocumentation);

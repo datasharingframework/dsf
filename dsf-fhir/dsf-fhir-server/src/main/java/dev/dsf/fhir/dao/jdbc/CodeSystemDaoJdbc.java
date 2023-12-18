@@ -15,6 +15,7 @@ import dev.dsf.fhir.dao.CodeSystemDao;
 import dev.dsf.fhir.search.filter.CodeSystemIdentityFilter;
 import dev.dsf.fhir.search.parameters.CodeSystemDate;
 import dev.dsf.fhir.search.parameters.CodeSystemIdentifier;
+import dev.dsf.fhir.search.parameters.CodeSystemName;
 import dev.dsf.fhir.search.parameters.CodeSystemStatus;
 import dev.dsf.fhir.search.parameters.CodeSystemUrl;
 import dev.dsf.fhir.search.parameters.CodeSystemVersion;
@@ -30,6 +31,7 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 				Arrays.asList(factory(CodeSystemDate.PARAMETER_NAME, CodeSystemDate::new),
 						factory(CodeSystemIdentifier.PARAMETER_NAME, CodeSystemIdentifier::new,
 								CodeSystemIdentifier.getNameModifiers()),
+						factory(CodeSystemName.PARAMETER_NAME, CodeSystemName::new, CodeSystemName.getNameModifiers()),
 						factory(CodeSystemStatus.PARAMETER_NAME, CodeSystemStatus::new,
 								CodeSystemStatus.getNameModifiers()),
 						factory(CodeSystemUrl.PARAMETER_NAME, CodeSystemUrl::new, CodeSystemUrl.getNameModifiers()),

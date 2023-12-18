@@ -153,11 +153,8 @@ public class SmtpMailService implements MailService, InitializingBean
 			super("SmtpMailService.Log4jAppender", ThresholdFilter.createFilter(null, null, null),
 					new Layout(debugLogLocation), false, null);
 
-			MailManagerFactory factory = (name, data) ->
+			MailManagerFactory factory = (name, data) -> new SmtpManager(name, session, message, data)
 			{
-				return new SmtpManager(name, session, message, data)
-				{
-				};
 			};
 			FactoryData data = new FactoryData(null, null, null, null, null, null, event -> subject, null, null, 0,
 					null, null, false, messageBufferSize, null, null);

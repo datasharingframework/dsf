@@ -42,9 +42,9 @@ public abstract class AbstractCanonicalUrlParameter<R extends Resource> extends 
 
 	protected CanonicalUrlAndSearchType valueAndType;
 
-	public AbstractCanonicalUrlParameter(String parameterName)
+	public AbstractCanonicalUrlParameter(Class<R> resourceType, String parameterName)
 	{
-		super(parameterName);
+		super(resourceType, parameterName);
 	}
 
 	@Override

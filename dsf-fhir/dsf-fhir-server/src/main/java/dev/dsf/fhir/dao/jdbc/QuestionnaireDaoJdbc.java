@@ -15,6 +15,7 @@ import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.search.filter.QuestionnaireIdentityFilter;
 import dev.dsf.fhir.search.parameters.QuestionnaireDate;
 import dev.dsf.fhir.search.parameters.QuestionnaireIdentifier;
+import dev.dsf.fhir.search.parameters.QuestionnaireName;
 import dev.dsf.fhir.search.parameters.QuestionnaireStatus;
 import dev.dsf.fhir.search.parameters.QuestionnaireUrl;
 import dev.dsf.fhir.search.parameters.QuestionnaireVersion;
@@ -30,6 +31,8 @@ public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire>
 				Arrays.asList(factory(QuestionnaireDate.PARAMETER_NAME, QuestionnaireDate::new),
 						factory(QuestionnaireIdentifier.PARAMETER_NAME, QuestionnaireIdentifier::new,
 								QuestionnaireIdentifier.getNameModifiers()),
+						factory(QuestionnaireName.PARAMETER_NAME, QuestionnaireName::new,
+								QuestionnaireName.getNameModifiers()),
 						factory(QuestionnaireStatus.PARAMETER_NAME, QuestionnaireStatus::new,
 								QuestionnaireStatus.getNameModifiers()),
 						factory(QuestionnaireUrl.PARAMETER_NAME, QuestionnaireUrl::new,

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 public class MailServiceImpl implements MailService, InitializingBean
 {
-	private MailService delegate;
+	private final MailService delegate;
 
 	public MailServiceImpl(MailService delegate)
 	{

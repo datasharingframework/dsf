@@ -65,6 +65,7 @@ public class DelegatingAuthenticator extends LoginAuthenticator implements Authe
 		{
 			AuthConfiguration openIdConfig = new WrappedAuthConfiguration(configuration)
 			{
+				@Override
 				public LoginService getLoginService()
 				{
 					return openIdLoginService;

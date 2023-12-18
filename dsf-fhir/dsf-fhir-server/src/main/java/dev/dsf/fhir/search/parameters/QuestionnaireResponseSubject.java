@@ -59,32 +59,19 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-				// testing all TargetResourceTypeName/ID combinations
-				return "questionnaire_response->'subject'->>'reference' = ANY (?)";
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "questionnaire_response->'subject'->>'reference' = ?";
-			case IDENTIFIER:
+			// testing all TargetResourceTypeName/ID combinations
+			case ID -> "questionnaire_response->'subject'->>'reference' = ANY (?)";
+			case RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"questionnaire_response->'subject'->>'reference' = ?";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
-								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
+						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -171,49 +158,37 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(QuestionnaireResponse resource)
 	{
-		if (!(resource instanceof QuestionnaireResponse))
-			return false;
-
-		QuestionnaireResponse qr = (QuestionnaireResponse) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (qr.getSubject().getResource() instanceof Organization o)
-			{
+			if (resource.getSubject().getResource() instanceof Organization o)
 				return o.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (qr.getSubject().getResource() instanceof Practitioner p)
-			{
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getSubject().getResource() instanceof Practitioner p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (qr.getSubject().getResource() instanceof PractitionerRole p)
-			{
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getSubject().getResource() instanceof PractitionerRole p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
 			else
 				return false;
 		}
 		else
 		{
-			String ref = qr.getSubject().getReference();
-			switch (valueAndType.type)
+			String ref = resource.getSubject().getReference();
+			return switch (valueAndType.type)
 			{
-				case ID:
-					return ref.equals("Organization" + "/" + valueAndType.id)
-							|| ref.equals("Practitioner" + "/" + valueAndType.id)
-							|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
-				case RESOURCE_NAME_AND_ID:
-					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-				case URL:
-					return ref.equals(valueAndType.url);
-				default:
-					return false;
-			}
+				case ID -> ref.equals("Organization" + "/" + valueAndType.id)
+						|| ref.equals("Practitioner" + "/" + valueAndType.id)
+						|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
+				case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+				case URL -> ref.equals(valueAndType.url);
+				default -> false;
+			};
 		}
 	}
 
@@ -230,20 +205,17 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
 				&& Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
 						.anyMatch(n -> n.equals(includeParts.getTargetResourceTypeName())))
-			switch (includeParts.getTargetResourceTypeName())
+			return switch (includeParts.getTargetResourceTypeName())
 			{
-				case "Organization":
-					return "(SELECT jsonb_build_array(organization) FROM current_organizations"
-							+ " WHERE concat('Organization/', organization->>'id') = questionnaire_response->'subject'->>'reference') AS organizations";
-				case "Practitioner":
-					return "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-							+ " WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'subject'->>'reference') AS practitioners";
-				case "PractitionerRole":
-					return "(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
+				case "Organization" -> "(SELECT jsonb_build_array(organization) FROM current_organizations"
+						+ " WHERE concat('Organization/', organization->>'id') = questionnaire_response->'subject'->>'reference') AS organizations";
+				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
+						+ " WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'subject'->>'reference') AS practitioners";
+				case "PractitionerRole" ->
+					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
 							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = questionnaire_response->'subject'->>'reference') AS practitioner_roles";
-				default:
-					return null;
-			}
+				default -> null;
+			};
 		else
 			return null;
 	}

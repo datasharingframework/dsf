@@ -12,6 +12,7 @@ import dev.dsf.fhir.dao.HealthcareServiceDao;
 import dev.dsf.fhir.search.filter.HealthcareServiceIdentityFilter;
 import dev.dsf.fhir.search.parameters.HealthcareServiceActive;
 import dev.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
+import dev.dsf.fhir.search.parameters.HealthcareServiceName;
 
 public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<HealthcareService> implements HealthcareServiceDao
 {
@@ -21,6 +22,8 @@ public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<Healthcare
 		super(dataSource, permanentDeleteDataSource, fhirContext, HealthcareService.class, "healthcare_services",
 				"healthcare_service", "healthcare_service_id", HealthcareServiceIdentityFilter::new,
 				Arrays.asList(factory(HealthcareServiceActive.PARAMETER_NAME, HealthcareServiceActive::new),
+						factory(HealthcareServiceName.PARAMETER_NAME, HealthcareServiceName::new,
+								HealthcareServiceName.getNameModifiers()),
 						factory(HealthcareServiceIdentifier.PARAMETER_NAME, HealthcareServiceIdentifier::new,
 								HealthcareServiceIdentifier.getNameModifiers())),
 				Collections.emptyList());

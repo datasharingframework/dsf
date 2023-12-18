@@ -65,7 +65,7 @@ public class ActivityDefinitionAuthorizationRule
 
 	private Optional<String> newResourceOk(Connection connection, ActivityDefinition newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		// TODO check existence of profiles, codes and identifier against DB
 		if (!processAuthorizationHelper.isValid(newResource, taskProfile -> true, practitionerRole -> true,

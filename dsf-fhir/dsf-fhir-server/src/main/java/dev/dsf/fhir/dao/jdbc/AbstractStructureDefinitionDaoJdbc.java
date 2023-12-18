@@ -21,6 +21,7 @@ import dev.dsf.fhir.search.SearchQueryParameter;
 import dev.dsf.fhir.search.SearchQueryParameterFactory;
 import dev.dsf.fhir.search.parameters.StructureDefinitionDate;
 import dev.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
+import dev.dsf.fhir.search.parameters.StructureDefinitionName;
 import dev.dsf.fhir.search.parameters.StructureDefinitionStatus;
 import dev.dsf.fhir.search.parameters.StructureDefinitionUrl;
 import dev.dsf.fhir.search.parameters.StructureDefinitionVersion;
@@ -52,6 +53,8 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 						factory(resourceColumn, StructureDefinitionDate.PARAMETER_NAME, StructureDefinitionDate::new),
 						factory(resourceColumn, StructureDefinitionIdentifier.PARAMETER_NAME,
 								StructureDefinitionIdentifier::new, StructureDefinitionIdentifier.getNameModifiers()),
+						factory(resourceColumn, StructureDefinitionName.PARAMETER_NAME, StructureDefinitionName::new,
+								StructureDefinitionName.getNameModifiers()),
 						factory(resourceColumn, StructureDefinitionStatus.PARAMETER_NAME,
 								StructureDefinitionStatus::new, StructureDefinitionStatus.getNameModifiers()),
 						factory(resourceColumn, StructureDefinitionUrl.PARAMETER_NAME, StructureDefinitionUrl::new,
@@ -60,8 +63,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 								StructureDefinitionVersion::new, StructureDefinitionVersion.getNameModifiers())),
 				Collections.emptyList());
 
-		readByUrl = new ReadByUrlDaoJdbc<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
-				resourceColumn);
+		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, resourceTable, resourceColumn);
 	}
 
 	@Override

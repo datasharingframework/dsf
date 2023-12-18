@@ -15,6 +15,7 @@ import dev.dsf.fhir.dao.LibraryDao;
 import dev.dsf.fhir.search.filter.LibraryIdentityFilter;
 import dev.dsf.fhir.search.parameters.LibraryDate;
 import dev.dsf.fhir.search.parameters.LibraryIdentifier;
+import dev.dsf.fhir.search.parameters.LibraryName;
 import dev.dsf.fhir.search.parameters.LibraryStatus;
 import dev.dsf.fhir.search.parameters.LibraryUrl;
 import dev.dsf.fhir.search.parameters.LibraryVersion;
@@ -31,6 +32,7 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 				Arrays.asList(factory(LibraryDate.PARAMETER_NAME, LibraryDate::new),
 						factory(LibraryIdentifier.PARAMETER_NAME, LibraryIdentifier::new,
 								LocationIdentifier.getNameModifiers()),
+						factory(LibraryName.PARAMETER_NAME, LibraryName::new, LibraryName.getNameModifiers()),
 						factory(LibraryStatus.PARAMETER_NAME, LibraryStatus::new, LibraryStatus.getNameModifiers()),
 						factory(LibraryUrl.PARAMETER_NAME, LibraryUrl::new, LibraryUrl.getNameModifiers()),
 						factory(LibraryVersion.PARAMETER_NAME, LibraryVersion::new, LibraryVersion.getNameModifiers())),

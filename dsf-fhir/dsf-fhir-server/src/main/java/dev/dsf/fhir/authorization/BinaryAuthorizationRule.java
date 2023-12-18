@@ -32,7 +32,7 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 		super(Binary.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
 				parameterConverter);
 
-		this.rules = Arrays.stream(supportedSecurityContextRules)
+		rules = Arrays.stream(supportedSecurityContextRules)
 				.collect(Collectors.toMap(AuthorizationRule::getResourceType, Function.identity()));
 	}
 
@@ -51,7 +51,7 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 
 	private Optional<String> newResourceOk(Connection connection, Identity identity, Binary newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		boolean hasValidReadAccessTag = hasValidReadAccessTag(connection, newResource);
 		boolean hasValidSecurityContext = hasValidSecurityContext(connection, identity, newResource);

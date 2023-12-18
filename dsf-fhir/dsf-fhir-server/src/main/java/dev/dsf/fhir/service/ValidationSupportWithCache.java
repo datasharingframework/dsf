@@ -208,6 +208,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		}
 	}
 
+	@Override
 	public List<IBaseResource> fetchAllConformanceResources()
 	{
 		if (!fetchAllConformanceResourcesDone.get())

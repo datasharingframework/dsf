@@ -40,7 +40,7 @@ public class LibraryAuthorizationRule extends AbstractMetaTagAuthorizationRule<L
 
 	private Optional<String> newResourceOk(Connection connection, Library newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

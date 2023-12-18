@@ -82,8 +82,8 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	}
 
 	@Override
-	public Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers, Class<? extends Resource> resource,
-			String id)
+	public Bundle getHistory(Identity identity, UriInfo uri, HttpHeaders headers,
+			Class<? extends Resource> resourceType, String id)
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
@@ -114,22 +114,22 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 
 		String path = null;
 		History history;
-		if (resource == null && id == null)
+		if (resourceType == null && id == null)
 			history = exceptionHandler.handleSqlException(() -> historyDao.readHistory(
 					historyUserFilterFactory.getIdentityFilters(identity), pageAndCount, atParameters, sinceParameter));
-		else if (resource != null && id != null)
+		else if (resourceType != null && id != null)
 		{
 			history = exceptionHandler.handleSqlException(() -> historyDao.readHistory(
-					historyUserFilterFactory.getIdentityFilter(identity, resource), pageAndCount, atParameters,
-					sinceParameter, resource, parameterConverter.toUuid(getResourceTypeName(resource), id)));
-			path = resource.getAnnotation(ResourceDef.class).name();
+					historyUserFilterFactory.getIdentityFilter(identity, resourceType), pageAndCount, atParameters,
+					sinceParameter, resourceType, parameterConverter.toUuid(getResourceTypeName(resourceType), id)));
+			path = resourceType.getAnnotation(ResourceDef.class).name();
 		}
-		else if (resource != null)
+		else if (resourceType != null)
 		{
 			history = exceptionHandler.handleSqlException(
-					() -> historyDao.readHistory(historyUserFilterFactory.getIdentityFilter(identity, resource),
-							pageAndCount, atParameters, sinceParameter, resource));
-			path = resource.getAnnotation(ResourceDef.class).name();
+					() -> historyDao.readHistory(historyUserFilterFactory.getIdentityFilter(identity, resourceType),
+							pageAndCount, atParameters, sinceParameter, resourceType));
+			path = resourceType.getAnnotation(ResourceDef.class).name();
 		}
 		else
 			throw new WebApplicationException();

@@ -29,7 +29,7 @@ public class EndpointProfileTest
 			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "urn_ietf_bcp_13.xml"),
 			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "valueset-mimetypes.xml"));
 
-	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
+	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
 	@Test

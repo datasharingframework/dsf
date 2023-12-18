@@ -13,6 +13,7 @@ public class TaskModified extends AbstractDateTimeParameter<Task>
 
 	public TaskModified()
 	{
-		super(PARAMETER_NAME, "task->>'lastModified'");
+		super(Task.class, PARAMETER_NAME, "task->>'lastModified'",
+				fromDateTime(Task::hasLastModifiedElement, Task::getLastModifiedElement));
 	}
 }

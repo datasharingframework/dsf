@@ -276,7 +276,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		boolean deleted = dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(deleted);
 
-		D updatedResource = dao.update(updateResource(createdResource), (long) ResourceDao.FIRST_VERSION + 1L);
+		D updatedResource = dao.update(updateResource(createdResource), ResourceDao.FIRST_VERSION + 1L);
 		assertNotNull(updatedResource);
 		assertNotNull(updatedResource.getIdElement());
 		assertNotNull(updatedResource.getIdElement().getIdPart());

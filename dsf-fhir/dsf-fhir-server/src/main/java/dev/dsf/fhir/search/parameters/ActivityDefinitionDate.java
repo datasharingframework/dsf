@@ -13,6 +13,7 @@ public class ActivityDefinitionDate extends AbstractDateTimeParameter<ActivityDe
 
 	public ActivityDefinitionDate()
 	{
-		super(PARAMETER_NAME, "activity_definition->>'date'");
+		super(ActivityDefinition.class, PARAMETER_NAME, "activity_definition->>'date'",
+				fromDateTime(ActivityDefinition::hasDateElement, ActivityDefinition::getDateElement));
 	}
 }

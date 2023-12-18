@@ -71,7 +71,7 @@ public class QuestionnaireResponseAuthorizationRule
 	private Optional<String> newResourceOk(QuestionnaireResponse newResource,
 			EnumSet<QuestionnaireResponseStatus> allowedStatus)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasStatus())
 		{

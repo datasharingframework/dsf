@@ -40,7 +40,7 @@ public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<P
 
 	private Optional<String> newResourceOk(Connection connection, Patient newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

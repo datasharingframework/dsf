@@ -515,18 +515,17 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextVersionSpecificAll() throws Exception
 	{
 		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
-				rs -> rs.getIdElement());
+				ResearchStudy::getIdElement);
 	}
 
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificLocal() throws Exception
 	{
 		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_LOCAL, new ReadAccessHelperImpl()::addLocal,
-				rs -> rs.getIdElement());
+				ResearchStudy::getIdElement);
 	}
 
-	private void testReadAccessTriggerSecurityContextOrganization(Function<ResearchStudy, IdType> securityContext)
-			throws SQLException, Exception
+	private void testReadAccessTriggerSecurityContextOrganization1() throws SQLException, Exception
 	{
 		Organization org = new Organization();
 		org.setActive(true);
@@ -552,13 +551,13 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganization() throws Exception
 	{
-		testReadAccessTriggerSecurityContextOrganization(rs -> rs.getIdElement().toUnqualifiedVersionless());
+		testReadAccessTriggerSecurityContextOrganization1();
 	}
 
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificOrganization() throws Exception
 	{
-		testReadAccessTriggerSecurityContextOrganization(rs -> rs.getIdElement());
+		testReadAccessTriggerSecurityContextOrganization1();
 	}
 
 	@Test
@@ -678,7 +677,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificRole() throws Exception
 	{
-		testReadAccessTriggerSecurityContextRole(r -> r.getIdElement());
+		testReadAccessTriggerSecurityContextRole(ResearchStudy::getIdElement);
 	}
 
 	@Test

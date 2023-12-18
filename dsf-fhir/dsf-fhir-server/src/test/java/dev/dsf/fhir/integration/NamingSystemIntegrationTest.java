@@ -1,7 +1,7 @@
 package dev.dsf.fhir.integration;
 
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Date;
 

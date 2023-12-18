@@ -18,6 +18,7 @@ public class StructureDefinitionDate extends AbstractDateTimeParameter<Structure
 
 	public StructureDefinitionDate(String resourceColumn)
 	{
-		super(PARAMETER_NAME, resourceColumn + "->>'date'");
+		super(StructureDefinition.class, PARAMETER_NAME, resourceColumn + "->>'date'",
+				fromDateTime(StructureDefinition::hasDateElement, StructureDefinition::getDateElement));
 	}
 }

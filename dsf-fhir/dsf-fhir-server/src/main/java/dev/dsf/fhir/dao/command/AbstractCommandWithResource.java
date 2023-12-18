@@ -43,7 +43,7 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver)
 	{
-		return new ReferencesHelperImpl<R>(index, identity, resource, serverBase, referenceExtractor, referenceResolver,
+		return new ReferencesHelperImpl<>(index, identity, resource, serverBase, referenceExtractor, referenceResolver,
 				responseGenerator);
 	}
 

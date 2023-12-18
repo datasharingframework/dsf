@@ -16,14 +16,12 @@ public enum PreferHandlingType
 		if (prefer == null)
 			return LENIENT;
 
-		switch (prefer)
+		return switch (prefer)
 		{
-			case "handling=strict":
-				return STRICT;
-			case "handling=lenient":
-			default:
-				return LENIENT;
-		}
+			case "handling=strict" -> STRICT;
+			case "handling=lenient" -> LENIENT;
+			default -> LENIENT;
+		};
 	}
 
 	public String getHeaderValue()

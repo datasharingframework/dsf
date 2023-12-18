@@ -114,6 +114,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		Objects.requireNonNull(webserviceClient, "webserviceClient");
 	}
 
+	@Override
 	public void onResource(Task task)
 	{
 		Objects.requireNonNull(task, "task");
