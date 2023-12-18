@@ -525,7 +525,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				ResearchStudy::getIdElement);
 	}
 
-	private void testReadAccessTriggerSecurityContextOrganization1() throws SQLException, Exception
+	private void testReadAccessTriggerSecurityContextOrganization(Function<ResearchStudy, IdType> securityContext)
+			throws SQLException, Exception
 	{
 		Organization org = new Organization();
 		org.setActive(true);
@@ -539,7 +540,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				.create(rS);
 
 		Binary b = createResource();
-		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		b.setSecurityContext(new Reference(securityContext.apply(createdRs)));
 		Binary createdB = dao.create(b);
 
 		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
@@ -551,13 +552,13 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganization() throws Exception
 	{
-		testReadAccessTriggerSecurityContextOrganization1();
+		testReadAccessTriggerSecurityContextOrganization(rs -> rs.getIdElement().toUnqualifiedVersionless());
 	}
 
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificOrganization() throws Exception
 	{
-		testReadAccessTriggerSecurityContextOrganization1();
+		testReadAccessTriggerSecurityContextOrganization(ResearchStudy::getIdElement);
 	}
 
 	@Test
