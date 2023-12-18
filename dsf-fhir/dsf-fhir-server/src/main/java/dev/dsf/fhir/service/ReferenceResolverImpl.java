@@ -26,7 +26,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.client.ClientProvider;
 import dev.dsf.fhir.client.FhirWebserviceClient;
-import dev.dsf.fhir.dao.NamingSystemDao;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -82,43 +81,37 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
 
-		ReferenceType type = reference.getType(serverBase);
-		switch (type)
+		return switch (reference.getType(serverBase))
 		{
-			case LITERAL_EXTERNAL:
-			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
-			case ATTACHMENT_LITERAL_EXTERNAL_URL:
-				return literalExternalReferenceCanBeCheckedAndResolved(reference);
-			case LOGICAL:
-				return logicalReferenceCanBeCheckedAndResolved(reference, connection);
-			default:
-				return true;
-		}
+			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+				literalExternalReferenceCanBeCheckedAndResolved(reference);
+
+			case LOGICAL -> logicalReferenceCanBeCheckedAndResolved(reference, connection);
+
+			default -> true;
+		};
 	}
 
 	private boolean logicalReferenceCanBeCheckedAndResolved(ResourceReference reference, Connection connection)
 	{
-		ReferenceType type = reference.getType(serverBase);
-		if (!ReferenceType.LOGICAL.equals(type))
+		if (!ReferenceType.LOGICAL.equals(reference.getType(serverBase)))
 			throw new IllegalArgumentException("Not a logical reference");
 
-		NamingSystemDao namingSystemDao = daoProvider.getNamingSystemDao();
-
-		return exceptionHandler
-				.handleSqlException(() -> namingSystemDao.existsWithUniqueIdUriEntryResolvable(connection,
+		return exceptionHandler.handleSqlException(
+				() -> daoProvider.getNamingSystemDao().existsWithUniqueIdUriEntryResolvable(connection,
 						reference.getReference().getIdentifier().getSystem()));
 	}
 
 	private boolean literalExternalReferenceCanBeCheckedAndResolved(ResourceReference reference)
 	{
-		ReferenceType type = reference.getType(serverBase);
 		if (!EnumSet.of(ReferenceType.LITERAL_EXTERNAL, ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL,
-				ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL).contains(type))
+				ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL).contains(reference.getType(serverBase)))
+		{
 			throw new IllegalArgumentException(
 					"Not a literal external reference, related artifact literal external url or attachment literal external url");
+		}
 
-		String remoteServerBase = reference.getServerBase(serverBase);
-		return clientProvider.endpointExists(remoteServerBase);
+		return clientProvider.endpointExists(reference.getServerBase(serverBase));
 	}
 
 	@Override
@@ -129,23 +122,16 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(connection, "connection");
 
 		ReferenceType type = reference.getType(serverBase);
-		switch (type)
+		return switch (type)
 		{
-			case LITERAL_INTERNAL:
-				return resolveLiteralInternalReference(reference, connection);
-			case LITERAL_EXTERNAL:
-			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
-			case ATTACHMENT_LITERAL_EXTERNAL_URL:
-				return resolveLiteralExternalReference(reference);
-			case CONDITIONAL:
-			case RELATED_ARTEFACT_CONDITIONAL_URL:
-			case ATTACHMENT_CONDITIONAL_URL:
-				return resolveConditionalReference(identity, reference, connection);
-			case LOGICAL:
-				return resolveLogicalReference(identity, reference, connection);
-			default:
-				throw new IllegalArgumentException("Reference of type " + type + " not supported");
-		}
+			case LITERAL_INTERNAL -> resolveLiteralInternalReference(reference, connection);
+			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+				resolveLiteralExternalReference(reference);
+			case CONDITIONAL, RELATED_ARTEFACT_CONDITIONAL_URL, ATTACHMENT_CONDITIONAL_URL ->
+				resolveConditionalReference(identity, reference, connection);
+			case LOGICAL -> resolveLogicalReference(identity, reference, connection);
+			default -> throw new IllegalArgumentException("Reference of type " + type + " not supported");
+		};
 	}
 
 	private void throwIfReferenceTypeUnexpected(ReferenceType type, ReferenceType expected)
@@ -238,12 +224,12 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 			catch (Exception e)
 			{
-				logger.error("Literal external reference {} could not be resolved on remote server {}: {}",
-						reference.getReference().getReference(), remoteServerBase, e.getMessage());
+				logger.debug("Literal external reference {} could not be resolved on remote server {}",
+						reference.getReference().getReference(), remoteServerBase, e);
+				logger.error("Literal external reference {} could not be resolved on remote server {}: {} - {}",
+						reference.getReference().getReference(), remoteServerBase, e.getClass().getName(),
+						e.getMessage());
 
-				if (logger.isDebugEnabled())
-					logger.debug("Literal external reference " + reference.getReference().getReference()
-							+ " could not be resolved on remote server " + remoteServerBase, e);
 				return Optional.empty();
 			}
 		}
@@ -372,6 +358,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 						UriComponentsBuilder.newInstance().path(referenceTargetDao.getResourceTypeName())
 								.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
 						resourceReference.getLocation());
+
 			return Optional.empty();
 		}
 		else if (result.getTotal() == 1)
@@ -488,12 +475,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 			catch (Exception e)
 			{
-				logger.error("Literal external reference {} could not be resolved on remote server {}: {}",
-						referenceValue, remoteServerBase, e.getMessage());
-
-				if (logger.isDebugEnabled())
-					logger.debug("Literal external reference " + referenceValue
-							+ " could not be resolved on remote server " + remoteServerBase, e);
+				logger.debug("Literal external reference {} could not be resolved on remote server {}", referenceValue,
+						remoteServerBase, e);
+				logger.error("Literal external reference {} could not be resolved on remote server {}: {} - {}",
+						referenceValue, remoteServerBase, e.getClass().getName(), e.getMessage());
 
 				return Optional.of(responseGenerator.referenceTargetCouldNotBeResolvedOnRemote(bundleIndex, resource,
 						reference, remoteServerBase));

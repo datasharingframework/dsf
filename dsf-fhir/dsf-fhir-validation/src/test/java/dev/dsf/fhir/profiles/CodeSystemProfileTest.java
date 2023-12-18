@@ -34,7 +34,7 @@ public class CodeSystemProfileTest
 			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"),
 			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"));
 
-	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
+	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
 	private CodeSystem createCodeSystem()

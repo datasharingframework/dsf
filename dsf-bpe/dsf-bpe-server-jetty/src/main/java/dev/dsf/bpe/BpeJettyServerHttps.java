@@ -9,7 +9,7 @@ import dev.dsf.common.jetty.JettyServer;
 import dev.dsf.common.jetty.Log4jInitializer;
 import dev.dsf.tools.db.DbMigrator;
 
-public class BpeJettyServerHttps
+public final class BpeJettyServerHttps
 {
 	static
 	{
@@ -17,6 +17,10 @@ public class BpeJettyServerHttps
 		SLF4JBridgeHandler.install();
 
 		Log4jInitializer.initializeLog4j();
+	}
+
+	private BpeJettyServerHttps()
+	{
 	}
 
 	public static void main(String[] args)

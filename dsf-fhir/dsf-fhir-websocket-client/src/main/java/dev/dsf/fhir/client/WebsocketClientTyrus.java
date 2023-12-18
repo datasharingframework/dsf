@@ -38,9 +38,16 @@ public class WebsocketClientTyrus implements WebsocketClient
 		@Override
 		public boolean onConnectFailure(Exception exception)
 		{
-			logger.warn("Websocket connection failed: {}", getMessages(exception));
-			logger.debug("onConnectFailure", exception);
-			return true;
+			if (exception == null)
+				logger.warn("Websocket connection failed: unknown error");
+			else
+			{
+				logger.warn("Websocket connection failed: {} - {}", exception.getClass().getName(),
+						getMessages(exception));
+				logger.debug("Websocket connection failed", exception);
+			}
+
+			return !closed;
 		}
 
 		private String getMessages(Exception e)
@@ -69,7 +76,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 		@Override
 		public boolean onDisconnect(CloseReason closeReason)
 		{
-			logger.debug("onDisconnect {}", closeReason.getReasonPhrase());
+			logger.debug("Websocket closed: {} - {}", closeReason.getCloseCode(), closeReason.getReasonPhrase());
+
 			return !closed;
 		}
 	};
@@ -143,16 +151,13 @@ public class WebsocketClientTyrus implements WebsocketClient
 		try
 		{
 			logger.debug("Connecting to websocket {} and waiting for connection", wsUri);
+
 			connection = manager.connectToServer(endpoint, config, wsUri);
 		}
-		catch (DeploymentException e)
+		catch (DeploymentException | IOException e)
 		{
-			logger.warn("Error while connecting to server", e);
-			throw new RuntimeException(e);
-		}
-		catch (IOException e)
-		{
-			logger.warn("Error while connecting to server", e);
+			logger.debug("Error while connecting to server", e);
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -164,7 +169,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 
 		ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator()
 		{
-			public void beforeRequest(java.util.Map<String, java.util.List<String>> headers)
+			@Override
+			public void beforeRequest(Map<String, java.util.List<String>> headers)
 			{
 				headers.put(HttpHeaders.USER_AGENT, Collections.singletonList(userAgentValue));
 			}
@@ -186,7 +192,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error while closing websocket", e);
+			logger.debug("Error while closing websocket", e);
+			logger.warn("Error while closing websocket: {} - {}", e.getClass().getName(), e.getMessage());
 		}
 
 		manager.shutdown();

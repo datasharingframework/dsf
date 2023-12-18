@@ -101,7 +101,7 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 	@Override
 	public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException
 	{
-		logger.error("Error while reading file at " + file.toString(), exc);
+		logger.error("Error while reading file at {}", file.toString(), exc);
 		return FileVisitResult.TERMINATE;
 	}
 

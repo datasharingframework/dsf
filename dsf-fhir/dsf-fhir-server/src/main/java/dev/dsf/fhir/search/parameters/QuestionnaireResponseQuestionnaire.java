@@ -22,9 +22,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractCanonicalReferenceParameter;
 @SearchParameterDefinition(name = QuestionnaireResponseQuestionnaire.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/QuestionnaireResponse-questionnaire", type = SearchParamType.REFERENCE, documentation = "The questionnaire the answers are provided for")
 public class QuestionnaireResponseQuestionnaire extends AbstractCanonicalReferenceParameter<QuestionnaireResponse>
 {
-	public static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
+	private static final String RESOURCE_TYPE_NAME = "QuestionnaireResponse";
 	public static final String PARAMETER_NAME = "questionnaire";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Questionnaire";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Questionnaire";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -46,10 +46,7 @@ public class QuestionnaireResponseQuestionnaire extends AbstractCanonicalReferen
 	@Override
 	public String getFilterQuery()
 	{
-		if (ReferenceSearchType.URL.equals(valueAndType.type))
-			return "(questionnaire_response->>'questionnaire' LIKE (? || '%'))";
-
-		return "";
+		return "(questionnaire_response->>'questionnaire' LIKE (? || '%'))";
 	}
 
 	@Override
@@ -62,11 +59,7 @@ public class QuestionnaireResponseQuestionnaire extends AbstractCanonicalReferen
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		if (ReferenceSearchType.URL.equals(valueAndType.type))
-		{
-			if (subqueryParameterIndex == 1)
-				statement.setString(parameterIndex, valueAndType.url);
-		}
+		statement.setString(parameterIndex, valueAndType.url);
 	}
 
 	@Override
@@ -77,17 +70,9 @@ public class QuestionnaireResponseQuestionnaire extends AbstractCanonicalReferen
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(QuestionnaireResponse resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof QuestionnaireResponse))
-			return false;
-
-		QuestionnaireResponse qr = (QuestionnaireResponse) resource;
-
-		return qr.getQuestionnaire().equals(valueAndType.url);
+		return resource.hasQuestionnaire() && resource.getQuestionnaire().equals(valueAndType.url);
 	}
 
 	@Override

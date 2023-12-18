@@ -85,6 +85,7 @@ import dev.dsf.fhir.search.parameters.BinaryContentType;
 import dev.dsf.fhir.search.parameters.BundleIdentifier;
 import dev.dsf.fhir.search.parameters.CodeSystemDate;
 import dev.dsf.fhir.search.parameters.CodeSystemIdentifier;
+import dev.dsf.fhir.search.parameters.CodeSystemName;
 import dev.dsf.fhir.search.parameters.CodeSystemStatus;
 import dev.dsf.fhir.search.parameters.CodeSystemUrl;
 import dev.dsf.fhir.search.parameters.CodeSystemVersion;
@@ -97,15 +98,19 @@ import dev.dsf.fhir.search.parameters.EndpointStatus;
 import dev.dsf.fhir.search.parameters.GroupIdentifier;
 import dev.dsf.fhir.search.parameters.HealthcareServiceActive;
 import dev.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
+import dev.dsf.fhir.search.parameters.HealthcareServiceName;
 import dev.dsf.fhir.search.parameters.LibraryDate;
 import dev.dsf.fhir.search.parameters.LibraryIdentifier;
+import dev.dsf.fhir.search.parameters.LibraryName;
 import dev.dsf.fhir.search.parameters.LibraryStatus;
 import dev.dsf.fhir.search.parameters.LibraryUrl;
 import dev.dsf.fhir.search.parameters.LibraryVersion;
 import dev.dsf.fhir.search.parameters.LocationIdentifier;
+import dev.dsf.fhir.search.parameters.LocationName;
 import dev.dsf.fhir.search.parameters.MeasureDate;
 import dev.dsf.fhir.search.parameters.MeasureDependsOn;
 import dev.dsf.fhir.search.parameters.MeasureIdentifier;
+import dev.dsf.fhir.search.parameters.MeasureName;
 import dev.dsf.fhir.search.parameters.MeasureReportIdentifier;
 import dev.dsf.fhir.search.parameters.MeasureStatus;
 import dev.dsf.fhir.search.parameters.MeasureUrl;
@@ -134,6 +139,7 @@ import dev.dsf.fhir.search.parameters.PractitionerRoleOrganization;
 import dev.dsf.fhir.search.parameters.PractitionerRolePractitioner;
 import dev.dsf.fhir.search.parameters.QuestionnaireDate;
 import dev.dsf.fhir.search.parameters.QuestionnaireIdentifier;
+import dev.dsf.fhir.search.parameters.QuestionnaireName;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseAuthored;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseIdentifier;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseStatus;
@@ -148,6 +154,7 @@ import dev.dsf.fhir.search.parameters.ResourceLastUpdated;
 import dev.dsf.fhir.search.parameters.ResourceProfile;
 import dev.dsf.fhir.search.parameters.StructureDefinitionDate;
 import dev.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
+import dev.dsf.fhir.search.parameters.StructureDefinitionName;
 import dev.dsf.fhir.search.parameters.StructureDefinitionStatus;
 import dev.dsf.fhir.search.parameters.StructureDefinitionUrl;
 import dev.dsf.fhir.search.parameters.StructureDefinitionVersion;
@@ -162,6 +169,7 @@ import dev.dsf.fhir.search.parameters.TaskRequester;
 import dev.dsf.fhir.search.parameters.TaskStatus;
 import dev.dsf.fhir.search.parameters.ValueSetDate;
 import dev.dsf.fhir.search.parameters.ValueSetIdentifier;
+import dev.dsf.fhir.search.parameters.ValueSetName;
 import dev.dsf.fhir.search.parameters.ValueSetStatus;
 import dev.dsf.fhir.search.parameters.ValueSetUrl;
 import dev.dsf.fhir.search.parameters.ValueSetVersion;
@@ -182,12 +190,19 @@ import jakarta.ws.rs.core.UriInfo;
 
 public class ConformanceServiceImpl extends AbstractBasicService implements ConformanceService, InitializingBean
 {
+	private static final CodeableConcept OAUTH = new CodeableConcept()
+			.addCoding(new Coding(RestfulSecurityService.OAUTH.getSystem(), RestfulSecurityService.OAUTH.toCode(),
+					RestfulSecurityService.OAUTH.getDisplay()));
+	private static final CodeableConcept CERTIFICATES = new CodeableConcept()
+			.addCoding(new Coding(RestfulSecurityService.CERTIFICATES.getSystem(),
+					RestfulSecurityService.CERTIFICATES.toCode(), RestfulSecurityService.CERTIFICATES.getDisplay()));
+
 	private static final class StructureDefinitionDistinctByUrl implements Comparable<StructureDefinitionDistinctByUrl>
 	{
 		final StructureDefinition structureDefinition;
 		final String url;
 
-		public StructureDefinitionDistinctByUrl(StructureDefinition structureDefinition)
+		StructureDefinitionDistinctByUrl(StructureDefinition structureDefinition)
 		{
 			this.structureDefinition = structureDefinition;
 			this.url = structureDefinition.getUrl();
@@ -201,10 +216,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		@Override
 		public int hashCode()
 		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((url == null) ? 0 : url.hashCode());
-			return result;
+			return Objects.hash(url);
 		}
 
 		@Override
@@ -212,19 +224,10 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		{
 			if (this == obj)
 				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
+			if (obj == null || getClass() != obj.getClass())
 				return false;
 			StructureDefinitionDistinctByUrl other = (StructureDefinitionDistinctByUrl) obj;
-			if (url == null)
-			{
-				if (other.url != null)
-					return false;
-			}
-			else if (!url.equals(other.url))
-				return false;
-			return true;
+			return Objects.equals(url, other.url);
 		}
 
 		@Override
@@ -240,14 +243,17 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	private final ParameterConverter parameterConverter;
 	private final IValidationSupport validationSupport;
 
+	private final List<CodeableConcept> securityServices;
+
 	public ConformanceServiceImpl(String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
-			ParameterConverter parameterConverter, IValidationSupport validationSupport)
+			ParameterConverter parameterConverter, IValidationSupport validationSupport, boolean oAuthEnabled)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.buildInfoReader = buildInfoReader;
 		this.parameterConverter = parameterConverter;
 		this.validationSupport = validationSupport;
+		this.securityServices = oAuthEnabled ? List.of(CERTIFICATES, OAUTH) : List.of(CERTIFICATES);
 	}
 
 	@Override
@@ -291,14 +297,10 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		// statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
 		statement.getImplementation().setUrl(serverBase);
 		statement.setFhirVersion(FHIRVersion._4_0_1);
-		statement.setFormat(
-				Arrays.asList(new CodeType(Constants.CT_FHIR_JSON_NEW), new CodeType(Constants.CT_FHIR_XML_NEW)));
+		statement.setFormat(List.of(new CodeType(Constants.CT_FHIR_JSON_NEW), new CodeType(Constants.CT_FHIR_XML_NEW)));
 		CapabilityStatementRestComponent rest = statement.addRest();
 		rest.setMode(RestfulCapabilityMode.SERVER);
-		rest.getSecurity()
-				.setService(Collections.singletonList(new CodeableConcept().addCoding(new Coding(
-						RestfulSecurityService.CERTIFICATES.getSystem(), RestfulSecurityService.CERTIFICATES.toCode(),
-						RestfulSecurityService.CERTIFICATES.getDisplay()))));
+		rest.getSecurity().setService(securityServices);
 		Extension websocketExtension = rest.addExtension();
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
@@ -323,7 +325,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(Bundle.class, Arrays.asList(BundleIdentifier.class));
 
 		searchParameters.put(CodeSystem.class, Arrays.asList(CodeSystemDate.class, CodeSystemIdentifier.class,
-				CodeSystemUrl.class, CodeSystemVersion.class, CodeSystemStatus.class));
+				CodeSystemName.class, CodeSystemUrl.class, CodeSystemVersion.class, CodeSystemStatus.class));
 
 		searchParameters.put(DocumentReference.class, Arrays.asList(DocumentReferenceIdentifier.class));
 
@@ -334,16 +336,17 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(Group.class, Arrays.asList(GroupIdentifier.class));
 		revIncludeParameters.put(Group.class, Arrays.asList(ResearchStudyEnrollmentRevInclude.class));
 
-		searchParameters.put(HealthcareService.class,
-				Arrays.asList(HealthcareServiceActive.class, HealthcareServiceIdentifier.class));
+		searchParameters.put(HealthcareService.class, Arrays.asList(HealthcareServiceActive.class,
+				HealthcareServiceIdentifier.class, HealthcareServiceName.class));
 
-		searchParameters.put(Library.class, Arrays.asList(LibraryDate.class, LibraryIdentifier.class,
+		searchParameters.put(Library.class, Arrays.asList(LibraryDate.class, LibraryIdentifier.class, LibraryName.class,
 				LibraryStatus.class, LibraryUrl.class, LibraryVersion.class));
 
-		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class));
+		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class, LocationName.class));
 
-		searchParameters.put(Measure.class, Arrays.asList(MeasureDate.class, MeasureDependsOn.class,
-				MeasureIdentifier.class, MeasureStatus.class, MeasureUrl.class, MeasureVersion.class));
+		searchParameters.put(Measure.class,
+				Arrays.asList(MeasureDate.class, MeasureDependsOn.class, MeasureIdentifier.class, MeasureName.class,
+						MeasureStatus.class, MeasureUrl.class, MeasureVersion.class));
 
 		searchParameters.put(MeasureReport.class, Arrays.asList(MeasureReportIdentifier.class));
 
@@ -370,8 +373,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				Arrays.asList(PractitionerRoleActive.class, PractitionerRoleIdentifier.class,
 						PractitionerRoleOrganization.class, PractitionerRolePractitioner.class));
 
-		searchParameters.put(Questionnaire.class, Arrays.asList(QuestionnaireDate.class, QuestionnaireIdentifier.class,
-				QuestionnaireStatus.class, QuestionnaireUrl.class, QuestionnaireVersion.class));
+		searchParameters.put(Questionnaire.class,
+				Arrays.asList(QuestionnaireDate.class, QuestionnaireIdentifier.class, QuestionnaireName.class,
+						QuestionnaireStatus.class, QuestionnaireUrl.class, QuestionnaireVersion.class));
 
 		searchParameters.put(QuestionnaireResponse.class, Arrays.asList(QuestionnaireResponseAuthored.class,
 				QuestionnaireResponseIdentifier.class, QuestionnaireResponseStatus.class));
@@ -381,7 +385,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		searchParameters.put(StructureDefinition.class,
 				Arrays.asList(StructureDefinitionDate.class, StructureDefinitionIdentifier.class,
-						StructureDefinitionStatus.class, StructureDefinitionUrl.class,
+						StructureDefinitionName.class, StructureDefinitionStatus.class, StructureDefinitionUrl.class,
 						StructureDefinitionVersion.class));
 
 		searchParameters.put(Subscription.class, Arrays.asList(SubscriptionCriteria.class, SubscriptionPayload.class,
@@ -391,7 +395,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				TaskRequester.class, TaskStatus.class));
 
 		searchParameters.put(ValueSet.class, Arrays.asList(ValueSetDate.class, ValueSetIdentifier.class,
-				ValueSetUrl.class, ValueSetVersion.class, ValueSetStatus.class));
+				ValueSetName.class, ValueSetUrl.class, ValueSetVersion.class, ValueSetStatus.class));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 
@@ -402,7 +406,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		var standardSortableSearchParameters = Arrays.asList(ResourceId.class, ResourceLastUpdated.class,
 				ResourceProfile.class);
-		var standardOperations = Arrays.asList(createValidateOperation());
 
 		Map<String, List<CanonicalType>> profileUrlsByResource = validationSupport.fetchAllStructureDefinitions()
 				.stream().filter(r -> r instanceof StructureDefinition).map(r -> (StructureDefinition) r)
@@ -479,7 +482,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.getSearchParam().sort(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName));
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
-			standardOperations.forEach(r::addOperation);
 
 			r.setSupportedProfile(
 					profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(), Collections.emptyList()));
@@ -516,17 +518,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						+ ":" + target);
 	}
 
-	private CapabilityStatementRestResourceOperationComponent createValidateOperation()
-	{
-		return createOperation("validate", "http://hl7.org/fhir/OperationDefinition/Resource-validate",
-				"The validate operation checks whether the attached content would be acceptable either generally, as a create, an update or as a delete to an existing resource. The action the server takes depends on the mode parameter");
-	}
-
 	private CapabilityStatementRestResourceSearchParamComponent createSortParameter(
 			@SuppressWarnings("rawtypes") Stream<Class<? extends AbstractSearchParameter>> parameters)
 	{
-		String values = parameters.map(p -> p.getAnnotation(SearchParameterDefinition.class)).map(def -> def.name())
-				.sorted().collect(Collectors.joining(", ", "[", "]"));
+		String values = parameters.map(p -> p.getAnnotation(SearchParameterDefinition.class))
+				.map(SearchParameterDefinition::name).sorted().collect(Collectors.joining(", ", "[", "]"));
 
 		return createSearchParameter("_sort", "", SearchParamType.SPECIAL,
 				"Specify the returned order, allowed values: " + values

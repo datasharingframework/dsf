@@ -28,9 +28,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://dsf.dev/fhir/SearchParameter/ResearchStudy-enrollment", type = SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
-	public static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
 	public static final String PARAMETER_NAME = "enrollment";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Group";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Group";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -46,33 +46,22 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "? IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS reference)";
-
-			case IDENTIFIER:
+			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"? IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS reference)";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return "(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_groups, jsonb_array_elements(group_json->'identifier') identifier"
-								+ " WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
-								+ " ) AS identifiers) @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM (SELECT identifier FROM current_groups, jsonb_array_elements(group_json->'identifier') identifier"
-								+ " WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
-								+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM ->
+					"(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_groups, jsonb_array_elements(group_json->'identifier') identifier"
+							+ " WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
+							+ " ) AS identifiers) @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY ->
+					"(SELECT count(*) FROM (SELECT identifier FROM current_groups, jsonb_array_elements(group_json->'identifier') identifier"
+							+ " WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
+							+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -144,37 +133,25 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(ResearchStudy resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof ResearchStudy))
-			return false;
-
-		ResearchStudy rs = (ResearchStudy) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			return rs.getEnrollment().stream().map(Reference::getResource).filter(r -> r instanceof Group)
-					.flatMap(r -> ((Group) r).getIdentifier().stream())
-					.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+			return resource.getEnrollment().stream().map(Reference::getResource).filter(r -> r instanceof Group)
+					.map(r -> (Group) r).map(Group::getIdentifier).flatMap(List::stream)
+					.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
 		}
 		else
 		{
-			return rs.getEnrollment().stream().map(Reference::getReference).anyMatch(ref ->
+			return resource.getEnrollment().stream().map(Reference::getReference).anyMatch(ref ->
 			{
-				switch (valueAndType.type)
+				return switch (valueAndType.type)
 				{
-					case ID:
-						return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-					case RESOURCE_NAME_AND_ID:
-						return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-					case URL:
-						return ref.equals(valueAndType.url);
-					default:
-						return false;
-				}
+					case ID -> ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
+					case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+					case URL -> ref.equals(valueAndType.url);
+					default -> false;
+				};
 			});
 		}
 	}

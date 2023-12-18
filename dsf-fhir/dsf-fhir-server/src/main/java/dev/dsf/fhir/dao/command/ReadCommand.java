@@ -218,7 +218,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			// map single search result from multipleResult field to singleResult field
 			if (multipleResult != null && multipleResult.getEntry().size() == 1)
 			{
-				singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
+				singleResult = multipleResult.getEntry().get(0).getResource();
 				multipleResult = null;
 
 				authorizationHelper.checkReadAllowed(index, connection, identity, singleResult);
@@ -227,7 +227,7 @@ public class ReadCommand extends AbstractCommand implements Command
 					&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(0).getSearch().getMode())
 					&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(1).getSearch().getMode()))
 			{
-				singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
+				singleResult = multipleResult.getEntry().get(0).getResource();
 				singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(1).getResource();
 				multipleResult = null;
 
@@ -237,7 +237,7 @@ public class ReadCommand extends AbstractCommand implements Command
 					&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(1).getSearch().getMode())
 					&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(0).getSearch().getMode()))
 			{
-				singleResult = (Resource) multipleResult.getEntry().get(1).getResource();
+				singleResult = multipleResult.getEntry().get(1).getResource();
 				singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(0).getResource();
 				multipleResult = null;
 

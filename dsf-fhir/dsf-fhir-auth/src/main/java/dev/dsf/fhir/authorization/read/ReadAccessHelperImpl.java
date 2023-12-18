@@ -319,29 +319,22 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private Predicate<Coding> isValidReadAccessTag(Predicate<Identifier> organizationWithIdentifierExists,
 			Predicate<Coding> roleExists)
 	{
-		return coding ->
+		return coding -> switch (coding.getCode())
 		{
-			switch (coding.getCode())
-			{
-				case READ_ACCESS_TAG_VALUE_LOCAL:
-					return true;
-				case READ_ACCESS_TAG_VALUE_ORGANIZATION:
-					return isValidOrganizationReadAccessTag(coding, organizationWithIdentifierExists);
-				case READ_ACCESS_TAG_VALUE_ROLE:
-					return isValidRoleReadAccessTag(coding, organizationWithIdentifierExists, roleExists);
-				case READ_ACCESS_TAG_VALUE_ALL:
-					return true;
-
-				default:
-					return false;
-			}
+			case READ_ACCESS_TAG_VALUE_LOCAL -> true;
+			case READ_ACCESS_TAG_VALUE_ORGANIZATION ->
+				isValidOrganizationReadAccessTag(coding, organizationWithIdentifierExists);
+			case READ_ACCESS_TAG_VALUE_ROLE ->
+				isValidRoleReadAccessTag(coding, organizationWithIdentifierExists, roleExists);
+			case READ_ACCESS_TAG_VALUE_ALL -> true;
+			default -> false;
 		};
 	}
 
 	private boolean isValidOrganizationReadAccessTag(Coding coding,
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
-		List<Extension> exts = coding.getExtension().stream().filter(e -> e.hasUrl())
+		List<Extension> exts = coding.getExtension().stream().filter(Extension::hasUrl)
 				.filter(e -> EXTENSION_READ_ACCESS_ORGANIZATION.equals(e.getUrl())).collect(Collectors.toList());
 
 		return coding.hasExtension() && exts.size() == 1
@@ -351,8 +344,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private boolean isValidExtensionReadAccesOrganization(Extension extension,
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
-		return extension.hasValue() && extension.getValue() instanceof Identifier
-				&& isValidOrganizationIdentifier((Identifier) extension.getValue(), organizationWithIdentifierExists);
+		return extension.hasValue() && extension.getValue() instanceof Identifier value
+				&& isValidOrganizationIdentifier(value, organizationWithIdentifierExists);
 	}
 
 	private boolean isValidOrganizationIdentifier(Identifier identifier,
@@ -365,7 +358,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private boolean isValidRoleReadAccessTag(Coding coding, Predicate<Identifier> organizationWithIdentifierExists,
 			Predicate<Coding> roleExists)
 	{
-		List<Extension> exts = coding.getExtension().stream().filter(e -> e.hasUrl())
+		List<Extension> exts = coding.getExtension().stream().filter(Extension::hasUrl)
 				.filter(e -> EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE.equals(e.getUrl()))
 				.collect(Collectors.toList());
 
@@ -390,15 +383,15 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
 		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION.equals(e.getUrl())
-				&& e.hasValue() && e.getValue() instanceof Identifier
-				&& isValidOrganizationIdentifier((Identifier) e.getValue(), organizationWithIdentifierExists);
+				&& e.hasValue() && e.getValue() instanceof Identifier value
+				&& isValidOrganizationIdentifier(value, organizationWithIdentifierExists);
 	}
 
 	private boolean isValidExtensionReadAccessParentOrganizationMemberRoleRole(Extension e,
 			Predicate<Coding> roleExists)
 	{
 		return e.hasUrl() && EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE.equals(e.getUrl())
-				&& e.hasValue() && e.getValue() instanceof Coding && isValidRole((Coding) e.getValue(), roleExists);
+				&& e.hasValue() && e.getValue() instanceof Coding value && isValidRole(value, roleExists);
 	}
 
 	private boolean isValidRole(Coding coding, Predicate<Coding> roleExists)

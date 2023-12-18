@@ -92,7 +92,10 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Error while creating StructureDefinition snapshot: " + e.getMessage(), e);
+				logger.debug("Error while creating StructureDefinition snapshot", e);
+				logger.warn("Error while creating StructureDefinition snapshot: {} - {}", e.getClass().getName(),
+						e.getMessage());
+
 				throw e;
 			}
 		}
@@ -117,7 +120,10 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 			}
 			catch (SQLException | ResourceNotFoundException | ResourceVersionNoMatchException e)
 			{
-				logger.warn("Error while updating StructureDefinition snapshot: " + e.getMessage(), e);
+				logger.debug("Error while updating StructureDefinition snapshot", e);
+				logger.warn("Error while updating StructureDefinition snapshot: {} - {}", e.getClass().getName(),
+						e.getMessage());
+
 				throw e;
 			}
 		}

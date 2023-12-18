@@ -13,6 +13,7 @@ public class CodeSystemDate extends AbstractDateTimeParameter<CodeSystem>
 
 	public CodeSystemDate()
 	{
-		super(PARAMETER_NAME, "(code_system->>'date')");
+		super(CodeSystem.class, PARAMETER_NAME, "code_system->>'date'",
+				fromDateTime(CodeSystem::hasDateElement, CodeSystem::getDateElement));
 	}
 }

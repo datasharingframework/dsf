@@ -200,7 +200,9 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while disconnecting websocket client", e);
+				logger.debug("Error while disconnecting websocket client", e);
+				logger.warn("Error while disconnecting websocket client: {} - {}", e.getClass().getName(),
+						e.getMessage());
 			}
 		}
 	}

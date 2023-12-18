@@ -6,28 +6,24 @@ public enum EventType
 
 	private final String value;
 
-	private EventType(String value)
+	EventType(String value)
 	{
 		this.value = value;
 	}
 
 	public static EventType fromString(String value)
 	{
-		switch (value.toLowerCase())
+		return switch (value.toLowerCase())
 		{
-			case "application/fhir+xml":
-			case "xml":
-				return XML;
-			case "application/fhir+json":
-			case "json":
-				return JSON;
-			case "ping":
-				return PING;
-			default:
-				throw new IllegalArgumentException("EvenType for " + value + " not implemented");
-		}
+			case "application/fhir+xml", "xml" -> XML;
+			case "application/fhir+json", "json" -> JSON;
+			case "ping" -> PING;
+
+			default -> throw new IllegalArgumentException("EvenType for " + value + " not implemented");
+		};
 	}
 
+	@Override
 	public String toString()
 	{
 		return value;

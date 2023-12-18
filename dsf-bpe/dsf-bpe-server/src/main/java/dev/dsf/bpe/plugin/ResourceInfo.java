@@ -100,9 +100,7 @@ public class ResourceInfo implements Comparable<ResourceInfo>
 	{
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (obj == null || getClass() != obj.getClass())
 			return false;
 		ResourceInfo other = (ResourceInfo) obj;
 		return Objects.equals(identifier, other.identifier) && Objects.equals(name, other.name)

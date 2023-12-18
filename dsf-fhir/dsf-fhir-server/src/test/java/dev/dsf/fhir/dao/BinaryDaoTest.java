@@ -515,14 +515,14 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextVersionSpecificAll() throws Exception
 	{
 		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
-				rs -> rs.getIdElement());
+				ResearchStudy::getIdElement);
 	}
 
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificLocal() throws Exception
 	{
 		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_LOCAL, new ReadAccessHelperImpl()::addLocal,
-				rs -> rs.getIdElement());
+				ResearchStudy::getIdElement);
 	}
 
 	private void testReadAccessTriggerSecurityContextOrganization(Function<ResearchStudy, IdType> securityContext)
@@ -540,7 +540,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				.create(rS);
 
 		Binary b = createResource();
-		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		b.setSecurityContext(new Reference(securityContext.apply(createdRs)));
 		Binary createdB = dao.create(b);
 
 		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
@@ -558,7 +558,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificOrganization() throws Exception
 	{
-		testReadAccessTriggerSecurityContextOrganization(rs -> rs.getIdElement());
+		testReadAccessTriggerSecurityContextOrganization(ResearchStudy::getIdElement);
 	}
 
 	@Test
@@ -678,7 +678,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificRole() throws Exception
 	{
-		testReadAccessTriggerSecurityContextRole(r -> r.getIdElement());
+		testReadAccessTriggerSecurityContextRole(ResearchStudy::getIdElement);
 	}
 
 	@Test

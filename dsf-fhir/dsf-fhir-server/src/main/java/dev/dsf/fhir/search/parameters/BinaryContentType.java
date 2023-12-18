@@ -8,7 +8,6 @@ import java.util.List;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -20,13 +19,12 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class BinaryContentType extends AbstractTokenParameter<Binary>
 {
 	public static final String PARAMETER_NAME = "contentType";
-	public static final String RESOURCE_COLUMN = "binary_json";
 
 	private CodeType contentType;
 
 	public BinaryContentType()
 	{
-		super(PARAMETER_NAME);
+		super(Binary.class, PARAMETER_NAME);
 	}
 
 	@Override
@@ -54,9 +52,15 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return RESOURCE_COLUMN + "->>'contentType' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return "binary_json->>'contentType' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return "binary_json->>'contentType' <> ?";
 	}
 
 	@Override
@@ -79,23 +83,15 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Binary resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Binary))
-			return false;
-
-		if (valueAndType.negated)
-			return !((Binary) resource).getContentType().equals(contentType.getValue());
-		else
-			return ((Binary) resource).getContentType().equals(contentType.getValue());
+		return valueAndType.negated ^ resource.hasContentType()
+				&& resource.getContentType().equals(contentType.getValue());
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return RESOURCE_COLUMN + "->>'contentType'" + sortDirectionWithSpacePrefix;
+		return "binary_json->>'contentType'" + sortDirectionWithSpacePrefix;
 	}
 }

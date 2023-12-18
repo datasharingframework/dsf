@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.UriType;
 
 public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHelper
 {
-	private String serverBaseUrl;
+	private final String serverBaseUrl;
 
 	/**
 	 * @param serverBaseUrl
@@ -79,31 +79,21 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 	@Override
 	public Type transformQuestionTypeToAnswerType(Questionnaire.QuestionnaireItemComponent question)
 	{
-		switch (question.getType())
+		return switch (question.getType())
 		{
-			case STRING:
-			case TEXT:
-				return new StringType("Placeholder..");
-			case INTEGER:
-				return new IntegerType(0);
-			case DECIMAL:
-				return new DecimalType(0.00);
-			case BOOLEAN:
-				return new BooleanType(false);
-			case DATE:
-				return new DateType("1900-01-01");
-			case TIME:
-				return new TimeType("00:00:00");
-			case DATETIME:
-				return new DateTimeType("1900-01-01T00:00:00.000Z");
-			case URL:
-				return new UriType("http://example.org/foo");
-			case REFERENCE:
-				return new Reference("http://example.org/fhir/Placeholder/id");
-			default:
-				throw new RuntimeException("Type '" + question.getType().getDisplay()
-						+ "' in Questionnaire.item is not supported as answer type");
-		}
+			case STRING, TEXT -> new StringType("Placeholder..");
+			case INTEGER -> new IntegerType(0);
+			case DECIMAL -> new DecimalType(0.00);
+			case BOOLEAN -> new BooleanType(false);
+			case DATE -> new DateType("1900-01-01");
+			case TIME -> new TimeType("00:00:00");
+			case DATETIME -> new DateTimeType("1900-01-01T00:00:00.000Z");
+			case URL -> new UriType("http://example.org/foo");
+			case REFERENCE -> new Reference("http://example.org/fhir/Placeholder/id");
+
+			default -> throw new RuntimeException("Type '" + question.getType().getDisplay()
+					+ "' in Questionnaire.item is not supported as answer type");
+		};
 	}
 
 	@Override

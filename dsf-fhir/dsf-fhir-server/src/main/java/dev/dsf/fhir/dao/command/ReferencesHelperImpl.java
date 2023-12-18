@@ -69,43 +69,35 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	private Optional<OperationOutcome> resolveTemporaryOrConditionalReferenceOrLiteralInternalRelatedArtifactOrAttachmentUrl(
 			ResourceReference reference, Map<String, IdType> idTranslationTable, Connection connection)
 	{
-		ReferenceType type = reference.getType(serverBase);
-		switch (type)
+		return switch (reference.getType(serverBase))
 		{
-			case TEMPORARY:
-				return resolveTemporary(reference, idTranslationTable, reference.getReference()::getReference,
-						reference.getReference()::setReferenceElement);
+			case TEMPORARY -> resolveTemporary(reference, idTranslationTable, reference.getReference()::getReference,
+					reference.getReference()::setReferenceElement);
 
-			case RELATED_ARTEFACT_TEMPORARY_URL:
-				return resolveTemporary(reference, idTranslationTable, reference.getRelatedArtifact()::getUrl,
-						newIdToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
+			case RELATED_ARTEFACT_TEMPORARY_URL -> resolveTemporary(reference, idTranslationTable,
+					reference.getRelatedArtifact()::getUrl, newIdToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
 
-			case ATTACHMENT_TEMPORARY_URL:
-				return resolveTemporary(reference, idTranslationTable, reference.getAttachment()::getUrl,
-						newIdToAbsoluteUrl(reference.getAttachment()::setUrl));
+			case ATTACHMENT_TEMPORARY_URL -> resolveTemporary(reference, idTranslationTable,
+					reference.getAttachment()::getUrl, newIdToAbsoluteUrl(reference.getAttachment()::setUrl));
 
-			case CONDITIONAL:
-				return resolveConditional(reference, connection, target -> reference.getReference().setReferenceElement(
+			case CONDITIONAL ->
+				resolveConditional(reference, connection, target -> reference.getReference().setReferenceElement(
 						new IdType(target.getResourceType().name(), target.getIdElement().getIdPart())));
 
-			case RELATED_ARTEFACT_CONDITIONAL_URL:
-				return resolveConditional(reference, connection,
-						targetToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
+			case RELATED_ARTEFACT_CONDITIONAL_URL ->
+				resolveConditional(reference, connection, targetToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
 
-			case ATTACHMENT_CONDITIONAL_URL:
-				return resolveConditional(reference, connection,
-						targetToAbsoluteUrl(reference.getAttachment()::setUrl));
+			case ATTACHMENT_CONDITIONAL_URL ->
+				resolveConditional(reference, connection, targetToAbsoluteUrl(reference.getAttachment()::setUrl));
 
-			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
-				return resolveLiteralInternalUrl(reference::getRelatedArtifact, RelatedArtifact::getUrl,
-						RelatedArtifact::setUrl);
+			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL -> resolveLiteralInternalUrl(reference::getRelatedArtifact,
+					RelatedArtifact::getUrl, RelatedArtifact::setUrl);
 
-			case ATTACHMENT_LITERAL_INTERNAL_URL:
-				return resolveLiteralInternalUrl(reference::getAttachment, Attachment::getUrl, Attachment::setUrl);
+			case ATTACHMENT_LITERAL_INTERNAL_URL ->
+				resolveLiteralInternalUrl(reference::getAttachment, Attachment::getUrl, Attachment::setUrl);
 
-			default:
-				return Optional.empty();
-		}
+			default -> Optional.empty();
+		};
 	}
 
 	private Consumer<IdType> newIdToAbsoluteUrl(Consumer<String> absoluteUrlConsumer)
@@ -210,7 +202,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		referenceExtractor.getReferences(resource).filter(checkReference)
 				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
 				{
-					Optional<OperationOutcome> outcome = checkReference(idTranslationTable, connection, ref);
+					Optional<OperationOutcome> outcome = checkReference(ref, connection);
 					if (outcome.isPresent())
 					{
 						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
@@ -219,29 +211,25 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 				});
 	}
 
-	private Optional<OperationOutcome> checkReference(Map<String, IdType> idTranslationTable, Connection connection,
-			ResourceReference reference) throws WebApplicationException
+	private Optional<OperationOutcome> checkReference(ResourceReference reference, Connection connection)
+			throws WebApplicationException
 	{
-		ReferenceType type = reference.getType(serverBase);
-		switch (type)
+		return switch (reference.getType(serverBase))
 		{
-			case LITERAL_INTERNAL:
-			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
-			case ATTACHMENT_LITERAL_INTERNAL_URL:
-				return referenceResolver.checkLiteralInternalReference(resource, reference, connection, index);
-			case LITERAL_EXTERNAL:
-			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
-			case ATTACHMENT_LITERAL_EXTERNAL_URL:
-				return referenceResolver.checkLiteralExternalReference(resource, reference, index);
-			case LOGICAL:
-				return referenceResolver.checkLogicalReference(identity, resource, reference, connection, index);
+			case LITERAL_INTERNAL, RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL ->
+				referenceResolver.checkLiteralInternalReference(resource, reference, connection, index);
+
+			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+				referenceResolver.checkLiteralExternalReference(resource, reference, index);
+
+			case LOGICAL -> referenceResolver.checkLogicalReference(identity, resource, reference, connection, index);
+
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
-			case RELATED_ARTEFACT_UNKNOWN_URL:
-			case ATTACHMENT_UNKNOWN_URL:
-				return Optional.empty();
-			case UNKNOWN:
-			default:
-				return Optional.of(responseGenerator.unknownReference(resource, reference, index));
-		}
+			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
+
+			case UNKNOWN -> Optional.of(responseGenerator.unknownReference(resource, reference, index));
+
+			default -> Optional.of(responseGenerator.unknownReference(resource, reference, index));
+		};
 	}
 }

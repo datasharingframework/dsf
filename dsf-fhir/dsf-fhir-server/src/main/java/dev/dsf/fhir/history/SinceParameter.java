@@ -2,20 +2,19 @@ package dev.dsf.fhir.history;
 
 import java.util.List;
 
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import dev.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
 
-public class SinceParameter extends AbstractDateTimeParameter<DomainResource>
+public class SinceParameter extends AbstractDateTimeParameter<Resource>
 {
 	public static final String PARAMETER_NAME = "_since";
 
 	public SinceParameter()
 	{
-		super(PARAMETER_NAME, "last_updated");
+		super(Resource.class, PARAMETER_NAME, "last_updated", null);
 	}
 
 	@Override
@@ -39,7 +38,7 @@ public class SinceParameter extends AbstractDateTimeParameter<DomainResource>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	public boolean resourceMatches(Resource resource)
 	{
 		// Not implemented for history
 		throw new UnsupportedOperationException();

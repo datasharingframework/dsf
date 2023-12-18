@@ -86,6 +86,9 @@ public class AuthorizationConfig
 	@Autowired
 	private ReferenceConfig referenceConfig;
 
+	@Autowired
+	private FhirConfig fhirConfig;
+
 	@Bean
 	public ReadAccessHelper readAccessHelper()
 	{
@@ -306,7 +309,7 @@ public class AuthorizationConfig
 	{
 		return new TaskAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), authenticationConfig.organizationProvider(), readAccessHelper(),
-				helperConfig.parameterConverter(), processAuthorizationHelper());
+				helperConfig.parameterConverter(), processAuthorizationHelper(), fhirConfig.fhirContext());
 	}
 
 	@Bean

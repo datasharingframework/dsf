@@ -48,22 +48,12 @@ public class QuestionnaireResponseAuthorizationRule
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.CREATE))
 		{
-			Optional<String> errors = newResourceOk(connection, identity, newResource,
-					EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
+			Optional<String> errors = newResourceOk(newResource, EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
 			if (errors.isEmpty())
 			{
-				if (!resourceExists(connection, newResource))
-				{
-					logger.info(
-							"Create of QuestionnaireResponse authorized for local user '{}', QuestionnaireResponse does not exist",
-							identity.getName());
-					return Optional.of("local user, QuestionnaireResponse does not exist yet");
-				}
-				else
-				{
-					logger.warn("Create of QuestionnaireResponse unauthorized, QuestionnaireResponse already exists");
-					return Optional.empty();
-				}
+				// TODO implement unique criteria based on UserTask.id when implemented as identifier
+				logger.info("Create of QuestionnaireResponse authorized for local user '{}'", identity.getName());
+				return Optional.of("local user");
 			}
 			else
 			{
@@ -78,10 +68,10 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, QuestionnaireResponse newResource,
+	private Optional<String> newResourceOk(QuestionnaireResponse newResource,
 			EnumSet<QuestionnaireResponseStatus> allowedStatus)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasStatus())
 		{
@@ -150,12 +140,6 @@ public class QuestionnaireResponseAuthorizationRule
 		return Optional.of(value.getValue());
 	}
 
-	private boolean resourceExists(Connection connection, QuestionnaireResponse newResource)
-	{
-		// TODO implement unique criteria based on UserTask.id when implemented as identifier
-		return false;
-	}
-
 	@Override
 	public Optional<String> reasonReadAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse existingResource)
@@ -178,11 +162,11 @@ public class QuestionnaireResponseAuthorizationRule
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.UPDATE))
 		{
-			Optional<String> errors = newResourceOk(connection, identity, newResource,
+			Optional<String> errors = newResourceOk(newResource,
 					EnumSet.of(QuestionnaireResponseStatus.COMPLETED, QuestionnaireResponseStatus.STOPPED));
 			if (errors.isEmpty())
 			{
-				if (modificationsOk(connection, oldResource, newResource))
+				if (modificationsOk(oldResource, newResource))
 				{
 					logger.info("Update of QuestionnaireResponse authorized for local user '{}', modification allowed",
 							identity.getName());
@@ -207,8 +191,7 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 	}
 
-	private boolean modificationsOk(Connection connection, QuestionnaireResponse oldResource,
-			QuestionnaireResponse newResource)
+	private boolean modificationsOk(QuestionnaireResponse oldResource, QuestionnaireResponse newResource)
 	{
 		boolean statusModificationOk = QuestionnaireResponseStatus.INPROGRESS.equals(oldResource.getStatus())
 				&& (QuestionnaireResponseStatus.COMPLETED.equals(newResource.getStatus())

@@ -29,9 +29,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 public class OrganizationAffiliationParticipatingOrganization
 		extends AbstractReferenceParameter<OrganizationAffiliation>
 {
-	public static final String RESOURCE_TYPE_NAME = "OrganizationAffiliation";
+	private static final String RESOURCE_TYPE_NAME = "OrganizationAffiliation";
 	public static final String PARAMETER_NAME = "participating-organization";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -50,30 +50,17 @@ public class OrganizationAffiliationParticipatingOrganization
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "organization_affiliation->'participatingOrganization'->>'reference' = ?";
-			case IDENTIFIER:
+			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"organization_affiliation->'participatingOrganization'->>'reference' = ?";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
-								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
+						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -144,41 +131,26 @@ public class OrganizationAffiliationParticipatingOrganization
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(OrganizationAffiliation resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof OrganizationAffiliation))
-			return false;
-
-		OrganizationAffiliation oA = (OrganizationAffiliation) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (oA.getParticipatingOrganization().getResource() instanceof Organization)
-			{
-				Organization o = (Organization) oA.getParticipatingOrganization().getResource();
+			if (resource.getParticipatingOrganization().getResource() instanceof Organization o)
 				return o.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
 			else
 				return false;
 		}
 		else
 		{
-			String ref = oA.getParticipatingOrganization().getReference();
-			switch (valueAndType.type)
+			String ref = resource.getParticipatingOrganization().getReference();
+			return switch (valueAndType.type)
 			{
-				case ID:
-					return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-				case RESOURCE_NAME_AND_ID:
-					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-				case URL:
-					return ref.equals(valueAndType.url);
-				default:
-					return false;
-			}
+				case ID -> ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
+				case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+				case URL -> ref.equals(valueAndType.url);
+				default -> false;
+			};
 		}
 	}
 

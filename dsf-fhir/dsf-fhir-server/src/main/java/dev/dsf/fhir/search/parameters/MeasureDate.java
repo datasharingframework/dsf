@@ -13,6 +13,7 @@ public class MeasureDate extends AbstractDateTimeParameter<Measure>
 
 	public MeasureDate()
 	{
-		super(PARAMETER_NAME, "measure->>'date'");
+		super(Measure.class, PARAMETER_NAME, "measure->>'date'",
+				fromDateTime(Measure::hasDateElement, Measure::getDateElement));
 	}
 }

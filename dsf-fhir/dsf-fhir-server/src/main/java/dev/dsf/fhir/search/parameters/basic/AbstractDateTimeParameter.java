@@ -12,9 +12,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
@@ -23,21 +27,21 @@ import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorTy
 
 public abstract class AbstractDateTimeParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
-	public static enum DateTimeSearchType
+	protected enum DateTimeSearchType
 	{
 		EQ("eq", "="), NE("ne", "<>"), GT("gt", ">"), LT("lt", "<"), GE("ge", ">="), LE("le", "<=");
 
 		public final String prefix;
 		public final String operator;
 
-		private DateTimeSearchType(String prefix, String operator)
+		DateTimeSearchType(String prefix, String operator)
 		{
 			this.prefix = prefix;
 			this.operator = operator;
 		}
 	}
 
-	protected static enum DateTimeType
+	protected enum DateTimeType
 	{
 		ZONED_DATE_TIME, LOCAL_DATE, YEAR_PERIOD, YEAR_MONTH_PERIOD;
 	}
@@ -82,15 +86,44 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 	private static final DateTimeFormatter YEAR_FORMAT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter YEAR_MONTH_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM");
 
+	private final String timestampColumn;
+	private final Function<R, Optional<java.util.Date>> getDate;
+
 	protected DateTimeValueAndTypeAndSearchType valueAndType;
 
-	private final String timestampColumn;
-
-	public AbstractDateTimeParameter(String parameterName, String timestampColumn)
+	public AbstractDateTimeParameter(Class<R> resourceType, String parameterName, String timestampColumn,
+			Function<R, Optional<java.util.Date>> getDate)
 	{
-		super(parameterName);
+		super(resourceType, parameterName);
 
 		this.timestampColumn = timestampColumn;
+		this.getDate = getDate;
+	}
+
+	protected static <R extends Resource> Function<R, Optional<java.util.Date>> fromInstant(Predicate<R> hasInstant,
+			Function<R, InstantType> getInstant)
+	{
+		return r ->
+		{
+			if (hasInstant.test(r))
+				return getInstant.andThen(Optional::of).apply(r).filter(InstantType::hasValue)
+						.map(InstantType::getValue);
+			else
+				return Optional.empty();
+		};
+	}
+
+	protected static <R extends Resource> Function<R, Optional<java.util.Date>> fromDateTime(Predicate<R> hasInstant,
+			Function<R, org.hl7.fhir.r4.model.DateTimeType> getDateTime)
+	{
+		return r ->
+		{
+			if (hasInstant.test(r))
+				return getDateTime.andThen(Optional::of).apply(r).filter(org.hl7.fhir.r4.model.DateTimeType::hasValue)
+						.map(org.hl7.fhir.r4.model.DateTimeType::getValue);
+			else
+				return Optional.empty();
+		};
 	}
 
 	@Override
@@ -207,8 +240,6 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 			case LOCAL_DATE -> ((LocalDate) value.value).format(DATE_FORMAT);
 			case YEAR_PERIOD -> ((LocalDatePair) value.value).startInclusive.format(YEAR_FORMAT);
 			case YEAR_MONTH_PERIOD -> ((LocalDatePair) value.value).startInclusive.format(YEAR_MONTH_FORMAT);
-			default -> throw new IllegalArgumentException(
-					"Unexpected " + DateTimeType.class.getName() + " value: " + value.type);
 		};
 	}
 
@@ -220,8 +251,6 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 			case ZONED_DATE_TIME -> getDateTimeQuery(valueAndType.searchType.operator);
 			case LOCAL_DATE -> getDateQuery(valueAndType.searchType.operator);
 			case YEAR_MONTH_PERIOD, YEAR_PERIOD -> getDatePairQuery();
-			default -> throw new IllegalArgumentException(
-					"Unexpected " + DateTimeType.class.getName() + " value: " + valueAndType.type);
 		};
 	}
 
@@ -247,8 +276,6 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 		{
 			case ZONED_DATE_TIME, LOCAL_DATE -> 1;
 			case YEAR_MONTH_PERIOD, YEAR_PERIOD -> 2;
-			default -> throw new IllegalArgumentException(
-					"Unexpected " + DateTimeType.class.getName() + " value: " + valueAndType.type);
 		};
 	}
 
@@ -280,79 +307,50 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(R resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		ZonedDateTime lastUpdated = toZonedDateTime(resource.getMeta().getLastUpdated());
-		return lastUpdated != null && matches(lastUpdated, valueAndType);
+		return getDate.apply(resource).map(this::matches).orElse(false);
 	}
 
-	private ZonedDateTime toZonedDateTime(java.util.Date date)
+	private boolean matches(java.util.Date date)
 	{
-		if (date == null)
-			return null;
-
-		return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+		return matches(ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()), valueAndType);
 	}
 
-	private boolean matches(ZonedDateTime lastUpdated, DateTimeValueAndTypeAndSearchType value)
+	private boolean matches(ZonedDateTime zonedDateTime, DateTimeValueAndTypeAndSearchType value)
 	{
-		switch (value.type)
+		return switch (value.type)
 		{
-			case ZONED_DATE_TIME:
-				return matches(lastUpdated, (ZonedDateTime) value.value, value.searchType);
-			case LOCAL_DATE:
-				return matches(lastUpdated.toLocalDate(), (LocalDate) value.value, value.searchType);
-			case YEAR_MONTH_PERIOD:
-			case YEAR_PERIOD:
-				return matches(lastUpdated.toLocalDate(), (LocalDatePair) value.value);
-			default:
-				throw notDefined();
-		}
+			case ZONED_DATE_TIME -> matches(zonedDateTime, (ZonedDateTime) value.value, value.searchType);
+			case LOCAL_DATE -> matches(zonedDateTime.toLocalDate(), (LocalDate) value.value, value.searchType);
+			case YEAR_MONTH_PERIOD, YEAR_PERIOD -> matches(zonedDateTime.toLocalDate(), (LocalDatePair) value.value);
+		};
 	}
 
 	private boolean matches(ZonedDateTime lastUpdated, ZonedDateTime value, DateTimeSearchType type)
 	{
-		switch (type)
+		return switch (type)
 		{
-			case EQ:
-				return lastUpdated.equals(value);
-			case GT:
-				return lastUpdated.isAfter(value);
-			case GE:
-				return lastUpdated.isAfter(value) || lastUpdated.equals(value);
-			case LT:
-				return lastUpdated.isBefore(value);
-			case LE:
-				return lastUpdated.isBefore(value) || lastUpdated.equals(value);
-			case NE:
-				return !lastUpdated.isEqual(value);
-			default:
-				throw notDefined();
-		}
+			case EQ -> lastUpdated.equals(value);
+			case GT -> lastUpdated.isAfter(value);
+			case GE -> lastUpdated.isAfter(value) || lastUpdated.equals(value);
+			case LT -> lastUpdated.isBefore(value);
+			case LE -> lastUpdated.isBefore(value) || lastUpdated.equals(value);
+			case NE -> !lastUpdated.isEqual(value);
+		};
 	}
 
 	private boolean matches(LocalDate lastUpdated, LocalDate value, DateTimeSearchType type)
 	{
-		switch (type)
+		return switch (type)
 		{
-			case EQ:
-				return lastUpdated.equals(value);
-			case GT:
-				return lastUpdated.isAfter(value);
-			case GE:
-				return lastUpdated.isAfter(value) || lastUpdated.equals(value);
-			case LT:
-				return lastUpdated.isBefore(value);
-			case LE:
-				return lastUpdated.isBefore(value) || lastUpdated.equals(value);
-			case NE:
-				return !lastUpdated.isEqual(value);
-			default:
-				throw notDefined();
-		}
+			case EQ -> lastUpdated.equals(value);
+			case GT -> lastUpdated.isAfter(value);
+			case GE -> lastUpdated.isAfter(value) || lastUpdated.equals(value);
+			case LT -> lastUpdated.isBefore(value);
+			case LE -> lastUpdated.isBefore(value) || lastUpdated.equals(value);
+			case NE -> !lastUpdated.isEqual(value);
+		};
 	}
 
 	private boolean matches(LocalDate lastUpdated, LocalDatePair value)

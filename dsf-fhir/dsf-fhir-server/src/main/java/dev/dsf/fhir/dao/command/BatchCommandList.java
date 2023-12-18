@@ -55,8 +55,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 					initialReadOnly, initialAutoCommit,
 					getTransactionIsolationLevelString(initialTransactionIsolationLevel));
 
-			Map<Integer, Exception> caughtExceptions = new HashMap<Integer, Exception>(
-					(int) (commands.size() / 0.75) + 1);
+			Map<Integer, Exception> caughtExceptions = new HashMap<>((int) (commands.size() / 0.75) + 1);
 			Map<String, IdType> idTranslationTable = new HashMap<>();
 
 			if (hasModifyingCommands)
@@ -86,7 +85,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				connection.setTransactionIsolation(initialTransactionIsolationLevel);
 			}
 
-			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
+			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) (commands.size() / 0.75) + 1);
 
 			commands.forEach(postExecute(connection, caughtExceptions, results));
 			caughtExceptions.forEach((k, v) -> results.put(k, toEntry(v)));
@@ -113,22 +112,16 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 
 	private String getTransactionIsolationLevelString(int level)
 	{
-		switch (level)
+		return switch (level)
 		{
-			case Connection.TRANSACTION_NONE:
-				return "NONE";
-			case Connection.TRANSACTION_READ_UNCOMMITTED:
-				return "READ_UNCOMMITTED";
-			case Connection.TRANSACTION_READ_COMMITTED:
-				return "READ_COMMITTED";
-			case Connection.TRANSACTION_REPEATABLE_READ:
-				return "REPEATABLE_READ";
-			case Connection.TRANSACTION_SERIALIZABLE:
-				return "SERIALIZABLE";
+			case Connection.TRANSACTION_NONE -> "NONE";
+			case Connection.TRANSACTION_READ_UNCOMMITTED -> "READ_UNCOMMITTED";
+			case Connection.TRANSACTION_READ_COMMITTED -> "READ_COMMITTED";
+			case Connection.TRANSACTION_REPEATABLE_READ -> "REPEATABLE_READ";
+			case Connection.TRANSACTION_SERIALIZABLE -> "SERIALIZABLE";
 
-			default:
-				return "?";
-		}
+			default -> "?";
+		};
 	}
 
 	private Consumer<Command> preExecute(Map<String, IdType> idTranslationTable, Connection connection,
@@ -154,8 +147,11 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running pre-execute of command {} for entry at index {}: {}",
-						command.getClass().getName(), command.getIndex(), e.getMessage());
+				logger.debug("Error while running pre-execute of command {} for entry at index {}",
+						command.getClass().getName(), command.getIndex(), e);
+				logger.warn("Error while running pre-execute of command {} for entry at index {}: {} - {}",
+						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};
@@ -187,8 +183,11 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {}",
-						command.getClass().getName(), command.getIndex(), e.getMessage());
+				logger.debug("Error while executing command {}, rolling back transaction for entry at index {}",
+						command.getClass().getName(), command.getIndex(), e);
+				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {} - {}",
+						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+
 				caughtExceptions.put(command.getIndex(), e);
 
 				try
@@ -198,9 +197,13 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				}
 				catch (SQLException e1)
 				{
+					logger.debug(
+							"Error while executing command {}, error while rolling back transaction for entry at index {}",
+							command.getClass().getName(), command.getIndex(), e1);
 					logger.warn(
-							"Error while executing command {}, error while rolling back transaction for entry at index {}: {}",
-							command.getClass().getName(), command.getIndex(), e1.getMessage());
+							"Error while executing command {}, error while rolling back transaction for entry at index {}: {} - {}",
+							command.getClass().getName(), command.getIndex(), e1.getClass().getName(), e1.getMessage());
+
 					caughtExceptions.put(command.getIndex(), e1);
 				}
 			}
@@ -232,8 +235,11 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running post-execute of command {} for entry at index {}: {}",
-						command.getClass().getName(), command.getIndex(), e.getMessage());
+				logger.debug("Error while running post-execute of command {} for entry at index {}",
+						command.getClass().getName(), command.getIndex(), e);
+				logger.warn("Error while running post-execute of command {} for entry at index {}: {} - {}",
+						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};

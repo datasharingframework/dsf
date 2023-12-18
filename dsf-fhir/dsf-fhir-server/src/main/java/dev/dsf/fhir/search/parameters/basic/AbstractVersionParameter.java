@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -21,9 +20,9 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 
 	private String version;
 
-	public AbstractVersionParameter(String resourceColumn)
+	public AbstractVersionParameter(Class<R> resourceType, String resourceColumn)
 	{
-		super(PARAMETER_NAME);
+		super(resourceType, PARAMETER_NAME);
 
 		this.resourceColumn = resourceColumn;
 	}
@@ -48,9 +47,15 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return resourceColumn + "->>'version' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return resourceColumn + "->>'version' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return resourceColumn + "->>'version' <> ?";
 	}
 
 	@Override
@@ -66,23 +71,10 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 		statement.setString(parameterIndex, version);
 	}
 
-	protected abstract boolean instanceOf(Resource resource);
-
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(R resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!instanceOf(resource))
-			return false;
-
-		MetadataResource mRes = (MetadataResource) resource;
-
-		if (valueAndType.negated)
-			return !Objects.equals(mRes.getVersion(), version);
-		else
-			return Objects.equals(mRes.getVersion(), version);
+		return valueAndType.negated ^ (resource.hasVersion() && Objects.equals(resource.getVersion(), version));
 	}
 
 	@Override

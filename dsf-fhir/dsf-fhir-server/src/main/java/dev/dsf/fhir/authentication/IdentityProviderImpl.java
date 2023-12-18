@@ -128,8 +128,8 @@ public class IdentityProviderImpl extends AbstractProvider implements IdentityPr
 	private Map<String, Object> getPropertyMap(Map<String, Object> map, String property)
 	{
 		Object propertyValue = map.get(property);
-		if (propertyValue != null && propertyValue instanceof Map)
-			return (Map<String, Object>) propertyValue;
+		if (propertyValue != null && propertyValue instanceof Map m)
+			return m;
 		else
 			return Collections.emptyMap();
 	}
@@ -137,9 +137,8 @@ public class IdentityProviderImpl extends AbstractProvider implements IdentityPr
 	private List<String> getPropertyArray(Map<String, Object> map, String property)
 	{
 		Object propertyValue = map.get(property);
-		if (propertyValue != null && propertyValue instanceof Object[])
-			return Arrays.stream((Object[]) propertyValue).filter(v -> v instanceof String).map(v -> (String) v)
-					.toList();
+		if (propertyValue != null && propertyValue instanceof Object[] o)
+			return Arrays.stream(o).filter(v -> v instanceof String).map(v -> (String) v).toList();
 		else
 			return Collections.emptyList();
 	}

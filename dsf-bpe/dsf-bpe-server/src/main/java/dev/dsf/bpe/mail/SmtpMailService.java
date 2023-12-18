@@ -153,11 +153,8 @@ public class SmtpMailService implements MailService, InitializingBean
 			super("SmtpMailService.Log4jAppender", ThresholdFilter.createFilter(null, null, null),
 					new Layout(debugLogLocation), false, null);
 
-			MailManagerFactory factory = (name, data) ->
+			MailManagerFactory factory = (name, data) -> new SmtpManager(name, session, message, data)
 			{
-				return new SmtpManager(name, session, message, data)
-				{
-				};
 			};
 			FactoryData data = new FactoryData(null, null, null, null, null, null, event -> subject, null, null, 0,
 					null, null, false, messageBufferSize, null, null);
@@ -281,6 +278,7 @@ public class SmtpMailService implements MailService, InitializingBean
 		}
 		catch (AddressException e)
 		{
+			logger.debug("Unable to create {} from {}", InternetAddress.class.getName(), fromAddress, e);
 			logger.warn("Unable to create {} from {}: {} - {}", InternetAddress.class.getName(), fromAddress,
 					e.getClass().getName(), e.getMessage());
 
@@ -347,7 +345,9 @@ public class SmtpMailService implements MailService, InitializingBean
 		}
 		catch (UnrecoverableKeyException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException e)
 		{
+			logger.debug("Unable to create custom ssl socket factory", e);
 			logger.warn("Unable to create custom ssl socket factory: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -372,7 +372,7 @@ public class SmtpMailService implements MailService, InitializingBean
 			Optional<PrivateKey> pivateKey = getFirstPrivateKey(signStore, signStorePassword);
 			if (pivateKey.isEmpty())
 			{
-				logger.warn("Mail signing certificate store has no private key, not signing mails", fromAddress);
+				logger.warn("Mail signing certificate store has no private key, not signing mails");
 				return null;
 			}
 
@@ -535,7 +535,9 @@ public class SmtpMailService implements MailService, InitializingBean
 		}
 		catch (MessagingException e)
 		{
+			logger.debug("Unable to send message", e);
 			logger.warn("Unable to send message: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

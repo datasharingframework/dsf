@@ -70,7 +70,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		// Error boundary event, do not stop process execution
 		catch (BpmnError error)
 		{
-			logger.debug("Error while executing service delegate " + getClass().getName(), error);
+			logger.debug("Error while executing service delegate {}", getClass().getName(), error);
 			logger.error(
 					"Process {} encountered error boundary event in step {} for task {}, error-code: {}, message: {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
@@ -82,7 +82,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		// Not an error boundary event, stop process execution
 		catch (Exception exception)
 		{
-			logger.debug("Error while executing service delegate " + getClass().getName(), exception);
+			logger.debug("Error while executing service delegate {}", getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
@@ -148,7 +148,9 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		}
 		catch (Exception e)
 		{
-			logger.error("Unable to update Task " + api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
+			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 }

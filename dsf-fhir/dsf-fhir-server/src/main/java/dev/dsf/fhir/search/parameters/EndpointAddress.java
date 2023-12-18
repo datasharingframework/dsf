@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -20,21 +19,17 @@ public class EndpointAddress extends AbstractCanonicalUrlParameter<Endpoint>
 
 	public EndpointAddress()
 	{
-		super(PARAMETER_NAME);
+		super(Endpoint.class, PARAMETER_NAME);
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case PRECISE:
-				return "endpoint->>'address' = ?";
-			case BELOW:
-				return "endpoint->>'address' LIKE ?";
-			default:
-				return "";
-		}
+			case PRECISE -> "endpoint->>'address' = ?";
+			case BELOW -> "endpoint->>'address' LIKE ?";
+		};
 	}
 
 	@Override
@@ -52,34 +47,21 @@ public class EndpointAddress extends AbstractCanonicalUrlParameter<Endpoint>
 			case PRECISE:
 				statement.setString(parameterIndex, valueAndType.url);
 				return;
+
 			case BELOW:
 				statement.setString(parameterIndex, valueAndType.url + "%");
-				return;
-			default:
 				return;
 		}
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Endpoint resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Endpoint))
-			return false;
-
-		Endpoint endpoint = (Endpoint) resource;
-
-		switch (valueAndType.type)
+		return resource.hasAddress() && switch (valueAndType.type)
 		{
-			case PRECISE:
-				return Objects.equals(endpoint.getAddress(), valueAndType.url);
-			case BELOW:
-				return endpoint.getAddress() != null && endpoint.getAddress().startsWith(valueAndType.url);
-			default:
-				throw notDefined();
-		}
+			case PRECISE -> Objects.equals(resource.getAddress(), valueAndType.url);
+			case BELOW -> resource.getAddress().startsWith(valueAndType.url);
+		};
 	}
 
 	@Override

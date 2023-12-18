@@ -89,10 +89,7 @@ public class WebSocketSubscriptionManagerImpl
 		@Override
 		public int hashCode()
 		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
-			return result;
+			return Objects.hash(sessionId);
 		}
 
 		@Override
@@ -100,19 +97,10 @@ public class WebSocketSubscriptionManagerImpl
 		{
 			if (this == obj)
 				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
+			if (obj == null || getClass() != obj.getClass())
 				return false;
 			SessionIdAndRemoteAsync other = (SessionIdAndRemoteAsync) obj;
-			if (sessionId == null)
-			{
-				if (other.sessionId != null)
-					return false;
-			}
-			else if (!sessionId.equals(other.sessionId))
-				return false;
-			return true;
+			return Objects.equals(sessionId, other.sessionId);
 		}
 	}
 
@@ -186,7 +174,8 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing DB", e);
+			logger.debug("Error while accessing DB", e);
+			logger.error("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -350,7 +339,10 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while sending event to remote with session id {}", sessionAndRemote.sessionId);
+			logger.debug("Error while sending event to remote with session id {}: {} - {}", sessionAndRemote.sessionId,
+					e);
+			logger.warn("Error while sending event to remote with session id {}: {} - {}", sessionAndRemote.sessionId,
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -407,7 +399,7 @@ public class WebSocketSubscriptionManagerImpl
 	public void close(String sessionId)
 	{
 		logger.debug("Removing websocket session {}", sessionId);
-		asyncRemotesBySubscriptionIdPart.removeWhereValueMatches(list -> list.isEmpty(),
+		asyncRemotesBySubscriptionIdPart.removeWhereValueMatches(List::isEmpty,
 				list -> list.remove(new SessionIdAndRemoteAsync(null, sessionId, null)));
 	}
 }

@@ -136,22 +136,22 @@ public class ProcessPluginImplTest
 		}
 	}
 
-	private ProxyConfig proxyConfig = mock(ProxyConfig.class);
-	private EndpointProvider endpointProvider = mock(EndpointProvider.class);
-	private FhirContext fhirContext = FhirContext.forR4();
-	private FhirWebserviceClientProvider fhirWebserviceClientProvider = mock(FhirWebserviceClientProvider.class);
-	private MailService mailService = mock(MailService.class);
-	private ObjectMapper objectMapper = ObjectMapperFactory.createObjectMapper(fhirContext);
-	private OrganizationProvider organizationProvider = mock(OrganizationProvider.class);
-	private QuestionnaireResponseHelper questionnaireResponseHelper = mock(QuestionnaireResponseHelper.class);
-	private ProcessAuthorizationHelper processAuthorizationHelper = mock(ProcessAuthorizationHelper.class);
-	private ReadAccessHelper readAccessHelper = mock(ReadAccessHelper.class);
-	private TaskHelper taskHelper = mock(TaskHelper.class);
+	private final ProxyConfig proxyConfig = mock(ProxyConfig.class);
+	private final EndpointProvider endpointProvider = mock(EndpointProvider.class);
+	private final FhirContext fhirContext = FhirContext.forR4();
+	private final FhirWebserviceClientProvider fhirWebserviceClientProvider = mock(FhirWebserviceClientProvider.class);
+	private final MailService mailService = mock(MailService.class);
+	private final ObjectMapper objectMapper = ObjectMapperFactory.createObjectMapper(fhirContext);
+	private final OrganizationProvider organizationProvider = mock(OrganizationProvider.class);
+	private final QuestionnaireResponseHelper questionnaireResponseHelper = mock(QuestionnaireResponseHelper.class);
+	private final ProcessAuthorizationHelper processAuthorizationHelper = mock(ProcessAuthorizationHelper.class);
+	private final ReadAccessHelper readAccessHelper = mock(ReadAccessHelper.class);
+	private final TaskHelper taskHelper = mock(TaskHelper.class);
 
-	private ProcessPluginApi processPluginApi = new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext,
-			fhirWebserviceClientProvider, mailService, objectMapper, organizationProvider, processAuthorizationHelper,
-			questionnaireResponseHelper, readAccessHelper, taskHelper);
-	private ConfigurableEnvironment environment = new StandardEnvironment();
+	private final ProcessPluginApi processPluginApi = new ProcessPluginApiImpl(proxyConfig, endpointProvider,
+			fhirContext, fhirWebserviceClientProvider, mailService, objectMapper, organizationProvider,
+			processAuthorizationHelper, questionnaireResponseHelper, readAccessHelper, taskHelper);
+	private final ConfigurableEnvironment environment = new StandardEnvironment();
 
 	@Test
 	public void testInitializeAndValidateResourcesAllNull() throws Exception

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,7 +170,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					logger.warn("Create returned with entity of type {}", created.getEntity().getClass().getName());
 				else if (!created.hasEntity()
 						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
-					logger.warn("Create returned with status {}, but no entity", created.getStatus());
+					logger.warn("Create returned with status {} {}, but no entity",
+							created.getStatusInfo().getStatusCode(), created.getStatusInfo().getReasonPhrase());
 
 				return created;
 			});
@@ -263,9 +263,10 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		else
 		{
 			audit.info("Read of {} for identity '{}' returned without entity, status {} {}", resourceTypeName,
-					getCurrentIdentity().getName(), read.getStatus());
+					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
+					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with status {}, but no entity", read.getStatusInfo().getStatusCode(),
+			logger.info("Returning with status {} {}, but no entity", read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
@@ -318,7 +319,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with OperationOutcome, status {}", read.getStatusInfo().getStatusCode(),
+			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
@@ -356,9 +357,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
 			return logResultStatus(() -> delegate.history(uri, headers),
-					status -> audit.info("History of {} for identity '{}' successful: {}", resourceTypeName,
+					status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
-					status -> audit.info("History of {} for identity '{}' failed: {}", resourceTypeName,
+					status -> audit.info("History of {} for identity '{}' failed: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
 	}
@@ -379,9 +380,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
 			return logResultStatus(() -> delegate.history(id, uri, headers),
-					status -> audit.info("History of {} for identity '{}' successful: {}", resourceTypeName,
+					status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
-					status -> audit.info("History of {} for identity '{}' failed: {}", resourceTypeName,
+					status -> audit.info("History of {} for identity '{}' failed: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
 	}
@@ -441,7 +442,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					logger.warn("Update returned with entity of type {}", updated.getEntity().getClass().getName());
 				else if (!updated.hasEntity()
 						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
-					logger.warn("Update returned with status {}, but no entity", updated.getStatus());
+					logger.warn("Update returned with status {} {}, but no entity",
+							updated.getStatusInfo().getStatusCode(), updated.getStatusInfo().getReasonPhrase());
 
 				return updated;
 			});
@@ -493,7 +495,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
 					&& (!resource.getIdElement().hasResourceType()
 							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
-					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+					&& dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart()))
 			{
 				// more security checks and audit log in update method
 				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);
@@ -596,8 +598,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("{} to delete not found for user '{}'", resourceTypeName, getCurrentIdentity().getName(),
-					getCurrentIdentity().getName());
+			audit.info("{} to delete not found for user '{}'", resourceTypeName, getCurrentIdentity().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}
 	}
@@ -691,39 +692,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	}
 
 	@Override
-	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.postValidateNew(validate, parameters, uri, headers);
-	}
-
-	@Override
-	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.getValidateNew(validate, uri, headers);
-	}
-
-	@Override
-	public Response postValidateExisting(String validate, String id, Parameters parameters, UriInfo uri,
-			HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.postValidateExisting(validate, id, parameters, uri, headers);
-	}
-
-	@Override
-	public Response getValidateExisting(String validate, String id, UriInfo uri, HttpHeaders headers)
-	{
-		logCurrentIdentity();
-
-		return delegate.getValidateExisting(validate, id, uri, headers);
-	}
-
-	@Override
 	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
 	{
 		logCurrentIdentity();
@@ -785,10 +753,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		catch (Exception e)
 		{
-			StatusType status = e instanceof WebApplicationException
-					&& ((WebApplicationException) e).getResponse() != null
-							? ((WebApplicationException) e).getResponse().getStatusInfo()
-							: Status.INTERNAL_SERVER_ERROR;
+			StatusType status = e instanceof WebApplicationException w && w.getResponse() != null
+					? w.getResponse().getStatusInfo()
+					: Status.INTERNAL_SERVER_ERROR;
 
 			logErrorForStatusCode.accept(status);
 

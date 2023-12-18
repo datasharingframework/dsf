@@ -47,6 +47,7 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 		this.resourceClass = resourceClass;
 	}
 
+	@Override
 	public void readExistingResources(Map<String, List<String>> searchCriteriaQueryParameters)
 	{
 		// executing search until call results in no more found tasks
@@ -112,7 +113,9 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 		}
 		catch (SQLException e)
 		{
+			logger.debug("Unable to read last event time from db", e);
 			logger.warn("Unable to read last event time from db: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -125,7 +128,9 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 		}
 		catch (SQLException e)
 		{
+			logger.debug("Unable to write last event time to db", e);
 			logger.warn("Unable to write last event time to db: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}

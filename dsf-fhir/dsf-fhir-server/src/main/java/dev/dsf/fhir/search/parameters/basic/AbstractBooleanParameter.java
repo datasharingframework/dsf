@@ -1,19 +1,28 @@
 package dev.dsf.fhir.search.parameters.basic;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 
-public abstract class AbstractBooleanParameter<R extends DomainResource> extends AbstractSearchParameter<R>
+public abstract class AbstractBooleanParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
+	private final Predicate<R> hasBoolean;
+	private final Function<R, Boolean> getBoolean;
+
 	protected Boolean value;
 
-	public AbstractBooleanParameter(String parameterName)
+	public AbstractBooleanParameter(Class<R> resourceType, String parameterName, Predicate<R> hasBoolean,
+			Function<R, Boolean> getBoolean)
 	{
-		super(parameterName);
+		super(resourceType, parameterName);
+
+		this.hasBoolean = hasBoolean;
+		this.getBoolean = getBoolean;
 	}
 
 	@Override
@@ -55,5 +64,11 @@ public abstract class AbstractBooleanParameter<R extends DomainResource> extends
 	public String getBundleUriQueryParameterValue()
 	{
 		return String.valueOf(value);
+	}
+
+	@Override
+	protected boolean resourceMatches(R resource)
+	{
+		return hasBoolean.test(resource) && getBoolean.apply(resource) == value;
 	}
 }

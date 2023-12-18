@@ -24,7 +24,7 @@ public class DeleteStructureDefinitionCommand extends DeleteCommand
 {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteStructureDefinitionCommand.class);
 
-	private StructureDefinitionDao snapshotDao;
+	private final StructureDefinitionDao snapshotDao;
 
 	public DeleteStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
@@ -49,8 +49,11 @@ public class DeleteStructureDefinitionCommand extends DeleteCommand
 		}
 		catch (SQLException | ResourceNotFoundException e)
 		{
-			logger.warn("Error while deleting StructureDefinition snaphost for id " + uuid.toString()
-					+ ", exception will be ignored", e);
+			logger.debug("Error while deleting StructureDefinition snaphost for id {}, exception will be ignored",
+					uuid.toString(), e);
+			logger.warn(
+					"Error while deleting StructureDefinition snaphost for id {}, exception will be ignored: {} - {}",
+					uuid.toString(), e.getClass().getName(), e.getMessage());
 		}
 
 		return deleted;

@@ -25,7 +25,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ProcessPluginLoaderImpl implements ProcessPluginLoader, InitializingBean
 {
-	public static final String FILE_DRAFT_SUFFIX = "-SNAPSHOT.jar";
+	public static final String SNAPSHOT_FILE_SUFFIX = "-SNAPSHOT.jar";
+	public static final String MILESTONE_FILE_PATTERN = ".*-M[0-9]+.jar";
+	public static final String RELEASE_CANDIDATE_FILE_PATTERN = ".*-RC[0-9]+.jar";
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginLoaderImpl.class);
 
@@ -82,7 +84,9 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error loading process plugins", e);
+			logger.debug("Error loading process plugins", e);
+			logger.warn("Error loading process plugins: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
@@ -118,14 +122,22 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 			if (definitions.size() != 1)
 				return null;
 
-			boolean draft = jar.getFileName().toString().endsWith(FILE_DRAFT_SUFFIX);
+			String filename = jar.getFileName().toString();
+			boolean isSnapshot = filename.endsWith(SNAPSHOT_FILE_SUFFIX);
+			boolean isMilestone = filename.matches(MILESTONE_FILE_PATTERN);
+			boolean isReleaseCandidate = filename.matches(RELEASE_CANDIDATE_FILE_PATTERN);
+
+			boolean draft = isSnapshot || isMilestone || isReleaseCandidate;
+
 			return factory.createProcessPlugin(definitions.get(0).get(), draft, jar, classLoader, fhirContext,
 					environment);
 		}
 		catch (Exception e)
 		{
-			logger.warn("Ignoring {}: Unable to load process plugin {} - {}", jar.toString(), e.getClass().getName(),
+			logger.debug("Ignoring {}: Unable to load process plugin", jar.toString(), e);
+			logger.warn("Ignoring {}: Unable to load process plugin: {} - {}", jar.toString(), e.getClass().getName(),
 					e.getMessage());
+
 			return null;
 		}
 	}

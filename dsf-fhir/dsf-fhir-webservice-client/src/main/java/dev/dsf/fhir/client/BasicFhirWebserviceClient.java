@@ -45,6 +45,13 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 
 	<R extends Resource> boolean exists(Class<R> resourceType, String id);
 
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @return {@link InputStream} needs to be closed
+	 */
 	InputStream readBinary(String id, MediaType mediaType);
 
 	/**

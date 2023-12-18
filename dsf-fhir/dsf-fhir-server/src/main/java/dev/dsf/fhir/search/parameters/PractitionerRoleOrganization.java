@@ -28,9 +28,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = PractitionerRoleOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-organization", type = SearchParamType.REFERENCE, documentation = "The identity of the organization the practitioner represents / acts on behalf of")
 public class PractitionerRoleOrganization extends AbstractReferenceParameter<PractitionerRole>
 {
-	public static final String RESOURCE_TYPE_NAME = "PractitionerRole";
+	private static final String RESOURCE_TYPE_NAME = "PractitionerRole";
 	public static final String PARAMETER_NAME = "organization";
-	public static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
 	public static List<String> getIncludeParameterValues()
 	{
@@ -49,30 +49,18 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "practitioner_role->'organization'->>'reference' = ?";
-			case IDENTIFIER:
+			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"practitioner_role->'organization'->>'reference' = ?";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return PRACTITIONER_IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + PRACTITIONER_IDENTIFIERS_SUBQUERY
-								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> PRACTITIONER_IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY ->
+					"(SELECT count(*) FROM jsonb_array_elements(" + PRACTITIONER_IDENTIFIERS_SUBQUERY
+							+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -143,41 +131,26 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(PractitionerRole resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof PractitionerRole))
-			return false;
-
-		PractitionerRole pR = (PractitionerRole) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (pR.getOrganization().getResource() instanceof Organization)
-			{
-				Organization o = (Organization) pR.getOrganization().getResource();
+			if (resource.getOrganization().getResource() instanceof Organization o)
 				return o.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
 			else
 				return false;
 		}
 		else
 		{
-			String ref = pR.getOrganization().getReference();
-			switch (valueAndType.type)
+			String ref = resource.getOrganization().getReference();
+			return switch (valueAndType.type)
 			{
-				case ID:
-					return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-				case RESOURCE_NAME_AND_ID:
-					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-				case URL:
-					return ref.equals(valueAndType.url);
-				default:
-					return false;
-			}
+				case ID -> ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
+				case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+				case URL -> ref.equals(valueAndType.url);
+				default -> false;
+			};
 		}
 	}
 

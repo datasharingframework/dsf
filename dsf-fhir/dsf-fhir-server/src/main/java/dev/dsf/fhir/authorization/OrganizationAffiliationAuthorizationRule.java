@@ -45,20 +45,19 @@ public class OrganizationAffiliationAuthorizationRule
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			OrganizationAffiliation newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			OrganizationAffiliation newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity,
-			OrganizationAffiliation newResource)
+	private Optional<String> newResourceOk(Connection connection, OrganizationAffiliation newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (newResource.hasOrganization())
 		{
@@ -162,6 +161,7 @@ public class OrganizationAffiliationAuthorizationRule
 		if (!uQp.isEmpty())
 		{
 			logger.warn("Unable to search for OrganizationAffiliation: Unsupported query parameters: {}", uQp);
+
 			throw new IllegalStateException(
 					"Unable to search for OrganizationAffiliation: Unsupported query parameters");
 		}
@@ -173,7 +173,10 @@ public class OrganizationAffiliationAuthorizationRule
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Unable to search for OrganizationAffiliation", e);
+			logger.debug("Unable to search for OrganizationAffiliation", e);
+			logger.warn("Unable to search for OrganizationAffiliation: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			throw new RuntimeException("Unable to search for OrganizationAffiliation", e);
 		}
 	}
@@ -212,7 +215,10 @@ public class OrganizationAffiliationAuthorizationRule
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Unable to search for OrganizationAffiliation", e);
+				logger.debug("Unable to search for OrganizationAffiliation", e);
+				logger.warn("Unable to search for OrganizationAffiliation: {} - {}", e.getClass().getName(),
+						e.getMessage());
+
 				throw new RuntimeException("Unable to search for OrganizationAffiliation", e);
 			}
 		};

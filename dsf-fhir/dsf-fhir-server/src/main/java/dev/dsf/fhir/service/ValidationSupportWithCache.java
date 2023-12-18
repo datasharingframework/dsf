@@ -34,12 +34,12 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationSupportWithCache.class);
 
-	private final class CacheEntry<R extends Resource>
+	private static final class CacheEntry<R extends Resource>
 	{
-		private final Supplier<R> resourceSupplier;
-		private SoftReference<R> ref;
+		final Supplier<R> resourceSupplier;
+		SoftReference<R> ref;
 
-		public CacheEntry(R resource, Supplier<R> resourceSupplier)
+		CacheEntry(R resource, Supplier<R> resourceSupplier)
 		{
 			this.ref = new SoftReference<>(resource);
 			this.resourceSupplier = resourceSupplier;
@@ -53,9 +53,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		public R get()
 		{
 			if (ref == null || ref.get() == null)
-			{
 				ref = read();
-			}
 
 			return ref.get();
 		}
@@ -130,16 +128,14 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 
 	private void add(Resource resource)
 	{
-		if (resource instanceof CodeSystem)
-			doAdd((CodeSystem) resource, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion,
+		if (resource instanceof CodeSystem c)
+			doAdd(c, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion,
 					url -> (CodeSystem) delegate.fetchCodeSystem(url));
-		else if (resource instanceof StructureDefinition)
-			doAdd((StructureDefinition) resource, structureDefinitions, StructureDefinition::getUrl,
-					StructureDefinition::getVersion,
+		else if (resource instanceof StructureDefinition s)
+			doAdd(s, structureDefinitions, StructureDefinition::getUrl, StructureDefinition::getVersion,
 					url -> (StructureDefinition) delegate.fetchStructureDefinition(url));
-		else if (resource instanceof ValueSet)
-			doAdd((ValueSet) resource, valueSets, ValueSet::getUrl, ValueSet::getVersion,
-					url -> (ValueSet) delegate.fetchValueSet(url));
+		else if (resource instanceof ValueSet v)
+			doAdd(v, valueSets, ValueSet::getUrl, ValueSet::getVersion, url -> (ValueSet) delegate.fetchValueSet(url));
 	}
 
 	private <R extends Resource> void doAdd(R resource, ConcurrentMap<String, CacheEntry<R>> cache,
@@ -169,13 +165,12 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 
 	private void remove(Resource resource)
 	{
-		if (resource instanceof CodeSystem)
-			doRemove((CodeSystem) resource, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion);
-		else if (resource instanceof StructureDefinition)
-			doRemove((StructureDefinition) resource, structureDefinitions, StructureDefinition::getUrl,
-					StructureDefinition::getVersion);
-		else if (resource instanceof ValueSet)
-			doRemove((ValueSet) resource, valueSets, ValueSet::getUrl, ValueSet::getVersion);
+		if (resource instanceof CodeSystem c)
+			doRemove(c, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion);
+		else if (resource instanceof StructureDefinition s)
+			doRemove(s, structureDefinitions, StructureDefinition::getUrl, StructureDefinition::getVersion);
+		else if (resource instanceof ValueSet v)
+			doRemove(v, valueSets, ValueSet::getUrl, ValueSet::getVersion);
 	}
 
 	private <R extends Resource> void doRemove(R resource, ConcurrentMap<String, CacheEntry<R>> cache,
@@ -213,6 +208,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		}
 	}
 
+	@Override
 	public List<IBaseResource> fetchAllConformanceResources()
 	{
 		if (!fetchAllConformanceResourcesDone.get())

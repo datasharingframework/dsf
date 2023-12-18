@@ -106,7 +106,7 @@ public class EnvGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while writing .env file to " + target.toString(), e);
+			logger.error("Error while writing .env file to {}", target.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}

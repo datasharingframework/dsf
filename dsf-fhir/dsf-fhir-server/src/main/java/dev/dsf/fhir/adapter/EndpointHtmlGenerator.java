@@ -5,6 +5,7 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.List;
 
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -27,7 +28,7 @@ public class EndpointHtmlGenerator extends ResourceHtmlGenerator implements Html
 		out.write("</div>\n");
 
 		writeMeta(resource, out);
-		writeRow("Status", (resource.hasStatus() ? resource.getStatus().toCode() : ""), out);
+		writeRow("Status", resource.hasStatus() ? resource.getStatus().toCode() : "", out);
 
 		writeSectionHeader("Endpoint", out);
 
@@ -71,7 +72,7 @@ public class EndpointHtmlGenerator extends ResourceHtmlGenerator implements Html
 			writeRowWithList("Payload Types", payloadTypes, out);
 		}
 
-		List<String> payloadMimeTypes = resource.getPayloadMimeType().stream().map(c -> c.getCode()).toList();
+		List<String> payloadMimeTypes = resource.getPayloadMimeType().stream().map(CodeType::getCode).toList();
 		if (!payloadMimeTypes.isEmpty())
 		{
 			writeRowWithList("Payload Mime Types", payloadMimeTypes, out);

@@ -1,7 +1,6 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -21,7 +20,7 @@ public class PractitionerRoleDaoJdbc extends AbstractResourceDaoJdbc<Practitione
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, PractitionerRole.class, "practitioner_roles",
 				"practitioner_role", "practitioner_role_id", PractitionerRoleIdentityFilter::new,
-				Arrays.asList(factory(PractitionerRoleActive.PARAMETER_NAME, PractitionerRoleActive::new),
+				List.of(factory(PractitionerRoleActive.PARAMETER_NAME, PractitionerRoleActive::new),
 						factory(PractitionerRoleIdentifier.PARAMETER_NAME, PractitionerRoleIdentifier::new,
 								PractitionerRoleIdentifier.getNameModifiers()),
 						factory(PractitionerRoleOrganization.PARAMETER_NAME, PractitionerRoleOrganization::new,
@@ -30,7 +29,7 @@ public class PractitionerRoleDaoJdbc extends AbstractResourceDaoJdbc<Practitione
 						factory(PractitionerRolePractitioner.PARAMETER_NAME, PractitionerRolePractitioner::new,
 								PractitionerRolePractitioner.getNameModifiers(), PractitionerRolePractitioner::new,
 								PractitionerRolePractitioner.getIncludeParameterValues())),
-				Collections.emptyList());
+				List.of());
 	}
 
 	@Override

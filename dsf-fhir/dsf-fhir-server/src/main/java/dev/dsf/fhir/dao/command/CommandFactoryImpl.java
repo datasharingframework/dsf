@@ -127,15 +127,15 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 					.getDao(resource.getClass());
 
-			if (resource instanceof StructureDefinition)
+			if (resource instanceof StructureDefinition s)
 				return new CreateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
-						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-						referenceCleaner, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
+						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
 			else
-				return dao.map(d -> new CreateCommand<R, ResourceDao<R>>(index, identity, returnType, bundle, entry,
-						serverBase, authorizationHelper, resource, d, exceptionHandler, parameterConverter,
-						responseGenerator, referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
+				return dao.map(d -> new CreateCommand<>(index, identity, returnType, bundle, entry, serverBase,
+						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
+						referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -155,15 +155,15 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 					.getDao(resource.getClass());
 
-			if (resource instanceof StructureDefinition)
+			if (resource instanceof StructureDefinition s)
 				return new UpdateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
-						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-						referenceCleaner, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
+						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
 			else
-				return dao.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, identity, returnType, bundle, entry,
-						serverBase, authorizationHelper, resource, d, exceptionHandler, parameterConverter,
-						responseGenerator, referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
+				return dao.map(d -> new UpdateCommand<>(index, identity, returnType, bundle, entry, serverBase,
+						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
+						referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -207,17 +207,16 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 							handlingType, bundle, bundle.getEntry().get(index)))
 					.flatMap(Function.identity()).collect(Collectors.toList());
 
-			switch (bundle.getType())
+			return switch (bundle.getType())
 			{
-				case BATCH:
-					return new BatchCommandList(dataSource, exceptionHandler, commands, validationHelper,
-							snapshotGenerator, eventHandler);
-				case TRANSACTION:
-					return new TransactionCommandList(dataSource, exceptionHandler, commands,
-							transactionResourcesFactory);
-				default:
-					throw new BadBundleException("Unsupported bundle type " + bundle.getType());
-			}
+				case BATCH -> new BatchCommandList(dataSource, exceptionHandler, commands, validationHelper,
+						snapshotGenerator, eventHandler);
+
+				case TRANSACTION ->
+					new TransactionCommandList(dataSource, exceptionHandler, commands, transactionResourcesFactory);
+
+				default -> throw new BadBundleException("Unsupported bundle type " + bundle.getType());
+			};
 		}
 		else
 			throw new BadBundleException("Missing bundle type");
@@ -230,35 +229,30 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		{
 			if (!entry.hasResource())
 			{
-				switch (entry.getRequest().getMethod())
+				return switch (entry.getRequest().getMethod())
 				{
-					case GET: // read, vread
-						return Stream.of(get(index, identity, returnType, bundle, entry, handlingType));
-					case HEAD: // head -> read, vread
-						return Stream.of(head(index, identity, returnType, bundle, entry, handlingType));
-					case DELETE: // delete
-						return Stream.of(delete(index, identity, returnType, bundle, entry));
-					default:
-						throw new BadBundleException("Request method " + entry.getRequest().getMethod() + " at index "
-								+ index + " not supported without resource");
-				}
+					case GET -> Stream.of(get(index, identity, returnType, bundle, entry, handlingType));
+					case HEAD -> Stream.of(head(index, identity, returnType, bundle, entry, handlingType));
+					case DELETE -> Stream.of(delete(index, identity, returnType, bundle, entry));
+
+					default -> throw new BadBundleException("Request method " + entry.getRequest().getMethod()
+							+ " at index " + index + " not supported without resource");
+				};
 			}
 			else
 			{
-				switch (entry.getRequest().getMethod())
+				return switch (entry.getRequest().getMethod())
 				{
-					case POST: // create
-						Command post = post(index, identity, returnType, bundle, entry, (Resource) entry.getResource());
-						return resolveReferences(post, index, identity, returnType, bundle, entry,
-								(Resource) entry.getResource(), HTTPVerb.POST);
-					case PUT: // update
-						Command put = put(index, identity, returnType, bundle, entry, (Resource) entry.getResource());
-						return resolveReferences(put, index, identity, returnType, bundle, entry,
-								(Resource) entry.getResource(), HTTPVerb.PUT);
-					default:
-						throw new BadBundleException("Request method " + entry.getRequest().getMethod() + " at index "
-								+ index + " not supported with resource");
-				}
+					case POST ->
+						resolveReferences(post(index, identity, returnType, bundle, entry, entry.getResource()), index,
+								identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.POST);
+
+					case PUT -> resolveReferences(put(index, identity, returnType, bundle, entry, entry.getResource()),
+							index, identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.PUT);
+
+					default -> throw new BadBundleException("Request method " + entry.getRequest().getMethod()
+							+ " at index " + index + " not supported with resource");
+				};
 			}
 		}
 		else

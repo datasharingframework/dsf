@@ -9,10 +9,8 @@ import dev.dsf.fhir.search.parameters.basic.AbstractStatusParameter;
 @SearchParameterDefinition(name = AbstractStatusParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem-status", type = SearchParamType.TOKEN, documentation = "The current status of the code system")
 public class CodeSystemStatus extends AbstractStatusParameter<CodeSystem>
 {
-	public static final String RESOURCE_COLUMN = "code_system";
-
 	public CodeSystemStatus()
 	{
-		super(RESOURCE_COLUMN, CodeSystem.class);
+		super(CodeSystem.class, "code_system");
 	}
 }

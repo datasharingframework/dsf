@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
@@ -20,13 +19,12 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "payload";
-	public static final String RESOURCE_COLUMN = "subscription";
 
 	private String payloadMimeType;
 
 	public SubscriptionPayload()
 	{
-		super(PARAMETER_NAME);
+		super(Subscription.class, PARAMETER_NAME);
 	}
 
 	@Override
@@ -46,9 +44,15 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return RESOURCE_COLUMN + "->'channel'->>'payload' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return "subscription->'channel'->>'payload' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return "subscription->'channel'->>'payload' <> ?";
 	}
 
 	@Override
@@ -71,23 +75,15 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Subscription resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Subscription))
-			return false;
-
-		if (valueAndType.negated)
-			return !Objects.equals(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
-		else
-			return Objects.equals(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
+		return valueAndType.negated ^ (resource.hasChannel() && resource.getChannel().hasPayload()
+				&& Objects.equals(resource.getChannel().getPayload(), payloadMimeType));
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return RESOURCE_COLUMN + "->'channel'->>'payload'" + sortDirectionWithSpacePrefix;
+		return "subscription->'channel'->>'payload'" + sortDirectionWithSpacePrefix;
 	}
 }

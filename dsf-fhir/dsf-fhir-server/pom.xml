@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>1.3.2</version>
+		<version>1.4.0</version>
 	</parent>
 
 	<dependencies>
@@ -249,56 +249,12 @@
 						<include>**/*DaoTest</include>
 						<include>**/*IntegrationTest</include>
 					</includes>
-					<reuseForks>false</reuseForks>
 				</configuration>
 				<executions>
 					<execution>
 						<goals>
 							<goal>integration-test</goal>
 							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<extensions>true</extensions>
-				<executions>
-					<execution>
-						<id>start-postgres</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>start</goal>
-						</goals>
-						<configuration>
-							<images>
-								<image>
-									<name>postgres:15</name>
-									<run>
-										<ports>
-											<port>127.0.0.1:54321:5432</port>
-										</ports>
-										<env>
-											<TZ>Europe/Berlin</TZ>
-											<POSTGRES_USER>postgres</POSTGRES_USER>
-											<POSTGRES_PASSWORD>password</POSTGRES_PASSWORD>
-											<POSTGRES_DB>db</POSTGRES_DB>
-										</env>
-										<wait>
-											<!-- <log>(?s)database system is ready to accept connections.*database system is ready to accept connections</log> -->
-											<time>2500</time>
-										</wait>
-									</run>
-								</image>
-							</images>
-						</configuration>
-					</execution>
-					<execution>
-						<id>stop-postgres</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
 						</goals>
 					</execution>
 				</executions>

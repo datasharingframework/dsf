@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
@@ -20,13 +19,17 @@ public class SubscriptionCriteria extends AbstractStringParameter<Subscription>
 
 	public SubscriptionCriteria()
 	{
-		super(PARAMETER_NAME);
+		super(Subscription.class, PARAMETER_NAME);
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->>'criteria' = ?";
+		return switch (valueAndType.type)
+		{
+			case STARTS_WITH, CONTAINS -> "lower(subscription->>'criteria') LIKE ?";
+			case EXACT -> "subscription->>'criteria' = ?";
+		};
 	}
 
 	@Override
@@ -39,21 +42,36 @@ public class SubscriptionCriteria extends AbstractStringParameter<Subscription>
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		statement.setString(parameterIndex, valueAndType.value);
+		switch (valueAndType.type)
+		{
+			case STARTS_WITH:
+				statement.setString(parameterIndex, valueAndType.value.toLowerCase() + "%");
+				return;
+
+			case CONTAINS:
+				statement.setString(parameterIndex, "%" + valueAndType.value.toLowerCase() + "%");
+				return;
+
+			case EXACT:
+				statement.setString(parameterIndex, valueAndType.value);
+				return;
+		}
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Subscription resource)
 	{
-		if (!isDefined())
-			throw notDefined();
+		return resource.hasCriteria() && criteriaMatches(resource.getCriteria());
+	}
 
-		if (!(resource instanceof Subscription))
-			return false;
-
-		Subscription s = (Subscription) resource;
-
-		return Objects.equals(valueAndType.value, s.getCriteria());
+	private boolean criteriaMatches(String criteria)
+	{
+		return switch (valueAndType.type)
+		{
+			case STARTS_WITH -> criteria.toLowerCase().startsWith(valueAndType.value.toLowerCase());
+			case CONTAINS -> criteria.toLowerCase().contains(valueAndType.value.toLowerCase());
+			case EXACT -> Objects.equals(criteria, valueAndType.value);
+		};
 	}
 
 	@Override
@@ -61,5 +79,4 @@ public class SubscriptionCriteria extends AbstractStringParameter<Subscription>
 	{
 		return "subscription->>'criteria'" + sortDirectionWithSpacePrefix;
 	}
-
 }

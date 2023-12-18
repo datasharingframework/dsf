@@ -18,9 +18,9 @@ public class ResourceProfile<R extends Resource> extends AbstractCanonicalUrlPar
 
 	private final String resourceColumn;
 
-	public ResourceProfile(String resourceColumn)
+	public ResourceProfile(Class<R> resourceType, String resourceColumn)
 	{
-		super(PARAMETER_NAME);
+		super(resourceType, PARAMETER_NAME);
 
 		this.resourceColumn = resourceColumn;
 	}
@@ -49,24 +49,17 @@ public class ResourceProfile<R extends Resource> extends AbstractCanonicalUrlPar
 	@Override
 	public int getSqlParameterCount()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case PRECISE:
-				return valueAndType.version != null ? 1 : 2;
-			case BELOW:
-				return 1;
-			default:
-				return 0;
-		}
+			case PRECISE -> valueAndType.version != null ? 1 : 2;
+			case BELOW -> 1;
+		};
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		switch (valueAndType.type)
 		{
 			case PRECISE:
@@ -92,11 +85,8 @@ public class ResourceProfile<R extends Resource> extends AbstractCanonicalUrlPar
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(R resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
 		switch (valueAndType.type)
 		{
 			case PRECISE:

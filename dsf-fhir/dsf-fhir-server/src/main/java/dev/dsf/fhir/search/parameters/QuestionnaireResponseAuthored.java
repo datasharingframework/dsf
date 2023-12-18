@@ -13,6 +13,7 @@ public class QuestionnaireResponseAuthored extends AbstractDateTimeParameter<Que
 
 	public QuestionnaireResponseAuthored()
 	{
-		super(PARAMETER_NAME, "questionnaire_response->>'authored'");
+		super(QuestionnaireResponse.class, PARAMETER_NAME, "questionnaire_response->>'authored'",
+				fromDateTime(QuestionnaireResponse::hasAuthoredElement, QuestionnaireResponse::getAuthoredElement));
 	}
 }

@@ -1421,7 +1421,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		BasicDataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", BasicDataSource.class);
 
 		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0,
-				TestOrganizationIdentity.local(organizationProvider.getLocalOrganization().get()), task, BASE_URL,
+				TestOrganizationIdentity.local(organizationProvider.getLocalOrganization().get()), task, getBaseUrl(),
 				referenceExtractor, referenceResolver, responseGenerator);
 		try (Connection connection = dataSource.getConnection())
 		{
@@ -1440,7 +1440,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		BundleEntryComponent entry = bundle.addEntry()
-				.setFullUrl(created.getIdElement().withServerBase(BASE_URL, "Task").toVersionless().getValue());
+				.setFullUrl(created.getIdElement().withServerBase(getBaseUrl(), "Task").toVersionless().getValue());
 		entry.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
 				.setUrl("Task/" + created.getIdElement().getIdPart());
 

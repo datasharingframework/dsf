@@ -119,6 +119,12 @@ public class PropertiesConfig implements InitializingBean
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> proxyNoProxy;
 
+	@Value("${dev.dsf.server.auth.oidc.authorization.code.flow:false}")
+	private boolean oidcAuthorizationCodeFlowEnabled;
+
+	@Value("${dev.dsf.server.auth.oidc.bearer.token:false}")
+	private boolean oidcBearerTokenEnabled;
+
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
@@ -268,6 +274,16 @@ public class PropertiesConfig implements InitializingBean
 	public int getJettyStatusConnectorPort()
 	{
 		return jettyStatusConnectorPort;
+	}
+
+	public boolean getOidcAuthorizationCodeFlowEnabled()
+	{
+		return oidcAuthorizationCodeFlowEnabled;
+	}
+
+	public boolean getOidcBearerTokenEnabled()
+	{
+		return oidcBearerTokenEnabled;
 	}
 
 	@Bean

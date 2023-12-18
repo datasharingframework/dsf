@@ -8,8 +8,8 @@ import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -22,13 +22,12 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class SubscriptionType extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "type";
-	public static final String RESOURCE_COLUMN = "subscription";
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType channelType;
+	private SubscriptionChannelType channelType;
 
 	public SubscriptionType()
 	{
-		super(PARAMETER_NAME);
+		super(Subscription.class, PARAMETER_NAME);
 	}
 
 	@Override
@@ -41,15 +40,15 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 			channelType = toChannelType(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType toChannelType(
-			List<? super SearchQueryParameterError> errors, String status, String queryParameterValue)
+	private SubscriptionChannelType toChannelType(List<? super SearchQueryParameterError> errors, String status,
+			String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
 
 		try
 		{
-			return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(status);
+			return SubscriptionChannelType.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
@@ -66,9 +65,15 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return RESOURCE_COLUMN + "->'channel'->>'type' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return "subscription->'channel'->>'type' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return "subscription->'channel'->>'type' <> ?";
 	}
 
 	@Override
@@ -91,23 +96,15 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Subscription resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Subscription))
-			return false;
-
-		if (valueAndType.negated)
-			return !Objects.equals(((Subscription) resource).getChannel().getType(), channelType);
-		else
-			return Objects.equals(((Subscription) resource).getChannel().getType(), channelType);
+		return valueAndType.negated ^ (resource.hasChannel() && resource.getChannel().hasType()
+				&& Objects.equals(resource.getChannel().getType(), channelType));
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return RESOURCE_COLUMN + "->'channel'->>'type'" + sortDirectionWithSpacePrefix;
+		return "subscription->'channel'->>'type'" + sortDirectionWithSpacePrefix;
 	}
 }

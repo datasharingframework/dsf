@@ -13,7 +13,7 @@ public class PageAndCount
 
 	public String getSql()
 	{
-		return " LIMIT " + count + (page > 1 ? (" OFFSET " + ((page - 1) * count)) : "");
+		return " LIMIT " + count + (page > 1 ? " OFFSET " + ((page - 1) * count) : "");
 	}
 
 	public boolean isCountOnly(int total)

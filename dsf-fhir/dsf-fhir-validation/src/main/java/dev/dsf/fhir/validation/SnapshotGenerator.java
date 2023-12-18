@@ -9,7 +9,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 public interface SnapshotGenerator
 {
-	public class SnapshotWithValidationMessages
+	class SnapshotWithValidationMessages
 	{
 		private final StructureDefinition snapshot;
 		private final List<ValidationMessage> messages = new ArrayList<>();

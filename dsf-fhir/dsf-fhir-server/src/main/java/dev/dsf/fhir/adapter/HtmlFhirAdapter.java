@@ -32,6 +32,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.web.util.HtmlUtils;
@@ -176,12 +177,11 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 		out.write("<div id=\"icons\">\n");
 
 		Principal userPrincipal = securityContext.getUserPrincipal();
-		if (userPrincipal instanceof Identity)
+		if (userPrincipal instanceof Identity i)
 		{
-			Identity identity = (Identity) userPrincipal;
 			out.write("<span id=\"hello-user\">");
 			out.write("Hello, ");
-			out.write(identity.getDisplayName());
+			out.write(i.getDisplayName());
 			out.write("</span>\n");
 		}
 
@@ -344,7 +344,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 
 	private Optional<String> getResourceUrlString(Resource resource) throws MalformedURLException
 	{
-		if (resource instanceof Resource && resource.getIdElement().hasIdPart())
+		if (resource.getIdElement().hasIdPart())
 		{
 			if (!uriInfo.getPath().contains("_history"))
 				return Optional.of(String.format("%s/%s/%s", serverBaseUrl, resource.getIdElement().getResourceType(),
@@ -354,9 +354,9 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 						String.format("%s/%s/%s/_history/%s", serverBaseUrl, resource.getIdElement().getResourceType(),
 								resource.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart()));
 		}
-		else if (resource instanceof Bundle && !resource.getIdElement().hasIdPart())
-			return ((Bundle) resource).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
-					.map(c -> c.getUrl());
+		else if (resource instanceof Bundle b && !resource.getIdElement().hasIdPart())
+			return b.getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
+					.map(BundleLinkComponent::getUrl);
 		else
 			return Optional.empty();
 	}
@@ -494,9 +494,7 @@ public class HtmlFhirAdapter extends AbstractAdapter implements MessageBodyWrite
 						return new IdType(c.getResponse().getLocation()).getResourceType();
 				}).findFirst();
 		}
-		else if (resource instanceof Resource)
-			return Optional.of(resource.getClass().getAnnotation(ResourceDef.class).name());
 		else
-			return Optional.empty();
+			return Optional.of(resource.getClass().getAnnotation(ResourceDef.class).name());
 	}
 }

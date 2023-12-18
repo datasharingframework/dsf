@@ -156,8 +156,8 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 
 	private void modifyResource(Resource resource, Connection connection) throws SQLException
 	{
-		if (resource instanceof Binary)
-			binaryDao.modifySearchResultResource((Binary) resource, connection);
+		if (resource instanceof Binary b)
+			binaryDao.modifySearchResultResource(b, connection);
 	}
 
 	private PGobject uuidToPgObject(UUID uuid)
@@ -228,8 +228,8 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 	{
 		String idSql = forId ? "id = ?" : null;
 		String typeSql = forResource ? "type = ?" : null;
-		String filterSql = filter.stream().filter(HistoryIdentityFilter::isDefined).map(f -> f.getFilterQuery())
-				.collect(Collectors.joining(" OR ", "(", ")"));
+		String filterSql = filter.stream().filter(HistoryIdentityFilter::isDefined)
+				.map(HistoryIdentityFilter::getFilterQuery).collect(Collectors.joining(" OR ", "(", ")"));
 		filterSql = "()".equals(filterSql) ? null : filterSql;
 
 		Stream<String> params = Stream.concat(atParameters.stream(), Stream.of(sinceParameter))

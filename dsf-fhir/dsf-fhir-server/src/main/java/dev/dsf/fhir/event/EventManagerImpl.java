@@ -38,8 +38,10 @@ public class EventManagerImpl implements EventManager
 			}
 			catch (Exception ex)
 			{
-				logger.warn("Error while handling {} with {}", event.getClass().getSimpleName(),
-						e.getClass().getName());
+				logger.debug("Error while handling {} with {}", event.getClass().getSimpleName(),
+						e.getClass().getName(), ex);
+				logger.warn("Error while handling {} with {}: {} - {}", event.getClass().getSimpleName(),
+						e.getClass().getName(), ex.getClass().getName(), ex.getMessage());
 			}
 		};
 	}
@@ -61,8 +63,11 @@ public class EventManagerImpl implements EventManager
 			}
 			catch (Exception ex)
 			{
-				logger.warn("Error while handling {} event{} with {}", events.size(), events.size() != 1 ? "s" : "",
-						e.getClass().getName());
+				logger.debug("Error while handling {} event{} with {}", events.size(), events.size() != 1 ? "s" : "",
+						e.getClass().getName(), ex);
+				logger.warn("Error while handling {} event{} with {}: {} - {}", events.size(),
+						events.size() != 1 ? "s" : "", e.getClass().getName(), ex.getClass().getName(),
+						ex.getMessage());
 			}
 		};
 	}

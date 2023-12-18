@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -34,9 +33,9 @@ import dev.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 @SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
 public class TaskRequester extends AbstractReferenceParameter<Task>
 {
-	public static final String RESOURCE_TYPE_NAME = "Task";
+	private static final String RESOURCE_TYPE_NAME = "Task";
 	public static final String PARAMETER_NAME = "requester";
-	public static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
+	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
 			"PractitionerRole" };
 	// TODO add Device, RelatedPerson if supported, see also doResolveReferencesForMatching, matches, getIncludeSql
 
@@ -63,32 +62,19 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	@Override
 	public String getFilterQuery()
 	{
-		switch (valueAndType.type)
+		return switch (valueAndType.type)
 		{
-			case ID:
-				// testing all TargetResourceTypeName/ID combinations
-				return "task->'requester'->>'reference' = ANY (?)";
-			case RESOURCE_NAME_AND_ID:
-			case URL:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
-				return "task->'requester'->>'reference' = ?";
-			case IDENTIFIER:
+			// testing all TargetResourceTypeName/ID combinations
+			case ID -> "task->'requester'->>'reference' = ANY (?)";
+			case RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
+				"task->'requester'->>'reference' = ?";
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				switch (valueAndType.identifier.type)
-				{
-					case CODE:
-					case CODE_AND_SYSTEM:
-					case SYSTEM:
-						return IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
-								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-				}
-			}
-		}
-
-		return "";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
+						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+			};
+		};
 	}
 
 	@Override
@@ -176,62 +162,42 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Task resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Endpoint))
-			return false;
-
-		Task t = (Task) resource;
-
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (t.getRequester().getResource() instanceof Practitioner)
-			{
-				Practitioner p = (Practitioner) t.getRequester().getResource();
+			if (resource.getRequester().getResource() instanceof Practitioner p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (t.getRequester().getResource() instanceof Organization)
-			{
-				Organization o = (Organization) t.getRequester().getResource();
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getRequester().getResource() instanceof Organization o)
 				return o.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (t.getRequester().getResource() instanceof Patient)
-			{
-				Patient p = (Patient) t.getRequester().getResource();
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getRequester().getResource() instanceof Patient p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
-			else if (t.getRequester().getResource() instanceof PractitionerRole)
-			{
-				PractitionerRole p = (PractitionerRole) t.getRequester().getResource();
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
+			else if (resource.getRequester().getResource() instanceof PractitionerRole p)
 				return p.getIdentifier().stream()
-						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
-			}
+						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
+
 			else
 				return false;
 		}
 		else
 		{
-			String ref = t.getRequester().getReference();
-			switch (valueAndType.type)
+			String ref = resource.getRequester().getReference();
+			return switch (valueAndType.type)
 			{
-				case ID:
-					return ref.equals("Practitioner" + "/" + valueAndType.id)
-							|| ref.equals("Organization" + "/" + valueAndType.id)
-							|| ref.equals("Patient" + "/" + valueAndType.id)
-							|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
-				case RESOURCE_NAME_AND_ID:
-					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-				case URL:
-					return ref.equals(valueAndType.url);
-				default:
-					return false;
-			}
+				case ID -> ref.equals("Practitioner" + "/" + valueAndType.id)
+						|| ref.equals("Organization" + "/" + valueAndType.id)
+						|| ref.equals("Patient" + "/" + valueAndType.id)
+						|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
+				case RESOURCE_NAME_AND_ID -> ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+				case URL -> ref.equals(valueAndType.url);
+				default -> false;
+			};
 		}
 	}
 
@@ -248,23 +214,24 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
 				&& Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
 						.anyMatch(n -> n.equals(includeParts.getTargetResourceTypeName())))
-			switch (includeParts.getTargetResourceTypeName())
+
+			return switch (includeParts.getTargetResourceTypeName())
 			{
-				case "Practitioner":
-					return "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-							+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference') AS practitioners";
-				case "Organization":
-					return "(SELECT jsonb_build_array(organization) FROM current_organizations"
-							+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference') AS organizations";
-				case "Patient":
-					return "(SELECT jsonb_build_array(patient) FROM current_patients"
-							+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference') AS patients";
-				case "PractitionerRole":
-					return "(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
+				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
+						+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference') AS practitioners";
+
+				case "Organization" -> "(SELECT jsonb_build_array(organization) FROM current_organizations"
+						+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference') AS organizations";
+
+				case "Patient" -> "(SELECT jsonb_build_array(patient) FROM current_patients"
+						+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference') AS patients";
+
+				case "PractitionerRole" ->
+					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
 							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference') AS practitioner_roles";
-				default:
-					return null;
-			}
+
+				default -> null;
+			};
 		else
 			return null;
 	}

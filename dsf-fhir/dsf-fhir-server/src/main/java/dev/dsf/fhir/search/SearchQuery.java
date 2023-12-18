@@ -42,7 +42,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	public static final String[] STANDARD_PARAMETERS = { PARAMETER_SORT, PARAMETER_INCLUDE, PARAMETER_REVINCLUDE,
 			PARAMETER_PAGE, PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY, PARAMETER_SUMMARY };
 
-	public static final String[] SINGLE_VALUE_PARAMETERS = { PARAMETER_SORT, PARAMETER_PAGE, PARAMETER_COUNT,
+	private static final String[] SINGLE_VALUE_PARAMETERS = { PARAMETER_SORT, PARAMETER_PAGE, PARAMETER_COUNT,
 			PARAMETER_FORMAT, PARAMETER_PRETTY, PARAMETER_SUMMARY };
 
 	public static class SearchQueryBuilder<R extends Resource>
@@ -50,7 +50,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		public static <R extends Resource> SearchQueryBuilder<R> create(Class<R> resourceType, String resourceTable,
 				String resourceColumn, int page, int count)
 		{
-			return new SearchQueryBuilder<R>(resourceType, resourceTable, resourceColumn, page, count);
+			return new SearchQueryBuilder<>(resourceType, resourceTable, resourceColumn, page, count);
 		}
 
 		private final Class<R> resourceType;
@@ -119,7 +119,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		public SearchQuery<R> build()
 		{
-			return new SearchQuery<R>(resourceType, resourceTable, resourceColumn, identityFilter, page, count,
+			return new SearchQuery<>(resourceType, resourceTable, resourceColumn, identityFilter, page, count,
 					searchParameters, revIncludeParameters);
 		}
 	}
@@ -404,7 +404,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	{
 		String countQueryMain = "SELECT count(*) FROM current_" + resourceTable;
 
-		return countQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "");
+		return countQueryMain + (!filterQuery.isEmpty() ? " WHERE " + filterQuery : "");
 	}
 
 	@Override
@@ -413,7 +413,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		String searchQueryMain = "SELECT " + resourceColumn + includeSql + revIncludeSql + " FROM current_"
 				+ resourceTable;
 
-		return searchQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "") + sortSql
+		return searchQueryMain + (!filterQuery.isEmpty() ? " WHERE " + filterQuery : "") + sortSql
 				+ pageAndCount.getSql();
 	}
 
@@ -442,7 +442,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		}
 		catch (SQLException e)
 		{
-			logger.warn("Error while modifying prepared statement '{}': {}", statement.toString(), e.getMessage());
+			logger.debug("Error while modifying prepared statement '{}'", statement.toString(), e);
 			throw e;
 		}
 	}
@@ -470,7 +470,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		if (!sortParameters.isEmpty())
 		{
-			String values = sortParameters.stream().map(p -> p.getBundleUriQueryParameterValuePart())
+			String values = sortParameters.stream()
+					.map(SearchQuerySortParameterConfiguration::getBundleUriQueryParameterValuePart)
 					.collect(Collectors.joining(","));
 			bundleUri.replaceQueryParam(PARAMETER_SORT, values);
 		}
@@ -490,6 +491,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		return bundleUri;
 	}
 
+	@Override
 	public Class<R> getResourceType()
 	{
 		return resourceType;
@@ -498,10 +500,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	@Override
 	public void resloveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
 	{
-		if (resource == null)
-			return;
-
-		if (!getResourceType().isInstance(resource))
+		if (resource == null || !getResourceType().isInstance(resource))
 			return;
 
 		List<SQLException> exceptions = searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p ->
@@ -528,10 +527,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	@Override
 	public boolean matches(Resource resource)
 	{
-		if (resource == null)
-			return false;
-
-		if (!getResourceType().isInstance(resource))
+		if (resource == null || !getResourceType().isInstance(resource))
 			return false;
 
 		return searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p -> p.matches(resource))

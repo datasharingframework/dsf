@@ -8,7 +8,6 @@ import java.util.Objects;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
@@ -22,13 +21,12 @@ import dev.dsf.fhir.search.parameters.basic.TokenSearchType;
 public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "status";
-	public static final String RESOURCE_COLUMN = "subscription";
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionStatus status;
+	private Subscription.SubscriptionStatus status;
 
 	public SubscriptionStatus()
 	{
-		super(PARAMETER_NAME);
+		super(Subscription.class, PARAMETER_NAME);
 	}
 
 	@Override
@@ -41,15 +39,15 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 			status = toStatus(errors, valueAndType.codeValue, queryParameterValue);
 	}
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionStatus toStatus(
-			List<? super SearchQueryParameterError> errors, String status, String queryParameterValue)
+	private Subscription.SubscriptionStatus toStatus(List<? super SearchQueryParameterError> errors, String status,
+			String queryParameterValue)
 	{
 		if (status == null || status.isBlank())
 			return null;
 
 		try
 		{
-			return org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status);
+			return Subscription.SubscriptionStatus.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
@@ -66,9 +64,15 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return RESOURCE_COLUMN + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return "subscription->>'status' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return "subscription->>'status' <> ?";
 	}
 
 	@Override
@@ -91,23 +95,14 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(Subscription resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!(resource instanceof Subscription))
-			return false;
-
-		if (valueAndType.negated)
-			return !Objects.equals(((Subscription) resource).getStatus(), status);
-		else
-			return Objects.equals(((Subscription) resource).getStatus(), status);
+		return valueAndType.negated ^ (resource.hasStatus() && Objects.equals(resource.getStatus(), status));
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return RESOURCE_COLUMN + "->>'status'" + sortDirectionWithSpacePrefix;
+		return "subscription->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }

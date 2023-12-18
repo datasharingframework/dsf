@@ -57,24 +57,28 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				if (!resourceExists(connection, newResource))
 				{
 					logger.info("Create of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
+
 					return Optional.of("Identity is local identity and has role " + FhirServerRole.CREATE);
 				}
 				else
 				{
 					logger.warn("Create of {} unauthorized, unique resource already exists", getResourceTypeName());
+
 					return Optional.empty();
 				}
 			}
 			else
 			{
 				logger.warn("Create of {} unauthorized, {}", getResourceTypeName(), errors.get());
+
 				return Optional.empty();
 			}
 		}
 		else
 		{
 			logger.warn("Create of {} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), FhirServerRole.CREATE);
+					getResourceTypeName(), identity.getName(), FhirServerRole.CREATE);
+
 			return Optional.empty();
 		}
 	}
@@ -103,8 +107,8 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				if (accessTypes.isEmpty())
 				{
 					logger.warn("Read of {}/{}/_history/{} unauthorized for identity '{}', no matching access tags",
-							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
-							FhirServerRole.READ);
+							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName());
+
 					return Optional.empty();
 				}
 				else
@@ -114,13 +118,16 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 					logger.info("Read of {}/{}/_history/{} authorized for identity '{}', matching access {} {}",
 							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
 							accessTypes.size() == 1 ? "tag" : "tags", tags);
+
 					return Optional.of("Identity has role " + FhirServerRole.READ + ", matching access "
 							+ (accessTypes.size() == 1 ? "tag" : "tags") + " " + tags);
 				}
 			}
 			catch (SQLException e)
 			{
-				logger.warn("Error while checking read access", e);
+				logger.debug("Error while checking read access", e);
+				logger.warn("Error while checking read access: {} - {}", e.getClass().getName(), e.getMessage());
+
 				throw new RuntimeException(e);
 			}
 		}
@@ -128,6 +135,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		{
 			logger.warn("Read of {}/{}/_history/{} unauthorized for identity '{}', no role {}", getResourceTypeName(),
 					resourceId.toString(), resourceVersion, identity.getName(), FhirServerRole.READ);
+
 			return Optional.empty();
 		}
 	}
@@ -150,12 +158,14 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				{
 					logger.info("Update of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),
 							resourceId.toString(), resourceVersion, identity.getName());
+
 					return Optional.of("Identity is local identity and has role " + FhirServerRole.UPDATE);
 				}
 				else
 				{
 					logger.warn("Update of {}/{}/_history/{} unauthorized, modification not allowed",
 							getResourceTypeName(), resourceId.toString(), resourceVersion);
+
 					return Optional.empty();
 				}
 			}
@@ -163,6 +173,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 			{
 				logger.warn("Update of {}/{}/_history/{} unauthorized, {}", getResourceTypeName(),
 						resourceId.toString(), resourceVersion, errors.get());
+
 				return Optional.empty();
 			}
 		}
@@ -172,6 +183,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 					"Update of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
 					getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
 					FhirServerRole.UPDATE);
+
 			return Optional.empty();
 		}
 	}
@@ -200,6 +212,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		{
 			logger.info("Delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(), resourceId,
 					resourceVersion, identity.getName());
+
 			return Optional.of("Identity is local identity and has role " + FhirServerRole.DELETE);
 		}
 		else
@@ -207,6 +220,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 			logger.warn(
 					"Delete of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
 					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), FhirServerRole.DELETE);
+
 			return Optional.empty();
 		}
 	}

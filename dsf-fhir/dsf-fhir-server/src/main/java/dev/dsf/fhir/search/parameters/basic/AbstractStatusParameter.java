@@ -9,7 +9,6 @@ import java.util.Objects;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -20,16 +19,14 @@ public class AbstractStatusParameter<R extends MetadataResource> extends Abstrac
 	public static final String PARAMETER_NAME = "status";
 
 	private final String resourceColumn;
-	private final Class<R> resourceType;
 
 	private PublicationStatus status;
 
-	public AbstractStatusParameter(String resourceColumn, Class<R> resourceType)
+	public AbstractStatusParameter(Class<R> resourceType, String resourceColumn)
 	{
-		super(PARAMETER_NAME);
+		super(resourceType, PARAMETER_NAME);
 
 		this.resourceColumn = resourceColumn;
-		this.resourceType = resourceType;
 	}
 
 	@Override
@@ -67,9 +64,15 @@ public class AbstractStatusParameter<R extends MetadataResource> extends Abstrac
 	}
 
 	@Override
-	public String getFilterQuery()
+	protected String getPositiveFilterQuery()
 	{
-		return resourceColumn + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return resourceColumn + "->>'status' = ?";
+	}
+
+	@Override
+	protected String getNegatedFilterQuery()
+	{
+		return resourceColumn + "->>'status' <> ?";
 	}
 
 	@Override
@@ -92,18 +95,9 @@ public class AbstractStatusParameter<R extends MetadataResource> extends Abstrac
 	}
 
 	@Override
-	public boolean matches(Resource resource)
+	protected boolean resourceMatches(R resource)
 	{
-		if (!isDefined())
-			throw notDefined();
-
-		if (!resourceType.isInstance(resource))
-			return false;
-
-		if (valueAndType.negated)
-			return !Objects.equals(((MetadataResource) resource).getStatus(), status);
-		else
-			return Objects.equals(((MetadataResource) resource).getStatus(), status);
+		return valueAndType.negated ^ Objects.equals(resource.getStatus(), status);
 	}
 
 	@Override

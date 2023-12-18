@@ -30,19 +30,19 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 	protected Optional<String> newResourceOkForCreate(Connection connection, Identity identity,
 			ResearchStudy newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
 	@Override
 	protected Optional<String> newResourceOkForUpdate(Connection connection, Identity identity,
 			ResearchStudy newResource)
 	{
-		return newResourceOk(connection, identity, newResource);
+		return newResourceOk(connection, newResource);
 	}
 
-	private Optional<String> newResourceOk(Connection connection, Identity identity, ResearchStudy newResource)
+	private Optional<String> newResourceOk(Connection connection, ResearchStudy newResource)
 	{
-		List<String> errors = new ArrayList<String>();
+		List<String> errors = new ArrayList<>();
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

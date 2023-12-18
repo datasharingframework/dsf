@@ -13,10 +13,12 @@ import dev.dsf.fhir.search.parameters.SearchQuerySortParameter;
 public abstract class AbstractSearchParameter<R extends Resource>
 		implements SearchQueryParameter<R>, SearchQuerySortParameter
 {
+	protected final Class<R> resourceType;
 	protected final String parameterName;
 
-	public AbstractSearchParameter(String parameterName)
+	public AbstractSearchParameter(Class<R> resourceType, String parameterName)
 	{
+		this.resourceType = resourceType;
 		this.parameterName = parameterName;
 	}
 
@@ -52,4 +54,12 @@ public abstract class AbstractSearchParameter<R extends Resource>
 	}
 
 	protected abstract String getSortSql(String sortDirectionWithSpacePrefix);
+
+	@Override
+	public final boolean matches(Resource resource)
+	{
+		return resource != null && resourceType.isInstance(resource) && resourceMatches(resourceType.cast(resource));
+	}
+
+	protected abstract boolean resourceMatches(R resource);
 }

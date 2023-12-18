@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Organization.OrganizationContactComponent;
 import org.hl7.fhir.r4.model.Reference;
@@ -59,9 +60,9 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 		}
 
 		List<String> thumbprints = resource.getExtension().stream()
-				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()) && e.hasValue()).map(e -> e.getValue())
-				.filter(t -> t instanceof StringType).map(t -> (StringType) t).filter(s -> s.hasValue())
-				.map(s -> s.getValue()).toList();
+				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()) && e.hasValue()).map(Extension::getValue)
+				.filter(t -> t instanceof StringType).map(t -> (StringType) t).filter(StringType::hasValue)
+				.map(StringType::getValue).toList();
 		if (!thumbprints.isEmpty())
 		{
 			writeRowWithList("Thumbprints", thumbprints, out);
@@ -92,9 +93,9 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 
 				if (contact.hasName())
 					writeRow("Name",
-							(contact.getName().getNameAsSingleString() != null
+							contact.getName().getNameAsSingleString() != null
 									? contact.getName().getNameAsSingleString()
-									: ""),
+									: "",
 							out);
 
 				if (contact.hasAddress())
@@ -131,15 +132,15 @@ public class OrganizationHtmlGenerator extends ResourceHtmlGenerator implements 
 
 		if (eMail.isPresent() || phone.isPresent())
 		{
-			out.write("<div class=\"contact\">\n");
+			out.write("<div class=\"flex-element\">\n");
 
 			if (eMail.isPresent())
 				writeRowWithAdditionalRowClasses("eMail", eMail.get().getValue(),
-						(phone.isPresent() ? "contact-element-50 contact-element-margin" : "contact-element-100"), out);
+						phone.isPresent() ? "flex-element-50 flex-element-margin" : "flex-element-100", out);
 
 			if (phone.isPresent())
 				writeRowWithAdditionalRowClasses("Phone", phone.get().getValue(),
-						(eMail.isPresent() ? "contact-element-50" : "contact-element-100"), out);
+						eMail.isPresent() ? "flex-element-50" : "flex-element-100", out);
 
 			out.write("</div>\n");
 		}

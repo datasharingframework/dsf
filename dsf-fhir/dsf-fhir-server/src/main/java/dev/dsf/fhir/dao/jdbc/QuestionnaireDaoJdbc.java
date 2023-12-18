@@ -2,8 +2,7 @@ package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -15,6 +14,7 @@ import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.search.filter.QuestionnaireIdentityFilter;
 import dev.dsf.fhir.search.parameters.QuestionnaireDate;
 import dev.dsf.fhir.search.parameters.QuestionnaireIdentifier;
+import dev.dsf.fhir.search.parameters.QuestionnaireName;
 import dev.dsf.fhir.search.parameters.QuestionnaireStatus;
 import dev.dsf.fhir.search.parameters.QuestionnaireUrl;
 import dev.dsf.fhir.search.parameters.QuestionnaireVersion;
@@ -27,16 +27,18 @@ public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire>
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Questionnaire.class, "questionnaires",
 				"questionnaire", "questionnaire_id", QuestionnaireIdentityFilter::new,
-				Arrays.asList(factory(QuestionnaireDate.PARAMETER_NAME, QuestionnaireDate::new),
+				List.of(factory(QuestionnaireDate.PARAMETER_NAME, QuestionnaireDate::new),
 						factory(QuestionnaireIdentifier.PARAMETER_NAME, QuestionnaireIdentifier::new,
 								QuestionnaireIdentifier.getNameModifiers()),
+						factory(QuestionnaireName.PARAMETER_NAME, QuestionnaireName::new,
+								QuestionnaireName.getNameModifiers()),
 						factory(QuestionnaireStatus.PARAMETER_NAME, QuestionnaireStatus::new,
 								QuestionnaireStatus.getNameModifiers()),
 						factory(QuestionnaireUrl.PARAMETER_NAME, QuestionnaireUrl::new,
 								QuestionnaireUrl.getNameModifiers()),
 						factory(QuestionnaireVersion.PARAMETER_NAME, QuestionnaireVersion::new,
 								QuestionnaireVersion.getNameModifiers())),
-				Collections.emptyList());
+				List.of());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

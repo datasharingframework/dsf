@@ -26,6 +26,7 @@ public class EventResourceHandlerImpl<R extends Resource> implements EventResour
 		this.resourceClass = resourceClass;
 	}
 
+	@Override
 	public void onResource(Resource resource)
 	{
 		logger.trace("Resource of type {} received", resource.getClass().getAnnotation(ResourceDef.class).name());
@@ -51,7 +52,9 @@ public class EventResourceHandlerImpl<R extends Resource> implements EventResour
 		}
 		catch (SQLException e)
 		{
+			logger.debug("Unable to write last event time to db", e);
 			logger.warn("Unable to write last event time to db: {} - {}", e.getClass().getName(), e.getMessage());
+
 			throw new RuntimeException(e);
 		}
 	}
