@@ -113,7 +113,7 @@ public class BundleTest
 	public void testBundleVersionTag() throws Exception
 	{
 		IdType i = new IdType(null, "id", "version");
-		System.out.println(i.withResourceType("Bundle").getValueAsString());
+		logger.debug(i.withResourceType("Bundle").getValueAsString());
 
 		Bundle b = new Bundle();
 		b.setIdElement(new IdType("Bundle", UUID.randomUUID().toString(), "123"));

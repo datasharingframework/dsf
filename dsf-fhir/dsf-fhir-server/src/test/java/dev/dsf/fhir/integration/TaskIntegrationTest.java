@@ -37,6 +37,8 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.client.FhirWebserviceClient;
@@ -53,6 +55,8 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(TaskIntegrationTest.class);
+
 	@Test(expected = WebApplicationException.class)
 	public void testCreateTaskStartPingProcessNotAllowedForRemoteUser() throws Exception
 	{
@@ -1425,9 +1429,9 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				referenceExtractor, referenceResolver, responseGenerator);
 		try (Connection connection = dataSource.getConnection())
 		{
-			System.out.println(fhirContext.newJsonParser().encodeResourceToString(task));
+			logger.debug(fhirContext.newJsonParser().encodeResourceToString(task));
 			referencesHelper.resolveLogicalReferences(connection);
-			System.out.println(fhirContext.newJsonParser().encodeResourceToString(task));
+			logger.debug(fhirContext.newJsonParser().encodeResourceToString(task));
 		}
 
 		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);

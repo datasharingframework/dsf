@@ -24,12 +24,16 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
 
 public class ProcessAuthorizationHelperTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(ProcessAuthorizationHelperTest.class);
+
 	private final ProcessAuthorizationHelper helper = new ProcessAuthorizationHelperImpl();
 
 	private ActivityDefinition createActivityDefinition()
@@ -955,7 +959,7 @@ public class ProcessAuthorizationHelperTest
 		ad = helper.add(ad, messageName, taskProfile, Collections.singleton(requesterLocalRolePractitioner),
 				Collections.singleton(recipientLocalAll));
 
-		System.out.println(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(ad));
+		logger.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(ad));
 
 		assertNotNull(ad);
 		assertTrue(ad.hasExtension());
