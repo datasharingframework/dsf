@@ -394,12 +394,34 @@ function adaptTaskFormInputs() {
 			let currentUrl = window.location.origin + window.location.pathname
 			let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile
 
-			loadStructureDefinition(requestUrl).then(bundle => parseStructureDefinition(bundle))
+			loadResource(requestUrl).then(bundle => parseStructureDefinition(bundle))
 		}
 	}
 }
 
-function loadStructureDefinition(url) {
+function adaptQuestionnaireResponseInputsIfNotVersion1_0_0() {
+	const resourceType = getResourceTypeForCurrentUrl();
+
+	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === 'QuestionnaireResponse') {
+		const questionnaireResponse = getResourceAsJson()
+
+		if (questionnaireResponse.status === 'in-progress' && questionnaireResponse.questionnaire !== null) {
+      const urlVersion = questionnaireResponse.questionnaire.split('|')
+
+      if (urlVersion.length > 1) {
+        const url = urlVersion[0]
+        const version = urlVersion[1]
+
+        let currentUrl = window.location.origin + window.location.pathname
+        let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/QuestionnaireResponse")) + "/Questionnaire?url=" + url + '&version=' + version
+
+        loadResource(requestUrl).then(bundle => parseQuestionnaire(bundle))
+      }
+		}
+	}
+}
+
+function loadResource(url) {
 	return fetch(url, {
 		method: "GET",
 		headers: {
@@ -409,17 +431,37 @@ function loadStructureDefinition(url) {
 }
 
 function parseStructureDefinition(bundle) {
-	if (bundle.entry.length > 0 && bundle.entry[0].resource != null) {
+	if (bundle.entry.length > 0 && bundle.entry[0].resource !== null) {
 		const structureDefinition = bundle.entry[0].resource
 
-		if (structureDefinition.differential != null) {
+		if (structureDefinition.differential !== null) {
 			const differentials = structureDefinition.differential.element
 			const slices = filterInputSlices(differentials)
 			const groupedSlices = groupBy(slices, d => d.id.split(".")[1])
 			const definitions = getDefinitions(groupedSlices)
 
 			const indices = new Map()
-			definitions.forEach(definition => { modifyInputRow(definition, indices) })
+			definitions.forEach(definition => { modifyTaskInputRow(definition, indices) })
+		}
+	}
+}
+
+function parseQuestionnaire(bundle) {
+	if (bundle.entry.length > 0 && bundle.entry[0].resource !== null) {
+		const questionnaire = bundle.entry[0].resource
+
+		if (questionnaire.meta !== null && questionnaire.meta.profile !== null && questionnaire.meta.profile.length > 0) {
+		  const profile = questionnaire.meta.profile[0]
+      const urlVersion = profile.split('|')
+
+      if (urlVersion.length > 1) {
+        const url = urlVersion[0]
+        const version = urlVersion[1]
+
+        if (version !== '1.0.0' && questionnaire.item !== undefined) {
+          questionnaire.item.forEach(item => { modifyQuestionnaireInputRow(item) })
+        }
+      }
 		}
 	}
 }
@@ -455,7 +497,7 @@ function getDefinitions(groupedSlices) {
 			identifier: window.location.href,
 			typeSystem: getValueOfDifferential(differentials, "Task.input.type.coding.system", "fixedUri"),
 			typeCode: getValueOfDifferential(differentials, "Task.input.type.coding.code", "fixedCode"),
-			valueType: (valueType != undefined && valueType.length > 0) ? valueType[0].code : undefined,
+			valueType: (valueType !== undefined && valueType.length > 0) ? valueType[0].code : undefined,
 			min: getValueOfDifferential(differentials, "Task.input", "min"),
 			max: getValueOfDifferential(differentials, "Task.input", "max"),
 		}
@@ -472,7 +514,7 @@ function getValueOfDifferential(differentials, path, property) {
 	}
 }
 
-function modifyInputRow(definition, indices) {
+function modifyTaskInputRow(definition, indices) {
 	const row = document.querySelector("[name='" + definition.typeCode + "-input-row']")
 
 	if (row) {
@@ -484,7 +526,7 @@ function modifyInputRow(definition, indices) {
 
 		const label = row.querySelector("label")
 		if (label) {
-			const cardinalities = htmlToElement('<span class="cardinalities"></span>', " [" + definition.min + ".." + definition.max + "]")
+			const cardinalities = htmlToElement('<span class="cardinalities"></span>', ' [' + definition.min + '..' + definition.max + ']')
 			label.appendChild(cardinalities)
 
 			if (definition.max !== "1") {
@@ -503,6 +545,26 @@ function modifyInputRow(definition, indices) {
 		if (definition.min < 1 || definition.min === undefined)
 			row.setAttribute("optional", "")
 	}
+}
+
+function modifyQuestionnaireInputRow(item) {
+  const row = document.querySelector("[name='" + item.linkId + "-input-row']")
+
+  if (row) {
+    if (item.required !== true) {
+      row.setAttribute("optional", "")
+    }
+
+    const label = row.querySelector("label")
+    if (label) {
+      const cardinalities = htmlToElement('<span class="cardinalities"></span>', ' [' + (item.required === true ? '1': '0') + '..1]')
+      label.appendChild(cardinalities)
+    }
+  }
+
+  if (item.item) {
+    item.item.forEach(item => { modifyQuestionnaireInputRow(item) })
+  }
 }
 
 function appendInputRowAfter(inputRow, definition, indices) {

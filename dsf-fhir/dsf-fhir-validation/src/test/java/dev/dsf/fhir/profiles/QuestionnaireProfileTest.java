@@ -170,10 +170,13 @@ public class QuestionnaireProfileTest
 		res.setDate(new Date());
 		res.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		res.addItem().setLinkId("business-key").setType(Questionnaire.QuestionnaireItemType.STRING)
-				.setText("The business-key of the process execution");
+				.setText("The business-key of the process execution").setRequired(true);
 		res.addItem().setLinkId("user-task-id").setType(Questionnaire.QuestionnaireItemType.STRING)
-				.setText("The user-task-id of the process execution");
-		res.addItem().setLinkId("valid-type").setType(type).setText("valid type");
+				.setText("The user-task-id of the process execution").setRequired(true);
+
+		var item = res.addItem().setLinkId("valid-type").setType(type).setText("valid type");
+		if (!Questionnaire.QuestionnaireItemType.DISPLAY.equals(type))
+			item.setRequired(true);
 
 		return res;
 	}

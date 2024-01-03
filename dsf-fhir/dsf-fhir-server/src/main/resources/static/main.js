@@ -27,6 +27,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	checkBookmarked()
 	openInitialTab()
 	adaptTaskFormInputs()
+	adaptQuestionnaireResponseInputsIfNotVersion1_0_0()
 
 	document.querySelector('div#icons > svg#help-icon')?.addEventListener('click', () => showHelp())
 	document.querySelector('div#icons > svg#light-mode')?.addEventListener('click', () => setUiTheme('light'))
