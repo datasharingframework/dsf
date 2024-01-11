@@ -26,6 +26,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up JDK 17
+      if: ${{ matrix.language == 'java-kotlin' }}
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
@@ -39,6 +40,7 @@ jobs:
         queries: security-extended, security-and-quality
 
     - name: Compile with Maven
+      if: ${{ matrix.language == 'java-kotlin' }}
       run: mvn --batch-mode --fail-at-end --threads 1C -Dmaven.javadoc.skip=true -Dimpsort.skip=true -Dformatter.skip=true -Dgpg.skip -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests clean package
 
     - name: Perform CodeQL Analysis
