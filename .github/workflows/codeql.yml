@@ -39,7 +39,7 @@ jobs:
         queries: security-extended, security-and-quality
 
     - name: Compile with Maven
-      run: mvn --batch-mode --fail-at-end --threads 1C -Dgpg.skip clean compile
+      run: mvn --batch-mode --fail-at-end --threads 1C -Dmaven.javadoc.skip=true -Dimpsort.skip=true -Dformatter.skip=true -Dgpg.skip -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests clean package
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
