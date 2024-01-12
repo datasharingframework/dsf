@@ -149,7 +149,7 @@ public class FhirClientConfig implements InitializingBean
 
 		if (!Files.isReadable(certificatePath))
 			throw new IOException("Certificate file '" + certificatePath.toString() + "' not readable");
-		if (!Files.isReadable(certificatePath))
+		if (!Files.isReadable(privateKeyPath))
 			throw new IOException("Private key file '" + privateKeyPath.toString() + "' not readable");
 
 		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
