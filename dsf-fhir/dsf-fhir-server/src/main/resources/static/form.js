@@ -402,17 +402,17 @@ function adaptQuestionnaireResponseInputsIfNotVersion1_0_0(resourceType) {
 		const questionnaireResponse = getResourceAsJson()
 
 		if (questionnaireResponse.status === 'in-progress' && questionnaireResponse.questionnaire !== null) {
-      const urlVersion = questionnaireResponse.questionnaire.split('|')
+			const urlVersion = questionnaireResponse.questionnaire.split('|')
 
-      if (urlVersion.length > 1) {
-        const url = urlVersion[0]
-        const version = urlVersion[1]
+			if (urlVersion.length > 1) {
+				const url = urlVersion[0]
+				const version = urlVersion[1]
 
-        let currentUrl = window.location.origin + window.location.pathname
-        let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/QuestionnaireResponse")) + "/Questionnaire?url=" + url + '&version=' + version
+				let currentUrl = window.location.origin + window.location.pathname
+				let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/QuestionnaireResponse")) + "/Questionnaire?url=" + url + '&version=' + version
 
-        loadResource(requestUrl).then(bundle => parseQuestionnaire(bundle))
-      }
+				loadResource(requestUrl).then(bundle => parseQuestionnaire(bundle))
+			}
 		}
 	}
 }
@@ -447,17 +447,17 @@ function parseQuestionnaire(bundle) {
 		const questionnaire = bundle.entry[0].resource
 
 		if (questionnaire.meta !== null && questionnaire.meta.profile !== null && questionnaire.meta.profile.length > 0) {
-		  const profile = questionnaire.meta.profile[0]
-      const urlVersion = profile.split('|')
+			const profile = questionnaire.meta.profile[0]
+			const urlVersion = profile.split('|')
 
-      if (urlVersion.length > 1) {
-        const url = urlVersion[0]
-        const version = urlVersion[1]
+			if (urlVersion.length > 1) {
+				const url = urlVersion[0]
+				const version = urlVersion[1]
 
-        if (version !== '1.0.0' && questionnaire.item !== undefined) {
-          questionnaire.item.forEach(item => { modifyQuestionnaireInputRow(item) })
-        }
-      }
+				if (version !== '1.0.0' && questionnaire.item !== undefined) {
+					questionnaire.item.forEach(item => { modifyQuestionnaireInputRow(item) })
+				}
+			}
 		}
 	}
 }
@@ -472,7 +472,7 @@ function groupBy(list, keyGetter) {
 	const map = new Map()
 
 	list.forEach((item) => {
-		const key = keyGetter(item);
+		const key = keyGetter(item)
 		const collection = map.get(key)
 
 		if (!collection) {
@@ -480,9 +480,9 @@ function groupBy(list, keyGetter) {
 		} else {
 			collection.push(item)
 		}
-	});
+	})
 
-	return Array.from(map.values());
+	return Array.from(map.values())
 }
 
 function getDefinitions(groupedSlices) {
@@ -544,27 +544,27 @@ function modifyTaskInputRow(definition, indices) {
 }
 
 function modifyQuestionnaireInputRow(item) {
-  const row = document.querySelector("[name='" + item.linkId + "-input-row']")
+	const row = document.querySelector("[name='" + item.linkId + "-input-row']")
 
-  if (row) {
-    if (item.required !== true) {
-      row.setAttribute("optional", "")
-    }
+	if (row) {
+		if (item.required !== true) {
+			row.setAttribute("optional", "")
+		}
 
-    const label = row.querySelector("label")
-    if (label) {
-      const cardinalities = htmlToElement('<span class="cardinalities"></span>', ' [' + (item.required === true ? '1': '0') + '..1]')
-      label.appendChild(cardinalities)
-    }
-  }
+		const label = row.querySelector("label")
+		if (label) {
+			const cardinalities = htmlToElement('<span class="cardinalities"></span>', ' [' + (item.required === true ? '1': '0') + '..1]')
+			label.appendChild(cardinalities)
+		}
+	}
 
-  if (item.item) {
-    item.item.forEach(item => { modifyQuestionnaireInputRow(item) })
-  }
+	if (item.item) {
+		item.item.forEach(item => { modifyQuestionnaireInputRow(item) })
+	}
 }
 
 function appendInputRowAfter(inputRow, definition, indices) {
-	const clone = inputRow.cloneNode(true);
+	const clone = inputRow.cloneNode(true)
 
 	const index = getIndex(getDefinitionId(definition), indices)
 	clone.setAttribute("index", index)

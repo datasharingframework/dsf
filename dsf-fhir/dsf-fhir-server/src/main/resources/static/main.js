@@ -1,24 +1,24 @@
 function setUiTheme(theme = getUiTheme()) {
-    if (theme === 'dark') {
-        document.getElementById('light-mode').style.display = 'block'
-        document.getElementById('dark-mode').style.display = 'none'
-    }
-    else {
-        document.getElementById('light-mode').style.display = 'none'
-        document.getElementById('dark-mode').style.display = 'block'
-    }
-    
-    document.querySelector("html").setAttribute("theme", theme);
-    localStorage.setItem("theme", theme);
+	if (theme === 'dark') {
+		document.getElementById('light-mode').style.display = 'block'
+		document.getElementById('dark-mode').style.display = 'none'
+	}
+	else {
+		document.getElementById('light-mode').style.display = 'none'
+		document.getElementById('dark-mode').style.display = 'block'
+	}
+
+	document.querySelector("html").setAttribute("theme", theme)
+	localStorage.setItem("theme", theme)
 }
 
 function getUiTheme() {
-    if (localStorage !== null && localStorage.getItem("theme") !== null)
-        return localStorage.getItem("theme")
-    else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
-    	return "dark"
-    else
-        return "light"
+	if (localStorage !== null && localStorage.getItem("theme") !== null)
+		return localStorage.getItem("theme")
+	else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+		return "dark"
+	else
+		return "light"
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -45,10 +45,9 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector('div.tab > button#json-button')?.addEventListener('click', () => openTab('json'))
 	document.querySelector('div.tab > button#xml-button')?.addEventListener('click', () => openTab('xml'))
 
-	const resourceType = getResourceTypeForCurrentUrl();
+	const resourceType = getResourceTypeForCurrentUrl()
 
 	if (resourceType != null && resourceType[1] != null && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
-
 		// search bundle rows
 		document.querySelectorAll('div#html > div.bundle > div#list td.id-value:first-child').forEach(td => {
 			if (td?.firstChild?.href) {
@@ -60,9 +59,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		})
 	}
 
-
 	if (resourceType != null && resourceType[1] === 'QuestionnaireResponse' && resourceType[2] !== null) {
-
 		// input placeholder insert buttons
 		document.querySelectorAll('form > fieldset#form-fieldset > div.row input').forEach(input => {
 			if (input?.nextElementSibling?.tagName?.toLowerCase() === 'svg') {
@@ -80,7 +77,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	}
 
 	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2] !== null) {
-
 		// input placeholder insert buttons
 		document.querySelectorAll('form > fieldset#form-fieldset > section#inputs > div.row input').forEach(input => {
 			if (input?.nextElementSibling?.tagName?.toLowerCase() === 'svg') {
