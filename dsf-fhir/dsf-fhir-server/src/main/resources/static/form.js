@@ -382,9 +382,7 @@ function disableSpinner() {
 	spinner.classList.add("spinner-disabled")
 }
 
-function adaptTaskFormInputs() {
-	const resourceType = getResourceTypeForCurrentUrl();
-
+function adaptTaskFormInputs(resourceType) {
 	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === 'Task') {
 		const task = getResourceAsJson()
 
@@ -399,9 +397,7 @@ function adaptTaskFormInputs() {
 	}
 }
 
-function adaptQuestionnaireResponseInputsIfNotVersion1_0_0() {
-	const resourceType = getResourceTypeForCurrentUrl();
-
+function adaptQuestionnaireResponseInputsIfNotVersion1_0_0(resourceType) {
 	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === 'QuestionnaireResponse') {
 		const questionnaireResponse = getResourceAsJson()
 
