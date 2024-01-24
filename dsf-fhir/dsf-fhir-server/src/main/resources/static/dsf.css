@@ -332,7 +332,7 @@ pre.lang-html {
 }
 
 .bundle>#header>table {
-  width: 100%
+	width: 100%
 }
 
 .bundle>#header>table td:nth-child(2) {
@@ -361,7 +361,7 @@ pre.lang-html {
 .bundle>#list>table {
 	border-collapse: separate;
 	border-spacing: 0 1rem;
-  width: 100%
+	width: 100%
 }
 
 .bundle>#list>table tr:not(:first-child) {
@@ -495,42 +495,42 @@ pre.lang-html {
 }
 
 .resource {
-  border: 1px solid #ccc;
-  padding: 20px 20px 10px 20px;
-  color: var(--color-prime);
+	border: 1px solid #ccc;
+	padding: 20px 20px 10px 20px;
+	color: var(--color-prime);
 }
 
 .meta {
-  display: flex;
-  flex-direction: row
+	display: flex;
+	flex-direction: row
 }
 
 .row-list {
-  padding-inline-start: 25px;
-  margin-top: 0.15em;
-  margin-bottom: 0.1em;
+	padding-inline-start: 25px;
+	margin-top: 0.15em;
+	margin-bottom: 0.1em;
 }
 
 .row-text>a {
-  text-decoration: none;
-  color: var(--color-disabled-text);
+	text-decoration: none;
+	color: var(--color-disabled-text);
 }
 
 .row-text>a:hover {
-  text-decoration: underline;
+	text-decoration: underline;
 }
 
 .row-text, .row-text>a:visited {
-  color: var(--color-disabled-text);
-  word-wrap: break-word;
+	color: var(--color-disabled-text);
+	word-wrap: break-word;
 }
 
 .row-text.id-value {
-  font-family: monospace;
+	font-family: monospace;
 }
 
 div.row-text {
-  padding-left: 6px;
+	padding-left: 6px;
 }
 
 .row[active="true"] {
@@ -570,42 +570,42 @@ div.row-text {
 }
 
 .flex-element {
-  display: flex;
-  flex-direction: row;
+	display: flex;
+	flex-direction: row;
 }
 
 .flex-element-100 {
-  width: 100%;
-  margin-right: 0em;
+	width: 100%;
+	margin-right: 0em;
 }
 
 .flex-element-67 {
-  width: 67%;
+	width: 67%;
 }
 
 .flex-element-50 {
-  width: 50%;
-  margin-right: 0em;
+	width: 50%;
+	margin-right: 0em;
 }
 
 .flex-element-33 {
-  width: 33%;
+	width: 33%;
 }
 
 .flex-element-margin {
-  margin-right: 0.7em;
+	margin-right: 0.7em;
 }
 
 .authorization {
-  padding-bottom: 0.25em !important;
+	padding-bottom: 0.25em !important;
 }
 
 .authorization>h3
 {
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 1em 1em 0.75em 0.25em;
-  font-size: 1em;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: 1em 1em 0.75em 0.25em;
+	font-size: 1em;
 }
 
 @media print {
