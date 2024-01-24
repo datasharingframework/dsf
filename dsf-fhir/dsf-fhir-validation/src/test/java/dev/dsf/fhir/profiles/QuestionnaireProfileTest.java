@@ -23,9 +23,12 @@ public class QuestionnaireProfileTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProfileTest.class);
 
+	private static final String VERSION_1_0_0 = "1.0.0";
+	private static final String VERSION_1_5_0 = "1.5.0";
+
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-questionnaire-1.0.0.xml"), Collections.emptyList(), Collections.emptyList());
+			Arrays.asList("dsf-questionnaire-1.0.0.xml", "dsf-questionnaire-1.5.0.xml"), Collections.emptyList(), Collections.emptyList());
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -33,72 +36,83 @@ public class QuestionnaireProfileTest
 	@Test
 	public void testQuestionnaireValidTypeString()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.STRING);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.STRING);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.STRING);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeText()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.TEXT);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.TEXT);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.TEXT);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeInteger()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.INTEGER);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.INTEGER);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.INTEGER);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDecimal()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DECIMAL);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DECIMAL);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DECIMAL);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeBoolean()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.BOOLEAN);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.BOOLEAN);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.BOOLEAN);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDate()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DATE);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DATE);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DATE);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeTime()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.TIME);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.TIME);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.TIME);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDateTime()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DATETIME);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DATETIME);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DATETIME);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeUrl()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.URL);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.URL);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.URL);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeReference()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.REFERENCE);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.REFERENCE);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.REFERENCE);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDisplay()
 	{
-		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DISPLAY);
+		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DISPLAY);
+		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DISPLAY);
 	}
 
-	private void testQuestionnaireValidType(Questionnaire.QuestionnaireItemType type)
+	private void testQuestionnaireValidType(String profileVersion, Questionnaire.QuestionnaireItemType type)
 	{
-		Questionnaire res = createQuestionnaire(type);
+		Questionnaire res = createQuestionnaire(profileVersion, type);
 
 		ValidationResult result = resourceValidator.validate(res);
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
@@ -111,42 +125,48 @@ public class QuestionnaireProfileTest
 	@Test
 	public void testQuestionnaireInvalidTypeGroup()
 	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.GROUP);
+		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.GROUP);
+		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.GROUP);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeQuestion()
 	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.QUESTION);
+		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.QUESTION);
+		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.QUESTION);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeChoice()
 	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.CHOICE);
+		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.CHOICE);
+		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.CHOICE);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeOpenChoice()
 	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.OPENCHOICE);
+		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.OPENCHOICE);
+		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.OPENCHOICE);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeAttachment()
 	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.ATTACHMENT);
+		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.ATTACHMENT);
+		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.ATTACHMENT);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeQuantity()
 	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.QUANTITY);
+		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.QUANTITY);
+		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.QUANTITY);
 	}
 
-	private void testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType type)
+	private void testQuestionnaireInvalidType(String profileVersion, Questionnaire.QuestionnaireItemType type)
 	{
-		Questionnaire res = createQuestionnaire(Questionnaire.QuestionnaireItemType.STRING);
+		Questionnaire res = createQuestionnaire(profileVersion, Questionnaire.QuestionnaireItemType.STRING);
 		res.addItem().setLinkId("invalid-type").setType(type).setText("Invalid type");
 
 		ValidationResult result = resourceValidator.validate(res);
@@ -161,10 +181,10 @@ public class QuestionnaireProfileTest
 						.count());
 	}
 
-	private Questionnaire createQuestionnaire(Questionnaire.QuestionnaireItemType type)
+	private Questionnaire createQuestionnaire(String profileVersion, Questionnaire.QuestionnaireItemType type)
 	{
 		Questionnaire res = new Questionnaire();
-		res.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire");
+		res.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire|" + profileVersion);
 		res.setUrl("http://dsf.dev/fhir/Questionnaire/hello-world");
 		res.setVersion("0.1.0");
 		res.setDate(new Date());
