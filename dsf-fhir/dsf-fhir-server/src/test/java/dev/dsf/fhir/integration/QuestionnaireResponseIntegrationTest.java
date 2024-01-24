@@ -6,25 +6,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Type;
 import org.junit.Test;
 
 import dev.dsf.fhir.authentication.OrganizationProvider;
@@ -33,30 +25,22 @@ import dev.dsf.fhir.dao.QuestionnaireResponseDao;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
-public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest
+public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireIntegrationTest
 {
-	private static final String CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
-
-	private static final Date AUTHORED = Date
-			.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
-	private static final String QUESTIONNAIRE_URL = "http://dsf.dev/fhir/Questionnaire/userTask/foo";
-	private static final String QUESTIONNAIRE_VERSION = "1.0.0";
-	private static final String QUESTIONNAIRE = QUESTIONNAIRE_URL + "|" + QUESTIONNAIRE_VERSION;
-	private static final QuestionnaireResponse.QuestionnaireResponseStatus STATUS = QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS;
 
 	@Test
-	public void testCreateValidByLocalUser() throws Exception
+	public void testCreateValidByLocalUser()
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-
 		QuestionnaireResponse created = getWebserviceClient().create(questionnaireResponse);
+
 		assertNotNull(created);
 		assertNotNull(created.getIdElement().getIdPart());
 		assertNotNull(created.getIdElement().getVersionIdPart());
 	}
 
 	@Test(expected = WebApplicationException.class)
-	public void testCreateNotAllowedByLocalUser() throws Exception
+	public void testCreateNotAllowedByLocalUser()
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -73,7 +57,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	}
 
 	@Test(expected = WebApplicationException.class)
-	public void testCreateNotAllowedByRemoteUser() throws Exception
+	public void testCreateNotAllowedByRemoteUser()
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 
@@ -126,7 +110,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	}
 
 	@Test(expected = WebApplicationException.class)
-	public void testUpdateNotAllowedByLocalUserNowUserTaskId() throws Exception
+	public void testUpdateNotAllowedByLocalUserNoUserTaskId() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
@@ -157,7 +141,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 		created.setStatus(QuestionnaireResponseStatus.STOPPED);
 		created.getItem().clear();
-		addItem(created, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
+
+		addItem(created, QUESTIONNAIRE_ITEM_USER_TASK_ID_LINK, QUESTIONNAIRE_ITEM_USER_TASK_ID_TEXT,
 				new StringType(UUID.randomUUID().toString()));
 
 		try
@@ -232,23 +217,19 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasAuthored());
-		assertEquals(0, AUTHORED.compareTo(searchQuestionnaireResponse.getAuthored()));
+		assertEquals(0, QUESTIONNAIRE_RESPONSE_DATE.compareTo(searchQuestionnaireResponse.getAuthored()));
 	}
 
 	@Test
 	public void testSearchByIdentifier() throws Exception
 	{
-		final String value = UUID.randomUUID().toString();
-		final String system = "http://foo/fhir/sid/Test";
-
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		questionnaireResponse.getIdentifier().setSystem(system).setValue(value);
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("identifier", Collections.singletonList(system + "|" + value)));
+				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -259,22 +240,20 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		QuestionnaireResponse foundQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
 		assertTrue(foundQuestionnaireResponse.hasIdentifier());
+		assertEquals(TEST_IDENTIFIER_SYSTEM, foundQuestionnaireResponse.getIdentifier().getSystem());
+		assertEquals(TEST_IDENTIFIER_VALUE, foundQuestionnaireResponse.getIdentifier().getValue());
 	}
 
 	@Test
 	public void testSearchByIdentifierRemoteUser() throws Exception
 	{
-		final String value = UUID.randomUUID().toString();
-		final String system = "http://foo/fhir/sid/Test";
-
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		questionnaireResponse.getIdentifier().setSystem(system).setValue(value);
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getExternalWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("identifier", Collections.singletonList(system + "|" + value)));
+				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(0, searchBundle.getEntry().size());
@@ -283,7 +262,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	@Test
 	public void testSearchByQuestionnaireWithVersion() throws Exception
 	{
-		testSearchByQuestionnaire(QUESTIONNAIRE);
+		testSearchByQuestionnaire(QUESTIONNAIRE_URL_VERSION);
 	}
 
 	@Test
@@ -316,7 +295,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasQuestionnaire());
-		assertEquals(QUESTIONNAIRE, searchQuestionnaireResponse.getQuestionnaire());
+		assertEquals(QUESTIONNAIRE_URL_VERSION, searchQuestionnaireResponse.getQuestionnaire());
 
 		assertNotNull(searchBundle.getEntry().get(1));
 		assertNotNull(searchBundle.getEntry().get(1).getResource());
@@ -401,7 +380,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasQuestionnaire());
-		assertEquals(QUESTIONNAIRE, searchQuestionnaireResponse.getQuestionnaire());
+		assertEquals(QUESTIONNAIRE_URL_VERSION, searchQuestionnaireResponse.getQuestionnaire());
 
 		assertNotNull(searchBundle.getEntry().get(1));
 		assertNotNull(searchBundle.getEntry().get(1).getResource());
@@ -425,7 +404,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("status", Collections.singletonList(STATUS.toCode())));
+				Map.of("status", Collections.singletonList(QUESTIONNAIRE_RESPONSE_STATUS.toCode())));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -436,7 +415,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasStatus());
-		assertEquals(STATUS, searchQuestionnaireResponse.getStatus());
+		assertEquals(QUESTIONNAIRE_RESPONSE_STATUS, searchQuestionnaireResponse.getStatus());
 	}
 
 	@Test
@@ -449,9 +428,9 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
 				.getBean(OrganizationProvider.class);
-		Organization organization = organizationProvider.getLocalOrganization().get();
+		Organization localOrganization = organizationProvider.getLocalOrganization().get();
+		String organizationReference = "Organization/" + localOrganization.getIdElement().getIdPart();
 
-		String organizationReference = "Organization/" + organization.getIdElement().getIdPart();
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
 				Map.of("subject", Collections.singletonList(organizationReference), "_include",
 						Collections.singletonList("QuestionnaireResponse:subject:Organization")));
@@ -472,57 +451,10 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		assertTrue(searchBundle.getEntry().get(1).getResource() instanceof Organization);
 
 		Organization searchOrganization = (Organization) searchBundle.getEntry().get(1).getResource();
-		assertEquals(organization.getIdentifierFirstRep().getSystem(),
+		assertEquals(localOrganization.getIdentifierFirstRep().getSystem(),
 				searchOrganization.getIdentifierFirstRep().getSystem());
-		assertEquals(organization.getIdentifierFirstRep().getValue(),
+		assertEquals(localOrganization.getIdentifierFirstRep().getValue(),
 				searchOrganization.getIdentifierFirstRep().getValue());
-	}
-
-	private Questionnaire createQuestionnaire()
-	{
-		Questionnaire questionnaire = new Questionnaire();
-		questionnaire.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
-
-		questionnaire.setUrl(QUESTIONNAIRE_URL);
-		questionnaire.setVersion(QUESTIONNAIRE_VERSION);
-
-		questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
-
-		questionnaire.addItem().setLinkId("foo").setText("Approve?")
-				.setType(Questionnaire.QuestionnaireItemType.BOOLEAN).addInitial().setValue(new BooleanType(false));
-
-		return questionnaire;
-	}
-
-	private QuestionnaireResponse createQuestionnaireResponse()
-	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
-				.getBean(OrganizationProvider.class);
-		assertNotNull(organizationProvider);
-
-		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
-
-		questionnaireResponse.setQuestionnaire(QUESTIONNAIRE);
-
-		questionnaireResponse.setStatus(STATUS);
-		questionnaireResponse.setAuthored(AUTHORED);
-
-		String organizationReference = "Organization/"
-				+ organizationProvider.getLocalOrganization().get().getIdElement().getIdPart();
-		questionnaireResponse.setSubject(new Reference(organizationReference));
-
-		addItem(questionnaireResponse, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
-				new StringType(UUID.randomUUID().toString()));
-
-		return questionnaireResponse;
-	}
-
-	private void addItem(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer)
-	{
-		List<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent> answerComponent = Collections
-				.singletonList(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent().setValue(answer));
-
-		questionnaireResponse.addItem().setLinkId(linkId).setText(text).setAnswer(answerComponent);
 	}
 
 	@Test
@@ -712,7 +644,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 		List<QuestionnaireResponse> qrFromBundle = historyBundle3.getEntry().stream()
 				.filter(e -> e.hasResource() && e.getResource() instanceof QuestionnaireResponse)
-				.map(e -> (QuestionnaireResponse) e.getResource()).collect(Collectors.toList());
+				.map(e -> (QuestionnaireResponse) e.getResource()).toList();
 
 		assertEquals(1, qrFromBundle.size());
 		assertNotNull(qrFromBundle.get(0));
@@ -743,7 +675,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 		List<QuestionnaireResponse> qrFromBundle = historyBundle3.getEntry().stream()
 				.filter(e -> e.hasResource() && e.getResource() instanceof QuestionnaireResponse)
-				.map(e -> (QuestionnaireResponse) e.getResource()).collect(Collectors.toList());
+				.map(e -> (QuestionnaireResponse) e.getResource()).toList();
 
 		assertEquals(0, qrFromBundle.size());
 	}
