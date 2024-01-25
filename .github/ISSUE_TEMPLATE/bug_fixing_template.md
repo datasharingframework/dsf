@@ -10,11 +10,14 @@ Do not report a security vulnerablity as an issue. Please use the [security vuln
 -->
 
 ## Bug description
+<!--
 A clear and concise description of what the bug is.
+-->
 
 ## DSF version and other components
 I tested the bug with DSF version 1.x.y. 
 
 ## Relevant code
+<!--
 Reference to relevant code parts.
-
+-->
