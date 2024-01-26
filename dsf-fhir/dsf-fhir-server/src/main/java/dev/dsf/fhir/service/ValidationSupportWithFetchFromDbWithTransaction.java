@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -22,6 +24,8 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import dev.dsf.fhir.dao.CodeSystemDao;
+import dev.dsf.fhir.dao.MeasureDao;
+import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.ValueSetDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;
@@ -36,12 +40,15 @@ public class ValidationSupportWithFetchFromDbWithTransaction implements IValidat
 	private final StructureDefinitionDao structureDefinitionSnapshotDao;
 	private final CodeSystemDao codeSystemDao;
 	private final ValueSetDao valueSetDao;
+	private final MeasureDao measureDao;
+	private final QuestionnaireDao questionnaireDao;
 
 	private final Connection connection;
 
 	public ValidationSupportWithFetchFromDbWithTransaction(FhirContext context,
 			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
-			CodeSystemDao codeSystemDao, ValueSetDao valueSetDao, Connection connection)
+			CodeSystemDao codeSystemDao, ValueSetDao valueSetDao, MeasureDao measureDao,
+			QuestionnaireDao questionnaireDao, Connection connection)
 	{
 		this.context = context;
 
@@ -49,6 +56,8 @@ public class ValidationSupportWithFetchFromDbWithTransaction implements IValidat
 		this.structureDefinitionSnapshotDao = structureDefinitionSnapshotDao;
 		this.codeSystemDao = codeSystemDao;
 		this.valueSetDao = valueSetDao;
+		this.measureDao = measureDao;
+		this.questionnaireDao = questionnaireDao;
 
 		this.connection = connection;
 	}
@@ -89,6 +98,28 @@ public class ValidationSupportWithFetchFromDbWithTransaction implements IValidat
 				.forEach(s -> byUrl.putIfAbsent(s.getUrl(), s));
 
 		return new ArrayList<>(byUrl.values());
+	}
+
+	@Override
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri)
+	{
+		T resource = IValidationSupport.super.fetchResource(theClass, theUri);
+		if (resource != null)
+		{
+			return resource;
+		}
+
+		if (Measure.class.equals(theClass))
+		{
+			return theClass.cast(fetchMeasure(theUri));
+		}
+
+		if (Questionnaire.class.equals(theClass))
+		{
+			return theClass.cast(fetchQuestionnaire(theUri));
+		}
+
+		return null;
 	}
 
 	@Override
@@ -143,5 +174,20 @@ public class ValidationSupportWithFetchFromDbWithTransaction implements IValidat
 			return valueSet.get();
 		else
 			return null;
+	}
+
+	public Measure fetchMeasure(String url)
+	{
+		Optional<Measure> measure = throwRuntimeException(() -> measureDao.readByUrlAndVersion(url));
+		if (measure.isPresent())
+			return measure.get();
+		else
+			return null;
+	}
+
+	public Questionnaire fetchQuestionnaire(String url)
+	{
+		Optional<Questionnaire> questionnaire = throwRuntimeException(() -> questionnaireDao.readByUrlAndVersion(url));
+		return questionnaire.orElse(null);
 	}
 }

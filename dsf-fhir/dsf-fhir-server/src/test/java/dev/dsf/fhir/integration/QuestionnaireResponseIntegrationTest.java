@@ -27,10 +27,13 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireIntegrationTest
 {
-
 	@Test
-	public void testCreateValidByLocalUser()
+	public void testCreateValidByLocalUser() throws Exception
 	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponse created = getWebserviceClient().create(questionnaireResponse);
 
@@ -75,6 +78,10 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateAllowedByLocalUser() throws Exception
 	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
@@ -273,7 +280,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 
 	private void testSearchByQuestionnaire(String questionnaireUrl) throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaire();
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -311,7 +318,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchByQuestionnaireNoVersion() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaire().setVersion(null);
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100().setVersion(null);
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -350,16 +357,16 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	{
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 
-		Questionnaire questionnaire1 = createQuestionnaire().setVersion("0.1.0");
+		Questionnaire questionnaire1 = createQuestionnaireProfileVersion100().setVersion("0.1.0");
 		questionnaireDao.create(questionnaire1);
 
-		Questionnaire questionnaire2 = createQuestionnaire();
+		Questionnaire questionnaire2 = createQuestionnaireProfileVersion100();
 		questionnaireDao.create(questionnaire2);
 
-		Questionnaire questionnaire3 = createQuestionnaire().setVersion("0.2.0");
+		Questionnaire questionnaire3 = createQuestionnaireProfileVersion100().setVersion("0.2.0");
 		questionnaireDao.create(questionnaire3);
 
-		Questionnaire questionnaire4 = createQuestionnaire().setVersion(null);
+		Questionnaire questionnaire4 = createQuestionnaireProfileVersion100().setVersion(null);
 		questionnaireDao.create(questionnaire4);
 
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();

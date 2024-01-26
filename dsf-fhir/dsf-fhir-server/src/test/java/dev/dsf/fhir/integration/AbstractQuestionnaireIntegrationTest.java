@@ -7,9 +7,12 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -39,7 +42,7 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 	protected static final Date QUESTIONNAIRE_RESPONSE_DATE = Date
 			.from(LocalDateTime.parse("2022-01-02T00:00:00").toInstant(ZoneOffset.UTC));
 
-	protected Questionnaire createQuestionnaire()
+	protected Questionnaire createQuestionnaireProfileVersion100()
 	{
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire|1.0.0");
@@ -59,6 +62,39 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 				.setText(QUESTIONNAIRE_ITEM_BUSINESS_KEY_TEXT).setType(Questionnaire.QuestionnaireItemType.STRING);
 
 		return questionnaire;
+	}
+
+	protected Questionnaire createQuestionnaireProfileVersion100(String questionnaireVersion)
+	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		return questionnaire.setVersion(questionnaireVersion);
+	}
+
+	protected Questionnaire createQuestionnaireProfileVersion150()
+	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Meta meta = questionnaire.getMeta();
+
+		String profile = meta.getProfile().get(0).getValue().replace("1.0.0", "1.5.0");
+		meta.setProfile(List.of(new CanonicalType(profile)));
+
+		questionnaire.getItem().forEach(i -> i.setRequired(true));
+
+		return questionnaire;
+	}
+
+	protected Questionnaire createQuestionnaireProfileVersion150(String questionnaireVersion)
+	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion150();
+		return questionnaire.setVersion(questionnaireVersion);
+	}
+
+	protected void addItem(Questionnaire questionnaire, String linkId, String text,
+			Questionnaire.QuestionnaireItemType type, Optional<Boolean> required)
+	{
+		Questionnaire.QuestionnaireItemComponent item = questionnaire.addItem().setLinkId(linkId).setText(text)
+				.setType(type);
+		required.ifPresent(item::setRequired);
 	}
 
 	protected QuestionnaireResponse createQuestionnaireResponse()
@@ -88,6 +124,14 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 				new StringType(UUID.randomUUID().toString()));
 
 		return questionnaireResponse;
+	}
+
+	protected QuestionnaireResponse createQuestionnaireResponse(String questionnaireVersion)
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		String urlVersion = questionnaireResponse.getQuestionnaire().replace(QUESTIONNAIRE_VERSION,
+				questionnaireVersion);
+		return questionnaireResponse.setQuestionnaire(urlVersion);
 	}
 
 	protected void addItem(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer)
