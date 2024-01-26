@@ -18,9 +18,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-
 public class OrganizationIntegrationTest extends AbstractIntegrationTest
 {
 	@Test
@@ -128,8 +125,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
-		List<Extension> thumbprints = org
-				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints = org.getExtensionsByUrl(
+				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
@@ -138,7 +135,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		getWebserviceClient().update(org);
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testUpdateOrganizationWithExistingThumbprint() throws Exception
 	{
 		Bundle bundle1 = getWebserviceClient().search(Organization.class, Map.of("identifier",
@@ -154,8 +151,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle1.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org1 = (Organization) bundle1.getEntryFirstRep().getResource();
-		List<Extension> thumbprints1 = org1
-				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints1 = org1.getExtensionsByUrl(
+				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints1);
 		assertEquals(1, thumbprints1.size());
 
@@ -174,25 +171,17 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle2.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org2 = (Organization) bundle2.getEntryFirstRep().getResource();
-		List<Extension> thumbprints2 = org2
-				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints2 = org2.getExtensionsByUrl(
+				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints2);
 		assertEquals(1, thumbprints2.size());
 
 		thumbprints2.get(0).setValue(new StringType(existingThumbprint));
 
-		try
-		{
-			getWebserviceClient().update(org2);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getWebserviceClient().update(org2));
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testUpdateOrganizationWithExistingIdentifier() throws Exception
 	{
 		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
@@ -210,15 +199,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
 		org.getIdentifierFirstRep().setValue("Test_Organization");
 
-		try
-		{
-			getWebserviceClient().update(org);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getWebserviceClient().update(org));
 	}
 
 	@Test
@@ -237,15 +218,15 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
-		List<Extension> thumbprints = org
-				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints = org.getExtensionsByUrl(
+				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
 		Extension oldThumbprint = thumbprints.get(0);
 		Extension newThumbprint = new Extension(
 				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint", new StringType(
-						"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+				"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
 		org.setExtension(List.of(newThumbprint, oldThumbprint));
 		getWebserviceClient().update(org);
@@ -270,18 +251,10 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(outcomeEntry.getResource() instanceof OperationOutcome);
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testStrictSearchWithUnsupportedRevIncludeParameter() throws Exception
 	{
-		try
-		{
-			getWebserviceClient().searchWithStrictHandling(Organization.class,
-					Map.of("_revinclude", Collections.singletonList("Endpoint:foo")));
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Organization.class,
+				Map.of("_revinclude", Collections.singletonList("Endpoint:foo"))));
 	}
 }
