@@ -113,7 +113,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		for (TaskStatus illegal : illegalCreateStates)
 		{
 			t.setStatus(illegal);
-			expectForbidden(() -> getWebserviceClient().create(t));;
+			expectForbidden(() -> getWebserviceClient().create(t));
+			;
 		}
 	}
 

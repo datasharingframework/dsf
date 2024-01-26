@@ -125,8 +125,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
-		List<Extension> thumbprints = org.getExtensionsByUrl(
-				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints = org
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
@@ -151,8 +151,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle1.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org1 = (Organization) bundle1.getEntryFirstRep().getResource();
-		List<Extension> thumbprints1 = org1.getExtensionsByUrl(
-				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints1 = org1
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints1);
 		assertEquals(1, thumbprints1.size());
 
@@ -171,8 +171,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle2.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org2 = (Organization) bundle2.getEntryFirstRep().getResource();
-		List<Extension> thumbprints2 = org2.getExtensionsByUrl(
-				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints2 = org2
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints2);
 		assertEquals(1, thumbprints2.size());
 
@@ -218,15 +218,15 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(bundle.getEntry().get(0).getResource() instanceof Organization);
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
-		List<Extension> thumbprints = org.getExtensionsByUrl(
-				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		List<Extension> thumbprints = org
+				.getExtensionsByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
 		Extension oldThumbprint = thumbprints.get(0);
 		Extension newThumbprint = new Extension(
 				"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint", new StringType(
-				"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+						"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
 		org.setExtension(List.of(newThumbprint, oldThumbprint));
 		getWebserviceClient().update(org);
