@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Main Template</title>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+</head>
+<body>
+	<p th:text="${data.hello}">Hello World!</p>
+	
+	<div th:replace="~{(${contentTemplate})::content}" ></div>
+</body>
+</html>
