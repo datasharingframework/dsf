@@ -61,15 +61,29 @@ window.addEventListener('DOMContentLoaded', () => {
 	if (resourceType != null && resourceType[1] === 'QuestionnaireResponse' && resourceType[2] !== null) {
 
 		// input placeholder insert buttons
-		document.querySelectorAll('form > fieldset#form-fieldset > div.row input').forEach(input => {
-			if (input?.nextElementSibling?.tagName?.toLowerCase() === 'svg') {
-				input.nextElementSibling.addEventListener('click', () => {
+		document.querySelectorAll('form > fieldset#form-fieldset > div.row svg.insert:not([disabled])').forEach(svg => {
+			const inputs = svg.parentElement.querySelectorAll("input")
+			svg.addEventListener('click', () => {
+				inputs.forEach(input => {
 					if (input?.placeholder !== '') {
-						input.text = input.placeholder
-						input.value = input.placeholder
+						if (input.type === 'radio')
+							input.checked = input.placeholder === 'true'
+						else
+							input.value = input.placeholder
 					}
 				})
-			}
+			})
+		})
+		
+		// input value copy buttons
+		document.querySelectorAll('form > fieldset#form-fieldset > div.row svg.copy:not([disabled])').forEach(svg => {
+			const input = svg.parentElement.querySelector("input")
+			svg.addEventListener('click', () => {
+				if (input.type === 'radio')
+					navigator?.clipboard?.writeText(input.checked)
+				else
+					navigator?.clipboard?.writeText(input.value)
+			})
 		})
 
 		// complete questionnaire response
@@ -79,18 +93,36 @@ window.addEventListener('DOMContentLoaded', () => {
 	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2] !== null) {
 
 		// input placeholder insert buttons
-		document.querySelectorAll('form > fieldset#form-fieldset > section#inputs > div.row input').forEach(input => {
-			if (input?.nextElementSibling?.tagName?.toLowerCase() === 'svg') {
-				input.nextElementSibling.addEventListener('click', () => {
+		document.querySelectorAll('form > fieldset#form-fieldset > div.row svg.insert:not([disabled])').forEach(svg => {
+			const inputs = svg.parentElement.querySelectorAll("input")
+			svg.addEventListener('click', () => {
+				inputs.forEach(input => {
 					if (input?.placeholder !== '') {
-						input.text = input.placeholder
-						input.value = input.placeholder
+						if (input.type === 'radio')
+							input.checked = input.placeholder === 'true'
+						else
+							input.value = input.placeholder
 					}
 				})
-			}
+			})
+		})
+
+		// input / output value copy buttons
+		document.querySelectorAll('form > fieldset#form-fieldset > div.row svg.copy:not([disabled])').forEach(svg => {
+			const input = svg.parentElement.querySelector("input")
+			svg.addEventListener('click', () => {
+				if (input.type === 'radio')
+					navigator?.clipboard?.writeText(input.checked)
+				else
+					navigator?.clipboard?.writeText(input.value)
+			})
 		})
 
 		// start process button
 		document.querySelector('form > fieldset#form-fieldset > div.row-submit > button#start-process')?.addEventListener('click', () => startProcess())
 	}
 })
+
+window.addEventListener("popstate", (event) => {
+	openTab(event.state?.lang !== undefined ? event.state?.lang : 'html')
+});

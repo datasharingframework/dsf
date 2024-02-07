@@ -123,10 +123,6 @@ function getResourceTypeOrMisc(url) {
 		return '_misc';
 }
 
-function getBasePath() {
-
-}
-
 function getInitialBookmarks() {
 	return {
 		'_misc': ['metadata'],
@@ -134,10 +130,15 @@ function getInitialBookmarks() {
 		'CodeSystem': ['CodeSystem'],
 		'Endpoint': ['Endpoint'],
 		'NamingSystem': ['NamingSystem'],
+		'Library': ['Library'],
+		'Measure': ['Measure'],
+		'MeasureReport': ['MeasureReport'],
 		'Organization': ['Organization', 'Organization?identifier=highmed.org', 'Organization?identifier=medizininformatik-initiative.de', 'Organization?identifier=netzwerk-universitaetsmedizin.de'],
 		'OrganizationAffiliation': ['OrganizationAffiliation'],
+		'Questionnaire': ['Questionnaire'],
 		'QuestionnaireResponse': ['QuestionnaireResponse?_sort=-_lastUpdated', 'QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],
 		'Subscription': ['Subscription'],
+		'StructureDefinition': ['StructureDefinition'],
 		'Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile,identifier&status=draft'],
 		'ValueSet': ['ValueSet']
 	};

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="resource-data" th:fragment="resource-data">
+			<th:block th:insert="~{resourceElements::string}" th:with="label='URL | Version',string=${metadataResource.urlAndVersion}" th:if="${metadataResource.urlAndVersion}"></th:block>
+			<th:block th:insert="~{resourceElements::identifier}" th:with="identifier=${metadataResource.identifier}" th:if="${metadataResource.identifier}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Name',string=${metadataResource.name}" th:if="${metadataResource.name}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Title',string=${metadataResource.title}" th:if="${metadataResource.title}"></th:block>
+			<th:block th:insert="~{resourceElements::status}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Experimental',string=${metadataResource.experimental}" th:if="${metadataResource.experimental}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Date',string=${metadataResource.date}" th:if="${metadataResource.date}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Description',string=${codeSystem.description}" th:if="${codeSystem.description}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Case Sensitive',string=${codeSystem.caseSensitive}" th:if="${codeSystem.caseSensitive}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Hierarchy Meaning',string=${codeSystem.hierarchyMeaning}" th:if="${codeSystem.hierarchyMeaning}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Version Needed',string=${codeSystem.versionNeeded}" th:if="${codeSystem.versionNeeded}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Content',string=${codeSystem.content}" th:if="${codeSystem.content}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Count',string=${codeSystem.count}" th:if="${codeSystem.count}"></th:block>
+			<div th:class="'element element-100'" th:if="${codeSystem.concept}">
+				<label>Concept</label>
+				<table>
+					<tr>
+					<th>Code</th>
+					<th>Display</th>
+					<th>Definition</th>
+					</tr>
+					<tr th:each="i : ${codeSystem.concept}">
+						<td class="no-wrap" th:text="${i.code}"></td>
+						<td class="no-wrap" th:text="${i.display}"></td>
+						<td th:text="${i.definition}"></td>
+					</tr>
+				</table>
+			</div>
+			<th:block th:insert="~{resourceElements::additionalValuesComment}"></th:block>
+		</div>
+	</div>
+</body>
+</html>

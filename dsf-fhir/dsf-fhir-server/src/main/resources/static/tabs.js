@@ -1,4 +1,12 @@
 function openTab(lang) {
+	if ((('html' !== lang) || ('html' === lang && history.state?.lang !== undefined)) && history.state?.lang !== lang)
+		history.pushState({ lang: lang }, '', window.location.href)
+	
+	setDownloadLink(lang === 'json' ? 'json' : 'xml')
+	
+	if('html' === lang && document.querySelector('div#html') === null)
+		lang = 'xml';
+	
     const tabcontent = document.getElementsByClassName("prettyprint")
     for (let i = 0; i < tabcontent.length; i++)
         tabcontent[i].style.display = "none"
@@ -9,24 +17,13 @@ function openTab(lang) {
 
     document.getElementById(lang).style.display = "block"
     document.getElementById(lang + "-button").className += " active"
-
-    if (lang != "html" && localStorage != null)
-        localStorage.setItem('lang', lang)
-    
-    if (lang == "html")
-        lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml"
-
-    setDownloadLink(lang)
 }
 
 function openInitialTab() {
-    if (document.querySelector('div#html') != null)
-        openTab("html")
-    else {
-        const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml"
-        if (lang == "xml" || lang == "json")
-            openTab(lang);
-    }
+	if (history.state?.lang === 'html' || history.state?.lang === 'json' || history.state?.lang === 'xml')
+		openTab(history.state?.lang)		
+	else
+		openTab('html')		
 }
 
 function setDownloadLink(lang) {
@@ -35,7 +32,7 @@ function setDownloadLink(lang) {
     searchParams.set('_pretty', 'true')
 
     const downloadLink = document.getElementById('download-link')
-    downloadLink.href = '?' + searchParams.toString()
+    downloadLink.href = window.location.origin + window.location.pathname + '?' + searchParams.toString()
     downloadLink.download = getDownloadFileName(lang)
     downloadLink.title = 'Download as ' + lang.toUpperCase()
 }
