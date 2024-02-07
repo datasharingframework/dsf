@@ -129,7 +129,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		context.setVariable("json", toJson(mediaType, resource));
 		context.setVariable("resourceId", ElementId.from(resource));
 
-		getContext(resource, type, uriInfo).ifPresent(tContext ->
+		getContext(type, uriInfo).ifPresent(tContext ->
 		{
 			context.setVariable("htmlFragment", tContext.getHtmlFragment());
 			tContext.setVariables(context::setVariable, resource);
@@ -139,7 +139,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		templateEngine.process("main", context, writer);
 	}
 
-	private Optional<ThymeleafContext> getContext(Resource resource, Class<?> type, UriInfo uriInfo)
+	private Optional<ThymeleafContext> getContext(Class<?> type, UriInfo uriInfo)
 	{
 		return contextsByResourceType.getOrDefault(type, List.of()).stream().filter(g ->
 		{
