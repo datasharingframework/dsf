@@ -212,27 +212,27 @@ public class ResourceTask extends AbstractResource<Task>
 
 	private String getHtmlInputType(Type typedValue)
 	{
-		if (typedValue instanceof BooleanType b)
+		if (typedValue instanceof BooleanType)
 			return "boolean";
-		else if (typedValue instanceof DecimalType d)
+		else if (typedValue instanceof DecimalType)
 			return "number";
-		else if (typedValue instanceof IntegerType i)
+		else if (typedValue instanceof IntegerType)
 			return "number";
-		else if (typedValue instanceof DateType d)
+		else if (typedValue instanceof DateType)
 			return "date";
-		else if (typedValue instanceof DateTimeType dt)
+		else if (typedValue instanceof DateTimeType)
 			return "datetime-local";
-		else if (typedValue instanceof TimeType t)
+		else if (typedValue instanceof TimeType)
 			return "time";
-		else if (typedValue instanceof InstantType i)
+		else if (typedValue instanceof InstantType)
 			return "datetime-local";
-		else if (typedValue instanceof StringType s)
+		else if (typedValue instanceof StringType)
 			return "text";
-		else if (typedValue instanceof UriType u)
+		else if (typedValue instanceof UriType)
 			return "url";
-		else if (typedValue instanceof Coding c)
+		else if (typedValue instanceof Coding)
 			return "coding";
-		else if (typedValue instanceof Identifier i)
+		else if (typedValue instanceof Identifier)
 			return "identifier";
 		else if (typedValue instanceof Reference r && r.hasReferenceElement())
 			return "url";
