@@ -16,7 +16,7 @@
 			<div id="spinner" class="spinner spinner-disabled"></div>
 			<form>
 				<fieldset id="form-fieldset" th:disabled="${resource.status != 'in-progress'}">
-					<div class="row" th:each="i : ${questionnaireResponse.item}" th:if="${questionnaireResponse.item}" th:classappend="${not i.show and i.type == null ? 'row-display invisible' : not i.show and i.type != null ? 'invisible' : i.show and i.type == null ? 'row-display' : ''}">
+					<div class="row" th:each="i : ${questionnaireResponse.item}" th:if="${questionnaireResponse.item}" th:classappend="${not i.show and i.type == null ? 'row-display invisible' : not i.show and i.type != null ? 'invisible' : i.show and i.type == null ? 'row-display' : ''}" th:attr="for = ${i.id}">
 						<th:block th:if="${i.type == null}">
 							<p class="p-display" th:unless="${i.type}" th:text="${i.label}">label text</p>
 						</th:block>

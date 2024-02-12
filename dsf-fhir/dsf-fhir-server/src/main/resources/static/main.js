@@ -26,7 +26,10 @@ window.addEventListener('DOMContentLoaded', () => {
 	prettyPrint()
 	checkBookmarked()
 	openInitialTab()
-	adaptTaskFormInputs()
+
+	const resourceType = getResourceTypeForCurrentUrl()
+	adaptTaskFormInputs(resourceType)
+  adaptQuestionnaireResponseInputsIfNotVersion1_0_0(resourceType)
 
 	document.querySelector('div#icons > svg#help-icon')?.addEventListener('click', () => showHelp())
 	document.querySelector('div#icons > svg#light-mode')?.addEventListener('click', () => setUiTheme('light'))
@@ -41,8 +44,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector('div.tab > button#html-button')?.addEventListener('click', () => openTab('html'))
 	document.querySelector('div.tab > button#json-button')?.addEventListener('click', () => openTab('json'))
 	document.querySelector('div.tab > button#xml-button')?.addEventListener('click', () => openTab('xml'))
-
-	const resourceType = getResourceTypeForCurrentUrl();
 
 	if (resourceType != null && resourceType[1] != null && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
 

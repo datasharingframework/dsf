@@ -230,26 +230,28 @@ function readQuestionnaireResponseAnswersFromForm() {
 }
 
 function readAndValidateQuestionnaireResponseItem(item, id) {
-	const htmlInputs = document.querySelectorAll(`input[fhir-type][id^="${CSS.escape(id)}"]`)
+	const row = document.querySelector(`div.row[for^="${CSS.escape(id)}"]`)
+	const optional = row.hasAttribute('optional')
+	const htmlInputs = row.querySelectorAll("input[fhir-type]")
 
 	if (htmlInputs?.length === 1) {
 		const inputFhirType = htmlInputs[0].getAttribute("fhir-type")
 
 		if (inputFhirType === "Reference.reference")
-			return newQuestionnaireResponseItemReferenceReference(item.text, id, htmlInputs[0].value, false)
+			return newQuestionnaireResponseItemReferenceReference(item.text, id, htmlInputs[0].value, optional)
 		else
-			return newQuestionnaireResponseItemTyped(item.text, id, "value" + inputFhirType.charAt(0).toUpperCase() + inputFhirType.slice(1), htmlInputs[0].value, false)
+			return newQuestionnaireResponseItemTyped(item.text, id, "value" + inputFhirType.charAt(0).toUpperCase() + inputFhirType.slice(1), htmlInputs[0].value, optional)
 	}
 	else if (htmlInputs?.length === 2) {
 		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
 		const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
 
 		if ("Coding.system" === input0FhirType && "Coding.code" === input1FhirType)
-			return newQuestionnaireResponseItemCoding(item.text, id, htmlInputs[0].value, htmlInputs[1].value, false)
+			return newQuestionnaireResponseItemCoding(item.text, id, htmlInputs[0].value, htmlInputs[1].value, optional)
 		else if ("Reference.identifier.system" === input0FhirType && "Reference.identifier.value" == input1FhirType)
-			return newQuestionnaireResponseItemReferenceIdentifier(item.text, id, htmlInputs[0].value, htmlInputs[1].value, false)
+			return newQuestionnaireResponseItemReferenceIdentifier(item.text, id, htmlInputs[0].value, htmlInputs[1].value, optional)
 		else if ("boolean.true" === input0FhirType && "boolean.false" == input1FhirType)
-			return newQuestionnaireResponseItemBoolean(item.text, id, htmlInputs[0].checked, htmlInputs[1].checked, false)
+			return newQuestionnaireResponseItemBoolean(item.text, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
 
 	return null
@@ -593,9 +595,7 @@ function disableSpinner() {
 	spinner.classList.add("spinner-disabled")
 }
 
-function adaptTaskFormInputs() {
-	const resourceType = getResourceTypeForCurrentUrl()
-
+function adaptTaskFormInputs(resourceType) {
 	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === "Task") {
 		const task = getResourceAsJson()
 
@@ -605,12 +605,32 @@ function adaptTaskFormInputs() {
 			let currentUrl = window.location.origin + window.location.pathname
 			let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile
 
-			loadStructureDefinition(requestUrl).then(parseStructureDefinition)
+			loadResource(requestUrl).then(parseStructureDefinition)
 		}
 	}
 }
 
-function loadStructureDefinition(url) {
+function adaptQuestionnaireResponseInputsIfNotVersion1_0_0(resourceType) {
+	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === 'QuestionnaireResponse') {
+		const questionnaireResponse = getResourceAsJson()
+
+		if (questionnaireResponse.status === 'in-progress' && questionnaireResponse.questionnaire !== null) {
+			const urlVersion = questionnaireResponse.questionnaire.split('|')
+
+			if (urlVersion.length > 1) {
+				const url = urlVersion[0]
+				const version = urlVersion[1]
+
+				let currentUrl = window.location.origin + window.location.pathname
+				let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/QuestionnaireResponse")) + "/Questionnaire?url=" + url + '&version=' + version
+
+				loadResource(requestUrl).then(parseQuestionnaire)
+			}
+		}
+	}
+}
+
+function loadResource(url) {
 	return fetch(url, {
 		method: "GET",
 		headers: {
@@ -620,7 +640,7 @@ function loadStructureDefinition(url) {
 }
 
 function parseStructureDefinition(bundle) {
-	if (bundle.entry.length > 0 && bundle.entry[0].resource != null) {
+	if (bundle.entry.length > 0 && bundle.entry[0].resource !== null) {
 		const structureDefinition = bundle.entry[0].resource
 
 		if (structureDefinition.differential != null) {
@@ -629,7 +649,26 @@ function parseStructureDefinition(bundle) {
 			const groupedSlices = groupBy(slices, d => d.id.split(".")[1])
 			const definitions = getDefinitions(groupedSlices)
 
-			definitions.forEach(modifyInputRow)
+			definitions.forEach(modifyTaskInputRow)
+		}
+	}
+}
+
+function parseQuestionnaire(bundle) {
+	if (bundle.entry.length > 0 && bundle.entry[0].resource !== null) {
+		const questionnaire = bundle.entry[0].resource
+
+		if (questionnaire.meta !== null && questionnaire.meta.profile !== null && questionnaire.meta.profile.length > 0) {
+			const profile = questionnaire.meta.profile[0]
+			const urlVersion = profile.split('|')
+
+			if (urlVersion.length > 1) {
+				const version = urlVersion[1]
+
+				if (version !== '1.0.0' && questionnaire.item !== undefined) {
+					questionnaire.item.forEach(modifyQuestionnaireInputRow)
+				}
+			}
 		}
 	}
 }
@@ -665,7 +704,7 @@ function getDefinitions(groupedSlices) {
 			identifier: window.location.href,
 			typeSystem: getValueOfDifferential(differentials, "Task.input.type.coding.system", "fixedUri"),
 			typeCode: getValueOfDifferential(differentials, "Task.input.type.coding.code", "fixedCode"),
-			valueType: (valueType != undefined && valueType.length > 0) ? valueType[0].code : undefined,
+			valueType: (valueType !== undefined && valueType.length > 0) ? valueType[0].code : undefined,
 			min: getValueOfDifferential(differentials, "Task.input", "min"),
 			max: getValueOfDifferential(differentials, "Task.input", "max"),
 		}
@@ -682,7 +721,7 @@ function getValueOfDifferential(differentials, path, property) {
 	}
 }
 
-function modifyInputRow(definition) {
+function modifyTaskInputRow(definition) {
 	const id = definition.typeSystem + "|" + definition.typeCode
 	const row = document.querySelector(`div.row[for="${CSS.escape(id)}"]`)
 	const span = row.querySelector('span.cardinalities')
@@ -703,6 +742,25 @@ function modifyInputRow(definition) {
 
 	if (definition.min < 1 || definition.min === undefined)
 		row.setAttribute("optional", "")
+}
+
+function modifyQuestionnaireInputRow(item) {
+	const row = document.querySelector(`div.row[for="${CSS.escape(item.linkId)}"]`)
+
+	if (row) {
+		if (item.required !== true) {
+					row.setAttribute("optional", "")
+		}
+
+		const span = row.querySelector('span.cardinalities')
+		if (span) {
+			span.innerText = `[${item.required ? '1' : '0'}..1]`
+		}
+	}
+
+	if (item.item) {
+		item.item.forEach(item => { modifyQuestionnaireInputRow(item) })
+	}
 }
 
 function appendInputRowAfter(id) {

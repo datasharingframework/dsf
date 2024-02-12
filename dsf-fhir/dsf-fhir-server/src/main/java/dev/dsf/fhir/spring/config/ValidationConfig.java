@@ -39,7 +39,8 @@ public class ValidationConfig
 		return new ValidationSupportWithCache(fhirConfig.fhirContext(),
 				validationSupportChain(new ValidationSupportWithFetchFromDb(fhirConfig.fhirContext(),
 						daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao(),
-						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), daoConfig.measureDao())));
+						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), daoConfig.measureDao(),
+						daoConfig.questionnaireDao())));
 	}
 
 	private ValidationSupportChain validationSupportChain(IValidationSupport dbSupport)
@@ -71,7 +72,8 @@ public class ValidationConfig
 		ValidationSupportWithCache validationSupport = new ValidationSupportWithCache(fhirConfig.fhirContext(),
 				validationSupportChain(new ValidationSupportWithFetchFromDbWithTransaction(fhirConfig.fhirContext(),
 						daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao(),
-						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), connection)));
+						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), daoConfig.measureDao(),
+						daoConfig.questionnaireDao(), connection)));
 
 		return validationSupport.populateCache(validationSupport().fetchAllConformanceResources());
 	}
