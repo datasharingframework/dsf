@@ -8,8 +8,8 @@ function setUiTheme(theme = getUiTheme()) {
         document.getElementById('dark-mode').style.display = 'block'
     }
     
-    document.querySelector("html").setAttribute("theme", theme);
-    localStorage.setItem("theme", theme);
+    document.querySelector("html").setAttribute("theme", theme)
+    localStorage.setItem("theme", theme)
 }
 
 function getUiTheme() {
@@ -126,4 +126,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener("popstate", (event) => {
 	openTab(event.state?.lang !== undefined ? event.state?.lang : 'html')
-});
+})
