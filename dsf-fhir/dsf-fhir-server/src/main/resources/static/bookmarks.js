@@ -87,7 +87,7 @@ function getBookmarks() {
 
 function cleanBookmarkUrls(bookmarks) {
 	let b = new Object()
-	Object.entries(bookmarks).map(e => new Array(e[0], e[1].map(u => u.startsWith('/fhir/') ? u.substring('/fhir/'.length) : u))).forEach(e => b[e[0]] = e[1])
+	Object.entries(bookmarks).map(e => new Array(e[0], e[1].map(u => u.startsWith('/fhir/') ? u.substring('/fhir/'.length) : u))).forEach(e => b[e[0].startsWith('$') ? e[0] : '$' + e[0]] = e[1])
 	return b
 }
 
@@ -101,7 +101,7 @@ function saveBookmarks(bookmarks) {
 }
 
 function getResourceTypeOrMisc(url) {
-	const regex = new RegExp('(?:(?:http|https):\/\/(?:[A-Za-z0-9\-\\\.\:\%\$]*\/)+)?'
+	const regex = new RegExp('(?:(?:http|https):\/\/(?:[A-Za-z0-9-.:%$]*\/)+)?'
 		+ '(Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement'
 		+ '|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition'
 		+ '|ConceptMap|Condition|Consent|Contract|Coverage|CoverageEligibilityRequest|CoverageEligibilityResponse|DetectedIssue|Device|DeviceDefinition|DeviceMetric|DeviceRequest|DeviceUseStatement'
@@ -118,29 +118,29 @@ function getResourceTypeOrMisc(url) {
 		+ '(?:[\/?#](?:.*)?)?$')
 	const match = regex.exec(url)
 	if (match != null)
-		return match[1]
+		return '$' + match[1]
 	else
-		return '_misc'
+		return '$_misc'
 }
 
 function getInitialBookmarks() {
 	return {
-		'_misc': ['metadata'],
-		'ActivityDefinition': ['ActivityDefinition', "ActivityDefinition?_sort=status,url,version"],
-		'CodeSystem': ['CodeSystem'],
-		'Endpoint': ['Endpoint'],
-		'NamingSystem': ['NamingSystem'],
-		'Library': ['Library'],
-		'Measure': ['Measure'],
-		'MeasureReport': ['MeasureReport'],
-		'Organization': ['Organization', 'Organization?identifier=highmed.org', 'Organization?identifier=medizininformatik-initiative.de', 'Organization?identifier=netzwerk-universitaetsmedizin.de'],
-		'OrganizationAffiliation': ['OrganizationAffiliation'],
-		'Questionnaire': ['Questionnaire'],
-		'QuestionnaireResponse': ['QuestionnaireResponse?_sort=-_lastUpdated', 'QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],
-		'Subscription': ['Subscription'],
-		'StructureDefinition': ['StructureDefinition'],
-		'Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile,identifier&status=draft'],
-		'ValueSet': ['ValueSet']
+		'$_misc': ['metadata'],
+		'$ActivityDefinition': ['ActivityDefinition', "ActivityDefinition?_sort=status,url,version"],
+		'$CodeSystem': ['CodeSystem'],
+		'$Endpoint': ['Endpoint'],
+		'$NamingSystem': ['NamingSystem'],
+		'$Library': ['Library'],
+		'$Measure': ['Measure'],
+		'$MeasureReport': ['MeasureReport'],
+		'$Organization': ['Organization', 'Organization?identifier=highmed.org', 'Organization?identifier=medizininformatik-initiative.de', 'Organization?identifier=netzwerk-universitaetsmedizin.de'],
+		'$OrganizationAffiliation': ['OrganizationAffiliation'],
+		'$Questionnaire': ['Questionnaire'],
+		'$QuestionnaireResponse': ['QuestionnaireResponse?_sort=-_lastUpdated', 'QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],
+		'$Subscription': ['Subscription'],
+		'$StructureDefinition': ['StructureDefinition'],
+		'$Task': ['Task', 'Task?_sort=-_lastUpdated', 'Task?_sort=_profile,identifier&status=draft'],
+		'$ValueSet': ['ValueSet']
 	}
 }
 
@@ -151,7 +151,7 @@ function createBookmarkList(bookmarks) {
 	const bookmarkList = document.getElementById('bookmarks-list')
 	bookmarkList.innerHTML = null
 
-	Object.entries(bookmarks).sort((e1, e2) => e1[0].localeCompare(e2[0])).forEach(e => {
+	Object.entries(bookmarks).map(e => [e[0].substring(1), e[1]]).sort((e1, e2) => e1[0].localeCompare(e2[0])).forEach(e => {
 		if (e[0] !== '_misc' && e[1].length > 0) {
 			const h4 = document.createElement("h4")
 			const h4Link = document.createElement("a")
@@ -175,7 +175,7 @@ function createBookmarkList(bookmarks) {
 				divAddIcon.children[0].innerHTML = 'Add Bookmark: ' + b
 				const divRemoveIcon = removeIcon.cloneNode(true)
 				divRemoveIcon.setAttribute('id', 'bookmark-remove-' + c)
-				divRemoveIcon.addEventListener('click', () =>  removeBookmark(b, c))
+				divRemoveIcon.addEventListener('click', () => removeBookmark(b, c))
 				divRemoveIcon.setAttribute('viewBox', '4 0 24 24')
 				divRemoveIcon.style.display = 'inline'
 				divRemoveIcon.children[0].innerHTML = 'Remove Bookmark: ' + b
