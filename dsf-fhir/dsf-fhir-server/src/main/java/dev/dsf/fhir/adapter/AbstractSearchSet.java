@@ -27,7 +27,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 
 abstract class AbstractSearchSet<MR extends Resource> extends AbstractThymeleafContext<Bundle>
 {
-	protected static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9]{1,63}|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
+	protected static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
 			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
 	protected static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
 			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);

@@ -145,12 +145,12 @@ public abstract class AbstractProcessPlugin<D, A> implements ProcessPlugin<D, A>
 			.compile(Pattern.quote(PLACEHOLDER_PREFIX_TMP));
 	private static final Pattern PLACEHOLDER_PREFIX_PATTERN = Pattern.compile(Pattern.quote(PLACEHOLDER_PREFIX));
 
-	private static final String ACTIVITY_DEFINITION_URL_PATTERN_STRING = "^(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9]{1,63}|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
+	private static final String ACTIVITY_DEFINITION_URL_PATTERN_STRING = "^(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
 			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))$";
 	private static final Pattern ACTIVITY_DEFINITION_URL_PATTERN = Pattern
 			.compile(ACTIVITY_DEFINITION_URL_PATTERN_STRING);
 
-	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9]{1,63}|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
+	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
 			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
 	private static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
 			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);
