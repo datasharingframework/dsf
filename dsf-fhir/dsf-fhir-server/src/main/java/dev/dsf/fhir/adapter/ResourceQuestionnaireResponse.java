@@ -2,6 +2,7 @@ package dev.dsf.fhir.adapter;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
@@ -45,6 +46,12 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 	{
 		super(QuestionnaireResponse.class, ActiveOrStatus.status(QuestionnaireResponse::hasStatusElement,
 				QuestionnaireResponse::getStatusElement));
+	}
+
+	@Override
+	protected void doSetAdditionalVariables(BiConsumer<String, Object> variables, QuestionnaireResponse resource)
+	{
+		variables.accept("form", true);
 	}
 
 	@Override

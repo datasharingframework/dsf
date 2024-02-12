@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,6 +73,12 @@ public class ResourceTask extends AbstractResource<Task>
 	public ResourceTask()
 	{
 		super(Task.class, ActiveOrStatus.status(Task::hasStatusElement, Task::getStatusElement));
+	}
+
+	@Override
+	protected void doSetAdditionalVariables(BiConsumer<String, Object> variables, Task resource)
+	{
+		variables.accept("form", true);
 	}
 
 	@Override

@@ -14,10 +14,10 @@
 <script src="static/tabs.js"></script>
 <script src="static/bookmarks.js"></script>
 <script src="static/help.js"></script>
-<script src="static/form.js"></script>
+<script src="static/form.js" th:if="${form}"></script>
 <link rel="stylesheet" type="text/css" href="static/prettify.css">
 <link rel="stylesheet" type="text/css" href="static/dsf.css">
-<link rel="stylesheet" type="text/css" href="static/form.css">
+<link rel="stylesheet" type="text/css" href="static/form.css" th:if="${form}">
 <title th:text="${title}">DSF</title>
 </head>
 <body>
