@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import dev.dsf.fhir.dao.CodeSystemDao;
 import dev.dsf.fhir.dao.MeasureDao;
+import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.ValueSetDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;
@@ -38,10 +40,11 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 	private final CodeSystemDao codeSystemDao;
 	private final ValueSetDao valueSetDao;
 	private final MeasureDao measureDao;
+	private final QuestionnaireDao questionnaireDao;
 
 	public ValidationSupportWithFetchFromDb(FhirContext context, StructureDefinitionDao structureDefinitionDao,
 			StructureDefinitionDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao, ValueSetDao valueSetDao,
-			MeasureDao measureDao)
+			MeasureDao measureDao, QuestionnaireDao questionnaireDao)
 	{
 		this.context = context;
 
@@ -50,6 +53,7 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 		this.codeSystemDao = codeSystemDao;
 		this.valueSetDao = valueSetDao;
 		this.measureDao = measureDao;
+		this.questionnaireDao = questionnaireDao;
 	}
 
 	@Override
@@ -59,6 +63,8 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 		Objects.requireNonNull(structureDefinitionSnapshotDao, "structureDefinitionSnapshotDao");
 		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
 		Objects.requireNonNull(valueSetDao, "valueSetDao");
+		Objects.requireNonNull(measureDao, "measureDao");
+		Objects.requireNonNull(questionnaireDao, "questionnaireDao");
 	}
 
 	@Override
@@ -100,6 +106,11 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 		if (Measure.class.equals(theClass))
 		{
 			return theClass.cast(fetchMeasure(theUri));
+		}
+
+		if (Questionnaire.class.equals(theClass))
+		{
+			return theClass.cast(fetchQuestionnaire(theUri));
 		}
 
 		return null;
@@ -162,5 +173,11 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 			return measure.get();
 		else
 			return null;
+	}
+
+	public Questionnaire fetchQuestionnaire(String url)
+	{
+		Optional<Questionnaire> questionnaire = throwRuntimeException(() -> questionnaireDao.readByUrlAndVersion(url));
+		return questionnaire.orElse(null);
 	}
 }

@@ -5,7 +5,7 @@ function openTab(lang) {
 	setDownloadLink(lang === 'json' ? 'json' : 'xml')
 	
 	if('html' === lang && document.querySelector('div#html') === null)
-		lang = 'xml';
+		lang = 'xml'
 	
     const tabcontent = document.getElementsByClassName("prettyprint")
     for (let i = 0; i < tabcontent.length; i++)
