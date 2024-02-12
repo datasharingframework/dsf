@@ -219,6 +219,7 @@ public class ResourceTask extends AbstractResource<Task>
 
 	private String getHtmlInputType(Type typedValue)
 	{
+		// TODO use switch expression with pattern matching after switching to java 21
 		if (typedValue instanceof BooleanType)
 			return "boolean";
 		else if (typedValue instanceof DecimalType)
@@ -253,6 +254,7 @@ public class ResourceTask extends AbstractResource<Task>
 	{
 		String type = typedValue.getClass().getAnnotation(DatatypeDef.class).name();
 
+		// TODO use switch expression with pattern matching after switching to java 21
 		if (typedValue instanceof Reference r && r.hasReferenceElement())
 			return type + ".reference";
 		else if (typedValue instanceof Reference r && r.hasIdentifier())
@@ -263,6 +265,7 @@ public class ResourceTask extends AbstractResource<Task>
 
 	private String getStringValue(Type typedValue)
 	{
+		// TODO use switch expression with pattern matching after switching to java 21
 		if (typedValue instanceof DecimalType d)
 			return d.hasValue() ? String.valueOf(d.getValue()) : null;
 		else if (typedValue instanceof IntegerType i)
@@ -288,6 +291,7 @@ public class ResourceTask extends AbstractResource<Task>
 
 	private ElementSystemValue getSystemValueValue(Type typedValue)
 	{
+		// TODO use switch expression with pattern matching after switching to java 21
 		if (typedValue instanceof Coding c)
 			return ElementSystemValue.from(c);
 		else if (typedValue instanceof Identifier i)

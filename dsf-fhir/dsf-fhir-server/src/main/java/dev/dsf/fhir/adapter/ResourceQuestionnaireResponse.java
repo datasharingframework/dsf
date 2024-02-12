@@ -102,6 +102,7 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 	{
 		String fhirType = typedValue.getClass().getAnnotation(DatatypeDef.class).name();
 
+		// TODO use switch expression with pattern matching after switching to java 21
 		if (typedValue instanceof BooleanType b)
 			return new Item(show, id, "boolean", label, fhirType, null, null, b.hasValue() ? b.getValue() : null);
 		else if (typedValue instanceof DecimalType d)
