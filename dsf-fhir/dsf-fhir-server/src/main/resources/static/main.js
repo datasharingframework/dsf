@@ -27,10 +27,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	checkBookmarked()
 	openInitialTab()
 
-	const resourceType = getResourceTypeForCurrentUrl()
-	adaptTaskFormInputs(resourceType)
-  adaptQuestionnaireResponseInputsIfNotVersion1_0_0(resourceType)
-
 	document.querySelector('div#icons > svg#help-icon')?.addEventListener('click', () => showHelp())
 	document.querySelector('div#icons > svg#light-mode')?.addEventListener('click', () => setUiTheme('light'))
 	document.querySelector('div#icons > svg#dark-mode')?.addEventListener('click', () => setUiTheme('dark'))
@@ -45,7 +41,8 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector('div.tab > button#json-button')?.addEventListener('click', () => openTab('json'))
 	document.querySelector('div.tab > button#xml-button')?.addEventListener('click', () => openTab('xml'))
 
-	if (resourceType != null && resourceType[1] != null && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
+	const resourceType = getResourceTypeForCurrentUrl()
+	if (resourceType != null && resourceType[1]	 && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
 
 		// search bundle rows
 		document.querySelectorAll('div#html > div.bundle > div#list td.id-value:first-child').forEach(td => {
@@ -58,8 +55,9 @@ window.addEventListener('DOMContentLoaded', () => {
 		})
 	}
 
+	if (resourceType != null && resourceType[1] === 'QuestionnaireResponse' && resourceType[2]) {
 
-	if (resourceType != null && resourceType[1] === 'QuestionnaireResponse' && resourceType[2] !== null) {
+		adaptQuestionnaireResponseInputsIfNotVersion1_0_0()
 
 		// input placeholder insert buttons
 		document.querySelectorAll('form > fieldset#form-fieldset > div.row svg.insert:not([disabled])').forEach(svg => {
@@ -91,7 +89,9 @@ window.addEventListener('DOMContentLoaded', () => {
 		document.querySelector('form > fieldset#form-fieldset > div.row-submit > button#complete-questionnaire-response')?.addEventListener('click', () => completeQuestionnaireResponse())
 	}
 
-	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2] !== null) {
+	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2]) {
+
+		adaptTaskFormInputs()
 
 		// input placeholder insert buttons
 		document.querySelectorAll('form > fieldset#form-fieldset > div.row svg.insert:not([disabled])').forEach(svg => {

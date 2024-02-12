@@ -106,7 +106,7 @@ function newTaskInputTyped(type, id, fhirType, inputValue, optional) {
 			type: type
 		}
 		input[fhirType] = value
-		
+
 		return { optional: optional, input: input }
 	} else
 		return { optional: optional, input: null }
@@ -595,37 +595,33 @@ function disableSpinner() {
 	spinner.classList.add("spinner-disabled")
 }
 
-function adaptTaskFormInputs(resourceType) {
-	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === "Task") {
-		const task = getResourceAsJson()
+function adaptTaskFormInputs() {
+	const task = getResourceAsJson()
 
-		if (task.status === "draft" && task.meta !== null && task.meta.profile !== null && task.meta.profile.length > 0) {
-			const profile = task.meta.profile[0]
+	if (task.status === "draft" && task.meta !== null && task.meta.profile !== null && task.meta.profile.length > 0) {
+		const profile = task.meta.profile[0]
 
-			let currentUrl = window.location.origin + window.location.pathname
-			let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile
+		let currentUrl = window.location.origin + window.location.pathname
+		let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile
 
-			loadResource(requestUrl).then(parseStructureDefinition)
-		}
+		loadResource(requestUrl).then(parseStructureDefinition)
 	}
 }
 
-function adaptQuestionnaireResponseInputsIfNotVersion1_0_0(resourceType) {
-	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === 'QuestionnaireResponse') {
-		const questionnaireResponse = getResourceAsJson()
+function adaptQuestionnaireResponseInputsIfNotVersion1_0_0() {
+	const questionnaireResponse = getResourceAsJson()
 
-		if (questionnaireResponse.status === 'in-progress' && questionnaireResponse.questionnaire !== null) {
-			const urlVersion = questionnaireResponse.questionnaire.split('|')
+	if (questionnaireResponse.status === 'in-progress' && questionnaireResponse.questionnaire !== null) {
+		const urlVersion = questionnaireResponse.questionnaire.split('|')
 
-			if (urlVersion.length > 1) {
-				const url = urlVersion[0]
-				const version = urlVersion[1]
+		if (urlVersion.length > 1) {
+			const url = urlVersion[0]
+			const version = urlVersion[1]
 
-				let currentUrl = window.location.origin + window.location.pathname
-				let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/QuestionnaireResponse")) + "/Questionnaire?url=" + url + '&version=' + version
+			let currentUrl = window.location.origin + window.location.pathname
+			let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/QuestionnaireResponse")) + "/Questionnaire?url=" + url + '&version=' + version
 
-				loadResource(requestUrl).then(parseQuestionnaire)
-			}
+			loadResource(requestUrl).then(parseQuestionnaire)
 		}
 	}
 }
@@ -749,7 +745,7 @@ function modifyQuestionnaireInputRow(item) {
 
 	if (row) {
 		if (item.required !== true) {
-					row.setAttribute("optional", "")
+			row.setAttribute("optional", "")
 		}
 
 		const span = row.querySelector('span.cardinalities')
