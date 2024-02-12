@@ -1,6 +1,5 @@
 package dev.dsf.fhir.config;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jetty.websocket.jakarta.client.JakartaWebSocketShutdownContainer;
@@ -22,7 +21,7 @@ public class FhirHttpJettyConfig extends AbstractHttpJettyConfig
 	@Override
 	protected List<Class<? extends ServletContainerInitializer>> servletContainerInitializers()
 	{
-		return Arrays.asList(JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
+		return List.of(JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
 				JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
 	}
 }
