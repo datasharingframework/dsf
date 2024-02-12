@@ -41,6 +41,12 @@ public class StatusPortAuthenticator implements Authenticator
 	public boolean isStatusPortRequest(ServletRequest req)
 	{
 		HttpServletRequest request = (HttpServletRequest) req;
+		return statusPortSupplier.get() != null && statusPortSupplier.get() == request.getLocalPort();
+	}
+
+	private boolean isStatusPortAndPathGetRequest(ServletRequest req)
+	{
+		HttpServletRequest request = (HttpServletRequest) req;
 		return HttpMethod.GET.is(request.getMethod()) && STATUS_PATH.equals(request.getPathInfo())
 				&& statusPortSupplier.get() != null && statusPortSupplier.get() == request.getLocalPort();
 	}
@@ -55,7 +61,7 @@ public class StatusPortAuthenticator implements Authenticator
 	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
 			throws ServerAuthException
 	{
-		if (isStatusPortRequest(request))
+		if (isStatusPortAndPathGetRequest(request))
 			return new UserAuthentication(getAuthMethod(), null);
 		else
 			return Authentication.UNAUTHENTICATED;
