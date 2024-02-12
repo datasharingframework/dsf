@@ -193,7 +193,8 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		{
 			String queryValue = HtmlUtils.htmlEscape(uri.getQuery());
 			u += "?" + queryValue;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?" + queryValue + "</a>");
+			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?"
+					+ queryValue.replace("&amp;", "<wbr>&amp;").replace("-", "&#8209;") + "</a>");
 		}
 		else if (uriInfo.getQueryParameters().containsKey("_summary"))
 		{

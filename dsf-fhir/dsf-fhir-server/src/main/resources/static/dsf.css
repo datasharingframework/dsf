@@ -95,10 +95,15 @@ td#url {
 }
 
 td#url h1 {
+	font-size: 2em;
 	font-family: monospace;
 	color: var(--color-prime);
 	margin: 0 0 0 1em;
 	word-break: break-word;
+}
+
+td#url h1 a {
+	white-space: nowrap;
 }
 
 td#url h1 a:link, td#url h1 a:visited, td#url h1 a:active {
