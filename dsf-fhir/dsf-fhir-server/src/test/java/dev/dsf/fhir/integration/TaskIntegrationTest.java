@@ -58,8 +58,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateTaskStartPingProcessNotAllowedForRemoteUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -85,8 +85,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenLocalUserIllegalStatus() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		EnumSet<TaskStatus> illegalCreateStates = EnumSet.of(TaskStatus.RECEIVED, TaskStatus.ACCEPTED,
@@ -118,8 +118,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenExternalUserIllegalStatus() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		EnumSet<TaskStatus> illegalCreateStates = EnumSet.of(TaskStatus.RECEIVED, TaskStatus.ACCEPTED,
@@ -153,8 +153,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenLocalUserNotPartOfRequesterOrganization() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -181,8 +181,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setRequester(requester1);
 		expectForbidden(() -> getWebserviceClient().create(t));
 
-		Reference requester2 = new Reference().setReference(
-				"http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
+		Reference requester2 = new Reference()
+				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRequester(requester2);
 		expectForbidden(() -> getWebserviceClient().create(t));
 	}
@@ -190,8 +190,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenExternalUserNotPartOfRequesterOrganization() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -211,13 +211,13 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setRequester(new Reference());
 		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
-		Reference requester1 = new Reference().setReferenceElement(
-				organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
+		Reference requester1 = new Reference()
+				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
 		t.setRequester(requester1);
 		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
-		Reference requester2 = new Reference().setReference(
-				"http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
+		Reference requester2 = new Reference()
+				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRequester(requester2);
 		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
@@ -225,8 +225,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenLocalUserRestrictionRecipientNotValidByLocalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -259,8 +259,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(requester1);
 		expectForbidden(() -> getWebserviceClient().create(t));
 
-		Reference requester2 = new Reference().setReference(
-				"http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
+		Reference requester2 = new Reference()
+				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester2);
 		expectForbidden(() -> getWebserviceClient().create(t));
@@ -278,8 +278,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenLocalUserRestrictionRecipientNotValidByExternalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -314,8 +314,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(requester1);
 		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
-		Reference requester2 = new Reference().setReference(
-				"http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
+		Reference requester2 = new Reference()
+				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester2);
 		expectForbidden(() -> getExternalWebserviceClient().create(t));
@@ -333,8 +333,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenInstantiatesUriNotValidByLocalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -360,8 +360,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenInstantiatesUriNotValidByExternalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -390,8 +390,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenInputNotValidByLocalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -453,8 +453,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenInputNotValidByExternalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -519,8 +519,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenOutputNotValidByLocalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -544,8 +544,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateForbiddenOutputNotValidByExternalUser() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
@@ -572,8 +572,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchTaskByRequesterId() throws Exception
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		Organization o = new Organization();
@@ -623,8 +623,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 	private Task readTestTask(String requester, String recipient) throws IOException
 	{
-		try (InputStream in = Files.newInputStream(
-				Paths.get("src/test/resources/integration/task/dsf-test-task-1.0.xml")))
+		try (InputStream in = Files
+				.newInputStream(Paths.get("src/test/resources/integration/task/dsf-test-task-1.0.xml")))
 		{
 			Task task = fhirContext.newXmlParser().parseResource(Task.class, in);
 			task.setAuthoredOn(new Date());
@@ -1058,11 +1058,11 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	public void testCreateTaskNotAllowedRemoteUser2() throws Exception
 	{
 		ActivityDefinition ad3 = readActivityDefinition("dsf-test-activity-definition3-1.0.xml");
-		Coding recipient = (Coding) ad3.getExtensionByUrl(
-						"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization")
+		Coding recipient = (Coding) ad3
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization")
 				.getExtensionByUrl("recipient").getValue();
 		Coding role = (Coding) recipient.getExtensionByUrl(
-						"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role")
+				"http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role")
 				.getExtensionByUrl("organization-role").getValue();
 		role.setCode("TTP");
 
@@ -1249,8 +1249,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	{
 		final String profile = "http://foo.bar/fhir/StructureDefinition/baz";
 
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 		Organization org = organizationProvider.getLocalOrganization().get();
 
@@ -1381,8 +1381,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		task.addInput().setValue(new Reference("https://localhost:80010/fhir/Binary/" + UUID.randomUUID().toString()))
 				.getType().getCodingFirstRep().setSystem("http://test.com/fhir/CodeSystem/test").setCode("binary-ref");
 
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		ReferenceExtractor referenceExtractor = getSpringWebApplicationContext().getBean(ReferenceExtractor.class);
 		ReferenceResolver referenceResolver = getSpringWebApplicationContext().getBean(ReferenceResolver.class);
 		ResponseGenerator responseGenerator = getSpringWebApplicationContext().getBean(ResponseGenerator.class);

@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.search.PartialResult;
@@ -329,8 +328,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
-		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1).configureParameters(
-				Map.of("identifier",
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("identifier",
 						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
@@ -357,8 +356,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
-		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1).configureParameters(
-				Map.of("identifier",
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("identifier",
 						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
@@ -378,9 +377,10 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
-		bundle.addEntry().setFullUrl(
-						createdEndpoint.getIdElement().withServerBase(getWebserviceClient().getBaseUrl(), "Endpoint")
-								.toVersionless().getValue()).setResource(createdEndpoint).getRequest().setMethod(HTTPVerb.PUT)
+		bundle.addEntry()
+				.setFullUrl(createdEndpoint.getIdElement()
+						.withServerBase(getWebserviceClient().getBaseUrl(), "Endpoint").toVersionless().getValue())
+				.setResource(createdEndpoint).getRequest().setMethod(HTTPVerb.PUT)
 				.setUrl("Endpoint/" + createdEndpoint.getIdElement().getIdPart());
 
 		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
