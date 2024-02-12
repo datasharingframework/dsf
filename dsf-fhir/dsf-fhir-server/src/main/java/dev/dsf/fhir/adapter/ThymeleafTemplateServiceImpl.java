@@ -143,11 +143,11 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	{
 		return contextsByResourceType.getOrDefault(type, List.of()).stream().filter(g ->
 		{
-			List<PathSegment> pathSegments = uriInfo.getPathSegments();
-			if (pathSegments.isEmpty())
-				return false;
-			else
-				return g.isResourceSupported(pathSegments.get(pathSegments.size() - 1).getPath());
+			Optional<String> lastSegment = uriInfo.getPathSegments().stream().filter(Objects::nonNull)
+					.map(PathSegment::getPath).filter(Objects::nonNull).filter(s -> !s.isBlank())
+					.reduce((first, second) -> second);
+
+			return lastSegment.map(g::isResourceSupported).orElse(false);
 		}).findFirst();
 	}
 
