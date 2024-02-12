@@ -22,8 +22,6 @@ import org.junit.Test;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireIntegrationTest
 {
