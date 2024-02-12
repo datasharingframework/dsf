@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import dev.dsf.fhir.dao.LibraryDao;
 import dev.dsf.fhir.dao.MeasureDao;
-import jakarta.ws.rs.WebApplicationException;
 
 public class MeasureIntegrationTest extends AbstractIntegrationTest
 {
@@ -109,22 +108,14 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		assertEquals(measureId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testSearchMeasureDependingOnLibraryNotSupportedById() throws Exception
 	{
 		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
 		measureDao.create(createMeasure()).getIdElement().getIdPart();
 
-		try
-		{
-			getWebserviceClient().searchWithStrictHandling(Measure.class,
-					Map.of("depends-on", Collections.singletonList("0a887526-2b9f-413a-8842-5e9252e2d7f7")));
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(400, e.getResponse().getStatus());
-			throw e;
-		}
+		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Measure.class,
+				Map.of("depends-on", Collections.singletonList("0a887526-2b9f-413a-8842-5e9252e2d7f7"))));
 	}
 
 	@Test

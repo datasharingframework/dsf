@@ -26,12 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 
 public class EndpointIntegrationTest extends AbstractIntegrationTest
 {
@@ -76,19 +75,11 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		assertEquals(SearchEntryMode.MATCH, searchBundle.getEntry().get(1).getSearch().getMode());
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testSearchWithUnsupportedQueryParameterStrictHandling() throws Exception
 	{
-		try
-		{
-			getWebserviceClient().searchWithStrictHandling(Endpoint.class,
-					Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value")));
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Endpoint.class,
+				Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value"))));
 	}
 
 	@Test
@@ -338,8 +329,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
-		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("identifier",
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1).configureParameters(
+				Map.of("identifier",
 						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
@@ -366,8 +357,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
-		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("identifier",
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1).configureParameters(
+				Map.of("identifier",
 						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
@@ -387,10 +378,9 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
-		bundle.addEntry()
-				.setFullUrl(createdEndpoint.getIdElement()
-						.withServerBase(getWebserviceClient().getBaseUrl(), "Endpoint").toVersionless().getValue())
-				.setResource(createdEndpoint).getRequest().setMethod(HTTPVerb.PUT)
+		bundle.addEntry().setFullUrl(
+						createdEndpoint.getIdElement().withServerBase(getWebserviceClient().getBaseUrl(), "Endpoint")
+								.toVersionless().getValue()).setResource(createdEndpoint).getRequest().setMethod(HTTPVerb.PUT)
 				.setUrl("Endpoint/" + createdEndpoint.getIdElement().getIdPart());
 
 		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
