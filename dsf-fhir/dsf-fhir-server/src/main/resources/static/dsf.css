@@ -1,5 +1,5 @@
-[theme="light"] {
-	--color-prime: #326F95;
+[mode="light"] {
+	--color-prime: #326f95;
 	--color-background: #fff;
 	--color-alt-background: #eee;
 	--color-tab-button: #000;
@@ -16,7 +16,7 @@
 	--color-input-radio-border: #000;
 	--color-input-placeholder: #aaa;
 	--color-info-background-blue: #deecf9;
-	--color-info-blue: #326F95;
+	--color-info-blue: #326f95;
 	--color-info-background-grey: #f2f2f2;
 	--color-info-grey: #545454;
 	--color-info-background-orange: #fff7c7;
@@ -29,14 +29,14 @@
 	--color-error-text: #761137;
 	--color-disabled-background: #f2f2f2;
 	--color-disabled-text: #545454;
-	--color-row-border-blue: #326F95;
+	--color-row-border-blue: #326f95;
 	--color-row-border-grey: #545454;
 	--color-row-border-orange: #a25b36;
 	--color-row-border-green: #357a38;
 	--color-row-border-red: #761137;
 }
 
-[theme="dark"] {
+[mode="dark"] {
 	--color-prime: #fff;
 	--color-background: #000;
 	--color-alt-background: #181818;
@@ -53,7 +53,7 @@
 	--color-input-border: #666;
 	--color-input-radio-border: #fff;
 	--color-input-placeholder: #666;
-	--color-info-background-blue: #326F95;
+	--color-info-background-blue: #326f95;
 	--color-info-blue: #deecf9;
 	--color-info-background-grey: #333;
 	--color-info-grey: #aaa;
@@ -67,11 +67,29 @@
 	--color-error-text: #ffe1e1;
 	--color-disabled-background: #333;
 	--color-disabled-text: #aaa;
-	--color-row-border-blue: #326F95;
+	--color-row-border-blue: #326f95;
 	--color-row-border-grey: #aaa;
 	--color-row-border-orange: #a25b36;
 	--color-row-border-green: #14452f;
 	--color-row-border-red: #761137;
+}
+
+html[theme="dev"] {
+	border-top: 0.5em solid #aaa;
+}
+
+html[theme="test"] {
+	border-top: 0.5em solid #54aea0;
+}
+
+html[theme="prod"] {
+	border-top: 0.5em solid #326f95;
+}
+
+html[theme="dev"] body, 
+html[theme="test"] body, 
+html[theme="prod"] body	{
+	margin-top: 1.5em;
 }
 
 body {
@@ -106,7 +124,9 @@ td#url h1 a {
 	white-space: nowrap;
 }
 
-td#url h1 a:link, td#url h1 a:visited, td#url h1 a:active {
+td#url h1 a:link,
+td#url h1 a:visited,
+td#url h1 a:active {
 	color: var(--color-prime);
 	text-decoration: none;
 }
@@ -274,7 +294,9 @@ pre.lang-html {
 	font-family: sans-serif;
 }
 
-#bookmarks a:link, #bookmarks a:visited, #bookmarks a:active {
+#bookmarks a:link,
+#bookmarks a:visited,
+#bookmarks a:active {
 	color: var(--color-prime);
 	text-decoration: none;
 	vertical-align: super;
@@ -313,8 +335,9 @@ pre.lang-html {
 	right: 1em;
 }
 
-.bookmarks-list-entry-removed>a:link, .bookmarks-list-entry-removed>a:visited,
-	.bookmarks-list-entry-removed>a:active {
+.bookmarks-list-entry-removed>a:link,
+.bookmarks-list-entry-removed>a:visited,
+.bookmarks-list-entry-removed>a:active {
 	color: #aaa !important;
 }
 
@@ -397,35 +420,35 @@ pre.lang-html {
 }
 
 .bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="draft"],
-	.bundle>#list>table tr[resource-type="CodeSystem"] td[status="draft"],
-	.bundle>#list>table tr[resource-type="Library"] td[status="draft"],
-	.bundle>#list>table tr[resource-type="Measure"] td[status="draft"],
-	.bundle>#list>table tr[resource-type="NamingSystem"] td[status="draft"],
-	.bundle>#list>table tr[resource-type="Questionnaire"] td[status="draft"],
-	.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="draft"],
-	.bundle>#list>table tr[resource-type="ValueSet"] td[status="draft"] {
+.bundle>#list>table tr[resource-type="CodeSystem"] td[status="draft"],
+.bundle>#list>table tr[resource-type="Library"] td[status="draft"],
+.bundle>#list>table tr[resource-type="Measure"] td[status="draft"],
+.bundle>#list>table tr[resource-type="NamingSystem"] td[status="draft"],
+.bundle>#list>table tr[resource-type="Questionnaire"] td[status="draft"],
+.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="draft"],
+.bundle>#list>table tr[resource-type="ValueSet"] td[status="draft"] {
 	border-left-color: var(--color-row-border-blue);
 }
 
 .bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="active"],
-	.bundle>#list>table tr[resource-type="CodeSystem"] td[status="active"],
-	.bundle>#list>table tr[resource-type="Library"] td[status="active"],
-	.bundle>#list>table tr[resource-type="Measure"] td[status="active"],
-	.bundle>#list>table tr[resource-type="NamingSystem"] td[status="active"],
-	.bundle>#list>table tr[resource-type="Questionnaire"] td[status="active"],
-	.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="active"],
-	.bundle>#list>table tr[resource-type="ValueSet"] td[status="active"] {
+.bundle>#list>table tr[resource-type="CodeSystem"] td[status="active"],
+.bundle>#list>table tr[resource-type="Library"] td[status="active"],
+.bundle>#list>table tr[resource-type="Measure"] td[status="active"],
+.bundle>#list>table tr[resource-type="NamingSystem"] td[status="active"],
+.bundle>#list>table tr[resource-type="Questionnaire"] td[status="active"],
+.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="active"],
+.bundle>#list>table tr[resource-type="ValueSet"] td[status="active"] {
 	border-left-color: var(--color-row-border-green);
 }
 
 .bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="retired"],
-	.bundle>#list>table tr[resource-type="CodeSystem"] td[status="retired"],
-	.bundle>#list>table tr[resource-type="Library"] td[status="retired"],
-	.bundle>#list>table tr[resource-type="Measure"] td[status="retired"],
-	.bundle>#list>table tr[resource-type="NamingSystem"] td[status="retired"],
-	.bundle>#list>table tr[resource-type="Questionnaire"] td[status="retired"],
-	.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="retired"],
-	.bundle>#list>table tr[resource-type="ValueSet"] td[status="retired"] {
+.bundle>#list>table tr[resource-type="CodeSystem"] td[status="retired"],
+.bundle>#list>table tr[resource-type="Library"] td[status="retired"],
+.bundle>#list>table tr[resource-type="Measure"] td[status="retired"],
+.bundle>#list>table tr[resource-type="NamingSystem"] td[status="retired"],
+.bundle>#list>table tr[resource-type="Questionnaire"] td[status="retired"],
+.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="retired"],
+.bundle>#list>table tr[resource-type="ValueSet"] td[status="retired"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
@@ -434,12 +457,12 @@ pre.lang-html {
 }
 
 .bundle>#list>table tr[resource-type="Endpoint"] td[status="off"],
-	.bundle>#list>table tr[resource-type="Endpoint"] td[status="suspended"] {
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="suspended"]	{
 	border-left-color: var(--color-row-border-grey);
 }
 
 .bundle>#list>table tr[resource-type="Endpoint"] td[status="error"],
-	.bundle>#list>table tr[resource-type="Endpoint"] td[status="entered-in-error"] {
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="entered-in-error"] {
 	border-left-color: var(--color-row-border-red);
 }
 
@@ -460,26 +483,26 @@ pre.lang-html {
 }
 
 .bundle>#list>table tr[resource-type="Organization"] td[active="true"],
-	.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="true"] {
+.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="true"] {
 	border-left-color: var(--color-row-border-green);
 }
 
 .bundle>#list>table tr[resource-type="Organization"] td[active="false"],
-	.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="false"] {
+.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="false"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="in-progress"] 	{
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="in-progress"] {
 	border-left-color: var(--color-row-border-orange);
 }
 
 .bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"],
-	.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="amended"] {
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="amended"] {
 	border-left-color: var(--color-row-border-green);
 }
 
 .bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="entered-in-error"],
-	.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="stopped"] {
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="stopped"] {
 	border-left-color: var(--color-row-border-red);
 }
 
@@ -523,7 +546,9 @@ pre.lang-html {
 	font-family: monospace;
 }
 
-.bundle a:link, .bundle a:visited, .bundle a:active {
+.bundle a:link,
+.bundle a:visited,
+.bundle a:active {
 	color: var(--color-prime);
 	text-decoration: none;
 }
@@ -532,12 +557,14 @@ pre.lang-html {
 	text-decoration: underline;
 }
 
-.bundle>#list>table td:first-child, .bundle>#list>table th:first-child {
+.bundle>#list>table td:first-child,
+.bundle>#list>table th:first-child {
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
 }
 
-.bundle>#list>table td:last-child, .bundle>#list>table th:last-child {
+.bundle>#list>table td:last-child,
+.bundle>#list>table th:last-child {
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
 }
@@ -572,43 +599,43 @@ pre.lang-html {
 	/* margin-bottom: 1em; */
 }
 
-#resource:not([status],[active]) #base-data {
+#resource:not([status], [active]) #base-data {
 	color: var(--color-input-text);
 	border: 1px solid #ccc;
 }
 
 #resource[resource-type="ActivityDefinition"][status="draft"] #base-data,
-	#resource[resource-type="CodeSystem"][status="draft"] #base-data,
-	#resource[resource-type="Library"][status="draft"] #base-data,
-	#resource[resource-type="Measure"][status="draft"] #base-data,
-	#resource[resource-type="NamingSystem"][status="draft"] #base-data,
-	#resource[resource-type="Questionnaire"][status="draft"] #base-data,
-	#resource[resource-type="StructureDefinition"][status="draft"] #base-data,
-	#resource[resource-type="ValueSet"][status="draft"] #base-data {
+#resource[resource-type="CodeSystem"][status="draft"] #base-data,
+#resource[resource-type="Library"][status="draft"] #base-data,
+#resource[resource-type="Measure"][status="draft"] #base-data,
+#resource[resource-type="NamingSystem"][status="draft"] #base-data,
+#resource[resource-type="Questionnaire"][status="draft"] #base-data,
+#resource[resource-type="StructureDefinition"][status="draft"] #base-data,
+#resource[resource-type="ValueSet"][status="draft"] #base-data {
 	background-color: var(--color-info-background-blue);
 	color: var(--color-info-blue);
 }
 
 #resource[resource-type="ActivityDefinition"][status="active"] #base-data,
-	#resource[resource-type="CodeSystem"][status="active"] #base-data,
-	#resource[resource-type="Library"][status="active"] #base-data,
-	#resource[resource-type="Measure"][status="active"] #base-data,
-	#resource[resource-type="NamingSystem"][status="active"] #base-data,
-	#resource[resource-type="Questionnaire"][status="active"] #base-data,
-	#resource[resource-type="StructureDefinition"][status="active"] #base-data,
-	#resource[resource-type="ValueSet"][status="active"] #base-data {
+#resource[resource-type="CodeSystem"][status="active"] #base-data,
+#resource[resource-type="Library"][status="active"] #base-data,
+#resource[resource-type="Measure"][status="active"] #base-data,
+#resource[resource-type="NamingSystem"][status="active"] #base-data,
+#resource[resource-type="Questionnaire"][status="active"] #base-data,
+#resource[resource-type="StructureDefinition"][status="active"] #base-data,
+#resource[resource-type="ValueSet"][status="active"] #base-data {
 	background-color: var(--color-info-background-green);
 	color: var(--color-info-green);
 }
 
 #resource[resource-type="ActivityDefinition"][status="retired"] #base-data,
-	#resource[resource-type="CodeSystem"][status="retired"] #base-data,
-	#resource[resource-type="Library"][status="retired"] #base-data,
-	#resource[resource-type="Measure"][status="retired"] #base-data,
-	#resource[resource-type="NamingSystem"][status="retired"] #base-data,
-	#resource[resource-type="Questionnaire"][status="retired"] #base-data,
-	#resource[resource-type="StructureDefinition"][status="retired"] #base-data,
-	#resource[resource-type="ValueSet"][status="retired"] #base-data {
+#resource[resource-type="CodeSystem"][status="retired"] #base-data,
+#resource[resource-type="Library"][status="retired"] #base-data,
+#resource[resource-type="Measure"][status="retired"] #base-data,
+#resource[resource-type="NamingSystem"][status="retired"] #base-data,
+#resource[resource-type="Questionnaire"][status="retired"] #base-data,
+#resource[resource-type="StructureDefinition"][status="retired"] #base-data,
+#resource[resource-type="ValueSet"][status="retired"] #base-data {
 	background-color: var(--color-info-background-grey);
 	color: var(--color-info-grey);
 }
@@ -619,13 +646,13 @@ pre.lang-html {
 }
 
 #resource[resource-type="Endpoint"][status="off"] #base-data,
-	#resource[resource-type="Endpoint"][status="suspended"] #base-data {
+#resource[resource-type="Endpoint"][status="suspended"] #base-data {
 	background-color: var(--color-info-background-grey);
 	color: var(--color-info-grey);
 }
 
 #resource[resource-type="Endpoint"][status="error"] #base-data,
-	#resource[resource-type="Endpoint"][status="entered-in-error"] #base-data {
+#resource[resource-type="Endpoint"][status="entered-in-error"] #base-data {
 	background-color: var(--color-info-background-red);
 	color: var(--color-info-red);
 }
@@ -636,13 +663,13 @@ pre.lang-html {
 }
 
 #resource[resource-type="Organization"][active="true"] #base-data,
-	#resource[resource-type="OrganizationAffiliation"][active="true"] #base-data {
+#resource[resource-type="OrganizationAffiliation"][active="true"] #base-data {
 	background-color: var(--color-info-background-green);
 	color: var(--color-info-green);
 }
 
 #resource[resource-type="Organization"][active="false"] #base-data,
-	#resource[resource-type="OrganizationAffiliation"][active="false"] #base-data {
+#resource[resource-type="OrganizationAffiliation"][active="false"] #base-data {
 	background-color: var(--color-info-background-grey);
 	color: var(--color-info-grey);
 }
@@ -688,7 +715,7 @@ pre.lang-html {
 }
 
 #resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data,
-	#resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data {
+#resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data {
 	background-color: var(--color-info-background-green);
 	color: var(--color-info-green);
 }
@@ -737,40 +764,40 @@ pre.lang-html {
 	width: 2em;
 }
 
-#resource:not([status],[active]) #base-data path {
+#resource:not([status], [active]) #base-data path {
 	fill: var(--color-input-text);
 }
 
 #resource[resource-type="ActivityDefinition"][status="draft"] #base-data path,
-	#resource[resource-type="CodeSystem"][status="draft"] #base-data path,
-	#resource[resource-type="Library"][status="draft"] #base-data path,
-	#resource[resource-type="Measure"][status="draft"] #base-data path,
-	#resource[resource-type="NamingSystem"][status="draft"] #base-data path,
-	#resource[resource-type="Questionnaire"][status="draft"] #base-data path,
-	#resource[resource-type="StructureDefinition"][status="draft"] #base-data path,
-	#resource[resource-type="ValueSet"][status="draft"] #base-data path {
+#resource[resource-type="CodeSystem"][status="draft"] #base-data path,
+#resource[resource-type="Library"][status="draft"] #base-data path,
+#resource[resource-type="Measure"][status="draft"] #base-data path,
+#resource[resource-type="NamingSystem"][status="draft"] #base-data path,
+#resource[resource-type="Questionnaire"][status="draft"] #base-data path,
+#resource[resource-type="StructureDefinition"][status="draft"] #base-data path,
+#resource[resource-type="ValueSet"][status="draft"] #base-data path {
 	fill: var(--color-info-blue);
 }
 
 #resource[resource-type="ActivityDefinition"][status="active"] #base-data path,
-	#resource[resource-type="CodeSystem"][status="active"] #base-data path,
-	#resource[resource-type="Library"][status="active"] #base-data path,
-	#resource[resource-type="Measure"][status="active"] #base-data path,
-	#resource[resource-type="NamingSystem"][status="active"] #base-data path,
-	#resource[resource-type="Questionnaire"][status="active"] #base-data path,
-	#resource[resource-type="StructureDefinition"][status="active"] #base-data path,
-	#resource[resource-type="ValueSet"][status="active"] #base-data path {
+#resource[resource-type="CodeSystem"][status="active"] #base-data path,
+#resource[resource-type="Library"][status="active"] #base-data path,
+#resource[resource-type="Measure"][status="active"] #base-data path,
+#resource[resource-type="NamingSystem"][status="active"] #base-data path,
+#resource[resource-type="Questionnaire"][status="active"] #base-data path,
+#resource[resource-type="StructureDefinition"][status="active"] #base-data path,
+#resource[resource-type="ValueSet"][status="active"] #base-data path {
 	fill: var(--color-info-green);
 }
 
 #resource[resource-type="ActivityDefinition"][status="retired"] #base-data path,
-	#resource[resource-type="CodeSystem"][status="retired"] #base-data path,
-	#resource[resource-type="Library"][status="retired"] #base-data path,
-	#resource[resource-type="Measure"][status="retired"] #base-data path,
-	#resource[resource-type="NamingSystem"][status="retired"] #base-data path,
-	#resource[resource-type="Questionnaire"][status="retired"] #base-data path,
-	#resource[resource-type="StructureDefinition"][status="retired"] #base-data path,
-	#resource[resource-type="ValueSet"][status="retired"] #base-data path {
+#resource[resource-type="CodeSystem"][status="retired"] #base-data path,
+#resource[resource-type="Library"][status="retired"] #base-data path,
+#resource[resource-type="Measure"][status="retired"] #base-data path,
+#resource[resource-type="NamingSystem"][status="retired"] #base-data path,
+#resource[resource-type="Questionnaire"][status="retired"] #base-data path,
+#resource[resource-type="StructureDefinition"][status="retired"] #base-data path,
+#resource[resource-type="ValueSet"][status="retired"] #base-data path {
 	fill: var(--color-info-grey);
 }
 
@@ -779,12 +806,12 @@ pre.lang-html {
 }
 
 #resource[resource-type="Endpoint"][status="off"] #base-data path,
-	#resource[resource-type="Endpoint"][status="suspended"] #base-data path {
+#resource[resource-type="Endpoint"][status="suspended"] #base-data path {
 	fill: var(--color-info-grey);
 }
 
 #resource[resource-type="Endpoint"][status="error"] #base-data path,
-	#resource[resource-type="Endpoint"][status="entered-in-error"] #base-data path {
+#resource[resource-type="Endpoint"][status="entered-in-error"] #base-data path {
 	fill: var(--color-info-red);
 }
 
@@ -793,12 +820,12 @@ pre.lang-html {
 }
 
 #resource[resource-type="Organization"][active="true"] #base-data path,
-	#resource[resource-type="OrganizationAffiliation"][active="true"] #base-data path {
+#resource[resource-type="OrganizationAffiliation"][active="true"] #base-data path {
 	fill: var(--color-info-green);
 }
 
 #resource[resource-type="Organization"][active="false"] #base-data path,
-	#resource[resource-type="OrganizationAffiliation"][active="false"] #base-data path {
+#resource[resource-type="OrganizationAffiliation"][active="false"] #base-data path {
 	fill: var(--color-info-grey);
 }
 
@@ -806,7 +833,7 @@ pre.lang-html {
 	fill: var(--color-info-blue);
 }
 
-#resource[resource-type="Subscription"][status="active"] #base-data path {
+#resource[resource-type="Subscription"][status="active"] #base-data path{
 	fill: var(--color-info-green);
 }
 
@@ -835,7 +862,7 @@ pre.lang-html {
 }
 
 #resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data path,
-	#resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data path {
+#resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data path {
 	fill: var(--color-info-green);
 }
 
@@ -920,9 +947,9 @@ pre.lang-html {
 	padding-bottom: 0.5em;
 }
 
-#resource .element a:link, 
-	#resource .element a:visited, 
-	#resource .element a:active {
+#resource .element a:link,
+#resource .element a:visited,
+#resource .element a:active {
 	color: var(--color-input-text);
 	text-decoration: none;
 }
@@ -1033,7 +1060,8 @@ pre.lang-html {
 	text-decoration: underline;
 }
 
-.row-text, .row-text>a:visited {
+.row-text,
+.row-text>a:visited {
 	color: var(--color-disabled-text);
 	word-wrap: break-word;
 }

@@ -83,8 +83,8 @@ public class AdapterConfig
 				new SearchSetTask(propertiesConfig.getDefaultPageCount()),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), ValueSet.class));
 
-		return new ThymeleafTemplateServiceImpl(propertiesConfig.getServerBaseUrl(), fhirConfig.fhirContext(),
-				thymeleafContexts, propertiesConfig.getStaticResourceCacheEnabled());
+		return new ThymeleafTemplateServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getUiTheme(),
+				fhirConfig.fhirContext(), thymeleafContexts, propertiesConfig.getStaticResourceCacheEnabled());
 	}
 
 	@Bean

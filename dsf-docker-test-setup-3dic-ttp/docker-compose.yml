@@ -125,6 +125,10 @@ services:
       - type: bind
         source: ./dic1/fhir/log
         target: /opt/fhir/log
+      - type: bind
+        source: ./dic1/fhir/ui
+        target: /opt/fhir/ui
+        read_only: true
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
@@ -136,6 +140,7 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
       DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic1_fhir
+      DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: dic1_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: dic1_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic1_fhir_permanent_delete_users
@@ -194,6 +199,10 @@ services:
       - type: bind
         source: ./dic2/fhir/log
         target: /opt/fhir/log
+      - type: bind
+        source: ./dic2/fhir/ui
+        target: /opt/fhir/ui
+        read_only: true
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
@@ -205,6 +214,7 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
       DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic2_fhir
+      DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: dic2_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: dic2_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic2_fhir_permanent_delete_users
@@ -263,6 +273,10 @@ services:
       - type: bind
         source: ./dic3/fhir/log
         target: /opt/fhir/log
+      - type: bind
+        source: ./dic3/fhir/ui
+        target: /opt/fhir/ui
+        read_only: true
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
@@ -274,6 +288,7 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
       DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic3_fhir
+      DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: dic3_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: dic3_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic3_fhir_permanent_delete_users
@@ -336,6 +351,10 @@ services:
       - type: bind
         source: ./ttp/fhir/log
         target: /opt/fhir/log
+      - type: bind
+        source: ./ttp/fhir/ui
+        target: /opt/fhir/ui
+        read_only: true
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
@@ -347,6 +366,7 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
       DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/ttp_fhir
+      DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: ttp_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: ttp_fhir_server_user
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: ttp_fhir_permanent_delete_users

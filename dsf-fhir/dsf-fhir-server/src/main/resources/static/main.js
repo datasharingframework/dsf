@@ -1,35 +1,35 @@
-function setUiTheme(theme = getUiTheme()) {
-    if (theme === 'dark') {
-        document.getElementById('light-mode').style.display = 'block'
-        document.getElementById('dark-mode').style.display = 'none'
-    }
-    else {
-        document.getElementById('light-mode').style.display = 'none'
-        document.getElementById('dark-mode').style.display = 'block'
-    }
-    
-    document.querySelector("html").setAttribute("theme", theme)
-    localStorage.setItem("theme", theme)
+function setUiMode(mode = getUiMode()) {
+	if (mode === 'dark') {
+		document.getElementById('light-mode').style.display = 'block'
+		document.getElementById('dark-mode').style.display = 'none'
+	}
+	else {
+		document.getElementById('light-mode').style.display = 'none'
+		document.getElementById('dark-mode').style.display = 'block'
+	}
+
+	document.querySelector("html").setAttribute("mode", mode)
+	localStorage.setItem("mode", mode)
 }
 
-function getUiTheme() {
-    if (localStorage !== null && localStorage.getItem("theme") !== null)
-        return localStorage.getItem("theme")
-    else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
-    	return "dark"
-    else
-        return "light"
+function getUiMode() {
+	if (localStorage !== null && localStorage.getItem("mode") !== null)
+		return localStorage.getItem("mode")
+	else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+		return "dark"
+	else
+		return "light"
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-	setUiTheme()
+	setUiMode()
 	prettyPrint()
 	checkBookmarked()
 	openInitialTab()
 
 	document.querySelector('div#icons > svg#help-icon')?.addEventListener('click', () => showHelp())
-	document.querySelector('div#icons > svg#light-mode')?.addEventListener('click', () => setUiTheme('light'))
-	document.querySelector('div#icons > svg#dark-mode')?.addEventListener('click', () => setUiTheme('dark'))
+	document.querySelector('div#icons > svg#light-mode')?.addEventListener('click', () => setUiMode('light'))
+	document.querySelector('div#icons > svg#dark-mode')?.addEventListener('click', () => setUiMode('dark'))
 	document.querySelector('div#icons > svg#bookmark-add')?.addEventListener('click', () => addCurrentBookmark())
 	document.querySelector('div#icons > svg#bookmark-remove')?.addEventListener('click', () => removeCurrentBookmark())
 	document.querySelector('div#icons > svg#bookmark-list')?.addEventListener('click', () => showBookmarks())
@@ -42,7 +42,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector('div.tab > button#xml-button')?.addEventListener('click', () => openTab('xml'))
 
 	const resourceType = getResourceTypeForCurrentUrl()
-	if (resourceType != null && resourceType[1]	 && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
+	if (resourceType != null && resourceType[1] && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
 
 		// search bundle rows
 		document.querySelectorAll('div#html > div.bundle > div#list td.id-value:first-child').forEach(td => {
@@ -55,7 +55,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		})
 	}
 
-	if (resourceType != null && resourceType[1] === 'QuestionnaireResponse' && resourceType[2]) {
+	if (resourceType != null && resourceType[1] === 'QuestionnaireResponse' && resourceType[2] && (resourceType[3] === undefined || resourceType[4])) {
 
 		adaptQuestionnaireResponseInputsIfNotVersion1_0_0()
 
@@ -73,7 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				})
 			})
 		})
-		
+
 		// input value copy buttons
 		document.querySelectorAll('form > fieldset#form-fieldset > div.row svg.copy:not([disabled])').forEach(svg => {
 			const input = svg.parentElement.querySelector("input")
@@ -89,7 +89,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		document.querySelector('form > fieldset#form-fieldset > div.row-submit > button#complete-questionnaire-response')?.addEventListener('click', () => completeQuestionnaireResponse())
 	}
 
-	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2]) {
+	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2] && (resourceType[3] === undefined || resourceType[4])) {
 
 		adaptTaskFormInputs()
 

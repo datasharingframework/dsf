@@ -62,6 +62,7 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
       DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
+      DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_SERVER_BASE_URL: https://fhir/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_Organization
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${BUNDLE_USER_THUMBPRINT}

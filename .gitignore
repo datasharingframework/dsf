@@ -22,6 +22,7 @@ dsf-bpe/dsf-bpe-server-jetty/process/*.jar
 # dsf-fhir ignores
 ###
 dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml
+dsf-fhir/dsf-fhir-server-jetty/ui
 dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
 dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
 dsf-fhir/dsf-fhir-server-jetty/docker/dsf_status_client.jar

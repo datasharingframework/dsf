@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" th:attr="theme=${theme}">
 <head>
 <base th:href="(${basePath} +'/')" href="/">
 <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
@@ -18,6 +18,7 @@
 <link rel="stylesheet" type="text/css" href="static/prettify.css">
 <link rel="stylesheet" type="text/css" href="static/dsf.css">
 <link rel="stylesheet" type="text/css" href="static/form.css" th:if="${form}">
+<link rel="stylesheet" type="text/css" href="static/mod.css">
 <title th:text="${title}">DSF</title>
 </head>
 <body>

@@ -3,6 +3,9 @@ package dev.dsf.fhir.webservice.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -10,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Hex;
 
@@ -28,6 +32,8 @@ import jakarta.ws.rs.core.UriInfo;
 
 public class StaticResourcesServiceImpl extends AbstractBasicService implements StaticResourcesService
 {
+	private static final Path OVERRIDE_RESOURCE_FOLDER = Paths.get("ui");
+
 	private static CacheControl NO_TRANSFORM = new CacheControl();
 	private static CacheControl NO_CACHE_NO_TRANSFORM = new CacheControl();
 	static
@@ -36,32 +42,30 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 		NO_CACHE_NO_TRANSFORM.setNoCache(true);
 	}
 
-	private static final class CacheEntry
+	private record CacheEntry(byte[] data, EntityTag tag, String mimeType)
 	{
-		private final byte[] data;
-		private final byte[] hash;
-		private final String mimeType;
-
-		CacheEntry(byte[] data, byte[] hash, String mimeType)
+		CacheEntry(byte[] data, String fileName)
 		{
-			this.data = data;
-			this.hash = hash;
-			this.mimeType = mimeType;
+			this(data, tag(data), mimeType(fileName));
 		}
 
-		byte[] getData()
+		private static EntityTag tag(byte[] data)
 		{
-			return data;
+			try
+			{
+				MessageDigest digest = MessageDigest.getInstance("SHA256");
+				return new EntityTag(Hex.encodeHexString(digest.digest(data)));
+			}
+			catch (NoSuchAlgorithmException e)
+			{
+				throw new RuntimeException(e);
+			}
 		}
 
-		EntityTag getTag()
+		private static String mimeType(String fileName)
 		{
-			return new EntityTag(Hex.encodeHexString(hash));
-		}
-
-		String getMimeType()
-		{
-			return mimeType;
+			String[] parts = fileName.split("\\.");
+			return MIME_TYPE_BY_SUFFIX.get(parts[parts.length - 1]);
 		}
 	}
 
@@ -72,29 +76,17 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 		protected CacheEntry read(InputStream stream, String fileName) throws IOException
 		{
 			byte[] data = stream.readAllBytes();
-			byte[] hash = hash(data);
-			String mimeType = mimeType(fileName);
 
-			return new CacheEntry(data, hash, mimeType);
+			return new CacheEntry(data, fileName);
 		}
 
-		private byte[] hash(byte[] data)
+		protected InputStream getStream(String fileName) throws IOException
 		{
-			try
-			{
-				MessageDigest digest = MessageDigest.getInstance("MD5");
-				return digest.digest(data);
-			}
-			catch (NoSuchAlgorithmException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-
-		private String mimeType(String fileName)
-		{
-			String[] parts = fileName.split("\\.");
-			return MIME_TYPE_BY_SUFFIX.get(parts[parts.length - 1]);
+			Path target = OVERRIDE_RESOURCE_FOLDER.resolve(fileName);
+			if (Files.isReadable(target))
+				return Files.newInputStream(target);
+			else
+				return StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName);
 		}
 	}
 
@@ -114,7 +106,7 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 
 		Optional<CacheEntry> read(String fileName)
 		{
-			try (InputStream stream = StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName))
+			try (InputStream stream = getStream(fileName))
 			{
 				if (stream == null)
 					return Optional.empty();
@@ -137,7 +129,7 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 		@Override
 		Optional<CacheEntry> get(String fileName)
 		{
-			try (InputStream stream = StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName))
+			try (InputStream stream = getStream(fileName))
 			{
 				if (stream == null)
 					return Optional.empty();
@@ -150,6 +142,9 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 			}
 		}
 	}
+
+	private static final String FILENAME_PATTERN_STRING = "^[0-9a-zA-Z_-]+\\.[0-9a-zA-Z]+$";
+	private static final Pattern FILENAME_PATTERN = Pattern.compile(FILENAME_PATTERN_STRING);
 
 	private static final Map<String, String> MIME_TYPE_BY_SUFFIX = Map.of("css", "text/css", "js", "text/javascript",
 			"html", "text/html", "pdf", "application/pdf", "png", "image/png", "svg", "image/svg+xml", "jpg",
@@ -167,7 +162,7 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 	@Override
 	public Response getFile(String fileName, UriInfo uri, HttpHeaders headers)
 	{
-		if (fileName == null || fileName.isBlank())
+		if (fileName == null || fileName.isBlank() || !FILENAME_PATTERN.matcher(fileName).matches())
 			return Response.status(Status.NOT_FOUND).build();
 		else if (!MIME_TYPE_BY_SUFFIX.keySet().stream().anyMatch(key -> fileName.endsWith(key)))
 			return Response.status(Status.NOT_FOUND).build();
@@ -186,10 +181,10 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 	{
 		return entry ->
 		{
-			if (entry.getTag().getValue().equals(matchTag.replace("\"", "")))
+			if (entry.tag().getValue().equals(matchTag.replace("\"", "")))
 				return Response.status(Status.NOT_MODIFIED);
 			else
-				return Response.ok(entry.getData(), MediaType.valueOf(entry.getMimeType())).tag(entry.getTag())
+				return Response.ok(entry.data(), MediaType.valueOf(entry.mimeType())).tag(entry.tag())
 						.cacheControl(cacheControl);
 		};
 	}
