@@ -1,4 +1,4 @@
-package dev.dsf.fhir.authentication;
+package dev.dsf.common.auth.conf;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -12,9 +12,6 @@ import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
-
-import dev.dsf.common.auth.conf.DsfRole;
-import dev.dsf.common.auth.conf.Identity;
 
 public abstract class AbstractIdentity implements Identity
 {

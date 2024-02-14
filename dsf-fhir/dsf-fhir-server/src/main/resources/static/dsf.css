@@ -596,7 +596,6 @@ pre.lang-html {
 	flex-direction: row;
 	border-radius: 0.4em;
 	padding: 1em;
-	/* margin-bottom: 1em; */
 }
 
 #resource:not([status], [active]) #base-data {

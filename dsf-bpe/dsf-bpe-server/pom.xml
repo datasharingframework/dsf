@@ -47,6 +47,10 @@
 			<artifactId>dsf-common-status</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-ui</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>crypto-utils</artifactId>
 		</dependency>

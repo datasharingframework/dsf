@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.dsf.bpe.ui.ThymeleafTemplateService;
+import dev.dsf.bpe.ui.ThymeleafTemplateServiceImpl;
 import dev.dsf.bpe.webservice.ProcessService;
 import dev.dsf.bpe.webservice.RootService;
 import dev.dsf.common.auth.logout.LogoutService;
 import dev.dsf.common.status.webservice.StatusService;
+import dev.dsf.common.ui.webservice.StaticResourcesService;
 
 @Configuration
 public class WebserviceConfig
@@ -23,6 +26,13 @@ public class WebserviceConfig
 	private PropertiesConfig propertiesConfig;
 
 	@Bean
+	public ThymeleafTemplateService thymeleafTemplateService()
+	{
+		return new ThymeleafTemplateServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getUiTheme(),
+				propertiesConfig.getStaticResourceCacheEnabled());
+	}
+
+	@Bean
 	public LogoutService logoutService()
 	{
 		return new LogoutService();
@@ -31,13 +41,20 @@ public class WebserviceConfig
 	@Bean
 	public ProcessService processService()
 	{
-		return new ProcessService(processEngine.getRuntimeService(), processEngine.getRepositoryService());
+		return new ProcessService(processEngine.getRepositoryService());
 	}
 
 	@Bean
 	public RootService rootService()
 	{
-		return new RootService();
+		return new RootService(processEngine.getRepositoryService(), processEngine.getRuntimeService(),
+				thymeleafTemplateService());
+	}
+
+	@Bean
+	public StaticResourcesService staticResourcesService()
+	{
+		return new StaticResourcesService(propertiesConfig.getStaticResourceCacheEnabled());
 	}
 
 	@Bean

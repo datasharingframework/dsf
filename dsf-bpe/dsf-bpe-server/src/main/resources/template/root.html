@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource" th:fragment="content">
+		<h3>Deployed Processes</h3>
+		<ul>
+			<li th:each="p : ${processes}" th:text="${p}"></li>
+			<li th:if="${#lists.isEmpty(processes)}"><i>No deployed processes</i></li>
+		</ul>
+		<h3>Active Process Instances</h3>
+		<ul>
+			<li th:each="p : ${processInstances}" th:text="${p}"></li>
+			<li th:if="${#lists.isEmpty(processInstances)}"><i>No active process instances</i></li>
+		</ul>
+		
+	</div>
+</body>
+</html>

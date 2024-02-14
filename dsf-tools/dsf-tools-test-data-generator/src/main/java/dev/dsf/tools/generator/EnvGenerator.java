@@ -42,6 +42,9 @@ public class EnvGenerator
 		String webbroserTestUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"Webbrowser Test User").findFirst().get();
 
+		writeEnvFile(Paths.get("../../dsf-docker-test-setup/bpe/.env"),
+				List.of(new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint)));
+
 		writeEnvFile(Paths.get("../../dsf-docker-test-setup/fhir/.env"),
 				List.of(new EnvEntry(BUNDLE_USER_THUMBPRINT, bundleUserThumbprint),
 						new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint)));

@@ -30,6 +30,7 @@
 		<jackson.version>2.16.0</jackson.version>
 		<camunda.version>7.20.0</camunda.version>
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
+		<bouncycastle.version>1.77</bouncycastle.version>
 	</properties>
 
 	<name>DSF</name>
@@ -121,7 +122,7 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcmail-jdk18on</artifactId>
-				<version>1.77</version>
+				<version>${bouncycastle.version}</version>
 			</dependency>
 
 			<!-- testing -->
@@ -138,7 +139,12 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk18on</artifactId>
-				<version>1.77</version>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
 			</dependency>
 
 			<!-- database -->
@@ -318,6 +324,11 @@
 				<version>3.1.0</version>
 			</dependency>
 			<dependency>
+				<groupId>jakarta.annotation</groupId>
+				<artifactId>jakarta.annotation-api</artifactId>
+				<version>2.1.1</version>
+			</dependency>
+			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>
 				<version>6.0.0</version>
@@ -413,6 +424,11 @@
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>2.15.1</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.16.1</version>
 			</dependency>
 
 			<dependency>

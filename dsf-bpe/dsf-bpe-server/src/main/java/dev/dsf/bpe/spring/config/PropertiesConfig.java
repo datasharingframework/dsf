@@ -20,6 +20,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.documentation.Documentation;
+import dev.dsf.common.ui.theme.Theme;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
@@ -47,6 +48,22 @@ public class PropertiesConfig implements InitializingBean
 	@Documentation(required = true, description = "Password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
 	@Value("${dev.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
+
+	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments im configured; supported values: `dev`, `test` and `prod`")
+	@Value("${dev.dsf.bpe.server.ui.theme:}")
+	private String uiTheme;
+
+	@Documentation(required = true, description = "Base address of the BPE server", example = "https://foo.bar/bpe")
+	@Value("${dev.dsf.bpe.server.base.url}")
+	private String bpeServerBaseUrl;
+
+	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control).")
+	@Value("${dev.dsf.bpe.server.roleConfig:}")
+	private String roleConfig;
+
+	@Documentation(description = "To disable static resource caching, set to `false`", recommendation = "Only set to `false` for development")
+	@Value("${dev.dsf.bpe.server.static.resource.cache:true}")
+	private boolean staticResourceCacheEnabled;
 
 	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas}")
@@ -78,7 +95,7 @@ public class PropertiesConfig implements InitializingBean
 
 	@Documentation(required = true, description = "Base address of the local DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
 	@Value("${dev.dsf.bpe.fhir.server.base.url}")
-	private String serverBaseUrl;
+	private String fhirServerBaseUrl;
 
 	@Documentation(description = "Timeout in milliseconds until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:60000}")
@@ -267,26 +284,27 @@ public class PropertiesConfig implements InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		URL url = new URL(serverBaseUrl);
+		URL url = new URL(fhirServerBaseUrl);
 		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
-					serverBaseUrl);
+					fhirServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with 'http://' or 'https://'");
 		}
-		else if (serverBaseUrl.endsWith("//"))
+		else if (fhirServerBaseUrl.endsWith("//"))
 		{
-			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", serverBaseUrl);
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", fhirServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, ending in //");
 		}
-		else if (!serverBaseUrl.startsWith("https://"))
+		else if (!fhirServerBaseUrl.startsWith("https://"))
 		{
-			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", serverBaseUrl);
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", fhirServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with https://");
 		}
 
-		if (serverBaseUrl.endsWith("/"))
-			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+		if (fhirServerBaseUrl.endsWith("/"))
+			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'",
+					fhirServerBaseUrl);
 
 		logger.info(
 				"Concurrency config: {process-threads: {}, engine-core-pool: {}, engine-queue: {}, engine-max-pool: {}}",
@@ -317,6 +335,28 @@ public class PropertiesConfig implements InitializingBean
 	public char[] getDbCamundaPassword()
 	{
 		return dbCamundaPassword;
+	}
+
+	public Theme getUiTheme()
+	{
+		return Theme.fromString(uiTheme);
+	}
+
+	public String getServerBaseUrl()
+	{
+		return bpeServerBaseUrl != null && bpeServerBaseUrl.endsWith("/")
+				? bpeServerBaseUrl.substring(0, bpeServerBaseUrl.length() - 1)
+				: bpeServerBaseUrl;
+	}
+
+	public String getRoleConfig()
+	{
+		return roleConfig;
+	}
+
+	public boolean getStaticResourceCacheEnabled()
+	{
+		return staticResourceCacheEnabled;
 	}
 
 	public String getClientCertificateTrustStoreFile()
@@ -354,11 +394,11 @@ public class PropertiesConfig implements InitializingBean
 		return webserviceClientRemoteVerbose;
 	}
 
-	public String getServerBaseUrl()
+	public String getFhirServerBaseUrl()
 	{
-		return serverBaseUrl != null && serverBaseUrl.endsWith("/")
-				? serverBaseUrl.substring(0, serverBaseUrl.length() - 1)
-				: serverBaseUrl;
+		return fhirServerBaseUrl != null && fhirServerBaseUrl.endsWith("/")
+				? fhirServerBaseUrl.substring(0, fhirServerBaseUrl.length() - 1)
+				: fhirServerBaseUrl;
 	}
 
 	public int getWebserviceClientLocalReadTimeout()

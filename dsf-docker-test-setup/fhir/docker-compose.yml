@@ -14,15 +14,15 @@ services:
     environment:
       TZ: Europe/Berlin
       HTTPS_SERVER_NAME_PORT: localhost:443
-      APP_SERVER_IP: 172.28.1.3
+      APP_SERVER_IP: 172.28.1.11
       SSL_CERTIFICATE_FILE: /run/secrets/proxy_server_certificate.pem
       SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_server_certificate_private_key.pem
       SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
     networks:
       frontend:
-        ipv4_address: 172.28.1.2
+        ipv4_address: 172.28.1.10
       bpe:
-        ipv4_address: 172.28.2.2
+        ipv4_address: 172.28.1.2
         aliases:
           - fhir
     depends_on:
@@ -82,9 +82,9 @@ services:
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
     networks:
       frontend:
-        ipv4_address: 172.28.1.3
+        ipv4_address: 172.28.1.11
       backend:
-        ipv4_address: 172.28.1.130
+        ipv4_address: 172.28.1.18
     depends_on:
       - db
 
@@ -105,7 +105,7 @@ services:
       POSTGRES_DB: fhir
     networks:
       backend:
-        ipv4_address: 172.28.1.131
+        ipv4_address: 172.28.1.19
     secrets:
       - db_liquibase.password
 
@@ -141,16 +141,16 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.28.1.0/25
+        - subnet: 172.28.1.8/29
   backend:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 172.28.1.128/25
+        - subnet: 172.28.1.16/29
   bpe:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 172.28.2.0/24
+        - subnet: 172.28.1.0/29

@@ -2,8 +2,11 @@ package dev.dsf.common.auth;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import javax.security.auth.Subject;
 
@@ -14,6 +17,8 @@ import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import dev.dsf.common.auth.conf.DsfRole;
+import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
 import jakarta.servlet.ServletRequest;
 
@@ -22,10 +27,14 @@ public class DsfLoginService implements LoginService
 	private static final class UserIdentityImpl implements UserIdentity
 	{
 		private final Principal principal;
+		private final Set<String> roles = new HashSet<>();
 
-		private UserIdentityImpl(Principal principal)
+		private UserIdentityImpl(Principal principal, Set<String> roles)
 		{
 			this.principal = principal;
+
+			if (roles != null)
+				this.roles.addAll(roles);
 		}
 
 		@Override
@@ -43,11 +52,12 @@ public class DsfLoginService implements LoginService
 		@Override
 		public boolean isUserInRole(String role, Scope scope)
 		{
-			return false;
+			return roles.contains(role);
 		}
 	}
 
 	private final AtomicReference<IdentityProvider> identityProvider = new AtomicReference<>(null);
+
 	private final ContextHandler contextHandler;
 
 	public DsfLoginService(ContextHandler contextHandler)
@@ -71,18 +81,23 @@ public class DsfLoginService implements LoginService
 		if (identityProvider == null)
 			return null;
 
-		Principal principal = null;
+		Identity identity = null;
 		if (credentials instanceof X509Certificate[] c)
-			principal = identityProvider.getIdentity(c);
+			identity = identityProvider.getIdentity(c);
 		else if (credentials instanceof OpenIdCredentials o)
-			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl(o));
+			identity = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl(o));
 		else if (credentials instanceof String s)
-			principal = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl(s));
+			identity = identityProvider.getIdentity(new DsfOpenIdCredentialsImpl(s));
 
-		if (principal == null)
+		if (identity == null)
 			return null;
 
-		return new UserIdentityImpl(principal);
+		return new UserIdentityImpl(identity, toRoles(identity));
+	}
+
+	private Set<String> toRoles(Identity identity)
+	{
+		return identity.getDsfRoles().stream().map(DsfRole::name).collect(Collectors.toSet());
 	}
 
 	protected IdentityProvider getIdentityProvider()

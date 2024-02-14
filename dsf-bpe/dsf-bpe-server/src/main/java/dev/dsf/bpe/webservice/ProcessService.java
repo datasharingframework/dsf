@@ -3,7 +3,6 @@ package dev.dsf.bpe.webservice;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -21,25 +21,23 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path(ProcessService.PATH)
+@RolesAllowed("ADMIN")
 public class ProcessService implements InitializingBean
 {
 	public static final String PATH = "Process";
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessService.class);
 
-	private final RuntimeService runtimeService;
 	private final RepositoryService repositoryService;
 
-	public ProcessService(RuntimeService runtimeService, RepositoryService repositoryService)
+	public ProcessService(RepositoryService repositoryService)
 	{
-		this.runtimeService = runtimeService;
 		this.repositoryService = repositoryService;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(runtimeService, "runtimeService");
 		Objects.requireNonNull(repositoryService, "repositoryService");
 	}
 

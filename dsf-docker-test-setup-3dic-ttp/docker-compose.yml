@@ -126,7 +126,7 @@ services:
         source: ./dic1/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./dic1/fhir/ui
+        source: ./dic1/ui
         target: /opt/fhir/ui
         read_only: true
     environment:
@@ -200,7 +200,7 @@ services:
         source: ./dic2/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./dic2/fhir/ui
+        source: ./dic2/ui
         target: /opt/fhir/ui
         read_only: true
     environment:
@@ -274,7 +274,7 @@ services:
         source: ./dic3/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./dic3/fhir/ui
+        source: ./dic3/ui
         target: /opt/fhir/ui
         read_only: true
     environment:
@@ -352,7 +352,7 @@ services:
         source: ./ttp/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./ttp/fhir/ui
+        source: ./ttp/ui
         target: /opt/fhir/ui
         read_only: true
     environment:
@@ -414,7 +414,7 @@ services:
     image: datasharingframework/bpe
     restart: "no"
     ports:
-     - 127.0.0.1:5011:5011
+      - 127.0.0.1:5011:5011
     secrets:
       - db_liquibase.password
       - db_dic1_bpe_user.password
@@ -425,13 +425,17 @@ services:
       - app_dic1_client_certificate_private_key.pem
       - app_dic1_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./dic1/bpe/process
-      target: /opt/bpe/process
-      read_only: true
-    - type: bind
-      source: ./dic1/bpe/log
-      target: /opt/bpe/log
+      - type: bind
+        source: ./dic1/bpe/process
+        target: /opt/bpe/process
+        read_only: true
+      - type: bind
+        source: ./dic1/bpe/log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./dic1/ui
+        target: /opt/bpe/ui
+        read_only: true
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
@@ -447,6 +451,8 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: dic1_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic1_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic1_camunda_server_user
+      DEV_DSF_BPE_SERVER_BASE_URL: https://dic1/bpe
+      DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic1/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_updateAllowList|1.0
@@ -458,6 +464,12 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
+      DEV_DSF_BPE_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
@@ -481,7 +493,7 @@ services:
     image: datasharingframework/bpe
     restart: "no"
     ports:
-     - 127.0.0.1:5012:5012
+      - 127.0.0.1:5012:5012
     secrets:
       - db_liquibase.password
       - db_dic2_bpe_user.password
@@ -492,13 +504,17 @@ services:
       - app_dic2_client_certificate_private_key.pem
       - app_dic2_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./dic2/bpe/process
-      target: /opt/bpe/process
-      read_only: true
-    - type: bind
-      source: ./dic2/bpe/log
-      target: /opt/bpe/log
+      - type: bind
+        source: ./dic2/bpe/process
+        target: /opt/bpe/process
+        read_only: true
+      - type: bind
+        source: ./dic2/bpe/log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./dic2/ui
+        target: /opt/bpe/ui
+        read_only: true
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
@@ -514,6 +530,8 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: dic2_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic2_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic2_camunda_server_user
+      DEV_DSF_BPE_SERVER_BASE_URL: https://dic2/bpe
+      DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic2/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_updateAllowList|1.0
@@ -525,6 +543,12 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
+      DEV_DSF_BPE_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
@@ -548,7 +572,7 @@ services:
     image: datasharingframework/bpe
     restart: "no"
     ports:
-     - 127.0.0.1:5014:5014
+      - 127.0.0.1:5014:5014
     secrets:
       - db_liquibase.password
       - db_dic3_bpe_user.password
@@ -559,13 +583,16 @@ services:
       - app_dic3_client_certificate_private_key.pem
       - app_dic3_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./dic3/bpe/process
-      target: /opt/bpe/process
-      read_only: true
-    - type: bind
-      source: ./dic3/bpe/log
-      target: /opt/bpe/log
+      - type: bind
+        source: ./dic3/bpe/process
+        target: /opt/bpe/process
+        read_only: true
+      - type: bind
+        source: ./dic3/bpe/log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./dic3/ui
+        target: /opt/bpe/ui
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
@@ -581,6 +608,8 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: dic3_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic3_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic3_camunda_server_user
+      DEV_DSF_BPE_SERVER_BASE_URL: https://dic3/bpe
+      DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic3/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_updateAllowList|1.0
@@ -592,6 +621,12 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
+      DEV_DSF_BPE_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
@@ -616,7 +651,7 @@ services:
     image: datasharingframework/bpe
     restart: "no"
     ports:
-     - 127.0.0.1:5013:5013
+      - 127.0.0.1:5013:5013
     secrets:
       - db_liquibase.password
       - db_ttp_bpe_user.password
@@ -627,13 +662,16 @@ services:
       - app_ttp_client_certificate_private_key.pem
       - app_ttp_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./ttp/bpe/process
-      target: /opt/bpe/process
-      read_only: true
-    - type: bind
-      source: ./ttp/bpe/log
-      target: /opt/bpe/log
+      - type: bind
+        source: ./ttp/bpe/process
+        target: /opt/bpe/process
+        read_only: true
+      - type: bind
+        source: ./ttp/bpe/log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./ttp/ui
+        target: /opt/bpe/ui
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
@@ -649,6 +687,8 @@ services:
       DEV_DSF_BPE_DB_USER_USERNAME: ttp_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: ttp_camunda_users
       DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
+      DEV_DSF_BPE_SERVER_BASE_URL: https://ttp/bpe
+      DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp/fhir
       DEV_DSF_BPE_PROCESS_EXCLUDED: >-
         dsfdev_downloadAllowList|1.0
@@ -661,6 +701,12 @@ services:
       #DEV_DSF_BPE_PROCESS_EXCLUDED: # default no excluded processes
       # property dev.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
+      DEV_DSF_BPE_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'

@@ -1,10 +1,9 @@
-package dev.dsf.fhir.webservice.impl;
+package dev.dsf.common.ui.webservice;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -17,22 +16,25 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Hex;
 
-import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.fhir.webservice.base.AbstractBasicService;
-import dev.dsf.fhir.webservice.specification.StaticResourcesService;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.UriInfo;
 
-public class StaticResourcesServiceImpl extends AbstractBasicService implements StaticResourcesService
+@Path(StaticResourcesService.PATH)
+public class StaticResourcesService
 {
-	private static final Path OVERRIDE_RESOURCE_FOLDER = Paths.get("ui");
+	public static final String PATH = "static";
+
+	private static final java.nio.file.Path OVERRIDE_RESOURCE_FOLDER = Paths.get("ui");
 
 	private static CacheControl NO_TRANSFORM = new CacheControl();
 	private static CacheControl NO_CACHE_NO_TRANSFORM = new CacheControl();
@@ -82,11 +84,11 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 
 		protected InputStream getStream(String fileName) throws IOException
 		{
-			Path target = OVERRIDE_RESOURCE_FOLDER.resolve(fileName);
+			java.nio.file.Path target = OVERRIDE_RESOURCE_FOLDER.resolve(fileName);
 			if (Files.isReadable(target))
 				return Files.newInputStream(target);
 			else
-				return StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName);
+				return StaticResourcesService.class.getResourceAsStream("/static/" + fileName);
 		}
 	}
 
@@ -153,14 +155,15 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 	private final AbstractCache cache;
 	private final CacheControl cacheControl;
 
-	public StaticResourcesServiceImpl(boolean cacheEnabled)
+	public StaticResourcesService(boolean cacheEnabled)
 	{
 		cache = cacheEnabled ? new Cache() : new NoCache();
 		cacheControl = cacheEnabled ? NO_TRANSFORM : NO_CACHE_NO_TRANSFORM;
 	}
 
-	@Override
-	public Response getFile(String fileName, UriInfo uri, HttpHeaders headers)
+	@GET
+	@Path("/{fileName}")
+	public Response getFile(@PathParam("fileName") String fileName, @Context HttpHeaders headers)
 	{
 		if (fileName == null || fileName.isBlank() || !FILENAME_PATTERN.matcher(fileName).matches())
 			return Response.status(Status.NOT_FOUND).build();
@@ -169,8 +172,9 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 		else
 		{
 			Optional<CacheEntry> entry = cache.get(fileName);
-			Optional<String> matchTag = Arrays.asList(Constants.HEADER_IF_NONE_MATCH, Constants.HEADER_IF_NONE_MATCH_LC)
-					.stream().map(name -> headers.getHeaderString(name)).filter(h -> h != null).findFirst();
+			Optional<String> matchTag = Arrays
+					.asList(HttpHeaders.IF_NONE_MATCH, HttpHeaders.IF_NONE_MATCH.toLowerCase()).stream()
+					.map(name -> headers.getHeaderString(name)).filter(h -> h != null).findFirst();
 
 			return entry.map(toNotModifiedOrOkResponse(matchTag.orElse(""))).orElse(Response.status(Status.NOT_FOUND))
 					.build();

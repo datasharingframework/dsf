@@ -81,18 +81,18 @@ public class PluginConfig
 		FhirWebserviceClientProvider clientProvider = new FhirWebserviceClientProviderImpl(
 				fhirClientConfig.clientProvider());
 		EndpointProvider endpointProvider = new EndpointProviderImpl(clientProvider,
-				propertiesConfig.getServerBaseUrl());
+				propertiesConfig.getFhirServerBaseUrl());
 		FhirContext fhirContext = fhirConfig.fhirContext();
 		MailService mailService = new MailServiceImpl(mailConfig.mailService());
 		ObjectMapper objectMapper = serializerConfig.objectMapper();
 		OrganizationProvider organizationProvider = new OrganizationProviderImpl(clientProvider,
-				propertiesConfig.getServerBaseUrl());
+				propertiesConfig.getFhirServerBaseUrl());
 
 		ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
 		QuestionnaireResponseHelper questionnaireResponseHelper = new QuestionnaireResponseHelperImpl(
-				propertiesConfig.getServerBaseUrl());
+				propertiesConfig.getFhirServerBaseUrl());
 		ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
-		TaskHelper taskHelper = new TaskHelperImpl(propertiesConfig.getServerBaseUrl());
+		TaskHelper taskHelper = new TaskHelperImpl(propertiesConfig.getFhirServerBaseUrl());
 
 		return new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext, clientProvider, mailService,
 				objectMapper, organizationProvider, processAuthorizationHelper, questionnaireResponseHelper,
@@ -140,7 +140,7 @@ public class PluginConfig
 		return new ProcessPluginManagerImpl(
 				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory()),
 				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler(),
-				propertiesConfig.getServerBaseUrl(), fhirClientConfig.clientProvider().getLocalWebserviceClient(),
+				propertiesConfig.getFhirServerBaseUrl(), fhirClientConfig.clientProvider().getLocalWebserviceClient(),
 				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
 	}
 }

@@ -43,6 +43,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.ui.theme.Theme;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.SecurityContext;
@@ -50,33 +51,6 @@ import jakarta.ws.rs.core.UriInfo;
 
 public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, InitializingBean
 {
-	public static enum UiTheme
-	{
-		DEV, TEST, PROD;
-
-		public static UiTheme fromString(String s)
-		{
-			if (s == null || s.isBlank())
-				return null;
-			else
-			{
-				return switch (s.toLowerCase())
-				{
-					case "dev" -> DEV;
-					case "test" -> TEST;
-					case "prod" -> PROD;
-					default -> null;
-				};
-			}
-		}
-
-		@Override
-		public String toString()
-		{
-			return name().toLowerCase();
-		}
-	}
-
 	private static final String RESOURCE_NAMES = "Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary"
 			+ "|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse"
 			+ "|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition|ConceptMap|Condition|Consent|Contract|Coverage"
@@ -109,7 +83,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 			.compile("\"id\": \"(" + UUID + ")\",\\n([ ]*)\"meta\": \\{\\n([ ]*)\"versionId\": \"([0-9]+)\",");
 
 	private final String serverBaseUrl;
-	private final UiTheme theme;
+	private final Theme theme;
 	private final FhirContext fhirContext;
 
 	private final Map<Class<? extends Resource>, List<ThymeleafContext>> contextsByResourceType;
@@ -117,8 +91,18 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	private final TemplateEngine templateEngine = new TemplateEngine();
 
-
-	public ThymeleafTemplateServiceImpl(String serverBaseUrl, UiTheme theme, FhirContext fhirContext,
+	/**
+	 * @param serverBaseUrl
+	 *            not <code>null</code>
+	 * @param theme
+	 *            may be <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param contexts
+	 *            may be <code>null</code>
+	 * @param cacheEnabled
+	 */
+	public ThymeleafTemplateServiceImpl(String serverBaseUrl, Theme theme, FhirContext fhirContext,
 			List<? extends ThymeleafContext> contexts, boolean cacheEnabled)
 	{
 		this.serverBaseUrl = serverBaseUrl;
@@ -142,6 +126,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	{
 		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 		Objects.requireNonNull(fhirContext, "fhirContext");
+		// theme may be null
 	}
 
 	@Override

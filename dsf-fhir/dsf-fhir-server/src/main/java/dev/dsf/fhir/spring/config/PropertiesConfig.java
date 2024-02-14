@@ -20,7 +20,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.documentation.Documentation;
-import dev.dsf.fhir.adapter.ThymeleafTemplateServiceImpl.UiTheme;
+import dev.dsf.common.ui.theme.Theme;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
@@ -216,9 +216,9 @@ public class PropertiesConfig implements InitializingBean
 		return serverBaseUrl.endsWith("/") ? serverBaseUrl.substring(serverBaseUrl.length() - 1) : serverBaseUrl;
 	}
 
-	public UiTheme getUiTheme()
+	public Theme getUiTheme()
 	{
-		return UiTheme.fromString(uiTheme);
+		return Theme.fromString(uiTheme);
 	}
 
 	public int getDefaultPageCount()
