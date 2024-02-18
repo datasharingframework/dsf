@@ -219,8 +219,6 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?_summary=" + summaryValue + "</a>");
 		}
 
-		heading.append('\n');
-
 		return heading.toString();
 	}
 
