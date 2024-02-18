@@ -115,6 +115,25 @@ td#heading h1 a:hover {
 	border-top: 0.07em solid #ccc;
 }
 
+a:link,
+a:visited,
+a:active {
+	color: var(--color-prime);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+#bpmn-canvas {
+	position: absolute;
+	top: 10em;
+	right: 1em;
+	bottom: 1em;
+	left: 1em;
+}
+
 @media print {
 	body {
 		margin: 0;

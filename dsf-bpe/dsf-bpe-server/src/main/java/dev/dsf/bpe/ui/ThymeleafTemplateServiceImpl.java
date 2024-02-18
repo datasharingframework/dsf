@@ -18,6 +18,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 {
 	private final String serverBaseUrl;
 	private final Theme theme;
+	private final boolean cacheEnabled;
 
 	private final TemplateEngine templateEngine = new TemplateEngine();
 
@@ -32,6 +33,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	{
 		this.serverBaseUrl = serverBaseUrl;
 		this.theme = theme;
+		this.cacheEnabled = cacheEnabled;
 
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		resolver.setTemplateMode(TemplateMode.HTML);
@@ -61,19 +63,23 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	}
 
 	@Override
-	public StreamingOutput writeRootUi(Context context)
+	public StreamingOutput write(Context context, MainValues mainValues)
 	{
 		Objects.requireNonNull(context, "context");
+		Objects.requireNonNull(mainValues, "mainValues");
 
-		return output ->
-		{
-			context.setVariable("basePath", getServerBaseUrlPathWithLeadingSlash());
-			context.setVariable("theme", theme == null ? null : theme.toString());
-			context.setVariable("title", "DSF: BPE");
-			context.setVariable("heading", "BPE");
-			context.setVariable("htmlFragment", "root");
+		context.setVariable("title", mainValues.title());
+		context.setVariable("heading", mainValues.heading());
+		context.setVariable("htmlFragment", mainValues.htmlFragment());
 
-			templateEngine.process("main", context, new OutputStreamWriter(output));
-		};
+		context.setVariable("username", mainValues.username());
+		context.setVariable("openid", mainValues.openid());
+
+		context.setVariable("basePath", getServerBaseUrlPathWithLeadingSlash());
+		context.setVariable("theme", theme == null ? null : theme.toString());
+
+		context.setVariable("bpmnProd", cacheEnabled);
+
+		return output -> templateEngine.process("main", context, new OutputStreamWriter(output));
 	}
 }

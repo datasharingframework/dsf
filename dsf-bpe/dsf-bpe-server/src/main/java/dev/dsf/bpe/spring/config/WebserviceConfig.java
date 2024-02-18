@@ -41,14 +41,14 @@ public class WebserviceConfig
 	@Bean
 	public ProcessService processService()
 	{
-		return new ProcessService(processEngine.getRepositoryService());
+		return new ProcessService(thymeleafTemplateService(), processEngine.getRepositoryService());
 	}
 
 	@Bean
 	public RootService rootService()
 	{
-		return new RootService(processEngine.getRepositoryService(), processEngine.getRuntimeService(),
-				thymeleafTemplateService());
+		return new RootService(thymeleafTemplateService(), processEngine.getRepositoryService(),
+				processEngine.getRuntimeService());
 	}
 
 	@Bean
