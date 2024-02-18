@@ -19,6 +19,10 @@ fieldset#form-fieldset {
 	background-color: var(--color-row-background);
 }
 
+fieldset div:last-child {
+	margin-bottom: 0;
+}
+
 .row:has(ul.error-list:not(:empty)) {
 	background-color: var(--color-error-background);
 }
@@ -28,7 +32,7 @@ fieldset#form-fieldset {
 }
 
 .row-submit {
-	margin-top: 0.3em;
+	margin-top: 1em;
 }
 
 .comment {
