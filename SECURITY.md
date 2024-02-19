@@ -2,13 +2,13 @@
 
 You can find explanations of architectural decisions and functions that involve the security of the Data Sharing Framework (DSF), services and tools offered by us at https://dsf.dev/security. An overview of the currently supported DSF versions can be found there.
 
-## Security vulnerability disclosure policy
+## Security Vulnerability Disclosure Policy
 
-### Our commitment to security
+### Our Commitment to Security
 
 We as the DSF development team take security of our software, services and data very seriously. We understand that despite our best efforts, vulnerabilities can exist. To address this, we encourage responsible reporting of any security vulnerabilities discovered in our software and systems.
 
-### Responsible disclosure
+### Responsible Disclosure
 
 We kindly ask security researchers and the general public to follow the principles of *Coordinated Vulnerability Disclosure (CVD)* or *Responsible Disclosure* when reporting vulnerabilities to us. This approach helps us to mitigate potential risks and protect our users' data effectively.
 
@@ -23,7 +23,7 @@ If you believe you have found a security vulnerability in our system, please ema
 
 Please do not file an issue on a security-related topic and use the e-mail address provided. You can verify the address both in the application repository and at https://dsf.dev/security.
 
-### Our promise
+### Our Promise
 
 * **Acknowledgement**: We usually will acknowledge receipt of your vulnerability report within 48 hours.
 * **Investigation**: Our security team will investigate the issue and work diligently to verify and reproduce the vulnerability.

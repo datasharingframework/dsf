@@ -12,7 +12,7 @@ Start now by visiting our contribution pages. Every line of code helps us build 
 
 ## General
 
-### Code style
+### Code Style
 
 You can import our code style for your specific IDE:
 
@@ -21,7 +21,7 @@ You can import our code style for your specific IDE:
 
 Pull requests will only be approved if the code is formatted according to the code style configurations above. To format the code with maven before pushing to GitHub, use `mvn compile -Pformat-and-sort`.
 
-### Branching strategy
+### Branching Strategy
 
 [Git Flow](https://www.atlassian.com/de/git/tutorials/comparing-workflows/gitflow-workflow) is used as this project's branching strategy. Therefore, you will find the following structure:
 
@@ -34,7 +34,7 @@ Pull requests will only be approved if the code is formatted according to the co
 Notice that only the first two elements listed are actual branches. The other elements are containers to hold all branches belonging to that category.
 
 
-#### Branch naming
+#### Branch Naming
 
 The following ruleset is applied to name branches:
 
@@ -42,7 +42,7 @@ The following ruleset is applied to name branches:
 * `hotfix/<version>`
 * `release/<version>`
 
-## Setting up the project
+## Setting up the Project
 
 This chapter lists all important requirements to get the project buildable and running properly.
 
@@ -68,7 +68,7 @@ The project relies on [Maven](https://maven.apache.org/) as its management tool.
 3. If you desire feedback, create a pull request or comment on it in the issue. Feel free to @ any member with write permissions if you feel like your request has not been registered yet. They will review your changes and/or change requests
 4. If your changes are production-ready, create a [pull request](https://github.com/datasharingframework/dsf/pulls).
 
-### Pull request process
+### Pull Request Process
 
 We follow Martin Fowler's method for managing pull requests. This approach categorizes pull requests based on the level of trust and experience of the contributor, as well as the impact of the changes. Here's how we apply it:
 

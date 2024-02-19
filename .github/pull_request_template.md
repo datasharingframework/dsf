@@ -8,6 +8,9 @@ Thanks for sending a pull request!  Here are some tips for you:
   6. If possible, provide a concise example to reproduce the issue for a faster review.
 -->
 
+<!-- IMPORTANT: Please make sure to remove any sensitive information from your input! -->
+
+
 Closes #issuenumber(s).
 
 ### Changes
@@ -16,7 +19,7 @@ Please clarify what changes you are proposing. The purpose of this section is to
 -->
 
 
-### How was this patch tested?
+### How Was This Patch Tested?
 <!--
 If tests were added, say they were added here. Please make sure to add some test cases that check the changes thoroughly including negative and positive cases if possible.
 If it was tested in a different way from regular unit tests, please clarify how you tested step by step, ideally copy and pastetable, so that other reviewers can test and check, and descendants can verify in the future.
