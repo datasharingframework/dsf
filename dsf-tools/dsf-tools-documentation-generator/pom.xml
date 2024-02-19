@@ -59,6 +59,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
+				<configuration>
+					<goalPrefix>dsf-documentation</goalPrefix>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
