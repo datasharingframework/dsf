@@ -53,8 +53,8 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.server.ui.theme:}")
 	private String uiTheme;
 
-	@Documentation(required = true, description = "Base address of the BPE server", example = "https://foo.bar/bpe")
-	@Value("${dev.dsf.bpe.server.base.url}")
+	@Documentation(description = "Base address of the BPE server, configure when exposing the web-ui", example = "https://foo.bar/bpe")
+	@Value("${dev.dsf.bpe.server.base.url:https://localhost/bpe}")
 	private String bpeServerBaseUrl;
 
 	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control).")
