@@ -1,150 +1,73 @@
 package dev.dsf.bpe.authentication;
 
 import java.security.cert.X509Certificate;
-import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.DsfOpenIdCredentials;
-import dev.dsf.common.auth.conf.DsfRole;
+import dev.dsf.bpe.service.LocalOrganizationProvider;
+import dev.dsf.common.auth.conf.AbstractIdentityProvider;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
-import dev.dsf.common.auth.conf.OrganizationIdentity;
-import dev.dsf.common.auth.conf.PractitionerIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentityImpl;
+import dev.dsf.common.auth.conf.RoleConfig;
 
-public class IdentityProviderImpl implements IdentityProvider
+public class IdentityProviderImpl extends AbstractIdentityProvider implements IdentityProvider, InitializingBean
 {
-	@Override
-	public Identity getIdentity(DsfOpenIdCredentials credentials)
+	private static final Logger logger = LoggerFactory.getLogger(IdentityProviderImpl.class);
+
+	private final LocalOrganizationProvider organizationProvider;
+
+	public IdentityProviderImpl(RoleConfig roleConfig, LocalOrganizationProvider organizationProvider)
 	{
-		return new PractitionerIdentity()
-		{
-			@Override
-			public String getName()
-			{
-				return credentials.getUserId();
-			}
+		super(roleConfig);
 
-			@Override
-			public String getDisplayName()
-			{
-				return getName();
-			}
+		this.organizationProvider = organizationProvider;
+	}
 
-			@Override
-			public boolean isLocalIdentity()
-			{
-				return true;
-			}
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
 
-			@Override
-			public boolean hasDsfRole(DsfRole role)
-			{
-				return BpeServerRole.ORGANIZATION.equals(role);
-			}
+		Objects.requireNonNull(organizationProvider, "organizationProvider");
+	}
 
-			@Override
-			public Set<DsfRole> getDsfRoles()
-			{
-				return Collections.singleton(BpeServerRole.ORGANIZATION);
-			}
-
-			@Override
-			public Optional<String> getOrganizationIdentifierValue()
-			{
-				return Optional.empty();
-			}
-
-			@Override
-			public Organization getOrganization()
-			{
-				return null;
-			}
-
-			@Override
-			public Practitioner getPractitioner()
-			{
-				return null;
-			}
-
-			@Override
-			public Set<Coding> getPractionerRoles()
-			{
-				return Collections.emptySet();
-			}
-
-			@Override
-			public Optional<DsfOpenIdCredentials> getCredentials()
-			{
-				return Optional.of(credentials);
-			}
-
-			@Override
-			public Optional<X509Certificate> getCertificate()
-			{
-				return Optional.empty();
-			}
-		};
+	@Override
+	protected Optional<Organization> getLocalOrganization()
+	{
+		return organizationProvider.getLocalOrganization();
 	}
 
 	@Override
 	public Identity getIdentity(X509Certificate[] certificates)
 	{
-		return new OrganizationIdentity()
+		if (certificates == null || certificates.length == 0)
+			return null;
+
+		String thumbprint = getThumbprint(certificates[0]);
+
+		Optional<Practitioner> practitioner = toPractitioner(certificates[0]);
+		Optional<Organization> localOrganization = organizationProvider.getLocalOrganization();
+		if (practitioner.isPresent() && localOrganization.isPresent())
 		{
-			@Override
-			public String getName()
-			{
-				return certificates[0].getSubjectX500Principal().getName(X500Principal.RFC1779);
-			}
+			Practitioner p = practitioner.get();
+			Organization o = localOrganization.get();
 
-			@Override
-			public String getDisplayName()
-			{
-				return getName();
-			}
-
-			@Override
-			public Set<DsfRole> getDsfRoles()
-			{
-				return Collections.singleton(BpeServerRole.ORGANIZATION);
-			}
-
-			@Override
-			public Organization getOrganization()
-			{
-				return null;
-			}
-
-			@Override
-			public boolean isLocalIdentity()
-			{
-				return true;
-			}
-
-			@Override
-			public Optional<String> getOrganizationIdentifierValue()
-			{
-				return Optional.empty();
-			}
-
-			@Override
-			public boolean hasDsfRole(DsfRole role)
-			{
-				return BpeServerRole.ORGANIZATION.equals(role);
-			}
-
-			@Override
-			public Optional<X509Certificate> getCertificate()
-			{
-				return Optional.of(certificates[0]);
-			}
-		};
+			return new PractitionerIdentityImpl(o, getDsfRolesFor(p, thumbprint, null, null), certificates[0], p,
+					getPractitionerRolesFor(p, thumbprint, null, null), null);
+		}
+		else
+		{
+			logger.warn(
+					"Certificate with thumbprint '{}' for '{}' unknown, not configured as local user or local organization unknown",
+					thumbprint, getDn(certificates[0]));
+			return null;
+		}
 	}
 }

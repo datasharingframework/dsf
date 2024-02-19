@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.authentication.OrganizationProvider;
-import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.TaskDao;
 import dev.dsf.fhir.dao.TestOrganizationIdentity;
@@ -51,13 +50,12 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskIntegrationTest.class);
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testCreateTaskStartPingProcessNotAllowedForRemoteUser() throws Exception
 	{
 		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
@@ -81,15 +79,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
-		try
-		{
-			getExternalWebserviceClient().create(t);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
 
 	@Test
@@ -116,12 +106,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setStatus(null);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		for (TaskStatus illegal : illegalCreateStates)
 		{
 			t.setStatus(illegal);
-			testCreateExpectForbidden(getWebserviceClient(), t);
+			expectForbidden(() -> getWebserviceClient().create(t));
 		}
 	}
 
@@ -151,38 +141,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
 		t.setStatus(null);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		for (TaskStatus illegal : illegalCreateStates)
 		{
 			t.setStatus(illegal);
-			testCreateExpectForbidden(getExternalWebserviceClient(), t);
-		}
-	}
-
-	private void testCreateExpectForbidden(FhirWebserviceClient client, Task task) throws Exception
-	{
-		try
-		{
-			client.create(task);
-			fail("WebApplicationException expected");
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(403, e.getResponse().getStatus());
-		}
-	}
-
-	private void testUpdateExpectForbidden(FhirWebserviceClient client, Task task) throws Exception
-	{
-		try
-		{
-			client.update(task);
-			fail("WebApplicationException expected");
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(403, e.getResponse().getStatus());
+			expectForbidden(() -> getExternalWebserviceClient().create(t));
 		}
 	}
 
@@ -206,21 +170,21 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setRequester(null);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setRequester(new Reference());
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		Reference requester1 = new Reference().setType("Organization");
 		requester1.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRequester(requester1);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		Reference requester2 = new Reference()
 				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRequester(requester2);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 	}
 
 	@Test
@@ -242,20 +206,20 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
 		t.setRequester(null);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setRequester(new Reference());
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		Reference requester1 = new Reference()
 				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
 		t.setRequester(requester1);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		Reference requester2 = new Reference()
 				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRequester(requester2);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
 
 	@Test
@@ -278,37 +242,37 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setRestriction(null);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.getRestriction().addExtension().setUrl("test");
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		Reference requester0 = new Reference().setReference("Organization/" + UUID.randomUUID().toString());
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester0);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		Reference requester1 = new Reference().setType("Organization");
 		requester1.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester1);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		Reference requester2 = new Reference()
 				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester2);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester1).addRecipient(requester2);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()))
 				.addRecipient(requester0);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 	}
 
 	@Test
@@ -333,37 +297,37 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
 		t.setRestriction(null);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.getRestriction().addExtension().setUrl("test");
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		Reference requester0 = new Reference().setReference("Organization/" + UUID.randomUUID().toString());
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester0);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		Reference requester1 = new Reference().setType("Organization");
 		requester1.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
 				.setValue("External_Test_Organization");
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester1);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		Reference requester2 = new Reference()
 				.setReference("http://foo.test/fhir/Organization/" + UUID.randomUUID().toString());
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester2);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(requester1).addRecipient(requester2);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setRestriction(new TaskRestrictionComponent());
 		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()))
 				.addRecipient(requester0);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
 
 	@Test
@@ -387,10 +351,10 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setInstantiatesCanonical(null);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setInstantiatesCanonical("not-a-valid-pattern");
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 	}
 
 	@Test
@@ -417,10 +381,10 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
 		t.setInstantiatesCanonical(null);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setInstantiatesCanonical("not-a-valid-pattern");
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
 
 	@Test
@@ -444,12 +408,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		// t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setInput(null);
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("system").setCode("code");
 		t.getInputFirstRep().setValue(new StringType("value"));
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setInput(null);
 		ParameterComponent in1 = t.addInput();
@@ -460,30 +424,30 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		in2.getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		in2.setValue(new StringType("startPingProcessMessage"));
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("");
 		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType(""));
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new Coding().setSystem("system").setCode("code"));
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 	}
 
 	@Test
@@ -510,12 +474,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		// t.getInputFirstRep().setValue(new StringType("pingMessage"));
 
 		t.setInput(null);
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("system").setCode("code");
 		t.getInputFirstRep().setValue(new StringType("value"));
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setInput(null);
 		ParameterComponent in1 = t.addInput();
@@ -526,30 +490,30 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		in2.getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		in2.setValue(new StringType("startPingProcessMessage"));
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("");
 		t.getInputFirstRep().setValue(new StringType("pingMessage"));
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType(""));
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new Coding().setSystem("system").setCode("code"));
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
 
 	@Test
@@ -574,7 +538,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		t.getOutputFirstRep().getType().getCodingFirstRep().setSystem("system").setCode("code");
 		t.getOutputFirstRep().setValue(new StringType("value"));
-		testCreateExpectForbidden(getWebserviceClient(), t);
+		expectForbidden(() -> getWebserviceClient().create(t));
 	}
 
 	@Test
@@ -602,7 +566,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		t.getOutputFirstRep().getType().getCodingFirstRep().setSystem("system").setCode("code");
 		t.getOutputFirstRep().setValue(new StringType("value"));
-		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
 
 	@Test
@@ -724,7 +688,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+		expectForbidden(() -> getPractitionerWebserviceClient().create(task));
 	}
 
 	@Test
@@ -760,7 +724,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+		expectForbidden(() -> getPractitionerWebserviceClient().create(task));
 	}
 
 	@Test
@@ -777,7 +741,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getWebserviceClient(), task);
+		expectForbidden(() -> getWebserviceClient().create(task));
 	}
 
 	@Test
@@ -813,7 +777,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+		expectForbidden(() -> getPractitionerWebserviceClient().create(task));
 	}
 
 	@Test
@@ -830,7 +794,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getWebserviceClient(), task);
+		expectForbidden(() -> getWebserviceClient().create(task));
 	}
 
 	@Test
@@ -888,7 +852,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("External_Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getExternalWebserviceClient(), task);
+		expectForbidden(() -> getExternalWebserviceClient().create(task));
 	}
 
 	@Test
@@ -905,7 +869,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+		expectForbidden(() -> getPractitionerWebserviceClient().create(task));
 	}
 
 	@Test
@@ -941,7 +905,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+		expectForbidden(() -> getPractitionerWebserviceClient().create(task));
 	}
 
 	@Test
@@ -977,7 +941,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+		expectForbidden(() -> getPractitionerWebserviceClient().create(task));
 	}
 
 	@Test
@@ -1032,7 +996,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getWebserviceClient(), task);
+		expectForbidden(() -> getWebserviceClient().create(task));
 	}
 
 	@Test
@@ -1068,7 +1032,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getWebserviceClient(), task);
+		expectForbidden(() -> getWebserviceClient().create(task));
 	}
 
 	@Test
@@ -1111,8 +1075,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(createdTestTaskProfile);
 		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
 
-		Task task = readTestTask("External_Test_Organization", "Test_Organization");
-		testCreateExpectForbidden(getExternalWebserviceClient(), task);
+		Task t = readTestTask("External_Test_Organization", "Test_Organization");
+		expectForbidden(() -> getExternalWebserviceClient().create(t));
 	}
 
 	@Test
@@ -1483,7 +1447,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		task.getIdentifier().clear();
 		task.setStatus(TaskStatus.REQUESTED);
 
-		testCreateExpectForbidden(getWebserviceClient(), task);
+		expectForbidden(() -> getWebserviceClient().create(task));
 	}
 
 	@Test
@@ -1492,7 +1456,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Task task = readTestTask("External_Test_Organization", "Test_Organization");
 		task.setStatus(TaskStatus.DRAFT);
 
-		testCreateExpectForbidden(getExternalWebserviceClient(), task);
+		expectForbidden(() -> getExternalWebserviceClient().create(task));
 	}
 
 	@Test
@@ -1501,7 +1465,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Task task = readTestTask("Test_Organization", "Test_Organization");
 		task.setStatus(TaskStatus.DRAFT);
 
-		testCreateExpectForbidden(getPractitionerWebserviceClient(), task);
+		expectForbidden(() -> getPractitionerWebserviceClient().create(task));
 	}
 
 	@Test
@@ -1513,6 +1477,6 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Task createdTask = dao.create(task);
 
 		createdTask.setStatus(TaskStatus.INPROGRESS);
-		testUpdateExpectForbidden(getExternalWebserviceClient(), createdTask);
+		expectForbidden(() -> getExternalWebserviceClient().update(createdTask));
 	}
 }

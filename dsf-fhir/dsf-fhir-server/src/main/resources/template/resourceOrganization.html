@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="resource-data" th:fragment="resource-data">
+			<th:block th:insert="~{resourceElements::identifier}" th:with="identifier=${organization.identifier}"></th:block>
+			<th:block th:insert="~{resourceElements::active}" th:if="${resource.active}"></th:block>
+			<th:block th:insert="~{resourceElements::systemsAndValues}" th:with="label='Type',systemsAndValues=${organization.type}" th:if="${organization.type}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Name',string=${organization.name}" th:if="${organization.name}"></th:block>
+			<th:block th:insert="~{resourceElements::strings}" th:with="label='Alias',strings=${organization.alias}" th:if="${organization.alias}"></th:block>
+			<th:block th:insert="~{resourceElements::systemsAndValues}" th:with="label='Telecom',systemsAndValues=${organization.telecom}" th:if="${organization.telecom}"></th:block>
+			<th:block th:insert="~{resourceElements::addresses}" th:with="addresses=${organization.address}" th:if="${organization.address}"></th:block>
+			<th:block th:insert="~{resourceElements::ids}" th:with="label='Endpoint',ids=${organization.endpoint}" th:if="${organization.endpoint}"></th:block>
+		</div>
+	</div>
+</body>
+</html>

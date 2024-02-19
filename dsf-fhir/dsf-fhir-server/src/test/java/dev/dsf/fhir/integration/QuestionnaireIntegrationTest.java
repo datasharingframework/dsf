@@ -4,53 +4,21 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.junit.Test;
 
 import dev.dsf.fhir.dao.QuestionnaireDao;
 
-public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
+public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrationTest
 {
-	private static final Date DATE = Date.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
-	private static final String IDENTIFIER_SYSTEM = "http://dsf.dev/fhir/CodeSystem/user-task";
-	private static final String IDENTIFIER_VALUE = "foo";
-	private static final String URL = "http://dsf.dev/fhir/Questionnaire/userTask/foo";
-	private static final String VERSION = "1.0.0";
-	private static final Enumerations.PublicationStatus STATUS = Enumerations.PublicationStatus.ACTIVE;
-
-	private Questionnaire createQuestionnaire()
-	{
-		Questionnaire questionnaire = new Questionnaire();
-		questionnaire.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
-
-		questionnaire.addIdentifier().setSystem(IDENTIFIER_SYSTEM).setValue(IDENTIFIER_VALUE);
-
-		questionnaire.setUrl(URL);
-		questionnaire.setVersion(VERSION);
-
-		questionnaire.setStatus(STATUS);
-		questionnaire.setDate(DATE);
-
-		questionnaire.addItem().setLinkId("foo").setText("Approve?")
-				.setType(Questionnaire.QuestionnaireItemType.BOOLEAN).addInitial().setValue(new BooleanType(false));
-
-		return questionnaire;
-	}
-
 	@Test
-	public void testCreateValidByLocalUser() throws Exception
+	public void testCreateValidByLocalUser()
 	{
-		Questionnaire questionnaire = createQuestionnaire();
-
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
 		Questionnaire created = getWebserviceClient().create(questionnaire);
 
 		assertNotNull(created);
@@ -61,7 +29,7 @@ public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchByDate() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaire();
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -76,18 +44,18 @@ public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
 
 		Questionnaire searchQuestionnaire = (Questionnaire) searchBundle.getEntry().get(0).getResource();
 		assertTrue(searchQuestionnaire.hasDate());
-		assertEquals(0, DATE.compareTo(searchQuestionnaire.getDate()));
+		assertEquals(0, QUESTIONNAIRE_DATE.compareTo(searchQuestionnaire.getDate()));
 	}
 
 	@Test
 	public void testSearchByIdentifier() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaire();
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
 		Bundle searchBundle = getWebserviceClient().search(Questionnaire.class,
-				Map.of("identifier", Collections.singletonList(IDENTIFIER_SYSTEM + "|" + IDENTIFIER_VALUE)));
+				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -97,19 +65,19 @@ public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
 
 		Questionnaire searchQuestionnaire = (Questionnaire) searchBundle.getEntry().get(0).getResource();
 		assertEquals(1, searchQuestionnaire.getIdentifier().size());
-		assertEquals(IDENTIFIER_SYSTEM, searchQuestionnaire.getIdentifier().get(0).getSystem());
-		assertEquals(IDENTIFIER_VALUE, searchQuestionnaire.getIdentifier().get(0).getValue());
+		assertEquals(TEST_IDENTIFIER_SYSTEM, searchQuestionnaire.getIdentifier().get(0).getSystem());
+		assertEquals(TEST_IDENTIFIER_VALUE, searchQuestionnaire.getIdentifier().get(0).getValue());
 	}
 
 	@Test
 	public void testSearchByStatus() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaire();
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
 		Bundle searchBundle = getWebserviceClient().search(Questionnaire.class,
-				Map.of("status", Collections.singletonList(STATUS.toCode())));
+				Map.of("status", Collections.singletonList(QUESTIONNAIRE_STATUS.toCode())));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -119,18 +87,19 @@ public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
 
 		Questionnaire searchQuestionnaire = (Questionnaire) searchBundle.getEntry().get(0).getResource();
 		assertTrue(searchQuestionnaire.hasStatus());
-		assertEquals(STATUS, searchQuestionnaire.getStatus());
+		assertEquals(QUESTIONNAIRE_STATUS, searchQuestionnaire.getStatus());
 	}
 
 	@Test
 	public void testSearchByUrlAndVersion() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaire();
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
 		Bundle searchBundle = getWebserviceClient().search(Questionnaire.class,
-				Map.of("url", Collections.singletonList(URL), "version", Collections.singletonList(VERSION)));
+				Map.of("url", Collections.singletonList(QUESTIONNAIRE_URL), "version",
+						Collections.singletonList(QUESTIONNAIRE_VERSION)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -140,8 +109,8 @@ public class QuestionnaireIntegrationTest extends AbstractIntegrationTest
 
 		Questionnaire searchQuestionnaire = (Questionnaire) searchBundle.getEntry().get(0).getResource();
 		assertTrue(searchQuestionnaire.hasUrl());
-		assertEquals(URL, searchQuestionnaire.getUrl());
+		assertEquals(QUESTIONNAIRE_URL, searchQuestionnaire.getUrl());
 		assertTrue(searchQuestionnaire.hasVersion());
-		assertEquals(VERSION, searchQuestionnaire.getVersion());
+		assertEquals(QUESTIONNAIRE_VERSION, searchQuestionnaire.getVersion());
 	}
 }

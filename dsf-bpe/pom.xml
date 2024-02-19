@@ -144,6 +144,11 @@
 				<artifactId>dsf-common-status</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>dev.dsf</groupId>

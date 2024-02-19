@@ -47,7 +47,7 @@ public class RoleConfig
 		private final List<DsfRole> dsfRoles = new ArrayList<>();
 		private final List<Coding> practitionerRoles = new ArrayList<>();
 
-		private Mapping(String name, List<String> thumbprints, List<String> emails, List<String> tokenRoles,
+		public Mapping(String name, List<String> thumbprints, List<String> emails, List<String> tokenRoles,
 				List<String> tokenGroups, List<DsfRole> dsfRoles, List<Coding> practitionerRoles)
 		{
 			this.name = name;

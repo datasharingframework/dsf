@@ -1,7 +1,5 @@
 package dev.dsf.fhir.spring.config;
 
-import java.util.List;
-
 import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +14,6 @@ import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.IdentityProviderImpl;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authentication.OrganizationProviderImpl;
-import dev.dsf.fhir.authentication.PractitionerProvider;
-import dev.dsf.fhir.authentication.PractitionerProviderImpl;
 
 @Configuration
 public class AuthenticationConfig
@@ -41,18 +37,10 @@ public class AuthenticationConfig
 	}
 
 	@Bean
-	public PractitionerProvider practitionerProvider()
-	{
-		List<String> configuredUserThumbprints = roleConfig().getEntries().stream()
-				.flatMap(e -> e.getThumbprints().stream()).distinct().toList();
-		return new PractitionerProviderImpl(configuredUserThumbprints);
-	}
-
-	@Bean
 	public IdentityProvider identityProvider()
 	{
-		return new IdentityProviderImpl(organizationProvider(), practitionerProvider(),
-				propertiesConfig.getOrganizationIdentifierValue(), roleConfig());
+		return new IdentityProviderImpl(roleConfig(), organizationProvider(),
+				propertiesConfig.getOrganizationIdentifierValue());
 	}
 
 	@Bean

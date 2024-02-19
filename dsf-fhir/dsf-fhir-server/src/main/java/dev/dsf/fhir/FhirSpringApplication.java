@@ -2,7 +2,6 @@ package dev.dsf.fhir;
 
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import jakarta.servlet.ServletContext;
@@ -15,7 +14,6 @@ public class FhirSpringApplication implements WebApplicationInitializer
 	{
 		AnnotationConfigWebApplicationContext context = getContext();
 		servletContext.addListener(new ContextLoaderListener(context));
-		servletContext.addListener(new RequestContextListener());
 	}
 
 	private AnnotationConfigWebApplicationContext getContext()

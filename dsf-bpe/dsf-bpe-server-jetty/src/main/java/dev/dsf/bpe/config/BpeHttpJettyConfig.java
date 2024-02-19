@@ -1,6 +1,5 @@
 package dev.dsf.bpe.config;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
@@ -20,6 +19,6 @@ public class BpeHttpJettyConfig extends AbstractHttpJettyConfig
 	@Override
 	protected List<Class<? extends ServletContainerInitializer>> servletContainerInitializers()
 	{
-		return Arrays.asList(JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
+		return List.of(JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
 	}
 }

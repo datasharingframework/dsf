@@ -48,6 +48,10 @@ public final class TestDataGenerator
 		bundleGenerator.createTestBundle(clientCertificateFilesByCommonName);
 		bundleGenerator.copyJavaTestBundle();
 
+		// bpe config.properties
+		configGenerator.modifyJavaTestBpeConfigProperties(clientCertificateFilesByCommonName);
+		configGenerator.copyJavaTestBpeConfigProperties();
+
 		// fhir config.properties
 		configGenerator.modifyJavaTestFhirConfigProperties(clientCertificateFilesByCommonName);
 		configGenerator.copyJavaTestFhirConfigProperties();

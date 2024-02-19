@@ -20,6 +20,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.documentation.Documentation;
+import dev.dsf.common.ui.theme.Theme;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
@@ -28,43 +29,47 @@ public class PropertiesConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
-	@Documentation(required = true, description = "The address of the database used for the DSF FHIR server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/fhir")
+	@Documentation(required = true, description = "Address of the database used for the DSF FHIR server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/fhir")
 	@Value("${dev.dsf.fhir.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "The user name to access the database from the DSF FHIR server")
+	@Documentation(description = "Username to access the database from the DSF FHIR server")
 	@Value("${dev.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, description = "The password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, description = "Password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${dev.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "The user name to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then *DEV_DSF_FHIR_DB_USER_USERNAME*")
+	@Documentation(description = "Username to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then *DEV_DSF_FHIR_DB_USER_USERNAME*")
 	@Value("${dev.dsf.fhir.db.user.permanent.delete.username:fhir_server_permanent_delete_user}")
 	private String dbPermanentDeleteUsername;
 
-	@Documentation(required = true, description = "The password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_permanent_delete.password")
+	@Documentation(required = true, description = "Password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_permanent_delete.password")
 	@Value("${dev.dsf.fhir.db.user.permanent.delete.password}")
 	private char[] dbPermanentDeletePassword;
 
-	@Documentation(required = true, description = "The base address of this DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
+	@Documentation(required = true, description = "Base address of this DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
 	@Value("${dev.dsf.fhir.server.base.url}")
 	private String serverBaseUrl;
 
-	@Documentation(description = "The page size returned by the DSF FHIR server when reading/searching fhir resources")
+	@Documentation(description = "Page size returned by the DSF FHIR server when reading/searching fhir resources")
 	@Value("${dev.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
+
+	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments im configured; supported values: `dev`, `test` and `prod`")
+	@Value("${dev.dsf.fhir.server.ui.theme:}")
+	private String uiTheme;
 
 	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control).")
 	@Value("${dev.dsf.fhir.server.roleConfig:}")
 	private String roleConfig;
 
-	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
+	@Documentation(required = true, description = "Local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
 	@Value("${dev.dsf.fhir.server.organization.identifier.value}")
 	private String organizationIdentifierValue;
 
-	@Documentation(description = "The fhir bundle containing the initial Allow-List, loaded on startup of the DSF FHIR server", recommendation = "Change only if you don't use the provided files from the installation guide, have local changes in the Allow-List or received an Allow-List from another source")
+	@Documentation(description = "Fhir bundle containing the initial Allow-List, loaded on startup of the DSF FHIR server", recommendation = "Change only if you don't use the provided files from the installation guide, have local changes in the Allow-List or received an Allow-List from another source")
 	@Value("${dev.dsf.fhir.server.init.bundle:conf/bundle.xml}")
 	private String initBundleFile;
 
@@ -84,11 +89,11 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] webserviceClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "The timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.fhir.client.timeout.read:10000}")
 	private int webserviceClientReadTimeout;
 
-	@Documentation(description = "The timeout in milliseconds until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout in milliseconds until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.fhir.client.timeout.connect:2000}")
 	private int webserviceClientConnectTimeout;
 
@@ -209,6 +214,11 @@ public class PropertiesConfig implements InitializingBean
 	public String getServerBaseUrl()
 	{
 		return serverBaseUrl.endsWith("/") ? serverBaseUrl.substring(serverBaseUrl.length() - 1) : serverBaseUrl;
+	}
+
+	public Theme getUiTheme()
+	{
+		return Theme.fromString(uiTheme);
 	}
 
 	public int getDefaultPageCount()
