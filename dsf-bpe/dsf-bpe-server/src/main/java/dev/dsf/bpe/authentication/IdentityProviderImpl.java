@@ -65,7 +65,7 @@ public class IdentityProviderImpl extends AbstractIdentityProvider implements Id
 		else
 		{
 			logger.warn(
-					"Certificate with thumbprint '{}' for '{}' unknown, not part of allowlist and not configured as local user or local organization",
+					"Certificate with thumbprint '{}' for '{}' unknown, not configured as local user or local organization unknown",
 					thumbprint, getDn(certificates[0]));
 			return null;
 		}
