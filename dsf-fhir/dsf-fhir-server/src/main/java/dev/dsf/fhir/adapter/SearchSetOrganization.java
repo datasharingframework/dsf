@@ -18,8 +18,7 @@ public class SearchSetOrganization extends AbstractSearchSet<Organization>
 	protected Row toRow(ElementId id, Organization resource)
 	{
 		boolean active = resource.hasActiveElement() && resource.getActiveElement().hasValue()
-				? Boolean.TRUE.equals(resource.getActiveElement().getValue())
-				: false;
+				&& Boolean.TRUE.equals(resource.getActiveElement().getValue());
 
 		String identifier = getIdentifierValues(resource, Organization::hasIdentifier, Organization::getIdentifier,
 				NAMING_SYSTEM_ORGANIZATION_IDENTIFIER);

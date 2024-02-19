@@ -21,8 +21,7 @@ public class SearchSetOrganizationAffiliation extends AbstractSearchSet<Organiza
 	protected Row toRow(ElementId id, OrganizationAffiliation resource)
 	{
 		boolean active = resource.hasActiveElement() && resource.getActiveElement().hasValue()
-				? Boolean.TRUE.equals(resource.getActiveElement().getValue())
-				: false;
+				&& Boolean.TRUE.equals(resource.getActiveElement().getValue());
 
 		ElementId parentOrganization = ElementId.from(resource, OrganizationAffiliation::hasOrganization,
 				OrganizationAffiliation::getOrganization);
