@@ -1,5 +1,8 @@
 package dev.dsf.bpe.spring.config;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.camunda.bpm.engine.ProcessEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +32,12 @@ public class WebserviceConfig
 	public ThymeleafTemplateService thymeleafTemplateService()
 	{
 		return new ThymeleafTemplateServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getUiTheme(),
-				propertiesConfig.getStaticResourceCacheEnabled());
+				propertiesConfig.getStaticResourceCacheEnabled(), modCssExists());
+	}
+
+	private boolean modCssExists()
+	{
+		return Files.isReadable(Paths.get("ui/mod.css"));
 	}
 
 	@Bean

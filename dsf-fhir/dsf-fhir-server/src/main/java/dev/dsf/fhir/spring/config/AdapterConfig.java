@@ -1,5 +1,7 @@
 package dev.dsf.fhir.spring.config;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -84,7 +86,13 @@ public class AdapterConfig
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), ValueSet.class));
 
 		return new ThymeleafTemplateServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getUiTheme(),
-				fhirConfig.fhirContext(), thymeleafContexts, propertiesConfig.getStaticResourceCacheEnabled());
+				fhirConfig.fhirContext(), thymeleafContexts, propertiesConfig.getStaticResourceCacheEnabled(),
+				modCssExists());
+	}
+
+	private boolean modCssExists()
+	{
+		return Files.isReadable(Paths.get("ui/mod.css"));
 	}
 
 	@Bean

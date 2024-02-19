@@ -11,7 +11,7 @@
 <script src="static/bpmn.js" th:if="${bpmnViewer}"></script>
 <link rel="stylesheet" type="text/css" href="static/bpmn-viewer.css" th:if="${bpmnViewer}">
 <link rel="stylesheet" type="text/css" href="static/dsf.css">
-<link rel="stylesheet" type="text/css" href="static/mod.css">
+<link rel="stylesheet" type="text/css" href="static/mod.css" th:if="${modCssExists}">
 <title th:text="${title}">DSF</title>
 </head>
 <body>

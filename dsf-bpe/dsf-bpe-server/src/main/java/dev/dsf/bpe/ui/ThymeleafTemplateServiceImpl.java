@@ -19,6 +19,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	private final String serverBaseUrl;
 	private final Theme theme;
 	private final boolean cacheEnabled;
+	private final boolean modCssExists;
 
 	private final TemplateEngine templateEngine = new TemplateEngine();
 
@@ -28,12 +29,14 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	 * @param theme
 	 *            may be <code>null</code>
 	 * @param cacheEnabled
+	 * @param modCssExists
 	 */
-	public ThymeleafTemplateServiceImpl(String serverBaseUrl, Theme theme, boolean cacheEnabled)
+	public ThymeleafTemplateServiceImpl(String serverBaseUrl, Theme theme, boolean cacheEnabled, boolean modCssExists)
 	{
 		this.serverBaseUrl = serverBaseUrl;
 		this.theme = theme;
 		this.cacheEnabled = cacheEnabled;
+		this.modCssExists = modCssExists;
 
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		resolver.setTemplateMode(TemplateMode.HTML);
@@ -76,6 +79,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		context.setVariable("openid", mainValues.openid());
 
 		context.setVariable("basePath", getServerBaseUrlPathWithLeadingSlash());
+		context.setVariable("modCssExists", modCssExists);
 		context.setVariable("theme", theme == null ? null : theme.toString());
 
 		context.setVariable("bpmnProd", cacheEnabled);

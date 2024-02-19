@@ -85,6 +85,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	private final String serverBaseUrl;
 	private final Theme theme;
 	private final FhirContext fhirContext;
+	private final boolean modCssExists;
 
 	private final Map<Class<? extends Resource>, List<ThymeleafContext>> contextsByResourceType;
 
@@ -101,13 +102,15 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	 * @param contexts
 	 *            may be <code>null</code>
 	 * @param cacheEnabled
+	 * @param modCssExists
 	 */
 	public ThymeleafTemplateServiceImpl(String serverBaseUrl, Theme theme, FhirContext fhirContext,
-			List<? extends ThymeleafContext> contexts, boolean cacheEnabled)
+			List<? extends ThymeleafContext> contexts, boolean cacheEnabled, boolean modCssExists)
 	{
 		this.serverBaseUrl = serverBaseUrl;
 		this.theme = theme;
 		this.fhirContext = fhirContext;
+		this.modCssExists = modCssExists;
 
 		contextsByResourceType = contexts == null ? Map.of()
 				: contexts.stream().collect(Collectors.groupingBy(ThymeleafContext::getResourceType));
@@ -135,6 +138,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	{
 		Context context = new Context();
 		context.setVariable("basePath", getServerBaseUrlPathWithLeadingSlash());
+		context.setVariable("modCssExists", modCssExists);
 		context.setVariable("theme", theme == null ? null : theme.toString());
 		context.setVariable("title", getTitle(uriInfo));
 		context.setVariable("heading", getHeading(resource, uriInfo));
