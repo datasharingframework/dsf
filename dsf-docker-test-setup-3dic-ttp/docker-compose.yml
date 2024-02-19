@@ -126,8 +126,16 @@ services:
         source: ./dic1/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./dic1/ui
-        target: /opt/fhir/ui
+        source: ./dic1/ui/logo.svg
+        target: /opt/fhir/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./dic1/ui/logo_dark.svg
+        target: /opt/fhir/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/fhir_mod.css
+        target: /opt/fhir/ui/mod.css
         read_only: true
     environment:
       TZ: Europe/Berlin
@@ -200,8 +208,16 @@ services:
         source: ./dic2/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./dic2/ui
-        target: /opt/fhir/ui
+        source: ./dic2/ui/logo.svg
+        target: /opt/fhir/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./dic2/ui/logo_dark.svg
+        target: /opt/fhir/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/fhir_mod.css
+        target: /opt/fhir/ui/mod.css
         read_only: true
     environment:
       TZ: Europe/Berlin
@@ -274,8 +290,16 @@ services:
         source: ./dic3/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./dic3/ui
-        target: /opt/fhir/ui
+        source: ./dic3/ui/logo.svg
+        target: /opt/fhir/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./dic3/ui/logo_dark.svg
+        target: /opt/fhir/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/fhir_mod.css
+        target: /opt/fhir/ui/mod.css
         read_only: true
     environment:
       TZ: Europe/Berlin
@@ -352,8 +376,16 @@ services:
         source: ./ttp/fhir/log
         target: /opt/fhir/log
       - type: bind
-        source: ./ttp/ui
-        target: /opt/fhir/ui
+        source: ./ttp/ui/logo.svg
+        target: /opt/fhir/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./ttp/ui/logo_dark.svg
+        target: /opt/fhir/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/fhir_mod.css
+        target: /opt/fhir/ui/mod.css
         read_only: true
     environment:
       TZ: Europe/Berlin
@@ -433,8 +465,16 @@ services:
         source: ./dic1/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./dic1/ui
-        target: /opt/bpe/ui
+        source: ./dic1/ui/logo.svg
+        target: /opt/bpe/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./dic1/ui/logo_dark.svg
+        target: /opt/bpe/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/bpe_mod.css
+        target: /opt/bpe/ui/mod.css
         read_only: true
     environment:
       TZ: Europe/Berlin
@@ -512,8 +552,16 @@ services:
         source: ./dic2/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./dic2/ui
-        target: /opt/bpe/ui
+        source: ./dic2/ui/logo.svg
+        target: /opt/bpe/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./dic2/ui/logo_dark.svg
+        target: /opt/bpe/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/bpe_mod.css
+        target: /opt/bpe/ui/mod.css
         read_only: true
     environment:
       TZ: Europe/Berlin
@@ -591,8 +639,17 @@ services:
         source: ./dic3/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./dic3/ui
-        target: /opt/bpe/ui
+        source: ./dic3/ui/logo.svg
+        target: /opt/bpe/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./dic3/ui/logo_dark.svg
+        target: /opt/bpe/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/bpe_mod.css
+        target: /opt/bpe/ui/mod.css
+        read_only: true
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
@@ -670,8 +727,16 @@ services:
         source: ./ttp/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./ttp/ui
-        target: /opt/bpe/ui
+        source: ./ttp/ui/logo.svg
+        target: /opt/bpe/ui/logo.svg
+        read_only: true
+      - type: bind
+        source: ./ttp/ui/logo_dark.svg
+        target: /opt/bpe/ui/logo_dark.svg
+        read_only: true
+      - type: bind
+        source: ./ui/bpe_mod.css
+        target: /opt/bpe/ui/mod.css
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
