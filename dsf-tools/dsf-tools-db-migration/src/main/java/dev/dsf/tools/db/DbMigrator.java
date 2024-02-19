@@ -22,7 +22,7 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.ReleaseLocksCommandStep;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -109,7 +109,7 @@ public final class DbMigrator
 						{
 							ByteArrayOutputStream output = new ByteArrayOutputStream();
 							CommandScope unlockCommand = new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME);
-							unlockCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+							unlockCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
 							unlockCommand.setOutput(output);
 
 							logger.warn("Unlocking DB for migration ...");
@@ -125,7 +125,7 @@ public final class DbMigrator
 
 						ByteArrayOutputStream output = new ByteArrayOutputStream();
 						CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-						updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+						updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
 						updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "db/db.changelog.xml");
 						updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, new Contexts().toString());
 						updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG,
