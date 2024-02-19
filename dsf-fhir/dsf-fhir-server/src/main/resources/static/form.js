@@ -213,9 +213,9 @@ function readQuestionnaireResponseAnswersFromForm() {
 			if (id !== "business-key" && id !== "user-task-id") {
 				const result = readAndValidateQuestionnaireResponseItem(item, id)
 
-				if (result)
-					newItems.push(result)
-				else
+				if (result.item)
+					newItems.push(result.item)
+				else if (!result.valid)
 					valid = false
 			} else {
 				newItems.push(item)
@@ -260,12 +260,8 @@ function readAndValidateQuestionnaireResponseItem(item, id) {
 function newQuestionnaireResponseItemReferenceReference(text, id, inputValue, optional) {
 	const value = validateAndConvert(id, "valueReference", inputValue, optional, "Item")
 
-	if (optional && value === null) {
-		return {
-			linkId: id,
-			text: text
-		}
-	}
+	if (optional && value === null)
+		return { item: null, valid: true }
 	else if (value !== null) {
 		const item = {
 			linkId: id,
@@ -277,20 +273,16 @@ function newQuestionnaireResponseItemReferenceReference(text, id, inputValue, op
 			}]
 		}
 
-		return item
+		return { item: item, valid: true }
 	} else
-		return null
+		return { item: null, valid: true }
 }
 
 function newQuestionnaireResponseItemTyped(text, id, fhirType, inputValue, optional) {
 	const value = validateAndConvert(id, fhirType, inputValue, optional, "Item")
 
-	if (optional && value === null) {
-		return {
-			linkId: id,
-			text: text
-		}
-	}
+	if (optional && value === null)
+		return { item: null, valid: true }
 	else if (value !== null) {
 		const item = {
 			linkId: id,
@@ -299,16 +291,16 @@ function newQuestionnaireResponseItemTyped(text, id, fhirType, inputValue, optio
 		}
 		item.answer[0][fhirType] = value
 
-		return item
+		return { item: item, valid: true }
 	} else
-		return null
+		return { item: null, valid: false }
 }
 
 function newQuestionnaireResponseItemCoding(text, id, system, code, optional) {
 	const validated = validateCoding(id, system, code, optional, "Item")
 
 	if (validated !== null) {
-		return {
+		const item = {
 			linkId: id,
 			text: text,
 			answer: [{
@@ -318,15 +310,17 @@ function newQuestionnaireResponseItemCoding(text, id, system, code, optional) {
 				}
 			}]
 		}
+
+		return { item: item, valid: true }
 	} else
-		return null
+		return { item: null, valid: optional }
 }
 
 function newQuestionnaireResponseItemReferenceIdentifier(text, id, system, value, optional) {
 	const validated = validateIdentifier(id, system, value, optional, "Item")
 
 	if (validated !== null) {
-		return {
+		const item = {
 			linkId: id,
 			text: text,
 			answer: [{
@@ -338,32 +332,33 @@ function newQuestionnaireResponseItemReferenceIdentifier(text, id, system, value
 				}
 			}]
 		}
+
+		return { item: item, valid: true }
 	} else
-		return null
+		return { item: null, valid: optional }
 }
 
 function newQuestionnaireResponseItemBoolean(text, id, checkedTrue, checkedFalse, optional) {
 	const value = !checkedTrue && !checkedFalse ? undefined : checkedTrue
 
-	if (optional && value === undefined) {
-		return {
-			linkId: id,
-			text: text
-		}
-	}
+	if (optional && value === undefined)
+		return { item: null, valid: true }
 	else if (value !== undefined) {
-		return {
+		const item = {
 			linkId: id,
 			text: text,
 			answer: [{
 				valueBoolean: value
 			}]
 		}
+
+		return { item: item, valid: true }
 	}
 	else {
 		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
 		addError(errorListElement, "Item mandatory")
-		return null
+
+		return { item: null, valid: false }
 	}
 }
 
