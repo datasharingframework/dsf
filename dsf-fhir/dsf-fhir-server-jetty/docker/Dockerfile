@@ -15,8 +15,8 @@ LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
 
 EXPOSE 8080
 
-RUN adduser --system --no-create-home --group --uid 2101 java && apt update && \
-    apt dist-upgrade -y && apt install curl -y
+RUN adduser --system --no-create-home --group --uid 2101 java && \
+    apt update && apt dist-upgrade -y && apt install curl -y
 
 WORKDIR /opt/fhir
 COPY --from=builder /opt/fhir ./
