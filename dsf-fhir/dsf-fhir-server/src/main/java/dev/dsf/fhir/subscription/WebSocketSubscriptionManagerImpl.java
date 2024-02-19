@@ -339,8 +339,7 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		catch (Exception e)
 		{
-			logger.debug("Error while sending event to remote with session id {}: {} - {}", sessionAndRemote.sessionId,
-					e);
+			logger.debug("Error while sending event to remote with session id {}", sessionAndRemote.sessionId, e);
 			logger.warn("Error while sending event to remote with session id {}: {} - {}", sessionAndRemote.sessionId,
 					e.getClass().getName(), e.getMessage());
 		}
