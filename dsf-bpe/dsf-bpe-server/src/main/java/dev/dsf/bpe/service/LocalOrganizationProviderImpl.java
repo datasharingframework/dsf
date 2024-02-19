@@ -38,17 +38,17 @@ public class LocalOrganizationProviderImpl implements LocalOrganizationProvider,
 	@Override
 	public Optional<Organization> getLocalOrganization()
 	{
-		OrganizationEntry organization = this.organization.get();
-		if (organization == null || organization.organization().isEmpty()
-				|| !organization.readTime().plus(cacheTimeout).isAfter(LocalDateTime.now()))
+		OrganizationEntry entry = organization.get();
+		if (entry == null || entry.organization().isEmpty()
+				|| LocalDateTime.now().isAfter(entry.readTime().plus(cacheTimeout)))
 		{
 			Optional<Organization> o = delegate.getLocalOrganization();
-			if (this.organization.compareAndSet(organization, new OrganizationEntry(o, LocalDateTime.now())))
+			if (organization.compareAndSet(entry, new OrganizationEntry(o, LocalDateTime.now())))
 				return o;
 			else
-				return this.organization.get().organization();
+				return organization.get().organization();
 		}
 		else
-			return organization.organization();
+			return entry.organization();
 	}
 }
