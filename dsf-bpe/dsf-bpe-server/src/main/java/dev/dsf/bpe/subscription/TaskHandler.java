@@ -312,8 +312,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		if (processVersion != null && !processVersion.isBlank())
 			return repositoryService.createProcessDefinitionQuery().active()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion).list()
-					.stream().sorted(Comparator.comparing(ProcessDefinition::getVersion).reversed()).findFirst()
-					.orElse(null);
+					.stream().max(Comparator.comparing(ProcessDefinition::getVersion)).orElse(null);
 		else
 			return repositoryService.createProcessDefinitionQuery().active()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();
