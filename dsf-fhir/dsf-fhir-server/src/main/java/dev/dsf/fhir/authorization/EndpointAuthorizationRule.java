@@ -31,7 +31,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	private static final Logger logger = LoggerFactory.getLogger(EndpointAuthorizationRule.class);
 
 	private static final String ENDPOINT_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/endpoint-identifier";
-	private static final String ENDPOINT_ADDRESS_PATTERN_STRING = "https://([0-9a-zA-Z\\.-]+)+(:\\d{1,4})?([-\\w/]*)";
+	private static final String ENDPOINT_ADDRESS_PATTERN_STRING = "https://(?:[0-9a-zA-Z.-]+)+(?::\\d{1,4})?(?:[-\\w/]*)";
 	private static final Pattern ENDPOINT_ADDRESS_PATTERN = Pattern.compile(ENDPOINT_ADDRESS_PATTERN_STRING);
 
 	public EndpointAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
