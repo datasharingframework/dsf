@@ -74,7 +74,7 @@ public class RootService extends AbstractService implements InitializingBean
 		return repositoryService.createProcessDefinitionQuery().active().unlimitedList().stream()
 				.map(def -> new ProcessEntry("Process/" + def.getKey() + "/" + def.getVersionTag(),
 						def.getKey() + " | " + def.getVersionTag()))
-				.sorted(Comparator.comparing(ProcessEntry::value)).toList();
+				.sorted(Comparator.comparing(ProcessEntry::value)).distinct().toList();
 	}
 
 	private List<String> processInstances()

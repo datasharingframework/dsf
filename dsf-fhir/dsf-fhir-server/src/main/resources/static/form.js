@@ -207,18 +207,18 @@ function readQuestionnaireResponseAnswersFromForm() {
 	var valid = true
 
 	questionnaireResponse.item.forEach(item => {
-		if (item?.linkId !== undefined && item?.answer !== undefined) {
+		if (item?.linkId !== undefined) {
 			const id = item.linkId
 
-			if (id !== "business-key" && id !== "user-task-id") {
+			if (id === "business-key" || id === "user-task-id" || item?.answer === undefined) {
+				newItems.push(item)
+			} else {
 				const result = readAndValidateQuestionnaireResponseItem(item, id)
 
 				if (result.item)
 					newItems.push(result.item)
 				else if (!result.valid)
 					valid = false
-			} else {
-				newItems.push(item)
 			}
 		}
 	})
