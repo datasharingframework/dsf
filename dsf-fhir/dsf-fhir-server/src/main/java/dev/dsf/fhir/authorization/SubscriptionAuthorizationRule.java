@@ -88,7 +88,8 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 				Optional<ResourceDao<?>> optDao = daoProvider.getDao(cComponentes.getPathSegments().get(0));
 				if (optDao.isPresent())
 				{
-					SearchQuery<?> searchQuery = optDao.get().createSearchQueryWithoutUserFilter(PageAndCount.exists());
+					SearchQuery<?> searchQuery = optDao.get().createSearchQueryWithoutUserFilter(PageAndCount.exists())
+							.configureParameters(cComponentes.getQueryParams());
 					List<SearchQueryParameterError> uQp = searchQuery.getUnsupportedQueryParameters();
 					if (!uQp.isEmpty())
 					{
