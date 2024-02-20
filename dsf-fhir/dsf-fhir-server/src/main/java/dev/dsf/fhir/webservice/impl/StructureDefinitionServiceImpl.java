@@ -31,6 +31,7 @@ import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.history.HistoryService;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.parameters.ResourceLastUpdated;
@@ -225,7 +226,8 @@ public class StructureDefinitionServiceImpl extends
 
 	private Response getSnapshot(String url, UriInfo uri, HttpHeaders headers)
 	{
-		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentIdentity(), 1, 1);
+		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentIdentity(),
+				PageAndCount.single());
 		Map<String, List<String>> searchParameters = new HashMap<>();
 		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, Collections.singletonList(url));
 		searchParameters.put(SearchQuery.PARAMETER_SORT,

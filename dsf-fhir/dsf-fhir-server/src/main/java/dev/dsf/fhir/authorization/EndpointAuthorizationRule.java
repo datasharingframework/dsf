@@ -21,6 +21,7 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -111,7 +112,8 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	{
 		Map<String, List<String>> queryParameters = Map.of("address", Collections.singletonList(address));
 		EndpointDao dao = getDao();
-		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
+		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
+				.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
 		if (!uQp.isEmpty())
@@ -140,7 +142,8 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		Map<String, List<String>> queryParameters = Map.of("identifier",
 				Collections.singletonList(ENDPOINT_IDENTIFIER_SYSTEM + "|" + identifierValue));
 		EndpointDao dao = getDao();
-		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
+		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
+				.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
 		if (!uQp.isEmpty())

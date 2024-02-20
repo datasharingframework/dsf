@@ -43,6 +43,7 @@ import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.PatientDao;
 import dev.dsf.fhir.dao.ResearchStudyDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import jakarta.ws.rs.core.MediaType;
 
@@ -222,8 +223,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedExternalUser() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -264,8 +266,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedExternalUserViaSecurityContext() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -300,8 +303,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedExternalUserViaSecurityContextDocumentReference() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -337,8 +341,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testReadNotAllowedExternalUser() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -395,8 +400,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedExternalUserViaTransactionBundle() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -486,8 +492,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testReadAllowedExternalUserViaBatchBundle() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -1008,8 +1015,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testHeadAllowedExternalUserViaTransactionBundle() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -1093,8 +1101,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testHeadAllowedExternalUserViaBatchBundle() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());

@@ -23,6 +23,7 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.OrganizationAffiliationDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -154,7 +155,7 @@ public class OrganizationAffiliationAuthorizationRule
 	private boolean organizationAffiliationExists(Connection connection, Map<String, List<String>> queryParameters)
 	{
 		OrganizationAffiliationDao dao = getDao();
-		SearchQuery<OrganizationAffiliation> query = dao.createSearchQueryWithoutUserFilter(0, 0)
+		SearchQuery<OrganizationAffiliation> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
 				.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();

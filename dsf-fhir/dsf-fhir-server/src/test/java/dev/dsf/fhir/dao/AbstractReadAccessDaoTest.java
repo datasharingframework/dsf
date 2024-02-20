@@ -32,6 +32,7 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 
@@ -1054,7 +1055,7 @@ public abstract class AbstractReadAccessDaoTest<D extends Resource, C extends Re
 		D createdD = getDao().create(d);
 		assertReadAccessEntryCount(1, 1, createdD, accessType);
 
-		SearchQuery<D> query = getDao().createSearchQuery(userCreator.apply(createdOrg), 1, 20)
+		SearchQuery<D> query = getDao().createSearchQuery(userCreator.apply(createdOrg), PageAndCount.from(1, 20))
 				.configureParameters(Map.of("id", Collections.singletonList(createdD.getIdElement().getIdPart())));
 		PartialResult<D> searchResult = getDao().search(query);
 		assertNotNull(searchResult);

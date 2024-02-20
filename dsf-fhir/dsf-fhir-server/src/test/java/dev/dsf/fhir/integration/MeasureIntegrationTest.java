@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -139,5 +140,14 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(resultBundle.getEntryFirstRep());
 		assertNotNull(resultBundle.getEntryFirstRep().getResource());
 		assertEquals(measureId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testSearchMeasureWithMaxIntegerPageAndCount() throws Exception
+	{
+		List<String> integerMax = List.of(String.valueOf(Integer.MAX_VALUE));
+		Bundle result = getWebserviceClient().search(Measure.class, Map.of("_page", integerMax, "_count", integerMax));
+		assertNotNull(result);
+		assertEquals(0, result.getTotal());
 	}
 }

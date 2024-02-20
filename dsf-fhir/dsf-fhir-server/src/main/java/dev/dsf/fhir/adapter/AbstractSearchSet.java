@@ -96,9 +96,9 @@ abstract class AbstractSearchSet<MR extends Resource> extends AbstractThymeleafC
 
 		int currentPage = getPage(params);
 		int count = getCount(params, defaultPageCount);
-		int maxPages = (int) Math.ceil((double) resource.getTotal() / count);
+		int maxPages = count <= 0 ? 0 : (int) Math.ceil((double) resource.getTotal() / count);
 		int offset = Math.multiplyExact(currentPage - 1, count);
-		int firstResource = Integer.MAX_VALUE - 1 < offset ? 0 : offset + 1;
+		int firstResource = count == 0 ? 0 : Integer.MAX_VALUE - 1 < offset ? 0 : offset + 1;
 		int lastResource = Integer.MAX_VALUE - matchResources.size() < offset ? 0 : offset + matchResources.size();
 
 		long includeResources = resource.getEntry().stream().filter(
@@ -142,11 +142,11 @@ abstract class AbstractSearchSet<MR extends Resource> extends AbstractThymeleafC
 			}
 			catch (NumberFormatException e)
 			{
-				return 1;
+				return 0;
 			}
 		}
 		else
-			return 1;
+			return 0;
 	}
 
 	private int getCount(MultivaluedMap<String, String> params, int defaultPageCount)

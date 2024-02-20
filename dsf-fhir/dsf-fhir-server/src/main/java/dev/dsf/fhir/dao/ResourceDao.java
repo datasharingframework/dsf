@@ -14,6 +14,7 @@ import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import dev.dsf.fhir.search.DbSearchQuery;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 
@@ -355,9 +356,21 @@ public interface ResourceDao<R extends Resource>
 	 */
 	PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException;
 
-	SearchQuery<R> createSearchQuery(Identity identity, int page, int count);
+	/**
+	 * @param identity
+	 *            not <code>null</code>
+	 * @param pageAndCount
+	 *            not <code>null</code>
+	 * @return query
+	 */
+	SearchQuery<R> createSearchQuery(Identity identity, PageAndCount pageAndCount);
 
-	SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count);
+	/**
+	 * @param pageAndCount
+	 *            not <code>null</code>
+	 * @return query
+	 */
+	SearchQuery<R> createSearchQueryWithoutUserFilter(PageAndCount pageAndCount);
 
 	/**
 	 * Permanently delete a resource that was previously marked as deleted.

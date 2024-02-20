@@ -48,32 +48,30 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	public static class SearchQueryBuilder<R extends Resource>
 	{
 		public static <R extends Resource> SearchQueryBuilder<R> create(Class<R> resourceType, String resourceTable,
-				String resourceColumn, int page, int count)
+				String resourceColumn, PageAndCount pageAndCount)
 		{
-			return new SearchQueryBuilder<>(resourceType, resourceTable, resourceColumn, page, count);
+			return new SearchQueryBuilder<>(resourceType, resourceTable, resourceColumn, pageAndCount);
 		}
 
 		private final Class<R> resourceType;
 		private final String resourceTable;
 		private final String resourceColumn;
 
-		private final int page;
-		private final int count;
+		private final PageAndCount pageAndCount;
 
 		private final List<SearchQueryParameterFactory<R>> searchParameters = new ArrayList<>();
 		private final List<SearchQueryRevIncludeParameterFactory> revIncludeParameters = new ArrayList<>();
 
 		private SearchQueryIdentityFilter identityFilter; // may be null
 
-		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceColumn, int page,
-				int count)
+		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceColumn,
+				PageAndCount pageAndCount)
 		{
 			this.resourceType = resourceType;
 			this.resourceTable = resourceTable;
 			this.resourceColumn = resourceColumn;
 
-			this.page = page;
-			this.count = count;
+			this.pageAndCount = pageAndCount;
 		}
 
 		public SearchQueryBuilder<R> with(SearchQueryIdentityFilter identityFilter)
@@ -119,7 +117,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		public SearchQuery<R> build()
 		{
-			return new SearchQuery<>(resourceType, resourceTable, resourceColumn, identityFilter, page, count,
+			return new SearchQuery<>(resourceType, resourceTable, resourceColumn, identityFilter, pageAndCount,
 					searchParameters, revIncludeParameters);
 		}
 	}
@@ -151,7 +149,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private String revIncludeSql;
 
 	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn,
-			SearchQueryIdentityFilter identityFilter, int page, int count,
+			SearchQueryIdentityFilter identityFilter, PageAndCount pageAndCount,
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,
 			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
@@ -161,7 +159,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		this.identityFilter = identityFilter;
 
-		this.pageAndCount = new PageAndCount(page, count);
+		this.pageAndCount = pageAndCount;
 
 		if (searchParameterFactories != null)
 		{

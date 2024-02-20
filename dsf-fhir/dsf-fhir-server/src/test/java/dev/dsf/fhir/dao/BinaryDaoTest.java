@@ -39,6 +39,7 @@ import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 
@@ -145,7 +146,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -172,7 +173,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -210,7 +211,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdOrg), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdOrg),
+				PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -268,7 +270,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdMemberOrg), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdMemberOrg),
+				PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 

@@ -186,8 +186,7 @@ public class ResponseGenerator
 
 		bundle.setTotal(result.getTotal());
 
-		setLinks(result.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle,
-				result.getPartialResult().isEmpty(), result.getTotal());
+		setLinks(result.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle, result.getTotal());
 
 		return bundle;
 	}
@@ -217,8 +216,7 @@ public class ResponseGenerator
 
 		bundle.setTotal(history.getTotal());
 
-		setLinks(history.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle,
-				history.getEntries().isEmpty(), history.getTotal());
+		setLinks(history.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle, history.getTotal());
 
 		return bundle;
 	}
@@ -262,7 +260,7 @@ public class ResponseGenerator
 	}
 
 	private void setLinks(PageAndCount pageAndCount, UriBuilder bundleUri, String format, String pretty,
-			SummaryMode summaryMode, Bundle bundle, boolean isEmpty, int total)
+			SummaryMode summaryMode, Bundle bundle, int total)
 	{
 		if (format != null)
 			bundleUri = bundleUri.replaceQueryParam("_format", format);
@@ -271,17 +269,18 @@ public class ResponseGenerator
 		if (summaryMode != null)
 			bundleUri = bundleUri.replaceQueryParam("_summary", summaryMode.toString());
 
-		if (pageAndCount.getCount() > 0)
+		boolean countOnly = pageAndCount.isCountOnly(total);
+		if (!countOnly)
 		{
 			bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
-			bundleUri = bundleUri.replaceQueryParam("_page", isEmpty ? 1 : pageAndCount.getPage());
+			bundleUri = bundleUri.replaceQueryParam("_page", pageAndCount.getPage());
 		}
 		else
 			bundleUri = bundleUri.replaceQueryParam("_count", "0");
 
 		bundle.addLink().setRelation("self").setUrlElement(new UriType(bundleUri.build()));
 
-		if (pageAndCount.getCount() > 0 && !isEmpty)
+		if (!countOnly && pageAndCount.getCount() > 0)
 		{
 			bundleUri = bundleUri.replaceQueryParam("_page", 1);
 			bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());

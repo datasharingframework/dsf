@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 
@@ -328,7 +329,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
-		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
 				.configureParameters(Map.of("identifier",
 						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
@@ -356,7 +357,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
-		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
 				.configureParameters(Map.of("identifier",
 						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);

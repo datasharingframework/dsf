@@ -31,6 +31,7 @@ import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -172,7 +173,7 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = dao.createSearchQueryWithoutUserFilter(1, 1);
+		SearchQuery<?> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.single());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
