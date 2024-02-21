@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -1386,7 +1387,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		ReferenceExtractor referenceExtractor = getSpringWebApplicationContext().getBean(ReferenceExtractor.class);
 		ReferenceResolver referenceResolver = getSpringWebApplicationContext().getBean(ReferenceResolver.class);
 		ResponseGenerator responseGenerator = getSpringWebApplicationContext().getBean(ResponseGenerator.class);
-		BasicDataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", BasicDataSource.class);
+		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 
 		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0,
 				TestOrganizationIdentity.local(organizationProvider.getLocalOrganization().get()), task, getBaseUrl(),

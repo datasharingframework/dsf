@@ -56,7 +56,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final ReferenceExtractor referenceExtractor;
 	protected final Class<R> resourceType;
 	protected final String resourceTypeName;
-	protected final String serverBase;
 	protected final D dao;
 	protected final ExceptionHandler exceptionHandler;
 	protected final ParameterConverter parameterConverter;
@@ -75,7 +74,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.referenceExtractor = referenceExtractor;
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
-		this.serverBase = serverBase;
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
@@ -92,7 +90,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
-		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
@@ -140,8 +137,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		resolveLiteralInternalRelatedArtifactOrAttachmentUrls(resource);
 
 		Optional<String> reasonCreateAllowed = authorizationRule.reasonCreateAllowed(getCurrentIdentity(), resource);
@@ -207,8 +202,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Response read = delegate.read(id, uri, headers);
 
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
@@ -276,8 +269,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Response read = delegate.vread(id, version, uri, headers);
 
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
@@ -345,8 +336,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response history(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{
@@ -368,8 +357,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response history(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{
@@ -391,8 +378,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
@@ -454,8 +439,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Map<String, List<String>> queryParameters = uri.getQueryParameters();
 		PartialResult<R> result = getExisting(queryParameters);
 
@@ -564,8 +547,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<R> dbResource = exceptionHandler
 				.handleSqlException(() -> dao.readIncludingDeleted(parameterConverter.toUuid(resourceTypeName, id)));
 
@@ -607,8 +588,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response delete(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Map<String, List<String>> queryParameters = uri.getQueryParameters();
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
@@ -672,8 +651,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response search(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<String> reasonSearchAllowed = authorizationRule.reasonSearchAllowed(getCurrentIdentity());
 		if (reasonSearchAllowed.isEmpty())
 		{
@@ -695,8 +672,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	@Override
 	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<R> dbResource = exceptionHandler
 				.handleSqlException(() -> dao.readIncludingDeleted(parameterConverter.toUuid(resourceTypeName, id)));
 

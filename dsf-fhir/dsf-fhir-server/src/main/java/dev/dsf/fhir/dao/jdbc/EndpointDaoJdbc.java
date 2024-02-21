@@ -9,8 +9,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Endpoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.EndpointDao;
@@ -24,8 +22,6 @@ import dev.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude
 
 public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implements EndpointDao
 {
-	private static final Logger logger = LoggerFactory.getLogger(EndpointDaoJdbc.class);
-
 	public EndpointDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint",
@@ -61,7 +57,6 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 		{
 			statement.setString(1, address);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				return result.next() && result.getInt(1) > 0;

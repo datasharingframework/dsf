@@ -2,8 +2,6 @@ package dev.dsf.fhir.webservice.jaxrs;
 
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 import jakarta.ws.rs.GET;
@@ -22,8 +20,6 @@ public class StructureDefinitionServiceJaxrs
 {
 	public static final String PATH = "StructureDefinition";
 
-	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceJaxrs.class);
-
 	public StructureDefinitionServiceJaxrs(StructureDefinitionService delegate)
 	{
 		super(delegate);
@@ -35,8 +31,6 @@ public class StructureDefinitionServiceJaxrs
 	public Response postSnapshotNew(@PathParam("snapshot") String snapshotPath, Parameters parameters,
 			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
 		return delegate.postSnapshotNew(snapshotPath, parameters, uri, headers);
 	}
 
@@ -46,8 +40,6 @@ public class StructureDefinitionServiceJaxrs
 	public Response getSnapshotNew(@PathParam("snapshot") String snapshotPath, @Context UriInfo uri,
 			@Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.getSnapshotNew(snapshotPath, uri, headers);
 	}
 
@@ -57,8 +49,6 @@ public class StructureDefinitionServiceJaxrs
 	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
 			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
 		return delegate.postSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 
@@ -68,8 +58,6 @@ public class StructureDefinitionServiceJaxrs
 	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
 			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.getSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 }

@@ -20,8 +20,6 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -39,8 +37,6 @@ import dev.dsf.fhir.search.SearchQueryParameter;
 
 public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(HistroyDaoJdbc.class);
-
 	private final DataSource dataSource;
 	private final FhirContext fhirContext;
 	private final BinaryDaoJdbc binaryDao;
@@ -112,7 +108,6 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 			{
 				configureStatement(statement, id, resource, filter, atParameters, sinceParameter);
 
-				logger.trace("Executing count query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
 				{
 					if (result.next())
@@ -128,7 +123,6 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 				{
 					configureStatement(statement, id, resource, filter, atParameters, sinceParameter);
 
-					logger.trace("Executing read query '{}'", statement);
 					try (ResultSet result = statement.executeQuery())
 					{
 						while (result.next())

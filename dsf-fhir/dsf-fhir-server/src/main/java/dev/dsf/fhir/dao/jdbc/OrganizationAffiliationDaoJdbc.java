@@ -13,8 +13,6 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.OrganizationAffiliationDao;
@@ -29,8 +27,6 @@ import dev.dsf.fhir.search.parameters.OrganizationAffiliationRole;
 public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<OrganizationAffiliation>
 		implements OrganizationAffiliationDao
 {
-	private static final Logger logger = LoggerFactory.getLogger(OrganizationAffiliationDaoJdbc.class);
-
 	public OrganizationAffiliationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
 			FhirContext fhirContext)
 	{
@@ -85,7 +81,6 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 			statement.setString(1, "[{\"system\": \"http://dsf.dev/sid/organization-identifier\", \"value\": \""
 					+ identifierValue + "\"}]");
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				List<OrganizationAffiliation> affiliations = new ArrayList<>();
@@ -131,7 +126,6 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 			statement.setString(3, "[{\"code\": \"" + roleCode + "\", \"system\": \"" + roleSystem + "\"}]");
 			statement.setString(4, "Endpoint/" + endpoint.toString());
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				return result.next() && result.getInt(1) > 0;

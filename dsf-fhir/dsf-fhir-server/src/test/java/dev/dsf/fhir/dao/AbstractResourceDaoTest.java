@@ -42,8 +42,8 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		R apply(A a, B b, C c);
 	}
 
-	protected static BasicDataSource defaultDataSource;
-	protected static BasicDataSource permanentDeleteDataSource;
+	protected static DataSource defaultDataSource;
+	protected static DataSource permanentDeleteDataSource;
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
@@ -58,21 +58,21 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	{
 		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
 				liquibaseRule.getDatabaseName());
-		defaultDataSource.start();
+		defaultDataSource.unwrap(BasicDataSource.class).start();
 
 		permanentDeleteDataSource = createPermanentDeleteDataSource(liquibaseRule.getHost(),
 				liquibaseRule.getMappedPort(5432), liquibaseRule.getDatabaseName());
-		permanentDeleteDataSource.start();
+		permanentDeleteDataSource.unwrap(BasicDataSource.class).start();
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
 		if (defaultDataSource != null)
-			defaultDataSource.close();
+			defaultDataSource.unwrap(BasicDataSource.class).close();
 
 		if (permanentDeleteDataSource != null)
-			permanentDeleteDataSource.close();
+			permanentDeleteDataSource.unwrap(BasicDataSource.class).close();
 	}
 
 	protected final Class<D> resouceClass;
@@ -97,21 +97,6 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	public C getDao()
 	{
 		return dao;
-	}
-
-	public FhirContext getFhirContext()
-	{
-		return fhirContext;
-	}
-
-	public BasicDataSource getDefaultDataSource()
-	{
-		return defaultDataSource;
-	}
-
-	public BasicDataSource getPermanentDeleteDataSource()
-	{
-		return permanentDeleteDataSource;
 	}
 
 	public Logger getLogger()

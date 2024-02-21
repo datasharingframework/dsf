@@ -1,8 +1,6 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
 import org.hl7.fhir.r4.model.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.api.Constants;
@@ -24,8 +22,6 @@ import jakarta.ws.rs.core.UriInfo;
 public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends BasicResourceService<R>>
 		extends AbstractServiceJaxrs<S> implements BasicResourceService<R>, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceJaxrs.class);
-
 	public AbstractResourceServiceJaxrs(S delegate)
 	{
 		super(delegate);
@@ -39,8 +35,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response create(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
 		return delegate.create(resource, uri, headers);
 	}
 
@@ -51,8 +45,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response read(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.read(id, uri, headers);
 	}
 
@@ -64,8 +56,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	public Response vread(@PathParam("id") String id, @PathParam("version") long version, @Context UriInfo uri,
 			@Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.vread(id, version, uri, headers);
 	}
 
@@ -76,8 +66,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response history(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.history(uri, headers);
 	}
 
@@ -88,8 +76,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response history(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.history(id, uri, headers);
 	}
 
@@ -102,8 +88,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("PUT {}", uri.getRequestUri().toString());
-
 		return delegate.update(id, resource, uri, headers);
 	}
 
@@ -115,8 +99,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response update(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("PUT {}", uri.getRequestUri().toString());
-
 		return delegate.update(resource, uri, headers);
 	}
 
@@ -129,8 +111,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response delete(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("DELETE {}", uri.getRequestUri().toString());
-
 		return delegate.delete(id, uri, headers);
 	}
 
@@ -142,8 +122,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response delete(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("DELETE {}", uri.getRequestUri().toString());
-
 		return delegate.delete(uri, headers);
 	}
 
@@ -153,8 +131,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Override
 	public Response search(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.search(uri, headers);
 	}
 
@@ -168,8 +144,6 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	public Response deletePermanently(@PathParam("delete") String deletePath, @PathParam("id") String id,
 			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
 		return delegate.deletePermanently(deletePath, id, uri, headers);
 	}
 }

@@ -66,8 +66,6 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	@Override
 	public Response create(InputStream in, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
 		try (in)
 		{
 			String securityContext = getSecurityContext(headers);
@@ -243,8 +241,6 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	public Response update(@PathParam("id") String id, InputStream in, @Context UriInfo uri,
 			@Context HttpHeaders headers)
 	{
-		logger.trace("PUT {}", uri.getRequestUri().toString());
-
 		try (in)
 		{
 			String securityContext = getSecurityContext(headers);

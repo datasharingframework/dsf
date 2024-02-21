@@ -232,7 +232,7 @@ public class ExceptionHandler
 
 	public WebApplicationException gone(String serverBase, String resourceTypeName, ResourceDeletedException e)
 	{
-		logger.error("{} with id {} is marked as deleted", resourceTypeName, e.getId());
+		logger.warn("{} with given id is marked as deleted", resourceTypeName);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.DELETED,
 				"Resource with id " + e.getId() + " is marked as deleted.");

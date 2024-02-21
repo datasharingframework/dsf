@@ -253,6 +253,18 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.debug.log.message.variablesLocal:false}")
 	private boolean debugLogMessageVariablesLocal;
 
+	@Documentation(description = "To enable logging of webservices requests set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.webserviceRequest:false}")
+	private boolean debugLogMessageWebserviceRequest;
+
+	@Documentation(description = "To enable logging of DB queries set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.dbStatement:false}")
+	private boolean debugLogMessageDbStatement;
+
+	@Documentation(description = "To enable logging of the currently requesting user set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.currentUser:false}")
+	private boolean debugLogMessageCurrentUser;
+
 	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
 
@@ -597,6 +609,21 @@ public class PropertiesConfig implements InitializingBean
 	public boolean getDebugLogMessageVariablesLocal()
 	{
 		return debugLogMessageVariablesLocal;
+	}
+
+	public boolean getDebugLogMessageWebserviceRequest()
+	{
+		return debugLogMessageWebserviceRequest;
+	}
+
+	public boolean getDebugLogMessageDbStatement()
+	{
+		return debugLogMessageDbStatement;
+	}
+
+	public boolean getDebugLogMessageCurrentUser()
+	{
+		return debugLogMessageCurrentUser;
 	}
 
 	public int getJettyStatusConnectorPort()

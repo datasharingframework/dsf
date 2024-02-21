@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -30,10 +31,10 @@ public class StatusService implements InitializingBean
 
 	private static final Logger logger = LoggerFactory.getLogger(StatusService.class);
 
-	private final BasicDataSource dataSource;
+	private final DataSource dataSource;
 	private final int statusConnectorPort;
 
-	public StatusService(BasicDataSource dataSource, int statusConnectorPort)
+	public StatusService(DataSource dataSource, int statusConnectorPort)
 	{
 		this.dataSource = dataSource;
 		this.statusConnectorPort = statusConnectorPort;
@@ -48,8 +49,6 @@ public class StatusService implements InitializingBean
 	@GET
 	public Response status(@Context UriInfo uri, @Context HttpHeaders headers, @Context HttpServletRequest request)
 	{
-		logger.trace("GET {}, Local port {}", uri.getRequestUri().toString(), request.getLocalPort());
-
 		if (request.getLocalPort() != statusConnectorPort)
 		{
 			logger.warn("Sending '401 Unauthorized' request not on status port {}", statusConnectorPort);

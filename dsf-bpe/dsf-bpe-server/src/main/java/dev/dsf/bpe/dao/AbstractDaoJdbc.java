@@ -2,14 +2,15 @@ package dev.dsf.bpe.dao;
 
 import java.util.Objects;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.InitializingBean;
 
 public abstract class AbstractDaoJdbc implements InitializingBean
 {
-	protected final BasicDataSource dataSource;
+	protected final DataSource dataSource;
 
-	public AbstractDaoJdbc(BasicDataSource dataSource)
+	public AbstractDaoJdbc(DataSource dataSource)
 	{
 		this.dataSource = dataSource;
 	}

@@ -12,8 +12,6 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import org.postgresql.util.PGobject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.parser.DataFormatException;
@@ -21,8 +19,6 @@ import dev.dsf.fhir.dao.ReadAccessDao;
 
 public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(ReadAccessDaoJdbc.class);
-
 	private final DataSource dataSource;
 
 	public ReadAccessDaoJdbc(DataSource dataSource)
@@ -52,7 +48,6 @@ public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
 			statement.setLong(2, version);
 			statement.setObject(3, uuidToPgObject(organizationId));
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				List<String> accessTypes = new ArrayList<>();

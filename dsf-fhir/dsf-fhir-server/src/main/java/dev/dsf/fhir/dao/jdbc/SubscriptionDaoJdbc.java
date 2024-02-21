@@ -11,8 +11,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Subscription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.SubscriptionDao;
@@ -24,8 +22,6 @@ import dev.dsf.fhir.search.parameters.SubscriptionType;
 
 public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> implements SubscriptionDao
 {
-	private static final Logger logger = LoggerFactory.getLogger(SubscriptionDaoJdbc.class);
-
 	public SubscriptionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Subscription.class, "subscriptions", "subscription",
@@ -59,7 +55,6 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 		{
 			statement.setString(1, status.toCode());
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				List<Subscription> all = new ArrayList<>();

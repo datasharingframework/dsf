@@ -105,7 +105,6 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 			statement.setString(1, processUrl);
 			statement.setString(2, processVersion);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				List<ActivityDefinition> definitions = new ArrayList<>();

@@ -1,8 +1,6 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.webservice.specification.RootService;
@@ -24,8 +22,6 @@ public class RootServiceJaxrs extends AbstractServiceJaxrs<RootService> implemen
 {
 	public static final String PATH = "";
 
-	private static final Logger logger = LoggerFactory.getLogger(RootServiceJaxrs.class);
-
 	public RootServiceJaxrs(RootService delegate)
 	{
 		super(delegate);
@@ -35,8 +31,6 @@ public class RootServiceJaxrs extends AbstractServiceJaxrs<RootService> implemen
 	@Override
 	public Response root(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.root(uri, headers);
 	}
 
@@ -45,8 +39,6 @@ public class RootServiceJaxrs extends AbstractServiceJaxrs<RootService> implemen
 	@Override
 	public Response history(@Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.history(uri, headers);
 	}
 
@@ -56,8 +48,6 @@ public class RootServiceJaxrs extends AbstractServiceJaxrs<RootService> implemen
 	@Override
 	public Response handleBundle(Bundle bundle, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
 		return delegate.handleBundle(bundle, uri, headers);
 	}
 }
