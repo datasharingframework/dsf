@@ -56,7 +56,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final ReferenceExtractor referenceExtractor;
 	protected final Class<R> resourceType;
 	protected final String resourceTypeName;
-	protected final String serverBase;
 	protected final D dao;
 	protected final ExceptionHandler exceptionHandler;
 	protected final ParameterConverter parameterConverter;
@@ -75,7 +74,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.referenceExtractor = referenceExtractor;
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
-		this.serverBase = serverBase;
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
@@ -92,7 +90,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
-		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
