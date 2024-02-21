@@ -107,7 +107,7 @@ public final class SearchQueryParameterFactory<R extends Resource>
 
 	public boolean isIncludeParameter()
 	{
-		return includeSupplier != null && includeParameterValues != null;
+		return includeSupplier != null;
 	}
 
 	public SearchQueryIncludeParameter<R> createQueryIncludeParameter()

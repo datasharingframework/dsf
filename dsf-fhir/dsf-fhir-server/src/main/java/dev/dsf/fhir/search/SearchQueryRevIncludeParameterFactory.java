@@ -37,7 +37,7 @@ public final class SearchQueryRevIncludeParameterFactory
 
 	public boolean isIncludeParameter()
 	{
-		return revIncludeSupplier != null && revIncludeParameterValues != null;
+		return revIncludeSupplier != null;
 	}
 
 	public SearchQueryRevIncludeParameter createQueryRevIncludeParameter()

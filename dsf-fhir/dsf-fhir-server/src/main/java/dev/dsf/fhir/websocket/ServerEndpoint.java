@@ -75,8 +75,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 			return;
 		}
 
-		logger.info("Websocket open, session {}, identity '{}'", session.getId(),
-				principal == null ? null : principal.getName());
+		logger.info("Websocket open, session {}, identity '{}'", session.getId(), principal.getName());
 
 		session.addMessageHandler(new Whole<String>() // don't use lambda
 		{
