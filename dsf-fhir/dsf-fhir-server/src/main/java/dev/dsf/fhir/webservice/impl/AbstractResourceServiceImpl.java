@@ -259,14 +259,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	{
 		return switch (reference.getType(serverBase))
 		{
-			case LITERAL_INTERNAL, RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL ->
-				referenceResolver.checkLiteralInternalReference(resource, reference, connection);
+			case LITERAL_INTERNAL, RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL -> referenceResolver
+					.checkLiteralInternalReference(resource, reference, connection);
 
-			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
-				referenceResolver.checkLiteralExternalReference(resource, reference);
+			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL -> referenceResolver
+					.checkLiteralExternalReference(resource, reference);
 
-			case LOGICAL ->
-				referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
+			case LOGICAL -> referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference,
+					connection);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
@@ -431,7 +431,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, id,
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
 
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,

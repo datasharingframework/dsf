@@ -395,8 +395,8 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.warn("Bad If-None-Exist header value, unsupported query parameter{} {}",
-				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+		logger.warn("Bad If-None-Exist header value, {} unsupported query parameter{}",
+				unsupportedQueryParameters.size(), unsupportedQueryParameters.size() != 1 ? "s" : "");
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "', unsupported query parameter"
