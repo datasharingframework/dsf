@@ -90,7 +90,8 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 	public static final String TASK_VARIABLE = TaskHandler.class.getName() + ".task";
 
-	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http://(?<processDomain>(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*(?:[A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))/bpe/Process/(?<processDefinitionKey>[-\\w]+))\\|(?<processVersion>\\d+\\.\\d+)";
+	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
+			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
 	private static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
 			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);
 
@@ -125,8 +126,8 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 			throw new IllegalStateException("InstantiatesCanonical of Task with id " + task.getIdElement().getIdPart()
 					+ " does not match " + INSTANTIATES_CANONICAL_PATTERN_STRING);
 
-		String processDomain = matcher.group("processDomain").replace(".", "");
-		String processDefinitionKey = matcher.group("processDefinitionKey");
+		String processDomain = matcher.group("domain").replace(".", "");
+		String processDefinitionKey = matcher.group("processName");
 		String processVersion = matcher.group("processVersion");
 
 		String messageName = getFirstInputParameter(task, BpmnMessage.messageName());
@@ -311,8 +312,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		if (processVersion != null && !processVersion.isBlank())
 			return repositoryService.createProcessDefinitionQuery().active()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion).list()
-					.stream().sorted(Comparator.comparing(ProcessDefinition::getVersion).reversed()).findFirst()
-					.orElse(null);
+					.stream().max(Comparator.comparing(ProcessDefinition::getVersion)).orElse(null);
 		else
 			return repositoryService.createProcessDefinitionQuery().active()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();

@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.net.URL;
-
 import org.junit.Test;
 
 public class JwksTest
@@ -40,14 +38,5 @@ public class JwksTest
 
 		assertEquals("RSA", jwk0.getPublicKey().get().getAlgorithm());
 		assertEquals("RSA", jwk1.getPublicKey().get().getAlgorithm());
-	}
-
-	@Test
-	public void foo() throws Exception
-	{
-		URL url = new URL("https://foo:844");
-		System.out.println(url.getProtocol());
-		System.out.println(url.getHost());
-		System.out.println(url.getPort() < 0 ? url.getDefaultPort() : url.getPort());
 	}
 }

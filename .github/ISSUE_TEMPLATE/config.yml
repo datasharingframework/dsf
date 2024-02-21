@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Installation Guide
+    url: https://dsf.dev/stable/maintain/install
+    about: Read how to install the DSF.
+  - name: Getting Help
+    url: https://github.com/datasharingframework/dsf/discussions
+    about: For general questions about the DSF, please use GitHub Discussions.
+  - name: MII / NUM Related Questions
+    url: https://mii.zulipchat.com/#narrow/stream/392426-Data-Sharing-Framework-.28DSF.29
+    about: For questions about the use of the DSF in the Medical Informatics Initiative (MII) or the Network University Medicine (NUM), please use the channels in the MII Zulipchat.

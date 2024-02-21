@@ -9,18 +9,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.sql.DataSource;
 
 import dev.dsf.bpe.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.plugin.ProcessState;
 
 public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessStateDao
 {
-	private static final Logger logger = LoggerFactory.getLogger(ProcessStateDaoJdbc.class);
-
-	public ProcessStateDaoJdbc(BasicDataSource dataSource)
+	public ProcessStateDaoJdbc(DataSource dataSource)
 	{
 		super(dataSource);
 	}
@@ -49,7 +45,6 @@ public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessState
 					statement.addBatch();
 				}
 
-				logger.trace("Executing query '{}'", statement);
 				statement.executeBatch();
 			}
 		}

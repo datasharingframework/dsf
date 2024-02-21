@@ -24,8 +24,8 @@ preferred-citation:
   doi: 10.3233/SHTI210060
   type: proceedings
 title: "Data Sharing Framework (DSF)"
-version: 1.4.0
-date-released: 2023-12-18
+version: 1.5.0
+date-released: 2023-02-21
 url: https://dsf.dev
 repository-code: https://github.com/datasharingframework/dsf
 repository-artifact: https://github.com/datasharingframework/dsf/releases
@@ -221,3 +221,23 @@ references:
     year: 2023
     pages: 252-256
     doi: 10.3233/SHTI230113
+  - type: proceedings
+    authors:
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Wettstein
+        given-names: Reto
+      - family-names: Kurscheidt
+        given-names: Maximilian
+      - family-names: Schweizer
+        given-names: Simon Tobias
+      - family-names: Zilske
+        given-names: Christoph
+      - family-names: Fegeler
+        given-names: Christian
+    title: "Interoperability Is a Process - The Data Sharing Framework"
+    journal: Stud Health Technol Inform
+    volume: 310
+    year: 2024
+    pages: 28-32
+    doi: 10.3233/SHTI230921

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.common.auth.logout.LogoutService;
 import dev.dsf.common.status.webservice.StatusService;
+import dev.dsf.common.ui.webservice.StaticResourcesService;
 import dev.dsf.fhir.exception.DataFormatExceptionHandler;
 import dev.dsf.fhir.webservice.filter.BrowserPolicyHeaderResponseFilter;
 import dev.dsf.fhir.webservice.impl.ActivityDefinitionServiceImpl;
@@ -32,7 +33,6 @@ import dev.dsf.fhir.webservice.impl.QuestionnaireResponseServiceImpl;
 import dev.dsf.fhir.webservice.impl.QuestionnaireServiceImpl;
 import dev.dsf.fhir.webservice.impl.ResearchStudyServiceImpl;
 import dev.dsf.fhir.webservice.impl.RootServiceImpl;
-import dev.dsf.fhir.webservice.impl.StaticResourcesServiceImpl;
 import dev.dsf.fhir.webservice.impl.StructureDefinitionServiceImpl;
 import dev.dsf.fhir.webservice.impl.SubscriptionServiceImpl;
 import dev.dsf.fhir.webservice.impl.TaskServiceImpl;
@@ -61,7 +61,6 @@ import dev.dsf.fhir.webservice.jaxrs.QuestionnaireResponseServiceJaxrs;
 import dev.dsf.fhir.webservice.jaxrs.QuestionnaireServiceJaxrs;
 import dev.dsf.fhir.webservice.jaxrs.ResearchStudyServiceJaxrs;
 import dev.dsf.fhir.webservice.jaxrs.RootServiceJaxrs;
-import dev.dsf.fhir.webservice.jaxrs.StaticResourcesServiceJaxrs;
 import dev.dsf.fhir.webservice.jaxrs.StructureDefinitionServiceJaxrs;
 import dev.dsf.fhir.webservice.jaxrs.SubscriptionServiceJaxrs;
 import dev.dsf.fhir.webservice.jaxrs.TaskServiceJaxrs;
@@ -90,7 +89,6 @@ import dev.dsf.fhir.webservice.secure.QuestionnaireResponseServiceSecure;
 import dev.dsf.fhir.webservice.secure.QuestionnaireServiceSecure;
 import dev.dsf.fhir.webservice.secure.ResearchStudyServiceSecure;
 import dev.dsf.fhir.webservice.secure.RootServiceSecure;
-import dev.dsf.fhir.webservice.secure.StaticResourcesServiceSecure;
 import dev.dsf.fhir.webservice.secure.StructureDefinitionServiceSecure;
 import dev.dsf.fhir.webservice.secure.SubscriptionServiceSecure;
 import dev.dsf.fhir.webservice.secure.TaskServiceSecure;
@@ -119,7 +117,6 @@ import dev.dsf.fhir.webservice.specification.QuestionnaireResponseService;
 import dev.dsf.fhir.webservice.specification.QuestionnaireService;
 import dev.dsf.fhir.webservice.specification.ResearchStudyService;
 import dev.dsf.fhir.webservice.specification.RootService;
-import dev.dsf.fhir.webservice.specification.StaticResourcesService;
 import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 import dev.dsf.fhir.webservice.specification.SubscriptionService;
 import dev.dsf.fhir.webservice.specification.TaskService;
@@ -903,18 +900,7 @@ public class WebserviceConfig
 	@Bean
 	public StaticResourcesService staticResourcesService()
 	{
-		return new StaticResourcesServiceJaxrs(staticResourcesServiceSecure());
-	}
-
-	private StaticResourcesServiceSecure staticResourcesServiceSecure()
-	{
-		return new StaticResourcesServiceSecure(staticResourcesServiceImpl(), propertiesConfig.getServerBaseUrl(),
-				helperConfig.responseGenerator(), referenceConfig.referenceResolver());
-	}
-
-	private StaticResourcesServiceImpl staticResourcesServiceImpl()
-	{
-		return new StaticResourcesServiceImpl(propertiesConfig.getStaticResourceCacheEnabled());
+		return new StaticResourcesService(propertiesConfig.getStaticResourceCacheEnabled());
 	}
 
 	@Bean

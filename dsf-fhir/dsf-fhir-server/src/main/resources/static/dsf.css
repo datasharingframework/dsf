@@ -1,9 +1,9 @@
-[theme="light"] {
-	--color-prime: #326F95;
+[mode="light"] {
+	--color-prime: #326f95;
 	--color-background: #fff;
 	--color-alt-background: #eee;
 	--color-tab-button: #000;
-	--color-tab-button-background: #f1f1f1;
+	--color-tab-button-background: #f2f2f2;
 	--color-tab-button-hover: #000;
 	--color-tab-button-background-hover: #ddd;
 	--color-tab-button-background-active: #ccc;
@@ -15,36 +15,33 @@
 	--color-input-border: #ccc;
 	--color-input-radio-border: #000;
 	--color-input-placeholder: #aaa;
-	--color-info-background-draft: #deecf9;
-	--color-info-text-draft: #326F95;
-	--color-info-background-requested: #f2f2f2;
-	--color-info-text-requested: #545454;
-	--color-info-background-progress: #fff7c7;
-	--color-info-text-progress: #a25b36;
-	--color-info-background-completed: #e4fde1;
-	--color-info-text-completed: #357a38;
-	--color-info-background-failed: #ffe1e1;
-	--color-info-text-failed: #761137;
-	--color-info-background-stopped: #ffe1e1;
-	--color-info-text-stopped: #761137;
+	--color-info-background-blue: #deecf9;
+	--color-info-blue: #326f95;
+	--color-info-background-grey: #f2f2f2;
+	--color-info-grey: #545454;
+	--color-info-background-orange: #fff7c7;
+	--color-info-orange: #a25b36;
+	--color-info-background-green: #e4fde1;
+	--color-info-green: #357a38;
+	--color-info-background-red: #ffe1e1;
+	--color-info-red: #761137;
 	--color-error-background: #ffe1e1;
 	--color-error-text: #761137;
 	--color-disabled-background: #f2f2f2;
 	--color-disabled-text: #545454;
-	--color-row-border-draft: #326F95;
-	--color-row-border-requested: #545454;
-	--color-row-border-progress: #a25b36;
-	--color-row-border-completed: #357a38;
-	--color-row-border-failed: #761137;
-	--color-row-border-stopped: #761137;
+	--color-row-border-blue: #326f95;
+	--color-row-border-grey: #545454;
+	--color-row-border-orange: #a25b36;
+	--color-row-border-green: #357a38;
+	--color-row-border-red: #761137;
 }
 
-[theme="dark"] {
+[mode="dark"] {
 	--color-prime: #fff;
 	--color-background: #000;
 	--color-alt-background: #181818;
 	--color-tab-button: #fff;
-	--color-tab-button-background: #181818;
+	--color-tab-button-background: #333;
 	--color-tab-button-background-hover: #ddd;
 	--color-tab-button-hover: #000;
 	--color-tab-button-background-active: #888;
@@ -56,28 +53,43 @@
 	--color-input-border: #666;
 	--color-input-radio-border: #fff;
 	--color-input-placeholder: #666;
-	--color-info-background-draft: #326F95;
-	--color-info-text-draft: #deecf9;
-	--color-info-background-requested: #333;
-	--color-info-text-requested: #aaa;
-	--color-info-background-progress: #a25b36;
-	--color-info-text-progress: #fff7c7;
-	--color-info-background-completed: #14452f;
-	--color-info-text-completed: #e4fde1;
-	--color-info-background-failed: #761137;
-	--color-info-text-failed: #ffe1e1;
-	--color-info-background-stopped: #761137;
-	--color-info-text-stopped: #ffe1e1;
+	--color-info-background-blue: #326f95;
+	--color-info-blue: #deecf9;
+	--color-info-background-grey: #333;
+	--color-info-grey: #aaa;
+	--color-info-background-orange: #a25b36;
+	--color-info-orange: #fff7c7;
+	--color-info-background-green: #14452f;
+	--color-info-green: #e4fde1;
+	--color-info-background-red: #761137;
+	--color-info-red: #ffe1e1;
 	--color-error-background: #761137;
 	--color-error-text: #ffe1e1;
 	--color-disabled-background: #333;
 	--color-disabled-text: #aaa;
-	--color-row-border-draft: #326F95;
-	--color-row-border-requested: #aaa;
-	--color-row-border-progress: #a25b36;
-	--color-row-border-completed: #14452f;
-	--color-row-border-failed: #761137;
-	--color-row-border-stopped: #761137;
+	--color-row-border-blue: #326f95;
+	--color-row-border-grey: #aaa;
+	--color-row-border-orange: #a25b36;
+	--color-row-border-green: #14452f;
+	--color-row-border-red: #761137;
+}
+
+html[theme="dev"] {
+	border-top: 0.5em solid #aaa;
+}
+
+html[theme="test"] {
+	border-top: 0.5em solid #54aea0;
+}
+
+html[theme="prod"] {
+	border-top: 0.5em solid #326f95;
+}
+
+html[theme="dev"] body, 
+html[theme="test"] body, 
+html[theme="prod"] body	{
+	margin-top: 1.5em;
 }
 
 body {
@@ -101,10 +113,15 @@ td#url {
 }
 
 td#url h1 {
+	font-size: 2em;
 	font-family: monospace;
 	color: var(--color-prime);
 	margin: 0 0 0 1em;
 	word-break: break-word;
+}
+
+td#url h1 a {
+	white-space: nowrap;
 }
 
 td#url h1 a:link,
@@ -161,7 +178,6 @@ pre.lang-html {
 	border: 0;
 	font-family: monospace;
 }
-
 
 #icons {
 	position: absolute;
@@ -332,7 +348,7 @@ pre.lang-html {
 }
 
 .bundle>#header>table {
-  width: 100%
+	width: 100%
 }
 
 .bundle>#header>table td:nth-child(2) {
@@ -361,7 +377,7 @@ pre.lang-html {
 .bundle>#list>table {
 	border-collapse: separate;
 	border-spacing: 0 1rem;
-  width: 100%
+	width: 100%
 }
 
 .bundle>#list>table tr:not(:first-child) {
@@ -403,60 +419,127 @@ pre.lang-html {
 	padding-right: 1rem;
 }
 
-.bundle>#list>table td[status="draft"]:first-child {
-	border-left-color: var(--color-row-border-draft);
+.bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="draft"],
+.bundle>#list>table tr[resource-type="CodeSystem"] td[status="draft"],
+.bundle>#list>table tr[resource-type="Library"] td[status="draft"],
+.bundle>#list>table tr[resource-type="Measure"] td[status="draft"],
+.bundle>#list>table tr[resource-type="NamingSystem"] td[status="draft"],
+.bundle>#list>table tr[resource-type="Questionnaire"] td[status="draft"],
+.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="draft"],
+.bundle>#list>table tr[resource-type="ValueSet"] td[status="draft"] {
+	border-left-color: var(--color-row-border-blue);
 }
 
-.bundle>#list>table td[status="requested"]:first-child {
-	border-left-color: var(--color-row-border-requested);
+.bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="active"],
+.bundle>#list>table tr[resource-type="CodeSystem"] td[status="active"],
+.bundle>#list>table tr[resource-type="Library"] td[status="active"],
+.bundle>#list>table tr[resource-type="Measure"] td[status="active"],
+.bundle>#list>table tr[resource-type="NamingSystem"] td[status="active"],
+.bundle>#list>table tr[resource-type="Questionnaire"] td[status="active"],
+.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="active"],
+.bundle>#list>table tr[resource-type="ValueSet"] td[status="active"] {
+	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table td[status="in-progress"]:first-child {
-	border-left-color: var(--color-row-border-progress);
+.bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="retired"],
+.bundle>#list>table tr[resource-type="CodeSystem"] td[status="retired"],
+.bundle>#list>table tr[resource-type="Library"] td[status="retired"],
+.bundle>#list>table tr[resource-type="Measure"] td[status="retired"],
+.bundle>#list>table tr[resource-type="NamingSystem"] td[status="retired"],
+.bundle>#list>table tr[resource-type="Questionnaire"] td[status="retired"],
+.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="retired"],
+.bundle>#list>table tr[resource-type="ValueSet"] td[status="retired"] {
+	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table td[status="completed"]:first-child {
-	border-left-color: var(--color-row-border-completed);
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="active"] {
+	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table td[status="failed"]:first-child {
-	border-left-color: var(--color-row-border-failed);
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="off"],
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="suspended"]	{
+	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table td[status="stopped"]:first-child {
-	border-left-color: var(--color-row-border-stopped);
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="error"],
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="entered-in-error"] {
+	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table td[status="active"]:first-child {
-	border-left-color: var(--color-row-border-completed);
+.bundle>#list>table tr[resource-type="Endpoint"] td[status="test"] {
+	border-left-color: var(--color-row-border-blue);
 }
 
-.bundle>#list>table td[status="suspended"]:first-child {
-	border-left-color: var(--color-row-border-stopped);
+.bundle>#list>table tr[resource-type="MeasureReport"] td[status="complete"] {
+	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table td[status="error"]:first-child {
-	border-left-color: var(--color-row-border-failed);
+.bundle>#list>table tr[resource-type="MeasureReport"] td[status="pending"] {
+	border-left-color: var(--color-row-border-orange);
 }
 
-.bundle>#list>table td[status="off"]:first-child {
-	border-left-color: var(--color-row-border-requested);
+.bundle>#list>table tr[resource-type="MeasureReport"] td[status="error"] {
+	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table td[status="entered-in-error"]:first-child {
-	border-left-color: var(--color-row-border-failed);
+.bundle>#list>table tr[resource-type="Organization"] td[active="true"],
+.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="true"] {
+	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table td[status="test"]:first-child {
-	border-left-color: var(--color-row-border-draft);
+.bundle>#list>table tr[resource-type="Organization"] td[active="false"],
+.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="false"] {
+	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table td[active="true"]:first-child {
-	border-left-color: var(--color-row-border-completed);
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="in-progress"] {
+	border-left-color: var(--color-row-border-orange);
 }
 
-.bundle>#list>table td[active="false"]:first-child {
-	border-left-color: var(--color-row-border-requested);
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"],
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="amended"] {
+	border-left-color: var(--color-row-border-green);
+}
+
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="entered-in-error"],
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="stopped"] {
+	border-left-color: var(--color-row-border-red);
+}
+
+.bundle>#list>table tr[resource-type="Subscription"] td[status="requested"] {
+	border-left-color: var(--color-row-border-blue);
+}
+
+.bundle>#list>table tr[resource-type="Subscription"] td[status="active"] {
+	border-left-color: var(--color-row-border-green);
+}
+
+.bundle>#list>table tr[resource-type="Subscription"] td[status="error"] {
+	border-left-color: var(--color-row-border-red);
+}
+
+.bundle>#list>table tr[resource-type="Subscription"] td[status="off"] {
+	border-left-color: var(--color-row-border-grey);
+}
+
+.bundle>#list>table tr[resource-type="Task"] td[status="draft"] {
+	border-left-color: var(--color-row-border-blue);
+}
+
+.bundle>#list>table tr[resource-type="Task"] td[status="requested"] {
+	border-left-color: var(--color-row-border-grey);
+}
+
+.bundle>#list>table tr[resource-type="Task"] td[status="in-progress"] {
+	border-left-color: var(--color-row-border-orange);
+}
+
+.bundle>#list>table tr[resource-type="Task"] td[status="completed"] {
+	border-left-color: var(--color-row-border-green);
+}
+
+.bundle>#list>table tr[resource-type="Task"] td[status="failed"] {
+	border-left-color: var(--color-row-border-red);
 }
 
 .bundle>#list>table td.id-value {
@@ -486,6 +569,14 @@ pre.lang-html {
 	border-bottom-right-radius: 5px;
 }
 
+.bundle>#include-footer>p {
+	font-style: italic;
+}
+
+.bundle>#diagnostics-footer>p {
+	font-style: italic;
+}
+
 .section-header {
 	font-family: monospace;
 	font-size: 1.75em;
@@ -494,153 +585,593 @@ pre.lang-html {
 	margin-bottom: 12px;
 }
 
-.resource {
-  border: 1px solid #ccc;
-  padding: 20px 20px 10px 20px;
-  color: var(--color-prime);
+#resource {
+	border: 1px solid #ccc;
+	padding: 20px;
+	color: var(--color-prime);
+}
+
+#resource #base-data {
+	display: flex;
+	flex-direction: row;
+	border-radius: 0.4em;
+	padding: 1em;
+}
+
+#resource:not([status], [active]) #base-data {
+	color: var(--color-input-text);
+	border: 1px solid #ccc;
+}
+
+#resource[resource-type="ActivityDefinition"][status="draft"] #base-data,
+#resource[resource-type="CodeSystem"][status="draft"] #base-data,
+#resource[resource-type="Library"][status="draft"] #base-data,
+#resource[resource-type="Measure"][status="draft"] #base-data,
+#resource[resource-type="NamingSystem"][status="draft"] #base-data,
+#resource[resource-type="Questionnaire"][status="draft"] #base-data,
+#resource[resource-type="StructureDefinition"][status="draft"] #base-data,
+#resource[resource-type="ValueSet"][status="draft"] #base-data {
+	background-color: var(--color-info-background-blue);
+	color: var(--color-info-blue);
+}
+
+#resource[resource-type="ActivityDefinition"][status="active"] #base-data,
+#resource[resource-type="CodeSystem"][status="active"] #base-data,
+#resource[resource-type="Library"][status="active"] #base-data,
+#resource[resource-type="Measure"][status="active"] #base-data,
+#resource[resource-type="NamingSystem"][status="active"] #base-data,
+#resource[resource-type="Questionnaire"][status="active"] #base-data,
+#resource[resource-type="StructureDefinition"][status="active"] #base-data,
+#resource[resource-type="ValueSet"][status="active"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="ActivityDefinition"][status="retired"] #base-data,
+#resource[resource-type="CodeSystem"][status="retired"] #base-data,
+#resource[resource-type="Library"][status="retired"] #base-data,
+#resource[resource-type="Measure"][status="retired"] #base-data,
+#resource[resource-type="NamingSystem"][status="retired"] #base-data,
+#resource[resource-type="Questionnaire"][status="retired"] #base-data,
+#resource[resource-type="StructureDefinition"][status="retired"] #base-data,
+#resource[resource-type="ValueSet"][status="retired"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="Endpoint"][status="active"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="Endpoint"][status="off"] #base-data,
+#resource[resource-type="Endpoint"][status="suspended"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="Endpoint"][status="error"] #base-data,
+#resource[resource-type="Endpoint"][status="entered-in-error"] #base-data {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
+#resource[resource-type="Endpoint"][status="test"] #base-data {
+	background-color: var(--color-info-background-blue);
+	color: var(--color-info-blue);
+}
+
+#resource[resource-type="Organization"][active="true"] #base-data,
+#resource[resource-type="OrganizationAffiliation"][active="true"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="Organization"][active="false"] #base-data,
+#resource[resource-type="OrganizationAffiliation"][active="false"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="Subscription"][status="requested"] #base-data {
+	background-color: var(--color-info-background-blue);
+	color: var(--color-info-blue);
+}
+
+#resource[resource-type="Subscription"][status="active"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="Subscription"][status="error"] #base-data {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
+#resource[resource-type="Subscription"][status="off"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="MeasureReport"][status="complete"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="MeasureReport"][status="pending"] #base-data {
+	background-color: var(--color-info-background-blue);
+	color: var(--color-info-blue);
+}
+
+#resource[resource-type="MeasureReport"][status="error"] #base-data {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="in-progress"] #base-data {
+	background-color: var(--color-info-background-orange);
+	color: var(--color-info-orange);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data,
+#resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="entered-in-error"] #base-data {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="stopped"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="Task"][status="draft"] #base-data {
+	background-color: var(--color-info-background-blue);
+	color: var(--color-info-blue);
+}
+
+#resource[resource-type="Task"][status="requested"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="Task"][status="in-progress"] #base-data {
+	background-color: var(--color-info-background-orange);
+	color: var(--color-info-orange);
+}
+
+#resource[resource-type="Task"][status="completed"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="Task"][status="failed"] #base-data {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
+#resource #base-data-icon {
+	padding: 0.2em 1em 0 0;
+}
+
+#resource #base-data-icon svg {
+	height: 2em;
+	width: 2em;
+}
+
+#resource:not([status], [active]) #base-data path {
+	fill: var(--color-input-text);
+}
+
+#resource[resource-type="ActivityDefinition"][status="draft"] #base-data path,
+#resource[resource-type="CodeSystem"][status="draft"] #base-data path,
+#resource[resource-type="Library"][status="draft"] #base-data path,
+#resource[resource-type="Measure"][status="draft"] #base-data path,
+#resource[resource-type="NamingSystem"][status="draft"] #base-data path,
+#resource[resource-type="Questionnaire"][status="draft"] #base-data path,
+#resource[resource-type="StructureDefinition"][status="draft"] #base-data path,
+#resource[resource-type="ValueSet"][status="draft"] #base-data path {
+	fill: var(--color-info-blue);
+}
+
+#resource[resource-type="ActivityDefinition"][status="active"] #base-data path,
+#resource[resource-type="CodeSystem"][status="active"] #base-data path,
+#resource[resource-type="Library"][status="active"] #base-data path,
+#resource[resource-type="Measure"][status="active"] #base-data path,
+#resource[resource-type="NamingSystem"][status="active"] #base-data path,
+#resource[resource-type="Questionnaire"][status="active"] #base-data path,
+#resource[resource-type="StructureDefinition"][status="active"] #base-data path,
+#resource[resource-type="ValueSet"][status="active"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="ActivityDefinition"][status="retired"] #base-data path,
+#resource[resource-type="CodeSystem"][status="retired"] #base-data path,
+#resource[resource-type="Library"][status="retired"] #base-data path,
+#resource[resource-type="Measure"][status="retired"] #base-data path,
+#resource[resource-type="NamingSystem"][status="retired"] #base-data path,
+#resource[resource-type="Questionnaire"][status="retired"] #base-data path,
+#resource[resource-type="StructureDefinition"][status="retired"] #base-data path,
+#resource[resource-type="ValueSet"][status="retired"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="Endpoint"][status="active"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="Endpoint"][status="off"] #base-data path,
+#resource[resource-type="Endpoint"][status="suspended"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="Endpoint"][status="error"] #base-data path,
+#resource[resource-type="Endpoint"][status="entered-in-error"] #base-data path {
+	fill: var(--color-info-red);
+}
+
+#resource[resource-type="Endpoint"][status="test"] #base-data path {
+	fill: var(--color-info-blue);
+}
+
+#resource[resource-type="Organization"][active="true"] #base-data path,
+#resource[resource-type="OrganizationAffiliation"][active="true"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="Organization"][active="false"] #base-data path,
+#resource[resource-type="OrganizationAffiliation"][active="false"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="Subscription"][status="requested"] #base-data path {
+	fill: var(--color-info-blue);
+}
+
+#resource[resource-type="Subscription"][status="active"] #base-data path{
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="Subscription"][status="error"] #base-data path {
+	fill: var(--color-info-red);
+}
+
+#resource[resource-type="Subscription"][status="off"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="MeasureReport"][status="complete"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="MeasureReport"][status="pending"] #base-data path {
+	fill: var(--color-info-blue);
+}
+
+#resource[resource-type="MeasureReport"][status="error"] #base-data path {
+	fill: var(--color-info-red);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="in-progress"] #base-data path {
+	fill: var(--color-info-orange);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data path,
+#resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="entered-in-error"] #base-data path {
+	fill: var(--color-info-red);
+}
+
+#resource[resource-type="QuestionnaireResponse"][status="stopped"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="Task"][status="draft"] #base-data path {
+	fill: var(--color-info-blue);
+}
+
+#resource[resource-type="Task"][status="requested"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="Task"][status="in-progress"] #base-data path {
+	fill: var(--color-info-orange);
+}
+
+#resource[resource-type="Task"][status="completed"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="Task"][status="failed"] #base-data path {
+	fill: var(--color-info-red);
+}
+
+#resource #base-data-list ul {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+#resource #base-data-list li {
+	margin: 0.2em 0;
+}
+
+#resource #resource-data {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 1em;
+	row-gap: 1em;
+	margin-top: 1em;
+}
+
+#resource h2 {
+	font-family: monospace;
+	font-size: 1.75em;
+	margin: 0 0 1rem;
+}
+
+#resource h3 {
+	font-family: monospace;
+	font-size: 1.5em;
+	margin: 1rem 0 0 0;
+}
+
+#resource .element {
+	background-color: var(--color-row-background);
+	border-radius: 0.4em;
+	padding: 1em;
+	color: var(--color-input-text);
+}
+
+#resource .element-100 {
+	width: 100%;
+}
+
+#resource .element-50 {
+	width: calc(50% - 2.5em);
+}
+
+#resource .element label {
+	display: block;
+	font-weight: bold;
+	font-size: small;
+	padding-bottom: 0.5em;
+}
+
+#resource .element a:link,
+#resource .element a:visited,
+#resource .element a:active {
+	color: var(--color-input-text);
+	text-decoration: none;
+}
+
+#resource .element a:hover {
+	text-decoration: underline;
+}
+
+#resource .element ul {
+	padding: 0 0 0 1em;
+	margin: 0;
+}
+
+#resource .element li {
+	margin: 0 0 0.5em 0;
+}
+
+#resource .element li:last-child {
+	margin: 0;
+}
+
+#resource .element li.address p {
+	margin: 0;
+}
+
+#resource .element table {
+	border-collapse: separate;
+	border-spacing: 0 0.4rem;
+	margin: -0.4rem auto;
+}
+
+#resource .element table th {
+	text-align: left;
+	background-color: var(--color-row-background-hover);
+	padding: 0.3em;
+}
+
+#resource .element table th:first-child {
+	border-top-left-radius: 0.2em;
+	border-bottom-left-radius: 0.2em;
+}
+
+#resource .element table th:last-child {
+	border-top-right-radius: 0.2em;
+	border-bottom-right-radius: 0.2em;
+}
+
+#resource .element table td {
+	vertical-align: top;
+	background-color: var(--color-row-background-deep);
+	padding: 0.3em;
+}
+
+#resource .element table td:first-child {
+	border-top-left-radius: 0.2em;
+	border-bottom-left-radius: 0.2em;
+}
+
+#resource .element table td:last-child {
+	border-top-right-radius: 0.2em;
+	border-bottom-right-radius: 0.2em;
+}
+
+#resource .element table td.no-wrap {
+	white-space: nowrap;
+}
+
+#resource .element-sub1:first-child {
+	background-color: var(--color-row-background-deep);
+	margin-top: 0.5em;
+}
+
+#resource .sub1 {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 1em;
+	row-gap: 1em;
+}
+
+#resource .element-sub1-100 {
+	background-color: var(--color-row-background-deep);
+	width: 100%;
+}
+
+#resource .element-sub1-50 {
+	background-color: var(--color-row-background-deep);
+	width: calc(50% - 2.5em);
 }
 
 .meta {
-  display: flex;
-  flex-direction: row
+	display: flex;
+	flex-direction: row;
 }
 
 .row-list {
-  padding-inline-start: 25px;
-  margin-top: 0.15em;
-  margin-bottom: 0.1em;
+	padding-inline-start: 25px;
+	margin-top: 0.15em;
+	margin-bottom: 0.1em;
 }
 
 .row-text>a {
-  text-decoration: none;
-  color: var(--color-disabled-text);
+	text-decoration: none;
+	color: var(--color-disabled-text);
 }
 
 .row-text>a:hover {
-  text-decoration: underline;
+	text-decoration: underline;
 }
 
-.row-text, .row-text>a:visited {
-  color: var(--color-disabled-text);
-  word-wrap: break-word;
+.row-text,
+.row-text>a:visited {
+	color: var(--color-disabled-text);
+	word-wrap: break-word;
 }
 
 .row-text.id-value {
-  font-family: monospace;
+	font-family: monospace;
 }
 
 div.row-text {
-  padding-left: 6px;
+	padding-left: 6px;
 }
 
 .row[active="true"] {
-	background: var(--color-row-border-completed);
+	background: var(--color-row-border-green);
 }
 
 .row[active="false"] {
-	background: var(--color-row-border-requested);
+	background: var(--color-row-border-grey);
 }
 
 .row[status="active"]:first-child {
-	background: var(--color-row-border-completed);
+	background: var(--color-row-border-green);
 }
 
 .row[status="suspended"]:first-child {
-	background: var(--color-row-border-stopped);
+	background: var(--color-row-border-red);
 }
 
 .row[status="error"]:first-child {
-	background: var(--color-row-border-failed);
+	background: var(--color-row-border-red);
 }
 
 .row[status="off"]:first-child {
-	background: var(--color-row-border-requested);
+	background: var(--color-row-border-grey);
 }
 
 .row[status="entered-in-error"]:first-child {
-	background: var(--color-row-border-failed);
+	background: var(--color-row-border-red);
 }
 
 .row[status="test"]:first-child {
-	background: var(--color-row-border-draft);
+	background: var(--color-row-border-blue);
 }
 
 .row[status="draft"]:first-child {
-	background: var(--color-row-border-draft);
+	background: var(--color-row-border-blue);
 }
 
 .flex-element {
-  display: flex;
-  flex-direction: row;
+	display: flex;
+	flex-direction: row;
 }
 
 .flex-element-100 {
-  width: 100%;
-  margin-right: 0em;
+	width: 100%;
+	margin-right: 0em;
 }
 
 .flex-element-67 {
-  width: 67%;
+	width: 67%;
 }
 
 .flex-element-50 {
-  width: 50%;
-  margin-right: 0em;
+	width: 50%;
+	margin-right: 0em;
 }
 
 .flex-element-33 {
-  width: 33%;
+	width: 33%;
 }
 
 .flex-element-margin {
-  margin-right: 0.7em;
+	margin-right: 0.7em;
 }
 
 .authorization {
-  padding-bottom: 0.25em !important;
+	padding-bottom: 0.25em !important;
 }
 
-.authorization>h3
-{
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 1em 1em 0.75em 0.25em;
-  font-size: 1em;
+.authorization>h3 {
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: 1em 1em 0.75em 0.25em;
+	font-size: 1em;
 }
 
 @media print {
 	body {
 		margin: 0;
 	}
-
 	table#header {
 		margin-bottom: 2em;
 	}
-
 	table#header img {
 		height: 3em;
 	}
-
 	td#url h1 {
 		font-size: 1.5em;
 	}
-
 	.tab {
 		display: none;
 	}
-
 	pre.prettyprint {
 		border: 0 !important;
 	}
-
 	#icons {
 		display: none;
 	}
-
 	#bookmarks {
 		display: none;
 	}
-
 	#help {
 		display: none;
 	}

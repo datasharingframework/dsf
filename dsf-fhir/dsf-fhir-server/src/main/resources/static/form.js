@@ -1,20 +1,41 @@
 function startProcess() {
-	const task = getResourceAsJson()
-	const errors = []
+	const task = readTaskInputsFromForm()
 
-	readTaskInputsFromForm(task, errors)
-
-	if (errors.length === 0) {
+	if (task) {
 		const taskString = JSON.stringify(task)
 		createTask(taskString)
 	}
 }
 
-function readTaskInputsFromForm(task, errors) {
+function readTaskInputsFromForm() {
+	document.querySelectorAll("ul.error-list").forEach(ul => ul.replaceChildren())
+
+	const task = getResourceAsJson()
+	const newInputs = []
+	var valid = true
+
+	task.input.forEach(input => {
+		if (input?.type?.coding[0]?.system !== undefined && input?.type?.coding[0]?.code !== undefined) {
+			const id = input.type.coding[0].system + "|" + input.type.coding[0].code
+
+			if (id !== "http://dsf.dev/fhir/CodeSystem/bpmn-message|message-name") {
+				document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).forEach(row => {
+					const result = readAndValidateTaskInput(input, row)
+
+					if (result.input)
+						newInputs.push(result.input)
+					else if (!result.valid)
+						valid = false
+				})
+			} else {
+				newInputs.push(input)
+			}
+		}
+	})
+
 	delete task["id"]
-	delete task.meta["lastUpdated"]
-	delete task.meta["version"]
 	delete task.meta["versionId"]
+	delete task.meta["lastUpdated"]
 	delete task["identifier"]
 
 	// TODO set requester as practitioner-identifier if OIDC or Personal Client-Certificate
@@ -24,297 +45,495 @@ function readTaskInputsFromForm(task, errors) {
 
 	task.status = "requested"
 	task.authoredOn = new Date().toISOString()
-
-	const newInputs = []
-
-	task.input.forEach((input) => {
-		if (input.hasOwnProperty("type")) {
-			const code = input.type.coding[0].code
-
-			if (code !== "message-name" && code !== "business-key" && code !== "correlation-key") {
-				document.querySelectorAll("div[name='" + code + "-input-row']").forEach(rowElement => {
-					const newInput = JSON.parse(JSON.stringify(input)) // clone
-					const inputValueType = Object.keys(newInput).find((string) => string.startsWith("value"))
-					const inputValue = readAndValidateValue(rowElement, newInput, code, inputValueType, errors)
-
-					if (inputValue) {
-						newInput[inputValueType] = inputValue
-						newInputs.push(newInput)
-					}
-				})
-			} else {
-				newInputs.push(input)
-			}
-		}
-	})
-
 	task.input = newInputs
+
+	return valid ? task : null
+}
+
+function readAndValidateTaskInput(input, row) {
+	const htmlInputs = row.querySelectorAll("input[fhir-type]")
+	const id = row.getAttribute("for")
+	const optional = row.hasAttribute('optional')
+
+	if (htmlInputs?.length === 1) {
+		const inputFhirType = htmlInputs[0].getAttribute("fhir-type")
+
+		if (inputFhirType === "Reference.reference")
+			return newTaskInputReferenceReference(input.type, id, htmlInputs[0].value, optional)
+		else
+			return newTaskInputTyped(input.type, id, "value" + inputFhirType.charAt(0).toUpperCase() + inputFhirType.slice(1), htmlInputs[0].value, optional)
+	}
+
+	else if (htmlInputs?.length === 2) {
+		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
+		const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
+
+		if ("Coding.system" === input0FhirType && "Coding.code" === input1FhirType)
+			return newTaskInputCoding(input.type, id, htmlInputs[0].value, htmlInputs[1].value, optional)
+		else if ("Identifier.system" === input0FhirType && "Identifier.value" == input1FhirType)
+			return newTaskInputIdentifier(input.type, id, htmlInputs[0].value, htmlInputs[1].value, optional)
+		else if ("Reference.identifier.system" === input0FhirType && "Reference.identifier.value" == input1FhirType)
+			return newTaskInputReferenceIdentifier(input.type, id, htmlInputs[0].value, htmlInputs[1].value, optional, input?.valueReference?.type)
+		else if ("boolean.true" === input0FhirType && "boolean.false" == input1FhirType)
+			return newTaskInputBoolean(input.type, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
+	}
+
+	return { input: null, valid: false }
+}
+
+function newTaskInputReferenceReference(type, id, inputValue, optional) {
+	const result = validateAndConvert(id, "valueReference", inputValue, optional, "Input")
+
+	if (result.valid && result.value !== null) {
+		return {
+			input: {
+				type: type,
+				valueReference: {
+					reference: result.value
+				}
+			},
+			valid: true
+		}
+	} else
+		return { input: null, valid: result.valid }
+}
+
+function newTaskInputTyped(type, id, fhirType, inputValue, optional) {
+	const result = validateAndConvert(id, fhirType, inputValue, optional, "Input")
+
+	if (result.valid && result.value !== null) {
+		const input = {
+			type: type
+		}
+		input[fhirType] = result.value
+
+		return { input: input, valid: true }
+	} else
+		return { input: null, valid: result.valid }
+}
+
+function newTaskInputCoding(type, id, system, code, optional) {
+	const result = validateCoding(id, system, code, optional, "Input")
+
+	if (result.valid && result.value !== null) {
+		return {
+			input: {
+				type: type,
+				valueCoding: {
+					system: result.value.system,
+					code: result.value.code
+				}
+			},
+			valid: true
+		}
+	} else
+		return { input: null, valid: result.valid }
+}
+
+function newTaskInputIdentifier(type, id, system, value, optional) {
+	const result = validateIdentifier(id, system, value, optional, "Input")
+
+	if (result.valid && result.value !== null) {
+		return {
+			input: {
+				type: type,
+				valueIdentifier: {
+					system: result.value.system,
+					value: result.value.value
+				}
+			},
+			valid: true
+		}
+	} else
+		return { input: null, valid: result.valid }
+}
+
+function newTaskInputReferenceIdentifier(type, id, system, value, optional, referenceType) {
+	const result = validateIdentifier(id, system, value, optional, "Input")
+
+	if (result.valid && result.value !== null) {
+		return {
+			input: {
+				type: type,
+				valueReference: {
+					type: referenceType,
+					identifier: {
+						system: result.value.system,
+						value: result.value.value
+					}
+				}
+			},
+			valid: true
+		}
+	} else
+		return { input: null, valid: result.valid }
+}
+
+function newTaskInputBoolean(type, id, checkedTrue, checkedFalse, optional) {
+	const value = !checkedTrue && !checkedFalse ? null : checkedTrue
+
+	if (!optional && value === null) {
+		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
+		addError(errorListElement, "Input mandatory")
+	}
+
+	if (value) {
+		return {
+			input: {
+				type: type,
+				valueBoolean: value
+			},
+			valid: true
+		}
+	}
+	else
+		return { input: null, valid: optional }
 }
 
 function completeQuestionnaireResponse() {
-	const questionnaireResponse = getResourceAsJson()
-	const errors = []
+	const questionnaireResponse = readQuestionnaireResponseAnswersFromForm()
 
-	readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors)
-
-	if (errors.length === 0) {
+	if (questionnaireResponse) {
 		const questionnaireResponseString = JSON.stringify(questionnaireResponse)
 		updateQuestionnaireResponse(questionnaireResponseString)
 	}
 }
 
-function readQuestionnaireResponseAnswersFromForm(questionnaireResponse, errors) {
-	questionnaireResponse.status = "completed"
+function readQuestionnaireResponseAnswersFromForm() {
+	document.querySelectorAll("ul.error-list").forEach(ul => ul.replaceChildren())
 
+	const questionnaireResponse = getResourceAsJson()
 	const newItems = []
+	var valid = true
 
-	questionnaireResponse.item.forEach((item) => {
-		if (item.hasOwnProperty("answer")) {
+	questionnaireResponse.item.forEach(item => {
+		if (item?.linkId !== undefined) {
 			const id = item.linkId
 
-			if (id !== "business-key" && id !== "user-task-id") {
-				document.querySelectorAll("div[name='" + id + "-input-row']").forEach(rowElement => {
-					const newItem = JSON.parse(JSON.stringify(item)) // clone
-					const answer = newItem.answer[0]
-					const answerType = Object.keys(answer).find((string) => string.startsWith("value"))
-					const answerValue = readAndValidateValue(rowElement, answer, id, answerType, errors)
-
-					if (answerValue) {
-						answer[answerType] = answerValue
-						newItems.push(newItem)
-					}
-				})
-			} else {
+			if (id === "business-key" || id === "user-task-id" || item?.answer === undefined) {
 				newItems.push(item)
+			} else {
+				const result = readAndValidateQuestionnaireResponseItem(item, id)
+
+				if (result.item)
+					newItems.push(result.item)
+				else if (!result.valid)
+					valid = false
 			}
 		}
 	})
 
+	questionnaireResponse.status = "completed"
 	questionnaireResponse.item = newItems
+
+	return valid ? questionnaireResponse : null
 }
 
-function readAndValidateValue(rowElement, templateValue, name, valueType, errors) {
-	const valueElement = rowElement.querySelector("input[name='" + name + "']")
-	const value = valueElement?.value
-	const valueBoolean = rowElement.querySelector("input[name='" + name + "']:checked")?.value
-	const valueValue = rowElement.querySelector("input[name='" + name + "-code']")?.value
-	const valueSystem = rowElement.querySelector("input[name='" + name + "-system']")?.value
+function readAndValidateQuestionnaireResponseItem(item, id) {
+	const row = document.querySelector(`div.row[for^="${CSS.escape(id)}"]`)
+	const optional = row.hasAttribute('optional')
+	const htmlInputs = row.querySelectorAll("input[fhir-type]")
 
-	const optional = rowElement.hasAttribute("optional")
-	const valueExists = ((value && valueType !== "valueBoolean") ||
-		(valueBoolean && valueType === "valueBoolean") ||
-		valueValue || valueSystem)
+	if (htmlInputs?.length === 1) {
+		const inputFhirType = htmlInputs[0].getAttribute("fhir-type")
 
-	if (optional && !valueExists) {
-		return null
+		if (inputFhirType === "Reference.reference")
+			return newQuestionnaireResponseItemReferenceReference(item.text, id, htmlInputs[0].value, optional)
+		else
+			return newQuestionnaireResponseItemTyped(item.text, id, "value" + inputFhirType.charAt(0).toUpperCase() + inputFhirType.slice(1), htmlInputs[0].value, optional)
+	}
+	else if (htmlInputs?.length === 2) {
+		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
+		const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
+
+		if ("Coding.system" === input0FhirType && "Coding.code" === input1FhirType)
+			return newQuestionnaireResponseItemCoding(item.text, id, htmlInputs[0].value, htmlInputs[1].value, optional)
+		else if ("Reference.identifier.system" === input0FhirType && "Reference.identifier.value" == input1FhirType)
+			return newQuestionnaireResponseItemReferenceIdentifier(item.text, id, htmlInputs[0].value, htmlInputs[1].value, optional)
+		else if ("boolean.true" === input0FhirType && "boolean.false" == input1FhirType)
+			return newQuestionnaireResponseItemBoolean(item.text, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
 
-	const errorListElement = rowElement.querySelector("ul[name='" + name + "-error']")
-	errorListElement.replaceChildren()
+	return { item: null, valid: false }
+}
 
-	if (valueType === 'valueString') {
-		return validateString(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueInteger') {
-		return validateInteger(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueDecimal') {
-		return validateDecimal(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueDate') {
-		return validateDate(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueTime') {
-		return validateTime(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueDateTime') {
-		return validateDateTime(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueInstant') {
-		return validateInstant(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueUri') {
-		return validateUrl(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueUrl') {
-		return validateUrl(rowElement, errorListElement, value, errors)
-	} else if (valueType === 'valueReference') {
-		if (valueElement) {
-			return validateReference(rowElement, errorListElement, value, errors)
-		} else {
-			const valueIdentifier = validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors)
-			return { identifier: valueIdentifier, type: templateValue?.valueReference?.type }
+function newQuestionnaireResponseItemReferenceReference(text, id, inputValue, optional) {
+	const result = validateAndConvert(id, "valueReference", inputValue, optional, "Item")
+
+	if (result.valid && result.value !== null) {
+		return {
+			item: {
+				linkId: id,
+				text: text,
+				answer: [{
+					valueReference: {
+						reference: result.value
+					}
+				}]
+			},
+			valid: true
 		}
-	} else if (valueType === 'valueBoolean') {
-		return validateBoolean(rowElement, errorListElement, valueBoolean, errors)
-	} else if (valueType === "valueIdentifier") {
-		return validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors)
-	} else if (valueType === "valueCoding") {
-		return validateCoding(rowElement, errorListElement, valueSystem, valueValue, errors)
-	} else {
-		return null
+	} else
+		return { item: null, valid: result.valid }
+}
+
+function newQuestionnaireResponseItemTyped(text, id, fhirType, inputValue, optional) {
+	const result = validateAndConvert(id, fhirType, inputValue, optional, "Item")
+
+	if (result.valid && result.value !== null) {
+		const item = {
+			linkId: id,
+			text: text,
+			answer: [{}]
+		}
+		item.answer[0][fhirType] = result.value
+
+		return { item: item, valid: true }
+	} else
+		return { item: null, valid: result.valid }
+}
+
+function newQuestionnaireResponseItemCoding(text, id, system, code, optional) {
+	const result = validateCoding(id, system, code, optional, "Item")
+
+	if (result.valid && result.value !== null) {
+		return {
+			item: {
+				linkId: id,
+				text: text,
+				answer: [{
+					valueCoding: {
+						system: result.value.system,
+						code: result.value.code
+					}
+				}]
+			},
+			valid: true
+		}
+	} else
+		return { item: null, valid: result.valid }
+}
+
+function newQuestionnaireResponseItemReferenceIdentifier(text, id, system, value, optional) {
+	const result = validateIdentifier(id, system, value, optional, "Item")
+
+	if (result.valid && result.value !== null) {
+		return {
+			item: {
+				linkId: id,
+				text: text,
+				answer: [{
+					valueReference: {
+						identifier: {
+							system: result.value.system,
+							value: result.value.value
+						}
+					}
+				}]
+			},
+			valid: true
+		}
+	} else
+		return { item: null, valid: result.valid }
+}
+
+function newQuestionnaireResponseItemBoolean(text, id, checkedTrue, checkedFalse, optional) {
+	const value = !checkedTrue && !checkedFalse ? undefined : checkedTrue
+
+	if (optional && value === undefined)
+		return { item: null, valid: true }
+	else if (value !== undefined) {
+		const item = {
+			linkId: id,
+			text: text,
+			answer: [{
+				valueBoolean: value
+			}]
+		}
+
+		return { item: item, valid: true }
+	}
+	else {
+		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
+		addError(errorListElement, "Item mandatory")
+
+		return { item: null, valid: false }
 	}
 }
 
-function validateString(rowElement, errorListElement, value, errors) {
-	if (value === null || value.trim() === "") {
-		addError(rowElement, errorListElement, errors, "Value is null or empty")
-		return null
-	} else {
-		removeError(rowElement, errorListElement)
-		return value
+function validateAndConvert(id, fhirType, inputValue, optional, valueName) {
+	const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
+
+	if (fhirType === "valueString")
+		return validateString(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueInteger")
+		return validateInteger(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueDecimal")
+		return validateDecimal(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueDate")
+		return validateDate(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueTime")
+		return validateTime(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueDateTime")
+		return validateDateTime(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueInstant")
+		return validateInstant(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueUri")
+		return validateUrl(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueUrl")
+		return validateUrl(errorListElement, inputValue, optional, valueName)
+	else if (fhirType === "valueReference")
+		return validateReference(errorListElement, inputValue, optional, valueName)
+	else
+		return { value: null, valid: false }
+}
+
+function validateCoding(id, system, code, optional, valueName) {
+	const systemEmpty = system === null || system.trim() === ""
+	const codeEmpty = code === null || code.trim() === ""
+
+	if (optional && systemEmpty && codeEmpty)
+		return { value: null, valid: true }
+	else {
+		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
+
+		const resultSystem = validateUrl(errorListElement, system, false, valueName + " system")
+		const resultCode = validateString(errorListElement, code, false, valueName + " code")
+
+		if (resultSystem.valid && resultSystem.value !== null && resultCode.valid && resultCode.value !== null) {
+			return {
+				value: {
+					system: resultSystem.value,
+					code: resultCode.value
+				},
+				valid: true
+			}
+		}
+		else
+			return { value: null, valid: false }
 	}
 }
 
-function validateInteger(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
+function validateIdentifier(id, system, value, optional, valueName) {
+	const systemEmpty = system === null || system.trim() === ""
+	const valueEmpty = value === null || value.trim() === ""
 
-	if (!Number.isInteger(parseInt(value))) {
-		addError(rowElement, errorListElement, errors, "Value is not an integer")
-		return null
-	} else {
-		removeError(rowElement, errorListElement)
-		return value
+	if (optional && systemEmpty && valueEmpty)
+		return { value: null, valid: true }
+	else {
+		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
+
+		const resultSystem = validateUrl(errorListElement, system, false, valueName + " system")
+		const resultValue = validateString(errorListElement, value, false, valueName + " value")
+
+		if (resultSystem.valid && resultSystem.value !== null && resultValue.valid && resultValue.value !== null) {
+			return {
+				value: {
+					system: resultSystem.value,
+					value: resultValue.value
+				},
+				valid: true
+			}
+		}
+		else
+			return { value: null, valid: false }
 	}
 }
 
-function validateDecimal(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
+function validateType(errorListElement, value, optional, valueName, typeValid, typeSpecificError, toType) {
+	const stringValid = value !== null && value.trim() !== ""
 
-	if (isNaN(parseFloat(value))) {
-		addError(rowElement, errorListElement, errors, "Value is not a decimal")
-		return null
-	} else {
-		removeError(rowElement, errorListElement)
-		return value
-	}
+	if (!optional && !stringValid) {
+		addError(errorListElement, valueName + " mandatory")
+		return { value: null, valid: false }
+	} else if (stringValid) {
+		if (typeValid(value)) {
+			const typedValue = toType(value)
+			return { value: typedValue, valid: true }
+		}
+		else {
+			addError(errorListElement, valueName + " " + typeSpecificError)
+			return { value: null, valid: false }
+		}
+	} else
+		return { value: null, valid: true }
 }
 
-function validateDate(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
-
-	const date = new Date(value)
-	if ((date === "Invalid Date") || isNaN(date)) {
-		addError(rowElement, errorListElement, errors, "Value is not a date")
-		return null
-	} else {
-		removeError(rowElement, errorListElement)
-		return value
-	}
+function validateString(errorListElement, value, optional, valueName) {
+	return validateType(errorListElement, value, optional, valueName, () => true, null, v => v)
 }
 
-function validateTime(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
+function validateInteger(errorListElement, value, optional, valueName) {
+	const integerValid = v => Number.isSafeInteger(parseInt(v)) && parseInt(v) == v
 
-	if (!(new RegExp('^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])(:[0-5]?[0-9])?$').test(value))) {
-		addError(rowElement, errorListElement, errors, "Value is not a time")
-		return null
-	} else {
-		removeError(rowElement, errorListElement)
-		return (value.split(":").length - 1 === 1) ? value + ":00" : value
-	}
+	return validateType(errorListElement, value, optional, valueName, integerValid, "not an integer", parseInt)
 }
 
-function validateDateTime(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
+function validateDecimal(errorListElement, value, optional, valueName) {
+	const decimalValid = v => !isNaN(parseFloat(v)) && parseFloat(v) == v
 
-	try {
-		const dateTime = new Date(value).toISOString()
-		removeError(rowElement, errorListElement)
-		return dateTime
-	} catch (_) {
-		addError(rowElement, errorListElement, errors, "Value is not a date time")
-		return null
-	}
+	return validateType(errorListElement, value, optional, valueName, decimalValid, "not a decimal", parseFloat)
 }
 
-function validateInstant(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
+function validateDate(errorListElement, value, optional, valueName) {
+	const dateValid = v => !isNaN(new Date(v))
 
-	try {
-		const dateTime = new Date(value).toISOString()
-		removeError(rowElement, errorListElement)
-		return dateTime
-	} catch (_) {
-		addError(rowElement, errorListElement, errors, "Value is not an instant")
-		return null
-	}
+	return validateType(errorListElement, value, optional, valueName, dateValid, "is not a date", v => new Date(v).toISOString().substring(0, 10))
 }
 
-function validateReference(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
+function validateTime(errorListElement, value, optional, valueName) {
+	const timeValid = v => new RegExp("^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])(:[0-5]?[0-9])?$").test(v)
 
-	try {
-		new URL(value)
-		removeError(rowElement, errorListElement)
-		return { reference: value }
-	} catch (_) {
-		addError(rowElement, errorListElement, errors, "Value is not a reference")
-		return null
-	}
+	return validateType(errorListElement, value, optional, valueName, timeValid, "is not a time", v => {
+		v = v.split(":").length === 2 ? v + ":00" : v
+		return v.split(":").map(v => v.padStart(2, "0")).join(":")
+	})
 }
 
-function validateUrl(rowElement, errorListElement, value, errors) {
-	validateString(rowElement, errorListElement, value, errors)
+function validateDateTime(errorListElement, value, optional, valueName) {
+	// TODO precision YYYY, YYYY-MM, YYYY-MM-DD also valid
 
-	try {
-		new URL(value)
-		removeError(rowElement, errorListElement)
-		return value
-	} catch (_) {
-		addError(rowElement, errorListElement, errors, "Value is not a url")
-		return null
-	}
+	const dateValid = v => !isNaN(new Date(v))
+
+	return validateType(errorListElement, value, optional, valueName, dateValid, "is not a date-time", v => new Date(v).toISOString())
 }
 
-function validateBoolean(rowElement, errorListElement, valueBoolean, errors) {
-	if (valueBoolean === "true" || valueBoolean === "false") {
-		removeError(rowElement, errorListElement)
-		return valueBoolean
-	} else {
-		addError(rowElement, errorListElement, errors, "Boolean value not selected")
-		return null
-	}
+function validateInstant(errorListElement, value, optional, valueName) {
+	const dateValid = v => !isNaN(new Date(v))
+
+	return validateType(errorListElement, value, optional, valueName, dateValid, "is not a date-time", v => new Date(v).toISOString())
 }
 
-function validateIdentifier(rowElement, errorListElement, valueSystem, valueValue, errors) {
-	const validatedSystem = validateUrl(rowElement, errorListElement, valueSystem, errors)
-	const validatedValue = validateString(rowElement, errorListElement, valueValue, errors)
-
-	if (validatedSystem && validatedValue) {
-		removeError(rowElement, errorListElement)
-		return { system: valueSystem, value: valueValue }
-	} else {
-		addError(rowElement, errorListElement, errors, "System or value not usable for identifier")
-		return null
+function validateReference(errorListElement, value, optional, valueName) {
+	const urlValid = v => {
+		try {
+			new URL(v)
+			return true
+		} catch (_) {
+			return false
+		}
 	}
+
+	return validateType(errorListElement, value, optional, valueName, urlValid, "is not a reference", v => v)
 }
 
-function validateCoding(rowElement, errorListElement, valueSystem, valueValue, errors) {
-	const validatedSystem = validateUrl(rowElement, errorListElement, valueSystem, errors)
-	const validatedCode = validateString(rowElement, errorListElement, valueValue, errors)
-
-	if (validatedSystem && validatedCode) {
-		removeError(rowElement, errorListElement)
-		return { system: valueSystem, code: valueValue }
-	} else {
-		addError(rowElement, errorListElement, errors, "System or code not usable for coding")
-		return null
+function validateUrl(errorListElement, value, optional, valueName) {
+	const urlValid = v => {
+		try {
+			new URL(v)
+			return true
+		} catch (_) {
+			return false
+		}
 	}
+
+	return validateType(errorListElement, value, optional, valueName, urlValid, "is not a url", v => v)
 }
 
-function addError(rowElement, errorListElement, errors, message) {
-	const id = rowElement.getAttribute("name") + "-" + rowElement.getAttribute("index")
-	errors.push({ id: id, error: message })
-
-	rowElement.classList.add("error")
-
+function addError(errorListElement, message) {
 	const errorMessageElement = document.createElement("li")
-	errorMessageElement.appendChild(document.createTextNode(message))
-
+	errorMessageElement.innerText = message
 	errorListElement.appendChild(errorMessageElement)
-	errorListElement.classList.remove("error-list-not-visible")
-	errorListElement.classList.add("error-list-visible")
-}
-
-function removeError(rowElement, errorListElement) {
-	rowElement.classList.remove("error")
-
-	errorListElement.classList.remove("error-list-visible")
-	errorListElement.classList.add("error-list-not-visible")
-	errorListElement.replaceChildren()
 }
 
 function updateQuestionnaireResponse(questionnaireResponse) {
@@ -327,13 +546,11 @@ function updateQuestionnaireResponse(questionnaireResponse) {
 	fetch(requestUrl, {
 		method: "PUT",
 		headers: {
-			'Content-type': 'application/json',
-			'Accept': 'application/json'
+			"Content-type": "application/json",
+			"Accept": "application/json"
 		},
 		body: questionnaireResponse
-	}).then(response => {
-		parseResponse(response, resourceBaseUrlWithoutId)
-	})
+	}).then(response => parseResponse(response, resourceBaseUrlWithoutId))
 }
 
 function createTask(task) {
@@ -345,17 +562,15 @@ function createTask(task) {
 	fetch(requestUrl, {
 		method: "POST",
 		headers: {
-			'Content-type': 'application/json',
-			'Accept': 'application/json'
+			"Content-type": "application/json",
+			"Accept": "application/json"
 		},
 		body: task
-	}).then(response => {
-		parseResponse(response, requestUrl)
-	})
+	}).then(response => parseResponse(response, requestUrl))
 }
 
 function parseResponse(response, resourceBaseUrlWithoutId) {
-	response.text().then((text) => {
+	response.text().then(text => {
 		if (response.ok) {
 			const resource = JSON.parse(text)
 			setTimeout(() => {
@@ -383,33 +598,47 @@ function disableSpinner() {
 }
 
 function adaptTaskFormInputs() {
-	const resourceType = getResourceTypeForCurrentUrl();
+	const task = getResourceAsJson()
 
-	if (resourceType !== null && resourceType[1] !== undefined && resourceType[1] === 'Task') {
-		const task = getResourceAsJson()
+	if (task.status === "draft" && task.meta !== null && task.meta.profile !== null && task.meta.profile.length > 0) {
+		const profile = task.meta.profile[0]
 
-		if (task.status === 'draft' && task.meta !== null && task.meta.profile !== null && task.meta.profile.length > 0) {
-			const profile = task.meta.profile[0]
+		let currentUrl = window.location.origin + window.location.pathname
+		let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile
+
+		loadResource(requestUrl).then(parseStructureDefinition)
+	}
+}
+
+function adaptQuestionnaireResponseInputsIfNotVersion1_0_0() {
+	const questionnaireResponse = getResourceAsJson()
+
+	if (questionnaireResponse.status === 'in-progress' && questionnaireResponse.questionnaire !== null) {
+		const urlVersion = questionnaireResponse.questionnaire.split('|')
+
+		if (urlVersion.length > 1) {
+			const url = urlVersion[0]
+			const version = urlVersion[1]
 
 			let currentUrl = window.location.origin + window.location.pathname
-			let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/Task")) + "/StructureDefinition?url=" + profile
+			let requestUrl = currentUrl.slice(0, currentUrl.indexOf("/QuestionnaireResponse")) + "/Questionnaire?url=" + url + '&version=' + version
 
-			loadStructureDefinition(requestUrl).then(bundle => parseStructureDefinition(bundle))
+			loadResource(requestUrl).then(parseQuestionnaire)
 		}
 	}
 }
 
-function loadStructureDefinition(url) {
+function loadResource(url) {
 	return fetch(url, {
 		method: "GET",
 		headers: {
-			'Accept': 'application/json'
+			"Accept": "application/json"
 		}
 	}).then(response => response.json())
 }
 
 function parseStructureDefinition(bundle) {
-	if (bundle.entry.length > 0 && bundle.entry[0].resource != null) {
+	if (bundle.entry.length > 0 && bundle.entry[0].resource !== null) {
 		const structureDefinition = bundle.entry[0].resource
 
 		if (structureDefinition.differential != null) {
@@ -418,8 +647,26 @@ function parseStructureDefinition(bundle) {
 			const groupedSlices = groupBy(slices, d => d.id.split(".")[1])
 			const definitions = getDefinitions(groupedSlices)
 
-			const indices = new Map()
-			definitions.forEach(definition => { modifyInputRow(definition, indices) })
+			definitions.forEach(modifyTaskInputRow)
+		}
+	}
+}
+
+function parseQuestionnaire(bundle) {
+	if (bundle.entry.length > 0 && bundle.entry[0].resource !== null) {
+		const questionnaire = bundle.entry[0].resource
+
+		if (questionnaire.meta !== null && questionnaire.meta.profile !== null && questionnaire.meta.profile.length > 0) {
+			const profile = questionnaire.meta.profile[0]
+			const urlVersion = profile.split('|')
+
+			if (urlVersion.length > 1) {
+				const version = urlVersion[1]
+
+				if (version !== '1.0.0' && questionnaire.item !== undefined) {
+					questionnaire.item.forEach(modifyQuestionnaireInputRow)
+				}
+			}
 		}
 	}
 }
@@ -433,8 +680,8 @@ function filterInputSlices(differentials) {
 function groupBy(list, keyGetter) {
 	const map = new Map()
 
-	list.forEach((item) => {
-		const key = keyGetter(item);
+	list.forEach(item => {
+		const key = keyGetter(item)
 		const collection = map.get(key)
 
 		if (!collection) {
@@ -442,9 +689,9 @@ function groupBy(list, keyGetter) {
 		} else {
 			collection.push(item)
 		}
-	});
+	})
 
-	return Array.from(map.values());
+	return Array.from(map.values())
 }
 
 function getDefinitions(groupedSlices) {
@@ -455,7 +702,7 @@ function getDefinitions(groupedSlices) {
 			identifier: window.location.href,
 			typeSystem: getValueOfDifferential(differentials, "Task.input.type.coding.system", "fixedUri"),
 			typeCode: getValueOfDifferential(differentials, "Task.input.type.coding.code", "fixedCode"),
-			valueType: (valueType != undefined && valueType.length > 0) ? valueType[0].code : undefined,
+			valueType: (valueType !== undefined && valueType.length > 0) ? valueType[0].code : undefined,
 			min: getValueOfDifferential(differentials, "Task.input", "min"),
 			max: getValueOfDifferential(differentials, "Task.input", "max"),
 		}
@@ -472,45 +719,63 @@ function getValueOfDifferential(differentials, path, property) {
 	}
 }
 
-function modifyInputRow(definition, indices) {
-	const row = document.querySelector("[name='" + definition.typeCode + "-input-row']")
+function modifyTaskInputRow(definition) {
+	const id = definition.typeSystem + "|" + definition.typeCode
+	const row = document.querySelector(`div.row[for="${CSS.escape(id)}"]`)
+	const span = row.querySelector('span.cardinalities')
+	span.innerText = `[${definition.min}..${definition.max}]`
+
+	if (definition.max !== "1") {
+		const plusIcon = htmlToElement('<span class="plus-minus-icon"></span>')
+		const plusIconSvg = htmlToElement('<svg height="20" width="20" viewBox="0 -960 960 960"><title>Add additional input</title><path d="M453-280h60v-166h167v-60H513v-174h-60v174H280v60h173v166Zm27.266 200q-82.734 0-155.5-31.5t-127.266-86q-54.5-54.5-86-127.341Q80-397.681 80-480.5q0-82.819 31.5-155.659Q143-709 197.5-763t127.341-85.5Q397.681-880 480.5-880q82.819 0 155.659 31.5Q709-817 763-763t85.5 127Q880-563 880-480.266q0 82.734-31.5 155.5T763-197.684q-54 54.316-127 86Q563-80 480.266-80Zm.234-60Q622-140 721-239.5t99-241Q820-622 721.188-721 622.375-820 480-820q-141 0-240.5 98.812Q140-622.375 140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/></svg>')
+
+		plusIconSvg.addEventListener("click", event => {
+			appendInputRowAfter(id)
+			event.preventDefault()
+		})
+
+		plusIcon.appendChild(plusIconSvg)
+		span.appendChild(plusIcon)
+	}
+
+	if (definition.min < 1 || definition.min === undefined)
+		row.setAttribute("optional", "")
+}
+
+function modifyQuestionnaireInputRow(item) {
+	const row = document.querySelector(`div.row[for="${CSS.escape(item.linkId)}"]`)
 
 	if (row) {
-		const rowIndex = row.getAttribute("index")
-		if (rowIndex) {
-			const index = parseInt(rowIndex)
-			indices.set(getDefinitionId(definition), index)
-		}
-
-		const label = row.querySelector("label")
-		if (label) {
-			const cardinalities = htmlToElement('<span class="cardinalities"></span>', " [" + definition.min + ".." + definition.max + "]")
-			label.appendChild(cardinalities)
-
-			if (definition.max !== "1") {
-				const plusIcon = htmlToElement('<span class="plus-minus-icon"></span>')
-				const plusIconSvg = htmlToElement('<svg height="20" width="20" viewBox="0 -960 960 960"><title>Add additional input</title><path d="M453-280h60v-166h167v-60H513v-174h-60v174H280v60h173v166Zm27.266 200q-82.734 0-155.5-31.5t-127.266-86q-54.5-54.5-86-127.341Q80-397.681 80-480.5q0-82.819 31.5-155.659Q143-709 197.5-763t127.341-85.5Q397.681-880 480.5-880q82.819 0 155.659 31.5Q709-817 763-763t85.5 127Q880-563 880-480.266q0 82.734-31.5 155.5T763-197.684q-54 54.316-127 86Q563-80 480.266-80Zm.234-60Q622-140 721-239.5t99-241Q820-622 721.188-721 622.375-820 480-820q-141 0-240.5 98.812Q140-622.375 140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/></svg>')
-
-				plusIconSvg.addEventListener("click", () => {
-					appendInputRowAfter(row, definition, indices)
-				})
-
-				plusIcon.appendChild(plusIconSvg)
-				label.appendChild(plusIcon)
-			}
-		}
-
-		if (definition.min < 1 || definition.min === undefined)
+		if (item.required !== true) {
 			row.setAttribute("optional", "")
+		}
+
+		const span = row.querySelector('span.cardinalities')
+		if (span) {
+			span.innerText = `[${item.required ? '1' : '0'}..1]`
+		}
+	}
+
+	if (item.item) {
+		item.item.forEach(item => { modifyQuestionnaireInputRow(item) })
 	}
 }
 
-function appendInputRowAfter(inputRow, definition, indices) {
-	const clone = inputRow.cloneNode(true);
+function appendInputRowAfter(id) {
+	const rows = document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`)
 
-	const index = getIndex(getDefinitionId(definition), indices)
-	clone.setAttribute("index", index)
-	clone.querySelectorAll("[index]").forEach(e => { e.setAttribute("index", index) })
+	if (rows.length <= 0)
+		return
+
+	const idParts = rows[rows.length - 1].getAttribute("for")?.split("|")
+	const index = idParts && idParts.length === 3 ? parseInt(idParts[2]) + 1 : 1
+	const clone = rows[0].cloneNode(true)
+
+	clone.setAttribute("for", id + "|" + index)
+	clone.querySelector("ul.error-list").replaceChildren()
+
+	clone.querySelectorAll("[for]").forEach(e => e.setAttribute("for", id + "|" + index))
+	clone.querySelectorAll("input[id]").forEach(e => e.setAttribute("id", id + "|" + index))
 
 	clone.querySelector("span[class='plus-minus-icon']").remove()
 	clone.querySelectorAll("input").forEach(input => {
@@ -520,8 +785,13 @@ function appendInputRowAfter(inputRow, definition, indices) {
 		if (input?.nextElementSibling?.tagName?.toLowerCase() === 'svg') {
 			input.nextElementSibling.addEventListener('click', () => {
 				if (input?.placeholder !== '') {
-					input.text = input.placeholder
-					input.value = input.placeholder
+					if (input.type === 'radio') {
+						input.checked = input.placeholder === 'true'
+					}
+					else {
+						input.text = input.placeholder
+						input.value = input.placeholder
+					}
 				}
 			})
 		}
@@ -532,23 +802,17 @@ function appendInputRowAfter(inputRow, definition, indices) {
 		const minusIcon = htmlToElement('<span class="plus-minus-icon"></span>')
 		const minusIconSvg = htmlToElement('<svg height="20" width="20" viewBox="0 -960 960 960"><path d="M280-453h400v-60H280v60ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z"/></svg>')
 
-		minusIconSvg.addEventListener("click", () => { clone.remove() })
+		minusIconSvg.addEventListener("click", () => clone.remove())
 
 		minusIcon.appendChild(minusIconSvg)
 		label.appendChild(minusIcon)
 	}
 
-	inputRow.after(clone)
-}
-
-function insertPlaceholderInValue(element, name, placeholder) {
-	const input = element.querySelector("input[name='" + name + "']")
-	input.text = placeholder
-	input.value = placeholder
+	rows[rows.length - 1].after(clone)
 }
 
 function htmlToElement(html, innerText) {
-	const template = document.createElement('template')
+	const template = document.createElement("template")
 	template.innerHTML = html
 	const child = template.content.firstChild
 
@@ -556,21 +820,6 @@ function htmlToElement(html, innerText) {
 		child.innerText = innerText
 
 	return child
-}
-
-function getDefinitionId(definition) {
-	return definition.typeSystem + "|" + definition.typeCode
-}
-
-function getIndex(id, indexMap) {
-	if (indexMap.has(id)) {
-		const index = indexMap.get(id) + 1
-		indexMap.set(id, index)
-		return index
-	} else {
-		indexMap.set(id, 0)
-		return 0
-	}
 }
 
 function getResourceAsJson() {

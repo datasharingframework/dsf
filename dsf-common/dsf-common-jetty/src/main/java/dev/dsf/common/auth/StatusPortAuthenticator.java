@@ -5,8 +5,10 @@ import java.util.function.Supplier;
 
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.security.Authenticator;
+import org.eclipse.jetty.security.DefaultUserIdentity;
 import org.eclipse.jetty.security.ServerAuthException;
 import org.eclipse.jetty.security.UserAuthentication;
+import org.eclipse.jetty.security.UserPrincipal;
 import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Authentication.User;
 
@@ -41,6 +43,12 @@ public class StatusPortAuthenticator implements Authenticator
 	public boolean isStatusPortRequest(ServletRequest req)
 	{
 		HttpServletRequest request = (HttpServletRequest) req;
+		return statusPortSupplier.get() != null && statusPortSupplier.get() == request.getLocalPort();
+	}
+
+	private boolean isStatusPortAndPathGetRequest(ServletRequest req)
+	{
+		HttpServletRequest request = (HttpServletRequest) req;
 		return HttpMethod.GET.is(request.getMethod()) && STATUS_PATH.equals(request.getPathInfo())
 				&& statusPortSupplier.get() != null && statusPortSupplier.get() == request.getLocalPort();
 	}
@@ -55,8 +63,9 @@ public class StatusPortAuthenticator implements Authenticator
 	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
 			throws ServerAuthException
 	{
-		if (isStatusPortRequest(request))
-			return new UserAuthentication(getAuthMethod(), null);
+		if (isStatusPortAndPathGetRequest(request))
+			return new UserAuthentication(getAuthMethod(), new DefaultUserIdentity(null,
+					new UserPrincipal("STATUS_PORT_USER", null), new String[] { "STATUS_PORT_ROLE" }));
 		else
 			return Authentication.UNAUTHENTICATED;
 	}

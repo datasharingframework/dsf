@@ -33,6 +33,7 @@ import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -189,7 +190,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		Map<String, List<String>> queryParameters = Map.of("identifier",
 				Collections.singletonList(iSystem + "|" + iValue));
 		OrganizationDao dao = daoProvider.getOrganizationDao();
-		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(0, 0)
+		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
 				.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
@@ -223,7 +224,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		Map<String, List<String>> queryParameters = Map.of("url",
 				Collections.singletonList(cSystem + (coding.hasVersion() ? "|" + cVersion : "")));
 		CodeSystemDao dao = daoProvider.getCodeSystemDao();
-		SearchQuery<CodeSystem> query = dao.createSearchQueryWithoutUserFilter(1, 1)
+		SearchQuery<CodeSystem> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.single())
 				.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();

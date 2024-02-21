@@ -1,0 +1,6 @@
+CREATE OR REPLACE FUNCTION on_endpoints_delete() RETURNS TRIGGER AS $$
+BEGIN
+	PERFORM on_resources_delete(OLD.endpoint_id);
+	RETURN OLD;
+END;
+$$ LANGUAGE PLPGSQL

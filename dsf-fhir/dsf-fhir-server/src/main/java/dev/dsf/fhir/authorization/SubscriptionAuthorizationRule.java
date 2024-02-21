@@ -24,6 +24,7 @@ import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.SubscriptionDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -87,7 +88,8 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 				Optional<ResourceDao<?>> optDao = daoProvider.getDao(cComponentes.getPathSegments().get(0));
 				if (optDao.isPresent())
 				{
-					SearchQuery<?> searchQuery = optDao.get().createSearchQueryWithoutUserFilter(1, 1);
+					SearchQuery<?> searchQuery = optDao.get().createSearchQueryWithoutUserFilter(PageAndCount.exists())
+							.configureParameters(cComponentes.getQueryParams());
 					List<SearchQueryParameterError> uQp = searchQuery.getUnsupportedQueryParameters();
 					if (!uQp.isEmpty())
 					{
@@ -131,7 +133,7 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 				Collections.singletonList(newResource.getChannel().getType().toCode()), "payload",
 				Collections.singletonList(newResource.getChannel().getPayload()));
 		SubscriptionDao dao = getDao();
-		SearchQuery<Subscription> query = dao.createSearchQueryWithoutUserFilter(1, 1)
+		SearchQuery<Subscription> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
 				.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();

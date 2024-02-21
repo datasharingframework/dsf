@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.search.Matcher;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.SearchQuery;
 
 public class MatcherFactory
@@ -33,7 +34,7 @@ public class MatcherFactory
 		if (daosByResourceName.containsKey(path))
 		{
 			ResourceDao<? extends Resource> dao = daosByResourceName.get(path);
-			SearchQuery<? extends Resource> query = dao.createSearchQueryWithoutUserFilter(1, 1);
+			SearchQuery<? extends Resource> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists());
 			query.configureParameters(queryParameters);
 			return Optional.of(query);
 		}

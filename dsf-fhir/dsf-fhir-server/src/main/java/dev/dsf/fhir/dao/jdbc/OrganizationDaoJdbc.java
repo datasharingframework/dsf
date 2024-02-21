@@ -73,7 +73,6 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 					+ thumbprintHex + "\"}]";
 			statement.setString(1, search);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -116,7 +115,6 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 					+ identifierValue + "\"}]";
 			statement.setString(1, search);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -158,7 +156,6 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 					+ thumbprintHex + "\"}]";
 			statement.setString(1, search);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())

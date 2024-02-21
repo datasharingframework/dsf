@@ -43,7 +43,8 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 								ActivityDefinitionName.getNameModifiers()),
 						factory(ActivityDefinitionStatus.PARAMETER_NAME, ActivityDefinitionStatus::new,
 								ActivityDefinitionStatus.getNameModifiers()),
-						factory(ActivityDefinitionUrl.PARAMETER_NAME, ActivityDefinitionUrl::new),
+						factory(ActivityDefinitionUrl.PARAMETER_NAME, ActivityDefinitionUrl::new,
+								ActivityDefinitionUrl.getNameModifiers()),
 						factory(ActivityDefinitionVersion.PARAMETER_NAME, ActivityDefinitionVersion::new,
 								ActivityDefinitionVersion.getNameModifiers())),
 				List.of());
@@ -104,7 +105,6 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 			statement.setString(1, processUrl);
 			statement.setString(2, processVersion);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				List<ActivityDefinition> definitions = new ArrayList<>();

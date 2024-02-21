@@ -12,11 +12,13 @@
 ###
 # dsf-bpe ignores
 ###
+dsf-bpe/dsf-bpe-server-jetty/conf/config.properties
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_bpe.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_status_client.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/lib/*.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/lib_external/*.jar
 dsf-bpe/dsf-bpe-server-jetty/process/*.jar
+dsf-bpe/dsf-bpe-server-jetty/ui
 
 ###
 # dsf-fhir ignores
@@ -26,6 +28,7 @@ dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
 dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
 dsf-fhir/dsf-fhir-server-jetty/docker/dsf_status_client.jar
 dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
+dsf-fhir/dsf-fhir-server-jetty/ui
 dsf-fhir/dsf-fhir-validation/src/main/resources/fhir/bundle.xml
 
 ###
@@ -36,6 +39,7 @@ dsf-docker-test-setup/bpe/log/*.log.gz
 dsf-docker-test-setup/bpe/lib_external/*.jar
 dsf-docker-test-setup/bpe/process/*.jar
 dsf-docker-test-setup/bpe/secrets/*.pem
+dsf-docker-test-setup/bpe/.env
 
 dsf-docker-test-setup/fhir/log/*.log
 dsf-docker-test-setup/fhir/log/*.log.gz

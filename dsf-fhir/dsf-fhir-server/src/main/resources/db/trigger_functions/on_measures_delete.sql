@@ -1,0 +1,6 @@
+CREATE OR REPLACE FUNCTION on_measures_delete() RETURNS TRIGGER AS $$
+BEGIN
+	PERFORM on_resources_delete(OLD.measure_id);
+	RETURN OLD;
+END;
+$$ LANGUAGE PLPGSQL

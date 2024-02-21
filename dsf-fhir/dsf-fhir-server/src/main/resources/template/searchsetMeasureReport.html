@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<table>
+		<tr th:fragment="header"><th>ID</th><th>Status</th><th>Type</th><th>Date</th><th>Measure</th><th>Last Updated</th></tr>
+		<tr th:fragment="row" title="Open" th:title="'Open ' + ${element.id.resourceType}" th:attr="resource-type=${element.id.resourceType}">
+			<td class="id-value" status="active" th:attr="status=${element.status}"><a href="#" title="Open" th:href="${element.id.href}" th:title="'Open ' + ${element.id.resourceType}" th:text="${element.id.value}">id</a></td>
+			<td th:text="${element.status}">complete</td>
+			<td th:text="${element.type}">type</td>
+			<td th:text="${element.date}">date</td>
+			<td class="id-value"><a href="#" title="Open" th:href="${element.measure.href}" th:title="'Open ' + ${element.measure.resourceType}" th:text="${element.measure.value}" th:if="${element.measure}">measure-id</a></td>
+			<td th:text="${element.lastUpdated}">lastUpdated</td>
+		</tr>
+	</table>
+</body>
+</html>

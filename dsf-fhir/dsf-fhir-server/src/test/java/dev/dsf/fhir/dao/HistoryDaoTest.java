@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.UUID;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.AfterClass;
@@ -30,8 +32,8 @@ import dev.dsf.fhir.search.PageAndCount;
 
 public class HistoryDaoTest extends AbstractDbTest
 {
-	private static BasicDataSource defaultDataSource;
-	private static BasicDataSource permanentDeleteDataSource;
+	private static DataSource defaultDataSource;
+	private static DataSource permanentDeleteDataSource;
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
@@ -46,18 +48,18 @@ public class HistoryDaoTest extends AbstractDbTest
 	{
 		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
 				liquibaseRule.getDatabaseName());
-		defaultDataSource.start();
+		defaultDataSource.unwrap(BasicDataSource.class).start();
 
 		permanentDeleteDataSource = createPermanentDeleteDataSource(liquibaseRule.getHost(),
 				liquibaseRule.getMappedPort(5432), liquibaseRule.getDatabaseName());
-		permanentDeleteDataSource.start();
+		permanentDeleteDataSource.unwrap(BasicDataSource.class).start();
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
-		defaultDataSource.close();
-		permanentDeleteDataSource.close();
+		defaultDataSource.unwrap(BasicDataSource.class).close();
+		permanentDeleteDataSource.unwrap(BasicDataSource.class).close();
 	}
 
 	private final FhirContext fhirContext = FhirContext.forR4();
@@ -78,7 +80,7 @@ public class HistoryDaoTest extends AbstractDbTest
 
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilters(TestOrganizationIdentity.local(createdOrganization)),
-				new PageAndCount(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter());
+				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter());
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -97,7 +99,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				new PageAndCount(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
+				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
 				Organization.class);
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
@@ -117,7 +119,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				new PageAndCount(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
+				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
 				Organization.class, UUID.fromString(createdOrganization.getIdElement().getIdPart()));
 
 		assertNotNull(history);

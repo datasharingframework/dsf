@@ -1,0 +1,49 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main", "develop", "hotfix/*", "release/*" ]
+  pull_request:
+    branches: [ "main", "develop", "hotfix/*", "release/*" ]
+  schedule:
+    - cron: '21 15 * * 0' # Sundays, 15:21
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java-kotlin', 'javascript-typescript' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      if: ${{ matrix.language == 'java-kotlin' }}
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: 17
+        cache: 'maven'
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended, security-and-quality
+
+    - name: Compile with Maven
+      if: ${{ matrix.language == 'java-kotlin' }}
+      run: mvn --batch-mode --fail-at-end --threads 1C -Dmaven.javadoc.skip=true -Dimpsort.skip=true -Dformatter.skip=true -Dgpg.skip -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests clean package
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"

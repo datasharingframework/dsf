@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.StringType;
 
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
-//TODO
 public class AbstractNameOrAliasParameter<R extends Resource> extends AbstractStringParameter<R>
 {
 	public static final String PARAMETER_NAME = "name";

@@ -12,8 +12,8 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.fhir.authentication.FhirServerRole;
-import dev.dsf.fhir.authentication.OrganizationIdentityImpl;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.command.CommandFactory;
 import dev.dsf.fhir.dao.command.CommandList;

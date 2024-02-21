@@ -63,7 +63,7 @@ public class CertificateGenerator
 			"test-client", "Webbrowser Test User" };
 
 	private static final Map<String, List<String>> DNS_NAMES = Map.of("localhost",
-			Arrays.asList("localhost", "host.docker.internal", "fhir", "ttp", "dic1", "dic2", "dic3"));
+			Arrays.asList("localhost", "host.docker.internal", "fhir", "bpe", "ttp", "dic1", "dic2", "dic3"));
 
 	private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
 
@@ -559,6 +559,14 @@ public class CertificateGenerator
 
 		Path baseFolder = Paths.get("../../", dockerTestFolder);
 
+		Path bpeCertificateFile = baseFolder.resolve("bpe/secrets/server_certificate.pem");
+		logger.info("Copying {} certificate pem file to {}", commonName, bpeCertificateFile);
+		writeCertificate(bpeCertificateFile, serverCertFiles.getCertificate());
+
+		Path bpeCertificatePrivateKeyFile = baseFolder.resolve("bpe/secrets/server_certificate_private_key.pem");
+		logger.info("Copying {} private-key file to {}", commonName, bpeCertificatePrivateKeyFile);
+		writePrivateKeyNotEncrypted(bpeCertificatePrivateKeyFile, serverCertFiles.keyPair.getPrivate());
+
 		Path bpeTestCaCertificate = baseFolder.resolve("bpe/secrets/testca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", bpeTestCaCertificate.toString());
 		writeCertificate(bpeTestCaCertificate, testCaCertificate);
@@ -567,9 +575,9 @@ public class CertificateGenerator
 		logger.info("Copying {} certificate pem file to {}", commonName, fhirCertificateFile);
 		writeCertificate(fhirCertificateFile, serverCertFiles.getCertificate());
 
-		Path fhirPrivateKeyFile = baseFolder.resolve("fhir/secrets/server_certificate_private_key.pem");
-		logger.info("Copying {} private-key file to {}", commonName, fhirPrivateKeyFile);
-		writePrivateKeyNotEncrypted(fhirPrivateKeyFile, serverCertFiles.keyPair.getPrivate());
+		Path fhirCertificatePrivateKeyFile = baseFolder.resolve("fhir/secrets/server_certificate_private_key.pem");
+		logger.info("Copying {} private-key file to {}", commonName, fhirCertificatePrivateKeyFile);
+		writePrivateKeyNotEncrypted(fhirCertificatePrivateKeyFile, serverCertFiles.keyPair.getPrivate());
 
 		Path fhirTestCaCertificate = baseFolder.resolve("fhir/secrets/testca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", fhirTestCaCertificate.toString());

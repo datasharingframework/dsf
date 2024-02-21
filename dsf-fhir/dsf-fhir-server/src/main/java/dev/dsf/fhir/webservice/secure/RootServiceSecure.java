@@ -42,8 +42,6 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 	@Override
 	public Response root(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		// get root allowed for all authenticated users
 
 		return delegate.root(uri, headers);
@@ -52,8 +50,6 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<String> reasonHandleBundleAllowed = reasonHandleBundleAllowed(bundle);
 
 		if (reasonHandleBundleAllowed.isEmpty())
@@ -88,8 +84,6 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 	@Override
 	public Response history(UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{

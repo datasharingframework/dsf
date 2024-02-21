@@ -79,20 +79,20 @@ public class CamundaConfig
 	@Bean
 	public StartListener startListener()
 	{
-		return new StartListener(propertiesConfig.getServerBaseUrl(), VariablesImpl::new);
+		return new StartListener(propertiesConfig.getFhirServerBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean
 	public EndListener endListener()
 	{
-		return new EndListener(propertiesConfig.getServerBaseUrl(), VariablesImpl::new,
+		return new EndListener(propertiesConfig.getFhirServerBaseUrl(), VariablesImpl::new,
 				fhirClientConfig.clientProvider().getLocalWebserviceClient());
 	}
 
 	@Bean
 	public ContinueListener continueListener()
 	{
-		return new ContinueListener(propertiesConfig.getServerBaseUrl(), VariablesImpl::new);
+		return new ContinueListener(propertiesConfig.getFhirServerBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean

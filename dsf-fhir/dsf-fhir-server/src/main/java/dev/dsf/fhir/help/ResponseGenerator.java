@@ -186,8 +186,7 @@ public class ResponseGenerator
 
 		bundle.setTotal(result.getTotal());
 
-		setLinks(result.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle,
-				result.getPartialResult().isEmpty(), result.getTotal());
+		setLinks(result.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle, result.getTotal());
 
 		return bundle;
 	}
@@ -217,8 +216,7 @@ public class ResponseGenerator
 
 		bundle.setTotal(history.getTotal());
 
-		setLinks(history.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle,
-				history.getEntries().isEmpty(), history.getTotal());
+		setLinks(history.getPageAndCount(), bundleUri, format, pretty, summaryMode, bundle, history.getTotal());
 
 		return bundle;
 	}
@@ -262,7 +260,7 @@ public class ResponseGenerator
 	}
 
 	private void setLinks(PageAndCount pageAndCount, UriBuilder bundleUri, String format, String pretty,
-			SummaryMode summaryMode, Bundle bundle, boolean isEmpty, int total)
+			SummaryMode summaryMode, Bundle bundle, int total)
 	{
 		if (format != null)
 			bundleUri = bundleUri.replaceQueryParam("_format", format);
@@ -271,17 +269,18 @@ public class ResponseGenerator
 		if (summaryMode != null)
 			bundleUri = bundleUri.replaceQueryParam("_summary", summaryMode.toString());
 
-		if (pageAndCount.getCount() > 0)
+		boolean countOnly = pageAndCount.isCountOnly(total);
+		if (!countOnly)
 		{
 			bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
-			bundleUri = bundleUri.replaceQueryParam("_page", isEmpty ? 1 : pageAndCount.getPage());
+			bundleUri = bundleUri.replaceQueryParam("_page", pageAndCount.getPage());
 		}
 		else
 			bundleUri = bundleUri.replaceQueryParam("_count", "0");
 
 		bundle.addLink().setRelation("self").setUrlElement(new UriType(bundleUri.build()));
 
-		if (pageAndCount.getCount() > 0 && !isEmpty)
+		if (!countOnly && pageAndCount.getCount() > 0)
 		{
 			bundleUri = bundleUri.replaceQueryParam("_page", 1);
 			bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
@@ -324,7 +323,7 @@ public class ResponseGenerator
 
 	public Response pathVsElementId(String resourceTypeName, String id, IdType resourceId)
 	{
-		logger.warn("Path id not equal to {} id ({} vs. {})", resourceTypeName, id, resourceId.getIdPart());
+		logger.warn("Path id not equal to {}.id", resourceTypeName);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Path id not equal to " + resourceTypeName + " id (" + id + " vs. " + resourceId.getIdPart() + ")");
@@ -375,16 +374,16 @@ public class ResponseGenerator
 
 	public Response multipleExists(String resourceTypeName, String ifNoneExistsHeaderValue)
 	{
-		logger.warn("Multiple {} resources with criteria {} exist", resourceTypeName, ifNoneExistsHeaderValue);
+		logger.warn("Multiple {} resources with If-None-Exist criteria exist", resourceTypeName);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.MULTIPLEMATCHES,
 				"Multiple " + resourceTypeName + " resources with criteria '" + ifNoneExistsHeaderValue + "' exist");
 		return Response.status(Status.PRECONDITION_FAILED).entity(outcome).build();
 	}
 
-	public Response badIfNoneExistHeaderValue(String ifNoneExistsHeaderValue)
+	public Response badIfNoneExistHeaderValue(String logMessageReason, String ifNoneExistsHeaderValue)
 	{
-		logger.warn("Bad If-None-Exist header value '{}'", ifNoneExistsHeaderValue);
+		logger.warn("Bad If-None-Exist header value: {}", logMessageReason);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "'");
@@ -396,8 +395,8 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.warn("Bad If-None-Exist header value '{}', unsupported query parameter{} {}", ifNoneExistsHeaderValue,
-				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+		logger.warn("Bad If-None-Exist header value, {} unsupported query parameter{}",
+				unsupportedQueryParameters.size(), unsupportedQueryParameters.size() != 1 ? "s" : "");
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "', unsupported query parameter"
@@ -407,7 +406,7 @@ public class ResponseGenerator
 
 	public Response oneExists(Resource resource, String ifNoneExistsHeaderValue)
 	{
-		logger.info("{} with criteria {} exists", resource.getResourceType().name(), ifNoneExistsHeaderValue);
+		logger.info("{} with criteria from 'If-None-Exist' header exists", resource.getResourceType().name());
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.INFORMATION, IssueType.DUPLICATE,
 				"Resource with criteria '" + ifNoneExistsHeaderValue + "' exists");

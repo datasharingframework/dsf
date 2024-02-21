@@ -35,32 +35,24 @@ public class StructureDefinitionServiceSecure
 	@Override
 	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		return delegate.postSnapshotNew(snapshotPath, parameters, uri, headers);
 	}
 
 	@Override
 	public Response getSnapshotNew(String snapshotPath, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		return delegate.getSnapshotNew(snapshotPath, uri, headers);
 	}
 
 	@Override
 	public Response postSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		return delegate.postSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 
 	@Override
 	public Response getSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		return delegate.getSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 }

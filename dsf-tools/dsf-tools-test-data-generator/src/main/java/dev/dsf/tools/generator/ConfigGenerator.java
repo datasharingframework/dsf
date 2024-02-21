@@ -27,8 +27,10 @@ public class ConfigGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigGenerator.class);
 
-	private static final String P_KEY_ROLE_CONFIG = "dev.dsf.fhir.server.roleConfig";
+	private static final String P_KEY_BPE_ROLE_CONFIG = "dev.dsf.bpe.server.roleConfig";
+	private static final String P_KEY_FHIR_ROLE_CONFIG = "dev.dsf.fhir.server.roleConfig";
 
+	private Properties javaTestBpeConfigProperties;
 	private Properties javaTestFhirConfigProperties;
 
 	private Properties readProperties(Path propertiesFile)
@@ -72,6 +74,24 @@ public class ConfigGenerator
 		}
 	}
 
+	public void modifyJavaTestBpeConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
+
+		Path javaTestFhirConfigTemplateFile = Paths
+				.get("src/main/resources/config-templates/java-test-bpe-config.properties");
+		javaTestBpeConfigProperties = readProperties(javaTestFhirConfigTemplateFile);
+		javaTestBpeConfigProperties.setProperty(P_KEY_BPE_ROLE_CONFIG, String.format("""
+				- webbrowser_test_user:
+				    thumbprint: %s
+				    token-role: admin
+				    dsf-role:
+				      - ADMIN
+				""", webbrowserTestUser.getCertificateSha512ThumbprintHex()));
+
+		writeProperties(Paths.get("config/java-test-bpe-config.properties"), javaTestBpeConfigProperties);
+	}
+
 	public void modifyJavaTestFhirConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
 		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
@@ -79,7 +99,7 @@ public class ConfigGenerator
 		Path javaTestFhirConfigTemplateFile = Paths
 				.get("src/main/resources/config-templates/java-test-fhir-config.properties");
 		javaTestFhirConfigProperties = readProperties(javaTestFhirConfigTemplateFile);
-		javaTestFhirConfigProperties.setProperty(P_KEY_ROLE_CONFIG, String.format("""
+		javaTestFhirConfigProperties.setProperty(P_KEY_FHIR_ROLE_CONFIG, String.format("""
 				- webbrowser_test_user:
 				    thumbprint: %s
 				    token-role: admin
@@ -98,10 +118,18 @@ public class ConfigGenerator
 		writeProperties(Paths.get("config/java-test-fhir-config.properties"), javaTestFhirConfigProperties);
 	}
 
+	public void copyJavaTestBpeConfigProperties()
+	{
+		Path javaTestBpeConfigPropertiesFile = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/conf/config.properties");
+		logger.info("Copying config.properties to {}", javaTestBpeConfigPropertiesFile);
+		writeProperties(javaTestBpeConfigPropertiesFile, javaTestBpeConfigProperties);
+	}
+
 	public void copyJavaTestFhirConfigProperties()
 	{
-		Path javaTestConfigPropertiesFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/config.properties");
-		logger.info("Copying config.properties to {}", javaTestConfigPropertiesFile);
-		writeProperties(javaTestConfigPropertiesFile, javaTestFhirConfigProperties);
+		Path javaTestFhirConfigPropertiesFile = Paths
+				.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/config.properties");
+		logger.info("Copying config.properties to {}", javaTestFhirConfigPropertiesFile);
+		writeProperties(javaTestFhirConfigPropertiesFile, javaTestFhirConfigProperties);
 	}
 }

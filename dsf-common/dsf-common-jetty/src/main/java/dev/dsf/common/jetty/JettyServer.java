@@ -1,7 +1,6 @@
 package dev.dsf.common.jetty;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
@@ -24,6 +23,7 @@ import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -41,6 +41,7 @@ import de.rwh.utils.crypto.CertificateHelper;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public final class JettyServer
 {
@@ -325,8 +326,8 @@ public final class JettyServer
 		return new ErrorHandler()
 		{
 			@Override
-			protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message,
-					boolean showStacks) throws IOException
+			protected void generateAcceptableResponse(Request baseRequest, HttpServletRequest request,
+					HttpServletResponse response, int code, String message) throws IOException
 			{
 				logger.info("Error {}: {}", code, message);
 			}

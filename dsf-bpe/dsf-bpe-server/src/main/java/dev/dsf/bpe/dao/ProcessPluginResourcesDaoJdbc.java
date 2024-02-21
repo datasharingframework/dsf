@@ -12,11 +12,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.hl7.fhir.r4.model.ResourceType;
 import org.postgresql.util.PGobject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import dev.dsf.bpe.plugin.ProcessIdAndVersion;
@@ -25,9 +24,7 @@ import dev.dsf.bpe.plugin.ResourceInfo;
 
 public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements ProcessPluginResourcesDao
 {
-	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginResourcesDaoJdbc.class);
-
-	public ProcessPluginResourcesDaoJdbc(BasicDataSource dataSource)
+	public ProcessPluginResourcesDaoJdbc(DataSource dataSource)
 	{
 		super(dataSource);
 	}
@@ -39,7 +36,6 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT process_key_and_version, resource_type, resource_id, url, version, name, identifier FROM process_plugin_resources ORDER BY process_key_and_version"))
 		{
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				Map<ProcessIdAndVersion, List<ResourceInfo>> resources = new HashMap<>();
@@ -117,7 +113,6 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 							statement.setObject(6, uuidToPgObject(resourceInfo.getResourceId()));
 
 							statement.addBatch();
-							logger.trace("Executing query '{}'", statement);
 
 							statement.executeBatch();
 						}
@@ -145,7 +140,6 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 							statement.setObject(4, uuidToPgObject(resourceInfo.getResourceId()));
 
 							statement.addBatch();
-							logger.trace("Executing query '{}'", statement);
 
 							statement.executeBatch();
 						}
@@ -173,7 +167,6 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 							statement.setObject(4, uuidToPgObject(resourceInfo.getResourceId()));
 
 							statement.addBatch();
-							logger.trace("Executing query '{}'", statement);
 
 							statement.executeBatch();
 						}
@@ -194,7 +187,6 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 					statement.setObject(1, uuidToPgObject(deletedId));
 
 					statement.addBatch();
-					logger.trace("Executing query '{}'", statement);
 				}
 
 				statement.executeBatch();
@@ -213,7 +205,6 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 					statement.setString(1, process.toString());
 
 					statement.addBatch();
-					logger.trace("Executing query '{}'", statement);
 				}
 
 				statement.executeBatch();

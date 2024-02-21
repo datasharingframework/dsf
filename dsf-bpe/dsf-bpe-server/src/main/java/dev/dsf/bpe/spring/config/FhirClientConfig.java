@@ -56,8 +56,9 @@ public class FhirClientConfig implements InitializingBean
 				propertiesConfig.getClientCertificateTrustStoreFile(), propertiesConfig.getClientCertificateFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFile(),
 				propertiesConfig.getClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
-				propertiesConfig.getServerBaseUrl(),
-				propertiesConfig.proxyConfig().isEnabled(propertiesConfig.getServerBaseUrl()) ? "enabled" : "disabled");
+				propertiesConfig.getFhirServerBaseUrl(),
+				propertiesConfig.proxyConfig().isEnabled(propertiesConfig.getFhirServerBaseUrl()) ? "enabled"
+						: "disabled");
 		logger.info(
 				"Local websocket client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " url: {}, proxy: {}}",
@@ -102,7 +103,7 @@ public class FhirClientConfig implements InitializingBean
 			KeyStore webserviceTrustStore = createTrustStore(propertiesConfig.getClientCertificateTrustStoreFile());
 
 			return new FhirClientProviderImpl(fhirConfig.fhirContext(), referenceCleaner(),
-					propertiesConfig.getServerBaseUrl(), propertiesConfig.getWebserviceClientLocalReadTimeout(),
+					propertiesConfig.getFhirServerBaseUrl(), propertiesConfig.getWebserviceClientLocalReadTimeout(),
 					propertiesConfig.getWebserviceClientLocalConnectTimeout(),
 					propertiesConfig.getWebserviceClientLocalVerbose(), webserviceTrustStore, webserviceKeyStore,
 					keyStorePassword, propertiesConfig.getWebserviceClientRemoteReadTimeout(),
@@ -119,7 +120,7 @@ public class FhirClientConfig implements InitializingBean
 
 	private String getWebsocketUrl()
 	{
-		String baseUrl = propertiesConfig.getServerBaseUrl();
+		String baseUrl = propertiesConfig.getFhirServerBaseUrl();
 
 		if (baseUrl.startsWith("https://"))
 			return baseUrl.replace("https://", "wss://") + "/ws";
@@ -149,7 +150,7 @@ public class FhirClientConfig implements InitializingBean
 
 		if (!Files.isReadable(certificatePath))
 			throw new IOException("Certificate file '" + certificatePath.toString() + "' not readable");
-		if (!Files.isReadable(certificatePath))
+		if (!Files.isReadable(privateKeyPath))
 			throw new IOException("Private key file '" + privateKeyPath.toString() + "' not readable");
 
 		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);

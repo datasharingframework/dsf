@@ -47,6 +47,7 @@ import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.help.SummaryMode;
 import dev.dsf.fhir.history.HistoryService;
 import dev.dsf.fhir.prefer.PreferHandlingType;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -124,7 +125,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(serverBase, "serverBase");
-		Objects.requireNonNull(defaultPageCount, "defaultPageCount");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(validator, "validator");
 		Objects.requireNonNull(eventHandler, "eventHandler");
@@ -286,7 +286,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			return; // header not found, nothing to check against
 
 		if (ifNoneExistHeader.get().isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
+			throw new WebApplicationException(
+					responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExistHeader.get()));
 
 		String ifNoneExistHeaderValue = ifNoneExistHeader.get();
 		if (!ifNoneExistHeaderValue.contains("?"))
@@ -295,23 +296,23 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistHeaderValue).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
+			throw new WebApplicationException(
+					responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExistHeader.get()));
 
 		Map<String, List<String>> queryParameters = parameterConverter
 				.urlDecodeQueryParameters(componentes.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
-					"{} Header contains query parameter not applicable in this conditional create context: '{}', parameters {} will be ignored",
-					Constants.HEADER_IF_NONE_EXIST, ifNoneExistHeader.get(),
-					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
+					"{} Header contains query parameter not applicable in this conditional create context, parameters {} will be ignored",
+					Constants.HEADER_IF_NONE_EXIST, Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
 			queryParameters = queryParameters.entrySet().stream()
 					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.single());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
@@ -430,7 +431,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, id,
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
 
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
@@ -624,14 +625,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	public Response search(UriInfo uri, HttpHeaders headers)
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-
-		Integer page = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_PAGE);
-		int effectivePage = page == null ? 1 : page;
-
-		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
-		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
-
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), effectivePage, effectiveCount);
+		PageAndCount pageAndCount = PageAndCount.from(queryParameters, defaultPageCount);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), pageAndCount);
 		query.configureParameters(queryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters();
 

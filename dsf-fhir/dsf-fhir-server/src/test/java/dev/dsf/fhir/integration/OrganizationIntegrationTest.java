@@ -18,9 +18,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-
 public class OrganizationIntegrationTest extends AbstractIntegrationTest
 {
 	@Test
@@ -138,7 +135,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		getWebserviceClient().update(org);
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testUpdateOrganizationWithExistingThumbprint() throws Exception
 	{
 		Bundle bundle1 = getWebserviceClient().search(Organization.class, Map.of("identifier",
@@ -181,18 +178,10 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		thumbprints2.get(0).setValue(new StringType(existingThumbprint));
 
-		try
-		{
-			getWebserviceClient().update(org2);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getWebserviceClient().update(org2));
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testUpdateOrganizationWithExistingIdentifier() throws Exception
 	{
 		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
@@ -210,15 +199,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
 		org.getIdentifierFirstRep().setValue("Test_Organization");
 
-		try
-		{
-			getWebserviceClient().update(org);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getWebserviceClient().update(org));
 	}
 
 	@Test
@@ -270,18 +251,10 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertTrue(outcomeEntry.getResource() instanceof OperationOutcome);
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testStrictSearchWithUnsupportedRevIncludeParameter() throws Exception
 	{
-		try
-		{
-			getWebserviceClient().searchWithStrictHandling(Organization.class,
-					Map.of("_revinclude", Collections.singletonList("Endpoint:foo")));
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Organization.class,
+				Map.of("_revinclude", Collections.singletonList("Endpoint:foo"))));
 	}
 }

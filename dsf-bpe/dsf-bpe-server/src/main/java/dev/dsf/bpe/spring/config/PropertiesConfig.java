@@ -20,6 +20,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.documentation.Documentation;
+import dev.dsf.common.ui.theme.Theme;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
@@ -28,25 +29,41 @@ public class PropertiesConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
-	@Documentation(required = true, description = "The address of the database used for the DSF BPE server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/bpe")
+	@Documentation(required = true, description = "Address of the database used for the DSF BPE server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/bpe")
 	@Value("${dev.dsf.bpe.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "The user name to access the database from the DSF BPE server")
+	@Documentation(description = "Username to access the database from the DSF BPE server")
 	@Value("${dev.dsf.bpe.db.user.username:bpe_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, description = "The password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, description = "Password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${dev.dsf.bpe.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "The user name to access the database from the DSF BPE server for camunda processes", recommendation = "Use a different user then in *DEV_DSF_BPE_DB_USER_USERNAME*")
+	@Documentation(description = "Username to access the database from the DSF BPE server for camunda processes", recommendation = "Use a different user then in *DEV_DSF_BPE_DB_USER_USERNAME*")
 	@Value("${dev.dsf.bpe.db.user.camunda.username:camunda_server_user}")
 	private String dbCamundaUsername;
 
-	@Documentation(required = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
+	@Documentation(required = true, description = "Password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
 	@Value("${dev.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
+
+	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments im configured; supported values: `dev`, `test` and `prod`")
+	@Value("${dev.dsf.bpe.server.ui.theme:}")
+	private String uiTheme;
+
+	@Documentation(description = "Base address of the BPE server, configure when exposing the web-ui", example = "https://foo.bar/bpe")
+	@Value("${dev.dsf.bpe.server.base.url:https://localhost/bpe}")
+	private String bpeServerBaseUrl;
+
+	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control).")
+	@Value("${dev.dsf.bpe.server.roleConfig:}")
+	private String roleConfig;
+
+	@Documentation(description = "To disable static resource caching, set to `false`", recommendation = "Only set to `false` for development")
+	@Value("${dev.dsf.bpe.server.static.resource.cache:true}")
+	private boolean staticResourceCacheEnabled;
 
 	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas}")
@@ -64,11 +81,11 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] clientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "The timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.read:60000}")
 	private int webserviceClientRemoteReadTimeout;
 
-	@Documentation(description = "The timeout in milliseconds until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout in milliseconds until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.connect:5000}")
 	private int webserviceClientRemoteConnectTimeout;
 
@@ -76,15 +93,15 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.client.remote.verbose:false}")
 	private boolean webserviceClientRemoteVerbose;
 
-	@Documentation(required = true, description = "The base address of the local DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
+	@Documentation(required = true, description = "Base address of the local DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
 	@Value("${dev.dsf.bpe.fhir.server.base.url}")
-	private String serverBaseUrl;
+	private String fhirServerBaseUrl;
 
-	@Documentation(description = "The timeout in milliseconds until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout in milliseconds until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:60000}")
 	private int webserviceClientLocalReadTimeout;
 
-	@Documentation(description = "The timeout in milliseconds until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout in milliseconds until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.local.timeout.connect:2000}")
 	private int webserviceClientLocalConnectTimeout;
 
@@ -236,6 +253,18 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.debug.log.message.variablesLocal:false}")
 	private boolean debugLogMessageVariablesLocal;
 
+	@Documentation(description = "To enable logging of webservices requests set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.webserviceRequest:false}")
+	private boolean debugLogMessageWebserviceRequest;
+
+	@Documentation(description = "To enable logging of DB queries set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.dbStatement:false}")
+	private boolean debugLogMessageDbStatement;
+
+	@Documentation(description = "To enable logging of the currently requesting user set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${dev.dsf.bpe.debug.log.message.currentUser:false}")
+	private boolean debugLogMessageCurrentUser;
+
 	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
 
@@ -267,26 +296,27 @@ public class PropertiesConfig implements InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		URL url = new URL(serverBaseUrl);
+		URL url = new URL(fhirServerBaseUrl);
 		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
-					serverBaseUrl);
+					fhirServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with 'http://' or 'https://'");
 		}
-		else if (serverBaseUrl.endsWith("//"))
+		else if (fhirServerBaseUrl.endsWith("//"))
 		{
-			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", serverBaseUrl);
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", fhirServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, ending in //");
 		}
-		else if (!serverBaseUrl.startsWith("https://"))
+		else if (!fhirServerBaseUrl.startsWith("https://"))
 		{
-			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", serverBaseUrl);
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", fhirServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with https://");
 		}
 
-		if (serverBaseUrl.endsWith("/"))
-			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+		if (fhirServerBaseUrl.endsWith("/"))
+			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'",
+					fhirServerBaseUrl);
 
 		logger.info(
 				"Concurrency config: {process-threads: {}, engine-core-pool: {}, engine-queue: {}, engine-max-pool: {}}",
@@ -317,6 +347,28 @@ public class PropertiesConfig implements InitializingBean
 	public char[] getDbCamundaPassword()
 	{
 		return dbCamundaPassword;
+	}
+
+	public Theme getUiTheme()
+	{
+		return Theme.fromString(uiTheme);
+	}
+
+	public String getServerBaseUrl()
+	{
+		return bpeServerBaseUrl != null && bpeServerBaseUrl.endsWith("/")
+				? bpeServerBaseUrl.substring(0, bpeServerBaseUrl.length() - 1)
+				: bpeServerBaseUrl;
+	}
+
+	public String getRoleConfig()
+	{
+		return roleConfig;
+	}
+
+	public boolean getStaticResourceCacheEnabled()
+	{
+		return staticResourceCacheEnabled;
 	}
 
 	public String getClientCertificateTrustStoreFile()
@@ -354,11 +406,11 @@ public class PropertiesConfig implements InitializingBean
 		return webserviceClientRemoteVerbose;
 	}
 
-	public String getServerBaseUrl()
+	public String getFhirServerBaseUrl()
 	{
-		return serverBaseUrl != null && serverBaseUrl.endsWith("/")
-				? serverBaseUrl.substring(0, serverBaseUrl.length() - 1)
-				: serverBaseUrl;
+		return fhirServerBaseUrl != null && fhirServerBaseUrl.endsWith("/")
+				? fhirServerBaseUrl.substring(0, fhirServerBaseUrl.length() - 1)
+				: fhirServerBaseUrl;
 	}
 
 	public int getWebserviceClientLocalReadTimeout()
@@ -557,6 +609,21 @@ public class PropertiesConfig implements InitializingBean
 	public boolean getDebugLogMessageVariablesLocal()
 	{
 		return debugLogMessageVariablesLocal;
+	}
+
+	public boolean getDebugLogMessageWebserviceRequest()
+	{
+		return debugLogMessageWebserviceRequest;
+	}
+
+	public boolean getDebugLogMessageDbStatement()
+	{
+		return debugLogMessageDbStatement;
+	}
+
+	public boolean getDebugLogMessageCurrentUser()
+	{
+		return debugLogMessageCurrentUser;
 	}
 
 	public int getJettyStatusConnectorPort()

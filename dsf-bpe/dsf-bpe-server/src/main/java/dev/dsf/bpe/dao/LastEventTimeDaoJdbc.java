@@ -10,18 +10,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.InitializingBean;
 
 public class LastEventTimeDaoJdbc extends AbstractDaoJdbc implements LastEventTimeDao, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(LastEventTimeDaoJdbc.class);
-
 	private final String type;
 
-	public LastEventTimeDaoJdbc(BasicDataSource dataSource, String type)
+	public LastEventTimeDaoJdbc(DataSource dataSource, String type)
 	{
 		super(dataSource);
 
@@ -47,7 +44,6 @@ public class LastEventTimeDaoJdbc extends AbstractDaoJdbc implements LastEventTi
 		{
 			statement.setString(1, type);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -77,7 +73,6 @@ public class LastEventTimeDaoJdbc extends AbstractDaoJdbc implements LastEventTi
 				statement.setString(3, type);
 				statement.setTimestamp(4, Timestamp.valueOf(lastEvent));
 
-				logger.trace("Executing query '{}'", statement);
 				statement.execute();
 			}
 		}

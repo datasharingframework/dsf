@@ -1,18 +1,23 @@
 package dev.dsf.fhir.authentication;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 
-public class OrganizationProviderImpl extends AbstractProvider implements OrganizationProvider, InitializingBean
+public class OrganizationProviderImpl implements OrganizationProvider, InitializingBean
 {
 	private final OrganizationDao dao;
 	private final ExceptionHandler exceptionHandler;
@@ -48,6 +53,19 @@ public class OrganizationProviderImpl extends AbstractProvider implements Organi
 
 		String thumbprint = getThumbprint(certificate);
 		return getOrganization(thumbprint);
+	}
+
+	protected String getThumbprint(X509Certificate certificate)
+	{
+		try
+		{
+			byte[] digest = MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded());
+			return Hex.encodeHexString(digest);
+		}
+		catch (CertificateEncodingException | NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

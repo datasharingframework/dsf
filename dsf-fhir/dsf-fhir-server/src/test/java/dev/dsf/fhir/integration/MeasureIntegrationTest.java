@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -19,7 +20,6 @@ import org.junit.Test;
 
 import dev.dsf.fhir.dao.LibraryDao;
 import dev.dsf.fhir.dao.MeasureDao;
-import jakarta.ws.rs.WebApplicationException;
 
 public class MeasureIntegrationTest extends AbstractIntegrationTest
 {
@@ -109,22 +109,14 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		assertEquals(measureId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testSearchMeasureDependingOnLibraryNotSupportedById() throws Exception
 	{
 		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
 		measureDao.create(createMeasure()).getIdElement().getIdPart();
 
-		try
-		{
-			getWebserviceClient().searchWithStrictHandling(Measure.class,
-					Map.of("depends-on", Collections.singletonList("0a887526-2b9f-413a-8842-5e9252e2d7f7")));
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(400, e.getResponse().getStatus());
-			throw e;
-		}
+		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Measure.class,
+				Map.of("depends-on", Collections.singletonList("0a887526-2b9f-413a-8842-5e9252e2d7f7"))));
 	}
 
 	@Test
@@ -148,5 +140,14 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(resultBundle.getEntryFirstRep());
 		assertNotNull(resultBundle.getEntryFirstRep().getResource());
 		assertEquals(measureId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testSearchMeasureWithMaxIntegerPageAndCount() throws Exception
+	{
+		List<String> integerMax = List.of(String.valueOf(Integer.MAX_VALUE));
+		Bundle result = getWebserviceClient().search(Measure.class, Map.of("_page", integerMax, "_count", integerMax));
+		assertNotNull(result);
+		assertEquals(0, result.getTotal());
 	}
 }

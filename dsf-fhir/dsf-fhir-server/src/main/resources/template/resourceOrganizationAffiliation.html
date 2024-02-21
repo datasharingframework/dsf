@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="resource-data" th:fragment="resource-data">
+			<th:block th:insert="~{resourceElements::identifier}" th:with="identifier=${organizationAffiliation.identifier}" th:if="${organizationAffiliation.identifier}"></th:block>
+			<th:block th:insert="~{resourceElements::active}" th:if="${resource.active}"></th:block>
+			<th:block th:insert="~{resourceElements::id}" th:with="label='Organization',id=${organizationAffiliation.organization}"></th:block>
+			<th:block th:insert="~{resourceElements::id}" th:with="label='Participating Organization',id=${organizationAffiliation.participatingOrganization}"></th:block>
+			<th:block th:insert="~{resourceElements::systemsAndValues}" th:with="label='Code',systemsAndValues=${organizationAffiliation.code}" th:if="${organizationAffiliation.code}"></th:block>
+			<th:block th:insert="~{resourceElements::id}" th:with="label='Endpoint',id=${organizationAffiliation.endpoint}" th:if="${organizationAffiliation.endpoint}"></th:block>
+		</div>
+	</div>
+</body>
+</html>

@@ -39,10 +39,11 @@ import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 
-public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> implements ReadAccessDaoTest<Binary>
+public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(BinaryDaoTest.class);
 
@@ -145,7 +146,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -172,7 +173,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -210,7 +211,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdOrg), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdOrg),
+				PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -268,7 +270,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdMemberOrg), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdMemberOrg),
+				PageAndCount.single());
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -281,202 +284,6 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary foundBinary = result.getPartialResult().get(0);
 		assertNotNull(foundBinary);
 		assertEquals(createdB.getContentAsBase64(), foundBinary.getContentAsBase64());
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerAll() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerAll();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerLocal() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerLocal();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerOrganization() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerOrganization();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerOrganizationResourceFirst() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationResourceFirst();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerOrganization2Organizations1Matching() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerOrganization2Organizations1Matching();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerOrganization2Organizations2Matching() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerOrganization2Organizations2Matching();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRole() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRole();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleResourceFirst() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleResourceFirst();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRole2Organizations1Matching() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRole2Organizations1Matching();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRole2Organizations2Matching() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRole2Organizations2Matching();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerAllUpdate() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerAllUpdate();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerLocalUpdate() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerLocalUpdate();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerOrganizationUpdate() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationUpdate();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleUpdate() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdate();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleUpdateMemberOrganizationNonActive() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateMemberOrganizationNonActive();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleUpdateParentOrganizationNonActive() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateParentOrganizationNonActive();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleUpdateMemberAndParentOrganizationNonActive() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateMemberAndParentOrganizationNonActive();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerAllDelete() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerAllDelete();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerLocalDelete() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerLocalDelete();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerOrganizationDelete() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationDelete();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleDelete() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleDelete();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleDeleteMember() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMember();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleDeleteParent() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteParent();
-	}
-
-	@Override
-	@Test
-	public void testReadAccessTriggerRoleDeleteMemberAndParent() throws Exception
-	{
-		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMemberAndParent();
-	}
-
-	@Override
-	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser() throws Exception
-	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser();
-	}
-
-	@Override
-	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser() throws Exception
-	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser();
-	}
-
-	@Override
-	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser() throws Exception
-	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser();
-	}
-
-	@Override
-	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
-	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser();
 	}
 
 	private void testReadAccessTriggerSecurityContext(String accessType, Consumer<ResearchStudy> readAccessModifier,
@@ -1236,8 +1043,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganizationDelete() throws Exception
 	{
-		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
-				getPermanentDeleteDataSource(), getFhirContext());
+		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
 
 		Organization org = new Organization();
 		org.setActive(true);
