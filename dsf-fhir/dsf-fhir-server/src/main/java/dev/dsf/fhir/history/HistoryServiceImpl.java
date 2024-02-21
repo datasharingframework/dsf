@@ -87,13 +87,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
-		Integer page = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_PAGE);
-		int effectivePage = page == null ? 1 : page;
-
-		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
-		int effectiveCount = count == null || count < 0 ? defaultPageCount : count;
-
-		PageAndCount pageAndCount = new PageAndCount(effectivePage, effectiveCount);
+		PageAndCount pageAndCount = PageAndCount.from(uri.getQueryParameters(), defaultPageCount);
 
 		List<AtParameter> atParameters = new ArrayList<>();
 		SinceParameter sinceParameter = new SinceParameter();

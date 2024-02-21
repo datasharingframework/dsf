@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -101,7 +102,8 @@ public class ProcessService extends AbstractService implements InitializingBean
 	{
 		if (versionTag != null && !versionTag.isBlank())
 			return repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey)
-					.versionTag(versionTag).singleResult();
+					.versionTag(versionTag).list().stream().max(Comparator.comparing(ProcessDefinition::getVersion))
+					.orElse(null);
 		else
 			return repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey)
 					.latestVersion().singleResult();

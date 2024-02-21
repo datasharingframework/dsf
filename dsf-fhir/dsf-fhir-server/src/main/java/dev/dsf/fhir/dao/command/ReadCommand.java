@@ -30,6 +30,7 @@ import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -193,14 +194,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			responseResult = Response.status(Status.NOT_FOUND).build();
 		else
 		{
-			Integer page = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_PAGE);
-			int effectivePage = page == null ? 1 : page;
-
-			Integer count = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_COUNT);
-			int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
-
-			SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(identity, effectivePage,
-					effectiveCount);
+			SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(identity,
+					PageAndCount.from(cleanQueryParameters, defaultPageCount));
 			query.configureParameters(cleanQueryParameters);
 			List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters();
 

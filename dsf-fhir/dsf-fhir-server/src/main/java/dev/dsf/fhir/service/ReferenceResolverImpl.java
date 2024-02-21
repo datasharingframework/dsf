@@ -31,6 +31,7 @@ import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -323,7 +324,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, 1, 1);
+		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, PageAndCount.single());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
@@ -588,7 +589,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, 1, 1);
+		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, PageAndCount.exists());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();

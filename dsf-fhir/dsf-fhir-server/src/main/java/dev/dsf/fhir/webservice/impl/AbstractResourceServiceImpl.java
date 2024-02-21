@@ -47,6 +47,7 @@ import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.help.SummaryMode;
 import dev.dsf.fhir.history.HistoryService;
 import dev.dsf.fhir.prefer.PreferHandlingType;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
@@ -124,7 +125,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(serverBase, "serverBase");
-		Objects.requireNonNull(defaultPageCount, "defaultPageCount");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(validator, "validator");
 		Objects.requireNonNull(eventHandler, "eventHandler");
@@ -311,7 +311,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.single());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
@@ -624,14 +624,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	public Response search(UriInfo uri, HttpHeaders headers)
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-
-		Integer page = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_PAGE);
-		int effectivePage = page == null ? 1 : page;
-
-		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
-		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
-
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), effectivePage, effectiveCount);
+		PageAndCount pageAndCount = PageAndCount.from(queryParameters, defaultPageCount);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), pageAndCount);
 		query.configureParameters(queryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters();
 

@@ -40,6 +40,7 @@ import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import dev.dsf.fhir.search.DbSearchQuery;
+import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
@@ -898,20 +899,24 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
-	public final SearchQuery<R> createSearchQuery(Identity identity, int page, int count)
+	public final SearchQuery<R> createSearchQuery(Identity identity, PageAndCount pageAndCount)
 	{
-		return doCreateSearchQuery(identity, page, count);
+		Objects.requireNonNull(identity, "identity");
+
+		return doCreateSearchQuery(identity, pageAndCount);
 	}
 
 	@Override
-	public SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count)
+	public SearchQuery<R> createSearchQueryWithoutUserFilter(PageAndCount pageAndCount)
 	{
-		return doCreateSearchQuery(null, page, count);
+		return doCreateSearchQuery(null, pageAndCount);
 	}
 
-	private SearchQuery<R> doCreateSearchQuery(Identity identity, int page, int count)
+	private SearchQuery<R> doCreateSearchQuery(Identity identity, PageAndCount pageAndCount)
 	{
-		var builder = SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count);
+		Objects.requireNonNull(pageAndCount, "pageAndCount");
+
+		var builder = SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), pageAndCount);
 
 		if (identity != null)
 			builder = builder.with(identityFilter.apply(identity));
