@@ -22,9 +22,9 @@ function readTaskInputsFromForm() {
 				document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).forEach(row => {
 					const result = readAndValidateTaskInput(input, row)
 
-					if (result.input !== null)
+					if (result.input)
 						newInputs.push(result.input)
-					else if (!result.optional)
+					else if (!result.valid)
 						valid = false
 				})
 			} else {
@@ -78,95 +78,95 @@ function readAndValidateTaskInput(input, row) {
 			return newTaskInputBoolean(input.type, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
 
-	return null
+	return { input: null, valid: false }
 }
 
 function newTaskInputReferenceReference(type, id, inputValue, optional) {
-	const value = validateAndConvert(id, "valueReference", inputValue, optional, "Input")
+	const result = validateAndConvert(id, "valueReference", inputValue, optional, "Input")
 
-	if (value !== null) {
+	if (result.valid && result.value !== null) {
 		return {
-			optional: optional,
 			input: {
 				type: type,
 				valueReference: {
-					reference: value
+					reference: result.value
 				}
-			}
+			},
+			valid: true
 		}
 	} else
-		return { optional: optional, input: null }
+		return { input: null, valid: result.valid }
 }
 
 function newTaskInputTyped(type, id, fhirType, inputValue, optional) {
-	const value = validateAndConvert(id, fhirType, inputValue, optional, "Input")
+	const result = validateAndConvert(id, fhirType, inputValue, optional, "Input")
 
-	if (value !== null) {
+	if (result.valid && result.value !== null) {
 		const input = {
 			type: type
 		}
-		input[fhirType] = value
+		input[fhirType] = result.value
 
-		return { optional: optional, input: input }
+		return { input: input, valid: true }
 	} else
-		return { optional: optional, input: null }
+		return { input: null, valid: result.valid }
 }
 
 function newTaskInputCoding(type, id, system, code, optional) {
-	const validated = validateCoding(id, system, code, optional, "Input")
+	const result = validateCoding(id, system, code, optional, "Input")
 
-	if (validated !== null) {
+	if (result.valid && result.value !== null) {
 		return {
-			optional: optional,
 			input: {
 				type: type,
 				valueCoding: {
-					system: validated.system,
-					code: validated.code
+					system: result.value.system,
+					code: result.value.code
 				}
-			}
+			},
+			valid: true
 		}
 	} else
-		return { optional: optional, input: null }
+		return { input: null, valid: result.valid }
 }
 
 function newTaskInputIdentifier(type, id, system, value, optional) {
-	const validated = validateIdentifier(id, system, value, optional, "Input")
+	const result = validateIdentifier(id, system, value, optional, "Input")
 
-	if (validated !== null) {
+	if (result.valid && result.value !== null) {
 		return {
-			optional: optional,
 			input: {
 				type: type,
 				valueIdentifier: {
-					system: validated.system,
-					value: validated.value
+					system: result.value.system,
+					value: result.value.value
 				}
-			}
+			},
+			valid: true
 		}
 	} else
-		return { optional: optional, input: null }
+		return { input: null, valid: result.valid }
 }
 
 function newTaskInputReferenceIdentifier(type, id, system, value, optional, referenceType) {
-	const validated = validateIdentifier(id, system, value, optional, "Input")
+	const result = validateIdentifier(id, system, value, optional, "Input")
 
-	if (validated !== null) {
+	if (result.valid && result.value !== null) {
 		return {
-			optional: optional,
 			input: {
 				type: type,
 				valueReference: {
 					type: referenceType,
 					identifier: {
-						system: validated.system,
-						value: validated.value
+						system: result.value.system,
+						value: result.value.value
 					}
 				}
-			}
+			},
+			valid: true
 		}
 	} else
-		return { optional: optional, input: null }
+		return { input: null, valid: result.valid }
 }
 
 function newTaskInputBoolean(type, id, checkedTrue, checkedFalse, optional) {
@@ -179,15 +179,15 @@ function newTaskInputBoolean(type, id, checkedTrue, checkedFalse, optional) {
 
 	if (value) {
 		return {
-			optional: optional,
 			input: {
 				type: type,
 				valueBoolean: value
-			}
+			},
+			valid: true
 		}
 	}
 	else
-		return { optional: optional, input: null }
+		return { input: null, valid: optional }
 }
 
 function completeQuestionnaireResponse() {
@@ -254,88 +254,87 @@ function readAndValidateQuestionnaireResponseItem(item, id) {
 			return newQuestionnaireResponseItemBoolean(item.text, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
 
-	return null
+	return { item: null, valid: false }
 }
 
 function newQuestionnaireResponseItemReferenceReference(text, id, inputValue, optional) {
-	const value = validateAndConvert(id, "valueReference", inputValue, optional, "Item")
+	const result = validateAndConvert(id, "valueReference", inputValue, optional, "Item")
 
-	if (optional && value === null)
-		return { item: null, valid: true }
-	else if (value !== null) {
-		const item = {
-			linkId: id,
-			text: text,
-			answer: [{
-				valueReference: {
-					reference: value
-				}
-			}]
+	if (result.valid && result.value !== null) {
+		return {
+			item: {
+				linkId: id,
+				text: text,
+				answer: [{
+					valueReference: {
+						reference: result.value
+					}
+				}]
+			},
+			valid: true
 		}
-
-		return { item: item, valid: true }
 	} else
-		return { item: null, valid: true }
+		return { item: null, valid: result.valid }
 }
 
 function newQuestionnaireResponseItemTyped(text, id, fhirType, inputValue, optional) {
-	const value = validateAndConvert(id, fhirType, inputValue, optional, "Item")
+	const result = validateAndConvert(id, fhirType, inputValue, optional, "Item")
 
-	if (optional && value === null)
-		return { item: null, valid: true }
-	else if (value !== null) {
+	if (result.valid && result.value !== null) {
 		const item = {
 			linkId: id,
 			text: text,
 			answer: [{}]
 		}
-		item.answer[0][fhirType] = value
+		item.answer[0][fhirType] = result.value
 
 		return { item: item, valid: true }
 	} else
-		return { item: null, valid: false }
+		return { item: null, valid: result.valid }
 }
 
 function newQuestionnaireResponseItemCoding(text, id, system, code, optional) {
-	const validated = validateCoding(id, system, code, optional, "Item")
+	const result = validateCoding(id, system, code, optional, "Item")
 
-	if (validated !== null) {
-		const item = {
-			linkId: id,
-			text: text,
-			answer: [{
-				valueCoding: {
-					system: validated.system,
-					code: validated.code
-				}
-			}]
+	if (result.valid && result.value !== null) {
+		return {
+			item: {
+				linkId: id,
+				text: text,
+				answer: [{
+					valueCoding: {
+						system: result.value.system,
+						code: result.value.code
+					}
+				}]
+			},
+			valid: true
 		}
-
-		return { item: item, valid: true }
 	} else
-		return { item: null, valid: optional }
+		return { item: null, valid: result.valid }
 }
 
 function newQuestionnaireResponseItemReferenceIdentifier(text, id, system, value, optional) {
-	const validated = validateIdentifier(id, system, value, optional, "Item")
+	const result = validateIdentifier(id, system, value, optional, "Item")
 
-	if (validated !== null) {
-		const item = {
-			linkId: id,
-			text: text,
-			answer: [{
-				valueReference: {
-					identifier: {
-						system: validated.system,
-						value: validated.value
+	if (result.valid && result.value !== null) {
+		return {
+			item: {
+				linkId: id,
+				text: text,
+				answer: [{
+					valueReference: {
+						identifier: {
+							system: result.value.system,
+							value: result.value.value
+						}
 					}
-				}
-			}]
+				}]
+			},
+			valid: true
 		}
-
-		return { item: item, valid: true }
 	} else
-		return { item: null, valid: optional }
+		return { item: null, valid: result.valid }
 }
 
 function newQuestionnaireResponseItemBoolean(text, id, checkedTrue, checkedFalse, optional) {
@@ -386,7 +385,7 @@ function validateAndConvert(id, fhirType, inputValue, optional, valueName) {
 	else if (fhirType === "valueReference")
 		return validateReference(errorListElement, inputValue, optional, valueName)
 	else
-		return undefined
+		return { value: null, valid: false }
 }
 
 function validateCoding(id, system, code, optional, valueName) {
@@ -394,21 +393,24 @@ function validateCoding(id, system, code, optional, valueName) {
 	const codeEmpty = code === null || code.trim() === ""
 
 	if (optional && systemEmpty && codeEmpty)
-		return null
-
+		return { value: null, valid: true }
 	else {
 		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
 
-		const validatedSystem = validateUrl(errorListElement, system, false, valueName + " system")
-		const validatedCode = validateString(errorListElement, code, false, valueName + " code")
+		const resultSystem = validateUrl(errorListElement, system, false, valueName + " system")
+		const resultCode = validateString(errorListElement, code, false, valueName + " code")
 
-		if (validatedSystem !== null && validatedCode !== null)
+		if (resultSystem.valid && resultSystem.value !== null && resultCode.valid && resultCode.value !== null) {
 			return {
-				system: validatedSystem,
-				code: validatedCode
+				value: {
+					system: resultSystem.value,
+					code: resultCode.value
+				},
+				valid: true
 			}
+		}
 		else
-			return null
+			return { value: null, valid: false }
 	}
 }
 
@@ -417,21 +419,24 @@ function validateIdentifier(id, system, value, optional, valueName) {
 	const valueEmpty = value === null || value.trim() === ""
 
 	if (optional && systemEmpty && valueEmpty)
-		return null
-
+		return { value: null, valid: true }
 	else {
 		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
 
-		const validatedSystem = validateUrl(errorListElement, system, false, valueName + " system")
-		const validatedValue = validateString(errorListElement, value, false, valueName + " value")
+		const resultSystem = validateUrl(errorListElement, system, false, valueName + " system")
+		const resultValue = validateString(errorListElement, value, false, valueName + " value")
 
-		if (validatedSystem !== null && validatedValue !== null)
+		if (resultSystem.valid && resultSystem.value !== null && resultValue.valid && resultValue.value !== null) {
 			return {
-				system: validatedSystem,
-				value: validatedValue
+				value: {
+					system: resultSystem.value,
+					value: resultValue.value
+				},
+				valid: true
 			}
+		}
 		else
-			return null
+			return { value: null, valid: false }
 	}
 }
 
@@ -440,16 +445,18 @@ function validateType(errorListElement, value, optional, valueName, typeValid, t
 
 	if (!optional && !stringValid) {
 		addError(errorListElement, valueName + " mandatory")
-		return null
+		return { value: null, valid: false }
 	} else if (stringValid) {
-		if (typeValid(value))
-			return toType(value)
+		if (typeValid(value)) {
+			const typedValue = toType(value)
+			return { value: typedValue, valid: true }
+		}
 		else {
 			addError(errorListElement, valueName + " " + typeSpecificError)
-			return null
+			return { value: null, valid: false }
 		}
 	} else
-		return null
+		return { value: null, valid: true }
 }
 
 function validateString(errorListElement, value, optional, valueName) {
