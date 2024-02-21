@@ -64,7 +64,6 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 		{
 			statement.setString(1, name);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -89,7 +88,6 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 		{
 			statement.setString(1, namingSystem);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				boolean found = result.next() && result.getInt(1) > 0;
@@ -117,7 +115,6 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 		{
 			statement.setString(1, namingSystem);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				boolean found = result.next() && result.getInt(1) > 0;

@@ -305,7 +305,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			preparedStatementFactory.configureCreateStatement(statement, resource, uuid);
 
-			logger.trace("Executing query '{}'", statement);
 			statement.execute();
 		}
 
@@ -344,7 +343,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			preparedStatementFactory.configureReadByIdStatement(statement, uuid);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -402,7 +400,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			preparedStatementFactory.configureReadByIdAndVersionStatement(statement, uuid, version);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -459,7 +456,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			preparedStatementFactory.configureReadByIdStatement(statement, uuid);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -497,7 +493,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		try (PreparedStatement statement = connection
 				.prepareStatement("SELECT " + getResourceColumn() + " FROM current_" + getResourceTable()))
 		{
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				List<R> all = new ArrayList<>();
@@ -537,7 +532,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
-				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
 				{
 					return result.next() && !result.getBoolean(1);
@@ -556,7 +550,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 				statement.setLong(2, version);
 
-				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
 				{
 					return result.next() && !result.getBoolean(1);
@@ -678,7 +671,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			preparedStatementFactory.configureUpdateNewRowSqlStatement(statement, uuid, version, resource);
 
-			logger.trace("Executing query '{}'", statement);
 			statement.execute();
 		}
 
@@ -728,7 +720,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -788,7 +779,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			statement.setObject(2, preparedStatementFactory.uuidToPgObject(uuid));
 			statement.setObject(3, preparedStatementFactory.uuidToPgObject(uuid));
 
-			logger.trace("Executing query '{}'", statement);
 			statement.execute();
 
 			logger.debug("{} with ID {} marked as deleted", resourceTypeName, uuid);
@@ -818,7 +808,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			query.modifyStatement(statement, connection::createArrayOf);
 
-			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
@@ -835,7 +824,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				query.modifyStatement(statement, connection::createArrayOf);
 
-				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
 				{
 					ResultSetMetaData metaData = result.getMetaData();
@@ -957,7 +945,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
-			logger.trace("Executing query '{}'", statement);
 			statement.execute();
 
 			logger.debug("{} with ID {} deleted permanently", resourceTypeName, uuid);

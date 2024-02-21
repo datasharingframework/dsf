@@ -177,7 +177,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			return Optional.empty();
 
 		if (ifNoneExist.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExist));
+			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExist));
 
 		if (!ifNoneExist.contains("?"))
 			ifNoneExist = '?' + ifNoneExist;
@@ -185,7 +185,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExist).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExist));
+			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExist));
 
 		Map<String, List<String>> queryParameters = parameterConverter
 				.urlDecodeQueryParameters(componentes.getQueryParams());

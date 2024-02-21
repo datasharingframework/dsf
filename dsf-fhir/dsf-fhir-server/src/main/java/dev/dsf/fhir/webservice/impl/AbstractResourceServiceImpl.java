@@ -286,7 +286,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			return; // header not found, nothing to check against
 
 		if (ifNoneExistHeader.get().isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
+			throw new WebApplicationException(
+					responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExistHeader.get()));
 
 		String ifNoneExistHeaderValue = ifNoneExistHeader.get();
 		if (!ifNoneExistHeaderValue.contains("?"))
@@ -295,16 +296,16 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistHeaderValue).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
+			throw new WebApplicationException(
+					responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExistHeader.get()));
 
 		Map<String, List<String>> queryParameters = parameterConverter
 				.urlDecodeQueryParameters(componentes.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
-					"{} Header contains query parameter not applicable in this conditional create context: '{}', parameters {} will be ignored",
-					Constants.HEADER_IF_NONE_EXIST, ifNoneExistHeader.get(),
-					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
+					"{} Header contains query parameter not applicable in this conditional create context, parameters {} will be ignored",
+					Constants.HEADER_IF_NONE_EXIST, Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
 			queryParameters = queryParameters.entrySet().stream()
 					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))

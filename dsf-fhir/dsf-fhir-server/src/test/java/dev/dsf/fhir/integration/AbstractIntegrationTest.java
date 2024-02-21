@@ -28,6 +28,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Server;
@@ -86,7 +88,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	@ClassRule
 	public static final X509Certificates certificates = new X509Certificates();
 
-	protected static BasicDataSource defaultDataSource;
+	protected static DataSource defaultDataSource;
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
@@ -123,7 +125,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	{
 		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
 				liquibaseRule.getDatabaseName());
-		defaultDataSource.start();
+		defaultDataSource.unwrap(BasicDataSource.class).start();
 
 		logger.info("Creating Bundle ...");
 		createTestBundle(certificates.getClientCertificate(), certificates.getExternalClientCertificate());
@@ -328,7 +330,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
-		defaultDataSource.close();
+		defaultDataSource.unwrap(BasicDataSource.class).close();
 
 		try
 		{

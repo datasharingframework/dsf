@@ -1,8 +1,5 @@
 package dev.dsf.fhir.webservice.jaxrs;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.webservice.specification.ConformanceService;
 import jakarta.ws.rs.GET;
@@ -22,8 +19,6 @@ public class ConformanceServiceJaxrs extends AbstractServiceJaxrs<ConformanceSer
 {
 	public static final String PATH = "metadata";
 
-	private static final Logger logger = LoggerFactory.getLogger(ConformanceServiceJaxrs.class);
-
 	public ConformanceServiceJaxrs(ConformanceService delegate)
 	{
 		super(delegate);
@@ -33,8 +28,6 @@ public class ConformanceServiceJaxrs extends AbstractServiceJaxrs<ConformanceSer
 	@Override
 	public Response getMetadata(@QueryParam("mode") String mode, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
 		return delegate.getMetadata(mode, uri, headers);
 	}
 }

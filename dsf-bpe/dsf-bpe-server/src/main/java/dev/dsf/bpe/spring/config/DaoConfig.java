@@ -1,5 +1,7 @@
 package dev.dsf.bpe.spring.config;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
 import dev.dsf.bpe.dao.ProcessPluginResourcesDaoJdbc;
 import dev.dsf.bpe.dao.ProcessStateDao;
 import dev.dsf.bpe.dao.ProcessStateDaoJdbc;
+import dev.dsf.common.db.DataSourceWithLogger;
 
 @Configuration
 public class DaoConfig
@@ -20,7 +23,7 @@ public class DaoConfig
 	private PropertiesConfig propertiesConfig;
 
 	@Bean
-	public BasicDataSource dataSource()
+	public DataSource dataSource()
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
@@ -31,7 +34,8 @@ public class DaoConfig
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
-		return dataSource;
+
+		return new DataSourceWithLogger(propertiesConfig.getDebugLogMessageDbStatement(), dataSource);
 	}
 
 	private String toString(char[] password)

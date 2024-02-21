@@ -18,8 +18,6 @@ public class ConformanceServiceSecure extends AbstractServiceSecure<ConformanceS
 	@Override
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
-		logCurrentIdentity();
-
 		// get metadata allowed for all authenticated users
 
 		return delegate.getMetadata(mode, uri, headers);

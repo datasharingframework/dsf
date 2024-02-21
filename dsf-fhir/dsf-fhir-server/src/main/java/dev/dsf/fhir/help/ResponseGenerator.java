@@ -323,7 +323,7 @@ public class ResponseGenerator
 
 	public Response pathVsElementId(String resourceTypeName, String id, IdType resourceId)
 	{
-		logger.warn("Path id not equal to {} id ({} vs. {})", resourceTypeName, id, resourceId.getIdPart());
+		logger.warn("Path id not equal to {}.id", resourceTypeName);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Path id not equal to " + resourceTypeName + " id (" + id + " vs. " + resourceId.getIdPart() + ")");
@@ -374,16 +374,16 @@ public class ResponseGenerator
 
 	public Response multipleExists(String resourceTypeName, String ifNoneExistsHeaderValue)
 	{
-		logger.warn("Multiple {} resources with criteria {} exist", resourceTypeName, ifNoneExistsHeaderValue);
+		logger.warn("Multiple {} resources with If-None-Exist criteria exist", resourceTypeName);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.MULTIPLEMATCHES,
 				"Multiple " + resourceTypeName + " resources with criteria '" + ifNoneExistsHeaderValue + "' exist");
 		return Response.status(Status.PRECONDITION_FAILED).entity(outcome).build();
 	}
 
-	public Response badIfNoneExistHeaderValue(String ifNoneExistsHeaderValue)
+	public Response badIfNoneExistHeaderValue(String logMessageReason, String ifNoneExistsHeaderValue)
 	{
-		logger.warn("Bad If-None-Exist header value '{}'", ifNoneExistsHeaderValue);
+		logger.warn("Bad If-None-Exist header value: {}", logMessageReason);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "'");
@@ -395,7 +395,7 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.warn("Bad If-None-Exist header value '{}', unsupported query parameter{} {}", ifNoneExistsHeaderValue,
+		logger.warn("Bad If-None-Exist header value, unsupported query parameter{} {}",
 				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -406,7 +406,7 @@ public class ResponseGenerator
 
 	public Response oneExists(Resource resource, String ifNoneExistsHeaderValue)
 	{
-		logger.info("{} with criteria {} exists", resource.getResourceType().name(), ifNoneExistsHeaderValue);
+		logger.info("{} with criteria from 'If-None-Exist' header exists", resource.getResourceType().name());
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.INFORMATION, IssueType.DUPLICATE,
 				"Resource with criteria '" + ifNoneExistsHeaderValue + "' exists");

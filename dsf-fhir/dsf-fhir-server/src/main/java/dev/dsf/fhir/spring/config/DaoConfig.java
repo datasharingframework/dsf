@@ -1,11 +1,14 @@
 package dev.dsf.fhir.spring.config;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.dsf.common.db.DataSourceWithLogger;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.BundleDao;
@@ -76,7 +79,7 @@ public class DaoConfig
 	private FhirConfig fhirConfig;
 
 	@Bean
-	public BasicDataSource dataSource()
+	public DataSource dataSource()
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
@@ -87,11 +90,12 @@ public class DaoConfig
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
-		return dataSource;
+
+		return new DataSourceWithLogger(propertiesConfig.getDebugLogMessageDbStatement(), dataSource);
 	}
 
 	@Bean
-	public BasicDataSource permanentDeleteDataSource()
+	public DataSource permanentDeleteDataSource()
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
@@ -102,7 +106,8 @@ public class DaoConfig
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
-		return dataSource;
+
+		return new DataSourceWithLogger(propertiesConfig.getDebugLogMessageDbStatement(), dataSource);
 	}
 
 	private String toString(char[] password)

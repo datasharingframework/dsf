@@ -1043,8 +1043,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganizationDelete() throws Exception
 	{
-		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
-				getPermanentDeleteDataSource(), getFhirContext());
+		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
 
 		Organization org = new Organization();
 		org.setActive(true);
