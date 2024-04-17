@@ -11,7 +11,7 @@
 					<li th:if="${task.businessKey}"><b>Business-Key:</b> [[${task.businessKey}]]</li>
 					<li th:if="${task.correlationKey}"><b>Correlation-Key:</b> [[${task.correlationKey}]]</li>
 					<li><b>Requester:</b> [[${task.requester.system}]] | [[${task.requester.value}]]</li>
-					<li><b>Recipient:</b> [[${task.recipient.system}]] | [[${task.requester.value}]]</li>
+					<li><b>Recipient:</b> [[${task.recipient.system}]] | [[${task.recipient.value}]]</li>
 					<li th:unless="${resource.status == 'draft'}"><b>Authored On:</b> [[${task.authoredOn}]]</li>
 				</th:block>
 			</div>

@@ -3,7 +3,7 @@
 
 	<groupId>dev.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.1</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -21,16 +21,16 @@
 
 		<main.basedir>${project.basedir}</main.basedir>
 
-		<slf4j.version>2.0.12</slf4j.version>
-		<log4j.version>2.22.1</log4j.version>
+		<slf4j.version>2.0.13</slf4j.version>
+		<log4j.version>2.23.1</log4j.version>
 		<jetty.version>11.0.20</jetty.version>
-		<jersey.version>3.1.5</jersey.version>
+		<jersey.version>3.1.6</jersey.version>
 		<tyrus.version>2.1.5</tyrus.version>
-		<spring.version>6.1.4</spring.version>
-		<jackson.version>2.16.1</jackson.version>
-		<camunda.version>7.20.0</camunda.version>
+		<spring.version>6.1.6</spring.version>
+		<jackson.version>2.17.0</jackson.version>
+		<camunda.version>7.21.0</camunda.version>
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
-		<bouncycastle.version>1.77</bouncycastle.version>
+		<bouncycastle.version>1.78</bouncycastle.version>
 	</properties>
 
 	<name>DSF</name>
@@ -134,7 +134,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>5.10.0</version>
+				<version>5.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -151,17 +151,17 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
-				<version>2.11.0</version>
+				<version>2.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
-				<version>4.26.0</version>
+				<version>4.27.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.2</version>
+				<version>42.7.3</version>
 			</dependency>
 
 			<!-- hhn rwh -->
@@ -277,7 +277,7 @@
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
-				<version>4.0.4</version>
+				<version>4.0.5</version>
 			</dependency>
 
 			<!-- spring -->
@@ -392,7 +392,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>1.26.0</version>
+				<version>1.26.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -423,7 +423,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.15.1</version>
+				<version>2.16.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -473,7 +473,7 @@
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
-				<version>3.11.0</version>
+				<version>3.12.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -484,12 +484,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.12.1</version>
+					<version>3.13.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.4.0</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -506,7 +506,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -531,7 +531,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.7.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -541,7 +541,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.2.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -577,7 +577,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.11.0</version>
+					<version>3.12.0</version>
 				</plugin>
 				<plugin>
 					<groupId>dev.dsf</groupId>
@@ -597,7 +597,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.8.3.1</version>
+					<version>4.8.4.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -692,7 +692,7 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.5.4</version>
+									<version>3.6.3</version>
 								</requireMavenVersion>
 								<bannedDependencies>
 									<excludes>
@@ -842,7 +842,7 @@
 						<plugin>
 							<groupId>jp.skypencil.findbugs.slf4j</groupId>
 							<artifactId>bug-pattern</artifactId>
-							<version>1.5.0</version>
+							<version>1.5.1-SNAPSHOT</version>
 						</plugin>
 					</plugins>
 				</configuration>
