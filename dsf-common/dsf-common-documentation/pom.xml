@@ -6,6 +6,6 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-common-pom</artifactId>
-		<version>1.5.1</version>
+		<version>1.5.2-SNAPSHOT</version>
 	</parent>
 </project>
