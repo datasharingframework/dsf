@@ -562,7 +562,7 @@
 				<plugin>
 					<groupId>net.revelc.code</groupId>
 					<artifactId>impsort-maven-plugin</artifactId>
-					<version>1.9.0</version>
+					<version>1.10.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -665,6 +665,9 @@
 				<configuration>
 					<groups>java.,javax.,org.,com.</groups>
 					<staticGroups>java,*</staticGroups>
+					<!-- Workaround to make impsort work with Java 21 code -->
+					<compliance>18</compliance>
+					<ignoreParseErrorsBelowImports>true</ignoreParseErrorsBelowImports>
 				</configuration>
 			</plugin>
 			<plugin>
