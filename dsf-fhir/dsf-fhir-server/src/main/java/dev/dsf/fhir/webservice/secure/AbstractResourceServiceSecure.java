@@ -153,10 +153,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 				audit.info("Create of resource {} allowed for user '{}', reason: {}", resourceTypeName,
 						getCurrentIdentity().getName(), reasonCreateAllowed.get());
 
-				Response created = logResultStatus(() -> delegate.create(resource, uri, headers),
-						status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
-								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
-								status.getReasonPhrase()),
+				Response created = logResultStatus(() ->
+				{
+					Response response = delegate.create(resource, uri, headers);
+					return response;
+				}, status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
+						resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
+						status.getReasonPhrase()),
 						status -> audit.info("Create of resource {} for user '{}' failed, status: {} {}",
 								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
 								status.getReasonPhrase()));
@@ -346,9 +349,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
-			return logResultStatus(() -> delegate.history(uri, headers),
-					status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
-							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+			return logResultStatus(() ->
+			{
+				Response response = delegate.history(uri, headers);
+				return response;
+			}, status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("History of {} for identity '{}' failed: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
@@ -367,9 +373,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
-			return logResultStatus(() -> delegate.history(id, uri, headers),
-					status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
-							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+			return logResultStatus(() ->
+			{
+				Response response = delegate.history(id, uri, headers);
+				return response;
+			}, status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("History of {} for identity '{}' failed: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
@@ -415,10 +424,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				audit.info("Update of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
 						resourceId, resourceVersion, getCurrentIdentity().getName(), reasonUpdateAllowed.get());
-				Response updated = logResultStatus(() -> delegate.update(id, newResource, uri, headers),
-						status -> audit.info("Update of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-								status.getStatusCode(), status.getReasonPhrase()),
+				Response updated = logResultStatus(() ->
+				{
+					Response response = delegate.update(id, newResource, uri, headers);
+					return response;
+				}, status -> audit.info("Update of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info("Update of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
 								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
 								status.getStatusCode(), status.getReasonPhrase()));
@@ -535,10 +547,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			audit.info(
 					"Update of resource {} denied for identity '{}', conditional update criteria contains unsupported parameters",
 					resourceTypeName, getCurrentIdentity().getName());
-			throw new WebApplicationException(responseGenerator.badRequest(
+
+			Response response = responseGenerator.badRequest(
 					UriComponentsBuilder.newInstance()
 							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-					unsupportedQueryParameters));
+					unsupportedQueryParameters);
+			throw new WebApplicationException(response);
 		}
 
 		return exceptionHandler.handleSqlException(() -> dao.search(query));
@@ -569,10 +583,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				audit.info("Delete of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
 						resourceId, resourceVersion, getCurrentIdentity().getName(), reasonDeleteAllowed.get());
-				return logResultStatus(() -> delegate.delete(id, uri, headers),
-						status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-								status.getStatusCode(), status.getReasonPhrase()),
+				return logResultStatus(() ->
+				{
+					Response response = delegate.delete(id, uri, headers);
+					return response;
+				}, status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
 								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
 								status.getStatusCode(), status.getReasonPhrase()));
@@ -661,9 +678,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("Search of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonSearchAllowed.get());
-			return logResultStatus(() -> delegate.search(uri, headers),
-					status -> audit.info("Search of {} for identity '{} successful, status: {} {}'", resourceTypeName,
-							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+			return logResultStatus(() ->
+			{
+				Response response = delegate.search(uri, headers);
+				return response;
+			}, status -> audit.info("Search of {} for identity '{} successful, status: {} {}'", resourceTypeName,
+					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("Search of {} for identity '{}' failed, status: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
@@ -694,11 +714,14 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
 						reasonDeleteAllowed.get());
 
-				return logResultStatus(() -> delegate.deletePermanently(deletePath, id, uri, headers),
-						status -> audit.info(
-								"Permanent delete of {}/{}/_history/{} by identity '{}' successful, status: {} {}",
-								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-								status.getStatusCode(), status.getReasonPhrase()),
+				return logResultStatus(() ->
+				{
+					Response response = delegate.deletePermanently(deletePath, id, uri, headers);
+					return response;
+				}, status -> audit.info(
+						"Permanent delete of {}/{}/_history/{} by identity '{}' successful, status: {} {}",
+						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info(
 								"Permanent delete of {}/{}/_history/{} by identity '{}' failed, status: {} {}",
 								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),

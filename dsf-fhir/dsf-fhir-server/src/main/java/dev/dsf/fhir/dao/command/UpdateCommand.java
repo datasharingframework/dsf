@@ -45,6 +45,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.RuntimeDelegate;
 
@@ -86,14 +87,21 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (eruComponentes.getPathSegments().size() == 2 && eruComponentes.getQueryParams().isEmpty())
 		{
 			if (!entry.hasFullUrl() || entry.getFullUrl().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(
-						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+			{
+				Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
+				throw new WebApplicationException(response);
+			}
 			else if (!resource.hasIdElement() || !resource.getIdElement().hasIdPart())
-				throw new WebApplicationException(
-						responseGenerator.bundleEntryResouceMissingId(index, resource.getResourceType().name()));
+			{
+				Response response = responseGenerator.bundleEntryResouceMissingId(index,
+						resource.getResourceType().name());
+				throw new WebApplicationException(response);
+			}
 			else if (resource.getIdElement().getIdPart().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(
-						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+			{
+				Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
+				throw new WebApplicationException(response);
+			}
 
 			String expectedBaseUrl = serverBase;
 			String expectedResourceTypeName = resource.getResourceType().name();
@@ -101,25 +109,38 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			String expectedfullUrl = new IdType(expectedBaseUrl, expectedResourceTypeName, expectedId, null).getValue();
 
 			if (!expectedfullUrl.equals(entry.getFullUrl()))
-				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrl(index, entry.getFullUrl()));
+			{
+				Response response = responseGenerator.badBundleEntryFullUrl(index, entry.getFullUrl());
+				throw new WebApplicationException(response);
+			}
 			else if (!expectedResourceTypeName.equals(eruComponentes.getPathSegments().get(0))
 					|| !expectedId.equals(eruComponentes.getPathSegments().get(1)))
-				throw new WebApplicationException(
-						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+			{
+				Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
+				throw new WebApplicationException(response);
+			}
 		}
 
 		// check conditional update request url: e.g. Patient?...
 		else if (eruComponentes.getPathSegments().size() == 1 && !eruComponentes.getQueryParams().isEmpty())
 		{
 			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(
-						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+			{
+				Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
+				throw new WebApplicationException(response);
+			}
 			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(responseGenerator.bundleEntryBadResourceId(index,
-						resource.getResourceType().name(), URL_UUID_PREFIX));
+			{
+				Response response = responseGenerator.bundleEntryBadResourceId(index, resource.getResourceType().name(),
+						URL_UUID_PREFIX);
+				throw new WebApplicationException(response);
+			}
 			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
-				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
-						entry.getFullUrl(), resource.getIdElement().getValue()));
+			{
+				Response response = responseGenerator.badBundleEntryFullUrlVsResourceId(index, entry.getFullUrl(),
+						resource.getIdElement().getValue());
+				throw new WebApplicationException(response);
+			}
 
 			// add new or existing id to the id translation table
 			addMissingIdToTranslationTableAndCheckConditionFindsResource(idTranslationTable, connection);
@@ -127,8 +148,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		// all other request urls
 		else
-			throw new WebApplicationException(
-					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+		{
+			Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private boolean addMissingIdToTranslationTableAndCheckConditionFindsResource(Map<String, IdType> idTranslationTable,
@@ -157,8 +180,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		List<SearchQueryParameterError> unsupportedParams = query.getUnsupportedQueryParameters();
 		if (!unsupportedParams.isEmpty())
-			throw new WebApplicationException(responseGenerator.unsupportedConditionalUpdateQuery(index,
-					entry.getRequest().getUrl(), unsupportedParams));
+		{
+			Response response = responseGenerator.unsupportedConditionalUpdateQuery(index, entry.getRequest().getUrl(),
+					unsupportedParams);
+			throw new WebApplicationException(response);
+		}
 
 		PartialResult<R> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
@@ -180,8 +206,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
 		// if it does not support Update as Create) -> reject
 		else if (result.getTotal() <= 0 && resource.hasId())
+		{
 			// TODO bundle specific error
-			throw new WebApplicationException(responseGenerator.updateAsCreateNotAllowed(resourceTypeName));
+			Response response = responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
+			throw new WebApplicationException(response);
+		}
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
 		// The server performs the update against the matching resource
@@ -212,18 +241,24 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				return true;
 			}
 			else
+			{
 				// TODO bundle specific error
-				throw new WebApplicationException(responseGenerator.badRequestIdsNotMatching(
+				Response response = responseGenerator.badRequestIdsNotMatching(
 						dbResourceId.withServerBase(serverBase, resourceTypeName),
 						resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
 								? resource.getIdElement()
-								: resource.getIdElement().withServerBase(serverBase, resourceTypeName)));
+								: resource.getIdElement().withServerBase(serverBase, resourceTypeName));
+				throw new WebApplicationException(response);
+			}
 		}
 		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
 		// not selective enough preferably with an OperationOutcome
 		else // if (result.getOverallCount() > 1)
-			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
-					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
+		{
+			Response response = responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder.newInstance()
+					.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
+			throw new WebApplicationException(response);
+		}
 	}
 
 	@Override
@@ -239,8 +274,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
 			updateByCondition(idTranslationTable, connection, validationHelper, componentes.getPathSegments().get(0));
 		else
-			throw new WebApplicationException(
-					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+		{
+			Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private void updateById(Map<String, IdType> idTranslationTable, Connection connection,
@@ -249,15 +286,22 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		IdType resourceId = resource.getIdElement();
 
 		if (!Objects.equals(pathId, resourceId.getIdPart()))
-			throw new WebApplicationException(
-					responseGenerator.pathVsElementIdInBundle(index, resourceTypeName, pathId, resourceId));
+		{
+			Response response = responseGenerator.pathVsElementIdInBundle(index, resourceTypeName, pathId, resourceId);
+			throw new WebApplicationException(response);
+		}
 		if (resourceId.getBaseUrl() != null && !serverBase.equals(resourceId.getBaseUrl()))
-			throw new WebApplicationException(
-					responseGenerator.invalidBaseUrlInBundle(index, resourceTypeName, resourceId));
+		{
+			Response response = responseGenerator.invalidBaseUrlInBundle(index, resourceTypeName, resourceId);
+			throw new WebApplicationException(response);
+		}
 
 		if (!Objects.equals(resourceTypeName, resource.getResourceType().name()))
-			throw new WebApplicationException(responseGenerator.nonMatchingResourceTypeAndRequestUrlInBundle(index,
-					resourceTypeName, entry.getRequest().getUrl()));
+		{
+			Response response = responseGenerator.nonMatchingResourceTypeAndRequestUrlInBundle(index, resourceTypeName,
+					entry.getRequest().getUrl());
+			throw new WebApplicationException(response);
+		}
 
 		@SuppressWarnings("unchecked")
 		R copy = (R) resource.copy();
@@ -289,7 +333,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		{
 			audit.info("Update as create of non existing {} denied for identity '{}'", resourceTypeName,
 					identity.getName());
-			throw new WebApplicationException(responseGenerator.updateAsCreateNotAllowed(resourceTypeName));
+			Response response = responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
+			throw new WebApplicationException(response);
 		}
 		else
 		{

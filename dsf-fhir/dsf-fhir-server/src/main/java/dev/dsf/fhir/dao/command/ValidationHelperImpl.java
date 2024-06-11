@@ -12,6 +12,7 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.ResourceValidator;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 public class ValidationHelperImpl implements ValidationHelper
 {
@@ -48,8 +49,9 @@ public class ValidationHelperImpl implements ValidationHelper
 			logger.warn("{} of {} unauthorized, resource not valid: {}", method, resource.fhirType(),
 					toValidationLogMessage(validationResult));
 
-			throw new WebApplicationException(
-					responseGenerator.forbiddenNotValid(method, identity, resource.fhirType(), validationResult));
+			Response response = responseGenerator.forbiddenNotValid(method, identity, resource.fhirType(),
+					validationResult);
+			throw new WebApplicationException(response);
 		}
 		else if (!validationResult.getMessages().isEmpty())
 			logger.info("Resource {} validated with messages: {}", resource.fhirType(),

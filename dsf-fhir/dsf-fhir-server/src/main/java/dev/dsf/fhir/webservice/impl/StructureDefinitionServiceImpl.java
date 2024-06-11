@@ -292,7 +292,9 @@ public class StructureDefinitionServiceImpl extends
 							.setCode(IssueType.STRUCTURE).setDiagnostics(vm.getMessage()))
 					.collect(Collectors.toList());
 			outcome.setIssue(issues);
-			throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
+
+			Response response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build();
+			throw new WebApplicationException(response);
 		}
 	}
 }

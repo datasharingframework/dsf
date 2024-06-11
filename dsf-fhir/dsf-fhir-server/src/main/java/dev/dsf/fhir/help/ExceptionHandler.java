@@ -126,7 +126,8 @@ public class ExceptionHandler
 		}
 		catch (ResourceNotFoundException e)
 		{
-			throw new WebApplicationException(responseGenerator.notFound(e.getId(), resourceTypeName));
+			Response response = responseGenerator.notFound(e.getId(), resourceTypeName);
+			throw new WebApplicationException(response);
 		}
 		catch (ResourceVersionNoMatchException e)
 		{
@@ -361,7 +362,8 @@ public class ExceptionHandler
 			logger.debug("Error while creating command list for bundle", e);
 			logger.warn("Error while creating command list for bundle: {}", e.getMessage());
 
-			throw new WebApplicationException(responseGenerator.badBundleRequest(e.getMessage()));
+			Response response = responseGenerator.badBundleRequest(e.getMessage());
+			throw new WebApplicationException(response);
 		}
 	}
 }
