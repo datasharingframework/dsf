@@ -42,7 +42,7 @@ public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 
 		try
 		{
-			URL u = new URL(url);
+			URL u = new URI(url).toURL();
 			if (u.getHost() == null || u.getHost().isBlank())
 			{
 				logger.warn("Forward proxy url '{}' malformed: no host name", u);
@@ -56,7 +56,7 @@ public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 
 			return url;
 		}
-		catch (MalformedURLException e)
+		catch (IllegalArgumentException | MalformedURLException | URISyntaxException e)
 		{
 			logger.warn("Forward proxy url '{}' malformed: {}", url, e.getMessage());
 			return null;

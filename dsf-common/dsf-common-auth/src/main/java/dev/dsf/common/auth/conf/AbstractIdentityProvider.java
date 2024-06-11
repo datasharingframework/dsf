@@ -1,7 +1,7 @@
 package dev.dsf.common.auth.conf;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -261,9 +261,9 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 
 		try
 		{
-			return sub + "@" + new URL(iss).getHost();
+			return sub + "@" + new URI(iss).getHost();
 		}
-		catch (MalformedURLException e)
+		catch (URISyntaxException e)
 		{
 			return null;
 		}
