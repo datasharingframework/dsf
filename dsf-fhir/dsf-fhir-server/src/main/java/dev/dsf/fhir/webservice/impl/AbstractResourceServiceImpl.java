@@ -286,8 +286,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			return; // header not found, nothing to check against
 
 		if (ifNoneExistHeader.get().isBlank())
-			throw new WebApplicationException(
-					responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExistHeader.get()));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExistHeader.get());
+			throw new WebApplicationException(response);
+		}
 
 		String ifNoneExistHeaderValue = ifNoneExistHeader.get();
 		if (!ifNoneExistHeaderValue.contains("?"))
@@ -296,8 +298,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistHeaderValue).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw new WebApplicationException(
-					responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExistHeader.get()));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExistHeader.get());
+			throw new WebApplicationException(response);
+		}
 
 		Map<String, List<String>> queryParameters = parameterConverter
 				.urlDecodeQueryParameters(componentes.getQueryParams());
@@ -317,16 +321,23 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
-			throw new WebApplicationException(
-					responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get(), unsupportedQueryParameters));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get(),
+					unsupportedQueryParameters);
+			throw new WebApplicationException(response);
+		}
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 		if (result.getTotal() == 1)
-			throw new WebApplicationException(
-					responseGenerator.oneExists(result.getPartialResult().get(0), ifNoneExistHeader.get()));
+		{
+			Response response = responseGenerator.oneExists(result.getPartialResult().get(0), ifNoneExistHeader.get());
+			throw new WebApplicationException(response);
+		}
 		else if (result.getTotal() > 1)
-			throw new WebApplicationException(
-					responseGenerator.multipleExists(resourceTypeName, ifNoneExistHeader.get()));
+		{
+			Response response = responseGenerator.multipleExists(resourceTypeName, ifNoneExistHeader.get());
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
@@ -384,7 +395,12 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
 
-		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+		}).orElseGet(() ->
+		{
+			// TODO return OperationOutcome
+			Response response = Response.status(Status.NOT_FOUND).build();
+			return response;
+		});
 	}
 
 	private boolean afterWithSecondsPrecision(Date a, Date b)
@@ -460,7 +476,12 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			}
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();
-		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+		}).orElseGet(() ->
+		{
+			// TODO return OperationOutcome
+			Response response = Response.status(Status.NOT_FOUND).build();
+			return response;
+		});
 	}
 
 	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)

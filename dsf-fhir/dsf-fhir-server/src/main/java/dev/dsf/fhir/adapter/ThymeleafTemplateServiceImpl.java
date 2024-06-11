@@ -5,10 +5,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -175,9 +173,9 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	{
 		try
 		{
-			return new URL(serverBaseUrl).getPath();
+			return new URI(serverBaseUrl).getPath();
 		}
-		catch (MalformedURLException e)
+		catch (URISyntaxException e)
 		{
 			throw new RuntimeException(e);
 		}

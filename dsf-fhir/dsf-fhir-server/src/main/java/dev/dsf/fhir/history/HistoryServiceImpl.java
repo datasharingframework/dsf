@@ -28,6 +28,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
@@ -129,9 +130,13 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 			throw new WebApplicationException();
 
 		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(parameterConverter.getPreferHandling(headers)))
-			throw new WebApplicationException(
-					responseGenerator.response(Status.BAD_REQUEST, responseGenerator.toOperationOutcomeError(errors),
-							parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build());
+		{
+			Response response = responseGenerator
+					.response(Status.BAD_REQUEST, responseGenerator.toOperationOutcomeError(errors),
+							parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
+					.build();
+			throw new WebApplicationException(response);
+		}
 
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);

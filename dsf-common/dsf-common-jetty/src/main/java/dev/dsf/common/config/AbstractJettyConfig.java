@@ -3,6 +3,8 @@ package dev.dsf.common.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -433,13 +435,13 @@ public abstract class AbstractJettyConfig
 		{
 			try
 			{
-				URL proxyUrl = new URL(config.getUrl());
+				URL proxyUrl = new URI(config.getUrl()).toURL();
 
 				Address address = new Address(proxyUrl.getHost(),
 						proxyUrl.getPort() < 0 ? proxyUrl.getDefaultPort() : proxyUrl.getPort());
 				return new HttpProxy(address, "https".equals(proxyUrl.getProtocol()));
 			}
-			catch (MalformedURLException e)
+			catch (MalformedURLException | URISyntaxException e)
 			{
 				throw new RuntimeException(e);
 			}

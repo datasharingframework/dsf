@@ -1,5 +1,6 @@
 package dev.dsf.bpe.spring.config;
 
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -296,7 +297,7 @@ public class PropertiesConfig implements InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		URL url = new URL(fhirServerBaseUrl);
+		URL url = new URI(fhirServerBaseUrl).toURL();
 		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",

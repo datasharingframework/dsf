@@ -1,12 +1,10 @@
-name: "CodeQL"
+name: Java 21 CodeQL
 
 on:
   push:
-    branches: [ "main", "develop", "hotfix/*", "release/*" ]
+    branches: develop_2
   pull_request:
-    branches: [ "main", "develop", "hotfix/*", "release/*" ]
-  schedule:
-    - cron: '21 15 * * 0' # Sundays, 15:21
+    branches: develop_2
 
 jobs:
   analyze:
@@ -25,12 +23,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       if: ${{ matrix.language == 'java-kotlin' }}
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: 17
+        java-version: 21
         cache: 'maven'
 
     - name: Initialize CodeQL

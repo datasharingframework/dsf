@@ -114,7 +114,10 @@ public class ReadCommand extends AbstractCommand implements Command
 			readByCondition(connection, resourceTypeName,
 					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
-			throw new WebApplicationException(responseGenerator.badReadRequestUrl(index, requestUrl));
+		{
+			Response response = responseGenerator.badReadRequestUrl(index, requestUrl);
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private void readById(Connection connection, String resourceTypeName, String id)
@@ -200,8 +203,11 @@ public class ReadCommand extends AbstractCommand implements Command
 			List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters();
 
 			if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(handlingType))
-				throw new WebApplicationException(responseGenerator.response(Status.BAD_REQUEST,
-						responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build());
+			{
+				Response response = responseGenerator.response(Status.BAD_REQUEST,
+						responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build();
+				throw new WebApplicationException(response);
+			}
 
 			PartialResult<? extends Resource> result = exceptionHandler
 					.handleSqlException(() -> optDao.get().searchWithTransaction(connection, query));
