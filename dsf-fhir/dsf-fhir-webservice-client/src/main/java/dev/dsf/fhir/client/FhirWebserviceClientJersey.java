@@ -134,8 +134,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	{
 		return switch (returnType)
 		{
-			case REPRESENTATION ->
-			{
+			case REPRESENTATION -> {
 				// TODO remove workaround if HAPI bug fixed
 				Resource resource = referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
 				yield PreferReturn.resource(resource);
