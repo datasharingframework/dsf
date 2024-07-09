@@ -73,7 +73,7 @@
 						<ul class="error-list" th:for="${i.id}" th:if="${resource.status == 'draft'}"></ul>
 					</div>
 					<div class="row-submit" th:if="${resource.status == 'draft'}">
-						<button id="start-process" type="button" name="submit" class="submit">Start Process</button>
+						<button id="start-process" type="submit" name="submit" class="submit">Start Process</button>
 					</div>
 				</fieldset>
 			</form>
