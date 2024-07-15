@@ -31,13 +31,12 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.eclipse.jetty.ee10.servlet.SessionHandler;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.websocket.jakarta.client.JakartaWebSocketShutdownContainer;
-import org.eclipse.jetty.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
@@ -227,8 +226,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				serverCertificateKeyStore, keyStorePassword, false);
 		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
 		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = Arrays.asList(
-				JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
-				JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
+				JakartaWebSocketServletContainerInitializer.class, JerseyServletContainerInitializer.class,
+				SpringServletContainerInitializer.class);
 
 		BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer = (webAppContext, statusPortSupplier) ->
 		{
