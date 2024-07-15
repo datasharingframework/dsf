@@ -85,14 +85,22 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
 		{
 			if (!entry.hasFullUrl() || !entry.getFullUrl().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(
-						responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
+			{
+				Response response = responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl());
+				throw new WebApplicationException(response);
+			}
 			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(
-						responseGenerator.bundleEntryBadResourceId(index, getResourceTypeName(), URL_UUID_PREFIX));
+			{
+				Response response = responseGenerator.bundleEntryBadResourceId(index, getResourceTypeName(),
+						URL_UUID_PREFIX);
+				throw new WebApplicationException(response);
+			}
 			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
-				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
-						entry.getFullUrl(), resource.getIdElement().getValue()));
+			{
+				Response response = responseGenerator.badBundleEntryFullUrlVsResourceId(index, entry.getFullUrl(),
+						resource.getIdElement().getValue());
+				throw new WebApplicationException(response);
+			}
 
 			// add new or existing id to the id translation table
 			addToIdTranslationTable(idTranslationTable, connection);
@@ -100,8 +108,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		// all other request urls
 		else
-			throw new WebApplicationException(
-					responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
+		{
+			Response response = responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl());
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private void addToIdTranslationTable(Map<String, IdType> idTranslationTable, Connection connection)
@@ -177,7 +187,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			return Optional.empty();
 
 		if (ifNoneExist.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExist));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExist);
+			throw new WebApplicationException(response);
+		}
 
 		if (!ifNoneExist.contains("?"))
 			ifNoneExist = '?' + ifNoneExist;
@@ -185,7 +198,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExist).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExist));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExist);
+			throw new WebApplicationException(response);
+		}
 
 		Map<String, List<String>> queryParameters = parameterConverter
 				.urlDecodeQueryParameters(componentes.getQueryParams());
@@ -205,15 +221,20 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
-			throw new WebApplicationException(
-					responseGenerator.badIfNoneExistHeaderValue(ifNoneExist, unsupportedQueryParameters));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue(ifNoneExist, unsupportedQueryParameters);
+			throw new WebApplicationException(response);
+		}
 
 		PartialResult<R> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
 		if (result.getTotal() == 1)
 			return Optional.of(result.getPartialResult().get(0));
 		else if (result.getTotal() > 1)
-			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, ifNoneExist));
+		{
+			Response response = responseGenerator.multipleExists(resourceTypeName, ifNoneExist);
+			throw new WebApplicationException(response);
+		}
 
 		return Optional.empty();
 	}

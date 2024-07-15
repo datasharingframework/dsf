@@ -1,6 +1,8 @@
 package dev.dsf.fhir.spring.config;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -157,7 +159,7 @@ public class PropertiesConfig implements InitializingBean
 	{
 		try
 		{
-			URL baseUrl = new URL(environment.getRequiredProperty("dev.dsf.fhir.server.base.url"));
+			URL baseUrl = new URI(environment.getRequiredProperty("dev.dsf.fhir.server.base.url")).toURL();
 			if (baseUrl.getHost() == null || baseUrl.getHost().isBlank())
 				throw new IllegalStateException("No hostname defined in FHIR server base url");
 
@@ -167,7 +169,7 @@ public class PropertiesConfig implements InitializingBean
 
 			environment.getPropertySources().addFirst(new PropertiesPropertySource("enpoint-properties", properties));
 		}
-		catch (MalformedURLException | IllegalStateException e)
+		catch (MalformedURLException | IllegalStateException | URISyntaxException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -176,7 +178,7 @@ public class PropertiesConfig implements InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		URL url = new URL(serverBaseUrl);
+		URL url = new URI(serverBaseUrl).toURL();
 		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",

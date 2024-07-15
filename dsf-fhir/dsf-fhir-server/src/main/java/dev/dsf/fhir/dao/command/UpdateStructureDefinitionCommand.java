@@ -28,6 +28,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDefinition, StructureDefinitionDao>
 		implements Command
@@ -71,8 +72,8 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 		if (s.getMessages().stream()
 				.anyMatch(m -> IssueSeverity.FATAL.equals(m.getLevel()) || IssueSeverity.ERROR.equals(m.getLevel())))
 		{
-			throw new WebApplicationException(
-					responseGenerator.unableToGenerateSnapshot(resource, index, s.getMessages()));
+			Response response = responseGenerator.unableToGenerateSnapshot(resource, index, s.getMessages());
+			throw new WebApplicationException(response);
 		}
 
 		return s.getSnapshot();

@@ -1,8 +1,7 @@
 package dev.dsf.bpe.ui;
 
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Objects;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -53,18 +52,6 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 	}
 
-	private String getServerBaseUrlPathWithLeadingSlash()
-	{
-		try
-		{
-			return new URL(serverBaseUrl).getPath();
-		}
-		catch (MalformedURLException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
 	@Override
 	public StreamingOutput write(Context context, MainValues mainValues)
 	{
@@ -78,7 +65,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		context.setVariable("username", mainValues.username());
 		context.setVariable("openid", mainValues.openid());
 
-		context.setVariable("basePath", getServerBaseUrlPathWithLeadingSlash());
+		context.setVariable("basePath", URI.create(serverBaseUrl).getPath());
 		context.setVariable("modCssExists", modCssExists);
 		context.setVariable("theme", theme == null ? null : theme.toString());
 

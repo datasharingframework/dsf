@@ -220,8 +220,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			if (e.getResponse() != null && Status.FORBIDDEN.getStatusCode() == e.getResponse().getStatus())
 				throw e;
 
-			throw new WebApplicationException(
-					Response.status(Status.BAD_REQUEST).entity(e.getResponse().getEntity()).build());
+			Response response = Response.status(Status.BAD_REQUEST).entity(e.getResponse().getEntity()).build();
+			throw new WebApplicationException(response);
 		}
 		catch (Exception e)
 		{
