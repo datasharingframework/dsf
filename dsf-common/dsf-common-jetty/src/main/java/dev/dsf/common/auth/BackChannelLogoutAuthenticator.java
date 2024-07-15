@@ -1,18 +1,26 @@
 package dev.dsf.common.auth;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.security.AuthenticationState;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ServerAuthException;
 import org.eclipse.jetty.security.openid.OpenIdAuthenticator;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.Authentication.User;
+import org.eclipse.jetty.server.FormFields;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.Fields;
+import org.eclipse.jetty.util.Fields.Field;
+import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +30,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionAttributeListener;
 import jakarta.servlet.http.HttpSessionBindingEvent;
@@ -55,43 +59,47 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 	}
 
 	@Override
-	public void setConfiguration(AuthConfiguration configuration)
+	public void setConfiguration(Configuration configuration)
 	{
 	}
 
 	@Override
-	public String getAuthMethod()
+	public String getAuthenticationType()
 	{
 		return "BACK_CHANNEL_LOGOUT";
 	}
 
-	public boolean isBackChannelLogoutRequest(ServletRequest request)
+	public boolean isBackChannelLogoutRequest(Request request)
 	{
-		final HttpServletRequest servletRequest = (HttpServletRequest) request;
+		return HttpMethod.POST.is(request.getMethod()) && ssoLogoutPath.equals(Request.getPathInContext(request))
+				&& isContentTypeFormEncoded(request);
+	}
 
-		return HttpMethod.POST.is(servletRequest.getMethod()) && ssoLogoutPath.equals(servletRequest.getPathInfo())
-				&& MimeTypes.Type.FORM_ENCODED.is(servletRequest.getContentType());
+	private boolean isContentTypeFormEncoded(Request request)
+	{
+		String contentType = request.getHeaders().get(HttpHeader.CONTENT_TYPE);
+		if (request.getLength() == 0 || StringUtil.isBlank(contentType))
+			return false;
+
+		String contentTypeWithoutCharset = MimeTypes.getContentTypeWithoutCharset(contentType);
+		MimeTypes.Type type = MimeTypes.CACHE.get(contentTypeWithoutCharset);
+
+		return type == MimeTypes.Type.FORM_ENCODED;
 	}
 
 	@Override
-	public void prepareRequest(ServletRequest request)
-	{
-		// nothing to do
-	}
-
-	@Override
-	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
+	public AuthenticationState validateRequest(Request request, Response response, Callback callback)
 			throws ServerAuthException
 	{
-		final HttpServletResponse servletResponse = (HttpServletResponse) response;
-
 		try
 		{
-			String[] logoutTokens = request.getParameterValues("logout_token");
-			if (logoutTokens == null || logoutTokens.length != 1)
+			Fields formFields = FormFields.from(request).get();
+			Field logoutTokenField = formFields.get("logout_token");
+
+			if (logoutTokenField == null || logoutTokenField.getValues().size() != 1)
 			{
-				servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
-				return Authentication.SEND_FAILURE;
+				Response.writeError(request, response, callback, HttpStatus.FORBIDDEN_403);
+				return AuthenticationState.SEND_FAILURE;
 			}
 
 			Algorithm algorithm = Algorithm.RSA256(openIdConfiguration.getRsaKeyProvider());
@@ -102,12 +110,12 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 
 			try
 			{
-				DecodedJWT jwt = verifier.verify(logoutTokens[0]);
+				DecodedJWT jwt = verifier.verify(logoutTokenField.getValue());
 				if (!jwt.getClaims().containsKey("sub") && !jwt.getClaims().containsKey("sid"))
 				{
 					logger.warn("Logout Token has no sub and no sid claim");
-					servletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
-					return Authentication.SEND_FAILURE;
+					Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
+					return AuthenticationState.SEND_FAILURE;
 				}
 
 				logger.debug("logout token claims: {}", jwt.getClaims());
@@ -126,15 +134,15 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 				if (sessionBySid != null)
 					sessionBySid.invalidate();
 
-				return Authentication.SEND_SUCCESS;
+				return AuthenticationState.SEND_SUCCESS;
 			}
 			catch (JWTVerificationException e)
 			{
-				servletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return Authentication.SEND_FAILURE;
+				Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
+				return AuthenticationState.SEND_FAILURE;
 			}
 		}
-		catch (IOException e)
+		catch (InterruptedException | ExecutionException e)
 		{
 			throw new ServerAuthException(e);
 		}
@@ -251,12 +259,5 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 			if (sid != null)
 				sessionsBySid.put(sid, event.getSession());
 		}
-	}
-
-	@Override
-	public boolean secureResponse(ServletRequest request, ServletResponse response, boolean mandatory,
-			User validatedUser) throws ServerAuthException
-	{
-		return request.isSecure();
 	}
 }

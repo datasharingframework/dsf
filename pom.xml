@@ -23,7 +23,7 @@
 
 		<slf4j.version>2.0.13</slf4j.version>
 		<log4j.version>2.23.1</log4j.version>
-		<jetty.version>11.0.22</jetty.version>
+		<jetty.version>12.0.10</jetty.version>
 		<jersey.version>3.1.7</jersey.version>
 		<tyrus.version>2.1.5</tyrus.version>
 		<spring.version>6.1.10</spring.version>
@@ -189,18 +189,23 @@
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-webapp</artifactId>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-webapp</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-annotations</artifactId>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-annotations</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-jakarta-server</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.ee10.websocket</groupId>
+				<artifactId>jetty-ee10-websocket-jakarta-server</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>

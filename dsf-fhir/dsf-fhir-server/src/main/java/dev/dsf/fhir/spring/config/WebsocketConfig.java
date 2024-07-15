@@ -1,6 +1,6 @@
 package dev.dsf.fhir.spring.config;
 
-import org.eclipse.jetty.websocket.jakarta.server.config.ContainerDefaultConfigurator;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.ContainerDefaultConfigurator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

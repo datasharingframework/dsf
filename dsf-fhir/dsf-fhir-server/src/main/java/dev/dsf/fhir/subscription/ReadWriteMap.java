@@ -1,6 +1,8 @@
 package dev.dsf.fhir.subscription;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,13 +40,14 @@ public class ReadWriteMap<K, V>
 		r.lock();
 		try
 		{
-			return map.keySet();
+			// defensive copy since keySet() returns view of map and may result in ConcurrentModificationException if
+			// the map is modified while iterating over the key set
+			return Collections.unmodifiableSet(new HashSet<>(map.keySet()));
 		}
 		finally
 		{
 			r.unlock();
 		}
-
 	}
 
 	public void replaceAll(Map<K, V> map)

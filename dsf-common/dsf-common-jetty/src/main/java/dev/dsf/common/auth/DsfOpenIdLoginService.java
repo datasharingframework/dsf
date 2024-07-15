@@ -1,15 +1,18 @@
 package dev.dsf.common.auth;
 
+import java.util.function.Function;
+
 import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.security.openid.OpenIdCredentials;
 import org.eclipse.jetty.security.openid.OpenIdLoginService;
-import org.eclipse.jetty.server.UserIdentity;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.common.auth.conf.PractitionerIdentity;
-import jakarta.servlet.ServletRequest;
 
 public class DsfOpenIdLoginService extends OpenIdLoginService
 {
@@ -27,7 +30,8 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 	}
 
 	@Override
-	public UserIdentity login(String identifier, Object credentials, ServletRequest req)
+	public UserIdentity login(String identifier, Object credentials, Request request,
+			Function<Boolean, Session> getOrCreateSession)
 	{
 		OpenIdCredentials openIdCredentials = (OpenIdCredentials) credentials;
 		try
@@ -42,7 +46,7 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			return null;
 		}
 
-		return loginService.login(openIdCredentials.getUserId(), credentials, req);
+		return loginService.login(openIdCredentials.getUserId(), credentials, request, getOrCreateSession);
 	}
 
 	@Override

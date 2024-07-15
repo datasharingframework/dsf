@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Arrays;
@@ -17,31 +16,32 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
+import org.eclipse.jetty.ee10.annotations.AnnotationConfiguration;
+import org.eclipse.jetty.ee10.webapp.Configuration;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.webapp.Configuration;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 public final class JettyServer
 {
@@ -286,17 +286,22 @@ public final class JettyServer
 	private WebAppContext webAppContext(String serverMavenModuleName, String contextPath,
 			List<Class<? extends ServletContainerInitializer>> initializers, Map<String, String> initParameters)
 	{
-		String[] classPath = classPath();
-
 		WebAppContext context = new WebAppContext();
+
 		initParameters.forEach(context::setInitParameter);
-		context.getServerClassMatcher().exclude(initializers.stream().map(Class::getName).toArray(String[]::new));
+
+		String[] classPath = classPath();
+		context.getHiddenClassMatcher().exclude(initializers.stream().map(Class::getName).toArray(String[]::new));
+
 		context.setContextPath(contextPath);
 		context.setLogUrlOnStart(true);
 		context.setThrowUnavailableOnStartupException(true);
 		context.setConfigurations(new Configuration[] { new AnnotationConfiguration() });
+
+		PathResourceFactory resourceFactory = new PathResourceFactory();
 		context.getMetaData().setWebInfClassesResources(Stream.of(classPath)
-				.filter(e -> e.contains(serverMavenModuleName)).map(Paths::get).map(Resource::newResource).toList());
+				.filter(e -> e.contains(serverMavenModuleName)).map(resourceFactory::newResource).toList());
+
 		context.setErrorHandler(statusCodeOnlyErrorHandler());
 
 		logger.debug("Java classpath: {}", Arrays.toString(classPath));
@@ -326,10 +331,11 @@ public final class JettyServer
 		return new ErrorHandler()
 		{
 			@Override
-			protected void generateAcceptableResponse(Request baseRequest, HttpServletRequest request,
-					HttpServletResponse response, int code, String message) throws IOException
+			protected void generateResponse(Request request, Response response, int code, String message,
+					Throwable cause, Callback callback) throws IOException
 			{
 				logger.info("Error {}: {}", code, message);
+				callback.succeeded();
 			}
 		};
 	}

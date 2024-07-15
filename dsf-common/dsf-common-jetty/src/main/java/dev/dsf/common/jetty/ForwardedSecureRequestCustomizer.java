@@ -7,8 +7,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
 
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.http.HttpFields.Mutable;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
@@ -34,17 +33,19 @@ public class ForwardedSecureRequestCustomizer implements Customizer
 	}
 
 	@Override
-	public void customize(Connector connector, HttpConfiguration channelConfig, Request request)
+	public Request customize(Request request, Mutable responseHeaders)
 	{
 		X509Certificate clientCert = getClientCert(request);
 
 		if (clientCert != null)
 			request.setAttribute("jakarta.servlet.request.X509Certificate", new X509Certificate[] { clientCert });
+
+		return request;
 	}
 
 	private X509Certificate getClientCert(Request request)
 	{
-		String clientCertString = request.getHeader(clientCertHeaderName);
+		String clientCertString = request.getHeaders().get(clientCertHeaderName);
 
 		if (clientCertString == null)
 		{
