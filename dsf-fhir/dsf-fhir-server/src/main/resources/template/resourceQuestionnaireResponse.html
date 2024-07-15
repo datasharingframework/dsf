@@ -68,7 +68,7 @@
 						<ul class="error-list" th:for="${i.id}" th:if="${resource.status == 'in-progress'}"></ul>
 					</div>
 					<div class="row-submit" th:if="${resource.status == 'in-progress'}">
-						<button id="complete-questionnaire-response" type="submit" name="submit" class="submit">Submit</button>
+						<button id="complete-questionnaire-response" type="submit" name="submit" class="submit" formnovalidate>Submit</button>
 					</div>
 				</fieldset>
 			</form>
