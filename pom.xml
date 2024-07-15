@@ -23,14 +23,14 @@
 
 		<slf4j.version>2.0.13</slf4j.version>
 		<log4j.version>2.23.1</log4j.version>
-		<jetty.version>11.0.20</jetty.version>
-		<jersey.version>3.1.6</jersey.version>
+		<jetty.version>11.0.22</jetty.version>
+		<jersey.version>3.1.7</jersey.version>
 		<tyrus.version>2.1.5</tyrus.version>
-		<spring.version>6.1.6</spring.version>
-		<jackson.version>2.17.0</jackson.version>
+		<spring.version>6.1.10</spring.version>
+		<jackson.version>2.17.2</jackson.version>
 		<camunda.version>7.21.0</camunda.version>
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
-		<bouncycastle.version>1.78</bouncycastle.version>
+		<bouncycastle.version>1.78.1</bouncycastle.version>
 	</properties>
 
 	<name>DSF</name>
@@ -134,7 +134,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>5.11.0</version>
+				<version>5.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -156,7 +156,7 @@
 			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
-				<version>4.27.0</version>
+				<version>4.28.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
@@ -392,12 +392,12 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>1.26.1</version>
+				<version>1.26.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.11.0</version>
+				<version>1.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -412,7 +412,7 @@
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.10.1</version>
+				<version>2.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
@@ -428,7 +428,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.16.1</version>
+				<version>1.17.0</version>
 			</dependency>
 
 			<dependency>
@@ -463,17 +463,17 @@
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-core</artifactId>
-				<version>3.9.6</version>
+				<version>3.9.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-plugin-api</artifactId>
-				<version>3.9.6</version>
+				<version>3.9.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
-				<version>3.12.0</version>
+				<version>3.13.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -489,7 +489,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.4.2</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -511,22 +511,22 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.6.3</version>
+					<version>3.7.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.2.5</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.2.5</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.5.2</version>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -541,33 +541,33 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
-					<version>3.2.3</version>
+					<version>3.2.4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
-					<!-- 3.1.0 not working, https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
+					<!-- 3.3.0 not working, https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
 					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.3.2</version>
+					<version>3.4.0</version>
 				</plugin>
 				<plugin>
 					<groupId>net.revelc.code.formatter</groupId>
 					<artifactId>formatter-maven-plugin</artifactId>
-					<version>2.23.0</version>
+					<version>2.24.1</version>
 				</plugin>
 				<plugin>
 					<groupId>net.revelc.code</groupId>
 					<artifactId>impsort-maven-plugin</artifactId>
-					<version>1.10.0</version>
+					<version>1.11.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.6.1</version>
+					<version>3.7.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -577,7 +577,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.12.0</version>
+					<version>3.13.1</version>
 				</plugin>
 				<plugin>
 					<groupId>dev.dsf</groupId>
@@ -587,7 +587,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.4.1</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -597,17 +597,17 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.8.4.0</version>
+					<version>4.8.6.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
-					<version>3.5.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-pmd-plugin</artifactId>
-					<version>3.21.2</version>
+					<version>3.23.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -665,9 +665,6 @@
 				<configuration>
 					<groups>java.,javax.,org.,com.</groups>
 					<staticGroups>java,*</staticGroups>
-					<!-- Workaround to make impsort work with Java 21 code -->
-					<compliance>18</compliance>
-					<ignoreParseErrorsBelowImports>true</ignoreParseErrorsBelowImports>
 				</configuration>
 			</plugin>
 			<plugin>

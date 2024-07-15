@@ -86,7 +86,10 @@ window.addEventListener('DOMContentLoaded', () => {
 		})
 
 		// complete questionnaire response
-		document.querySelector('form > fieldset#form-fieldset > div.row-submit > button#complete-questionnaire-response')?.addEventListener('click', () => completeQuestionnaireResponse())
+		document.querySelector('form')?.addEventListener('submit', event => {
+			completeQuestionnaireResponse()
+			event.preventDefault()
+		})
 	}
 
 	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2] && (resourceType[3] === undefined || resourceType[4])) {
@@ -120,7 +123,10 @@ window.addEventListener('DOMContentLoaded', () => {
 		})
 
 		// start process button
-		document.querySelector('form > fieldset#form-fieldset > div.row-submit > button#start-process')?.addEventListener('click', () => startProcess())
+		document.querySelector('form')?.addEventListener('submit', event => {
+			startProcess()
+			event.preventDefault()
+		})
 	}
 })
 
