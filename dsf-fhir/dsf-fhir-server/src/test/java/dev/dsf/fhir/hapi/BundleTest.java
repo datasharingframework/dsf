@@ -2,9 +2,11 @@ package dev.dsf.fhir.hapi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -14,6 +16,7 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +28,11 @@ public class BundleTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(BundleTest.class);
 
+	private static FhirContext fhirContext = FhirContext.forR4();
+
 	private IParser newXmlParser()
 	{
-		IParser p = FhirContext.forR4().newXmlParser();
+		IParser p = fhirContext.newXmlParser();
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 		return p;
@@ -35,7 +40,7 @@ public class BundleTest
 
 	private IParser newJsonParser()
 	{
-		IParser p = FhirContext.forR4().newJsonParser();
+		IParser p = fhirContext.newJsonParser();
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 		return p;
@@ -94,14 +99,8 @@ public class BundleTest
 		assertTrue(bundle2.getEntry().get(0).getResource() instanceof Organization);
 		assertNotNull(((Organization) bundle2.getEntry().get(0).getResource()).getEndpointFirstRep().getResource());
 
-		// FIXME workaround hapi parser bug
-		((Organization) bundle2.getEntry().get(0).getResource()).getEndpointFirstRep().setResource(null);
-
 		assertTrue(bundle2.getEntry().get(1).getResource() instanceof Endpoint);
 		assertNotNull(((Endpoint) bundle2.getEntry().get(1).getResource()).getManagingOrganization().getResource());
-
-		// FIXME workaround hapi parser bug
-		((Endpoint) bundle2.getEntry().get(1).getResource()).getManagingOrganization().setResource(null);
 
 		String bundle2String = parser.encodeResourceToString(bundle2);
 		logger.debug("Bundle2: {}", bundle2String);
@@ -123,10 +122,34 @@ public class BundleTest
 
 		Bundle bRead = newXmlParser().parseResource(Bundle.class, bundleTxt);
 		assertEquals("123", bRead.getMeta().getVersionId());
-		assertNull(bRead.getIdElement().getVersionIdPart());
-
-		// FIXME workaround hapi parser bug
-		bRead.setIdElement(bRead.getIdElement().withVersion(bRead.getMeta().getVersionId()));
 		assertEquals("123", bRead.getIdElement().getVersionIdPart());
+	}
+
+	@Test
+	public void testParseBundleCheckNoContainedResources() throws Exception
+	{
+		try (InputStream in = Files.newInputStream(Paths.get("src/test/resources/bundle.xml")))
+		{
+			Bundle bundle = newXmlParser().parseResource(Bundle.class, in);
+			assertNotNull(bundle);
+			assertNotNull(bundle.getEntry());
+			assertEquals(8, bundle.getEntry().size());
+
+			assertNotNull(bundle.getEntry().get(0));
+			assertNotNull(bundle.getEntry().get(0).getResource());
+			assertTrue(bundle.getEntry().get(0).getResource() instanceof Organization);
+
+			Organization org = (Organization) bundle.getEntry().get(0).getResource();
+			assertNotNull(org.getEndpoint());
+			assertEquals(1, org.getEndpoint().size());
+
+			Reference eRef = org.getEndpoint().get(0);
+			assertNotNull(eRef);
+
+			// FIXME HAPI FHIR parser adds contained resources to bundle references, getResource() should return null
+			assertNotNull(
+					"HAPI FHIR parser does not add contained resources to bunlde references anymore, remove workaounds using ReferenceCleaner",
+					eRef.getResource());
+		}
 	}
 }

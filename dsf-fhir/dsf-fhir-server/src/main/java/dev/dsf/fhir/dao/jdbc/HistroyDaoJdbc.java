@@ -16,8 +16,6 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.InitializingBean;
@@ -184,21 +182,10 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 		if (json == null)
 			return null;
 
-		Resource resource;
 		if (resourceType != null)
-			resource = getJsonParser().parseResource(resourceType, json);
+			return getJsonParser().parseResource(resourceType, json);
 		else
-			resource = (Resource) getJsonParser().parseResource(json);
-
-		// TODO Bugfix HAPI is not setting version information from bundle.id while parsing non DomainResource
-		if (!(resource instanceof DomainResource))
-		{
-			IdType fixedId = new IdType(resource.getResourceType().name(), resource.getIdElement().getIdPart(),
-					resource.getMeta().getVersionId());
-			resource.setIdElement(fixedId);
-		}
-
-		return resource;
+			return (Resource) getJsonParser().parseResource(json);
 	}
 
 	private String createCountSql(boolean forId, boolean forResource, List<HistoryIdentityFilter> filter,

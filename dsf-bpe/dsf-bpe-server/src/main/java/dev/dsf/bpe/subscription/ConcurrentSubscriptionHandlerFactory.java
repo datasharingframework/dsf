@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.FhirWebserviceClient;
 
 public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 		implements SubscriptionHandlerFactory<R>, InitializingBean

@@ -21,6 +21,7 @@ import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerVali
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
@@ -205,6 +206,17 @@ public class ValidationSupportRule extends ExternalResource
 			read = replaceVersionAndDate(read, version, date);
 
 			return context.newXmlParser().parseResource(ActivityDefinition.class, read);
+		}
+	}
+
+	public Task readTask(Path file) throws IOException
+	{
+		try (InputStream in = Files.newInputStream(file))
+		{
+			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
+			read = replaceVersionAndDate(read, version, date);
+
+			return context.newXmlParser().parseResource(Task.class, read);
 		}
 	}
 }

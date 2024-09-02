@@ -219,93 +219,77 @@ public class ResourceTask extends AbstractResource<Task>
 
 	private String getHtmlInputType(Type typedValue)
 	{
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof BooleanType)
-			return "boolean";
-		else if (typedValue instanceof DecimalType)
-			return "number";
-		else if (typedValue instanceof IntegerType)
-			return "number";
-		else if (typedValue instanceof DateType)
-			return "date";
-		else if (typedValue instanceof DateTimeType)
-			return "datetime-local";
-		else if (typedValue instanceof TimeType)
-			return "time";
-		else if (typedValue instanceof InstantType)
-			return "datetime-local";
-		else if (typedValue instanceof StringType)
-			return "text";
-		else if (typedValue instanceof UriType)
-			return "url";
-		else if (typedValue instanceof Coding)
-			return "coding";
-		else if (typedValue instanceof Identifier)
-			return "identifier";
-		else if (typedValue instanceof Reference r && r.hasReferenceElement())
-			return "url";
-		else if (typedValue instanceof Reference r && r.hasIdentifier())
-			return "identifier";
-		else
-			return null;
+		return switch (typedValue)
+		{
+			case BooleanType b -> "boolean";
+			case DecimalType d -> "number";
+			case IntegerType i -> "number";
+			case DateType d -> "date";
+			case DateTimeType dt -> "datetime-local";
+			case TimeType t -> "time";
+			case InstantType i -> "datetime-local";
+			case StringType s -> "text";
+			case UriType u -> "url";
+			case Coding c -> "coding";
+			case Identifier i -> "identifier";
+			case Reference r when r.hasReferenceElement() -> "url";
+			case Reference r when r.hasIdentifier() -> "identifier";
+
+			default -> null;
+		};
 	}
 
 	private String getFhirType(Type typedValue)
 	{
 		String type = typedValue.getClass().getAnnotation(DatatypeDef.class).name();
 
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof Reference r && r.hasReferenceElement())
-			return type + ".reference";
-		else if (typedValue instanceof Reference r && r.hasIdentifier())
-			return type + ".identifier";
-		else
-			return type;
+		return switch (typedValue)
+		{
+			case Reference r when r.hasReferenceElement() -> type + ".reference";
+			case Reference r when r.hasIdentifier() -> type + ".identifier";
+
+			default -> type;
+		};
 	}
 
 	private String getStringValue(Type typedValue)
 	{
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof DecimalType d)
-			return d.hasValue() ? String.valueOf(d.getValue()) : null;
-		else if (typedValue instanceof IntegerType i)
-			return i.hasValue() ? String.valueOf(i.getValue()) : null;
-		else if (typedValue instanceof DateType d)
-			return d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null;
-		else if (typedValue instanceof DateTimeType dt)
+		return switch (typedValue)
+		{
+			case DecimalType d when d.hasValue() -> String.valueOf(d.getValue());
+			case IntegerType i when i.hasValue() -> String.valueOf(i.getValue());
+			case DateType d when d.hasValue() -> format(d.getValue(), DATE_FORMAT);
+
 			// TODO format datetime based on precision
-			return dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null;
-		else if (typedValue instanceof TimeType t)
-			return t.hasValue() ? t.getValue() : null;
-		else if (typedValue instanceof InstantType i)
-			return i.hasValue() ? format(i.getValue(), DATE_TIME_FORMAT) : null;
-		else if (typedValue instanceof StringType s)
-			return s.hasValue() ? s.getValue() : null;
-		else if (typedValue instanceof UriType u)
-			return u.hasValue() ? u.getValue() : null;
-		else if (typedValue instanceof Reference r && r.hasReferenceElement())
-			return r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null;
-		else
-			return null;
+			case DateTimeType dt when dt.hasValue() -> format(dt.getValue(), DATE_TIME_FORMAT);
+
+			case TimeType t when t.hasValue() -> t.getValue();
+			case InstantType i when i.hasValue() -> format(i.getValue(), DATE_TIME_FORMAT);
+			case StringType s when s.hasValue() -> s.getValue();
+			case UriType u when u.hasValue() -> u.getValue();
+			case Reference r when r.hasReferenceElement() && r.getReferenceElement().hasValue() ->
+				r.getReferenceElement().getValue();
+
+			default -> null;
+		};
 	}
 
 	private ElementSystemValue getSystemValueValue(Type typedValue)
 	{
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof Coding c)
-			return ElementSystemValue.from(c);
-		else if (typedValue instanceof Identifier i)
-			return ElementSystemValue.from(i);
-		else if (typedValue instanceof Reference r && r.hasIdentifier())
-			return ElementSystemValue.from(r.getIdentifier());
-		else
-			return null;
+		return switch (typedValue)
+		{
+			case Coding c -> ElementSystemValue.from(c);
+			case Identifier i -> ElementSystemValue.from(i);
+			case Reference r when r.hasIdentifier() -> ElementSystemValue.from(r.getIdentifier());
+
+			default -> null;
+		};
 	}
 
 	private Boolean getBooleanValue(Type typedValue)
 	{
-		if (typedValue instanceof BooleanType b)
-			return b.hasValue() ? b.getValue() : null;
+		if (typedValue instanceof BooleanType b && b.hasValue())
+			return b.getValue();
 		else
 			return null;
 	}

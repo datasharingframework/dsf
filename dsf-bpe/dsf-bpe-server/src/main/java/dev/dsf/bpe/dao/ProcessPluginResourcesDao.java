@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.plugin.ProcessesResource;
 import dev.dsf.bpe.plugin.ResourceInfo;
 

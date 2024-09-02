@@ -18,17 +18,14 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.camunda.DelegateProvider;
 import dev.dsf.bpe.camunda.DelegateProviderImpl;
 import dev.dsf.bpe.camunda.FallbackSerializerFactory;
 import dev.dsf.bpe.camunda.FallbackSerializerFactoryImpl;
 import dev.dsf.bpe.camunda.MultiVersionSpringProcessEngineConfiguration;
-import dev.dsf.bpe.listener.ContinueListener;
 import dev.dsf.bpe.listener.DebugLoggingBpmnParseListener;
 import dev.dsf.bpe.listener.DefaultBpmnParseListener;
-import dev.dsf.bpe.listener.EndListener;
-import dev.dsf.bpe.listener.StartListener;
-import dev.dsf.bpe.variables.VariablesImpl;
 
 @Configuration
 public class CamundaConfig
@@ -37,13 +34,10 @@ public class CamundaConfig
 	private PropertiesConfig propertiesConfig;
 
 	@Autowired
-	private FhirClientConfig fhirClientConfig;
-
-	@Autowired
 	private ApplicationContext applicationContext;
 
 	@Autowired
-	private SerializerConfig serializerConfig;
+	private List<ProcessPluginFactory> processPluginFactories;
 
 	@Bean
 	public PlatformTransactionManager transactionManager()
@@ -77,28 +71,10 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public StartListener startListener()
-	{
-		return new StartListener(propertiesConfig.getFhirServerBaseUrl(), VariablesImpl::new);
-	}
-
-	@Bean
-	public EndListener endListener()
-	{
-		return new EndListener(propertiesConfig.getFhirServerBaseUrl(), VariablesImpl::new,
-				fhirClientConfig.clientProvider().getLocalWebserviceClient());
-	}
-
-	@Bean
-	public ContinueListener continueListener()
-	{
-		return new ContinueListener(propertiesConfig.getFhirServerBaseUrl(), VariablesImpl::new);
-	}
-
-	@Bean
 	public DefaultBpmnParseListener defaultBpmnParseListener()
 	{
-		return new DefaultBpmnParseListener(startListener(), endListener(), continueListener());
+		return new DefaultBpmnParseListener(
+				processPluginFactories.stream().map(ProcessPluginFactory::getListenerFactory));
 	}
 
 	@Bean
@@ -120,8 +96,7 @@ public class CamundaConfig
 		c.setJobExecutorActivate(false);
 		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener(), debugLoggingBpmnParseListener()));
 		c.setCustomPreVariableSerializers(
-				List.of(serializerConfig.targetSerializer(), serializerConfig.targetsSerializer(),
-						serializerConfig.fhirResourceSerializer(), serializerConfig.fhirResourcesListSerializer()));
+				processPluginFactories.stream().flatMap(ProcessPluginFactory::getSerializer).toList());
 		c.setFallbackSerializerFactory(fallbackSerializerFactory());
 
 		// see also MultiVersionSpringProcessEngineConfiguration
@@ -148,7 +123,7 @@ public class CamundaConfig
 	@Bean
 	public DelegateProvider delegateProvider()
 	{
-		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext);
+		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext, processPluginFactories);
 	}
 
 	@Bean

@@ -123,10 +123,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -137,14 +139,17 @@
 					<groupId>commons-logging</groupId>
 				</exclusion>
 			</exclusions>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 
 		<dependency>
@@ -169,6 +174,11 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>crypto-utils</artifactId>
 		</dependency>
 
 		<dependency>

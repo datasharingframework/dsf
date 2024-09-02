@@ -284,20 +284,21 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	protected static IParser newXmlParser()
 	{
-		IParser parser = fhirContext.newXmlParser();
-		parser.setStripVersionsFromReferences(false);
-		parser.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		parser.setPrettyPrint(true);
-		return parser;
+		return newParser(fhirContext::newXmlParser);
 	}
 
 	protected static IParser newJsonParser()
 	{
-		IParser parser = fhirContext.newJsonParser();
-		parser.setStripVersionsFromReferences(false);
-		parser.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		parser.setPrettyPrint(true);
-		return parser;
+		return newParser(fhirContext::newJsonParser);
+	}
+
+	private static IParser newParser(Supplier<IParser> supplier)
+	{
+		IParser p = supplier.get();
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		p.setPrettyPrint(true);
+		return p;
 	}
 
 	private static void createTestBundle(ClientCertificate clientCertificate,
@@ -319,9 +320,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		externalThumbprintExtension
 				.setValue(new StringType(externalClientCertificate.getCertificateSha512ThumbprintHex()));
-
-		// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
-		new ReferenceCleanerImpl(new ReferenceExtractorImpl()).cleanReferenceResourcesIfBundle(testBundle);
 
 		writeBundle(FHIR_BUNDLE_FILE, testBundle);
 	}

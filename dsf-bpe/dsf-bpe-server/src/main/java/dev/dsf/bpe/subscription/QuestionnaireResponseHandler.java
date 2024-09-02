@@ -6,33 +6,41 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.TaskService;
+import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.engine.variable.value.PrimitiveValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.v1.constants.CodeSystems.BpmnUserTask;
-import dev.dsf.bpe.variables.FhirResourceValues;
+import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.api.Constants;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.plugin.ProcessPluginManager;
 
-public class QuestionnaireResponseHandler implements ResourceHandler<QuestionnaireResponse>, InitializingBean
+public class QuestionnaireResponseHandler extends AbstractResourceHandler
+		implements ResourceHandler<QuestionnaireResponse>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseHandler.class);
 
-	public static final String QUESTIONNAIRE_RESPONSE_VARIABLE = QuestionnaireResponseHandler.class.getName()
-			+ ".questionnaireResponse";
-
 	private final TaskService userTaskService;
 
-	public QuestionnaireResponseHandler(TaskService userTaskService)
+	public QuestionnaireResponseHandler(RepositoryService repositoryService, ProcessPluginManager processPluginManager,
+			FhirContext fhirContext, TaskService userTaskService)
 	{
+		super(repositoryService, processPluginManager, fhirContext);
+
 		this.userTaskService = userTaskService;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(userTaskService, "userTaskService");
 	}
 
@@ -47,26 +55,36 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 			String questionnaire = questionnaireResponse.getQuestionnaire();
 			String user = questionnaireResponse.getAuthor().getIdentifier().getValue();
 			String userType = questionnaireResponse.getAuthor().getType();
-			String businessKey = getStringValueFromItems(items, BpmnUserTask.Codes.BUSINESS_KEY,
+			String businessKey = getStringValueFromItems(items, Constants.ITEM_LINK_ID_BUSINESS_KEY,
 					questionnaireResponseId).orElse("?");
 
-			Optional<String> userTaskIdOpt = getStringValueFromItems(items, BpmnUserTask.Codes.USER_TASK_ID,
+			Optional<String> userTaskIdOpt = getStringValueFromItems(items, Constants.ITEM_LINK_ID_USER_TASK_ID,
 					questionnaireResponseId);
 
 			userTaskIdOpt.ifPresentOrElse(userTaskId ->
 			{
+				String processDefinitionId = userTaskService.createTaskQuery().taskId(userTaskId).singleResult()
+						.getProcessDefinitionId();
+				ProcessDefinition processDefinition = repositoryService.getProcessDefinition(processDefinitionId);
+
+				Optional<ProcessPlugin> processPlugin = getProcessPlugin(processDefinition);
+
+				PrimitiveValue<?> fhirQuestionnaireResponseVariable = processPlugin.get()
+						.createFhirQuestionnaireResponseVariable(
+								newJsonParser().encodeResourceToString(questionnaireResponse));
+				Map<String, Object> variables = Map.of(Constants.QUESTIONNAIRE_RESPONSE_VARIABLE,
+						fhirQuestionnaireResponseVariable);
+
 				logger.info(
 						"QuestionnaireResponse '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
 						questionnaireResponseId, questionnaire, userTaskId, businessKey, user + "|" + userType);
 
-				Map<String, Object> variables = Map.of(QUESTIONNAIRE_RESPONSE_VARIABLE,
-						FhirResourceValues.create(questionnaireResponse));
 				userTaskService.complete(userTaskId, variables);
 			}, () ->
 			{
 				logger.warn(
 						"QuestionnaireResponse '{}' for Questionnaire '{}' has no answer with item.linkId '{}' [businessKey: {}, user: {}], ignoring QuestionnaireResponse",
-						questionnaireResponseId, questionnaire, BpmnUserTask.Codes.USER_TASK_ID, businessKey,
+						questionnaireResponseId, questionnaire, Constants.ITEM_LINK_ID_USER_TASK_ID, businessKey,
 						user + "|" + userType);
 			});
 		}

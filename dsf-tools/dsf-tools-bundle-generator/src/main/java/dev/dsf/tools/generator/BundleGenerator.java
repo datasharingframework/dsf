@@ -229,22 +229,14 @@ public class BundleGenerator
 
 	private Function<BundleEntryComponent, String> getSortCriteria3()
 	{
-		return (BundleEntryComponent e) ->
+		return (BundleEntryComponent e) -> switch (e.getResource())
 		{
-			if (e.getResource() == null)
-				return "";
-			else if (e.getResource() instanceof CodeSystem c)
-				return c.getUrl() + "|" + c.getVersion();
-			else if (e.getResource() instanceof NamingSystem n)
-				return n.getName();
-			else if (e.getResource() instanceof ValueSet v)
-				return v.getUrl() + "|" + v.getVersion();
-			else if (e.getResource() instanceof StructureDefinition s)
-				return s.getUrl() + "|" + s.getVersion();
-			else if (e.getResource() instanceof Subscription s)
-				return s.getReason();
-			else
-				return "";
+			case CodeSystem c -> c.getUrl() + "|" + c.getVersion();
+			case NamingSystem n -> n.getName();
+			case ValueSet v -> v.getUrl() + "|" + v.getVersion();
+			case StructureDefinition s -> s.getUrl() + "|" + s.getVersion();
+			case Subscription s -> s.getReason();
+			default -> "";
 		};
 	}
 

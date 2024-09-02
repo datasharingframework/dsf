@@ -7,51 +7,21 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.plugin.BpmnProcessStateChangeService;
 import dev.dsf.bpe.plugin.BpmnProcessStateChangeServiceImpl;
 import dev.dsf.bpe.plugin.FhirResourceHandler;
 import dev.dsf.bpe.plugin.FhirResourceHandlerImpl;
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.plugin.ProcessPluginLoader;
 import dev.dsf.bpe.plugin.ProcessPluginLoaderImpl;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 import dev.dsf.bpe.plugin.ProcessPluginManagerImpl;
-import dev.dsf.bpe.v1.ProcessPluginApi;
-import dev.dsf.bpe.v1.ProcessPluginApiImpl;
-import dev.dsf.bpe.v1.ProcessPluginDefinition;
-import dev.dsf.bpe.v1.config.ProxyConfig;
-import dev.dsf.bpe.v1.config.ProxyConfigDelegate;
-import dev.dsf.bpe.v1.plugin.ProcessPluginFactoryImpl;
-import dev.dsf.bpe.v1.service.EndpointProvider;
-import dev.dsf.bpe.v1.service.EndpointProviderImpl;
-import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
-import dev.dsf.bpe.v1.service.FhirWebserviceClientProviderImpl;
-import dev.dsf.bpe.v1.service.MailService;
-import dev.dsf.bpe.v1.service.MailServiceImpl;
-import dev.dsf.bpe.v1.service.OrganizationProvider;
-import dev.dsf.bpe.v1.service.OrganizationProviderImpl;
-import dev.dsf.bpe.v1.service.QuestionnaireResponseHelper;
-import dev.dsf.bpe.v1.service.QuestionnaireResponseHelperImpl;
-import dev.dsf.bpe.v1.service.TaskHelper;
-import dev.dsf.bpe.v1.service.TaskHelperImpl;
-import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
-import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
-import dev.dsf.fhir.authorization.read.ReadAccessHelper;
-import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 
 @Configuration
 public class PluginConfig
 {
-	@Autowired
-	private Environment environment;
-
 	@Autowired
 	private PropertiesConfig propertiesConfig;
 
@@ -65,45 +35,10 @@ public class PluginConfig
 	private DaoConfig daoConfig;
 
 	@Autowired
-	private MailConfig mailConfig;
-
-	@Autowired
-	private SerializerConfig serializerConfig;
-
-	@Autowired
 	private CamundaConfig camundaConfig;
 
-	@Bean
-	public ProcessPluginApi processPluginApiV1()
-	{
-		ProxyConfig proxyConfig = new ProxyConfigDelegate(propertiesConfig.proxyConfig());
-
-		FhirWebserviceClientProvider clientProvider = new FhirWebserviceClientProviderImpl(
-				fhirClientConfig.clientProvider());
-		EndpointProvider endpointProvider = new EndpointProviderImpl(clientProvider,
-				propertiesConfig.getFhirServerBaseUrl());
-		FhirContext fhirContext = fhirConfig.fhirContext();
-		MailService mailService = new MailServiceImpl(mailConfig.mailService());
-		ObjectMapper objectMapper = serializerConfig.objectMapper();
-		OrganizationProvider organizationProvider = new OrganizationProviderImpl(clientProvider,
-				propertiesConfig.getFhirServerBaseUrl());
-
-		ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
-		QuestionnaireResponseHelper questionnaireResponseHelper = new QuestionnaireResponseHelperImpl(
-				propertiesConfig.getFhirServerBaseUrl());
-		ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
-		TaskHelper taskHelper = new TaskHelperImpl(propertiesConfig.getFhirServerBaseUrl());
-
-		return new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext, clientProvider, mailService,
-				objectMapper, organizationProvider, processAuthorizationHelper, questionnaireResponseHelper,
-				readAccessHelper, taskHelper);
-	}
-
-	@Bean
-	public ProcessPluginFactory<ProcessPluginDefinition> processPluginFactoryV1()
-	{
-		return new ProcessPluginFactoryImpl(processPluginApiV1());
-	}
+	@Autowired
+	private List<ProcessPluginFactory> processPluginFactories;
 
 	@Bean
 	public ProcessPluginLoader processPluginLoader()
@@ -114,8 +49,7 @@ public class PluginConfig
 			throw new RuntimeException(
 					"Process plug in directory '" + processPluginDirectoryPath.toString() + "' not readable");
 
-		return new ProcessPluginLoaderImpl(List.of(processPluginFactoryV1()), processPluginDirectoryPath,
-				fhirConfig.fhirContext(), (ConfigurableEnvironment) environment);
+		return new ProcessPluginLoaderImpl(processPluginFactories, processPluginDirectoryPath);
 	}
 
 	@Bean

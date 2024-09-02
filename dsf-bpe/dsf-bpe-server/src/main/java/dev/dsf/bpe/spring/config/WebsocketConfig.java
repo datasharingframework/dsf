@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.subscription.ConcurrentSubscriptionHandlerFactory;
-import dev.dsf.bpe.subscription.FhirConnector;
-import dev.dsf.bpe.subscription.FhirConnectorImpl;
+import dev.dsf.bpe.subscription.LocalFhirConnector;
+import dev.dsf.bpe.subscription.LocalFhirConnectorImpl;
 import dev.dsf.bpe.subscription.QuestionnaireResponseHandler;
 import dev.dsf.bpe.subscription.QuestionnaireResponseSubscriptionHandlerFactory;
 import dev.dsf.bpe.subscription.ResourceHandler;
@@ -34,11 +34,15 @@ public class WebsocketConfig
 	@Autowired
 	private FhirClientConfig fhirClientConfig;
 
+	@Autowired
+	private PluginConfig pluginConfig;
+
 	@Bean
 	public ResourceHandler<Task> taskHandler()
 	{
-		return new TaskHandler(camundaConfig.processEngine().getRuntimeService(),
-				camundaConfig.processEngine().getRepositoryService(),
+		return new TaskHandler(camundaConfig.processEngine().getRepositoryService(),
+				pluginConfig.processPluginManager(), fhirConfig.fhirContext(),
+				camundaConfig.processEngine().getRuntimeService(),
 				fhirClientConfig.clientProvider().getLocalWebserviceClient());
 	}
 
@@ -50,17 +54,20 @@ public class WebsocketConfig
 	}
 
 	@Bean
-	public FhirConnector fhirConnectorTask()
+	public LocalFhirConnector fhirConnectorTask()
 	{
-		return new FhirConnectorImpl<>(Task.class, fhirClientConfig.clientProvider(), taskSubscriptionHandlerFactory(),
-				fhirConfig.fhirContext(), propertiesConfig.getTaskSubscriptionSearchParameter(),
-				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());
+		return new LocalFhirConnectorImpl<>(Task.class, fhirClientConfig.clientProvider(),
+				taskSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
+				propertiesConfig.getTaskSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
+				propertiesConfig.getWebsocketMaxRetries());
 	}
 
 	@Bean
 	public ResourceHandler<QuestionnaireResponse> questionnaireResponseHandler()
 	{
-		return new QuestionnaireResponseHandler(camundaConfig.processEngine().getTaskService());
+		return new QuestionnaireResponseHandler(camundaConfig.processEngine().getRepositoryService(),
+				pluginConfig.processPluginManager(), fhirConfig.fhirContext(),
+				camundaConfig.processEngine().getTaskService());
 	}
 
 	@Bean
@@ -72,9 +79,9 @@ public class WebsocketConfig
 	}
 
 	@Bean
-	public FhirConnector fhirConnectorQuestionnaireResponse()
+	public LocalFhirConnector fhirConnectorQuestionnaireResponse()
 	{
-		return new FhirConnectorImpl<>(QuestionnaireResponse.class, fhirClientConfig.clientProvider(),
+		return new LocalFhirConnectorImpl<>(QuestionnaireResponse.class, fhirClientConfig.clientProvider(),
 				questionnaireResponseSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
 				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());

@@ -5,8 +5,8 @@ import java.util.Objects;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.bpe.client.FhirWebserviceClient;
 import dev.dsf.bpe.dao.LastEventTimeDao;
-import dev.dsf.fhir.client.FhirWebserviceClient;
 
 public class TaskSubscriptionHandlerFactory implements SubscriptionHandlerFactory<Task>, InitializingBean
 {

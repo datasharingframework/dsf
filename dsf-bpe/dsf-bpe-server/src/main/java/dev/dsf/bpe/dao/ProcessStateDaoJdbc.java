@@ -11,7 +11,7 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.plugin.ProcessState;
 
 public class ProcessStateDaoJdbc extends AbstractDaoJdbc implements ProcessStateDao

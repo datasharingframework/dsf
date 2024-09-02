@@ -13,7 +13,7 @@ import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 
 public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExecutionListener
 {

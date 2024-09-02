@@ -277,8 +277,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 	private void checkReturnBundle(BundleType type, Bundle rBundle, int expectedEntrySize, List<String> expectedStatus)
 	{
-		logger.debug("Return Bundle:\n{}",
-				fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(rBundle));
+		logger.debug("Return Bundle:\n{}", newJsonParser().setPrettyPrint(true).encodeResourceToString(rBundle));
 
 		assertNotNull(rBundle);
 		assertEquals(type, rBundle.getType());

@@ -9,7 +9,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -32,17 +31,6 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	protected Binary copy(Binary resource)
 	{
 		return resource.copy();
-	}
-
-	@Override
-	protected Binary getResource(ResultSet result, int index) throws SQLException
-	{
-		// TODO Bugfix HAPI is removing version information from binary.id
-		Binary binary = super.getResource(result, index);
-		IdType fixedId = new IdType(binary.getResourceType().name(), binary.getIdElement().getIdPart(),
-				binary.getMeta().getVersionId());
-		binary.setIdElement(fixedId);
-		return binary;
 	}
 
 	@Override

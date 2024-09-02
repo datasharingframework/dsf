@@ -19,10 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import dev.dsf.fhir.service.ReferenceCleaner;
-import dev.dsf.fhir.service.ReferenceCleanerImpl;
-import dev.dsf.fhir.service.ReferenceExtractor;
-import dev.dsf.fhir.service.ReferenceExtractorImpl;
 import dev.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 
 public class BundleGenerator
@@ -30,8 +26,6 @@ public class BundleGenerator
 	private static final Logger logger = LoggerFactory.getLogger(BundleGenerator.class);
 
 	private final FhirContext fhirContext = FhirContext.forR4();
-	private final ReferenceExtractor extractor = new ReferenceExtractorImpl();
-	private final ReferenceCleaner cleaner = new ReferenceCleanerImpl(extractor);
 
 	private Bundle testBundle;
 
@@ -39,10 +33,7 @@ public class BundleGenerator
 	{
 		try (InputStream in = Files.newInputStream(bundleTemplateFile))
 		{
-			Bundle bundle = newXmlParser().parseResource(Bundle.class, in);
-
-			// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
-			return cleaner.cleanReferenceResourcesIfBundle(bundle);
+			return newXmlParser().parseResource(Bundle.class, in);
 		}
 		catch (IOException e)
 		{

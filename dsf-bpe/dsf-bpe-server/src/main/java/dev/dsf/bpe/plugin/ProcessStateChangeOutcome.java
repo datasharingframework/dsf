@@ -2,6 +2,8 @@ package dev.dsf.bpe.plugin;
 
 import java.util.Objects;
 
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+
 public class ProcessStateChangeOutcome
 {
 	private final ProcessIdAndVersion processKeyAndVersion;

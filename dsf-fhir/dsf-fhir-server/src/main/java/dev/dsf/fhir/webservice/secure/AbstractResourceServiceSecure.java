@@ -108,9 +108,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	private Response withResourceValidation(R resource, UriInfo uri, HttpHeaders headers, String method,
 			Supplier<Response> delegate)
 	{
-		// FIXME hapi parser bug workaround
-		referenceCleaner.cleanReferenceResourcesIfBundle(resource);
-
 		ValidationResult validationResult = resourceValidator.validate(resource);
 
 		if (validationResult.getMessages().stream().anyMatch(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())

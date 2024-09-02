@@ -166,24 +166,18 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	{
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (resource.getRequester().getResource() instanceof Practitioner p)
-				return p.getIdentifier().stream()
+			return switch (resource.getRequester().getResource())
+			{
+				case Practitioner p -> p.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else if (resource.getRequester().getResource() instanceof Organization o)
-				return o.getIdentifier().stream()
+				case Organization o -> o.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else if (resource.getRequester().getResource() instanceof Patient p)
-				return p.getIdentifier().stream()
+				case Patient p -> p.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else if (resource.getRequester().getResource() instanceof PractitionerRole p)
-				return p.getIdentifier().stream()
+				case PractitionerRole r -> r.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else
-				return false;
+				default -> false;
+			};
 		}
 		else
 		{

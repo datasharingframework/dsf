@@ -17,6 +17,7 @@
 		<Logger name="com.sun.jersey" level="WARN"/>
 		<Logger name="liquibase" level="WARN"/>
 		<Logger name="ca.uhn.hl7v2" level="WARN"/>
+		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR" />
 
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE"/>

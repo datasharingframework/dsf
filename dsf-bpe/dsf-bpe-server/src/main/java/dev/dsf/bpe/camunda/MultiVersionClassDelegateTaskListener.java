@@ -13,7 +13,7 @@ import org.camunda.bpm.engine.impl.task.delegate.TaskListenerInvocation;
 import org.camunda.bpm.engine.impl.task.listener.ClassDelegateTaskListener;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 
 public class MultiVersionClassDelegateTaskListener extends ClassDelegateTaskListener
 {

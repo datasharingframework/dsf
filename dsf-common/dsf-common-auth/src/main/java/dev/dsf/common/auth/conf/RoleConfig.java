@@ -288,12 +288,12 @@ public class RoleConfig
 	@SuppressWarnings("unchecked")
 	private static List<String> getValues(Object o)
 	{
-		if (o instanceof String s)
-			return Collections.singletonList(s);
-		else if (o instanceof List l)
-			return l;
-		else
-			return Collections.emptyList();
+		return switch (o)
+		{
+			case String s -> Collections.singletonList(s);
+			case @SuppressWarnings("rawtypes") List l -> l;
+			default -> Collections.emptyList();
+		};
 	}
 
 	public List<Mapping> getEntries()

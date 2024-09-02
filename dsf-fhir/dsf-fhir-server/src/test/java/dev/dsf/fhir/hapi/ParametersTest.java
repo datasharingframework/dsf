@@ -1,6 +1,7 @@
 package dev.dsf.fhir.hapi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
@@ -36,8 +37,13 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(mode, parameters.getParameter("mode"));
-		assertEquals(uri, parameters.getParameter("uri"));
+		ParametersParameterComponent modeParam = parameters.getParameter("mode");
+		assertNotNull(modeParam);
+		assertEquals(mode, modeParam.getValue());
+
+		ParametersParameterComponent uriParam = parameters.getParameter("uri");
+		assertNotNull(modeParam);
+		assertEquals(uri, uriParam.getValue());
 	}
 
 	@Test
@@ -56,8 +62,12 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(mode, parameters.getParameter("mode"));
-		assertEquals(uri, parameters.getParameter("uri"));
+		ParametersParameterComponent modeParam = parameters.getParameter("mode");
+		assertNotNull(modeParam);
+		assertEquals(mode, modeParam.getValue());
+		ParametersParameterComponent uriParam = parameters.getParameter("uri");
+		assertNotNull(uriParam);
+		assertEquals(uri, uriParam.getValue());
 
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
 				.filter(p -> "resource".equals(p.getName())).findFirst();
@@ -95,6 +105,8 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(uri, parameters.getParameter("url"));
+		ParametersParameterComponent urlParam = parameters.getParameter("url");
+		assertNotNull(urlParam);
+		assertEquals(uri, urlParam.getValue());
 	}
 }

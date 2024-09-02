@@ -181,7 +181,8 @@ public class StructureDefinitionServiceImpl extends
 	@Override
 	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		Type urlType = parameters.getParameter("url");
+		ParametersParameterComponent param = parameters.getParameter("url");
+		Type urlType = param.getValue();
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
 				.filter(p -> "resource".equals(p.getName())).findFirst();
 

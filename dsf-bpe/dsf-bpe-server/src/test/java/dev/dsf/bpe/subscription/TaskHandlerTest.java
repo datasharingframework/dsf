@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.camunda.bpm.engine.RepositoryService;
@@ -14,6 +15,7 @@ import org.camunda.bpm.engine.repository.ProcessDefinitionQuery;
 import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
+import org.camunda.bpm.engine.variable.Variables;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -24,11 +26,15 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
-import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
-import dev.dsf.fhir.client.FhirWebserviceClient;
+import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.api.Constants;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.plugin.ProcessPluginManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskHandlerTest
@@ -57,33 +63,52 @@ public class TaskHandlerTest
 	@Mock
 	private MessageCorrelationBuilder messageCorrelationBuilder;
 
+	@Mock
+	private ProcessPluginManager processPluginManager;
+
+	@Mock
+	private ProcessPlugin processPlugin;
+
+	@Spy
+	private FhirContext fhirContext = FhirContext.forR4();
+
 	@InjectMocks
 	private TaskHandler taskHandler;
 
 	@Captor
 	ArgumentCaptor<Task> taskAfterUpdate;
 
+	@Captor
+	ArgumentCaptor<String> taskJson;
+
 	@Test
 	public void testCreateBusinessKey()
 	{
 		// Mock preparations
-		Mockito.when(webserviceClient.update(Mockito.any(Task.class))).thenAnswer(i -> i.getArguments()[0]);
-
 		Mockito.when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
 		Mockito.when(processDefinitionQuery.active()).thenReturn(processDefinitionQuery);
-		Mockito.when(processDefinitionQuery.processDefinitionKey(Mockito.anyString()))
+		Mockito.when(processDefinitionQuery.processDefinitionKey(Mockito.eq("dsfdev_foo")))
 				.thenReturn(processDefinitionQuery);
-		Mockito.when(processDefinitionQuery.versionTag(Mockito.anyString())).thenReturn(processDefinitionQuery);
+		Mockito.when(processDefinitionQuery.versionTag(Mockito.eq("0.1"))).thenReturn(processDefinitionQuery);
 		Mockito.when(processDefinitionQuery.list()).thenReturn(List.of(processDefinition));
+
+		Mockito.when(processDefinition.getKey()).thenReturn("dsfdev_foo");
+		Mockito.when(processDefinition.getVersionTag()).thenReturn("0.1");
+		Mockito.when(processPluginManager.getProcessPlugin(Mockito.eq(new ProcessIdAndVersion("dsfdev_foo", "0.1"))))
+				.thenReturn(Optional.of(processPlugin));
+		Mockito.when(processPlugin.createFhirTaskVariable(Mockito.anyString()))
+				.thenAnswer(i -> Variables.stringValue(i.getArgument(0)));
+
+		Mockito.when(webserviceClient.update(Mockito.any(Task.class))).thenAnswer(i -> i.getArgument(0));
+
 		Mockito.when(processDefinition.getId()).thenReturn(UUID.randomUUID().toString());
 
 		Mockito.when(runtimeService.createProcessInstanceQuery()).thenReturn(processInstanceQuery);
 		Mockito.when(processInstanceQuery.processDefinitionId(Mockito.anyString())).thenReturn(processInstanceQuery);
 		Mockito.when(processInstanceQuery.processInstanceBusinessKey(Mockito.anyString()))
 				.thenReturn(processInstanceQuery);
-		Mockito.when(processInstanceQuery
-				.variableValueEquals(Mockito.eq(BpmnExecutionVariables.ALTERNATIVE_BUSINESS_KEY), Mockito.anyString()))
-				.thenReturn(processInstanceQuery);
+		Mockito.when(processInstanceQuery.variableValueEquals(Mockito.eq(Constants.ALTERNATIVE_BUSINESS_KEY),
+				Mockito.anyString())).thenReturn(processInstanceQuery);
 		Mockito.when(processInstanceQuery.list()).thenReturn(List.of(processInstance)).thenReturn(List.of());
 
 		Mockito.when(runtimeService.createMessageCorrelation(Mockito.anyString()))
@@ -99,8 +124,9 @@ public class TaskHandlerTest
 				taskBeforeUpdate
 						.getInput().stream().filter(
 								Objects::nonNull)
-						.flatMap(i -> i.getType().getCoding().stream().filter(c -> BpmnMessage.URL.equals(c.getSystem())
-								&& BpmnMessage.Codes.BUSINESS_KEY.equals(c.getCode())))
+						.flatMap(i -> i.getType().getCoding().stream()
+								.filter(c -> Constants.BPMN_MESSAGE_URL.equals(c.getSystem())
+										&& Constants.BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode())))
 						.count());
 
 		taskHandler.onResource(taskBeforeUpdate);
@@ -110,8 +136,9 @@ public class TaskHandlerTest
 				taskAfterUpdate
 						.getValue().getInput().stream().filter(
 								Objects::nonNull)
-						.flatMap(i -> i.getType().getCoding().stream().filter(c -> BpmnMessage.URL.equals(c.getSystem())
-								&& BpmnMessage.Codes.BUSINESS_KEY.equals(c.getCode())))
+						.flatMap(i -> i.getType().getCoding().stream()
+								.filter(c -> Constants.BPMN_MESSAGE_URL.equals(c.getSystem())
+										&& Constants.BPMN_MESSAGE_BUSINESS_KEY.equals(c.getCode())))
 						.count());
 	}
 

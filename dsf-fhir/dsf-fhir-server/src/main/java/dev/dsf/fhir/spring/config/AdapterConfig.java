@@ -54,10 +54,13 @@ public class AdapterConfig
 	@Autowired
 	private PropertiesConfig propertiesConfig;
 
+	@Autowired
+	private ReferenceConfig referenceConfig;
+
 	@Bean
 	public FhirAdapter fhirAdapter()
 	{
-		return new FhirAdapter(fhirConfig.fhirContext());
+		return new FhirAdapter(fhirConfig.fhirContext(), referenceConfig.referenceCleaner());
 	}
 
 	@Bean
