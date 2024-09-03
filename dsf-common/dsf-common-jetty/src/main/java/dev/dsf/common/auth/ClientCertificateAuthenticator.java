@@ -16,19 +16,16 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
+import org.eclipse.jetty.security.AuthenticationState;
+import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ServerAuthException;
-import org.eclipse.jetty.security.UserAuthentication;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.authentication.LoginAuthenticator;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.Authentication.User;
-import org.eclipse.jetty.server.UserIdentity;
-import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 
 public class ClientCertificateAuthenticator extends LoginAuthenticator
 {
@@ -42,24 +39,22 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 	}
 
 	@Override
-	public String getAuthMethod()
+	public String getAuthenticationType()
 	{
-		return Constraint.__CERT_AUTH;
+		return Authenticator.CERT_AUTH;
 	}
 
 	@Override
-	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
+	public AuthenticationState validateRequest(Request request, Response response, Callback callback)
 			throws ServerAuthException
 	{
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		X509Certificate[] certificates = (X509Certificate[]) httpRequest
+		X509Certificate[] certificates = (X509Certificate[]) request
 				.getAttribute("jakarta.servlet.request.X509Certificate");
 
 		if (certificates == null || certificates.length <= 0)
 		{
 			logger.warn("X509Certificate could not be retrieved, sending unauthorized");
-
-			return Authentication.UNAUTHENTICATED;
+			return null;
 		}
 
 		try
@@ -72,18 +67,17 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 			logger.warn("Unable to validate client certificates, sending unauthorized: {} - {}", e.getClass().getName(),
 					e.getMessage());
 
-			return Authentication.UNAUTHENTICATED;
+			return null;
 		}
 
-		UserIdentity user = login(null, certificates, httpRequest);
+		UserIdentity user = login(null, certificates, request, response);
 		if (user == null)
 		{
 			logger.warn("User '{}' not found, sending unauthorized", getSubjectDn(certificates));
-
-			return Authentication.UNAUTHENTICATED;
+			return null;
 		}
 
-		return new UserAuthentication(getAuthMethod(), user);
+		return new UserAuthenticationSucceeded(getAuthenticationType(), user);
 	}
 
 	private X509TrustManager createX509TrustManager(KeyStore clientTrustStore)
@@ -131,12 +125,5 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 	private String getSubjectDn(X509Certificate certificate)
 	{
 		return certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
-	}
-
-	@Override
-	public boolean secureResponse(ServletRequest request, ServletResponse response, boolean mandatory,
-			User validatedUser) throws ServerAuthException
-	{
-		return true; // nothing to do
 	}
 }

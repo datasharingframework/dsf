@@ -2,8 +2,7 @@ package dev.dsf.fhir.config;
 
 import java.util.List;
 
-import org.eclipse.jetty.websocket.jakarta.client.JakartaWebSocketShutdownContainer;
-import org.eclipse.jetty.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.springframework.web.SpringServletContainerInitializer;
 
@@ -21,7 +20,7 @@ public class FhirHttpsJettyConfig extends AbstractHttpsJettyConfig
 	@Override
 	protected List<Class<? extends ServletContainerInitializer>> servletContainerInitializers()
 	{
-		return List.of(JakartaWebSocketShutdownContainer.class, JakartaWebSocketServletContainerInitializer.class,
-				JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
+		return List.of(JakartaWebSocketServletContainerInitializer.class, JerseyServletContainerInitializer.class,
+				SpringServletContainerInitializer.class);
 	}
 }
