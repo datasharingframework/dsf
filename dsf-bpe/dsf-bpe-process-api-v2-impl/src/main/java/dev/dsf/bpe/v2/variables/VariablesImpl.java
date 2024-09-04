@@ -243,7 +243,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 					setResourceList(TASKS_PREFIX + instanceId, tasks);
 				else
 					logger.warn("Given task {} not part of tasks list '{}', ignoring task",
-							task.getIdElement().getIdPart().toString(), instanceId);
+							task.getIdElement().getIdPart(), instanceId);
 			}
 		}
 		else

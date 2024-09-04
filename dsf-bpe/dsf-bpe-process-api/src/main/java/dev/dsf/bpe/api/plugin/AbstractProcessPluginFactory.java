@@ -66,6 +66,7 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 		return defaultUserTaskListener;
 	}
 
+	@Override
 	public ProcessPlugin load(Path jar)
 	{
 		try

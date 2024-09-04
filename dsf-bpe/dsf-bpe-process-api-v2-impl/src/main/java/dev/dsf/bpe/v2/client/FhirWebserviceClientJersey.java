@@ -453,7 +453,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			{
 				String dateValue = formatRfc7231(oldValue.getMeta().getLastUpdated());
 				request.header(HttpHeaders.IF_MODIFIED_SINCE, dateValue);
-				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_MODIFIED_SINCE, dateValue.toString());
+				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_MODIFIED_SINCE, dateValue);
 			}
 		}
 
