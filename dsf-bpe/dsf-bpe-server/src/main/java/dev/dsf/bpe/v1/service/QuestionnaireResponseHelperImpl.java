@@ -100,6 +100,6 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 	public String getLocalVersionlessAbsoluteUrl(QuestionnaireResponse questionnaireResponse)
 	{
 		return questionnaireResponse.getIdElement().toVersionless()
-				.withServerBase(serverBaseUrl, ResourceType.Task.name()).getValue();
+				.withServerBase(serverBaseUrl, ResourceType.QuestionnaireResponse.name()).getValue();
 	}
 }
