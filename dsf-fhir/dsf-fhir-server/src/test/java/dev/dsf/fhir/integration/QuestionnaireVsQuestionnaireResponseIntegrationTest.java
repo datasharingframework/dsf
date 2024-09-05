@@ -168,9 +168,6 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + questionnaireResponse.getId())
 				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
 
-		BundleDao bundleDao = getSpringWebApplicationContext().getBean(BundleDao.class);
-		bundleDao.create(bundle);
-
 		assertNotNull(getWebserviceClient().postBundle(bundle));
 	}
 
@@ -190,9 +187,6 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
 		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + questionnaire.getId()).getRequest()
 				.setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.Questionnaire.name());
-
-		BundleDao bundleDao = getSpringWebApplicationContext().getBean(BundleDao.class);
-		bundleDao.create(bundle);
 
 		assertNotNull(getWebserviceClient().postBundle(bundle));
 	}
