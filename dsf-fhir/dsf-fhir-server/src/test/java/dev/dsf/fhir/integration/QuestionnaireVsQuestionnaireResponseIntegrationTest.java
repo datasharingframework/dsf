@@ -1,7 +1,9 @@
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -168,7 +170,8 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + questionnaireResponse.getId())
 				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
 
-		assertNotNull(getWebserviceClient().postBundle(bundle));
+		assertTrue(getWebserviceClient().postBundle(bundle).getEntry().stream()
+				.allMatch(entry -> entry.getResponse().getStatus().equals("201 Created")));
 	}
 
 	@Test
@@ -188,6 +191,7 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + questionnaire.getId()).getRequest()
 				.setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.Questionnaire.name());
 
-		assertNotNull(getWebserviceClient().postBundle(bundle));
+		assertTrue(getWebserviceClient().postBundle(bundle).getEntry().stream()
+				.allMatch(entry -> entry.getResponse().getStatus().equals("201 Created")));
 	}
 }
