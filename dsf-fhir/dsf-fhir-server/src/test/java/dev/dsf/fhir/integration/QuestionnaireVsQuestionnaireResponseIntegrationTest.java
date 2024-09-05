@@ -3,12 +3,16 @@ package dev.dsf.fhir.integration;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Optional;
+import java.util.UUID;
 
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
+import dev.dsf.fhir.dao.BundleDao;
 import dev.dsf.fhir.dao.QuestionnaireDao;
 
 public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends AbstractQuestionnaireIntegrationTest
@@ -145,5 +149,51 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		assertNotNull(updatedQr);
 		assertNotNull(updatedQr.getIdElement().getIdPart());
 		assertNotNull(updatedQr.getIdElement().getVersionIdPart());
+	}
+
+	@Test
+	public void testPostQuestionnaireAndCorrespondingQuestionnaireResponseInTransactionBundleOrderQuestionnaireBeforeQuestionnaireResponse()
+			throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.5.3");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
+
+		Bundle bundle = new Bundle();
+		bundle.setId("urn:uuid:" + UUID.randomUUID());
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		questionnaire.setId("urn:uuid:" + UUID.randomUUID());
+		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + questionnaire.getId()).getRequest()
+				.setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.Questionnaire.name());
+		questionnaireResponse.setId("urn:uuid:" + UUID.randomUUID());
+		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + questionnaireResponse.getId())
+				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
+
+		BundleDao bundleDao = getSpringWebApplicationContext().getBean(BundleDao.class);
+		bundleDao.create(bundle);
+
+		assertNotNull(getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testPostQuestionnaireAndCorrespondingQuestionnaireResponseInTransactionBundleOrderQuestionnaireResponseBeforeQuestionnaire()
+			throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.5.3");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
+
+		Bundle bundle = new Bundle();
+		bundle.setId("urn:uuid:" + UUID.randomUUID());
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		questionnaire.setId("urn:uuid:" + UUID.randomUUID());
+		questionnaireResponse.setId("urn:uuid:" + UUID.randomUUID());
+		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + questionnaireResponse.getId())
+				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
+		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + questionnaire.getId()).getRequest()
+				.setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.Questionnaire.name());
+
+		BundleDao bundleDao = getSpringWebApplicationContext().getBean(BundleDao.class);
+		bundleDao.create(bundle);
+
+		assertNotNull(getWebserviceClient().postBundle(bundle));
 	}
 }
