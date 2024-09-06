@@ -3,7 +3,6 @@ package dev.dsf.fhir.integration;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,7 +13,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
-import dev.dsf.fhir.dao.BundleDao;
 import dev.dsf.fhir.dao.QuestionnaireDao;
 
 public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends AbstractQuestionnaireIntegrationTest
@@ -161,13 +159,10 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
 
 		Bundle bundle = new Bundle();
-		bundle.setId("urn:uuid:" + UUID.randomUUID());
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		questionnaire.setId("urn:uuid:" + UUID.randomUUID());
-		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + questionnaire.getId()).getRequest()
+		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).getRequest()
 				.setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.Questionnaire.name());
-		questionnaireResponse.setId("urn:uuid:" + UUID.randomUUID());
-		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + questionnaireResponse.getId())
+		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + UUID.randomUUID().toString())
 				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
 
 		assertTrue(getWebserviceClient().postBundle(bundle).getEntry().stream()
@@ -182,13 +177,10 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
 
 		Bundle bundle = new Bundle();
-		bundle.setId("urn:uuid:" + UUID.randomUUID());
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		questionnaire.setId("urn:uuid:" + UUID.randomUUID());
-		questionnaireResponse.setId("urn:uuid:" + UUID.randomUUID());
-		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + questionnaireResponse.getId())
+		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + UUID.randomUUID().toString())
 				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
-		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + questionnaire.getId()).getRequest()
+		bundle.addEntry().setResource(questionnaire).setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).getRequest()
 				.setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.Questionnaire.name());
 
 		assertTrue(getWebserviceClient().postBundle(bundle).getEntry().stream()
