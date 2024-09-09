@@ -50,7 +50,8 @@ public class QuestionnaireResponseAuthorizationRule
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.CREATE))
 		{
-			Optional<String> errors = newResourceOk(newResource, EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
+			Optional<String> errors = newResourceOk(connection, newResource,
+					EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
 			if (errors.isEmpty())
 			{
 				// TODO implement unique criteria based on UserTask.id when implemented as identifier
@@ -70,7 +71,7 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 	}
 
-	private Optional<String> newResourceOk(QuestionnaireResponse newResource,
+	private Optional<String> newResourceOk(Connection connection, QuestionnaireResponse newResource,
 			EnumSet<QuestionnaireResponseStatus> allowedStatus)
 	{
 		List<String> errors = new ArrayList<>();
@@ -90,7 +91,7 @@ public class QuestionnaireResponseAuthorizationRule
 		getItemAndValidate(newResource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, errors);
 
 		String questionnaireUrlAndVersion = newResource.getQuestionnaire();
-		if (!questionnaireExists(questionnaireUrlAndVersion))
+		if (!questionnaireExists(connection, questionnaireUrlAndVersion))
 		{
 			errors.add(
 					"Questionnaire ressource referenced via canonical QuestionnaireResponse.questionnaire does not exist");
@@ -149,12 +150,12 @@ public class QuestionnaireResponseAuthorizationRule
 		return Optional.of(value.getValue());
 	}
 
-	private boolean questionnaireExists(String questionnaireUrlAndVersion)
+	private boolean questionnaireExists(Connection connection, String questionnaireUrlAndVersion)
 	{
 		try
 		{
 			Optional<Questionnaire> questionnaire = daoProvider.getQuestionnaireDao()
-					.readByUrlAndVersion(questionnaireUrlAndVersion);
+					.readByUrlAndVersionWithTransaction(connection, questionnaireUrlAndVersion);
 
 			return questionnaire.isPresent();
 		}
@@ -188,7 +189,7 @@ public class QuestionnaireResponseAuthorizationRule
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.UPDATE))
 		{
-			Optional<String> errors = newResourceOk(newResource,
+			Optional<String> errors = newResourceOk(connection, newResource,
 					EnumSet.of(QuestionnaireResponseStatus.COMPLETED, QuestionnaireResponseStatus.STOPPED));
 			if (errors.isEmpty())
 			{
