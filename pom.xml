@@ -26,7 +26,7 @@
 		<jetty.version>11.0.22</jetty.version>
 		<jersey.version>3.1.7</jersey.version>
 		<tyrus.version>2.1.5</tyrus.version>
-		<spring.version>6.1.10</spring.version>
+		<spring.version>6.1.12</spring.version>
 		<jackson.version>2.17.2</jackson.version>
 		<camunda.version>7.21.0</camunda.version>
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
