@@ -1,7 +1,6 @@
 package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
@@ -90,12 +88,8 @@ public class QuestionnaireResponseAuthorizationRule
 
 		getItemAndValidate(newResource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID, errors);
 
-		String questionnaireUrlAndVersion = newResource.getQuestionnaire();
-		if (!questionnaireExists(connection, questionnaireUrlAndVersion))
-		{
-			errors.add(
-					"Questionnaire ressource referenced via canonical QuestionnaireResponse.questionnaire does not exist");
-		}
+		if (!newResource.hasQuestionnaire())
+			errors.add("QuestionnaireResponse.questionnaire missing");
 
 		if (errors.isEmpty())
 			return Optional.empty();
@@ -148,23 +142,6 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 
 		return Optional.of(value.getValue());
-	}
-
-	private boolean questionnaireExists(Connection connection, String questionnaireUrlAndVersion)
-	{
-		try
-		{
-			Optional<Questionnaire> questionnaire = daoProvider.getQuestionnaireDao()
-					.readByUrlAndVersionWithTransaction(connection, questionnaireUrlAndVersion);
-
-			return questionnaire.isPresent();
-		}
-		catch (SQLException e)
-		{
-			logger.warn("Could not check questionnaire with url|version '{}' for questionnaire-response - {}",
-					questionnaireUrlAndVersion, e.getMessage());
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Override

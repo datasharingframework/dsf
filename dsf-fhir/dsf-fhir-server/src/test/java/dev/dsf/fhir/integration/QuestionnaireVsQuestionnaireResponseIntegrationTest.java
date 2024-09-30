@@ -186,4 +186,17 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		assertTrue(getWebserviceClient().postBundle(bundle).getEntry().stream()
 				.allMatch(entry -> entry.getResponse().getStatus().equals("201 Created")));
 	}
+
+	@Test
+	public void testPostQuestionnaireResponseInTransactionBundleQuestionnaireDoesNotExistForbidden() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().setResource(questionnaireResponse).setFullUrl("urn:uuid:" + UUID.randomUUID().toString())
+				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
 }
