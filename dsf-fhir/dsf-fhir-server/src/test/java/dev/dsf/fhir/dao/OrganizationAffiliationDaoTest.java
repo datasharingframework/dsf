@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -15,6 +17,10 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.Test;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.core.BaseConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
@@ -25,6 +31,8 @@ import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 public class OrganizationAffiliationDaoTest
 		extends AbstractReadAccessDaoTest<OrganizationAffiliation, OrganizationAffiliationDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(OrganizationAffiliationDaoTest.class);
+
 	private static final String identifierSystem = "http://dsf.dev/sid/organization-identifier";
 	private static final String identifierValue = "identifier.test";
 	private static final boolean active = true;
@@ -314,5 +322,115 @@ public class OrganizationAffiliationDaoTest
 							parentOrganization, memberOrganization, roleSystem, roleCode, UUID.randomUUID());
 			assertTrue(exists2);
 		}
+	}
+
+	private class TaskAsCsvGeneratorReader extends Reader
+	{
+		public static final int LINE_LENGHT = 1615;
+
+		private int currentTask;
+		private int maxTasks;
+
+		public TaskAsCsvGeneratorReader(int maxTasks)
+		{
+			this.maxTasks = maxTasks;
+		}
+
+		@Override
+		public int read(char[] cbuf, int off, int len) throws IOException
+		{
+			if (len != LINE_LENGHT)
+				throw new IllegalArgumentException("Buffer length " + LINE_LENGHT + " expected, not " + len);
+			if (off % LINE_LENGHT != 0)
+				throw new IllegalArgumentException("Buffer offset mod " + LINE_LENGHT + " == 0 expected, not "
+						+ (off & LINE_LENGHT) + " (off = " + off + ")");
+
+			if (currentTask < maxTasks)
+			{
+				String line = generateLine();
+
+				if (len != LINE_LENGHT)
+					throw new IllegalArgumentException("Buffer length " + LINE_LENGHT + " expected");
+
+				System.arraycopy(line.toCharArray(), 0, cbuf, 0, LINE_LENGHT);
+				currentTask++;
+
+				return LINE_LENGHT;
+			}
+			else
+				return -1;
+		}
+
+		@Override
+		public void close() throws IOException
+		{
+		}
+
+		private String generateLine()
+		{
+			String id = UUID.randomUUID().toString();
+			return "${id},3,,\"{\"\"resourceType\"\":\"\"Task\"\",\"\"id\"\":\"\"${id}\"\",\"\"meta\"\":{\"\"versionId\"\":\"\"3\"\",\"\"lastUpdated\"\":\"\"2024-10-01T18:22:06.765+02:00\"\",\"\"profile\"\":[\"\"http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-execute|1.0\"\"]},\"\"instantiatesCanonical\"\":\"\"http://medizininformatik-initiative.de/bpe/Process/feasibilityExecute|1.0\"\",\"\"status\"\":\"\"completed\"\",\"\"intent\"\":\"\"order\"\",\"\"authoredOn\"\":\"\"2024-10-01T18:22:07+02:00\"\",\"\"requester\"\":{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}},\"\"restriction\"\":{\"\"recipient\"\":[{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}}]},\"\"input\"\":[{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"message-name\"\"}]},\"\"valueString\"\":\"\"feasibilityExecuteMessage\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"business-key\"\"}]},\"\"valueString\"\":\"\"${business-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"correlation-key\"\"}]},\"\"valueString\"\":\"\"${correlation-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility\"\",\"\"code\"\":\"\"measure-reference\"\"}]},\"\"valueReference\"\":{\"\"reference\"\":\"\"https://dsf.fdpg.test.forschen-fuer-gesundheit.de/fhir/Measure/02bb7540-0d99-4c0e-8764-981e545cf646\"\"}}]}\"\n"
+					.replace("${id}", id).replace("${business-key}", UUID.randomUUID().toString())
+					.replace("${correlation-key}", UUID.randomUUID().toString());
+		}
+	}
+
+	@Test
+	public void testBigUpdate() throws Exception
+	{
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("organization.com");
+
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+		assertNotNull(createdMemberOrg);
+
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("organization.com");
+
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		assertNotNull(createdParentOrg);
+
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.setActive(true);
+		affiliation.getParticipatingOrganization()
+				.setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+		affiliation.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		affiliation.addCode().getCodingFirstRep().setSystem("role-system").setCode("role-code");
+
+		OrganizationAffiliation createdAffiliation = dao.create(affiliation);
+		assertNotNull(createdAffiliation);
+
+		final int taskCount = 500_000;
+
+		logger.info("Inserting {} Task resources ...", taskCount);
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			CopyManager copyManager = new CopyManager(connection.unwrap(BaseConnection.class));
+			TaskAsCsvGeneratorReader taskGenerator = new TaskAsCsvGeneratorReader(taskCount);
+			long insertedRows = copyManager.copyIn("COPY tasks FROM STDIN (FORMAT csv)", taskGenerator,
+					TaskAsCsvGeneratorReader.LINE_LENGHT);
+
+			assertEquals(taskCount, insertedRows);
+		}
+		logger.info("Inserting {} Task resources [Done]", taskCount);
+
+		long t0 = System.currentTimeMillis();
+
+		OrganizationAffiliation updatedAffiliation1 = dao.update(createdAffiliation);
+		assertNotNull(updatedAffiliation1);
+
+		OrganizationAffiliation updatedAffiliation2 = dao.update(updatedAffiliation1);
+		assertNotNull(updatedAffiliation2);
+
+		long t1 = System.currentTimeMillis();
+
+		logger.info("OrganizationAffiliation updates executed in {} ms", t1 - t0);
+		assertTrue("OrganizationAffiliation updates took longer then 200 ms", t1 - t0 <= 200);
 	}
 }
