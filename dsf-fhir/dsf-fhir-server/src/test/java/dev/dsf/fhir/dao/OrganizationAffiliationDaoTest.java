@@ -324,12 +324,12 @@ public class OrganizationAffiliationDaoTest
 		}
 	}
 
-	private class TaskAsCsvGeneratorReader extends Reader
+	private static class TaskAsCsvGeneratorReader extends Reader
 	{
 		public static final int TASK_ROW_LINE_LENGTH = 1615;
 
+		private final int maxTasks;
 		private int currentTask;
-		private int maxTasks;
 
 		public TaskAsCsvGeneratorReader(int maxTasks)
 		{
