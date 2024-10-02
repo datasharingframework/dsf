@@ -349,8 +349,8 @@ public class OrganizationAffiliationDaoTest
 			{
 				String line = generateLine();
 
-				if (len != TASK_ROW_LINE_LENGTH)
-					throw new IllegalArgumentException("Buffer length " + TASK_ROW_LINE_LENGTH + " expected");
+				if (line.length() != TASK_ROW_LINE_LENGTH)
+					throw new IllegalArgumentException("Line length " + TASK_ROW_LINE_LENGTH + " expected");
 
 				System.arraycopy(line.toCharArray(), 0, cbuf, 0, TASK_ROW_LINE_LENGTH);
 				currentTask++;
