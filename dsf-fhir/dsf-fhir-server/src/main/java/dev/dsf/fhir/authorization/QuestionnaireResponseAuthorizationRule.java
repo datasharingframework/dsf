@@ -48,8 +48,7 @@ public class QuestionnaireResponseAuthorizationRule
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.CREATE))
 		{
-			Optional<String> errors = newResourceOk(connection, newResource,
-					EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
+			Optional<String> errors = newResourceOk(newResource, EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
 			if (errors.isEmpty())
 			{
 				// TODO implement unique criteria based on UserTask.id when implemented as identifier
@@ -69,7 +68,7 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 	}
 
-	private Optional<String> newResourceOk(Connection connection, QuestionnaireResponse newResource,
+	private Optional<String> newResourceOk(QuestionnaireResponse newResource,
 			EnumSet<QuestionnaireResponseStatus> allowedStatus)
 	{
 		List<String> errors = new ArrayList<>();
@@ -166,7 +165,7 @@ public class QuestionnaireResponseAuthorizationRule
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.UPDATE))
 		{
-			Optional<String> errors = newResourceOk(connection, newResource,
+			Optional<String> errors = newResourceOk(newResource,
 					EnumSet.of(QuestionnaireResponseStatus.COMPLETED, QuestionnaireResponseStatus.STOPPED));
 			if (errors.isEmpty())
 			{
