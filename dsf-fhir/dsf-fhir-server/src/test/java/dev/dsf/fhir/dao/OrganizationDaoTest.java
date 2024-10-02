@@ -259,7 +259,7 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 
 	private class TaskAsCsvGeneratorReader extends Reader
 	{
-		public static final int LINE_LENGHT = 1615;
+		public static final int TASK_ROW_LINE_LENGTH = 1615;
 
 		private int currentTask;
 		private int maxTasks;
@@ -272,23 +272,23 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		@Override
 		public int read(char[] cbuf, int off, int len) throws IOException
 		{
-			if (len != LINE_LENGHT)
-				throw new IllegalArgumentException("Buffer length " + LINE_LENGHT + " expected, not " + len);
-			if (off % LINE_LENGHT != 0)
-				throw new IllegalArgumentException("Buffer offset mod " + LINE_LENGHT + " == 0 expected, not "
-						+ (off & LINE_LENGHT) + " (off = " + off + ")");
+			if (len != TASK_ROW_LINE_LENGTH)
+				throw new IllegalArgumentException("Buffer length " + TASK_ROW_LINE_LENGTH + " expected, not " + len);
+			if (off % TASK_ROW_LINE_LENGTH != 0)
+				throw new IllegalArgumentException("Buffer offset mod " + TASK_ROW_LINE_LENGTH + " == 0 expected, not "
+						+ (off & TASK_ROW_LINE_LENGTH) + " (off = " + off + ")");
 
 			if (currentTask < maxTasks)
 			{
 				String line = generateLine();
 
-				if (len != LINE_LENGHT)
-					throw new IllegalArgumentException("Buffer length " + LINE_LENGHT + " expected");
+				if (len != TASK_ROW_LINE_LENGTH)
+					throw new IllegalArgumentException("Buffer length " + TASK_ROW_LINE_LENGTH + " expected");
 
-				System.arraycopy(line.toCharArray(), 0, cbuf, 0, LINE_LENGHT);
+				System.arraycopy(line.toCharArray(), 0, cbuf, 0, TASK_ROW_LINE_LENGTH);
 				currentTask++;
 
-				return LINE_LENGHT;
+				return TASK_ROW_LINE_LENGTH;
 			}
 			else
 				return -1;
@@ -327,7 +327,7 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 			CopyManager copyManager = new CopyManager(connection.unwrap(BaseConnection.class));
 			TaskAsCsvGeneratorReader taskGenerator = new TaskAsCsvGeneratorReader(taskCount);
 			long insertedRows = copyManager.copyIn("COPY tasks FROM STDIN (FORMAT csv)", taskGenerator,
-					TaskAsCsvGeneratorReader.LINE_LENGHT);
+					TaskAsCsvGeneratorReader.TASK_ROW_LINE_LENGTH);
 
 			assertEquals(taskCount, insertedRows);
 		}
