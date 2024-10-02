@@ -560,7 +560,7 @@ public abstract class AbstractReadAccessDaoTest<D extends Resource, C extends Re
 
 		createdAff.getCodeFirstRep().getCodingFirstRep().setCode("HRP");
 		OrganizationAffiliation updatedAff = organizationAffiliationDao.update(createdAff);
-		
+
 		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
 		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, updatedAff);
 	}
