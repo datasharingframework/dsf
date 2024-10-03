@@ -68,7 +68,7 @@ public class ApiServiceConfig
 	private BpeMailService bpeMailService;
 
 	@Bean
-	public ProcessPluginApi processPluginApiV1()
+	public ProcessPluginApi processPluginApiV2()
 	{
 		ProxyConfig proxyConfig = new ProxyConfigDelegate(this.proxyConfig);
 
