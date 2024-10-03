@@ -125,7 +125,7 @@ public class ApiServiceConfig
 	@Bean
 	public FhirContext fhirContext()
 	{
-		// TODO remove workaround after upgrading to HAPI 6.8+, see https://github.com/hapifhir/hapi-fhir/issues/5205
+		// workaround for https://github.com/hapifhir/hapi-fhir/issues/5205
 		StreamReadConstraints.overrideDefaultStreamReadConstraints(
 				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
 
