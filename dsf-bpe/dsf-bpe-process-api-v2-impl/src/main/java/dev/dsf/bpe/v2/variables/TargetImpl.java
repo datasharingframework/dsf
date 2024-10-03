@@ -1,6 +1,5 @@
 package dev.dsf.bpe.v2.variables;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,11 +11,9 @@ public class TargetImpl implements Target
 	private final String correlationKey;
 
 	@JsonCreator
-	public TargetImpl(
-			@JsonProperty("organizationIdentifierValue") @JsonAlias("targetOrganizationIdentifierValue") String organizationIdentifierValue,
+	public TargetImpl(@JsonProperty("organizationIdentifierValue") String organizationIdentifierValue,
 			@JsonProperty("endpointIdentifierValue") String endpointIdentifierValue,
-			@JsonProperty("endpointUrl") @JsonAlias("targetEndpointUrl") String endpointUrl,
-			@JsonProperty("correlationKey") String correlationKey)
+			@JsonProperty("endpointUrl") String endpointUrl, @JsonProperty("correlationKey") String correlationKey)
 	{
 		this.organizationIdentifierValue = organizationIdentifierValue;
 		this.endpointIdentifierValue = endpointIdentifierValue;
