@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: nginx:1.23
+    image: nginx:1.27
     restart: "no"
     ports:
       - 127.0.0.1:443:443
