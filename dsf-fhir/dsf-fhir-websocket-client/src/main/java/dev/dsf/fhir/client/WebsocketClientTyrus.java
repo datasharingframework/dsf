@@ -90,8 +90,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private final String userAgentValue;
 	private final ClientEndpoint endpoint;
 
-	private ClientManager manager;
-	private Session connection;
+	private volatile ClientManager manager;
+	private volatile Session connection;
 	private volatile boolean closed;
 
 	public WebsocketClientTyrus(Runnable reconnector, URI wsUri, KeyStore trustStore, KeyStore keyStore,
@@ -130,6 +130,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 	{
 		if (manager != null)
 			throw new IllegalStateException("Allready connecting/connected");
+
+		closed = false;
 
 		manager = ClientManager.createClient();
 		manager.getProperties().put(ClientProperties.RECONNECT_HANDLER, reconnectHandler);

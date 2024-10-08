@@ -1,5 +1,6 @@
 package dev.dsf.fhir.client;
 
+import java.util.EnumSet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -80,7 +81,8 @@ public class ClientEndpoint extends Endpoint
 		logger.warn("Websocket closed, session {}: {} - {}", session.getId(), closeReason.getCloseCode().getCode(),
 				closeReason.getReasonPhrase());
 
-		if (CloseReason.CloseCodes.CANNOT_ACCEPT.equals(closeReason.getCloseCode()))
+		if (EnumSet.of(CloseReason.CloseCodes.CANNOT_ACCEPT, CloseReason.CloseCodes.CLOSED_ABNORMALLY)
+				.contains(closeReason.getCloseCode()))
 		{
 			logger.info("Trying to reconnect websocket");
 			reconnector.run();

@@ -429,7 +429,7 @@ public abstract class AbstractJettyConfig
 	private Proxy oidcClientProxy()
 	{
 		ProxyConfig config = new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
-		if (config.getUrl() != null && config.isNoProxyUrl(oidcProviderRealmBaseUrl))
+		if (config.getUrl() != null && !config.isNoProxyUrl(oidcProviderRealmBaseUrl))
 		{
 			try
 			{
