@@ -36,15 +36,6 @@ public interface ReferenceResolver
 	Optional<Resource> resolveReference(Identity identity, ResourceReference reference, Connection connection);
 
 	/**
-	 * @param reference
-	 *            not <code>null</code>
-	 * @param connection
-	 *            not <code>null</code>
-	 * @return <code>true</code> if the {@link ResourceReference} can be checked
-	 */
-	boolean referenceCanBeChecked(ResourceReference reference, Connection connection);
-
-	/**
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param resourceReference
@@ -160,4 +151,40 @@ public interface ReferenceResolver
 	Optional<OperationOutcome> checkLogicalReference(Identity identity, Resource resource,
 			ResourceReference resourceReference, Connection connection, Integer bundleIndex)
 			throws IllegalArgumentException;
+
+	/**
+	 * @param identity
+	 *            not <code>null</code>
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param reference
+	 *            not <code>null</code>
+	 * @param connection
+	 *            not <code>null</code>
+	 * @return {@link Optional#empty()} if the reference check was successful
+	 * @throws IllegalArgumentException
+	 *             if the reference is not of type {@link ResourceReference.ReferenceType#CANONICAL}
+	 * @see ResourceReference#getType(String)
+	 */
+	Optional<OperationOutcome> checkCanonicalReference(Identity identity, Resource resource,
+			ResourceReference reference, Connection connection) throws IllegalArgumentException;
+
+	/**
+	 * @param identity
+	 *            not <code>null</code>
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param reference
+	 *            not <code>null</code>
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param bundleIndex
+	 *            may be <code>null</code>
+	 * @return {@link Optional#empty()} if the reference check was successful
+	 * @throws IllegalArgumentException
+	 *             if the reference is not of type {@link ResourceReference.ReferenceType#CANONICAL}
+	 * @see ResourceReference#getType(String)
+	 */
+	Optional<OperationOutcome> checkCanonicalReference(Identity identity, Resource resource,
+			ResourceReference reference, Connection connection, Integer bundleIndex) throws IllegalArgumentException;
 }

@@ -335,12 +335,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			return Optional.empty();
 	}
 
-	protected final Optional<Resource> resolveReference(Connection connection, Identity identity,
-			Optional<ResourceReference> reference)
-	{
-		return reference.flatMap(ref -> referenceResolver.resolveReference(identity, ref, connection));
-	}
-
 	@Override
 	public Optional<String> reasonPermanentDeleteAllowed(Identity identity, R oldResource)
 	{
