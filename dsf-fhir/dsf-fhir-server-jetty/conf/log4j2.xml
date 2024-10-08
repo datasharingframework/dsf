@@ -1,4 +1,4 @@
-<Configuration status="INFO" monitorInterval="30"
+<Configuration status="WARN" monitorInterval="30"
 			   verbose="false">
 
 	<Appenders>
