@@ -108,12 +108,12 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-structures-r4</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-base</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.google.j2objc</groupId>
@@ -123,37 +123,37 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.utilities</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.r4</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-structures-r5</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.r5</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-validation</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-converter</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.convertors</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>net.sf.saxon</groupId>
@@ -163,22 +163,22 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.validation</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.dstu2</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.dstu2016may</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.dstu3</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.commons</groupId>
@@ -213,12 +213,12 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-validation-resources-r5</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>docker/api/v1</outputDirectory>
@@ -243,12 +243,12 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-structures-r4</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-base</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.google.j2objc</groupId>
@@ -258,37 +258,37 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.utilities</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.r4</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-structures-r5</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.r5</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-validation</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-converter</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.convertors</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>net.sf.saxon</groupId>
@@ -298,22 +298,22 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.validation</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.dstu2</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.dstu2016may</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.dstu3</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.commons</groupId>
@@ -348,12 +348,12 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-validation-resources-r5</artifactId>
-									<version>5.1.0</version>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>api/v1</outputDirectory>
@@ -388,17 +388,17 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-base</artifactId>
-									<version>7.4.0</version>
+									<version>${hapi.fhir.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-caching-api</artifactId>
-									<version>7.4.0</version>
+									<version>${hapi.fhir.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-structures-r4</artifactId>
-									<version>7.4.0</version>
+									<version>${hapi.fhir.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.ibm.icu</groupId>
@@ -468,17 +468,17 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-base</artifactId>
-									<version>7.4.0</version>
+									<version>${hapi.fhir.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-caching-api</artifactId>
-									<version>7.4.0</version>
+									<version>${hapi.fhir.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-structures-r4</artifactId>
-									<version>7.4.0</version>
+									<version>${hapi.fhir.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.ibm.icu</groupId>

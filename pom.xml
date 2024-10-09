@@ -30,6 +30,7 @@
 		<jackson.version>2.17.2</jackson.version>
 		<camunda.version>7.21.0</camunda.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
+		<hapi.fhir.version.v2>7.4.0</hapi.fhir.version.v2>
 		<hapi.fhir.version>7.4.0</hapi.fhir.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
 	</properties>
