@@ -11,17 +11,10 @@ public class MultiVersionSpringProcessEngineConfiguration extends SpringProcessE
 	}
 
 	@Override
-	protected void initTelemetry()
+	protected void initDiagnostics()
 	{
 		// override to turn telemetry collection of
-		// see also CamundaConfig
-	}
 
-	@Override
-	public TelemetryDataImpl getTelemetryData()
-	{
-		// NPE fix after turning off telemetry collection
-		// see also CamundaConfig
-		return new TelemetryDataImpl(null, null);
+		setTelemetryData(new TelemetryDataImpl(null, null));
 	}
 }
