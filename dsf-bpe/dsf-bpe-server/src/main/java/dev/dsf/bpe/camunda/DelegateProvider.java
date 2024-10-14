@@ -3,7 +3,7 @@ package dev.dsf.bpe.camunda;
 import org.camunda.bpm.engine.delegate.TaskListener;
 import org.springframework.context.ApplicationContext;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 
 public interface DelegateProvider extends ProcessPluginConsumer
 {

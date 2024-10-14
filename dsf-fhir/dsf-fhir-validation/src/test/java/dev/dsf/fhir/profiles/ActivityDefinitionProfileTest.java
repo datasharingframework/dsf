@@ -78,7 +78,9 @@ public class ActivityDefinitionProfileTest
 	private void logResource(Resource resource)
 	{
 		logger.trace("{}",
-				validationRule.getFhirContext().newJsonParser().setPrettyPrint(false).encodeResourceToString(resource));
+				validationRule.getFhirContext().newJsonParser().setStripVersionsFromReferences(false)
+						.setOverrideResourceIdWithBundleEntryFullUrl(false).setPrettyPrint(false)
+						.encodeResourceToString(resource));
 	}
 
 	@Test

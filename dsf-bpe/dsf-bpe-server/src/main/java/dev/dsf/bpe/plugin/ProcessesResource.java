@@ -1,5 +1,8 @@
 package dev.dsf.bpe.plugin;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,35 +28,46 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
+import dev.dsf.bpe.api.Constants;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 
 public final class ProcessesResource
 {
+	public static ProcessesResource from(FhirContext fhirContext, byte[] encodedResource)
+	{
+		try (InputStream in = new ByteArrayInputStream(encodedResource))
+		{
+			Resource resource = (Resource) fhirContext.newJsonParser().parseResource(in);
+			return from(resource);
+		}
+		catch (ConfigurationException | DataFormatException | IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static ProcessesResource from(Resource resource)
 	{
 		Objects.requireNonNull(resource, "resource");
 
-		if (resource instanceof ActivityDefinition a)
-			return fromMetadataResource(a);
-		else if (resource instanceof CodeSystem c)
-			return fromMetadataResource(c);
-		else if (resource instanceof Library l)
-			return fromMetadataResource(l);
-		else if (resource instanceof Measure m)
-			return fromMetadataResource(m);
-		else if (resource instanceof NamingSystem n)
-			return fromNamingSystem(n);
-		else if (resource instanceof Questionnaire q)
-			return fromMetadataResource(q);
-		else if (resource instanceof StructureDefinition s)
-			return fromMetadataResource(s);
-		else if (resource instanceof Task t)
-			return fromTask(t);
-		else if (resource instanceof ValueSet v)
-			return fromMetadataResource(v);
-		else
-			throw new IllegalArgumentException(
+		return switch (resource)
+		{
+			case ActivityDefinition a -> fromMetadataResource(a);
+			case CodeSystem c -> fromMetadataResource(c);
+			case Library l -> fromMetadataResource(l);
+			case Measure m -> fromMetadataResource(m);
+			case NamingSystem n -> fromNamingSystem(n);
+			case Questionnaire q -> fromMetadataResource(q);
+			case StructureDefinition s -> fromMetadataResource(s);
+			case Task t -> fromTask(t);
+			case ValueSet v -> fromMetadataResource(v);
+
+			default -> throw new IllegalArgumentException(
 					"MetadataResource of type " + resource.getClass().getName() + " not supported");
+		};
 	}
 
 	public static ProcessesResource fromMetadataResource(MetadataResource resource)
@@ -77,7 +91,11 @@ public final class ProcessesResource
 
 	private static String getIdentifier(Task resource)
 	{
-		return TaskIdentifier.findFirst(resource).map(Identifier::getValue).get();
+		return resource.getIdentifier().stream()
+				.filter(i -> i.hasSystemElement() && i.getSystemElement().hasValue()
+						&& Constants.TASK_IDENTIFIER_SID.equals(i.getSystemElement().getValue()))
+				.findFirst().filter(i -> i.hasValueElement() && i.getValueElement().hasValue())
+				.map(Identifier::getValue).get();
 	}
 
 	public static ProcessesResource from(ResourceInfo resourceInfo)

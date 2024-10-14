@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.fhir.adapter.AbstractAdapter;
+import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import jakarta.ws.rs.WebApplicationException;
@@ -145,9 +145,9 @@ public class ParameterConverter
 	{
 		Map<String, String> parameters = new HashMap<>();
 		if (pretty)
-			parameters.put(AbstractAdapter.PRETTY, "true");
+			parameters.put(FhirAdapter.PRETTY, "true");
 		if (summaryMode != null)
-			parameters.put(AbstractAdapter.SUMMARY, summaryMode.toString());
+			parameters.put(FhirAdapter.SUMMARY, summaryMode.toString());
 
 		return new MediaType(type, subtype, parameters);
 	}

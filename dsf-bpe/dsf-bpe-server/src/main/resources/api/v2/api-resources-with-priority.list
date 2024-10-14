@@ -1,0 +1,6 @@
+ca/uhn/fhir/hapi-fhir-base-build.properties
+ca/uhn/fhir/i18n/hapi-messages.properties
+dev/dsf/bpe/v2/plugin/ApiServicesSpringConfiguration.class
+dev/dsf/bpe/v2/spring/ApiServiceConfig.class
+META-INF/services/dev.dsf.bpe.api.plugin.ProcessPluginApiBuilder
+org/hl7/fhir/r4/hapi/model/fhirversion.properties

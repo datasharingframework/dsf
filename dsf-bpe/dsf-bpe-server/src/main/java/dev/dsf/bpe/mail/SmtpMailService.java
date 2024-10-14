@@ -68,9 +68,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import de.rwh.utils.crypto.context.SSLContextFactory;
-import dev.dsf.bpe.v1.service.MailService;
 
-public class SmtpMailService implements MailService, InitializingBean
+public class SmtpMailService implements BpeMailService, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SmtpMailService.class);
 

@@ -11,7 +11,11 @@
 	</parent>
 
 	<modules>
+		<module>dsf-bpe-process-api</module>
 		<module>dsf-bpe-process-api-v1</module>
+		<module>dsf-bpe-process-api-v1-impl</module>
+		<module>dsf-bpe-process-api-v2</module>
+		<module>dsf-bpe-process-api-v2-impl</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 	</modules>
@@ -62,39 +66,33 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-api-v1</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api-v1-impl</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api-v2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api-v2-impl</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-webservice-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-validation</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-validation</artifactId>
-				<classifier>tests</classifier>
-				<type>test-jar</type>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-auth</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

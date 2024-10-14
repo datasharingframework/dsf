@@ -473,7 +473,9 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 					task.getInstantiatesCanonical(), target.getOrganizationIdentifierValue(),
 					target.getEndpointIdentifierValue(), businessKey, messageName);
 
-		logger.trace("Task resource to send: {}", api.getFhirContext().newJsonParser().encodeResourceToString(task));
+		logger.trace("Task resource to send: {}",
+				api.getFhirContext().newJsonParser().setStripVersionsFromReferences(false)
+						.setOverrideResourceIdWithBundleEntryFullUrl(false).encodeResourceToString(task));
 
 		IdType created = doSend(client, task);
 

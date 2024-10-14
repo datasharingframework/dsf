@@ -10,17 +10,18 @@ import org.camunda.bpm.engine.delegate.TaskListener;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.plugin.ProcessPlugin;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 
 public class DelegateProviderImpl implements DelegateProvider, ProcessPluginConsumer, InitializingBean
 {
 	private static final class ProcessByIdAndVersion
 	{
 		final ProcessIdAndVersion processIdAndVersion;
-		final ProcessPlugin<?, ?> plugin;
+		final ProcessPlugin plugin;
 
-		ProcessByIdAndVersion(ProcessIdAndVersion idAndVersion, ProcessPlugin<?, ?> plugin)
+		ProcessByIdAndVersion(ProcessIdAndVersion idAndVersion, ProcessPlugin plugin)
 		{
 			this.processIdAndVersion = idAndVersion;
 			this.plugin = plugin;
@@ -31,7 +32,7 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 			return processIdAndVersion;
 		}
 
-		public ProcessPlugin<?, ?> getPlugin()
+		public ProcessPlugin getPlugin()
 		{
 			return plugin;
 		}
@@ -40,12 +41,19 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	private final ClassLoader defaultClassLoader;
 	private final ApplicationContext defaultApplicationContext;
 
-	private final Map<ProcessIdAndVersion, ProcessPlugin<?, ?>> processPluginsByIdAndVersion = new HashMap<>();
+	private final Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion = new HashMap<>();
+	private final Map<String, Class<? extends TaskListener>> defaultUserTaskListenerByApiVersion;
 
-	public DelegateProviderImpl(ClassLoader mainClassLoader, ApplicationContext mainApplicationContext)
+	public DelegateProviderImpl(ClassLoader mainClassLoader, ApplicationContext mainApplicationContext,
+			List<ProcessPluginFactory> pluginFactories)
 	{
 		this.defaultClassLoader = mainClassLoader;
 		this.defaultApplicationContext = mainApplicationContext;
+
+		Objects.requireNonNull(pluginFactories, "pluginFactories");
+
+		defaultUserTaskListenerByApiVersion = pluginFactories.stream().collect(Collectors
+				.toMap(f -> String.valueOf(f.getApiVersion()), ProcessPluginFactory::getDefaultUserTaskListener));
 	}
 
 	@Override
@@ -56,9 +64,9 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	}
 
 	@Override
-	public void setProcessPlugins(List<ProcessPlugin<?, ?>> plugins)
+	public void setProcessPlugins(List<ProcessPlugin> plugins)
 	{
-		processPluginsByIdAndVersion.putAll(plugins.stream()
+		processPluginsByProcessIdAndVersion.putAll(plugins.stream()
 				.flatMap(plugin -> plugin.getProcessKeysAndVersions().stream()
 						.map(idAndVersion -> new ProcessByIdAndVersion(idAndVersion, plugin)))
 				.collect(Collectors.toMap(ProcessByIdAndVersion::getProcessIdAndVersion,
@@ -71,7 +79,7 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 		if (processIdAndVersion == null)
 			return defaultClassLoader;
 
-		var plugin = processPluginsByIdAndVersion.get(processIdAndVersion);
+		var plugin = processPluginsByProcessIdAndVersion.get(processIdAndVersion);
 
 		if (plugin == null)
 			return defaultClassLoader;
@@ -85,7 +93,7 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 		if (processIdAndVersion == null)
 			return defaultApplicationContext;
 
-		var plugin = processPluginsByIdAndVersion.get(processIdAndVersion);
+		var plugin = processPluginsByProcessIdAndVersion.get(processIdAndVersion);
 
 		if (plugin == null)
 			return defaultApplicationContext;
@@ -96,11 +104,12 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	@Override
 	public Class<? extends TaskListener> getDefaultUserTaskListenerClass(String processPluginApiVersion)
 	{
-		return switch (processPluginApiVersion)
-		{
-			case "1" -> dev.dsf.bpe.v1.activity.DefaultUserTaskListener.class;
-			default -> throw new IllegalArgumentException(
-					"Process plugin API version " + processPluginApiVersion + " not supported");
-		};
+		Class<? extends TaskListener> listenerClass = defaultUserTaskListenerByApiVersion.get(processPluginApiVersion);
+
+		if (listenerClass != null)
+			return listenerClass;
+		else
+			throw new IllegalArgumentException(
+					"Process plugin api version " + processPluginApiVersion + " not supported");
 	}
 }

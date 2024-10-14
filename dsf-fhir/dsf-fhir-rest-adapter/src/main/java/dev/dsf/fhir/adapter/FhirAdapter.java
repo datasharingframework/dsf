@@ -7,15 +7,16 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.service.ReferenceCleaner;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
@@ -30,14 +31,41 @@ import jakarta.ws.rs.ext.Provider;
 		Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON, MediaType.APPLICATION_JSON })
 @Produces({ Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML,
 		Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON, MediaType.APPLICATION_JSON })
-public class FhirAdapter extends AbstractAdapter
-		implements MessageBodyReader<BaseResource>, MessageBodyWriter<BaseResource>
+public class FhirAdapter implements MessageBodyReader<BaseResource>, MessageBodyWriter<BaseResource>
 {
-	private final FhirContext fhirContext;
+	public static final String PRETTY = "pretty";
+	public static final String SUMMARY = "summary";
 
-	public FhirAdapter(FhirContext fhirContext)
+	private final FhirContext fhirContext;
+	private final ReferenceCleaner referenceCleaner;
+
+	public FhirAdapter(FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		this.fhirContext = fhirContext;
+		this.referenceCleaner = referenceCleaner;
+	}
+
+	private IParser getParser(MediaType mediaType, Supplier<IParser> parserFactor)
+	{
+		/* Parsers are not guaranteed to be thread safe */
+		IParser p = parserFactor.get();
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+
+		if (mediaType != null)
+		{
+			if ("true".equals(mediaType.getParameters().getOrDefault(PRETTY, "false")))
+				p.setPrettyPrint(true);
+
+			switch (mediaType.getParameters().getOrDefault(SUMMARY, "false"))
+			{
+				case "true" -> p.setSummaryMode(true);
+				case "text" -> p.setEncodeElements(Set.of("*.text", "*.id", "*.meta", "*.(mandatory)"));
+				case "data" -> p.setSuppressNarratives(true);
+			}
+		}
+
+		return p;
 	}
 
 	private IParser getParser(MediaType mediaType)
@@ -77,49 +105,11 @@ public class FhirAdapter extends AbstractAdapter
 			MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException
 	{
-		return fixResource(getParser(mediaType).parseResource(type, new InputStreamReader(entityStream)));
-	}
+		BaseResource resource = getParser(mediaType).parseResource(type, new InputStreamReader(entityStream));
 
-	private BaseResource fixResource(BaseResource resource)
-	{
+		// HAPI FHIR parser adds contained resources to bundle references
 		if (resource instanceof Bundle b)
-			return fixBundle(b);
-		else if (resource instanceof Binary b)
-			return fixBinary(b);
-		else
-			return resource;
-	}
-
-	private BaseResource fixBundle(Bundle resource)
-	{
-		if (resource.hasIdElement() && resource.getIdElement().hasIdPart()
-				&& !resource.getIdElement().hasVersionIdPart() && resource.hasMeta()
-				&& resource.getMeta().hasVersionId())
-		{
-			// TODO Bugfix HAPI is removing version information from bundle.id
-			IdType fixedId = new IdType(resource.getResourceType().name(), resource.getIdElement().getIdPart(),
-					resource.getMeta().getVersionId());
-			resource.setIdElement(fixedId);
-		}
-
-		// TODO Bugfix HAPI is removing version information from bundle.id
-		resource.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Bundle)
-				.map(e -> (Bundle) e.getResource()).forEach(this::fixResource);
-
-		return resource;
-	}
-
-	private BaseResource fixBinary(Binary resource)
-	{
-		if (resource.hasIdElement() && resource.getIdElement().hasIdPart()
-				&& !resource.getIdElement().hasVersionIdPart() && resource.hasMeta()
-				&& resource.getMeta().hasVersionId())
-		{
-			// TODO Bugfix HAPI is removing version information from binary.id
-			IdType fixedId = new IdType(resource.getResourceType().name(), resource.getIdElement().getIdPart(),
-					resource.getMeta().getVersionId());
-			resource.setIdElement(fixedId);
-		}
+			resource = referenceCleaner.cleanReferenceResourcesIfBundle(b);
 
 		return resource;
 	}

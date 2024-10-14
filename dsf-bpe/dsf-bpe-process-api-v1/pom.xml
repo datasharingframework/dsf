@@ -11,12 +11,9 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-auth</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-webservice-client</artifactId>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>${hapi.fhir.version.v1}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.camunda.bpm</groupId>
@@ -34,6 +31,10 @@
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
 		</dependency>
+		<dependency>
+			<artifactId>jakarta.ws.rs-api</artifactId>
+        	<groupId>jakarta.ws.rs</groupId>
+		</dependency>
 
 		<!-- optional dependencies provided by the DSF bpe -->
 		<dependency>
@@ -42,70 +43,9 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-validation</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>crypto-utils</artifactId>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
-	<profiles>
-		<profile>
-			<id>generate-source-and-javadoc-jars</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-test-sources</id>
-								<goals>
-									<goal>test-jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-test-javadocs</id>
-								<goals>
-									<goal>test-jar</goal>
-								</goals>
-								<configuration>
-									<detectOfflineLinks>false</detectOfflineLinks>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

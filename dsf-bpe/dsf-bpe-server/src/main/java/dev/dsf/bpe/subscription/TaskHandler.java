@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +21,7 @@ import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
+import org.camunda.bpm.engine.variable.value.PrimitiveValue;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 import org.camunda.bpm.model.bpmn.instance.StartEvent;
@@ -32,14 +34,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
-import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
-import dev.dsf.bpe.variables.FhirResourceValues;
-import dev.dsf.fhir.client.FhirWebserviceClient;
+import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.api.Constants;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.plugin.ProcessPluginManager;
 
-public class TaskHandler implements ResourceHandler<Task>, InitializingBean
+public class TaskHandler extends AbstractResourceHandler implements ResourceHandler<Task>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskHandler.class);
+
+	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
+			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
+	private static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
+			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);
 
 	private static final class ProcessNotFoundException extends ProcessEngineException
 	{
@@ -88,30 +96,24 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		}
 	}
 
-	public static final String TASK_VARIABLE = TaskHandler.class.getName() + ".task";
-
-	private static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
-			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";
-	private static final Pattern INSTANTIATES_CANONICAL_PATTERN = Pattern
-			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);
-
 	private final RuntimeService runtimeService;
-	private final RepositoryService repositoryService;
 	private final FhirWebserviceClient webserviceClient;
 
-	public TaskHandler(RuntimeService runtimeService, RepositoryService repositoryService,
-			FhirWebserviceClient webserviceClient)
+	public TaskHandler(RepositoryService repositoryService, ProcessPluginManager processPluginManager,
+			FhirContext fhirContext, RuntimeService runtimeService, FhirWebserviceClient webserviceClient)
 	{
+		super(repositoryService, processPluginManager, fhirContext);
+
 		this.runtimeService = runtimeService;
-		this.repositoryService = repositoryService;
 		this.webserviceClient = webserviceClient;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(runtimeService, "runtimeService");
-		Objects.requireNonNull(repositoryService, "repositoryService");
 		Objects.requireNonNull(webserviceClient, "webserviceClient");
 	}
 
@@ -130,26 +132,39 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		String processDefinitionKey = matcher.group("processName");
 		String processVersion = matcher.group("processVersion");
 
-		String messageName = getFirstInputParameter(task, BpmnMessage.messageName());
-		String businessKey = getFirstInputParameter(task, BpmnMessage.businessKey());
-		String correlationKey = getFirstInputParameter(task, BpmnMessage.correlationKey());
+		ProcessDefinition processDefinition = getProcessDefinition(processDomain, processDefinitionKey, processVersion);
+
+		if (processDefinition == null)
+			throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
+
+		Optional<ProcessPlugin> processPlugin = getProcessPlugin(processDefinition);
+
+		if (processPlugin.isEmpty())
+			throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
+
+		String messageName = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_MESSAGE_NAME);
+		String businessKey = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_BUSINESS_KEY);
+		String correlationKey = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_CORRELATION_KEY);
 
 		if (businessKey == null)
 		{
 			businessKey = UUID.randomUUID().toString();
 			logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getId());
-			task.addInput().setType(new CodeableConcept(BpmnMessage.businessKey()))
+			task.addInput().setType(new CodeableConcept().addCoding(
+					new Coding().setSystem(Constants.BPMN_MESSAGE_URL).setCode(Constants.BPMN_MESSAGE_BUSINESS_KEY)))
 					.setValue(new StringType(businessKey));
 		}
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		task = webserviceClient.update(task);
 
-		Map<String, Object> variables = Map.of(TASK_VARIABLE, FhirResourceValues.create(task));
+		PrimitiveValue<?> fhirTaskVariable = processPlugin.get()
+				.createFhirTaskVariable(newJsonParser().encodeResourceToString(task));
+		Map<String, Object> variables = Map.of(Constants.TASK_VARIABLE, fhirTaskVariable);
 
 		try
 		{
 			onMessage(businessKey, correlationKey, processDomain, processDefinitionKey, processVersion, messageName,
-					variables);
+					processDefinition.getId(), variables);
 		}
 		catch (MismatchingMessageCorrelationException e)
 		{
@@ -184,7 +199,10 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 	private void updateTaskFailed(Task task, String message)
 	{
-		task.addOutput().setType(new CodeableConcept(BpmnMessage.error())).setValue(new StringType(message));
+		task.addOutput()
+				.setType(new CodeableConcept().addCoding(
+						new Coding().setSystem(Constants.BPMN_MESSAGE_URL).setCode(Constants.BPMN_MESSAGE_ERROR)))
+				.setValue(new StringType(message));
 		task.setStatus(Task.TaskStatus.FAILED);
 
 		try
@@ -199,15 +217,15 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		}
 	}
 
-	private String getFirstInputParameter(Task task, Coding code)
+	private String getFirstBpmnMessageInputParameter(Task task, String code)
 	{
 		if (task == null || code == null)
 			return null;
 
 		return task.getInput().stream().filter(ParameterComponent::hasType)
 				.filter(c -> c.getType().getCoding().stream()
-						.anyMatch(co -> co != null && Objects.equals(code.getSystem(), co.getSystem())
-								&& Objects.equals(code.getCode(), co.getCode())))
+						.anyMatch(co -> co != null && Objects.equals(Constants.BPMN_MESSAGE_URL, co.getSystem())
+								&& Objects.equals(code, co.getCode())))
 				.filter(ParameterComponent::hasValue).map(ParameterComponent::getValue)
 				.filter(v -> v instanceof StringType).map(v -> (StringType) v).map(StringType::getValue).findFirst()
 				.orElse(null);
@@ -226,11 +244,14 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 	 *            not <code>null</code>
 	 * @param messageName
 	 *            not <code>null</code>
+	 * @param processDefinitionId
+	 *            not <code>null</code>
 	 * @param variables
 	 *            may be <code>null</code>
 	 */
 	protected void onMessage(String businessKey, String correlationKey, String processDomain,
-			String processDefinitionKey, String processVersion, String messageName, Map<String, Object> variables)
+			String processDefinitionKey, String processVersion, String messageName, String processDefinitionId,
+			Map<String, Object> variables)
 	{
 		// businessKey may be null
 		// correlationKey may be null
@@ -238,25 +259,21 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
 		Objects.requireNonNull(processVersion, "processVersion");
 		Objects.requireNonNull(messageName, "messageName");
+		Objects.requireNonNull(processDefinitionId, "processDefinitionId");
 
 		if (variables == null)
 			variables = Collections.emptyMap();
 
-		ProcessDefinition processDefinition = getProcessDefinition(processDomain, processDefinitionKey, processVersion);
-
-		if (processDefinition == null)
-			throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
-
 		if (businessKey == null)
 		{
-			runtimeService.startProcessInstanceByMessageAndProcessDefinitionId(messageName, processDefinition.getId(),
+			runtimeService.startProcessInstanceByMessageAndProcessDefinitionId(messageName, processDefinitionId,
 					UUID.randomUUID().toString(), variables);
 		}
 		else
 		{
-			List<ProcessInstance> instances = getProcessInstanceQuery(processDefinition, businessKey).list();
+			List<ProcessInstance> instances = getProcessInstanceQuery(processDefinitionId, businessKey).list();
 			List<ProcessInstance> instancesWithAlternativeBusinessKey = getAlternativeProcessInstanceQuery(
-					processDefinition, businessKey).list();
+					processDefinitionId, businessKey).list();
 
 			if (instances.size() + instancesWithAlternativeBusinessKey.size() > 1)
 				logger.warn("instance-ids {}",
@@ -265,7 +282,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 			if (instances.size() + instancesWithAlternativeBusinessKey.size() <= 0)
 			{
-				BpmnModelInstance model = repositoryService.getBpmnModelInstance(processDefinition.getId());
+				BpmnModelInstance model = repositoryService.getBpmnModelInstance(processDefinitionId);
 				Collection<StartEvent> startEvents = model == null ? Collections.emptySet()
 						: model.getModelElementsByType(StartEvent.class);
 				Stream<String> startEventMesssageNames = startEvents.stream().flatMap(e ->
@@ -276,7 +293,7 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 
 				if (startEventMesssageNames.anyMatch(m -> m.equals(messageName)))
 				{
-					runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
+					runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinitionId)
 							.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
 				}
 				else
@@ -292,12 +309,10 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 							.processInstanceBusinessKey(businessKey);
 				else
 					correlation = runtimeService.createMessageCorrelation(messageName).setVariables(variables)
-							.processInstanceVariableEquals(BpmnExecutionVariables.ALTERNATIVE_BUSINESS_KEY,
-									businessKey);
+							.processInstanceVariableEquals(Constants.ALTERNATIVE_BUSINESS_KEY, businessKey);
 
 				if (correlationKey != null)
-					correlation = correlation.localVariableEquals(BpmnExecutionVariables.CORRELATION_KEY,
-							correlationKey);
+					correlation = correlation.localVariableEquals(Constants.CORRELATION_KEY, correlationKey);
 
 				// throws MismatchingMessageCorrelationException - if none or more than one execution or process
 				// definition is matched by the correlation
@@ -318,16 +333,15 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();
 	}
 
-	private ProcessInstanceQuery getProcessInstanceQuery(ProcessDefinition processDefinition, String businessKey)
+	private ProcessInstanceQuery getProcessInstanceQuery(String processDefinitionId, String businessKey)
 	{
-		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
+		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinitionId)
 				.processInstanceBusinessKey(businessKey);
 	}
 
-	private ProcessInstanceQuery getAlternativeProcessInstanceQuery(ProcessDefinition processDefinition,
-			String businessKey)
+	private ProcessInstanceQuery getAlternativeProcessInstanceQuery(String processDefinitionId, String businessKey)
 	{
-		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
-				.variableValueEquals(BpmnExecutionVariables.ALTERNATIVE_BUSINESS_KEY, businessKey);
+		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinitionId)
+				.variableValueEquals(Constants.ALTERNATIVE_BUSINESS_KEY, businessKey);
 	}
 }

@@ -17,8 +17,8 @@ import org.camunda.bpm.engine.impl.util.xml.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.plugin.ProcessPlugin;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
 
 public class MultiVersionBpmnParse extends BpmnParse
 {

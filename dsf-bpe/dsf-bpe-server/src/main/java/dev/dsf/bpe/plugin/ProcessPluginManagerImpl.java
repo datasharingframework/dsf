@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,20 +20,26 @@ import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.camunda.ProcessPluginConsumer;
-import dev.dsf.bpe.v1.ProcessPluginDeploymentStateListener;
-import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
-import dev.dsf.fhir.client.BasicFhirWebserviceClient;
-import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.BasicFhirWebserviceClient;
+import dev.dsf.bpe.client.FhirWebserviceClient;
 
 public class ProcessPluginManagerImpl implements ProcessPluginManager, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginManagerImpl.class);
+
+	public static final String ORGANIZATION_IDENTIFIER_SID = "http://dsf.dev/sid/organization-identifier";
+
+	private record ProcessIdAndVersionAndProcessPlugin(ProcessIdAndVersion idAndVersion, ProcessPlugin plugin)
+	{
+	}
 
 	private final List<ProcessPluginConsumer> processPluginConsumers = new ArrayList<>();
 
@@ -46,6 +51,8 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	private final FhirWebserviceClient localWebserviceClient;
 	private final int fhirServerRequestMaxRetries;
 	private final long fhirServerRetryDelayMillis;
+
+	private Map<ProcessIdAndVersion, ProcessPlugin> pluginsByProcessIdAndVersion;
 
 	public ProcessPluginManagerImpl(List<ProcessPluginConsumer> processPluginConsumers,
 			ProcessPluginLoader processPluginLoader, BpmnProcessStateChangeService bpmnProcessStateChangeService,
@@ -84,7 +91,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		if (localOrganizationIdentifierValue.isEmpty())
 			logger.warn("Local organization identifier unknown, check DSF FHIR server allow list");
 
-		List<ProcessPlugin<?, ?>> plugins = removeDuplicates(processPluginLoader.loadPlugins().stream()
+		List<ProcessPlugin> plugins = removeDuplicates(processPluginLoader.loadPlugins().stream()
 				.filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null))));
 
 		if (plugins.isEmpty())
@@ -98,11 +105,16 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.deploySuspendOrActivateProcesses(models);
 
 		// deploy FHIR resources
-		Map<ProcessIdAndVersion, List<Resource>> resources = plugins.stream().map(ProcessPlugin::getFhirResources)
+		Map<ProcessIdAndVersion, List<byte[]>> resources = plugins.stream().map(ProcessPlugin::getFhirResources)
 				.flatMap(m -> m.entrySet().stream()).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		fhirResourceHandler.applyStateChangesAndStoreNewResourcesInDb(resources, outcomes);
 
 		onProcessesDeployed(outcomes, plugins);
+
+		this.pluginsByProcessIdAndVersion = plugins.stream().flatMap(
+				p -> p.getProcessKeysAndVersions().stream().map(iAV -> new ProcessIdAndVersionAndProcessPlugin(iAV, p)))
+				.collect(Collectors.toMap(ProcessIdAndVersionAndProcessPlugin::idAndVersion,
+						ProcessIdAndVersionAndProcessPlugin::plugin));
 	}
 
 	private BasicFhirWebserviceClient retryClient()
@@ -136,8 +148,12 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 			return Optional.empty();
 		}
 
-		return getActiveOrganizationFromIncludes(resultBundle).findFirst().flatMap(OrganizationIdentifier::findFirst)
-				.map(Identifier::getValue);
+		return getActiveOrganizationFromIncludes(resultBundle).findFirst()
+				.flatMap(o -> o.getIdentifier().stream()
+						.filter(i -> i.hasSystemElement() && i.getSystemElement().hasValue()
+								&& ORGANIZATION_IDENTIFIER_SID.equals(i.getSystem()))
+						.findFirst())
+				.filter(i -> i.hasValueElement() && i.getValueElement().hasValue()).map(Identifier::getValue);
 	}
 
 	private Stream<Organization> getActiveOrganizationFromIncludes(Bundle resultBundle)
@@ -148,9 +164,9 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.filter(r -> r instanceof Organization).map(r -> (Organization) r).filter(Organization::getActive);
 	}
 
-	private List<ProcessPlugin<?, ?>> removeDuplicates(Stream<ProcessPlugin<?, ?>> plugins)
+	private List<ProcessPlugin> removeDuplicates(Stream<ProcessPlugin> plugins)
 	{
-		Map<ProcessIdAndVersion, List<ProcessPlugin<?, ?>>> pluginsByProcessIdAndVersion = new HashMap<>();
+		Map<ProcessIdAndVersion, List<ProcessPlugin>> pluginsByProcessIdAndVersion = new HashMap<>();
 		plugins.forEach(plugin ->
 		{
 			List<ProcessIdAndVersion> processes = plugin.getProcessKeysAndVersions();
@@ -160,7 +176,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 					pluginsByProcessIdAndVersion.get(process).add(plugin);
 				else
 				{
-					List<ProcessPlugin<?, ?>> list = new ArrayList<>();
+					List<ProcessPlugin> list = new ArrayList<>();
 					list.add(plugin);
 					pluginsByProcessIdAndVersion.put(process, list);
 				}
@@ -179,40 +195,21 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.flatMap(e -> e.getValue().stream()).distinct().toList();
 	}
 
-	private void onProcessesDeployed(List<ProcessStateChangeOutcome> changes, List<ProcessPlugin<?, ?>> plugins)
+	private void onProcessesDeployed(List<ProcessStateChangeOutcome> changes, List<ProcessPlugin> plugins)
 	{
 		Set<ProcessIdAndVersion> activeProcesses = changes.stream()
 				.filter(c -> EnumSet.of(ProcessState.ACTIVE, ProcessState.DRAFT).contains(c.getNewProcessState()))
 				.map(ProcessStateChangeOutcome::getProcessKeyAndVersion).collect(Collectors.toSet());
 
-		plugins.forEach(plugin ->
-		{
-			List<String> activePluginProcesses = plugin.getProcessKeysAndVersions().stream()
-					.filter(activeProcesses::contains).map(ProcessIdAndVersion::getId).toList();
-
-			plugin.getApplicationContext().getBeansOfType(ProcessPluginDeploymentStateListener.class).entrySet()
-					.forEach(onProcessesDeployed(plugin, activePluginProcesses));
-		});
+		plugins.stream()
+				.forEach(plugin -> plugin.getProcessPluginDeploymentListener().onProcessesDeployed(activeProcesses));
 	}
 
-	private Consumer<Entry<String, ProcessPluginDeploymentStateListener>> onProcessesDeployed(
-			ProcessPlugin<?, ?> plugin, List<String> activePluginProcesses)
+	public Optional<ProcessPlugin> getProcessPlugin(ProcessIdAndVersion processIdAndVersion)
 	{
-		return entry ->
-		{
-			try
-			{
-				entry.getValue().onProcessesDeployed(activePluginProcesses);
-			}
-			catch (Exception e)
-			{
-				logger.debug("Error while executing {} bean {} for process plugin {}",
-						ProcessPluginDeploymentStateListener.class.getName(), entry.getKey(),
-						plugin.getJarFile().toString(), e);
-				logger.warn("Error while executing {} bean {} for process plugin {}: {} - {}",
-						ProcessPluginDeploymentStateListener.class.getName(), entry.getKey(),
-						plugin.getJarFile().toString(), e.getClass().getName(), e.getMessage());
-			}
-		};
+		if (pluginsByProcessIdAndVersion == null)
+			return Optional.empty();
+		else
+			return Optional.ofNullable(pluginsByProcessIdAndVersion.get(processIdAndVersion));
 	}
 }

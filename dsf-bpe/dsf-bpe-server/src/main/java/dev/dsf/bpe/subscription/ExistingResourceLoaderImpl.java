@@ -17,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.bpe.client.FhirWebserviceClient;
 import dev.dsf.bpe.dao.LastEventTimeDao;
-import dev.dsf.fhir.client.FhirWebserviceClient;
 import jakarta.ws.rs.core.UriBuilder;
 
 public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingResourceLoader<R>

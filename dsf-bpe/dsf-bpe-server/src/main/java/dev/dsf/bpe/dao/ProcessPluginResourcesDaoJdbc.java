@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.postgresql.util.PGobject;
 
 import ca.uhn.fhir.parser.DataFormatException;
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.plugin.ProcessesResource;
 import dev.dsf.bpe.plugin.ResourceInfo;
 

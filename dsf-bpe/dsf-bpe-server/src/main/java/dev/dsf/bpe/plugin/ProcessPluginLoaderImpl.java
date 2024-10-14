@@ -1,9 +1,6 @@
 package dev.dsf.bpe.plugin;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,42 +9,32 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.ServiceLoader;
-import java.util.ServiceLoader.Provider;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.env.ConfigurableEnvironment;
 
-import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 
 public class ProcessPluginLoaderImpl implements ProcessPluginLoader, InitializingBean
 {
-	public static final String SNAPSHOT_FILE_SUFFIX = "-SNAPSHOT.jar";
-	public static final String MILESTONE_FILE_PATTERN = ".*-M[0-9]+.jar";
-	public static final String RELEASE_CANDIDATE_FILE_PATTERN = ".*-RC[0-9]+.jar";
-
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginLoaderImpl.class);
 
 	private final Path pluginDirectory;
-	private final List<ProcessPluginFactory<?>> processPluginFactories = new ArrayList<>();
-	private final FhirContext fhirContext;
-	private final ConfigurableEnvironment environment;
+	private final List<ProcessPluginFactory> processPluginFactories = new ArrayList<>();
 
-	public ProcessPluginLoaderImpl(Collection<? extends ProcessPluginFactory<?>> processPluginFactories,
-			Path pluginDirectory, FhirContext fhirContext, ConfigurableEnvironment environment)
+	public ProcessPluginLoaderImpl(Collection<? extends ProcessPluginFactory> processPluginFactories,
+			Path pluginDirectory)
 	{
 		this.pluginDirectory = pluginDirectory;
-		this.fhirContext = fhirContext;
-		this.environment = environment;
 
 		if (processPluginFactories != null)
 		{
 			this.processPluginFactories.addAll(processPluginFactories);
 			this.processPluginFactories.sort(
-					Comparator.<ProcessPluginFactory<?>> comparingInt(ProcessPluginFactory::getApiVersion).reversed());
+					Comparator.<ProcessPluginFactory> comparingInt(ProcessPluginFactory::getApiVersion).reversed());
 		}
 	}
 
@@ -55,16 +42,14 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(pluginDirectory, "pluginDirectory");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(environment, "environment");
 	}
 
 	@Override
-	public List<ProcessPlugin<?, ?>> loadPlugins()
+	public List<ProcessPlugin> loadPlugins()
 	{
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(pluginDirectory))
 		{
-			List<ProcessPlugin<?, ?>> plugins = new ArrayList<>();
+			List<ProcessPlugin> plugins = new ArrayList<>();
 
 			directoryStream.forEach(p ->
 			{
@@ -74,7 +59,7 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 					logger.warn("Ignoring {}: {}", p.toAbsolutePath().toString(), "Not a .jar file");
 				else
 				{
-					ProcessPlugin<?, ?> plugin = load(p);
+					ProcessPlugin plugin = load(p);
 					if (plugin != null)
 						plugins.add(plugin);
 				}
@@ -91,11 +76,11 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		}
 	}
 
-	private ProcessPlugin<?, ?> load(Path jar)
+	private ProcessPlugin load(Path jar)
 	{
-		for (ProcessPluginFactory<?> factory : processPluginFactories)
+		for (ProcessPluginFactory factory : processPluginFactories)
 		{
-			var plugin = load(jar, factory);
+			ProcessPlugin plugin = factory.load(jar);
 
 			if (plugin != null)
 				return plugin;
@@ -107,50 +92,5 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 						: processPluginFactories.stream().map(f -> String.valueOf(f.getApiVersion()))
 								.collect(Collectors.joining(", ", "[", "]")));
 		return null;
-	}
-
-	private <D> ProcessPlugin<?, ?> load(Path jar, ProcessPluginFactory<D> factory)
-	{
-		try
-		{
-			URLClassLoader classLoader = new URLClassLoader(jar.getFileName().toString(), new URL[] { toUrl(jar) },
-					ClassLoader.getSystemClassLoader());
-
-			List<Provider<D>> definitions = ServiceLoader.load(factory.getProcessPluginDefinitionType(), classLoader)
-					.stream().collect(Collectors.toList());
-
-			if (definitions.size() != 1)
-				return null;
-
-			String filename = jar.getFileName().toString();
-			boolean isSnapshot = filename.endsWith(SNAPSHOT_FILE_SUFFIX);
-			boolean isMilestone = filename.matches(MILESTONE_FILE_PATTERN);
-			boolean isReleaseCandidate = filename.matches(RELEASE_CANDIDATE_FILE_PATTERN);
-
-			boolean draft = isSnapshot || isMilestone || isReleaseCandidate;
-
-			return factory.createProcessPlugin(definitions.get(0).get(), draft, jar, classLoader, fhirContext,
-					environment);
-		}
-		catch (Exception e)
-		{
-			logger.debug("Ignoring {}: Unable to load process plugin", jar.toString(), e);
-			logger.warn("Ignoring {}: Unable to load process plugin: {} - {}", jar.toString(), e.getClass().getName(),
-					e.getMessage());
-
-			return null;
-		}
-	}
-
-	private URL toUrl(Path p)
-	{
-		try
-		{
-			return p.toUri().toURL();
-		}
-		catch (MalformedURLException e)
-		{
-			throw new RuntimeException(e);
-		}
 	}
 }

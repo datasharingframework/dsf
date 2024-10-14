@@ -153,16 +153,14 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 	{
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (resource.getPrincipalInvestigator().getResource() instanceof Practitioner p)
-				return p.getIdentifier().stream()
+			return switch (resource.getPrincipalInvestigator().getResource())
+			{
+				case Practitioner p -> p.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else if (resource.getPrincipalInvestigator().getResource() instanceof PractitionerRole p)
-				return p.getIdentifier().stream()
+				case PractitionerRole r -> r.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else
-				return false;
+				default -> false;
+			};
 		}
 		else
 		{

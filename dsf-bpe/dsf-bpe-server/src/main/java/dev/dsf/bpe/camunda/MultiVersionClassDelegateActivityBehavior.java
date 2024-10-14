@@ -13,7 +13,7 @@ import org.camunda.bpm.engine.impl.pvm.delegate.ActivityBehavior;
 import org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 
 public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActivityBehavior
 {
@@ -36,15 +36,14 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
-		if (delegateInstance instanceof ActivityBehavior b)
-			return new CustomActivityBehavior(b);
+		return switch (delegateInstance)
+		{
+			case ActivityBehavior b -> new CustomActivityBehavior(b);
+			case JavaDelegate d -> new ServiceTaskJavaDelegateActivityBehavior(d);
 
-		else if (delegateInstance instanceof JavaDelegate d)
-			return new ServiceTaskJavaDelegateActivityBehavior(d);
-
-		else
-			throw LOG.missingDelegateParentClassException(delegateInstance.getClass().getName(),
+			default -> throw LOG.missingDelegateParentClassException(delegateInstance.getClass().getName(),
 					JavaDelegate.class.getName(), ActivityBehavior.class.getName());
+		};
 	}
 
 	private Object instantiateDelegate(ProcessIdAndVersion processKeyAndVersion, String className,

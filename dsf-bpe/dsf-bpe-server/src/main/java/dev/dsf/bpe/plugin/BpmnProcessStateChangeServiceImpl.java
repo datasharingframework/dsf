@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.dao.ProcessStateDao;
 
 public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChangeService, InitializingBean
@@ -199,7 +201,7 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 
 		DeploymentBuilder builder = repositoryService.createDeployment().name(processKeyAndVersion.toString())
 				.source(fileAndModel.getFile()).addModelInstance(fileAndModel.getFile(), fileAndModel.getModel())
-				.enableDuplicateFiltering(true);
+				.enableDuplicateFiltering(true).tenantId(String.valueOf(fileAndModel.getProcessPluginApiVersion()));
 
 		Deployment deployment = builder.deploy();
 

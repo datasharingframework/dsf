@@ -2,6 +2,8 @@ package dev.dsf.bpe.plugin;
 
 import java.util.List;
 
+import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
+
 public interface BpmnProcessStateChangeService
 {
 	/**

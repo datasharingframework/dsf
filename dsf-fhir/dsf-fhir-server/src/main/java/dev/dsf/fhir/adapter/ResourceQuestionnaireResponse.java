@@ -102,44 +102,47 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 	{
 		String fhirType = typedValue.getClass().getAnnotation(DatatypeDef.class).name();
 
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof BooleanType b)
-			return new Item(show, id, "boolean", label, fhirType, null, null, b.hasValue() ? b.getValue() : null);
-		else if (typedValue instanceof DecimalType d)
-			return new Item(show, id, "number", label, fhirType, d.hasValue() ? String.valueOf(d.getValue()) : null,
-					null, null);
-		else if (typedValue instanceof IntegerType i)
-			return new Item(show, id, "number", label, fhirType, i.hasValue() ? String.valueOf(i.getValue()) : null,
-					null, null);
-		else if (typedValue instanceof DateType d)
-			return new Item(show, id, "date", label, fhirType, d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null,
-					null, null);
-		else if (typedValue instanceof DateTimeType dt)
-			return new Item(show, id, "datetime-local", label, fhirType,
-					dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null, null, null);
-		else if (typedValue instanceof TimeType t)
-			return new Item(show, id, "time", label, fhirType, t.hasValue() ? t.getValue() : null, null, null);
-		else if (typedValue instanceof StringType s)
-			return new Item(show, id, "text", label, fhirType, s.hasValue() ? s.getValue() : null, null, null);
-		else if (typedValue instanceof UriType u)
-			return new Item(show, id, "url", label, fhirType, u.hasValue() ? u.getValue() : null, null, null);
-		// else if (typedValue instanceof Attachment a)
-		// return TODO
-		else if (typedValue instanceof Coding c)
-			return new Item(show, id, "coding", label, fhirType, null, ElementSystemValue.from(c), null);
-		// else if(typedValue instanceof Quantity q)
-		// return TODO
-		else if (typedValue instanceof Reference r)
+		return switch (typedValue)
 		{
-			if (r.hasReferenceElement())
-				return new Item(show, id, "url", label, fhirType + ".reference",
-						r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null, null, null);
-			else if (r.hasIdentifier())
-				return new Item(show, id, "identifier", label, fhirType + ".identifier", null,
-						ElementSystemValue.from(r.getIdentifier()), null);
-		}
+			case BooleanType b ->
+				new Item(show, id, "boolean", label, fhirType, null, null, b.hasValue() ? b.getValue() : null);
 
-		logger.warn("Element of type {}, not supported", fhirType);
-		return null;
+			case DecimalType d -> new Item(show, id, "number", label, fhirType,
+					d.hasValue() ? String.valueOf(d.getValue()) : null, null, null);
+
+			case IntegerType i -> new Item(show, id, "number", label, fhirType,
+					i.hasValue() ? String.valueOf(i.getValue()) : null, null, null);
+
+			case DateType d -> new Item(show, id, "date", label, fhirType,
+					d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null, null, null);
+
+			case DateTimeType dt -> new Item(show, id, "datetime-local", label, fhirType,
+					dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null, null, null);
+
+			case TimeType t ->
+				new Item(show, id, "time", label, fhirType, t.hasValue() ? t.getValue() : null, null, null);
+
+			case StringType s ->
+				new Item(show, id, "text", label, fhirType, s.hasValue() ? s.getValue() : null, null, null);
+
+			case UriType u ->
+				new Item(show, id, "url", label, fhirType, u.hasValue() ? u.getValue() : null, null, null);
+
+			case Coding c -> new Item(show, id, "coding", label, fhirType, null, ElementSystemValue.from(c), null);
+
+			case Reference r when r.hasReferenceElement() -> new Item(show, id, "url", label, fhirType + ".reference",
+					r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null, null, null);
+
+			case Reference r when r.hasIdentifier() -> new Item(show, id, "identifier", label, fhirType + ".identifier",
+					null, ElementSystemValue.from(r.getIdentifier()), null);
+
+			// TODO case Attachment a ->
+			// TODO case Quantity q ->
+
+			default -> {
+				logger.warn("Element of type {}, not supported", fhirType);
+				yield null;
+			}
+		};
 	}
 }

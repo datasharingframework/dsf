@@ -17,11 +17,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>crypto-utils</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 
 		<dependency>

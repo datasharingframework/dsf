@@ -37,9 +37,9 @@ import org.springframework.context.event.EventListener;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
+import dev.dsf.bpe.mail.BpeMailService;
 import dev.dsf.bpe.mail.LoggingMailService;
 import dev.dsf.bpe.mail.SmtpMailService;
-import dev.dsf.bpe.v1.service.MailService;
 import dev.dsf.tools.build.BuildInfoReader;
 
 @Configuration
@@ -56,7 +56,7 @@ public class MailConfig implements InitializingBean
 	BuildInfoReaderConfig buildInfoReaderConfig;
 
 	@Bean
-	public MailService mailService()
+	public BpeMailService mailService()
 	{
 		if (isConfigured())
 		{
@@ -78,7 +78,7 @@ public class MailConfig implements InitializingBean
 		return propertiesConfig.getMailServerHostname() != null && propertiesConfig.getMailServerPort() > 0;
 	}
 
-	private MailService newSmptMailService()
+	private BpeMailService newSmptMailService()
 			throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, PKCSException
 	{
 		String fromAddress = propertiesConfig.getMailFromAddress();

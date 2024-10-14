@@ -2,7 +2,7 @@ package dev.dsf.bpe.subscription;
 
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.FhirWebserviceClient;
 
 public interface SubscriptionHandlerFactory<R extends Resource>
 {

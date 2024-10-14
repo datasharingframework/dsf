@@ -18,17 +18,18 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.client.BasicFhirWebserviceClient;
+import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.PreferReturnMinimal;
 import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
-import dev.dsf.fhir.client.BasicFhirWebserviceClient;
-import dev.dsf.fhir.client.FhirWebserviceClient;
-import dev.dsf.fhir.client.PreferReturnMinimal;
 
 public class FhirResourceHandlerImpl implements FhirResourceHandler, InitializingBean
 {
@@ -80,7 +81,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	}
 
 	@Override
-	public void applyStateChangesAndStoreNewResourcesInDb(Map<ProcessIdAndVersion, List<Resource>> pluginResources,
+	public void applyStateChangesAndStoreNewResourcesInDb(Map<ProcessIdAndVersion, List<byte[]>> pluginResources,
 			List<ProcessStateChangeOutcome> changes)
 	{
 		Objects.requireNonNull(pluginResources, "pluginResources");
@@ -152,7 +153,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			else
 			{
 				logger.debug("Executing process plugin resources bundle");
-				logger.trace("Bundle: {}", fhirContext.newJsonParser().encodeResourceToString(batchBundle));
+				logger.trace("Bundle: {}", newJsonParser().encodeResourceToString(batchBundle));
 
 				Bundle returnBundle = minimalReturnRetryClient().postBundle(batchBundle);
 
@@ -181,10 +182,18 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 					e.getMessage());
 			logger.warn(
 					"Resources in FHIR server may not be consistent, please check resources and execute the following bundle if necessary: {}",
-					fhirContext.newJsonParser().encodeResourceToString(batchBundle));
+					newJsonParser().encodeResourceToString(batchBundle));
 
 			throw e;
 		}
+	}
+
+	private IParser newJsonParser()
+	{
+		IParser p = fhirContext.newJsonParser();
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		return p;
 	}
 
 	private int getSortIndex(ProcessesResource resource)
@@ -333,16 +342,16 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	}
 
 	private Stream<ProcessesResource> getCurrentOrOldResources(
-			Map<ProcessIdAndVersion, List<Resource>> pluginResourcesByProcess,
+			Map<ProcessIdAndVersion, List<byte[]>> pluginResourcesByProcess,
 			Map<ProcessIdAndVersion, List<ResourceInfo>> dbResourcesByProcess, ProcessIdAndVersion process)
 	{
-		List<Resource> pluginResources = pluginResourcesByProcess.get(process);
+		List<byte[]> pluginResources = pluginResourcesByProcess.get(process);
 		if (pluginResources != null)
 		{
-			Stream<Resource> resources = getResources(process, pluginResourcesByProcess);
-			return resources.map(fhirResource ->
+			Stream<byte[]> resources = getResources(process, pluginResourcesByProcess);
+			return resources.map(r ->
 			{
-				ProcessesResource resource = ProcessesResource.from(fhirResource).add(process);
+				ProcessesResource resource = ProcessesResource.from(fhirContext, r).add(process);
 
 				Optional<UUID> resourceId = getResourceId(dbResourcesByProcess, process, resource.getResourceInfo());
 				resourceId.ifPresent(id -> resource.getResourceInfo().setResourceId(id));
@@ -364,10 +373,10 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		}
 	}
 
-	private Stream<Resource> getResources(ProcessIdAndVersion process,
-			Map<ProcessIdAndVersion, List<Resource>> pluginResources)
+	private Stream<byte[]> getResources(ProcessIdAndVersion process,
+			Map<ProcessIdAndVersion, List<byte[]>> pluginResources)
 	{
-		List<Resource> resources = pluginResources.get(process);
+		List<byte[]> resources = pluginResources.get(process);
 		if (resources.isEmpty())
 		{
 			logger.warn("No FHIR resources found for process {}", process.toString());

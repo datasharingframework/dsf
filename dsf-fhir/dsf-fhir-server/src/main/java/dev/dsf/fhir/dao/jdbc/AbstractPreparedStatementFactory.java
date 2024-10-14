@@ -4,8 +4,6 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
 
@@ -46,17 +44,7 @@ abstract class AbstractPreparedStatementFactory<R extends Resource> implements P
 
 	protected final R jsonToResource(String json)
 	{
-		R resource = getJsonParser().parseResource(resourceType, json);
-
-		// TODO Bugfix HAPI is not setting version information from bundle.id while parsing non DomainResource
-		if (!(resource instanceof DomainResource))
-		{
-			IdType fixedId = new IdType(resource.getResourceType().name(), resource.getIdElement().getIdPart(),
-					resource.getMeta().getVersionId());
-			resource.setIdElement(fixedId);
-		}
-
-		return resource;
+		return getJsonParser().parseResource(resourceType, json);
 	}
 
 	@Override

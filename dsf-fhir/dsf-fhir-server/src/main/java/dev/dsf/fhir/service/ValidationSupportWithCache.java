@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import dev.dsf.fhir.event.Event;
@@ -353,11 +354,19 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 				theValueSet);
 	}
 
+	@Deprecated
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theRootValidationSupport, String theSystem,
 			String theCode)
 	{
 		return delegate.lookupCode(theRootValidationSupport, theSystem, theCode);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext,
+			LookupCodeRequest theLookupCodeRequest)
+	{
+		return delegate.lookupCode(theValidationSupportContext, theLookupCodeRequest);
 	}
 
 	@Override

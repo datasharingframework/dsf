@@ -22,16 +22,16 @@ public class AuthenticationConfig
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationConfig.class);
 
 	@Autowired
-	private PropertiesConfig propertiesConfig;
+	private FhirClientConfig fhirClientConfig;
 
 	@Autowired
-	private PluginConfig pluginConfig;
+	private PropertiesConfig propertiesConfig;
 
 	@Bean
 	public LocalOrganizationProvider localOrganizationProvider()
 	{
-		return new LocalOrganizationProviderImpl(Duration.ofSeconds(30),
-				pluginConfig.processPluginApiV1().getOrganizationProvider());
+		return new LocalOrganizationProviderImpl(Duration.ofSeconds(30), fhirClientConfig.clientProvider(),
+				propertiesConfig.getFhirServerBaseUrl());
 	}
 
 	@Bean
