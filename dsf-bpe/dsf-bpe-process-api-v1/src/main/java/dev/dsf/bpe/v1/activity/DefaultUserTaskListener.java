@@ -106,7 +106,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 			updateFailedIfInprogress(variables.getTasks(), errorMessage);
 
-			// TODO evaluate throwing exception as alternative to stopping the process instance
 			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
 					exception.getMessage());
 		}
