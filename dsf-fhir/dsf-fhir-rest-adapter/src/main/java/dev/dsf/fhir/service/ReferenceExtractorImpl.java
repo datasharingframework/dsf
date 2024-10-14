@@ -332,10 +332,6 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			case null -> Stream.empty();
 
 			case ActivityDefinition ad -> getReferences(ad);
-
-			// not implemented yet, special rules apply for tmp ids
-			// case Bundle b -> getReferences(b);
-
 			case Binary b -> getReferences(b);
 			case CodeSystem cs -> getReferences(cs);
 			case DocumentReference dr -> getReferences(dr);
