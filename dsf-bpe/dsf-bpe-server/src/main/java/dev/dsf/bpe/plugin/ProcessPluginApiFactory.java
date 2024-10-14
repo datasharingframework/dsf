@@ -65,7 +65,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 
 	private ProcessPluginFactory init(String apiVersion)
 	{
-		ClassLoader apiClassLoader = createParentClassLoader(apiVersion);
+		ClassLoader apiClassLoader = createApiClassLoader(apiVersion);
 		ProcessPluginApiBuilder apiBuilder = loadProcessPluginApiBuilder(apiClassLoader);
 		ApplicationContext apiApplicationContext = createApiApplicationContext(apiVersion, apiClassLoader,
 				apiBuilder.getSpringServiceConfigClass());
@@ -73,7 +73,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 		return pluginFactory;
 	}
 
-	private ClassLoader createParentClassLoader(String apiVersion)
+	private ClassLoader createApiClassLoader(String apiVersion)
 	{
 		Path apiClassPathFolder = Paths.get("api/v" + apiVersion);
 
