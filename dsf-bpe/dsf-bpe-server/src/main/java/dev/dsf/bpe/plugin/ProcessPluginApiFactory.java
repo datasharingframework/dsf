@@ -1,11 +1,5 @@
 package dev.dsf.bpe.plugin;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -37,15 +31,18 @@ public class ProcessPluginApiFactory implements InitializingBean
 	private final ProxyConfig proxyConfig;
 	private final BuildInfoProvider buildInfoProvider;
 	private final BpeMailService bpeMailService;
+	private final ProcessPluginApiClassLoaderFactory classLoaderFactory;
 
 	public ProcessPluginApiFactory(ConfigurableEnvironment environment, ClientConfig clientConfig,
-			ProxyConfig proxyConfig, BuildInfoProvider buildInfoProvider, BpeMailService bpeMailService)
+			ProxyConfig proxyConfig, BuildInfoProvider buildInfoProvider, BpeMailService bpeMailService,
+			ProcessPluginApiClassLoaderFactory classLoaderFactory)
 	{
 		this.environment = environment;
 		this.clientConfig = clientConfig;
 		this.proxyConfig = proxyConfig;
 		this.buildInfoProvider = buildInfoProvider;
 		this.bpeMailService = bpeMailService;
+		this.classLoaderFactory = classLoaderFactory;
 	}
 
 	@Override
@@ -56,6 +53,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
 		Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
 		Objects.requireNonNull(bpeMailService, "bpeMailService");
+		Objects.requireNonNull(classLoaderFactory, "classLoaderFactory");
 	}
 
 	public List<ProcessPluginFactory> initialize()
@@ -65,32 +63,12 @@ public class ProcessPluginApiFactory implements InitializingBean
 
 	private ProcessPluginFactory init(String apiVersion)
 	{
-		ClassLoader apiClassLoader = createApiClassLoader(apiVersion);
+		ClassLoader apiClassLoader = classLoaderFactory.createApiClassLoader(apiVersion);
 		ProcessPluginApiBuilder apiBuilder = loadProcessPluginApiBuilder(apiClassLoader);
 		ApplicationContext apiApplicationContext = createApiApplicationContext(apiVersion, apiClassLoader,
 				apiBuilder.getSpringServiceConfigClass());
-		ProcessPluginFactory pluginFactory = apiBuilder.build(apiClassLoader, apiApplicationContext, environment);
-		return pluginFactory;
-	}
 
-	private ClassLoader createApiClassLoader(String apiVersion)
-	{
-		Path apiClassPathFolder = Paths.get("api/v" + apiVersion);
-
-		try
-		{
-			URL[] apiClassPath = Files.list(apiClassPathFolder).filter(p -> p.getFileName().toString().endsWith(".jar"))
-					.map(this::toUrl).toArray(URL[]::new);
-
-			return new ProcessPluginApiClassLoader("Plugin API v" + apiVersion, apiClassPath,
-					ClassLoader.getSystemClassLoader());
-		}
-		catch (IOException e)
-		{
-			logger.warn("Unable to iterate files in api class path folder {}",
-					apiClassPathFolder.toAbsolutePath().toString());
-			throw new RuntimeException(e);
-		}
+		return apiBuilder.build(apiClassLoader, apiApplicationContext, environment);
 	}
 
 	private ProcessPluginApiBuilder loadProcessPluginApiBuilder(ClassLoader apiClassLoader)
@@ -122,18 +100,6 @@ public class ProcessPluginApiFactory implements InitializingBean
 		{
 			logger.error("Unable to create api v{} application context", apiVersion, e);
 			throw e;
-		}
-	}
-
-	private URL toUrl(Path p)
-	{
-		try
-		{
-			return p.toUri().toURL();
-		}
-		catch (MalformedURLException e)
-		{
-			throw new RuntimeException(e);
 		}
 	}
 }

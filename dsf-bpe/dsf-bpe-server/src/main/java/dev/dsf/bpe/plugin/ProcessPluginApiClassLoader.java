@@ -6,41 +6,39 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProcessPluginApiClassLoader extends URLClassLoader
 {
+	static
+	{
+		ClassLoader.registerAsParallelCapable();
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginApiClassLoader.class);
 
-	public ProcessPluginApiClassLoader(String name, URL[] urls, ClassLoader parent)
+	private final Set<String> allowedBpeClasses = new HashSet<>();
+	private final Set<String> apiResourcesWithPriority = new HashSet<>();
+	private final Set<String> allowedBpeResources = new HashSet<>();
+
+	public ProcessPluginApiClassLoader(String name, URL[] urls, ClassLoader bpeLoader, Set<String> allowedBpeClasses,
+			Set<String> apiResourcesWithPriority, Set<String> allowedBpeResources)
 	{
-		super(name, urls, parent);
-	}
+		super(name, urls, bpeLoader);
 
-	private static String toClassReference(String className)
-	{
-		if (className == null)
-			return null;
+		if (allowedBpeClasses != null)
+			this.allowedBpeClasses.addAll(allowedBpeClasses);
 
-		String name = className.replace('.', '/').concat(".class");
-		return name;
-	}
+		if (apiResourcesWithPriority != null)
+			this.apiResourcesWithPriority.addAll(apiResourcesWithPriority);
 
-	private Class<?> loadAsResource(final String name, boolean checkSystemResource) throws ClassNotFoundException
-	{
-		Class<?> webappClass = null;
-		URL webappUrl = findResource(toClassReference(name));
-
-		if (webappUrl != null && (!checkSystemResource || !isResourceHidden(name, webappUrl)))
-		{
-			webappClass = findClass(name);
-			resolveClass(webappClass);
-		}
-
-		return webappClass;
+		if (allowedBpeResources != null)
+			this.allowedBpeResources.addAll(allowedBpeResources);
 	}
 
 	@Override
@@ -52,57 +50,45 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 	@Override
 	protected Class<?> loadClass(String className, boolean resolve) throws ClassNotFoundException
 	{
-		// TODO remove
-		// logger.trace("loadClass({}, {}) ...", className, resolve);
 		synchronized (getClassLoadingLock(className))
 		{
-			ClassNotFoundException ex = null;
+			// check already loaded
 			Class<?> apiClass = findLoadedClass(className);
 			if (apiClass != null)
-			{
-				// TODO remove
-				// logger.trace("\t<-1 {}{}", className,
-				// (apiClass.getClassLoader() != null ? (" from " + apiClass.getClassLoader().getName()) : ""));
 				return apiClass;
-			}
 
-			apiClass = loadAsResource(className, true);
+			// check api class path
+			apiClass = loadClassAsResource(className);
 			if (apiClass != null)
-			{
-				// TODO remove
-				// logger.trace("\t<-2 {}{}", className,
-				// (apiClass.getClassLoader() != null ? (" from " + apiClass.getClassLoader().getName()) : ""));
 				return apiClass;
-			}
 
-			try
-			{
-				Class<?> parentClass = getParent().loadClass(className);
-				if (!isClassHidden(parentClass))
-				{
-					// TODO remove
-					// logger.trace("\t<-3 {}{}", className,
-					// (parentClass.getClassLoader() != null ? (" from " + parentClass.getClassLoader().getName())
-					// : ""));
-					return parentClass;
-				}
-			}
-			catch (ClassNotFoundException e)
-			{
-				ex = e;
-			}
+			// check bpe
+			Class<?> bpeClass = getParent().loadClass(className);
+			if (isBpeClassAllowed(bpeClass))
+				return bpeClass;
 
-			apiClass = loadAsResource(className, false);
-			if (apiClass != null)
-			{
-				// TODO remove
-				// logger.trace("\t<-4 {}{}", className,
-				// (apiClass.getClassLoader() != null ? (" from " + apiClass.getClassLoader().getName()) : ""));
-				return apiClass;
-			}
-
-			throw ex == null ? new ClassNotFoundException(className) : ex;
+			logger.warn("Class " + className + " not found or hidden");
+			throw new ClassNotFoundException(className);
 		}
+	}
+
+	private Class<?> loadClassAsResource(final String name) throws ClassNotFoundException
+	{
+		URL apiClassUrl = findResource(toClassReference(name));
+		if (apiClassUrl != null)
+		{
+			Class<?> apiClass = findClass(name);
+			resolveClass(apiClass);
+
+			return apiClass;
+		}
+		else
+			return null;
+	}
+
+	private String toClassReference(String className)
+	{
+		return className == null ? null : className.replace('.', '/').concat(".class");
 	}
 
 	@Override
@@ -110,16 +96,16 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 	{
 		URL resource = null;
 
-		URL webappUrl = findResource(name);
-		if (webappUrl != null && !isSystemResource(name, webappUrl))
-			resource = webappUrl;
+		URL apiResourceUrl = findResource(name);
+		if (apiResourceUrl != null && hasApiResourcePriority(name, apiResourceUrl))
+			resource = apiResourceUrl;
 		else
 		{
-			URL parentUrl = getParent().getResource(name);
-			if (parentUrl != null && !isServerResource(name, parentUrl))
-				resource = parentUrl;
-			else if (webappUrl != null)
-				resource = webappUrl;
+			URL bpeResourceUrl = getParent().getResource(name);
+			if (bpeResourceUrl != null && isBpeResourceAllowed(name, bpeResourceUrl))
+				resource = bpeResourceUrl;
+			else if (apiResourceUrl != null)
+				resource = apiResourceUrl;
 		}
 
 		if (resource == null && name.startsWith("/"))
@@ -131,63 +117,70 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 	@Override
 	public Enumeration<URL> getResources(String name) throws IOException
 	{
-		List<URL> fromParent = new ArrayList<>(), fromWebapp = new ArrayList<>();
+		List<URL> fromBpe = new ArrayList<>(), fromApi = new ArrayList<>();
 
 		Enumeration<URL> urls = getParent().getResources(name);
 		while (urls != null && urls.hasMoreElements())
 		{
-			URL url = urls.nextElement();
-			if (!isServerResource(name, url))
-				fromParent.add(url);
+			URL bpeResourceUrl = urls.nextElement();
+			if (isBpeResourceAllowed(name, bpeResourceUrl))
+				fromBpe.add(bpeResourceUrl);
 		}
 
 		urls = findResources(name);
 		while (urls != null && urls.hasMoreElements())
 		{
-			URL url = urls.nextElement();
-			if (!isSystemResource(name, url) || fromParent.isEmpty())
-				fromWebapp.add(url);
+			URL apiResourceUrl = urls.nextElement();
+			if (hasApiResourcePriority(name, apiResourceUrl) || fromBpe.isEmpty())
+				fromApi.add(apiResourceUrl);
 		}
 
-		fromWebapp.addAll(fromParent);
+		fromApi.addAll(fromBpe);
 
-		return Collections.enumeration(fromWebapp);
+		return Collections.enumeration(fromApi);
 	}
 
-	private boolean isClassHidden(Class<?> clazz)
+	/**
+	 * @param clazz
+	 * @return <code>false</code> if bpe class should be hidden from api or process plugin
+	 */
+	private boolean isBpeClassAllowed(Class<?> clazz)
 	{
-		if (clazz.getName().startsWith("java.") || clazz.getName().startsWith("javax.mail.")
-				|| clazz.getName().startsWith("javax.xml.") || clazz.getName().startsWith("jakarta.ws.rs.")
-				|| clazz.getName().startsWith("org.glassfish.jersey.") || clazz.getName().startsWith("org.slf4j.")
-				|| clazz.getName().startsWith("com.fasterxml.jackson."))
-			return false;
+		final String className = clazz.getName();
 
-		logger.trace("TODO should class be hidden? {}", clazz.getName());
-		// TODO Auto-generated method stub
+		if (className.startsWith("java.") || className.startsWith("javax.mail.") || className.startsWith("javax.xml.")
+				|| allowedBpeClasses.contains(className))
+			return true;
+
+		logger.debug("{} TODO: Should bpe class {} be allowed?", getName(), className);
 		return false;
 	}
 
-	private boolean isResourceHidden(String name, URL webappUrl)
+	/**
+	 * @param name
+	 * @param apiResourceUrl
+	 * @return <code>true</code> if resource from from api or process plugins has priority over resource from bpe
+	 */
+	private boolean hasApiResourcePriority(String name, URL apiResourceUrl)
 	{
-		if (name.startsWith("org.hl7.fhir.") || name.startsWith("ca.uhn.fhir."))
-			return false;
+		if ("jar".equals(apiResourceUrl.getProtocol()) && apiResourcesWithPriority.contains(name))
+			return true;
 
-		logger.trace("TODO should resource be hidden? {} {}", name, webappUrl);
-		// TODO Auto-generated method stub
+		logger.debug("{} TODO: Should api resource {} / {} have priority?", getName(), name, apiResourceUrl);
 		return false;
 	}
 
-	private boolean isSystemResource(String name, URL webappUrl)
+	/**
+	 * @param name
+	 * @param bpeResourcetUrl
+	 * @return <code>false</code> if resource from bpe should be hidden from api or process plugins
+	 */
+	private boolean isBpeResourceAllowed(String name, URL bpeResourcetUrl)
 	{
-		logger.trace("TODO should access to (system) resource be restricted? {} {}", name, webappUrl);
-		// TODO Auto-generated method stub
-		return false;
-	}
+		if ("jar".equals(bpeResourcetUrl.getProtocol()) && allowedBpeResources.contains(name))
+			return true;
 
-	private boolean isServerResource(String name, URL parentUrl)
-	{
-		logger.trace("TODO should access to (server) resource be restriced? {} {}", name, parentUrl);
-		// TODO Auto-generated method stub
+		logger.debug("{} TODO: Should bpe resource {} / {} be allowed?", getName(), name, bpeResourcetUrl);
 		return false;
 	}
 }

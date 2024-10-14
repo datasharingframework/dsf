@@ -23,6 +23,7 @@ import dev.dsf.bpe.api.config.ProxyConfig;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
+import dev.dsf.bpe.plugin.ProcessPluginApiClassLoaderFactory;
 import dev.dsf.bpe.plugin.ProcessPluginApiFactory;
 
 @Configuration
@@ -39,6 +40,12 @@ public class PluginFactoryConfig extends AbstractConfig
 
 	@Autowired
 	private MailConfig mailConfig;
+
+	@Bean
+	public ProcessPluginApiClassLoaderFactory pluginApiClassLoaderFactory()
+	{
+		return new ProcessPluginApiClassLoaderFactory();
+	}
 
 	@Bean
 	public ProcessPluginApiFactory processPluginApiFactory()
@@ -181,7 +188,7 @@ public class PluginFactoryConfig extends AbstractConfig
 		};
 
 		return new ProcessPluginApiFactory((ConfigurableEnvironment) environment, clientConfig, proxyConfig,
-				buildInfoProvider, bpeMailService);
+				buildInfoProvider, bpeMailService, pluginApiClassLoaderFactory());
 	}
 
 	@Bean
