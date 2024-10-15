@@ -99,10 +99,6 @@ public class CamundaConfig
 				processPluginFactories.stream().flatMap(ProcessPluginFactory::getSerializer).toList());
 		c.setFallbackSerializerFactory(fallbackSerializerFactory());
 
-		// see also MultiVersionSpringProcessEngineConfiguration
-		c.setInitializeTelemetry(false);
-		c.setTelemetryReporterActivate(false);
-
 		DefaultJobExecutor jobExecutor = new DefaultJobExecutor();
 		jobExecutor.setCorePoolSize(propertiesConfig.getProcessEngineJobExecutorCorePoolSize());
 		jobExecutor.setQueueSize(propertiesConfig.getProcessEngineJobExecutorQueueSize());

@@ -2,7 +2,6 @@ package dev.dsf.fhir.service;
 
 import java.sql.Connection;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +40,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 {
 	private static final Logger logger = LoggerFactory.getLogger(ReferenceResolverImpl.class);
 
+	private static final String QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE = "QuestionnaireResponse.questionnaire";
+	private static final String TASK_INSTANTIATES_CANONICAL = "Task.instantiatesCanonical";
+
 	private final String serverBase;
 	private final DaoProvider daoProvider;
 	private final ResponseGenerator responseGenerator;
@@ -73,46 +75,23 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	@Override
 	public boolean referenceCanBeResolved(ResourceReference reference, Connection connection)
 	{
-		return referenceCanBeChecked(reference, connection);
-	}
-
-	@Override
-	public boolean referenceCanBeChecked(ResourceReference reference, Connection connection)
-	{
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
 
 		return switch (reference.getType(serverBase))
 		{
 			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
-				literalExternalReferenceCanBeCheckedAndResolved(reference);
+				clientProvider.endpointExists(reference.getServerBase(serverBase));
 
-			case LOGICAL -> logicalReferenceCanBeCheckedAndResolved(reference, connection);
+			case LOGICAL -> exceptionHandler.handleSqlException(
+					() -> daoProvider.getNamingSystemDao().existsWithUniqueIdUriEntryResolvable(connection,
+							reference.getReference().getIdentifier().getSystem()));
+
+			case CANONICAL -> QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE.equals(reference.getLocation())
+					|| TASK_INSTANTIATES_CANONICAL.equals(reference.getLocation());
 
 			default -> true;
 		};
-	}
-
-	private boolean logicalReferenceCanBeCheckedAndResolved(ResourceReference reference, Connection connection)
-	{
-		if (!ReferenceType.LOGICAL.equals(reference.getType(serverBase)))
-			throw new IllegalArgumentException("Not a logical reference");
-
-		return exceptionHandler.handleSqlException(
-				() -> daoProvider.getNamingSystemDao().existsWithUniqueIdUriEntryResolvable(connection,
-						reference.getReference().getIdentifier().getSystem()));
-	}
-
-	private boolean literalExternalReferenceCanBeCheckedAndResolved(ResourceReference reference)
-	{
-		if (!EnumSet.of(ReferenceType.LITERAL_EXTERNAL, ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL,
-				ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL).contains(reference.getType(serverBase)))
-		{
-			throw new IllegalArgumentException(
-					"Not a literal external reference, related artifact literal external url or attachment literal external url");
-		}
-
-		return clientProvider.endpointExists(reference.getServerBase(serverBase));
 	}
 
 	@Override
@@ -131,6 +110,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			case CONDITIONAL, RELATED_ARTEFACT_CONDITIONAL_URL, ATTACHMENT_CONDITIONAL_URL ->
 				resolveConditionalReference(identity, reference, connection);
 			case LOGICAL -> resolveLogicalReference(identity, reference, connection);
+
 			default -> throw new IllegalArgumentException("Reference of type " + type + " not supported");
 		};
 	}
@@ -240,7 +220,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			Connection connection)
 	{
 		Objects.requireNonNull(reference, "reference");
-		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.CONDITIONAL,
+
+		ReferenceType referenceType = reference.getType(serverBase);
+		throwIfReferenceTypeUnexpected(referenceType, ReferenceType.CONDITIONAL,
 				ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL, ReferenceType.ATTACHMENT_CONDITIONAL_URL);
 
 		String referenceValue = reference.getValue();
@@ -271,7 +253,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return Optional.empty();
 			}
 
-			return search(identity, connection, d, reference, condition.getQueryParams(), true);
+			return search(identity, connection, d, reference, condition.getQueryParams(), referenceType);
 		}
 	}
 
@@ -302,14 +284,14 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 
 			Identifier targetIdentifier = reference.getReference().getIdentifier();
-			return search(identity, connection, d, reference, Map.of("identifier",
-					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
+			return search(identity, connection, d, reference,
+					Map.of("identifier", List.of(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())),
+					ReferenceType.LOGICAL);
 		}
 	}
 
 	private Optional<Resource> search(Identity identity, Connection connection, ResourceDao<?> referenceTargetDao,
-			ResourceReference resourceReference, Map<String, List<String>> queryParameters,
-			boolean logicalNotConditional)
+			ResourceReference resourceReference, Map<String, List<String>> queryParameters, ReferenceType referenceType)
 	{
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
@@ -333,11 +315,17 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 					.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
 
-			logger.warn("{} reference {} at {} in resource contains unsupported queryparameter{} {}",
-					logicalNotConditional ? "Logical" : "Conditional", queryParameters, resourceReference.getLocation(),
-					unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
-
-			return Optional.empty();
+			if (EnumSet.of(ReferenceType.CONDITIONAL, ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL,
+					ReferenceType.ATTACHMENT_CONDITIONAL_URL).contains(referenceType))
+			{
+				logger.warn("Conditional reference {} at {} in resource contains unsupported queryparameter{} {}",
+						queryParameters, resourceReference.getLocation(),
+						unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+				return Optional.empty();
+			}
+			else
+				throw new IllegalStateException("Unable to search for " + referenceTargetDao.getResourceTypeName()
+						+ ": Unsupported query parameters");
 		}
 
 		PartialResult<?> result = exceptionHandler.handleSqlException(() ->
@@ -348,39 +336,26 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return referenceTargetDao.searchWithTransaction(connection, query);
 		});
 
-		if (result.getTotal() <= 0)
-		{
-			if (logicalNotConditional)
-				logger.warn("Reference target by identifier '{}|{}' of reference at {} in resource",
-						resourceReference.getReference().getIdentifier().getSystem(),
-						resourceReference.getReference().getIdentifier().getValue(), resourceReference.getLocation());
-			else
-				logger.warn("Reference target by condition '{}' of reference at {} in resource",
-						UriComponentsBuilder.newInstance().path(referenceTargetDao.getResourceTypeName())
-								.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-						resourceReference.getLocation());
-
-			return Optional.empty();
-		}
-		else if (result.getTotal() == 1)
-		{
+		if (result.getTotal() == 1)
 			return Optional.of(result.getPartialResult().get(0));
-		}
-		else // if (result.getOverallCount() > 1)
+
+		else
 		{
 			int overallCount = result.getTotal();
 
-			if (logicalNotConditional)
-				logger.warn(
-						"Found {} matches for reference target by identifier '{}|{}' of reference at {} in resource",
-						overallCount, resourceReference.getReference().getIdentifier().getSystem(),
-						resourceReference.getReference().getIdentifier().getValue(), resourceReference.getLocation());
-			else
-				logger.warn("Found {} matches for reference target by condition '{}' of reference at {} in resource",
-						overallCount,
+			if (ReferenceType.LOGICAL.equals(referenceType))
+				logger.warn("Found {} matches for reference at {} with identifier '{}|{}'", overallCount,
+						resourceReference.getLocation(), resourceReference.getReference().getIdentifier().getSystem(),
+						resourceReference.getReference().getIdentifier().getValue());
+			else if (EnumSet.of(ReferenceType.CONDITIONAL, ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL,
+					ReferenceType.ATTACHMENT_CONDITIONAL_URL).contains(referenceType))
+				logger.warn("Found {} matches for reference at {} with condition '{}'", overallCount,
+						resourceReference.getLocation(),
 						UriComponentsBuilder.newInstance().path(referenceTargetDao.getResourceTypeName())
-								.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-						resourceReference.getLocation());
+								.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
+			else if (ReferenceType.CANONICAL.equals(referenceType))
+				logger.warn("Found {} matches for reference at {} with url '{}'", overallCount,
+						resourceReference.getLocation(), resourceReference.getCanonical().getValue());
 
 			return Optional.empty();
 		}
@@ -558,8 +533,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 			Identifier targetIdentifier = reference.getReference().getIdentifier();
 			// Resource target =
-			return search(identity, resource, bundleIndex, connection, d, reference, Map.of("identifier",
-					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
+			return search(identity, resource, bundleIndex, connection, d, reference,
+					Map.of("identifier", List.of(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())),
+					true);
 
 			// resourceReference.getReference().setIdentifier(null).setReferenceElement(
 			// new IdType(target.getResourceType().name(), target.getIdElement().getIdPart()));
@@ -626,5 +602,47 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return Optional.of(responseGenerator.referenceTargetMultipleMatchesLocallyByCondition(bundleIndex,
 						resource, resourceReference, result.getTotal()));
 		}
+	}
+
+	@Override
+	public Optional<OperationOutcome> checkCanonicalReference(Identity identity, Resource resource,
+			ResourceReference reference, Connection connection) throws IllegalArgumentException
+	{
+		return checkCanonicalReference(identity, resource, reference, connection, null);
+	}
+
+	@Override
+	public Optional<OperationOutcome> checkCanonicalReference(Identity identity, Resource resource,
+			ResourceReference reference, Connection connection, Integer bundleIndex) throws IllegalArgumentException
+	{
+		Objects.requireNonNull(identity, "identity");
+		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(reference, "reference");
+		Objects.requireNonNull(connection, "connection");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.CANONICAL);
+
+		Optional<ResourceDao<?>> referenceDao = switch (reference.getLocation())
+		{
+			case QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE -> Optional.of(daoProvider.getQuestionnaireDao());
+			case TASK_INSTANTIATES_CANONICAL -> Optional.of(daoProvider.getActivityDefinitionDao());
+
+			default -> Optional.empty();
+		};
+
+		if (referenceDao.isEmpty())
+		{
+			logger.debug(
+					"Canonical reference check only implemented for QuestionnaireResponse.questionnaire and Task.instantiatesCanonical, not checking {}",
+					reference.getLocation());
+			return Optional.empty();
+		}
+
+		Optional<Resource> referencedResource = referenceDao.flatMap(dao -> search(identity, connection, dao, reference,
+				Map.of("url", List.of(reference.getCanonical().getValue())), ReferenceType.CANONICAL));
+
+		if (referencedResource.isPresent())
+			return Optional.empty();
+		else
+			return Optional.of(responseGenerator.referenceTargetNotFoundLocally(bundleIndex, resource, reference));
 	}
 }

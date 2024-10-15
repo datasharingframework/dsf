@@ -243,7 +243,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			throws WebApplicationException
 	{
 		referenceExtractor.getReferences(resource).filter(checkReference)
-				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
+				.filter(ref -> referenceResolver.referenceCanBeResolved(ref, connection)).forEach(ref ->
 				{
 					Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
 					if (outcome.isPresent())
@@ -267,6 +267,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 			case LOGICAL ->
 				referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
+
+			case CANONICAL ->
+				referenceResolver.checkCanonicalReference(getCurrentIdentity(), resource, reference, connection);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();

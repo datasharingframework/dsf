@@ -228,7 +228,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	{
 		try
 		{
-			WebsocketClient client = clientProvider.getLocalWebsocketClient(() -> connect(),
+			WebsocketClient client = clientProvider.getLocalWebsocketClient(this::connect,
 					subscription.getIdElement().getIdPart());
 
 			EventType eventType = toEventType(subscription.getChannel().getPayload());
@@ -260,7 +260,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	{
 		// no debug log, exception previously logged by retrieveWebsocketSubscription, loadNewResources and
 		// connectWebsocket methods
-		logger.error("Error while loading existing {} resources and connecting websocket: {} - {}", resourceName,
+		logger.error("Error loading existing {} resources and connecting websocket: {} - {}", resourceName,
 				t.getClass().getName(), t.getMessage());
 
 		return null;
