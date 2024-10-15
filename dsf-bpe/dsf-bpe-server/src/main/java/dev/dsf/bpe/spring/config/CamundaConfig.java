@@ -124,10 +124,6 @@ public class CamundaConfig
 						serializerConfig.fhirResourceSerializer(), serializerConfig.fhirResourcesListSerializer()));
 		c.setFallbackSerializerFactory(fallbackSerializerFactory());
 
-		// see also MultiVersionSpringProcessEngineConfiguration
-		c.setInitializeTelemetry(false);
-		c.setTelemetryReporterActivate(false);
-
 		DefaultJobExecutor jobExecutor = new DefaultJobExecutor();
 		jobExecutor.setCorePoolSize(propertiesConfig.getProcessEngineJobExecutorCorePoolSize());
 		jobExecutor.setQueueSize(propertiesConfig.getProcessEngineJobExecutorQueueSize());

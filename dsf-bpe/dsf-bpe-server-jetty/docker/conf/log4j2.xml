@@ -1,4 +1,4 @@
-<Configuration status="INFO" monitorInterval="30" verbose="false">
+<Configuration status="WARN" monitorInterval="30" verbose="false">
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
 			<PatternLayout pattern="%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n" />
@@ -17,6 +17,7 @@
 		<Logger name="dev.dsf" level="DEBUG" />
 		<Logger name="de.netzwerk_universitaetsmedizin" level="DEBUG" />
 		<Logger name="de.medizininformatik_initiative" level="DEBUG" />
+		<Logger name="de.dkfz.nct" level="DEBUG" />
 		<Logger name="org.eclipse.jetty" level="INFO" />
 
 		<Root level="WARN">
