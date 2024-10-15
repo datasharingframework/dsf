@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.BackboneElement;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ClaimResponse;
@@ -80,18 +81,25 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	private Function<Reference, ResourceReference> toResourceReferenceFromReference(String referenceLocation,
 			Class<? extends Resource>... referenceTypes)
 	{
-		return ref -> new ResourceReference(referenceLocation, ref, referenceTypes);
+		return reference -> new ResourceReference(referenceLocation, reference, referenceTypes);
 	}
 
 	private Function<RelatedArtifact, ResourceReference> toResourceReferenceFromRelatedArtifact(
 			String relatedArtifactLocation)
 	{
-		return rel -> new ResourceReference(relatedArtifactLocation, rel);
+		return relatedArtifact -> new ResourceReference(relatedArtifactLocation, relatedArtifact);
 	}
 
 	private Function<Attachment, ResourceReference> toResourceReferenceFromAttachment(String attachmentLocation)
 	{
-		return rel -> new ResourceReference(attachmentLocation, rel);
+		return attachment -> new ResourceReference(attachmentLocation, attachment);
+	}
+
+	@SafeVarargs
+	private Function<CanonicalType, ResourceReference> toResourceReferenceFromCanonical(String canonicalLocation,
+			Class<? extends Resource>... referenceTypes)
+	{
+		return canonical -> new ResourceReference(canonicalLocation, canonical, referenceTypes);
 	}
 
 	@SafeVarargs
@@ -260,6 +268,50 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 				.map(toResourceReferenceFromReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
+	@SafeVarargs
+	private <R extends Resource> Stream<ResourceReference> getCanonical(R resource, Predicate<R> hasCanonical,
+			Function<R, CanonicalType> getCanonical, String canonicalLocation,
+			Class<? extends Resource>... canonicalTypes)
+	{
+		return hasCanonical.test(resource) ? Stream.of(getCanonical.apply(resource))
+				.map(toResourceReferenceFromCanonical(canonicalLocation, canonicalTypes)) : Stream.empty();
+	}
+
+	@SafeVarargs
+	private <R extends Resource> Stream<ResourceReference> getCanonicals(R resource, Predicate<R> hasCanonical,
+			Function<R, List<CanonicalType>> getCanonicals, String canonicalLocation,
+			Class<? extends Resource>... canonicalTypes)
+	{
+		return hasCanonical.test(resource) ? Stream.of(getCanonicals.apply(resource)).flatMap(List::stream)
+				.map(toResourceReferenceFromCanonical(canonicalLocation, canonicalTypes)) : Stream.empty();
+	}
+
+	@SafeVarargs
+	private <E extends BackboneElement> Stream<ResourceReference> getCanonical(E backboneElement,
+			Predicate<E> hasCanonical, Function<E, CanonicalType> getCanonical, String canonicalLocation,
+			Class<? extends Resource>... canonicalTypes)
+	{
+		return hasCanonical.test(backboneElement) ? Stream.of(getCanonical.apply(backboneElement))
+				.map(toResourceReferenceFromCanonical(canonicalLocation, canonicalTypes)) : Stream.empty();
+	}
+
+	@SafeVarargs
+	private <R extends Resource, E extends BackboneElement> Stream<ResourceReference> getBackboneElementsCanonical(
+			R resource, Predicate<R> hasBackboneElements, Function<R, List<E>> getBackboneElements,
+			Predicate<E> hasCanonical, Function<E, CanonicalType> getCanonical, String canonicalLocation,
+			Class<? extends Resource>... canonicalTypes)
+	{
+		if (hasBackboneElements.test(resource))
+		{
+			List<E> backboneElements = getBackboneElements.apply(resource);
+			return backboneElements.stream()
+					.map(e -> getCanonical(e, hasCanonical, getCanonical, canonicalLocation, canonicalTypes))
+					.flatMap(Function.identity());
+		}
+		else
+			return Stream.empty();
+	}
+
 	private Stream<ResourceReference> getExtensionReferences(DomainResource resource)
 	{
 		var extensions = resource.getExtension().stream().filter(e -> e.getValue() instanceof Reference)
@@ -409,9 +461,14 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 	private Stream<ResourceReference> getReferences(CodeSystem resource)
 	{
+		var supplements = getCanonical(resource, CodeSystem::hasSupplementsElement, CodeSystem::getSupplementsElement,
+				"CodeSystem.supplements", CodeSystem.class);
+		var valueSet = getCanonical(resource, CodeSystem::hasValueSetElement, CodeSystem::getValueSetElement,
+				"CodeSystem.valueSet", ValueSet.class);
+
 		var extensionReferences = getExtensionReferences(resource);
 
-		return extensionReferences;
+		return concat(valueSet, supplements, extensionReferences);
 	}
 
 	private Stream<ResourceReference> getReferences(DocumentReference resource)
@@ -522,6 +579,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 	private Stream<ResourceReference> getReferences(Measure resource)
 	{
+		var library = getCanonicals(resource, Measure::hasLibrary, Measure::getLibrary, "Measure.library",
+				Library.class);
 		var subject = getReference(resource, Measure::hasSubjectReference, Measure::getSubjectReference,
 				"Measure.subject", Group.class);
 		var relatedArtifacts = getRelatedArtifacts(resource, Measure::hasRelatedArtifact, Measure::getRelatedArtifact,
@@ -529,11 +588,13 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(subject, relatedArtifacts, extensionReferences);
+		return concat(library, subject, relatedArtifacts, extensionReferences);
 	}
 
 	private Stream<ResourceReference> getReferences(MeasureReport resource)
 	{
+		var measure = getCanonical(resource, MeasureReport::hasMeasureElement, MeasureReport::getMeasureElement,
+				"MeasureReport.measure", Measure.class);
 		var subject = getReference(resource, MeasureReport::hasSubject, MeasureReport::getSubject,
 				"MeasureReport.subject", Patient.class, Practitioner.class, PractitionerRole.class, Location.class,
 				Device.class, RelatedPerson.class, Group.class);
@@ -557,7 +618,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(subject, reporter, subjectResults1, subjectResults2, evaluatedResource, extensionReferences);
+		return concat(measure, subject, reporter, subjectResults1, subjectResults2, evaluatedResource,
+				extensionReferences);
 	}
 
 	private Stream<ResourceReference> getReferences(NamingSystem resource)
@@ -679,20 +741,24 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 	private Stream<ResourceReference> getReferences(Questionnaire resource)
 	{
+		var derivedFrom = getCanonicals(resource, Questionnaire::hasDerivedFrom, Questionnaire::getDerivedFrom,
+				"Questionnaire.derivedFrom", Questionnaire.class);
 		var enableWhen = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
 				Questionnaire.QuestionnaireItemComponent::hasEnableWhen,
 				Questionnaire.QuestionnaireItemComponent::getEnableWhen,
 				Questionnaire.QuestionnaireItemEnableWhenComponent::hasAnswerReference,
 				Questionnaire.QuestionnaireItemEnableWhenComponent::getAnswerReference,
 				"Questionnaire.item.enableWhen.answerReference");
-
 		var answerOption = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
 				Questionnaire.QuestionnaireItemComponent::hasAnswerOption,
 				Questionnaire.QuestionnaireItemComponent::getAnswerOption,
 				Questionnaire.QuestionnaireItemAnswerOptionComponent::hasValueReference,
 				Questionnaire.QuestionnaireItemAnswerOptionComponent::getValueReference,
 				"Questionnaire.item.answerOption.valueReference");
-
+		var answerValueSet = getBackboneElementsCanonical(resource, Questionnaire::hasItem, Questionnaire::getItem,
+				Questionnaire.QuestionnaireItemComponent::hasAnswerValueSetElement,
+				Questionnaire.QuestionnaireItemComponent::getAnswerValueSetElement, "Questionnaire.item.answerValueSet",
+				ValueSet.class);
 		var initial = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
 				Questionnaire.QuestionnaireItemComponent::hasInitial,
 				Questionnaire.QuestionnaireItemComponent::getInitial,
@@ -702,7 +768,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(enableWhen, answerOption, initial, extensionReferences);
+		return concat(derivedFrom, enableWhen, answerOption, answerValueSet, initial, extensionReferences);
 	}
 
 	private Stream<ResourceReference> getReferences(QuestionnaireResponse resource)
@@ -710,26 +776,24 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var author = getReference(resource, QuestionnaireResponse::hasAuthor, QuestionnaireResponse::getAuthor,
 				"QuestionnaireResponse.author", Device.class, Organization.class, Patient.class, Practitioner.class,
 				PractitionerRole.class, RelatedPerson.class);
-
 		var basedOn = getReferences(resource, QuestionnaireResponse::hasBasedOn, QuestionnaireResponse::getBasedOn,
 				"QuestionnaireResponse.basedOn", CarePlan.class, ServiceRequest.class);
-
 		var encounter = getReference(resource, QuestionnaireResponse::hasEncounter, QuestionnaireResponse::getEncounter,
 				"QuestionnaireResponse.encounter", Encounter.class);
-
 		var partOf = getReferences(resource, QuestionnaireResponse::hasPartOf, QuestionnaireResponse::getPartOf,
 				"QuestionnaireResponse.partOf", Observation.class, Procedure.class);
-
+		var questionnaire = getCanonical(resource, QuestionnaireResponse::hasQuestionnaireElement,
+				QuestionnaireResponse::getQuestionnaireElement, "QuestionnaireResponse.questionnaire",
+				Questionnaire.class);
 		var source = getReference(resource, QuestionnaireResponse::hasSource, QuestionnaireResponse::getSource,
 				"QuestionnaireResponse.source", Patient.class, Practitioner.class, PractitionerRole.class,
 				RelatedPerson.class);
-
 		var subject = getReference(resource, QuestionnaireResponse::hasSubject, QuestionnaireResponse::getSubject,
 				"QuestionnaireResponse.subject");
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(author, basedOn, encounter, partOf, source, subject, extensionReferences);
+		return concat(author, basedOn, encounter, partOf, questionnaire, source, subject, extensionReferences);
 	}
 
 	private Stream<ResourceReference> getReferences(ResearchStudy resource)
@@ -758,9 +822,13 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 	private Stream<ResourceReference> getReferences(StructureDefinition resource)
 	{
+		var baseDefinition = getCanonical(resource, StructureDefinition::hasBaseDefinitionElement,
+				StructureDefinition::getBaseDefinitionElement, "StructureDefinition.baseDefinition",
+				StructureDefinition.class);
+
 		var extensionReferences = getExtensionReferences(resource);
 
-		return extensionReferences;
+		return concat(baseDefinition, extensionReferences);
 	}
 
 	private Stream<ResourceReference> getReferences(Subscription resource)
@@ -773,23 +841,25 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	private Stream<ResourceReference> getReferences(Task resource)
 	{
 		var basedOns = getReferences(resource, Task::hasBasedOn, Task::getBasedOn, "Task.basedOn");
-		var partOfs = getReferences(resource, Task::hasPartOf, Task::getPartOf, "Task.partOf", Task.class);
-		var focus = getReference(resource, Task::hasFocus, Task::getFocus, "Task.focus");
-		var forRef = getReference(resource, Task::hasFor, Task::getFor, "Task.for");
 		var encounter = getReference(resource, Task::hasEncounter, Task::getEncounter, "Task.encounter",
 				Encounter.class);
-		var requester = getReference(resource, Task::hasRequester, Task::getRequester, "Task.requester", Device.class,
-				Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class);
+		var focus = getReference(resource, Task::hasFocus, Task::getFocus, "Task.focus");
+		var forRef = getReference(resource, Task::hasFor, Task::getFor, "Task.for");
+		var instantiatesCanonical = getCanonical(resource, Task::hasInstantiatesCanonicalElement,
+				Task::getInstantiatesCanonicalElement, "Task.instantiatesCanonical", ActivityDefinition.class);
+		var insurance = getReferences(resource, Task::hasInsurance, Task::getInsurance, "Task.insurance",
+				Coverage.class, ClaimResponse.class);
+		var location = getReference(resource, Task::hasLocation, Task::getLocation, "Task.location", Location.class);
 		var owner = getReference(resource, Task::hasOwner, Task::getOwner, "Task.owner", Practitioner.class,
 				PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class,
 				Device.class, RelatedPerson.class);
-		var location = getReference(resource, Task::hasLocation, Task::getLocation, "Task.location", Location.class);
+		var partOfs = getReferences(resource, Task::hasPartOf, Task::getPartOf, "Task.partOf", Task.class);
 		var reasonReference = getReference(resource, Task::hasReasonReference, Task::getReasonReference,
 				"Task.reasonReference");
-		var insurance = getReferences(resource, Task::hasInsurance, Task::getInsurance, "Task.insurance",
-				Coverage.class, ClaimResponse.class);
 		var relevanteHistories = getReferences(resource, Task::hasRelevantHistory, Task::getRelevantHistory,
 				"Task.relevantHistory", Provenance.class);
+		var requester = getReference(resource, Task::hasRequester, Task::getRequester, "Task.requester", Device.class,
+				Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class);
 		var restrictionRecipiets = getBackboneElementReferences(resource, Task::hasRestriction, Task::getRestriction,
 				Task.TaskRestrictionComponent::hasRecipient, Task.TaskRestrictionComponent::getRecipient,
 				"Task.restriction.recipient", Patient.class, Practitioner.class, PractitionerRole.class,
@@ -799,16 +869,13 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var outputReferences = getOutputReferences(resource);
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(basedOns, partOfs, focus, forRef, encounter, requester, owner, location, reasonReference,
-				insurance, relevanteHistories, restrictionRecipiets, inputReferences, outputReferences,
+		return concat(basedOns, encounter, focus, forRef, instantiatesCanonical, insurance, location, owner, partOfs,
+				reasonReference, relevanteHistories, requester, restrictionRecipiets, inputReferences, outputReferences,
 				extensionReferences);
 	}
 
 	private Stream<ResourceReference> getInputReferences(Task resource)
 	{
-		if (resource == null)
-			return Stream.empty();
-
 		var inputReferences = resource.getInput().stream().filter(in -> in.getValue() instanceof Reference)
 				.map(in -> (Reference) in.getValue())
 				.map(toResourceReferenceFromReference(resource.getResourceType().name() + ".input"));
@@ -821,9 +888,6 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 	private Stream<ResourceReference> getOutputReferences(Task resource)
 	{
-		if (resource == null)
-			return Stream.empty();
-
 		var outputReferences = resource.getOutput().stream().filter(out -> out.getValue() instanceof Reference)
 				.map(in -> (Reference) in.getValue())
 				.map(toResourceReferenceFromReference(resource.getResourceType().name() + ".output"));

@@ -523,6 +523,49 @@ public abstract class AbstractReadAccessDaoTest<D extends Resource, C extends Re
 	}
 
 	@Test
+	public void testReadAccessTriggerRoleUpdateRoleChange() throws Exception
+	{
+		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
+				defaultDataSource, permanentDeleteDataSource, fhirContext);
+
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role")
+				.setCode("DIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
+
+		D d = createResource();
+		readAccessHelper.addRole(d, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
+
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
+
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		createdAff.getCodeFirstRep().getCodingFirstRep().setCode("HRP");
+		OrganizationAffiliation updatedAff = organizationAffiliationDao.update(createdAff);
+
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, updatedAff);
+	}
+
+	@Test
 	public void testReadAccessTriggerRoleUpdateMemberOrganizationNonActive() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(

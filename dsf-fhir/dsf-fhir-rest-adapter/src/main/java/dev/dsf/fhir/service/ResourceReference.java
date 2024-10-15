@@ -1,7 +1,6 @@
 package dev.dsf.fhir.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -11,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -143,42 +143,54 @@ public class ResourceReference
 		/**
 		 * unknown url in Attachment
 		 */
-		ATTACHMENT_UNKNOWN_URL
+		ATTACHMENT_UNKNOWN_URL,
+		/**
+		 * canoncial reference
+		 */
+		CANONICAL
 	}
 
 	private final String location;
 	private final Reference reference;
 	private final RelatedArtifact relatedArtifact;
 	private final Attachment attachment;
+	private final CanonicalType canonical;
 	private final List<Class<? extends Resource>> referenceTypes = new ArrayList<>();
 
 	@SafeVarargs
 	public ResourceReference(String location, Reference reference, Class<? extends Resource>... referenceTypes)
 	{
-		this(location, reference, null, null, Arrays.asList(referenceTypes));
+		this(location, reference, null, null, null, List.of(referenceTypes));
 	}
 
 	public ResourceReference(String location, RelatedArtifact relatedArtifact)
 	{
-		this(location, null, relatedArtifact, null, Collections.emptyList());
+		this(location, null, relatedArtifact, null, null, Collections.emptyList());
 	}
 
 	public ResourceReference(String location, Attachment attachment)
 	{
-		this(location, null, null, attachment, Collections.emptyList());
+		this(location, null, null, attachment, null, Collections.emptyList());
+	}
+
+	@SafeVarargs
+	public ResourceReference(String location, CanonicalType canonical, Class<? extends Resource>... referenceTypes)
+	{
+		this(location, null, null, null, canonical, List.of(referenceTypes));
 	}
 
 	private ResourceReference(String location, Reference reference, RelatedArtifact relatedArtifact,
-			Attachment attachment, Collection<Class<? extends Resource>> referenceTypes)
+			Attachment attachment, CanonicalType canonical, Collection<Class<? extends Resource>> referenceTypes)
 	{
 		this.location = location;
 
-		if (reference == null && relatedArtifact == null && attachment == null)
-			throw new IllegalArgumentException("Either reference, relatedArtifact or attachment expected");
+		if (reference == null && relatedArtifact == null && attachment == null && canonical == null)
+			throw new IllegalArgumentException("Either reference, relatedArtifact, attachment or canonical expected");
 
 		this.reference = reference;
 		this.relatedArtifact = relatedArtifact;
 		this.attachment = attachment;
+		this.canonical = canonical;
 
 		if (referenceTypes != null)
 			this.referenceTypes.addAll(referenceTypes);
@@ -214,6 +226,16 @@ public class ResourceReference
 		return attachment;
 	}
 
+	public boolean hasCanonical()
+	{
+		return canonical != null;
+	}
+
+	public CanonicalType getCanonical()
+	{
+		return canonical;
+	}
+
 	public String getValue()
 	{
 		if (hasReference())
@@ -222,8 +244,10 @@ public class ResourceReference
 			return relatedArtifact.getUrl();
 		else if (hasAttachment())
 			return attachment.getUrl();
+		else if (hasCanonical())
+			return canonical.getValue();
 		else
-			throw new IllegalArgumentException("reference, related artefact or attachment not set");
+			throw new IllegalArgumentException("reference, related artefact, attachment or canonical not set");
 	}
 
 	public List<Class<? extends Resource>> getReferenceTypes()
@@ -336,8 +360,15 @@ public class ResourceReference
 
 			return ReferenceType.UNKNOWN;
 		}
+		else if (canonical != null)
+		{
+			if (canonical.hasValue())
+				return ReferenceType.CANONICAL;
+			else
+				return ReferenceType.UNKNOWN;
+		}
 		else
-			throw new IllegalStateException("Either reference or relatedArtifact expected");
+			throw new IllegalStateException("Either reference, related artefact, attachment or canonical expected");
 	}
 
 	public String getLocation()

@@ -200,7 +200,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 			Predicate<ResourceReference> checkReference) throws WebApplicationException
 	{
 		referenceExtractor.getReferences(resource).filter(checkReference)
-				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
+				.filter(ref -> referenceResolver.referenceCanBeResolved(ref, connection)).forEach(ref ->
 				{
 					Optional<OperationOutcome> outcome = checkReference(ref, connection);
 					if (outcome.isPresent())
@@ -223,6 +223,9 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 				referenceResolver.checkLiteralExternalReference(resource, reference, index);
 
 			case LOGICAL -> referenceResolver.checkLogicalReference(identity, resource, reference, connection, index);
+
+			case CANONICAL ->
+				referenceResolver.checkCanonicalReference(identity, resource, reference, connection, index);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();

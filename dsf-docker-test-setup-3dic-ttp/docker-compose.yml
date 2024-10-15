@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: nginx:1.23
+    image: nginx:1.27
     restart: "no"
     ports:
       - 127.0.0.1:443:443
@@ -78,7 +78,7 @@ services:
         read_only: true
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0
+    image: quay.io/keycloak/keycloak:25.0
     restart: "no"
     ports:
       - 127.0.0.1:8443:8443
@@ -104,7 +104,16 @@ services:
       --https-certificate-key-file=/run/secrets/keycloak_certificate_private_key.pem
       --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
       --spi-truststore-file-password=password
-      --spi-truststore-file-hostname-verification-policy=STRICT
+      --spi-truststore-file-hostname-verification-policy=DEFAULT
+
+  forward-proxy:
+    build: ./forward-proxy
+    restart: "no"
+    environment:
+      TZ: Europe/Berlin
+    networks:
+      forward-proxy:
+      internet:
 
   dic1-fhir:
     build: ../dsf-fhir/dsf-fhir-server-jetty/docker
@@ -518,15 +527,21 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: ytqFCErw9GfhVUrrM8xc0Grbu4r7qGig
+      DEV_DSF_PROXY_URL: http://forward-proxy:8080
+      DEV_DSF_PROXY_USERNAME: proxy_user
+      DEV_DSF_PROXY_PASSWORD: proxy_password
+      DEV_DSF_PROXY_NOPROXY: keycloak
     networks:
       dic1-bpe-frontend:
         ipv4_address: 172.20.0.35
       dic1-bpe-backend:
       internet:
+      forward-proxy:
     depends_on:
       - db
       - dic1-fhir
       - keycloak
+      - forward-proxy
 
   dic2-bpe:
     build: ../dsf-bpe/dsf-bpe-server-jetty/docker
@@ -944,6 +959,7 @@ networks:
       - subnet: 172.20.0.56/29
   ttp-bpe-backend:
   internet:
+  forward-proxy:
 
 volumes:
   db-data:

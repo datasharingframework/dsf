@@ -41,10 +41,18 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	}
 
 	@Test
-	public void testCreateNotAllowedByLocalUser() throws Exception
+	public void testCreateNotAllowedByLocalUserStatusCompleted() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
+
+		expectForbidden(() -> getWebserviceClient().create(questionnaireResponse));
+	}
+
+	@Test
+	public void testCreateNotAllowedByLocalUserQuestionnaireDoesNotExists() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 
 		expectForbidden(() -> getWebserviceClient().create(questionnaireResponse));
 	}
