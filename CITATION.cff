@@ -24,8 +24,8 @@ preferred-citation:
   doi: 10.3233/SHTI210060
   type: proceedings
 title: "Data Sharing Framework (DSF)"
-version: 1.5.3
-date-released: 2024-07-15
+version: 1.6.0
+date-released: 2024-10-15
 url: https://dsf.dev
 repository-code: https://github.com/datasharingframework/dsf
 repository-artifact: https://github.com/datasharingframework/dsf/releases
@@ -241,3 +241,23 @@ references:
     year: 2024
     pages: 28-32
     doi: 10.3233/SHTI230921
+  - type: proceedings
+    authors:
+      - family-names: Schweizer
+        given-names: Simon Tobias
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Kurscheidt
+        given-names: Maximilian
+      - family-names: Zilske
+        given-names: Christoph
+      - family-names: Böhringer
+        given-names: Jan P.
+      - family-names: Fegeler
+        given-names: Christian
+    title: "Handling Complexity in Decentralized Research Networks: The Data Sharing Framework Allowlist Management Application"
+    journal: Stud Health Technol Inform
+    volume: 317
+    year: 2024
+    pages: 85-93
+    doi: 10.3233/SHTI240841

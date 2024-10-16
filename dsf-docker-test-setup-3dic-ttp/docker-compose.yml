@@ -78,7 +78,7 @@ services:
         read_only: true
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0
+    image: quay.io/keycloak/keycloak:25.0
     restart: "no"
     ports:
       - 127.0.0.1:8443:8443
@@ -104,7 +104,7 @@ services:
       --https-certificate-key-file=/run/secrets/keycloak_certificate_private_key.pem
       --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
       --spi-truststore-file-password=password
-      --spi-truststore-file-hostname-verification-policy=STRICT
+      --spi-truststore-file-hostname-verification-policy=DEFAULT
 
   forward-proxy:
     build: ./forward-proxy
