@@ -228,4 +228,10 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			throw exceptionHandler.internalServerErrorBundleTransaction(e);
 		}
 	}
+
+	@Override
+	protected Exception internalServerError(Exception exception)
+	{
+		return exceptionHandler.internalServerErrorBundleTransaction(exception);
+	}
 }

@@ -244,4 +244,10 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			}
 		};
 	}
+
+	@Override
+	protected Exception internalServerError(Exception exception)
+	{
+		return exceptionHandler.internalServerErrorBundleBatch(exception);
+	}
 }

@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
-class AbstractCommandList
+abstract class AbstractCommandList
 {
 	private static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 
@@ -119,7 +119,7 @@ class AbstractCommandList
 		if (!(exception instanceof WebApplicationException w)
 				|| !(w.getResponse().getEntity() instanceof OperationOutcome))
 		{
-			exception = exceptionHandler.internalServerErrorBundleBatch(exception);
+			exception = internalServerError(exception);
 		}
 
 		Response httpResponse = ((WebApplicationException) exception).getResponse();
@@ -129,4 +129,6 @@ class AbstractCommandList
 
 		return entry;
 	}
+
+	protected abstract Exception internalServerError(Exception exception);
 }
