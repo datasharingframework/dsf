@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_activity_definitions_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/activity_definitions_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_code_systems_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/code_systems_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_endpoints_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/endpoints_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_naming_systems_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/naming_systems_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_organizations_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/organizations_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_organization_affiliations_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/organization_affiliations_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_structure_definitions_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/structure_definitions_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_subscriptions_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/subscriptions_unique.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_value_sets_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/value_sets_unique.sql" splitStatements="false" />
+	</changeSet>
+	
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1">
+		<sql dbms="postgresql">
+			CREATE CONSTRAINT TRIGGER activity_definitions_unique AFTER INSERT ON activity_definitions FOR EACH ROW EXECUTE PROCEDURE activity_definitions_unique();
+			CREATE CONSTRAINT TRIGGER code_systems_unique AFTER INSERT ON code_systems FOR EACH ROW EXECUTE PROCEDURE code_systems_unique();
+			CREATE CONSTRAINT TRIGGER endpoints_unique AFTER INSERT ON endpoints FOR EACH ROW EXECUTE PROCEDURE endpoints_unique();
+			CREATE CONSTRAINT TRIGGER naming_systems_unique AFTER INSERT ON naming_systems FOR EACH ROW EXECUTE PROCEDURE naming_systems_unique();
+			CREATE CONSTRAINT TRIGGER organizations_unique AFTER INSERT ON organizations FOR EACH ROW EXECUTE PROCEDURE organizations_unique();
+			CREATE CONSTRAINT TRIGGER organization_affiliations_unique AFTER INSERT ON organization_affiliations FOR EACH ROW EXECUTE PROCEDURE organization_affiliations_unique();
+			CREATE CONSTRAINT TRIGGER structure_definitions_unique AFTER INSERT ON structure_definitions FOR EACH ROW EXECUTE PROCEDURE structure_definitions_unique();
+			CREATE CONSTRAINT TRIGGER subscriptions_unique AFTER INSERT ON subscriptions FOR EACH ROW EXECUTE PROCEDURE subscriptions_unique();
+			CREATE CONSTRAINT TRIGGER value_sets_unique AFTER INSERT ON value_sets FOR EACH ROW EXECUTE PROCEDURE value_sets_unique();
+		</sql>
+	</changeSet>
+</databaseChangeLog>

@@ -381,6 +381,23 @@ public class ResponseGenerator
 		return Response.status(Status.PRECONDITION_FAILED).entity(outcome).build();
 	}
 
+	public Response dupicateResourceExists()
+	{
+		logger.warn("Duplicate resources exists");
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.DUPLICATE, "Duplicate resources exist");
+		return Response.status(Status.FORBIDDEN).entity(outcome).build();
+	}
+
+	public Response dupicateResourceExists(String resourceTypeName)
+	{
+		logger.warn("Duplicate {} resources exists", resourceTypeName);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.DUPLICATE,
+				"Duplicate " + resourceTypeName + " resources exist");
+		return Response.status(Status.FORBIDDEN).entity(outcome).build();
+	}
+
 	public Response badIfNoneExistHeaderValue(String logMessageReason, String ifNoneExistsHeaderValue)
 	{
 		logger.warn("Bad If-None-Exist header value: {}", logMessageReason);

@@ -1,6 +1,7 @@
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,10 +17,13 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.IdType;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -30,13 +34,16 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 	private static final Logger logger = LoggerFactory.getLogger(TransactionCommandList.class);
 
 	private final Function<Connection, TransactionResources> transactionResourceFactory;
+	private final ResponseGenerator responseGenerator;
 
 	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler,
-			List<? extends Command> commands, Function<Connection, TransactionResources> transactionResourceFactory)
+			List<? extends Command> commands, Function<Connection, TransactionResources> transactionResourceFactory,
+			ResponseGenerator responseGenerator)
 	{
 		super(dataSource, exceptionHandler, commands);
 
 		this.transactionResourceFactory = transactionResourceFactory;
+		this.responseGenerator = responseGenerator;
 
 		Collections.sort(this.commands,
 				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
@@ -55,7 +62,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 				{
 					connection.setReadOnly(false);
 					connection.setAutoCommit(false);
-					connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+					connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 				}
 
 				TransactionResources transactionResources = transactionResourceFactory.apply(connection);
@@ -131,7 +138,11 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 									e1.getMessage());
 						}
 
-						throw e;
+						if (e instanceof PSQLException s
+								&& PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
+							throw new WebApplicationException(responseGenerator.dupicateResourceExists());
+						else
+							throw e;
 					}
 				}
 
@@ -177,8 +188,20 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 
 				if (hasModifyingCommands)
 				{
-					logger.debug("Committing DB transaction");
-					connection.commit();
+					try
+					{
+						logger.debug("Committing DB transaction");
+						connection.commit();
+					}
+					catch (SQLException e)
+					{
+						connection.rollback();
+
+						if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
+							throw new WebApplicationException(responseGenerator.dupicateResourceExists());
+						else
+							throw e;
+					}
 				}
 			}
 

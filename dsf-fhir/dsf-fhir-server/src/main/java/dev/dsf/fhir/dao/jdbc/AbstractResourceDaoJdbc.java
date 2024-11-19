@@ -252,7 +252,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	{
 		Connection connection = dataSource.getConnection();
 		connection.setReadOnly(false);
-		connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 		connection.setAutoCommit(false);
 
 		return connection;
@@ -565,12 +565,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(resource, "resource");
 		// expectedVersion may be null
 
-		try (Connection connection = dataSource.getConnection())
+		try (Connection connection = newReadWriteTransaction())
 		{
-			connection.setReadOnly(false);
-			connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-			connection.setAutoCommit(false);
-
 			try
 			{
 				R updatedResource = updateWithTransaction(connection, resource, expectedVersion);
@@ -596,9 +592,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		// expectedVersion may be null
 		if (connection.isReadOnly())
 			throw new IllegalArgumentException("Connection is read-only");
-		if (connection.getTransactionIsolation() != Connection.TRANSACTION_REPEATABLE_READ
-				&& connection.getTransactionIsolation() != Connection.TRANSACTION_SERIALIZABLE)
-			throw new IllegalArgumentException("Connection transaction isolation not REPEATABLE_READ or SERIALIZABLE");
+		if (connection.getTransactionIsolation() != Connection.TRANSACTION_READ_COMMITTED)
+			throw new IllegalArgumentException("Connection transaction isolation not READ_COMMITTED");
 		if (connection.getAutoCommit())
 			throw new IllegalArgumentException("Connection transaction is in auto commit mode");
 
