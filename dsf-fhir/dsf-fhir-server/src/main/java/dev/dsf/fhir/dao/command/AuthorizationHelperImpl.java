@@ -130,7 +130,7 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(oldResource.getClass());
-		optRule.flatMap(rule -> rule.reasonDeleteAllowed(identity, oldResource)).ifPresentOrElse(reason ->
+		optRule.flatMap(rule -> rule.reasonDeleteAllowed(connection, identity, oldResource)).ifPresentOrElse(reason ->
 		{
 			audit.info("Delete of {}/{}/_history/{} allowed for identity '{}' via bundle at index {}, reason: {}",
 					resourceTypeName, resourceId, resourceVersion, identity.getName(), index, reason);
