@@ -1232,7 +1232,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 		Thread t1 = new Thread(createOperation1, "test 1");
 		t1.setUncaughtExceptionHandler(handler);
 
-		Thread t2 = new Thread(createOperation1, "test 2");
+		Thread t2 = new Thread(createOperation2, "test 2");
 		t2.setUncaughtExceptionHandler(handler);
 
 		t1.start();
