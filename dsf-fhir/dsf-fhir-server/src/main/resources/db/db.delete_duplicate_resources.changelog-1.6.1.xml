@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.activity_definitions">
+		<sql dbms="postgresql">
+			DELETE FROM activity_definitions WHERE activity_definition_id IN (
+				SELECT activity_definition_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY activity_definition->>'url', activity_definition->>'version'
+							ORDER BY activity_definition->>'url', activity_definition->>'version', (activity_definition->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, activity_definition_id
+					FROM current_activity_definitions
+				) AS ad WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.code_systems">
+		<sql dbms="postgresql">
+			DELETE FROM code_systems
+			WHERE code_system->'url' IS NOT NULL
+			AND code_system->'version' IS NOT NULL 
+			AND code_system_id IN (
+				SELECT code_system_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY code_system->>'url', code_system->>'version'
+							ORDER BY code_system->>'url', code_system->>'version', (code_system->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, code_system_id
+					FROM current_code_systems
+				) AS cs WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.endpoints.address">
+		<sql dbms="postgresql">
+			DELETE FROM endpoints
+			WHERE endpoint->'address' IS NOT NULL
+			AND endpoint_id IN (
+				SELECT endpoint_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY endpoint->>'address'
+							ORDER BY endpoint->>'address', (endpoint->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, endpoint_id
+					FROM current_endpoints
+				) AS e WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.endpoints.identifier">
+		<sql dbms="postgresql">
+			DELETE FROM endpoints
+			WHERE jsonb_path_exists(endpoint, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/endpoint-identifier").value')
+			AND endpoint_id IN (
+				SELECT endpoint_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY jsonb_path_query_array(endpoint, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/endpoint-identifier").value')
+							ORDER BY jsonb_path_query_array(endpoint, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/endpoint-identifier").value'), (endpoint->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, endpoint_id
+					FROM current_endpoints
+				) AS e WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.naming_systems.name">
+		<sql dbms="postgresql">
+			DELETE FROM naming_systems
+			WHERE naming_system->'name' IS NOT NULL
+			AND naming_system_id IN (
+				SELECT naming_system_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY naming_system->>'name'
+							ORDER BY naming_system->>'name', (naming_system->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, naming_system_id
+					FROM current_naming_systems
+				) AS ns WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.naming_systems.uniqueId">
+		<sql dbms="postgresql">
+			DELETE FROM naming_systems
+			WHERE jsonb_path_exists(naming_system, '$.uniqueId[*] ? (@.type == "other").value') 
+			AND naming_system_id IN (
+				SELECT naming_system_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY jsonb_path_query_array(naming_system, '$.uniqueId[*] ? (@.type == "other").value')
+							ORDER BY jsonb_path_query_array(naming_system, '$.uniqueId[*] ? (@.type == "other").value'), (naming_system->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, naming_system_id
+					FROM current_naming_systems
+				) AS ns WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.organizations-parent.identifier">
+		<sql dbms="postgresql">
+			DELETE FROM organizations
+			WHERE jsonb_path_exists(organization, '$.meta.profile[*] ? (@ == "http://dsf.dev/fhir/StructureDefinition/organization-parent")')
+			AND jsonb_path_exists(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier").value')
+			AND organization_id IN (
+				SELECT organization_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY jsonb_path_query_array(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier").value')
+							ORDER BY jsonb_path_query_array(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier").value'), (organization->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, organization_id
+					FROM current_organizations
+				) AS o WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.organizations-member.identifier">
+		<sql dbms="postgresql">
+			DELETE FROM organizations
+			WHERE jsonb_path_exists(organization, '$.meta.profile[*] ? (@ == "http://dsf.dev/fhir/StructureDefinition/organization")')
+			AND jsonb_path_exists(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier").value') 
+			AND organization_id IN (
+				SELECT organization_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY jsonb_path_query_array(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier").value')
+							ORDER BY jsonb_path_query_array(organization, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/organization-identifier").value'), (organization->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, organization_id
+					FROM current_organizations
+				) AS o WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.organizations-member.thumbprint">
+		<sql dbms="postgresql">
+			DELETE FROM organizations
+			WHERE jsonb_path_exists(organization, '$.meta.profile[*] ? (@ == "http://dsf.dev/fhir/StructureDefinition/organization")')
+			AND jsonb_path_exists(organization, '$.extension[*] ? (@.url == "http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint").valueString') 
+			AND organization_id IN (
+				SELECT organization_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY jsonb_path_query_array(organization, '$.extension[*] ? (@.url == "http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint").valueString')
+							ORDER BY jsonb_path_query_array(organization, '$.extension[*] ? (@.url == "http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint").valueString'), (organization->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, organization_id
+					FROM current_organizations
+				) AS o WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.organization_affiliations.endpoint">
+		<sql dbms="postgresql">
+			DELETE FROM organization_affiliations
+			WHERE organization_affiliation->'organization'->'reference' IS NOT NULL
+			AND organization_affiliation->'participatingOrganization'->'reference' IS NOT NULL
+			AND jsonb_path_exists(organization_affiliation, '$.endpoint[*].reference')
+			AND organization_affiliation_id IN (
+				SELECT organization_affiliation_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY organization_affiliation->'organization'->>'reference', organization_affiliation->'participatingOrganization'->>'reference', jsonb_path_query_array(organization_affiliation, '$.endpoint[*].reference')
+							ORDER BY organization_affiliation->'organization'->>'reference', organization_affiliation->'participatingOrganization'->>'reference', jsonb_path_query_array(organization_affiliation, '$.endpoint[*].reference'), (organization_affiliation->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, organization_affiliation_id
+					FROM current_organization_affiliations
+				) AS oa WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.organization_affiliations.role">
+		<sql dbms="postgresql">
+			DELETE FROM organization_affiliations
+			WHERE organization_affiliation->'organization'->'reference' IS NOT NULL
+			AND organization_affiliation->'participatingOrganization'->'reference' IS NOT NULL
+			AND jsonb_path_exists(organization_affiliation, '$.code[*].coding[*] ? (@.system == "http://dsf.dev/fhir/CodeSystem/organization-role").code')
+			AND organization_affiliation_id IN (
+				SELECT organization_affiliation_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY organization_affiliation->'organization'->>'reference', organization_affiliation->'participatingOrganization'->>'reference', jsonb_path_query_array(organization_affiliation, '$.code[*].coding[*] ? (@.system == "http://dsf.dev/fhir/CodeSystem/organization-role").code')
+							ORDER BY organization_affiliation->'organization'->>'reference', organization_affiliation->'participatingOrganization'->>'reference', jsonb_path_query_array(organization_affiliation, '$.code[*].coding[*] ? (@.system == "http://dsf.dev/fhir/CodeSystem/organization-role").code'), (organization_affiliation->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, organization_affiliation_id
+					FROM current_organization_affiliations
+				) AS oa WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.structure_definition_snapshots">
+		<sql dbms="postgresql">
+			DELETE FROM structure_definition_snapshots
+			WHERE structure_definition_snapshot->'url' IS NOT NULL
+			AND structure_definition_snapshot->'version' IS NOT NULL  
+			AND structure_definition_snapshot_id IN (
+				SELECT structure_definition_snapshot_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY structure_definition_snapshot->>'url', structure_definition_snapshot->>'version'
+							ORDER BY structure_definition_snapshot->>'url', structure_definition_snapshot->>'version', (structure_definition_snapshot->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, structure_definition_snapshot_id
+					FROM current_structure_definition_snapshots
+				) AS sd WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.structure_definitions">
+		<sql dbms="postgresql">
+			DELETE FROM structure_definitions
+			WHERE structure_definition->'url' IS NOT NULL
+			AND structure_definition->'version' IS NOT NULL  
+			AND structure_definition_id IN (
+				SELECT structure_definition_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY structure_definition->>'url', structure_definition->>'version'
+							ORDER BY structure_definition->>'url', structure_definition->>'version', (structure_definition->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, structure_definition_id
+					FROM current_structure_definitions
+				) AS sd WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.value_sets">
+		<sql dbms="postgresql">
+			DELETE FROM value_sets
+			WHERE value_set->'url' IS NOT NULL
+			AND value_set->'version' IS NOT NULL  
+			AND value_set_id IN (
+				SELECT value_set_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY value_set->>'url', value_set->>'version'
+							ORDER BY value_set->>'url', value_set->>'version', (value_set->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, value_set_id
+					FROM current_value_sets
+				) AS vs WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
+</databaseChangeLog>
