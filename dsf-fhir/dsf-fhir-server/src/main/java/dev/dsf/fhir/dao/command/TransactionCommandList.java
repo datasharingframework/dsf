@@ -126,6 +126,10 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 							connection.rollback();
 						}
 
+						if (e instanceof PSQLException s
+								&& PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
+							e = new WebApplicationException(e, responseGenerator.dupicateResourceExists());
+
 						try
 						{
 							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
@@ -138,11 +142,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 									e1.getMessage());
 						}
 
-						if (e instanceof PSQLException s
-								&& PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
-							throw new WebApplicationException(responseGenerator.dupicateResourceExists());
-						else
-							throw e;
+						throw e;
 					}
 				}
 
