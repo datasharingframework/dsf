@@ -30,6 +30,9 @@
 	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_subscriptions_unique" runOnChange="true">
 		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/subscriptions_unique.sql" splitStatements="false" />
 	</changeSet>
+	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_tasks_unique" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/tasks_unique.sql" splitStatements="false" />
+	</changeSet>
 	<changeSet author="hhund" id="db.constraint_trigger.changelog-1.6.1_value_sets_unique" runOnChange="true">
 		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="unique_trigger_functions/value_sets_unique.sql" splitStatements="false" />
 	</changeSet>
@@ -44,6 +47,7 @@
 			CREATE CONSTRAINT TRIGGER organization_affiliations_unique AFTER INSERT ON organization_affiliations FOR EACH ROW EXECUTE PROCEDURE organization_affiliations_unique();
 			CREATE CONSTRAINT TRIGGER structure_definitions_unique AFTER INSERT ON structure_definitions FOR EACH ROW EXECUTE PROCEDURE structure_definitions_unique();
 			CREATE CONSTRAINT TRIGGER subscriptions_unique AFTER INSERT ON subscriptions FOR EACH ROW EXECUTE PROCEDURE subscriptions_unique();
+			CREATE CONSTRAINT TRIGGER tasks_unique AFTER INSERT ON tasks FOR EACH ROW EXECUTE PROCEDURE tasks_unique();
 			CREATE CONSTRAINT TRIGGER value_sets_unique AFTER INSERT ON value_sets FOR EACH ROW EXECUTE PROCEDURE value_sets_unique();
 		</sql>
 	</changeSet>

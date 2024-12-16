@@ -48,6 +48,9 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelComponent;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskIntent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -63,6 +66,7 @@ import dev.dsf.fhir.dao.OrganizationAffiliationDao;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.SubscriptionDao;
+import dev.dsf.fhir.dao.TaskDao;
 import dev.dsf.fhir.dao.ValueSetDao;
 import dev.dsf.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
 import jakarta.ws.rs.WebApplicationException;
@@ -92,6 +96,10 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	private static final String SUBSCRIPTION_CRITERIA = "Patient";
 	private static final SubscriptionChannelType SUBSCRIPTION_CHANNEL_TYPE = SubscriptionChannelType.WEBSOCKET;
 	private static final String SUBSCRIPTION_CHANNEL_PAYLOAD = "application/fhir+json";
+
+	private static final String NAMING_SYSTEM_TASK_IDENTIFIER = "http://dsf.dev/sid/task-identifier";
+	private static final String TASK_IDENTIFIER_VALUE = ACTIVITY_DEFINITION_URL + "/" + ACTIVITY_DEFINITION_VERSION
+			+ "/test";
 
 	private static final String VALUE_SET_URL = "http://test.com/fhir/ValueSet/test";
 	private static final String VALUE_SET_VERSION = "test-version";
@@ -314,6 +322,30 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	public void testCreateDuplicateSubscriptionsViaBatchBundle() throws Exception
 	{
 		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(), null, 2);
+
+		checkReturnBatchBundle(getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testCreateDuplicateTasksViaTransactionBundle() throws Exception
+	{
+		ActivityDefinitionDao activityDefinitionDao = getSpringWebApplicationContext()
+				.getBean(ActivityDefinitionDao.class);
+		activityDefinitionDao.create(createActivityDefinition());
+
+		Bundle bundle = createBundle(BundleType.TRANSACTION, createTask(), null, 2);
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testCreateDuplicateTasksViaBatchBundle() throws Exception
+	{
+		ActivityDefinitionDao activityDefinitionDao = getSpringWebApplicationContext()
+				.getBean(ActivityDefinitionDao.class);
+		activityDefinitionDao.create(createActivityDefinition());
+
+		Bundle bundle = createBundle(BundleType.BATCH, createTask(), null, 2);
 
 		checkReturnBatchBundle(getWebserviceClient().postBundle(bundle));
 	}
@@ -575,6 +607,34 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateDuplicateTasksViaTransactionBundleWithIfNoneExists() throws Exception
+	{
+		ActivityDefinitionDao activityDefinitionDao = getSpringWebApplicationContext()
+				.getBean(ActivityDefinitionDao.class);
+		activityDefinitionDao.create(createActivityDefinition());
+
+		Bundle bundle = createBundle(BundleType.TRANSACTION, createTask(),
+				(t, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
+				2);
+
+		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.TRANSACTIONRESPONSE);
+	}
+
+	@Test
+	public void testCreateDuplicateTasksViaBatchBundleWithIfNoneExists() throws Exception
+	{
+		ActivityDefinitionDao activityDefinitionDao = getSpringWebApplicationContext()
+				.getBean(ActivityDefinitionDao.class);
+		activityDefinitionDao.create(createActivityDefinition());
+
+		Bundle bundle = createBundle(BundleType.BATCH, createTask(),
+				(t, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
+				2);
+
+		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.BATCHRESPONSE);
+	}
+
+	@Test
 	public void testCreateDuplicateValueSetsViaTransactionBundleWithIfNoneExists() throws Exception
 	{
 		Bundle bundle = createBundle(BundleType.TRANSACTION, createValueSet(),
@@ -775,6 +835,23 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				s -> SUBSCRIPTION_CRITERIA.equals(s.getCriteria())
 						&& SUBSCRIPTION_CHANNEL_TYPE.equals(s.getChannel().getType())
 						&& SUBSCRIPTION_CHANNEL_PAYLOAD.equals(s.getChannel().getPayload()));
+	}
+
+	@Test
+	public void testCreateDuplicateTasksParallelDirect() throws Exception
+	{
+		ActivityDefinitionDao activityDefinitionDao = getSpringWebApplicationContext()
+				.getBean(ActivityDefinitionDao.class);
+		activityDefinitionDao.create(createActivityDefinition());
+
+		testCreateDuplicatesParallel(() ->
+		{
+			Task returnT = getWebserviceClient().create(createTask());
+			assertNotNull(returnT);
+		}, TaskDao.class,
+				t -> TASK_IDENTIFIER_VALUE.equals(
+						t.getIdentifier().stream().filter(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem()))
+								.findFirst().map(Identifier::getValue).get()));
 	}
 
 	@Test
@@ -1194,6 +1271,50 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateDuplicateTasksParallelTransactionBundle() throws Exception
+	{
+		ActivityDefinitionDao activityDefinitionDao = getSpringWebApplicationContext()
+				.getBean(ActivityDefinitionDao.class);
+		activityDefinitionDao.create(createActivityDefinition());
+
+		testCreateDuplicatesParallel(() ->
+		{
+			Bundle returnBundle = getWebserviceClient()
+					.postBundle(createBundle(BundleType.TRANSACTION, createTask(), null, 1));
+			assertNotNull(returnBundle);
+		}, TaskDao.class,
+				t -> TASK_IDENTIFIER_VALUE.equals(
+						t.getIdentifier().stream().filter(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem()))
+								.findFirst().map(Identifier::getValue).get()));
+	}
+
+	@Test
+	public void testCreateDuplicateTasksParallelBatchBundle() throws Exception
+	{
+		ActivityDefinitionDao activityDefinitionDao = getSpringWebApplicationContext()
+				.getBean(ActivityDefinitionDao.class);
+		activityDefinitionDao.create(createActivityDefinition());
+
+		testCreateDuplicatesParallel(() ->
+		{
+			Bundle returnBundle = getWebserviceClient()
+					.postBundle(createBundle(BundleType.BATCH, createTask(), null, 1));
+			assertNotNull(returnBundle);
+
+			assertNotNull(returnBundle.getEntry());
+			assertEquals(1, returnBundle.getEntry().size());
+			assertNotNull(returnBundle.getEntry().get(0).getResponse());
+			assertNotNull(returnBundle.getEntry().get(0).getResponse().getStatus());
+
+			if ("403 Forbidden".equals(returnBundle.getEntry().get(0).getResponse().getStatus()))
+				throw new WebApplicationException(403);
+		}, TaskDao.class,
+				t -> TASK_IDENTIFIER_VALUE.equals(
+						t.getIdentifier().stream().filter(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem()))
+								.findFirst().map(Identifier::getValue).get()));
+	}
+
+	@Test
 	public void testCreateDuplicateValueSetsParallelTransactionBundle() throws Exception
 	{
 		testCreateDuplicatesParallel(() ->
@@ -1462,6 +1583,24 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 		getReadAccessHelper().addAll(s);
 
 		return s;
+	}
+
+	private Task createTask()
+	{
+		Task t = new Task();
+		t.setStatus(TaskStatus.DRAFT);
+		t.setIntent(TaskIntent.ORDER);
+		t.setAuthoredOn(new Date());
+		t.addIdentifier().setSystem(NAMING_SYSTEM_TASK_IDENTIFIER).setValue(TASK_IDENTIFIER_VALUE);
+		t.setInstantiatesCanonical(ACTIVITY_DEFINITION_URL + "|" + ACTIVITY_DEFINITION_VERSION);
+		t.getRequester().setType("Organization").getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier")
+				.setValue("Test_Organization");
+		t.getRestriction().getRecipientFirstRep().setType("Organization").getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization");
+		t.getInputFirstRep().setValue(new StringType("test")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("message-name");
+
+		return t;
 	}
 
 	private ValueSet createValueSet()

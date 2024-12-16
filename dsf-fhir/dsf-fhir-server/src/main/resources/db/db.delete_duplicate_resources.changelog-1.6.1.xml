@@ -235,6 +235,24 @@
 			)
 		</sql>
 	</changeSet>
+	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.tasks-draft">
+		<sql dbms="postgresql">
+			DELETE FROM tasks
+			WHERE task->>'status' = 'draft'
+			AND jsonb_path_exists(task, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/task-identifier").value') 
+			AND task_id IN (
+				SELECT task_id FROM (
+					SELECT
+						row_number() OVER (
+							PARTITION BY jsonb_path_query_array(task, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/task-identifier").value')
+							ORDER BY jsonb_path_query_array(task, '$.identifier[*] ? (@.system == "http://dsf.dev/sid/task-identifier").value'), (task->'meta'->>'lastUpdated')::timestamp DESC
+						) AS rn
+						, task_id
+					FROM current_tasks
+				) AS t WHERE rn > 1
+			)
+		</sql>
+	</changeSet>
 	<changeSet author="hhund" id="db.delete_duplicate_resources.changelog-1.6.1.value_sets">
 		<sql dbms="postgresql">
 			DELETE FROM value_sets
