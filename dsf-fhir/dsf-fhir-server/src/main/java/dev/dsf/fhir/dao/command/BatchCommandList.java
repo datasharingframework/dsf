@@ -169,7 +169,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 
 				if (e instanceof PSQLException s && PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
 					caughtExceptions.put(command.getIndex(),
-							new WebApplicationException(responseGenerator.dupicateResourceExists()));
+							new WebApplicationException(responseGenerator.duplicateResourceExists()));
 				else
 					caughtExceptions.put(command.getIndex(), e);
 

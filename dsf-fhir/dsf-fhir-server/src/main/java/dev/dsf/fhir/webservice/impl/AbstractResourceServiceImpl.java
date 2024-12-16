@@ -168,7 +168,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					connection.rollback();
 
 					if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
-						throw new WebApplicationException(responseGenerator.dupicateResourceExists(resourceTypeName));
+						throw new WebApplicationException(responseGenerator.duplicateResourceExists(resourceTypeName));
 					else
 						throw e;
 				}
@@ -535,7 +535,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						{
 							if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 								throw new WebApplicationException(
-										responseGenerator.dupicateResourceExists(resourceTypeName));
+										responseGenerator.duplicateResourceExists(resourceTypeName));
 
 							connection.rollback();
 							throw e;

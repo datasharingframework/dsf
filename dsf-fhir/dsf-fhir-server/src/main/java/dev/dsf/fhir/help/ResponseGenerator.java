@@ -381,7 +381,7 @@ public class ResponseGenerator
 		return Response.status(Status.PRECONDITION_FAILED).entity(outcome).build();
 	}
 
-	public Response dupicateResourceExists()
+	public Response duplicateResourceExists()
 	{
 		logger.warn("Duplicate resources exists");
 
@@ -389,7 +389,7 @@ public class ResponseGenerator
 		return Response.status(Status.FORBIDDEN).entity(outcome).build();
 	}
 
-	public Response dupicateResourceExists(String resourceTypeName)
+	public Response duplicateResourceExists(String resourceTypeName)
 	{
 		logger.warn("Duplicate {} resources exists", resourceTypeName);
 
