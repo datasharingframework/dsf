@@ -82,10 +82,10 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					catch (Exception e)
 					{
 						logger.debug(
-								"Error while running pre-execute of command {} for entry at index {}, abborting transaction",
+								"Error while running pre-execute of command {} for entry at index {}, aborting transaction",
 								c.getClass().getSimpleName(), c.getIndex(), e);
 						logger.warn(
-								"Error while running pre-execute of command {} for entry at index {}, abborting transaction: {} - {}",
+								"Error while running pre-execute of command {} for entry at index {}, aborting transaction: {} - {}",
 								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
 
 						try

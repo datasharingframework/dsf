@@ -78,22 +78,22 @@ abstract class AbstractCommandList
 	{
 		if (command instanceof DeleteCommand)
 		{
-			audit.info("Delete of {} for identity '{}' via bundle at index {} abborted", command.getResourceTypeName(),
+			audit.info("Delete of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
 		else if (command instanceof CreateCommand)
 		{
-			audit.info("Create of {} for identity '{}' via bundle at index {} abborted", command.getResourceTypeName(),
+			audit.info("Create of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
 		else if (command instanceof UpdateCommand)
 		{
-			audit.info("Update of {} for identity '{}' via bundle at index {} abborted", command.getResourceTypeName(),
+			audit.info("Update of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
 		else if (command instanceof ReadCommand r)
 		{
-			audit.info("{} of {} for identity '{}' via bundle at index {} abborted", r.isSearch() ? "Search" : "Read",
+			audit.info("{} of {} for identity '{}' via bundle at index {} aborted", r.isSearch() ? "Search" : "Read",
 					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex());
 		}
 	}
