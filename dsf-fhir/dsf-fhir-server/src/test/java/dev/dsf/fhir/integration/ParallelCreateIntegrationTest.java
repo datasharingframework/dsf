@@ -71,10 +71,10 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(ParallelCreateIntegrationTest.class);
 
-	private static final String ACTIVITY_DEFINITION_URL = "http://test.com/fhir/ActivityDefinition/test-url";
-	private static final String ACTIVITY_DEFINITION_VERSION = "test-version";
+	private static final String ACTIVITY_DEFINITION_URL = "http://test.com/bpe/Process/test";
+	private static final String ACTIVITY_DEFINITION_VERSION = "1.6";
 
-	private static final String CODE_SYSTEM_URL = "http://test.com/fhir/CodeSystem/test-url";
+	private static final String CODE_SYSTEM_URL = "http://test.com/fhir/CodeSystem/test";
 	private static final String CODE_SYSTEM_VERSION = "test-version";
 
 	private static final String ENDPOINT_IDENTIFIER_VALUE = "endpoint.test.org";
@@ -86,14 +86,14 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	private static final String ORGANIZATION_IDENTIFIER_VALUE_PARENT = "parent.org";
 	private static final String ORGANIZATION_IDENTIFIER_VALUE_MEMBER = "member.org";
 
-	private static final String STRUCTURE_DEFINITION_URL = "http://test.com/fhir/StructureDefinition/test-url";
+	private static final String STRUCTURE_DEFINITION_URL = "http://test.com/fhir/StructureDefinition/test";
 	private static final String STRUCTURE_DEFINITION_VERSION = "test-version";
 
 	private static final String SUBSCRIPTION_CRITERIA = "Patient";
 	private static final SubscriptionChannelType SUBSCRIPTION_CHANNEL_TYPE = SubscriptionChannelType.WEBSOCKET;
 	private static final String SUBSCRIPTION_CHANNEL_PAYLOAD = "application/fhir+json";
 
-	private static final String VALUE_SET_URL = "http://test.com/fhir/ValueSet/test-url";
+	private static final String VALUE_SET_URL = "http://test.com/fhir/ValueSet/test";
 	private static final String VALUE_SET_VERSION = "test-version";
 
 	private void checkReturnBatchBundle(Bundle b)
@@ -303,7 +303,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionViaTransactionBundle() throws Exception
+	public void testCreateDuplicateSubscriptionsViaTransactionBundle() throws Exception
 	{
 		Bundle bundle = createBundle(BundleType.TRANSACTION, createSubscription(), null, 2);
 
@@ -311,7 +311,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionViaBatchBundle() throws Exception
+	public void testCreateDuplicateSubscriptionsViaBatchBundle() throws Exception
 	{
 		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(), null, 2);
 
@@ -564,7 +564,27 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateDuplicateSubscriptionsViaBatchBundleWithIfNoneExists() throws Exception
+	{
+		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(),
+				(s, r) -> r
+						.setIfNoneExist("criteria=" + s.getCriteria() + "&type=" + s.getChannel().getType().toCode()),
+				2);
+
+		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.BATCHRESPONSE);
+	}
+
+	@Test
 	public void testCreateDuplicateValueSetsViaTransactionBundleWithIfNoneExists() throws Exception
+	{
+		Bundle bundle = createBundle(BundleType.TRANSACTION, createValueSet(),
+				(vS, r) -> r.setIfNoneExist("url=" + vS.getUrl() + "&version=" + vS.getVersion()), 2);
+
+		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.TRANSACTIONRESPONSE);
+	}
+
+	@Test
+	public void testCreateDuplicateValueSetsViaBatchBundleWithIfNoneExists() throws Exception
 	{
 		Bundle bundle = createBundle(BundleType.BATCH, createValueSet(),
 				(vS, r) -> r.setIfNoneExist("url=" + vS.getUrl() + "&version=" + vS.getVersion()), 2);
