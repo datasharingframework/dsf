@@ -40,4 +40,7 @@
 
 	<include file="db/db.read_access.changelog-1.6.0.xml" />
 
+	<include file="db/db.constraint_trigger.changelog-1.6.1.xml" />
+	<include file="db/db.delete_duplicate_resources.changelog-1.6.1.xml" />
+
 </databaseChangeLog>

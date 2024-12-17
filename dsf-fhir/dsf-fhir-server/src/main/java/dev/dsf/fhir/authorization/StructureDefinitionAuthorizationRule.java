@@ -73,6 +73,10 @@ public class StructureDefinitionAuthorizationRule
 		{
 			errors.add("StructureDefinition.version not defined");
 		}
+		if (!newResource.hasBaseDefinition())
+		{
+			errors.add("StructureDefinition.baseDefinition not defined");
+		}
 
 		if (!hasValidReadAccessTag(connection, newResource))
 		{

@@ -2,13 +2,14 @@ package dev.dsf.fhir.validation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,12 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 	public SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential,
 			String baseAbsoluteUrlPrefix)
 	{
-		Objects.requireNonNull(differential, "differential");
+		if (differential == null)
+			return new SnapshotWithValidationMessages(differential, List.of(new ValidationMessage(null,
+					IssueType.PROCESSING, null, "StructureDefinition is null", IssueSeverity.ERROR)));
+		if (!differential.hasBaseDefinition())
+			return new SnapshotWithValidationMessages(differential, List.of(new ValidationMessage(null,
+					IssueType.PROCESSING, null, "StructureDefinition.baseDefinition missing", IssueSeverity.ERROR)));
 
 		logger.debug("Generating snapshot for StructureDefinition with id {}, url {}, version {}, base {}",
 				differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion(),
