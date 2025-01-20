@@ -29,23 +29,23 @@ public class PropertiesConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
-	@Documentation(required = true, description = "Address of the database used for the DSF BPE server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/bpe")
+	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
 	@Value("${dev.dsf.bpe.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "Username to access the database from the DSF BPE server")
+	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
 	@Value("${dev.dsf.bpe.db.user.username:bpe_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, description = "Password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
+	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
 	@Value("${dev.dsf.bpe.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "Username to access the database from the DSF BPE server for camunda processes", recommendation = "Use a different user then in *DEV_DSF_BPE_DB_USER_USERNAME*")
+	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
 	@Value("${dev.dsf.bpe.db.user.camunda.username:camunda_server_user}")
 	private String dbCamundaUsername;
 
-	@Documentation(required = true, description = "Password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
+	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
 	@Value("${dev.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 
@@ -57,7 +57,7 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.server.base.url:https://localhost/bpe}")
 	private String bpeServerBaseUrl;
 
-	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control).")
+	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control)")
 	@Value("${dev.dsf.bpe.server.roleConfig:}")
 	private String roleConfig;
 
@@ -65,8 +65,8 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.server.static.resource.cache:true}")
 	private boolean staticResourceCacheEnabled;
 
-	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas}")
+	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas:ca/ServerCertRootCAs.pem}")
 	private String clientCertificateTrustStoreFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
@@ -198,7 +198,7 @@ public class PropertiesConfig implements InitializingBean
 	private char[] mailServerPassword;
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate the server certificate of the SMTP server. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_trust_certificates.pem")
-	@Value("${dev.dsf.bpe.mail.trust.server.certificate.cas:#{null}}")
+	@Value("${dev.dsf.bpe.mail.trust.server.certificate.cas:ca/ServerCertRootCAs.pem}")
 	private String mailServerTrustStoreFile;
 
 	@Documentation(description = "PEM encoded file with client certificate used to authenticate against the SMTP server. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate.pem")
@@ -221,66 +221,67 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.mail.smime.p12Keystore.password:#{null}}")
 	private char[] mailSmimeSigingKeyStorePassword;
 
-	@Documentation(description = "To enable a test mail being send on startup of the BPE, set to `true`. Requires SMTP server to be configured.")
+	@Documentation(description = "To enable a test mail being send on startup of the BPE, set to `true`; requires SMTP server to be configured")
 	@Value("${dev.dsf.bpe.mail.sendTestMailOnStartup:false}")
 	private boolean sendTestMailOnStartup;
 
-	@Documentation(description = "To enable mails being send for every ERROR logged, set to `true`. Requires SMTP server to be configured.")
+	@Documentation(description = "To enable mails being send for every ERROR logged, set to `true`; requires SMTP server to be configured")
 	@Value("${dev.dsf.bpe.mail.sendMailOnErrorLogEvent:false}")
 	private boolean sendMailOnErrorLogEvent;
 
-	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0). Requires send mail on ERROR log event option to be enabled to have an effect.")
+	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0); requires send mail on ERROR log event option to be enabled to have an effect")
 	@Value("${dev.dsf.bpe.mail.mailOnErrorLogEventBufferSize:4}")
 	private int mailOnErrorLogEventBufferSize;
 
-	@Documentation(description = "Location of the BPE debug log as displayed in the footer of ERROR log event mails, does not modify the actual location of the debug log file. Requires send mail on ERROR log event option to be enabled to have an effect.")
+	@Documentation(description = "Location of the BPE debug log as displayed in the footer of ERROR log event mails, does not modify the actual location of the debug log file; requires send mail on ERROR log event option to be enabled to have an effect")
 	@Value("${dev.dsf.bpe.mail.mailOnErrorLogEventDebugLogLocation:/opt/bpe/log/bpe.log}")
 	private String mailOnErrorLogEventDebugLogLocation;
 
-	@Documentation(description = "To enable debug log messages for every bpmn activity start, set to `true`.", recommendation = "This debug function should only be activated during process plugin development.")
+	@Documentation(description = "To enable debug log messages for every bpmn activity start, set to `true`", recommendation = "This debug function should only be activated during process plugin development")
 	@Value("${dev.dsf.bpe.debug.log.message.onActivityStart:false}")
 	private boolean debugLogMessageOnActivityStart;
 
-	@Documentation(description = "To enable debug log messages for every bpmn activity end, set to `true`.", recommendation = "This debug function should only be activated during process plugin development.")
+	@Documentation(description = "To enable debug log messages for every bpmn activity end, set to `true`", recommendation = "This debug function should only be activated during process plugin development")
 	@Value("${dev.dsf.bpe.debug.log.message.onActivityEnd:false}")
 	private boolean debugLogMessageOnActivityEnd;
 
-	@Documentation(description = "To enable logging of bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`", recommendation = "This debug function should only be activated during process plugin development; WARNNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.bpe.debug.log.message.variables:false}")
 	private boolean debugLogMessageVariables;
 
-	@Documentation(description = "To enable logging of local bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of local bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`", recommendation = "This debug function should only be activated during process plugin development; WARNNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.bpe.debug.log.message.variablesLocal:false}")
 	private boolean debugLogMessageVariablesLocal;
 
-	@Documentation(description = "To enable logging of webservices requests set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of webservices requests set to `true`", recommendation = "This debug function should only be activated during development; WARNNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.bpe.debug.log.message.webserviceRequest:false}")
 	private boolean debugLogMessageWebserviceRequest;
 
-	@Documentation(description = "To enable logging of DB queries set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of DB queries set to `true`", recommendation = "This debug function should only be activated during development; WARNNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.bpe.debug.log.message.dbStatement:false}")
 	private boolean debugLogMessageDbStatement;
 
-	@Documentation(description = "To enable logging of the currently requesting user set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of the currently requesting user set to `true`", recommendation = "This debug function should only be activated during development; WARNNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.bpe.debug.log.message.currentUser:false}")
 	private boolean debugLogMessageCurrentUser;
 
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
 
-	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.proxy.url:#{null}}")
 	private String proxyUrl;
 
-	@Documentation(description = "Forward proxy username", recommendation = "Configure username if proxy requires authentication")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.proxy.username:#{null}}")
 	private String proxyUsername;
 
-	@Documentation(description = "Forward Proxy password", recommendation = "Configure password if proxy requires authentication, use docker secret file to configure using *${env_variable}_FILE*")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
-	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> proxyNoProxy;
 

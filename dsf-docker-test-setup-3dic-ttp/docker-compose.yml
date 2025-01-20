@@ -149,6 +149,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic1_fhir
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user_permanent_delete.password
@@ -156,7 +157,6 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic1_fhir
       DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: dic1_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: dic1_fhir_server_user
@@ -231,6 +231,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic2_fhir
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user_permanent_delete.password
@@ -238,7 +239,6 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic2_fhir
       DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: dic2_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: dic2_fhir_server_user
@@ -313,6 +313,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic3_fhir
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user_permanent_delete.password
@@ -320,7 +321,6 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic3_fhir
       DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: dic3_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: dic3_fhir_server_user
@@ -399,6 +399,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/ttp_fhir
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user_permanent_delete.password
@@ -406,7 +407,6 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/ttp_fhir
       DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: ttp_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: ttp_fhir_server_user
@@ -488,6 +488,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic1_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user_camunda.password
@@ -495,7 +496,6 @@ services:
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
-      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic1_bpe
       DEV_DSF_BPE_DB_USER_GROUP: dic1_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: dic1_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic1_camunda_users
@@ -581,6 +581,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic2_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user_camunda.password
@@ -588,7 +589,6 @@ services:
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
-      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic2_bpe
       DEV_DSF_BPE_DB_USER_GROUP: dic2_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: dic2_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic2_camunda_users
@@ -668,6 +668,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic3_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user_camunda.password
@@ -675,7 +676,6 @@ services:
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
-      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic3_bpe
       DEV_DSF_BPE_DB_USER_GROUP: dic3_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: dic3_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic3_camunda_users
@@ -755,6 +755,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/ttp_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user_camunda.password
@@ -762,7 +763,6 @@ services:
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
-      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/ttp_bpe
       DEV_DSF_BPE_DB_USER_GROUP: ttp_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: ttp_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: ttp_camunda_users
