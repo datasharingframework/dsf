@@ -1,1 +1,1 @@
-Empty `lib_external` directory for docker build, can be used at runtime to add custom dependency jar files.
+Empty `lib_external` directory for docker build, can be used at runtime to add custom dependency jar files

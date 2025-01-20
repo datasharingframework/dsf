@@ -1,1 +1,1 @@
-Empty `lib` directory for maven/docker build, will contain dependency jar files after maven build.
+Empty `lib` directory for maven/docker build, will contain dependency jar files after maven build

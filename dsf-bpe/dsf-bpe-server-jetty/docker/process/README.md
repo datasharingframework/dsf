@@ -1,1 +1,1 @@
-Empty `process` directory for docker build, used at runtime to place process plugin jar files.
+Empty `process` directory for docker build, used at runtime to place process plugin jar files

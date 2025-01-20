@@ -1,1 +1,1 @@
-Empty `log` directory for docker build, will contain log files at runtime.
+Empty `log` directory for docker build, will contain log files at runtime

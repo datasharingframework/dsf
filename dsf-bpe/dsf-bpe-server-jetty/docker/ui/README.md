@@ -1,1 +1,1 @@
-Empty `ui` directory for docker build, can be used at runtime to place static override resources.
+Empty `ui` directory for docker build, can be used at runtime to place static override resources
