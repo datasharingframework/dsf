@@ -639,7 +639,7 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>dsf-docker-test-setup/bpe/app/log</directory>
+							<directory>dsf-docker-test-setup/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -647,7 +647,71 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup/fhir/app/log</directory>
+							<directory>dsf-docker-test-setup/fhir/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/dic1/bpe/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/dic1/fhir/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/dic2/bpe/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/dic2/fhir/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/dic3/bpe/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/dic3/fhir/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/ttp/bpe/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup-3dic-ttp/ttp/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
