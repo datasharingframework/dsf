@@ -66,7 +66,7 @@ public class PropertiesConfig implements InitializingBean
 	private boolean staticResourceCacheEnabled;
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas:ca/ServerCertRootCAs.pem}")
+	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
 	private String clientCertificateTrustStoreFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
@@ -198,7 +198,7 @@ public class PropertiesConfig implements InitializingBean
 	private char[] mailServerPassword;
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate the server certificate of the SMTP server. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_trust_certificates.pem")
-	@Value("${dev.dsf.bpe.mail.trust.server.certificate.cas:ca/ServerCertRootCAs.pem}")
+	@Value("${dev.dsf.bpe.mail.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
 	private String mailServerTrustStoreFile;
 
 	@Documentation(description = "PEM encoded file with client certificate used to authenticate against the SMTP server. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate.pem")

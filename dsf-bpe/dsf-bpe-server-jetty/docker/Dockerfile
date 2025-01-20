@@ -4,7 +4,7 @@ WORKDIR /opt/bpe
 COPY --chown=root:java ./ ./
 RUN chown root:java ./ && \
     chmod 750 ./ ./ca ./conf ./lib ./lib_external ./process ./ui ./dsf_bpe_start.sh ./healthcheck.sh && \
-	chmod 440 ./ca/ClientCertCaChains.pem ./ca/ServerCertRootCAs.pem ./conf/log4j2.xml ./dsf_bpe.jar ./lib/*.jar && \
+	chmod 440 ./ca/client_cert_ca_chains.pem ./ca/server_cert_root_cas.pem ./conf/log4j2.xml ./dsf_bpe.jar ./lib/*.jar && \
 	chmod 1775 ./log
 
 

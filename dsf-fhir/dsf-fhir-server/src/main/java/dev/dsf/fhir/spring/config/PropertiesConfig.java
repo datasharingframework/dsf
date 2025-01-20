@@ -74,7 +74,7 @@ public class PropertiesConfig implements InitializingBean
 	private String initBundleFile;
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/ServerCertRootCAs.pem}")
+	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
 	private String webserviceClientCertificateTrustCertificatesFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")

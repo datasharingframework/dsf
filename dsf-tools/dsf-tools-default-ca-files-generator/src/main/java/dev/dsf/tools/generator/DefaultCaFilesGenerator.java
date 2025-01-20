@@ -42,9 +42,9 @@ public class DefaultCaFilesGenerator
 			"GEANT eScience Personal ECC CA 4", "GEANT Personal CA 4", "GEANT Personal ECC CA 4", "GEANT S/MIME ECC 1",
 			"GEANT S/MIME RSA 1", "HARICA S/MIME ECC", "HARICA S/MIME RSA");
 
-	private static final String CLIENT_CERT_ISSUING_CAS_PEM = "ClientCertIssuingCAs.pem";
-	private static final String CLIENT_CERT_CA_CHAINS_PEM = "ClientCertCaChains.pem";
-	private static final String SERVER_CERT_ROOT_CAS_PEM = "ServerCertRootCAs.pem";
+	private static final String CLIENT_CERT_ISSUING_CAS_PEM = "client_cert_issuing_cas.pem";
+	private static final String CLIENT_CERT_CA_CHAINS_PEM = "client_cert_ca_chains.pem";
+	private static final String SERVER_CERT_ROOT_CAS_PEM = "server_cert_root_cas.pem";
 
 	private static final Path CLIENT_CERT_ISSUING_CAS_FILE = Paths.get("cert", CLIENT_CERT_ISSUING_CAS_PEM);
 	private static final Path CLIENT_CERT_CA_CHAINS_FILE = Paths.get("cert", CLIENT_CERT_CA_CHAINS_PEM);

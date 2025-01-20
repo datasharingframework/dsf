@@ -104,7 +104,7 @@ public abstract class AbstractJettyConfig
 	private String clientCertificateHeaderName;
 
 	@Documentation(description = "PEM encoded file with one or more trusted full CA chains to validate client certificates for https connections from local and remote clients", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/ClientCertCaChains.pem}")
+	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_cert_ca_chains.pem}")
 	private String clientCertificateTrustStoreFile;
 
 	@Documentation(description = "Server certificate file for testing", recommendation = "Only specify For testing when terminating TLS in jetty server")
@@ -144,7 +144,7 @@ public abstract class AbstractJettyConfig
 	private long oidcProviderClientIdleTimeout;
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to the OIDC provider", recommendation = "Use docker secret file to configure", example = "/run/secrets/oidc_provider_trust_certificates.pem")
-	@Value("${dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas:#{null}}")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
 	private String oidcProviderClientTrustCertificatesFile;
 
 	@Documentation(description = "PEM encoded file with client certificate for https connections to the OIDC provider", recommendation = "Use docker secret file to configure", example = "/run/secrets/oidc_provider_client_certificate.pem")

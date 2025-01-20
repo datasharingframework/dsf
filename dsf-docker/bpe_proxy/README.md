@@ -46,14 +46,14 @@
 - **Required:** No
 - **Description:** Certificate chain file including all issuing, intermediate and root certificates used to validate client certificates, PEM encoded, sets the apache httpd parameter `SSLCACertificateFile`
 - **Recommendation:** Use docker secret file to configure
-- **Default:** `ca/ClientCertCaChains.pem`
+- **Default:** `ca/client_cert_ca_chains.pem`
 
 
 ### SSL_CA_DN_REQUEST_FILE
 - **Required:** No
 - **Description:** File containing all signing certificates excepted, will be used to specify the `Acceptable client certificate CA names` send to the client, during TLS handshake, sets the apache httpd parameter `SSLCADNRequestFile`; if omitted all entries from `SSL_CA_CERTIFICATE_FILE` are used
 - **Recommendation:** Use docker secret file to configure
-- **Default:** `ca/ClientCertIssuingCAs.pem`
+- **Default:** `ca/client_cert_issuing_cas.pem`
 
 
 ### SSL_CERTIFICATE_CHAIN_FILE

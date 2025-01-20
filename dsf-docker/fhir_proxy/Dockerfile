@@ -7,7 +7,7 @@ WORKDIR /usr/local/apache2
 COPY ./ ./
 RUN chown daemon:daemon ./ca/ && \
 	chmod 750 ./ca/ ./start.sh && \
-	chmod 440 ./ca/ClientCertCaChains.pem ./ca/ClientCertIssuingCAs.pem && \
+	chmod 440 ./ca/client_cert_ca_chains.pem ./ca/client_cert_issuing_cas.pem && \
     chmod 644 ./conf/httpd.conf ./conf/extra/host.conf ./conf/extra/host-ssl.conf ./conf/extra/httpd-ssl.conf && \
     apk update && apk upgrade && rm -vrf /var/cache/apk/*
 
@@ -15,10 +15,10 @@ RUN chown daemon:daemon ./ca/ && \
 ENV SSL_CERTIFICATE_CHAIN_FILE="/does/not/exist"
 
 # trusted client certificate issuing CAs, modifies the "Acceptable client certificate CA names" send to the client, uses all from SSLCACertificateFile if set to a non existing file e.g. /does/not/exist 
-ENV SSL_CA_DN_REQUEST_FILE="ca/ClientCertIssuingCAs.pem"
+ENV SSL_CA_DN_REQUEST_FILE="ca/client_cert_issuing_cas.pem"
 
 # trusted full CA chains for validating client certificates
-ENV SSL_CA_CERTIFICATE_FILE="ca/ClientCertCaChains.pem"
+ENV SSL_CA_CERTIFICATE_FILE="ca/client_cert_ca_chains.pem"
 
 # setting default value - client certificate required, use 'optional' when using OIDC 
 ENV SSL_VERIFY_CLIENT="require"
