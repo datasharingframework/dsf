@@ -1,1 +1,1 @@
-Will contain FHIR test bundles generated in the build process
+Empty `bundle` directory, will contain FHIR test bundle after maven build

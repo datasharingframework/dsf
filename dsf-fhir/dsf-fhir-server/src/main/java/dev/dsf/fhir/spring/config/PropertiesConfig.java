@@ -29,23 +29,23 @@ public class PropertiesConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
-	@Documentation(required = true, description = "Address of the database used for the DSF FHIR server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/fhir")
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "Username to access the database from the DSF FHIR server")
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, description = "Password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "Username to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then *DEV_DSF_FHIR_DB_USER_USERNAME*")
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.permanent.delete.username:fhir_server_permanent_delete_user}")
 	private String dbPermanentDeleteUsername;
 
-	@Documentation(required = true, description = "Password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_permanent_delete.password")
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.permanent.delete.password}")
 	private char[] dbPermanentDeletePassword;
 
@@ -61,7 +61,7 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.server.ui.theme:}")
 	private String uiTheme;
 
-	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control).")
+	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control)")
 	@Value("${dev.dsf.fhir.server.roleConfig:}")
 	private String roleConfig;
 
@@ -73,8 +73,8 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.server.init.bundle:conf/bundle.xml}")
 	private String initBundleFile;
 
-	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client _trust_certificates.pem")
-	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas}")
+	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
 	private String webserviceClientCertificateTrustCertificatesFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
@@ -105,40 +105,43 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.server.static.resource.cache:true}")
 	private boolean staticResourceCacheEnabled;
 
-	@Documentation(description = "To enable logging of webservices requests set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of webservices requests set to `true`", recommendation = "This debug function should only be activated during development; WARNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.fhir.debug.log.message.webserviceRequest:false}")
 	private boolean debugLogMessageWebserviceRequest;
 
-	@Documentation(description = "To enable logging of DB queries set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of DB queries set to `true`", recommendation = "This debug function should only be activated during development; WARNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.fhir.debug.log.message.dbStatement:false}")
 	private boolean debugLogMessageDbStatement;
 
-	@Documentation(description = "To enable logging of the currently requesting user set to `true`.", recommendation = "This debug function should only be activated during development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Documentation(description = "To enable logging of the currently requesting user set to `true`", recommendation = "This debug function should only be activated during development; WARNING: Confidential information may be leaked via the debug log!")
 	@Value("${dev.dsf.fhir.debug.log.message.currentUser:false}")
 	private boolean debugLogMessageCurrentUser;
 
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.server.status.port}")
 	private int jettyStatusConnectorPort;
 
-	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.proxy.url:#{null}}")
 	private String proxyUrl;
 
-	@Documentation(description = "Forward proxy username", recommendation = "Configure username if proxy requires authentication")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.proxy.username:#{null}}")
 	private String proxyUsername;
 
-	@Documentation(description = "Forward Proxy password", recommendation = "Configure password if proxy requires authentication, use docker secret file to configure using *${env_variable}_FILE*")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
-	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> proxyNoProxy;
 
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.server.auth.oidc.authorization.code.flow:false}")
 	private boolean oidcAuthorizationCodeFlowEnabled;
 
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.server.auth.oidc.bearer.token:false}")
 	private boolean oidcBearerTokenEnabled;
 
