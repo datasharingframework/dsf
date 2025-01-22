@@ -11,14 +11,14 @@
 	<title value="IANA Media Types"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2025-01-02"/>
+	<date value="2025-01-16"/>
 	<publisher value="IANA"/>
 	<description value="Multipurpose Internet Mail Extensions (MIME) and Media Types as published by IANA at https://www.iana.org/assignments/media-types/media-types.xml"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>
 	<content value="complete"/>
-	<count value="2148"/>
+	<count value="2149"/>
 	<concept>
 		<code value="application/1d-interleaved-parityfec"/>
 		<display value="1d-interleaved-parityfec"/>
@@ -1707,7 +1707,7 @@
 	<concept>
 		<code value="application/pkixcmp"/>
 		<display value="pkixcmp"/>
-		<definition value="As defined by rfc2510"/>
+		<definition value="As defined by RFC-ietf-lamps-rfc6712bis-10"/>
 	</concept>
 	<concept>
 		<code value="application/pls+xml"/>
@@ -7893,6 +7893,11 @@
 		<code value="application/voucher-cms+json"/>
 		<display value="voucher-cms+json"/>
 		<definition value="As defined by rfc8366"/>
+	</concept>
+	<concept>
+		<code value="application/voucher-jws+json"/>
+		<display value="voucher-jws+json"/>
+		<definition value="As defined by RFC-ietf-anima-jws-voucher-16"/>
 	</concept>
 	<concept>
 		<code value="application/vp"/>
