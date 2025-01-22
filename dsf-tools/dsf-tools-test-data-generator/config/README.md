@@ -1,1 +1,1 @@
-Will contain properties files used in the FHIR application generated in the build process
+Empty `config` directory, will contain properties files after maven build

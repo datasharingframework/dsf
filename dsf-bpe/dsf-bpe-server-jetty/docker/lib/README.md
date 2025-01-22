@@ -1,1 +1,1 @@
-Empty lib directory for jar-files used in docker container 
+Empty `lib` directory for maven/docker build, will contain dependency jar files after maven build

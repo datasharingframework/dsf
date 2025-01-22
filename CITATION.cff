@@ -25,7 +25,7 @@ preferred-citation:
   type: proceedings
 title: "Data Sharing Framework (DSF)"
 version: 2.0.0
-date-released: 2024-10-15
+date-released: 2025-01-22
 url: https://dsf.dev
 repository-code: https://github.com/datasharingframework/dsf
 repository-artifact: https://github.com/datasharingframework/dsf/releases
@@ -252,7 +252,7 @@ references:
       - family-names: Zilske
         given-names: Christoph
       - family-names: Böhringer
-        given-names: Jan P.
+        given-names: Jan Philipp
       - family-names: Fegeler
         given-names: Christian
     title: "Handling Complexity in Decentralized Research Networks: The Data Sharing Framework Allowlist Management Application"

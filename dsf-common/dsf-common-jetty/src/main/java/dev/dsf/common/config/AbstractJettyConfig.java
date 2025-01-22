@@ -81,32 +81,32 @@ public abstract class AbstractJettyConfig
 
 	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
-	@Documentation(required = true, description = "Status connector host")
+	@Documentation(description = "Status connector host")
 	@Value("${dev.dsf.server.status.host:127.0.0.1}")
 	private String statusHost;
 
-	@Documentation(required = true, description = "Status connector port, default in docker image: `10000`")
+	@Documentation(description = "Status connector port, default in docker image: `10000`")
 	@Value("${dev.dsf.server.status.port}")
 	private int statusPort;
 
-	@Documentation(required = true, description = "API connector host, default in docker image: `0.0.0.0`")
+	@Documentation(description = "API connector host, default in docker image: `0.0.0.0`")
 	@Value("${dev.dsf.server.api.host:127.0.0.1}")
 	private String apiHost;
 
-	@Documentation(required = true, description = "API connector port, default in docker image: `8080`")
+	@Documentation(description = "API connector port, default in docker image: `8080`")
 	@Value("${dev.dsf.server.api.port}")
 	private int apiPort;
 
-	@Documentation(required = true, description = "Web application context path, default in `bpe` docker image: `/bpe`, default in `fhir` docker image: `/fhir`", recommendation = "Only modify for testing")
+	@Documentation(description = "Web application context path, default in `bpe` docker image: `/bpe`, default in `fhir` docker image: `/fhir`", recommendation = "Only modify for testing")
 	@Value("${dev.dsf.server.context.path}")
 	private String contextPath;
 
-	@Documentation(required = true, description = "Name of HTTP header with client certificate from reverse proxy")
+	@Documentation(description = "Name of HTTP header with client certificate from reverse proxy")
 	@Value("${dev.dsf.server.auth.client.certificate.header:X-ClientCert}")
 	private String clientCertificateHeaderName;
 
-	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate client certificates for https connections from local and remote clients", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.server.auth.trust.client.certificate.cas}")
+	@Documentation(description = "PEM encoded file with one or more trusted full CA chains to validate client certificates for https connections from local and remote clients", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_cert_ca_chains.pem}")
 	private String clientCertificateTrustStoreFile;
 
 	@Documentation(description = "Server certificate file for testing", recommendation = "Only specify For testing when terminating TLS in jetty server")
@@ -146,7 +146,7 @@ public abstract class AbstractJettyConfig
 	private long oidcProviderClientIdleTimeout;
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to the OIDC provider", recommendation = "Use docker secret file to configure", example = "/run/secrets/oidc_provider_trust_certificates.pem")
-	@Value("${dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas:#{null}}")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
 	private String oidcProviderClientTrustCertificatesFile;
 
 	@Documentation(description = "PEM encoded file with client certificate for https connections to the OIDC provider", recommendation = "Use docker secret file to configure", example = "/run/secrets/oidc_provider_client_certificate.pem")
@@ -177,19 +177,19 @@ public abstract class AbstractJettyConfig
 	@Value("${dev.dsf.server.auth.oidc.back.channel.logout.path:/back-channel-logout}")
 	private String oidcBackChannelPath;
 
-	// documentation in dev.dsf.fhir.spring.config.PropertiesConfig
+	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
 	@Value("${dev.dsf.proxy.url:#{null}}")
 	private String proxyUrl;
 
-	// documentation in dev.dsf.fhir.spring.config.PropertiesConfig
+	@Documentation(description = "Forward proxy username", recommendation = "Configure username if proxy requires authentication")
 	@Value("${dev.dsf.proxy.username:#{null}}")
 	private String proxyUsername;
 
-	// documentation in dev.dsf.fhir.spring.config.PropertiesConfig
+	@Documentation(description = "Forward Proxy password", recommendation = "Configure password if proxy requires authentication, use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
-	// documentation in dev.dsf.fhir.spring.config.PropertiesConfig
+	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
 	private List<String> proxyNoProxy;
 

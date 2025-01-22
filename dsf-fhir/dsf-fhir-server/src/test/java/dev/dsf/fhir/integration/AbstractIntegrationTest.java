@@ -67,6 +67,8 @@ import dev.dsf.common.auth.DsfLoginService;
 import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
 import dev.dsf.common.jetty.JettyServer;
+import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
+import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.client.FhirWebserviceClient;
@@ -109,7 +111,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
 
 	protected static final FhirContext fhirContext = FhirContext.forR4();
-	protected static final ReadAccessHelperImpl readAccessHelper = new ReadAccessHelperImpl();
+	protected static final ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
+	protected static final ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
 
 	private static final ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
@@ -408,6 +411,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static final ReadAccessHelper getReadAccessHelper()
 	{
 		return readAccessHelper;
+	}
+
+	protected static final ProcessAuthorizationHelper getProcessAuthorizationHelper()
+	{
+		return processAuthorizationHelper;
 	}
 
 	protected static void expectBadRequest(Runnable operation) throws Exception

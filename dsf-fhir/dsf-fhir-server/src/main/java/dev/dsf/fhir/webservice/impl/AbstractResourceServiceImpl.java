@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
+import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -162,7 +163,16 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 					return created;
 				}
-				catch (SQLException | WebApplicationException e)
+				catch (SQLException e)
+				{
+					connection.rollback();
+
+					if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
+						throw new WebApplicationException(responseGenerator.duplicateResourceExists(resourceTypeName));
+					else
+						throw e;
+				}
+				catch (WebApplicationException e)
 				{
 					connection.rollback();
 					throw e;
@@ -534,7 +544,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						{
 							resolveLogicalReferences(resource, connection);
 
-							R updated = dao.update(resource, ifMatch.orElse(null));
+							R updated = dao.updateWithTransaction(connection, resource, ifMatch.orElse(null));
 
 							checkReferences(resource, connection, ref -> checkReferenceAfterUpdate(updated, ref));
 
@@ -542,7 +552,16 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 							return updated;
 						}
-						catch (SQLException | WebApplicationException e)
+						catch (SQLException e)
+						{
+							if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
+								throw new WebApplicationException(
+										responseGenerator.duplicateResourceExists(resourceTypeName));
+
+							connection.rollback();
+							throw e;
+						}
+						catch (WebApplicationException e)
 						{
 							connection.rollback();
 							throw e;
