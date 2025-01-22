@@ -18,6 +18,8 @@ services:
       SSL_CERTIFICATE_FILE: /run/secrets/proxy_server_certificate.pem
       SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_server_certificate_private_key.pem
       SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
+      SSL_CA_DN_REQUEST_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
+      SSL_EXPECTED_CLIENT_I_DN_CN_VALUES: "'Test'"
     networks:
       frontend:
         ipv4_address: 172.28.1.10
@@ -54,6 +56,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_user_permanent_delete.password
@@ -61,7 +64,6 @@ services:
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
       DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_SERVER_BASE_URL: https://fhir/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_Organization

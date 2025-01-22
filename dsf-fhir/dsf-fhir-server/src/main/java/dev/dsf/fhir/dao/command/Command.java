@@ -23,7 +23,6 @@ public interface Command
 
 	default void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-
 	{
 	}
 

@@ -133,7 +133,7 @@ function getInitialBookmarks() {
 		'$Library': ['Library'],
 		'$Measure': ['Measure'],
 		'$MeasureReport': ['MeasureReport'],
-		'$Organization': ['Organization', 'Organization?identifier=highmed.org', 'Organization?identifier=medizininformatik-initiative.de', 'Organization?identifier=netzwerk-universitaetsmedizin.de'],
+		'$Organization': ['Organization', 'Organization?identifier=bzkf.de', 'Organization?identifier=medizininformatik-initiative.de', 'Organization?identifier=nct.dkfz.de', 'Organization?identifier=netzwerk-universitaetsmedizin.de'],
 		'$OrganizationAffiliation': ['OrganizationAffiliation'],
 		'$Questionnaire': ['Questionnaire'],
 		'$QuestionnaireResponse': ['QuestionnaireResponse?_sort=-_lastUpdated', 'QuestionnaireResponse?_sort=-_lastUpdated&status=in-progress'],

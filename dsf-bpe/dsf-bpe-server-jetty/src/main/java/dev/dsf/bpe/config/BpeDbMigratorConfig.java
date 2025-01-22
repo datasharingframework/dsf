@@ -26,27 +26,27 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	private static final String DB_CAMUNDA_USER = "db.camunda_user";
 	private static final String DB_CAMUNDA_USER_PASSWORD = "db.camunda_user_password";
 
-	// Documentation in dsf-bpe-server/src/main/java/dev/dsf/bpe/spring/config/PropertiesConfig.java
+	@Documentation(required = true, description = "Address of the database used for the DSF BPE server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/bpe")
 	@Value("${dev.dsf.bpe.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "The user name to access the database from the DSF BPE server to execute database migrations")
+	@Documentation(description = "Username to access the database from the DSF BPE server to execute database migrations")
 	@Value("${dev.dsf.bpe.db.liquibase.username:liquibase_user}")
 	private String dbLiquibaseUsername;
 
-	@Documentation(required = true, description = "The password to access the database from the DSF BPE server to execute database migrations", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_liquibase.password")
+	@Documentation(required = true, description = "Password to access the database from the DSF BPE server to execute database migrations", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_liquibase.password")
 	@Value("${dev.dsf.bpe.db.liquibase.password}")
 	private char[] dbLiquibasePassword;
 
-	@Documentation(description = "The name of the user group to access the database from the DSF BPE server")
+	@Documentation(description = "Name of the user group to access the database from the DSF BPE server")
 	@Value("${dev.dsf.bpe.db.user.group:bpe_users}")
 	private String dbUsersGroup;
 
-	// Documentation in dsf-bpe-server/src/main/java/dev/dsf/bpe/spring/config/PropertiesConfig.java
+	@Documentation(description = "Username to access the database from the DSF BPE server")
 	@Value("${dev.dsf.bpe.db.user.username:bpe_server_user}")
 	private String dbUsername;
 
-	// Documentation in dsf-bpe-server/src/main/java/dev/dsf/bpe/spring/config/PropertiesConfig.java
+	@Documentation(required = true, description = "Password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${dev.dsf.bpe.db.user.password}")
 	private char[] dbPassword;
 
@@ -58,15 +58,15 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	@Value("${dev.dsf.bpe.db.liquibase.lockWaitTime:2}")
 	private long dbLiquibaseLockWaitTime;
 
-	@Documentation(description = "The name of the user group to access the database from the DSF BPE server for camunda processes")
+	@Documentation(description = "Name of the user group to access the database from the DSF BPE server for camunda processes")
 	@Value("${dev.dsf.bpe.db.user.camunda.group:camunda_users}")
 	private String dbCamundaUsersGroup;
 
-	// Documentation in dsf-bpe-server/src/main/java/dev/dsf/bpe/spring/config/PropertiesConfig.java
+	@Documentation(description = "Username to access the database from the DSF BPE server for camunda processes", recommendation = "Use a different user then in *DEV_DSF_BPE_DB_USER_USERNAME*")
 	@Value("${dev.dsf.bpe.db.user.camunda.username:camunda_server_user}")
 	private String dbCamundaUsername;
 
-	// Documentation in dsf-bpe-server/src/main/java/dev/dsf/bpe/spring/config/PropertiesConfig.java
+	@Documentation(required = true, description = "Password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
 	@Value("${dev.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 

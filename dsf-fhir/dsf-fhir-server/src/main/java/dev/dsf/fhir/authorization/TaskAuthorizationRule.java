@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -15,6 +16,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -34,6 +36,10 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.TaskDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
+import dev.dsf.fhir.search.PageAndCount;
+import dev.dsf.fhir.search.PartialResult;
+import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
 
@@ -88,10 +94,20 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					Optional<String> errors = draftTaskOk(connection, identity, newResource);
 					if (errors.isEmpty())
 					{
-						logger.info("Create of Task authorized for local organization identity '{}', Task.status draft",
-								identity.getName());
+						if (!draftTaskExists(connection, newResource))
+						{
+							logger.info(
+									"Create of Task authorized for local organization identity '{}', Task.status draft",
+									identity.getName());
 
-						return Optional.of("Local identity, Task.status draft");
+							return Optional.of("Local identity, Task.status draft");
+						}
+						else
+						{
+							logger.warn("Create of Task unauthorized, unique resource already exists");
+
+							return Optional.empty();
+						}
 					}
 					else
 					{
@@ -284,9 +300,16 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	{
 		List<String> errors = new ArrayList<>();
 
-		if (newResource.getIdentifier().stream().noneMatch(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem())))
+		if (newResource.getIdentifier().stream().filter(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem()))
+				.count() != 1)
 		{
-			errors.add("Task.identifier[" + NAMING_SYSTEM_TASK_IDENTIFIER + "] missing");
+			errors.add("Task.identifier[" + NAMING_SYSTEM_TASK_IDENTIFIER + "] not defined or more than once");
+		}
+		else if (newResource.getIdentifier().stream().filter(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem()))
+				.findFirst().filter(Identifier::hasValueElement).map(Identifier::getValueElement)
+				.filter(StringType::hasValue).isEmpty())
+		{
+			errors.add("Task.identifier[" + NAMING_SYSTEM_TASK_IDENTIFIER + "] value not defined");
 		}
 
 		if (newResource.hasRequester())
@@ -397,6 +420,49 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				.filter(ParameterComponent::hasValue).filter(i -> i.getValue() instanceof StringType)
 				.map(ParameterComponent::getValue).map(v -> (StringType) v).map(StringType::getValueAsString)
 				.filter(s -> !s.isBlank());
+	}
+
+	/**
+	 * A draft {@link Task} with identifier (system {@link #NAMING_SYSTEM_TASK_IDENTIFIER}) may not exist
+	 *
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param newResource
+	 *            not <code>null</code>
+	 * @return <code>true</code> if the given draft Task is unique
+	 */
+	private boolean draftTaskExists(Connection connection, Task newResource)
+	{
+		SearchQuery<Task> query = getDao().createSearchQueryWithoutUserFilter(PageAndCount.exists())
+				.configureParameters(Map.of("identifier",
+						List.of(NAMING_SYSTEM_TASK_IDENTIFIER + "|" + getDraftTaskIdentifierValue(newResource))));
+
+		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
+		if (!uQp.isEmpty())
+		{
+			logger.warn("Unable to search for Task: Unsupported query parameters: {}", uQp);
+
+			throw new IllegalStateException("Unable to search for Task: Unsupported query parameters");
+		}
+
+		try
+		{
+			PartialResult<Task> result = getDao().searchWithTransaction(connection, query);
+			return result.getTotal() >= 1;
+		}
+		catch (SQLException e)
+		{
+			logger.debug("Unable to search for Task", e);
+			logger.warn("Unable to search for Task: {} - {}", e.getClass().getName(), e.getMessage());
+
+			throw new RuntimeException("Unable to search for Task", e);
+		}
+	}
+
+	private String getDraftTaskIdentifierValue(Task newResource)
+	{
+		return newResource.getIdentifier().stream().filter(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem()))
+				.findFirst().map(Identifier::getValue).get();
 	}
 
 	private boolean taskAllowedForRequesterAndRecipient(Connection connection, Identity requester, Task newResource)
@@ -549,16 +615,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 		if (identity.hasDsfRole(FhirServerRole.READ))
 		{
-			if (isCurrentIdentityPartOfReferencedOrganization(connection, identity, "Task.requester",
-					existingResource.getRequester()))
-			{
-				logger.info(
-						"Read of Task/{}/_history/{} authorized for identity '{}', Task.requester reference could be resolved and current identity part of referenced organization",
-						resourceId, resourceVersion, identity.getName());
-
-				return Optional.of("Task.requester resolved and identity part of referenced organization");
-			}
-			else if (identity.isLocalIdentity() && isCurrentIdentityPartOfReferencedOrganization(connection, identity,
+			if (identity.isLocalIdentity() && isCurrentIdentityPartOfReferencedOrganization(connection, identity,
 					"Task.restriction.recipient", existingResource.getRestriction().getRecipientFirstRep()))
 			{
 				logger.info(
@@ -567,6 +624,15 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 				return Optional
 						.of("Task.restriction.recipient resolved and local identity part of referenced organization");
+			}
+			else if (isCurrentIdentityPartOfReferencedOrganization(connection, identity, "Task.requester",
+					existingResource.getRequester()))
+			{
+				logger.info(
+						"Read of Task/{}/_history/{} authorized for identity '{}', Task.requester reference could be resolved and current identity part of referenced organization",
+						resourceId, resourceVersion, identity.getName());
+
+				return Optional.of("Task.requester resolved and identity part of referenced organization");
 			}
 			else
 			{
@@ -605,11 +671,23 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					Optional<String> errors = draftTaskOk(connection, identity, newResource);
 					if (errors.isEmpty())
 					{
-						logger.info("Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}'",
-								oldResourceId, oldResourceVersion, TaskStatus.DRAFT.toCode(), TaskStatus.DRAFT.toCode(),
-								identity.getName());
+						if (draftTaskIdentifierSame(oldResource, newResource))
+						{
+							logger.info("Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}'",
+									oldResourceId, oldResourceVersion, TaskStatus.DRAFT.toCode(),
+									TaskStatus.DRAFT.toCode(), identity.getName());
 
-						return Optional.of("Local identity, old Task.status draft, new Task.status draft");
+							return Optional.of("Local identity, old Task.status draft, new Task.status draft");
+						}
+						else
+						{
+							logger.warn(
+									"Update of Task/{}/_history/{} ({} -> {}) unauthorized for identity '{}' - identifier modified",
+									oldResourceId, oldResourceVersion, TaskStatus.DRAFT.toCode(),
+									TaskStatus.DRAFT.toCode(), identity.getName());
+
+							return Optional.empty();
+						}
 					}
 					else
 					{
@@ -788,6 +866,11 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 			return Optional.empty();
 		}
+	}
+
+	private boolean draftTaskIdentifierSame(Task oldResource, Task newResource)
+	{
+		return Objects.equals(getDraftTaskIdentifierValue(oldResource), getDraftTaskIdentifierValue(newResource));
 	}
 
 	private Optional<String> reasonNotSame(Task oldResource, Task newResource)

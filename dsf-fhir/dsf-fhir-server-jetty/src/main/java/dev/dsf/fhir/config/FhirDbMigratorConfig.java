@@ -26,15 +26,15 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	private static final String DB_SERVER_PERMANENT_DELETE_USER = "db.server_permanent_delete_user";
 	private static final String DB_SERVER_PERMANENT_DELETE_USER_PASSWORD = "db.server_permanent_delete_user_password";
 
-	// Documentation in dsf-fhir-server/src/main/java/dev/dsf/fhir/spring/config/PropertiesConfig.java
+	@Documentation(required = true, description = "Address of the database used for the DSF FHIR server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/fhir")
 	@Value("${dev.dsf.fhir.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "The user name to access the database from the DSF FHIR server to execute database migrations")
+	@Documentation(description = "Username to access the database from the DSF FHIR server to execute database migrations")
 	@Value("${dev.dsf.fhir.db.liquibase.username:liquibase_user}")
 	private String dbLiquibaseUsername;
 
-	@Documentation(required = true, description = "The password to access the database from the DSF FHIR server to execute database migrations", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_liquibase.password")
+	@Documentation(required = true, description = "Password to access the database from the DSF FHIR server to execute database migrations", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_liquibase.password")
 	@Value("${dev.dsf.fhir.db.liquibase.password}")
 	private char[] dbLiquibasePassword;
 
@@ -46,27 +46,27 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	@Value("${dev.dsf.fhir.db.liquibase.lockWaitTime:2}")
 	private long dbLiquibaseLockWaitTime;
 
-	@Documentation(description = "The name of the user group to access the database from the DSF FHIR server")
+	@Documentation(description = "Name of the user group to access the database from the DSF FHIR server")
 	@Value("${dev.dsf.fhir.db.user.group:fhir_users}")
 	private String dbUsersGroup;
 
-	// Documentation in dsf-fhir-server/src/main/java/dev/dsf/fhir/spring/config/PropertiesConfig.java
+	@Documentation(description = "Username to access the database from the DSF FHIR server")
 	@Value("${dev.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
 
-	// Documentation in dsf-fhir-server/src/main/java/dev/dsf/fhir/spring/config/PropertiesConfig.java
+	@Documentation(required = true, description = "Password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${dev.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "The name of the user group to access the database from the DSF FHIR server for permanent deletes")
+	@Documentation(description = "Name of the user group to access the database from the DSF FHIR server for permanent deletes")
 	@Value("${dev.dsf.fhir.db.user.permanent.delete.group:fhir_permanent_delete_users}")
 	private String dbPermanentDeleteUsersGroup;
 
-	// Documentation in dsf-fhir-server/src/main/java/dev/dsf/fhir/spring/config/PropertiesConfig.java
+	@Documentation(description = "Username to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then *DEV_DSF_FHIR_DB_USER_USERNAME*")
 	@Value("${dev.dsf.fhir.db.user.permanent.delete.username:fhir_server_permanent_delete_user}")
 	private String dbPermanentDeleteUsername;
 
-	// Documentation in dsf-fhir-server/src/main/java/dev/dsf/fhir/spring/config/PropertiesConfig.java
+	@Documentation(required = true, description = "Password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_permanent_delete.password")
 	@Value("${dev.dsf.fhir.db.user.permanent.delete.password}")
 	private char[] dbPermanentDeletePassword;
 

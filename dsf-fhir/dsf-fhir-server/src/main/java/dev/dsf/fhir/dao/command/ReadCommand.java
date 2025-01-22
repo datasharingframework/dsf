@@ -83,12 +83,6 @@ public class ReadCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-	{
-	}
-
-	@Override
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException

@@ -16,11 +16,14 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.IdType;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
+import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
 
@@ -31,15 +34,18 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 	private final ValidationHelper validationHelper;
 	private final SnapshotGenerator snapshotGenerator;
 	private final EventHandler eventHandler;
+	private final ResponseGenerator responseGenerator;
 
 	public BatchCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<? extends Command> commands,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator, EventHandler eventHandler)
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator, EventHandler eventHandler,
+			ResponseGenerator responseGenerator)
 	{
 		super(dataSource, exceptionHandler, commands);
 
 		this.validationHelper = validationHelper;
 		this.snapshotGenerator = snapshotGenerator;
 		this.eventHandler = eventHandler;
+		this.responseGenerator = responseGenerator;
 	}
 
 	@Override
@@ -50,23 +56,15 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			boolean initialReadOnly = connection.isReadOnly();
 			boolean initialAutoCommit = connection.getAutoCommit();
 			int initialTransactionIsolationLevel = connection.getTransactionIsolation();
-			logger.debug(
-					"Running batch with DB connection setting: read-only {}, auto-commit {}, transaction-isolation-level {}",
-					initialReadOnly, initialAutoCommit,
-					getTransactionIsolationLevelString(initialTransactionIsolationLevel));
 
 			Map<Integer, Exception> caughtExceptions = new HashMap<>((int) (commands.size() / 0.75) + 1);
 			Map<String, IdType> idTranslationTable = new HashMap<>();
 
 			if (hasModifyingCommands)
 			{
-				logger.debug(
-						"Elevating DB connection setting to: read-only {}, auto-commit {}, transaction-isolation-level {}",
-						false, false, getTransactionIsolationLevelString(Connection.TRANSACTION_REPEATABLE_READ));
-
 				connection.setReadOnly(false);
 				connection.setAutoCommit(false);
-				connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+				connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 			}
 
 			commands.forEach(preExecute(idTranslationTable, connection, caughtExceptions));
@@ -75,11 +73,6 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 
 			if (hasModifyingCommands)
 			{
-				logger.debug(
-						"Reseting DB connection setting to: read-only {}, auto-commit {}, transaction-isolation-level {}",
-						initialReadOnly, initialAutoCommit,
-						getTransactionIsolationLevelString(initialTransactionIsolationLevel));
-
 				connection.setReadOnly(initialReadOnly);
 				connection.setAutoCommit(initialAutoCommit);
 				connection.setTransactionIsolation(initialTransactionIsolationLevel);
@@ -108,20 +101,6 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 		{
 			throw exceptionHandler.internalServerErrorBundleTransaction(e);
 		}
-	}
-
-	private String getTransactionIsolationLevelString(int level)
-	{
-		return switch (level)
-		{
-			case Connection.TRANSACTION_NONE -> "NONE";
-			case Connection.TRANSACTION_READ_UNCOMMITTED -> "READ_UNCOMMITTED";
-			case Connection.TRANSACTION_READ_COMMITTED -> "READ_COMMITTED";
-			case Connection.TRANSACTION_REPEATABLE_READ -> "REPEATABLE_READ";
-			case Connection.TRANSACTION_SERIALIZABLE -> "SERIALIZABLE";
-
-			default -> "?";
-		};
 	}
 
 	private Consumer<Command> preExecute(Map<String, IdType> idTranslationTable, Connection connection,
@@ -188,7 +167,12 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {} - {}",
 						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
 
-				caughtExceptions.put(command.getIndex(), e);
+				if (e instanceof PSQLException s && PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
+					caughtExceptions.put(command.getIndex(),
+							new WebApplicationException(responseGenerator.duplicateResourceExists()));
+				else
+					caughtExceptions.put(command.getIndex(), e);
+
 
 				try
 				{
@@ -243,5 +227,11 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};
+	}
+
+	@Override
+	protected Exception internalServerError(Exception exception)
+	{
+		return exceptionHandler.internalServerErrorBundleBatch(exception);
 	}
 }

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-tools-pom</artifactId>
-		<version>1.6.0</version>
+		<version>1.7.0</version>
 	</parent>
 
 	<dependencies>
@@ -64,6 +64,84 @@
 						<argument>dev.dsf.tools.generator.TestDataGenerator</argument>
 					</arguments>
 					<workingDirectory>${project.basedir}</workingDirectory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>bundle</directory>
+							<includes>
+								<include>test-bundle.xml</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>config</directory>
+							<includes>
+								<include>*.properties</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-bpe/dsf-bpe-server-jetty/conf</directory>
+							<includes>
+								<include>config.properties</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker-test-setup/bpe</directory>
+							<includes>
+								<include>.env</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker-test-setup/bpe/secrets</directory>
+							<includes>
+								<include>*.pem</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker-test-setup/fhir</directory>
+							<includes>
+								<include>.env</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker-test-setup/fhir/secrets</directory>
+							<includes>
+								<include>*.pem</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker-test-setup-3dic-ttp</directory>
+							<includes>
+								<include>.env</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker-test-setup-3dic-ttp/secrets</directory>
+							<includes>
+								<include>*.pem</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker-test-setup-3dic-ttp/secrets</directory>
+							<includes>
+								<include>keycloak_trust_store.jks</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
 				</configuration>
 			</plugin>
 		</plugins>
