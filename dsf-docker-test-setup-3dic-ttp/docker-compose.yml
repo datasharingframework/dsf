@@ -125,11 +125,11 @@ services:
       - db_liquibase.password
       - db_dic1_fhir_user.password
       - db_dic1_fhir_user_permanent_delete.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_dic1_client_certificate.pem
       - app_dic1_client_certificate_private_key.pem
       - app_dic1_client_certificate_private_key.pem.password
+      - oidc_client_dic1_fhir.secret
     volumes:
       - type: bind
         source: ./dic1/fhir/log
@@ -153,7 +153,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic1_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
@@ -179,14 +179,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic1
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-fhir
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: mF0GEtjFoyWIM3in4VCwifGI3azb4DTn
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic1_fhir.secret
     networks:
       dic1-fhir-frontend:
         ipv4_address: 172.20.0.3
@@ -207,11 +207,11 @@ services:
       - db_liquibase.password
       - db_dic2_fhir_user.password
       - db_dic2_fhir_user_permanent_delete.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_dic2_client_certificate.pem
       - app_dic2_client_certificate_private_key.pem
       - app_dic2_client_certificate_private_key.pem.password
+      - oidc_client_dic2_fhir.secret
     volumes:
       - type: bind
         source: ./dic2/fhir/log
@@ -235,7 +235,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic2_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
@@ -261,14 +261,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic2
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic2-fhir
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: P7XhxzBixIf9vPdprItkbOXZwtSX2JNt
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic2_fhir.secret
     networks:
       dic2-fhir-frontend:
         ipv4_address: 172.20.0.11
@@ -289,11 +289,11 @@ services:
       - db_liquibase.password
       - db_dic3_fhir_user.password
       - db_dic3_fhir_user_permanent_delete.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_dic3_client_certificate.pem
       - app_dic3_client_certificate_private_key.pem
       - app_dic3_client_certificate_private_key.pem.password
+      - oidc_client_dic3_fhir.secret
     volumes:
       - type: bind
         source: ./dic3/fhir/log
@@ -317,7 +317,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic3_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
@@ -343,14 +343,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic3
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic3-fhir
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: 9i9WRfIedG7N3QoL5WuGM8hCoySblAhK
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic3_fhir.secret
     networks:
       dic3-fhir-frontend:
         ipv4_address: 172.20.0.19
@@ -371,11 +371,11 @@ services:
       - db_liquibase.password
       - db_ttp_fhir_user.password
       - db_ttp_fhir_user_permanent_delete.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_ttp_client_certificate.pem
       - app_ttp_client_certificate_private_key.pem
       - app_ttp_client_certificate_private_key.pem.password
+      - oidc_client_ttp_fhir.secret
     volumes:
       - type: bind
         source: ./ttp/fhir/conf/bundle.xml
@@ -403,7 +403,7 @@ services:
       DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user.password
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user_permanent_delete.password
-      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
@@ -432,14 +432,14 @@ services:
               - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-fhir
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: SquCQFwjUFqIpU8xQj9pFg79fFxlu2Eu
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_fhir.secret
     networks:
       ttp-fhir-frontend:
         ipv4_address: 172.20.0.27
@@ -460,11 +460,11 @@ services:
       - db_liquibase.password
       - db_dic1_bpe_user.password
       - db_dic1_bpe_user_camunda.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_dic1_client_certificate.pem
       - app_dic1_client_certificate_private_key.pem
       - app_dic1_client_certificate_private_key.pem.password
+      - oidc_client_dic1_bpe.secret
     volumes:
       - type: bind
         source: ./dic1/bpe/process
@@ -492,7 +492,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic1_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic1_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic1_client_certificate_private_key.pem.password
@@ -519,14 +519,14 @@ services:
             token-role: admin
             dsf-role:
               - ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic1
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-bpe
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: ytqFCErw9GfhVUrrM8xc0Grbu4r7qGig
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic1_bpe.secret
       DEV_DSF_PROXY_URL: http://forward-proxy:8080
       DEV_DSF_PROXY_USERNAME: proxy_user
       DEV_DSF_PROXY_PASSWORD: proxy_password
@@ -553,11 +553,11 @@ services:
       - db_liquibase.password
       - db_dic2_bpe_user.password
       - db_dic2_bpe_user_camunda.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_dic2_client_certificate.pem
       - app_dic2_client_certificate_private_key.pem
       - app_dic2_client_certificate_private_key.pem.password
+      - oidc_client_dic2_bpe.secret
     volumes:
       - type: bind
         source: ./dic2/bpe/process
@@ -585,7 +585,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic2_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic2_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic2_client_certificate_private_key.pem.password
@@ -612,14 +612,14 @@ services:
             token-role: admin
             dsf-role:
               - ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic2
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic2-bpe
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: 5GtUIUfoXnQVcsRfd0Hg4EGv14iAknGq
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic2_bpe.secret
     networks:
       dic2-bpe-frontend:
         ipv4_address: 172.20.0.43
@@ -640,11 +640,11 @@ services:
       - db_liquibase.password
       - db_dic3_bpe_user.password
       - db_dic3_bpe_user_camunda.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_dic3_client_certificate.pem
       - app_dic3_client_certificate_private_key.pem
       - app_dic3_client_certificate_private_key.pem.password
+      - oidc_client_dic3_bpe.secret
     volumes:
       - type: bind
         source: ./dic3/bpe/process
@@ -672,7 +672,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic3_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic3_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_dic3_client_certificate_private_key.pem.password
@@ -699,14 +699,14 @@ services:
             token-role: admin
             dsf-role:
               - ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic3
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic3-bpe
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: VGTQD3WWH4uGUMz408NWNzcHF1MsfV0l
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic3_bpe.secret
     networks:
       dic3-bpe-frontend:
         ipv4_address: 172.20.0.51
@@ -728,11 +728,11 @@ services:
       - db_liquibase.password
       - db_ttp_bpe_user.password
       - db_ttp_bpe_user_camunda.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
+      - app_testca_certificate.pem
       - app_ttp_client_certificate.pem
       - app_ttp_client_certificate_private_key.pem
       - app_ttp_client_certificate_private_key.pem.password
+      - oidc_client_ttp_bpe.secret
     volumes:
       - type: bind
         source: ./ttp/bpe/process
@@ -759,7 +759,7 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
@@ -787,14 +787,14 @@ services:
             token-role: admin
             dsf-role:
               - ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_testca_certificate.pem
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-bpe
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: dTB3Etd2lZ6cn6mK6YbUMvk3A5FmiOoA
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: /run/secrets/oidc_client_ttp_bpe.secret
     networks:
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.59
@@ -868,9 +868,7 @@ secrets:
   keycloak_trust_store.jks:
     file: ./secrets/keycloak_trust_store.jks
 
-  app_server_trust_certificates.pem:
-    file: ./secrets/app_testca_certificate.pem
-  app_client_trust_certificates.pem:
+  app_testca_certificate.pem:
     file: ./secrets/app_testca_certificate.pem
 
   app_dic1_client_certificate.pem:
@@ -901,6 +899,24 @@ secrets:
   app_ttp_client_certificate_private_key.pem.password:
     file: ./secrets/app_ttp-client_private-key.pem.password
 
+  oidc_client_dic1_fhir.secret:
+    file: ./secrets/oidc_client_dic1_fhir.secret
+  oidc_client_dic2_fhir.secret:
+    file: ./secrets/oidc_client_dic2_fhir.secret
+  oidc_client_dic3_fhir.secret:
+    file: ./secrets/oidc_client_dic3_fhir.secret
+  oidc_client_ttp_fhir.secret:
+    file: ./secrets/oidc_client_ttp_fhir.secret
+
+  oidc_client_dic1_bpe.secret:
+    file: ./secrets/oidc_client_dic1_bpe.secret
+  oidc_client_dic2_bpe.secret:
+    file: ./secrets/oidc_client_dic2_bpe.secret
+  oidc_client_dic3_bpe.secret:
+    file: ./secrets/oidc_client_dic3_bpe.secret
+  oidc_client_ttp_bpe.secret:
+    file: ./secrets/oidc_client_ttp_bpe.secret
+  
 networks:
   dic1-fhir-frontend:
     driver: bridge
