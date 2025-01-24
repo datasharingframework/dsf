@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 
-class AbstractCommandList
+abstract class AbstractCommandList
 {
 	private static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 
@@ -78,22 +78,22 @@ class AbstractCommandList
 	{
 		if (command instanceof DeleteCommand)
 		{
-			audit.info("Delete of {} for identity '{}' via bundle at index {} abborted", command.getResourceTypeName(),
+			audit.info("Delete of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
 		else if (command instanceof CreateCommand)
 		{
-			audit.info("Create of {} for identity '{}' via bundle at index {} abborted", command.getResourceTypeName(),
+			audit.info("Create of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
 		else if (command instanceof UpdateCommand)
 		{
-			audit.info("Update of {} for identity '{}' via bundle at index {} abborted", command.getResourceTypeName(),
+			audit.info("Update of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
 		else if (command instanceof ReadCommand r)
 		{
-			audit.info("{} of {} for identity '{}' via bundle at index {} abborted", r.isSearch() ? "Search" : "Read",
+			audit.info("{} of {} for identity '{}' via bundle at index {} aborted", r.isSearch() ? "Search" : "Read",
 					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex());
 		}
 	}
@@ -119,7 +119,7 @@ class AbstractCommandList
 		if (!(exception instanceof WebApplicationException w)
 				|| !(w.getResponse().getEntity() instanceof OperationOutcome))
 		{
-			exception = exceptionHandler.internalServerErrorBundleBatch(exception);
+			exception = internalServerError(exception);
 		}
 
 		Response httpResponse = ((WebApplicationException) exception).getResponse();
@@ -129,4 +129,6 @@ class AbstractCommandList
 
 		return entry;
 	}
+
+	protected abstract Exception internalServerError(Exception exception);
 }

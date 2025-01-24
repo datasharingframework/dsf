@@ -1,1 +1,1 @@
-Will contain test certificates generated in the build process
+Empty `cert` directory, will contain test certificates after maven build, content is not removed by `mvn clean`

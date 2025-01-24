@@ -98,7 +98,6 @@ public interface AuthorizationRule<R extends Resource>
 	 */
 	Optional<String> reasonDeleteAllowed(Identity identity, R oldResource);
 
-
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 *

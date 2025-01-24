@@ -17,6 +17,7 @@ dsf-bpe/dsf-bpe-server-jetty/api/v2/*.jar
 dsf-bpe/dsf-bpe-server-jetty/conf/config.properties
 dsf-bpe/dsf-bpe-server-jetty/docker/api/v1/*.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/api/v2/*.jar
+dsf-bpe/dsf-bpe-server-jetty/docker/ca/*.pem
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_bpe.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_status_client.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/lib/*.jar
@@ -25,15 +26,10 @@ dsf-bpe/dsf-bpe-server-jetty/process/*.jar
 dsf-bpe/dsf-bpe-server-jetty/ui
 
 ###
-# dsf-fhir ignores
+# dsf-docker ignore
 ###
-dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml
-dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
-dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
-dsf-fhir/dsf-fhir-server-jetty/docker/dsf_status_client.jar
-dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
-dsf-fhir/dsf-fhir-server-jetty/ui
-dsf-fhir/dsf-fhir-validation/src/main/resources/fhir/bundle.xml
+dsf-docker/bpe_proxy/ca/*.pem
+dsf-docker/fhir_proxy/ca/*.pem
 
 ###
 # dsf-docker-test-setup ignores
@@ -67,8 +63,22 @@ dsf-docker-test-setup-3dic-ttp/.env
 dsf-docker-test-setup-3dic-ttp/docker-compose.override.yml
 
 ###
+# dsf-fhir ignores
+###
+dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml
+dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
+dsf-fhir/dsf-fhir-server-jetty/docker/ca/*.pem
+dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
+dsf-fhir/dsf-fhir-server-jetty/docker/dsf_status_client.jar
+dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
+dsf-fhir/dsf-fhir-server-jetty/ui
+dsf-fhir/dsf-fhir-validation/src/main/resources/fhir/bundle.xml
+
+###
 # dsf-tools ignores
 ###
+dsf-tools/dsf-tools-default-ca-files-generator/cert/*.pem
+
 dsf-tools/dsf-tools-test-data-generator/bundle/*.xml
 
 dsf-tools/dsf-tools-test-data-generator/cert/**/*.pem

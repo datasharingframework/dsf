@@ -210,10 +210,10 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			return switch (bundle.getType())
 			{
 				case BATCH -> new BatchCommandList(dataSource, exceptionHandler, commands, validationHelper,
-						snapshotGenerator, eventHandler);
+						snapshotGenerator, eventHandler, responseGenerator);
 
-				case TRANSACTION ->
-					new TransactionCommandList(dataSource, exceptionHandler, commands, transactionResourcesFactory);
+				case TRANSACTION -> new TransactionCommandList(dataSource, exceptionHandler, commands,
+						transactionResourcesFactory, responseGenerator);
 
 				default -> throw new BadBundleException("Unsupported bundle type " + bundle.getType());
 			};

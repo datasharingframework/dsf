@@ -31,7 +31,8 @@ public class DockerSecretsPropertySourceFactory
 				.filter(s -> s instanceof EnumerablePropertySource).map(s -> (EnumerablePropertySource<?>) s)
 				.flatMap(s -> List.of(s.getPropertyNames()).stream()).filter(key -> key != null)
 				.filter(key -> key.toLowerCase().endsWith(".password.file")
-						|| key.toLowerCase().endsWith("_password_file"));
+						|| key.toLowerCase().endsWith("_password_file") || key.toLowerCase().endsWith(".secret.file")
+						|| key.toLowerCase().endsWith("_secret_file"));
 
 		passwordProperties.forEach(key ->
 		{
@@ -77,7 +78,7 @@ public class DockerSecretsPropertySourceFactory
 
 		if (!Files.isReadable(secretsFilePath))
 		{
-			logger.warn("Secrets file at {} not readable", secretsFilePath.toString());
+			logger.warn("Secrets file at {} for property {} not readable", secretsFilePath.toString(), key);
 			return null;
 		}
 
@@ -87,18 +88,20 @@ public class DockerSecretsPropertySourceFactory
 
 			if (secretLines.isEmpty())
 			{
-				logger.warn("Secrets file for property {} is empty", key);
+				logger.warn("Secrets file at {} for property {} is empty", secretsFilePath.toString(), key);
 				return null;
 			}
 
 			if (secretLines.size() > 1)
-				logger.warn("Secrets file for property {} contains multiple lines, using only the first line", key);
+				logger.warn("Secrets file at {} for property {} contains multiple lines, using only the first line",
+						secretsFilePath.toString(), key);
 
 			return secretLines.get(0);
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error while reading secrets file {}: {}", secretsFilePath.toString(), e.getMessage());
+			logger.warn("Error while reading secrets file {} for property {}: {}", secretsFilePath.toString(), key,
+					e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}

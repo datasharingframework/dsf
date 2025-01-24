@@ -54,6 +54,7 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 
 	@Override
 	public void checkCreateAllowed(int index, Connection connection, Identity identity, Resource newResource)
+			throws WebApplicationException
 	{
 		final String resourceTypeName = getResourceTypeName(newResource);
 
@@ -77,6 +78,7 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 
 	@Override
 	public void checkReadAllowed(int index, Connection connection, Identity identity, Resource existingResource)
+			throws WebApplicationException
 	{
 		final String resourceTypeName = getResourceTypeName(existingResource);
 		final String resourceId = existingResource.getIdElement().getIdPart();
@@ -98,7 +100,7 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 
 	@Override
 	public void checkUpdateAllowed(int index, Connection connection, Identity identity, Resource oldResource,
-			Resource newResource)
+			Resource newResource) throws WebApplicationException
 	{
 		final String resourceTypeName = getResourceTypeName(oldResource);
 		final String resourceId = oldResource.getIdElement().getIdPart();
@@ -121,13 +123,14 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 
 	@Override
 	public void checkDeleteAllowed(int index, Connection connection, Identity identity, Resource oldResource)
+			throws WebApplicationException
 	{
 		final String resourceTypeName = getResourceTypeName(oldResource);
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(oldResource.getClass());
-		optRule.flatMap(rule -> rule.reasonDeleteAllowed(identity, oldResource)).ifPresentOrElse(reason ->
+		optRule.flatMap(rule -> rule.reasonDeleteAllowed(connection, identity, oldResource)).ifPresentOrElse(reason ->
 		{
 			audit.info("Delete of {}/{}/_history/{} allowed for identity '{}' via bundle at index {}, reason: {}",
 					resourceTypeName, resourceId, resourceVersion, identity.getName(), index, reason);
@@ -140,7 +143,7 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 	}
 
 	@Override
-	public void checkSearchAllowed(int index, Identity identity, String resourceTypeName)
+	public void checkSearchAllowed(int index, Identity identity, String resourceTypeName) throws WebApplicationException
 	{
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(resourceTypeName);
 		optRule.flatMap(rule -> rule.reasonSearchAllowed(identity)).ifPresentOrElse(reason ->
