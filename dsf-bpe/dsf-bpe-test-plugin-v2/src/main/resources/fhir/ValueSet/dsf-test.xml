@@ -1,0 +1,27 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/ValueSet/test" />
+	<!-- version managed by bpe -->
+	<version value="#{version}" />
+	<name value="DSF_Test" />
+	<title value="DSF Test" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<experimental value="false" />
+	<!-- date managed by bpe -->
+	<date value="#{date}" />
+	<publisher value="DSF" />
+	<description value="ValueSet for process plugin integration testing" />
+	<immutable value="true" />
+	<compose>
+		<include>
+			<system value="http://dsf.dev/fhir/CodeSystem/test" />
+			<version value="#{version}" />
+		</include>
+	</compose>
+</ValueSet> 

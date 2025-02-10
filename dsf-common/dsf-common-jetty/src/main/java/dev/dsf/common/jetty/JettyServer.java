@@ -342,8 +342,6 @@ public final class JettyServer
 
 	public void start()
 	{
-		Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
-
 		try
 		{
 			logger.info("Starting jetty server ...");
@@ -365,6 +363,11 @@ public final class JettyServer
 			else
 				throw new RuntimeException(e);
 		}
+	}
+
+	public void addShutdownHook()
+	{
+		Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 	}
 
 	public void stop()

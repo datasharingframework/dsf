@@ -1,5 +1,7 @@
 package dev.dsf.fhir.integration;
 
+import static de.rwh.utils.crypto.CertificateHelper.DEFAULT_SIGNATURE_ALGORITHM;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +17,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -87,6 +91,7 @@ public class X509Certificates extends ExternalResource
 
 	private static final Logger logger = LoggerFactory.getLogger(X509Certificates.class);
 	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
+	private static final int KEY_SIZE = 2048;
 	public static final char[] PASSWORD = "password".toCharArray();
 
 	private ClientCertificate clientCertificate;
@@ -195,18 +200,21 @@ public class X509Certificates extends ExternalResource
 		CertificateAuthority.registerBouncyCastleProvider();
 
 		CertificateAuthority ca = new CertificateAuthority("DE", null, null, null, null, "test-ca");
-		ca.initialize();
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusDays(1);
+		ca.initialize(notBefore, notAfter, KEY_SIZE, DEFAULT_SIGNATURE_ALGORITHM);
+
 		X509Certificate caCertificate = ca.getCertificate();
 
 		PemIo.writeX509CertificateToPem(caCertificate, caCertificateFile);
 
 		// -- server
 		X500Name serverSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, "test-server");
-		KeyPair serverRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
+		KeyPair serverRsaKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM, KEY_SIZE);
 		JcaPKCS10CertificationRequest serverRequest = CertificationRequestBuilder
 				.createServerCertificationRequest(serverSubject, serverRsaKeyPair, null, "localhost");
 
-		X509Certificate serverCertificate = ca.signWebServerCertificate(serverRequest);
+		X509Certificate serverCertificate = ca.signWebServerCertificate(serverRequest, Period.ofDays(1));
 
 		CertificateWriter.toPkcs12(serverCertificateFile, serverRsaKeyPair.getPrivate(), PASSWORD, serverCertificate,
 				caCertificate, "test-server");
@@ -218,11 +226,11 @@ public class X509Certificates extends ExternalResource
 
 		// -- client
 		X500Name clientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, "test-client");
-		KeyPair clientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
+		KeyPair clientRsaKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM, KEY_SIZE);
 		JcaPKCS10CertificationRequest clientRequest = CertificationRequestBuilder
 				.createClientCertificationRequest(clientSubject, clientRsaKeyPair);
 
-		X509Certificate clientCertificate = ca.signWebClientCertificate(clientRequest);
+		X509Certificate clientCertificate = ca.signWebClientCertificate(clientRequest, Period.ofDays(1));
 
 		KeyStore clientKeyStore = CertificateHelper.toPkcs12KeyStore(clientRsaKeyPair.getPrivate(),
 				new Certificate[] { clientCertificate, caCertificate }, "test-client", PASSWORD);
@@ -235,11 +243,13 @@ public class X509Certificates extends ExternalResource
 		// -- external client
 		X500Name externalClientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
 				"external-client");
-		KeyPair externalClientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
+		KeyPair externalClientRsaKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM,
+				KEY_SIZE);
 		JcaPKCS10CertificationRequest externalClientRequest = CertificationRequestBuilder
 				.createClientCertificationRequest(externalClientSubject, externalClientRsaKeyPair);
 
-		X509Certificate externalClientCertificate = ca.signWebClientCertificate(externalClientRequest);
+		X509Certificate externalClientCertificate = ca.signWebClientCertificate(externalClientRequest,
+				Period.ofDays(1));
 
 		KeyStore externalClientKeyStore = CertificateHelper.toPkcs12KeyStore(externalClientRsaKeyPair.getPrivate(),
 				new Certificate[] { externalClientCertificate, caCertificate }, "external-client", PASSWORD);
@@ -255,7 +265,8 @@ public class X509Certificates extends ExternalResource
 		// -- practitioner client
 		X500Name practitionerClientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
 				"practitioner-client");
-		KeyPair practitionerClientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
+		KeyPair practitionerClientRsaKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM,
+				KEY_SIZE);
 		JcaPKCS10CertificationRequest practitionerClientRequest = CertificationRequestBuilder
 				.createClientCertificationRequest(practitionerClientSubject, practitionerClientRsaKeyPair,
 						"practitioner@test.org");

@@ -36,6 +36,8 @@ public final class BpeJettyServerHttps
 				BpeHttpsJettyConfig.class))
 		{
 			JettyServer server = context.getBean(JettyServer.class);
+
+			server.addShutdownHook();
 			server.start();
 		}
 	}

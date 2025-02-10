@@ -329,8 +329,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
-		defaultDataSource.unwrap(BasicDataSource.class).close();
-
 		try
 		{
 			if (fhirServer != null)
@@ -343,6 +341,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		{
 			logger.error("Error while stopping FHIR Server", e);
 		}
+
+		defaultDataSource.unwrap(BasicDataSource.class).close();
 
 		logger.info("Deleting files {} ...", FILES_TO_DELETE);
 		FILES_TO_DELETE.forEach(AbstractIntegrationTest::deleteFile);

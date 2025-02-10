@@ -82,6 +82,7 @@ org.camunda.bpm.engine.delegate.TaskListener
 org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer
 org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer
 org.camunda.bpm.engine.impl.variable.serializer.ValueFields
+org.camunda.bpm.engine.variable.Variables
 org.camunda.bpm.engine.variable.impl.type.PrimitiveValueTypeImpl
 org.camunda.bpm.engine.variable.impl.value.PrimitiveTypeValueImpl
 org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl
