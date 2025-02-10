@@ -128,7 +128,7 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 	@Override
 	protected boolean resourceExists(Connection connection, Subscription newResource)
 	{
-		Map<String, List<String>> queryParameters = Map.of("criteria",
+		Map<String, List<String>> queryParameters = Map.of("criteria:exact",
 				Collections.singletonList(newResource.getCriteria()), "type",
 				Collections.singletonList(newResource.getChannel().getType().toCode()), "payload",
 				Collections.singletonList(newResource.getChannel().getPayload()));

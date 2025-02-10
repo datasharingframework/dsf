@@ -110,11 +110,11 @@ public class PropertiesConfig implements InitializingBean
 	private boolean webserviceClientLocalVerbose;
 
 	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria:exact=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String taskSubscriptionSearchParameter;
 
 	@Documentation(description = "Subscription to receive notifications about questionnaire response resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria:exact=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String questionnaireResponseSubscriptionSearchParameter;
 
 	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
