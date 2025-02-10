@@ -63,7 +63,7 @@ public class ProcessPluginApiClassLoaderFactory
 
 	private Path getExternalFileIfReadable(String apiVersion, String file)
 	{
-		Path externalFile = Paths.get("api/v" + apiVersion + "/" + file);
+		Path externalFile = Paths.get("bpe/api/v" + apiVersion + "/" + file);
 
 		if (!Files.exists(externalFile))
 		{

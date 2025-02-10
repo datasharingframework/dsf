@@ -62,7 +62,7 @@ public class WebserviceConfig
 	@Bean
 	public StaticResourcesService staticResourcesService()
 	{
-		return new StaticResourcesService(propertiesConfig.getStaticResourceCacheEnabled());
+		return new StaticResourcesService("/bpe", propertiesConfig.getStaticResourceCacheEnabled());
 	}
 
 	@Bean

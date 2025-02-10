@@ -95,6 +95,12 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	{
 		return dbLiquibasePassword;
 	}
+	
+	@Override
+	public String getChangelogFile()
+	{
+		return  "fhir/db/db.changelog.xml";
+	}
 
 	@Override
 	public Map<String, String> getChangeLogParameters()

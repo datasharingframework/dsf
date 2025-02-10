@@ -14,7 +14,7 @@ public abstract class AbstractDbTest
 		SLF4JBridgeHandler.install();
 	}
 
-	protected static final String CHANGE_LOG_FILE = "db/db.changelog.xml";
+	protected static final String CHANGE_LOG_FILE = "bpe/db/db.changelog.xml";
 
 	protected static final String DATABASE_USERS_GROUP = "server_users_group";
 	protected static final String DATABASE_USER = "server_user";

@@ -10,6 +10,8 @@ public interface DbMigratorConfig
 
 	char[] getDbLiquibasePassword();
 
+	String getChangelogFile();
+
 	Map<String, String> getChangeLogParameters();
 
 	boolean forceLiquibaseUnlock();

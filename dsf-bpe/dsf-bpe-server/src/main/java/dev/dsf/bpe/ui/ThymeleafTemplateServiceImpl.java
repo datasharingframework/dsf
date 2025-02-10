@@ -39,7 +39,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		resolver.setTemplateMode(TemplateMode.HTML);
-		resolver.setPrefix("/template/");
+		resolver.setPrefix("/bpe/template/");
 		resolver.setSuffix(".html");
 		resolver.setCacheable(cacheEnabled);
 

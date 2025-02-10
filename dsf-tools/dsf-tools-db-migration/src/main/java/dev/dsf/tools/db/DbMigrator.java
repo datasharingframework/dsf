@@ -126,7 +126,7 @@ public final class DbMigrator
 						ByteArrayOutputStream output = new ByteArrayOutputStream();
 						CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
 						updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
-						updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "db/db.changelog.xml");
+						updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, config.getChangelogFile());
 						updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, new Contexts().toString());
 						updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG,
 								new LabelExpression().getOriginalString());

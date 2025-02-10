@@ -26,7 +26,7 @@ public abstract class AbstractDbTest
 
 	protected static final boolean LOG_DB_STATEMENTS = true;
 
-	protected static final String CHANGE_LOG_FILE = "db/db.changelog.xml";
+	protected static final String CHANGE_LOG_FILE = "fhir/db/db.changelog.xml";
 
 	protected static final String DATABASE_USERS_GROUP = "server_users_group";
 	protected static final String DATABASE_USER = "server_user";
