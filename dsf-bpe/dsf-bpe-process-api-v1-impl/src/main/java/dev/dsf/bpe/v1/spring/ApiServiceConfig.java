@@ -126,6 +126,7 @@ public class ApiServiceConfig
 	public FhirContext fhirContext()
 	{
 		// workaround for https://github.com/hapifhir/hapi-fhir/issues/5205
+		// Do not remove as HAPI dependency of v1 will not be upgraded to a fixed version
 		StreamReadConstraints.overrideDefaultStreamReadConstraints(
 				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
 
