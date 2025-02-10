@@ -189,8 +189,11 @@ public class WebsocketClientTyrus implements WebsocketClient
 		logger.debug("Closing websocket {}", wsUri);
 		try
 		{
-			connection.close();
-			connection = null;
+			if (connection != null)
+			{
+				connection.close();
+				connection = null;
+			}
 		}
 		catch (IOException e)
 		{
