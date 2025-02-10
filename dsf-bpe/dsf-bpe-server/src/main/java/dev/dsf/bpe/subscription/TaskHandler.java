@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -122,6 +123,9 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 	{
 		Objects.requireNonNull(task, "task");
 		Objects.requireNonNull(task.getInstantiatesCanonical(), "task.instantiatesCanonical");
+
+		if (!TaskStatus.REQUESTED.equals(task.getStatus()))
+			throw new IllegalArgumentException("Task.status != " + TaskStatus.REQUESTED.toCode());
 
 		Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(task.getInstantiatesCanonical());
 		if (!matcher.matches())

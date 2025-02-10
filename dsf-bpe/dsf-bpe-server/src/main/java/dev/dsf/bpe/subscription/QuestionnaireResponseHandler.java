@@ -11,6 +11,7 @@ import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.variable.value.PrimitiveValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,12 @@ public class QuestionnaireResponseHandler extends AbstractResourceHandler
 	@Override
 	public void onResource(QuestionnaireResponse questionnaireResponse)
 	{
+		Objects.requireNonNull(questionnaireResponse, "questionnaireResponse");
+
+		if (!QuestionnaireResponseStatus.COMPLETED.equals(questionnaireResponse.getStatus()))
+			throw new IllegalArgumentException(
+					"QuestionnaireResponse.status != " + QuestionnaireResponseStatus.COMPLETED.toCode());
+
 		try
 		{
 			List<QuestionnaireResponse.QuestionnaireResponseItemComponent> items = questionnaireResponse.getItem();
