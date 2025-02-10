@@ -8,7 +8,7 @@
 		<artifactId>dsf-bpe-pom</artifactId>
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -33,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<artifactId>jakarta.ws.rs-api</artifactId>
-        	<groupId>jakarta.ws.rs</groupId>
+			<groupId>jakarta.ws.rs</groupId>
 		</dependency>
 
 		<!-- optional dependencies provided by the DSF bpe -->
@@ -46,6 +46,18 @@
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>crypto-utils</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation</artifactId>
+			<version>${hapi.fhir.version.v1}</version>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

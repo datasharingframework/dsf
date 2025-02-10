@@ -56,16 +56,6 @@
 		<dependencies>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-jetty</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -87,6 +77,16 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-api-v2-impl</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-server-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

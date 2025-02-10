@@ -109,6 +109,10 @@
 			<artifactId>jersey-media-json-jackson</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-jaxb</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
 		</dependency>
@@ -160,13 +164,13 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>db-test-utils</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>db-test-utils</artifactId>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
