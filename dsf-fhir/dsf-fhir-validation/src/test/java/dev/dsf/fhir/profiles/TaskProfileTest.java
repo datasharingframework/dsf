@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -30,9 +31,9 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-task-base-1.0.0.xml", "dsf-task-test.xml"),
-			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml"),
-			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml"));
+			List.of("dsf-task-base-1.0.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
+			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"),
+			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -151,10 +152,10 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskValidationWithAdditionalInputNotInDsfBaseTask()
+	public void testTaskValidationWithAdditionalInputNotInDsfBaseTaskVersion1_4()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-test");
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-test|1.4");
 		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/test|1.4");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
@@ -167,7 +168,33 @@ public class TaskProfileTest
 		task.addInput().setValue(new StringType("test")).getType().getCodingFirstRep()
 				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("message-name");
 		task.addInput().setValue(new StringType("some-test-string")).getType().getCodingFirstRep()
-				.setSystem("http://dsf.dev/fhir/CodeSystem/test").setCode("string-example");
+				.setSystem("http://dsf.dev/fhir/CodeSystem/test|1.4").setCode("string-example");
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	@Test
+	public void testTaskValidationWithAdditionalInputNotInDsfBaseTaskVersion2_0()
+	{
+		Task task = new Task();
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-test|2.0");
+		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/test|2.0");
+		task.setStatus(TaskStatus.REQUESTED);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+
+		task.addInput().setValue(new StringType("test_v2")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new IntegerType(42)).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/test|2.0").setCode("integer-example");
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);

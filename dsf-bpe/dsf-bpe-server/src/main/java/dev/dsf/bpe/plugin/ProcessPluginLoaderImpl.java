@@ -22,20 +22,24 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginLoaderImpl.class);
 
-	private final Path pluginDirectory;
 	private final List<ProcessPluginFactory> processPluginFactories = new ArrayList<>();
 
-	public ProcessPluginLoaderImpl(Collection<? extends ProcessPluginFactory> processPluginFactories,
-			Path pluginDirectory)
-	{
-		this.pluginDirectory = pluginDirectory;
+	private final Path pluginDirectory;
+	private final List<Path> explodedPluginDirectories = new ArrayList<>();
 
+	public ProcessPluginLoaderImpl(Collection<? extends ProcessPluginFactory> processPluginFactories,
+			Path pluginDirectory, Collection<? extends Path> explodedPluginDirectories)
+	{
 		if (processPluginFactories != null)
 		{
 			this.processPluginFactories.addAll(processPluginFactories);
 			this.processPluginFactories.sort(
 					Comparator.<ProcessPluginFactory> comparingInt(ProcessPluginFactory::getApiVersion).reversed());
 		}
+
+		this.pluginDirectory = pluginDirectory;
+		if (explodedPluginDirectories != null)
+			this.explodedPluginDirectories.addAll(explodedPluginDirectories);
 	}
 
 	@Override
@@ -47,16 +51,16 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 	@Override
 	public List<ProcessPlugin> loadPlugins()
 	{
+		List<ProcessPlugin> plugins = new ArrayList<>();
+
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(pluginDirectory))
 		{
-			List<ProcessPlugin> plugins = new ArrayList<>();
-
 			directoryStream.forEach(p ->
 			{
 				if (!Files.isReadable(p))
-					logger.warn("Ignoring {}: {}", p.toAbsolutePath().toString(), "Not readable");
+					logger.warn("Ignoring {}: Not readable", p.toAbsolutePath().normalize().toString());
 				else if (!p.getFileName().toString().endsWith(".jar"))
-					logger.warn("Ignoring {}: {}", p.toAbsolutePath().toString(), "Not a .jar file");
+					logger.warn("Ignoring {}: Not a .jar file", p.toAbsolutePath().normalize().toString());
 				else
 				{
 					ProcessPlugin plugin = load(p);
@@ -64,8 +68,6 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 						plugins.add(plugin);
 				}
 			});
-
-			return plugins;
 		}
 		catch (IOException e)
 		{
@@ -74,19 +76,33 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 
 			throw new RuntimeException(e);
 		}
+
+		for (Path e : explodedPluginDirectories)
+		{
+			if (!Files.isDirectory(e))
+				logger.warn("Ignoring {}: Not a directory", e.toAbsolutePath().normalize().toString());
+			else
+			{
+				ProcessPlugin plugin = load(e);
+				if (plugin != null)
+					plugins.add(plugin);
+			}
+		}
+
+		return plugins;
 	}
 
-	private ProcessPlugin load(Path jar)
+	private ProcessPlugin load(Path pluginPath)
 	{
 		for (ProcessPluginFactory factory : processPluginFactories)
 		{
-			ProcessPlugin plugin = factory.load(jar);
+			ProcessPlugin plugin = factory.load(pluginPath);
 
 			if (plugin != null)
 				return plugin;
 		}
 
-		logger.warn("Ignoring {}: No process plugin definition for API version{} {} found", jar.toString(),
+		logger.warn("Ignoring {}: No process plugin definition for API version{} {} found", pluginPath.toString(),
 				processPluginFactories.size() != 1 ? "s" : "",
 				processPluginFactories.size() == 1 ? processPluginFactories.get(0).getApiVersion()
 						: processPluginFactories.stream().map(f -> String.valueOf(f.getApiVersion()))

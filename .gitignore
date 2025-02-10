@@ -12,8 +12,6 @@
 ###
 # dsf-bpe ignores
 ###
-dsf-bpe/dsf-bpe-server-jetty/api/v1/*.jar
-dsf-bpe/dsf-bpe-server-jetty/api/v2/*.jar
 dsf-bpe/dsf-bpe-server-jetty/conf/config.properties
 dsf-bpe/dsf-bpe-server-jetty/docker/api/v1/*.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/api/v2/*.jar
