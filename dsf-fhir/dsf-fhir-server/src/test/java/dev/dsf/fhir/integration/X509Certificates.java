@@ -89,10 +89,6 @@ public class X509Certificates extends ExternalResource
 	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 	public static final char[] PASSWORD = "password".toCharArray();
 
-	private boolean beforeRun;
-
-	private final X509Certificates parent;
-
 	private ClientCertificate clientCertificate;
 	private ClientCertificate practitionerClientCertificate;
 	private ClientCertificate externalClientCertificate;
@@ -109,134 +105,75 @@ public class X509Certificates extends ExternalResource
 
 	private List<Path> filesToDelete;
 
-	public X509Certificates()
-	{
-		this(null);
-	}
-
-	public X509Certificates(X509Certificates parent)
-	{
-		this.parent = parent;
-	}
-
-	private boolean parentBeforeRan()
-	{
-		return parent != null && parent.beforeRun;
-	}
-
 	@Override
 	protected void before() throws Throwable
 	{
-		if (parentBeforeRan())
-			logger.debug("X509Certificates created by parent");
-		else
-			createX509Certificates();
-
-		beforeRun = true;
+		createX509Certificates();
 	}
 
 	@Override
 	protected void after()
 	{
-		if (parentBeforeRan())
-			logger.debug("X509Certificates will be deleted by parent");
-		else
-			deleteX509Certificates();
+		deleteX509Certificates();
 	}
 
 	public ClientCertificate getClientCertificate()
 	{
-		if (parentBeforeRan())
-			return parent.getClientCertificate();
-		else
-			return clientCertificate;
+		return clientCertificate;
 	}
 
 	public ClientCertificate getExternalClientCertificate()
 	{
-		if (parentBeforeRan())
-			return parent.getExternalClientCertificate();
-		else
-			return externalClientCertificate;
+		return externalClientCertificate;
 	}
 
 	public ClientCertificate getPractitionerClientCertificate()
 	{
-		if (parentBeforeRan())
-			return parent.getPractitionerClientCertificate();
-		else
-			return practitionerClientCertificate;
+		return practitionerClientCertificate;
 	}
 
 	public Path getCaCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getCaCertificateFile();
-
 		return caCertificateFile;
 	}
 
 	public Path getServerCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getServerCertificateFile();
-
 		return serverCertificateFile;
 	}
 
 	public Path getServerCertificatePrivateKeyFile()
 	{
-		if (parentBeforeRan())
-			return parent.getServerCertificatePrivateKeyFile();
-
 		return serverCertificatePrivateKeyFile;
 	}
 
 	public Path getClientCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getClientCertificateFile();
-
 		return clientCertificateFile;
 	}
 
 	public Path getClientCertificatePrivateKeyFile()
 	{
-		if (parentBeforeRan())
-			return parent.getClientCertificatePrivateKeyFile();
-
 		return clientCertificatePrivateKeyFile;
 	}
 
 	public Path getExternalClientCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getExternalClientCertificateFile();
-
 		return externalClientCertificateFile;
 	}
 
 	public Path getExternalClientCertificatePrivateKeyFile()
 	{
-		if (parentBeforeRan())
-			return parent.getExternalClientCertificatePrivateKeyFile();
-
 		return externalClientCertificatePrivateKeyFile;
 	}
 
 	public Path getPractitionerClientCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getPractitionerClientCertificateFile();
-
 		return practitionerClientCertificateFile;
 	}
 
 	public Path getPractitionerClientCertificatePrivateKeyFile()
 	{
-		if (parentBeforeRan())
-			return parent.getPractitionerClientCertificatePrivateKeyFile();
-
 		return practitionerClientCertificatePrivateKeyFile;
 	}
 
@@ -277,7 +214,6 @@ public class X509Certificates extends ExternalResource
 		PemIo.writeX509CertificateToPem(serverCertificate, serverCertificateFile);
 		PemIo.writeAes128EncryptedPrivateKeyToPkcs8(provider, serverCertificatePrivateKeyFile,
 				serverRsaKeyPair.getPrivate(), PASSWORD);
-
 		// server --
 
 		// -- client
@@ -355,7 +291,7 @@ public class X509Certificates extends ExternalResource
 		this.practitionerClientCertificateFile = practitionerClientCertificateFile;
 		this.practitionerClientCertificatePrivateKeyFile = practitionerClientCertificatePrivateKeyFile;
 
-		this.filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, serverCertificatePrivateKeyFile,
+		filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, serverCertificatePrivateKeyFile,
 				clientCertificateFile, clientCertificatePrivateKeyFile, externalClientCertificateFile,
 				externalClientCertificatePrivateKeyFile, practitionerClientCertificateFile,
 				practitionerClientCertificatePrivateKeyFile);

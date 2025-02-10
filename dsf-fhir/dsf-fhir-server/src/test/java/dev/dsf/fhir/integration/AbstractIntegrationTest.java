@@ -105,10 +105,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
 	protected static final String CONTEXT_PATH = "/fhir";
-	protected static final String WEBSOCKET_URL = "wss://localhost:8001" + CONTEXT_PATH + "/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
-	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
+	private static final List<Path> FILES_TO_DELETE = List.of(FHIR_BUNDLE_FILE);
 
 	protected static final FhirContext fhirContext = FhirContext.forR4();
 	protected static final ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
@@ -169,12 +168,12 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				referenceCleaner);
 	}
 
-	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
+	private static WebsocketClient createWebsocketClient(int apiPort, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		return new WebsocketClientTyrus(() ->
-		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, null, null, null,
-				"Integration Test Client", subscriptionIdPart);
+		{}, URI.create("wss://localhost:" + apiPort + CONTEXT_PATH + "/ws"), trustStore, keyStore, keyStorePassword,
+				null, null, null, "Integration Test Client", subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer(ServerSocketChannel statusConnectorChannel,
@@ -271,7 +270,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		}
 	}
 
-	protected static void writeBundle(Path bundleFile, Bundle bundle)
+	private static void writeBundle(Path bundleFile, Bundle bundle)
 	{
 		try (OutputStream out = Files.newOutputStream(bundleFile);
 				OutputStreamWriter writer = new OutputStreamWriter(out))
@@ -336,7 +335,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		{
 			if (fhirServer != null)
 			{
-				logger.info("Stoping FHIR Server ...");
+				logger.info("Stopping FHIR Server ...");
 				fhirServer.stop();
 			}
 		}
@@ -403,7 +402,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		assertNotNull(subscription.getIdElement());
 		assertNotNull(subscription.getIdElement().getIdPart());
 
-		return createWebsocketClient(certificates.getClientCertificate().getTrustStore(),
+		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
 				certificates.getClientCertificate().getKeyStorePassword(), subscription.getIdElement().getIdPart());
 	}

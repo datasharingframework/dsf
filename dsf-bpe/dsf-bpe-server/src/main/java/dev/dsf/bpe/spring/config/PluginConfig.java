@@ -47,7 +47,7 @@ public class PluginConfig
 
 		if (!Files.isDirectory(processPluginDirectoryPath))
 			throw new RuntimeException(
-					"Process plug in directory '" + processPluginDirectoryPath.toString() + "' not readable");
+					"Process plugin directory '" + processPluginDirectoryPath.toString() + "' not readable");
 
 		return new ProcessPluginLoaderImpl(processPluginFactories, processPluginDirectoryPath);
 	}

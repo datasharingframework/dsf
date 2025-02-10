@@ -528,8 +528,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		if (resource == null || !getResourceType().isInstance(resource))
 			return false;
 
-		return searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p -> p.matches(resource))
-				.allMatch(b -> b);
+		// returns true if no search parameters configured
+		return searchParameters.stream().filter(SearchQueryParameter::isDefined).allMatch(p -> p.matches(resource));
 	}
 
 	@Override
