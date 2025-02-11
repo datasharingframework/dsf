@@ -177,7 +177,8 @@ public class CertificateGenerator
 		}
 		catch (IOException | OperatorCreationException e)
 		{
-			logger.error("Error while writing encrypted private-key to {}", privateKeyFile.toString(), e);
+			logger.error("Error while writing encrypted private-key to {}",
+					privateKeyFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -190,7 +191,8 @@ public class CertificateGenerator
 		}
 		catch (IOException | OperatorCreationException e)
 		{
-			logger.error("Error while writing not-encrypted private-key to {}", privateKeyFile.toString(), e);
+			logger.error("Error while writing not-encrypted private-key to {}",
+					privateKeyFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -203,7 +205,8 @@ public class CertificateGenerator
 		}
 		catch (CertificateEncodingException | IllegalStateException | IOException e)
 		{
-			logger.error("Error while writing certificate to {}", certificateFile.toString(), e);
+			logger.error("Error while writing certificate to {}",
+					certificateFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -216,7 +219,8 @@ public class CertificateGenerator
 		}
 		catch (IOException | PKCSException e)
 		{
-			logger.error("Error while reading private-key from {}", privateKeyFile.toString(), e);
+			logger.error("Error while reading private-key from {}",
+					privateKeyFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -229,7 +233,8 @@ public class CertificateGenerator
 		}
 		catch (CertificateException | IOException e)
 		{
-			logger.error("Error while reading certificate from {}", certFile.toString(), e);
+			logger.error("Error while reading certificate from {}", certFile.toAbsolutePath().normalize().toString(),
+					e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -251,7 +256,8 @@ public class CertificateGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while writing certificate thumbprints file to {}", thumbprintsFile.toString(), e);
+			logger.error("Error while writing certificate thumbprints file to {}",
+					thumbprintsFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -364,7 +370,8 @@ public class CertificateGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while reading certificate-request from {}", certificateRequestFile.toString(), e);
+			logger.error("Error while reading certificate-request from {}",
+					certificateRequestFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -377,7 +384,8 @@ public class CertificateGenerator
 		}
 		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
 		{
-			logger.error("Error while reading certificate-request from {}", certificateRequestFile.toString(), e);
+			logger.error("Error while reading certificate-request from {}",
+					certificateRequestFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -450,7 +458,8 @@ public class CertificateGenerator
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while creating directories {}", file.getParent().toString(), e);
+			logger.error("Error while creating directories {}",
+					file.getParent().toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 
@@ -694,7 +703,8 @@ public class CertificateGenerator
 		}
 		catch (CertificateEncodingException | IllegalStateException | IOException e)
 		{
-			logger.error("Error while writing certificate to {}", certificateFile.toString(), e);
+			logger.error("Error while writing certificate to {}",
+					certificateFile.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -738,7 +748,7 @@ public class CertificateGenerator
 		}
 		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
 		{
-			logger.error("Error while writing keystore file to {}", file.toString(), e);
+			logger.error("Error while writing keystore file to {}", file.toAbsolutePath().normalize().toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
