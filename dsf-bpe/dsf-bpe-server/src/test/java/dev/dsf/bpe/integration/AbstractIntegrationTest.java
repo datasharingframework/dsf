@@ -130,12 +130,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	private static final ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
-	private static String fhirBaseUrl;
 	private static JettyServer fhirServer;
-
 	private static FhirWebserviceClient webserviceClient;
-
-	private static String bpeBaseUrl;
 	private static JettyServer bpeServer;
 
 	@BeforeClass
@@ -145,18 +141,18 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				fhirLiquibaseRule.getMappedPort(5432), fhirLiquibaseRule.getDatabaseName());
 		fhirDefaultDataSource.unwrap(BasicDataSource.class).start();
 
-		ServerSocketChannel fhirStatusConnectorChannel = JettyServer.serverSocketChannel();
-		ServerSocketChannel fhirApiConnectorChannel = JettyServer.serverSocketChannel();
+		ServerSocketChannel fhirStatusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+		ServerSocketChannel fhirApiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
 
 		logger.info("Creating FHIR Bundle ...");
 		createTestBundle(certificates.getClientCertificate(), certificates.getExternalClientCertificate(),
 				fhirApiConnectorChannel.socket().getLocalPort());
 
-		fhirBaseUrl = "https://localhost:" + fhirApiConnectorChannel.socket().getLocalPort() + FHIR_CONTEXT_PATH;
+		String fhirBaseUrl = "https://localhost:" + fhirApiConnectorChannel.socket().getLocalPort() + FHIR_CONTEXT_PATH;
 
 		logger.info("Creating webservice client ...");
-		webserviceClient = createWebserviceClient(fhirApiConnectorChannel.socket().getLocalPort(),
-				certificates.getClientCertificate().getTrustStore(), certificates.getClientCertificate().getKeyStore(),
+		webserviceClient = createWebserviceClient(fhirBaseUrl, certificates.getClientCertificate().getTrustStore(),
+				certificates.getClientCertificate().getKeyStore(),
 				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
@@ -180,15 +176,15 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				bpeLiquibaseRule.getMappedPort(5432), bpeLiquibaseRule.getDatabaseName());
 		bpeDefaultDataSource.unwrap(BasicDataSource.class).start();
 
-		ServerSocketChannel bpeStatusConnectorChannel = JettyServer.serverSocketChannel();
-		ServerSocketChannel bpeApiConnectorChannel = JettyServer.serverSocketChannel();
+		ServerSocketChannel bpeStatusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+		ServerSocketChannel bpeApiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
 
-		bpeBaseUrl = "https://localhost:" + bpeApiConnectorChannel.socket().getLocalPort() + BPE_CONTEXT_PATH;
+		String bpeBaseUrl = "https://localhost:" + bpeApiConnectorChannel.socket().getLocalPort() + BPE_CONTEXT_PATH;
 
 		Files.createDirectories(EMPTY_PROCESS_DIRECTORY);
 
 		logger.info("Starting BPE Server ...");
-		bpeServer = startBpeServer(bpeStatusConnectorChannel, bpeApiConnectorChannel, bpeBaseUrl);
+		bpeServer = startBpeServer(bpeStatusConnectorChannel, bpeApiConnectorChannel, bpeBaseUrl, fhirBaseUrl);
 
 		logger.info("Creating FHIR template database ...");
 		fhirLiquibaseRule.createTemplateDatabase();
@@ -200,12 +196,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		Thread.sleep(Duration.ofSeconds(1));
 	}
 
-	private static FhirWebserviceClient createWebserviceClient(int fhirApiPort, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
+	private static FhirWebserviceClient createWebserviceClient(String fhirBaseUrl, KeyStore trustStore,
+			KeyStore keyStore, char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
-		return new FhirWebserviceClientJersey("https://localhost:" + fhirApiPort + FHIR_CONTEXT_PATH, trustStore,
-				keyStore, keyStorePassword, null, null, null, null, 0, 0, false, "DSF Integration Test Client",
-				fhirContext, referenceCleaner);
+		return new FhirWebserviceClientJersey(fhirBaseUrl, trustStore, keyStore, keyStorePassword, null, null, null,
+				null, 0, 0, false, "DSF Integration Test Client", fhirContext, referenceCleaner);
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()
@@ -394,7 +389,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	}
 
 	private static JettyServer startBpeServer(ServerSocketChannel statusConnectorChannel,
-			ServerSocketChannel apiConnectorChannel, String baseUrl) throws Exception
+			ServerSocketChannel apiConnectorChannel, String bpeBaseUrl, String fhirBaseUrl) throws Exception
 	{
 		Map<String, String> initParameters = new HashMap<>();
 		initParameters.put("dev.dsf.server.status.port",
@@ -416,6 +411,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.fhir.client.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
 
+		initParameters.put("dev.dsf.bpe.server.base.url", bpeBaseUrl);
 		initParameters.put("dev.dsf.bpe.fhir.server.base.url", fhirBaseUrl);
 
 		initParameters.put("dev.dsf.bpe.process.api.directroy", "../dsf-bpe-server-jetty/docker/api");

@@ -131,8 +131,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		logger.info("Creating Bundle ...");
 		createTestBundle(certificates.getClientCertificate(), certificates.getExternalClientCertificate());
 
-		ServerSocketChannel statusConnectorChannel = JettyServer.serverSocketChannel();
-		ServerSocketChannel apiConnectorChannel = JettyServer.serverSocketChannel();
+		ServerSocketChannel statusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+		ServerSocketChannel apiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
 
 		baseUrl = "https://localhost:" + apiConnectorChannel.socket().getLocalPort() + CONTEXT_PATH;
 

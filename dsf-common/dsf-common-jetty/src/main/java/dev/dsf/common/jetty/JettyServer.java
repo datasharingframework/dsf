@@ -2,6 +2,7 @@ package dev.dsf.common.jetty;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
 import java.security.KeyStore;
@@ -59,9 +60,10 @@ public final class JettyServer
 		return new HttpConnectionFactory(httpConfiguration);
 	}
 
-	public static ServerSocketChannel serverSocketChannel()
+	public static ServerSocketChannel serverSocketChannel(String hostname)
 	{
-		InetSocketAddress bindAddress = new InetSocketAddress(0);
+		InetSocketAddress bindAddress = hostname == null ? new InetSocketAddress(0)
+				: new InetSocketAddress(hostname, 0);
 		ServerSocketChannel serverChannel = null;
 
 		try
@@ -108,6 +110,7 @@ public final class JettyServer
 			{
 				ServerConnector connector = new ServerConnector(server, httpConnectionFactory());
 				connector.open(channel);
+				setHostAndPort(channel, connector);
 
 				return connector;
 			}
@@ -147,6 +150,7 @@ public final class JettyServer
 						httpConnectionFactory(new ForwardedRequestCustomizer(),
 								new ForwardedSecureRequestCustomizer(clientCertificateHeaderName)));
 				connector.open(channel);
+				setHostAndPort(channel, connector);
 
 				return connector;
 			}
@@ -173,6 +177,7 @@ public final class JettyServer
 								keyStorePassword, needClientAuth),
 						httpConnectionFactory(new SecureRequestCustomizer()));
 				connector.open(channel);
+				setHostAndPort(channel, connector);
 
 				return connector;
 			}
@@ -200,6 +205,17 @@ public final class JettyServer
 
 			return connector;
 		};
+	}
+
+	private static void setHostAndPort(ServerSocketChannel channel, ServerConnector connector) throws IOException
+	{
+		SocketAddress address = channel.getLocalAddress();
+		if (address != null && address instanceof InetSocketAddress i && i.getAddress() != null
+				&& i.getAddress().getHostAddress() != null)
+		{
+			connector.setHost(i.getAddress().getHostAddress());
+			connector.setPort(i.getPort());
+		}
 	}
 
 	private static SslConnectionFactory sslConnectionFactory(KeyStore clientCertificateTrustStore, KeyStore keyStore,
