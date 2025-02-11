@@ -96,11 +96,11 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	{
 		return dbLiquibasePassword;
 	}
-	
+
 	@Override
 	public String getChangelogFile()
 	{
-		return  "bpe/db/db.changelog.xml";
+		return "bpe/db/db.changelog.xml";
 	}
 
 	@Override

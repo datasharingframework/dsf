@@ -1,8 +1,9 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
-import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
+
+import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -70,7 +71,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-//copied and modified from https://github.com/hapifhir/hapi-fhir/blob/v7.6.1/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/validator/VersionSpecificWorkerContextWrapper.java 
+//copied and modified from https://github.com/hapifhir/hapi-fhir/blob/v7.6.1/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/validator/VersionSpecificWorkerContextWrapper.java
 public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext
 {
 	private static final Logger ourLog = LoggerFactory.getLogger(FixedVersionSpecificWorkerContextWrapper.class);

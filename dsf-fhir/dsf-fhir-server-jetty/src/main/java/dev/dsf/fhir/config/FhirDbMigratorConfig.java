@@ -95,11 +95,11 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	{
 		return dbLiquibasePassword;
 	}
-	
+
 	@Override
 	public String getChangelogFile()
 	{
-		return  "fhir/db/db.changelog.xml";
+		return "fhir/db/db.changelog.xml";
 	}
 
 	@Override
