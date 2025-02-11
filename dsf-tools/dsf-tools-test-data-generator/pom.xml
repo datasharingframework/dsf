@@ -54,7 +54,7 @@
 						<goals>
 							<goal>exec</goal>
 						</goals>
-						<phase>prepare-package</phase>
+						<phase>install</phase>
 					</execution>
 				</executions>
 				<configuration>
