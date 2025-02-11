@@ -92,8 +92,10 @@ public class StaticResourcesService
 
 		InputStream getStream(String fileName) throws IOException
 		{
-			java.nio.file.Path target = OVERRIDE_RESOURCE_FOLDER.resolve(fileName);
-			if (Files.isReadable(target))
+			java.nio.file.Path target = OVERRIDE_RESOURCE_FOLDER.resolve(fileName).normalize();
+			if (target.getParent() == null || !target.getParent().equals(OVERRIDE_RESOURCE_FOLDER))
+				return null;
+			else if (Files.isReadable(target))
 				return Files.newInputStream(target);
 			else
 				return StaticResourcesService.class.getResourceAsStream(baseFolder + "/static/" + fileName);
