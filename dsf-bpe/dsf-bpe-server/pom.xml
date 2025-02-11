@@ -206,6 +206,16 @@
 			<artifactId>dsf-bpe-test-plugin</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-bpe-test-plugin-v1</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-bpe-test-plugin-v2</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
