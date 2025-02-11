@@ -62,7 +62,14 @@ public class ProcessPluginApiClassLoaderFactory implements InitializingBean
 
 		try
 		{
-			return Files.list(apiClassPathDirectory).filter(p -> p.getFileName().toString().endsWith(".jar")).toList();
+			List<Path> files = Files.list(apiClassPathDirectory)
+					.filter(p -> p.getFileName().toString().endsWith(".jar")).toList();
+
+			if (files.isEmpty())
+				throw new IllegalArgumentException("No jar files found for API v" + apiVersion + " class-path at "
+						+ apiClassPathDirectory.toAbsolutePath().normalize().toString());
+
+			return files;
 		}
 		catch (IOException e)
 		{
