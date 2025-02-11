@@ -68,7 +68,7 @@
 				<executions>
 					<execution>
 						<id>copy-api-v2-dependencies-to-docker</id>
-						<phase>install</phase>
+						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
