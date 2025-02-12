@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -500,40 +498,49 @@ public class PropertiesConfig implements InitializingBean
 
 	public Map<Integer, Path> getApiAllowedBpeClasses()
 	{
-		return apiAllowedBpeClasses.entrySet().stream().filter(hasVersionKeyAndNotBlankValue())
-				.collect(Collectors.toMap(toVersion(), toPath()));
+		return apiAllowedBpeClasses.entrySet().stream().filter(this::hasVersionKeyAndNotBlankValue)
+				.collect(Collectors.toMap(this::toVersion, this::toPath));
 	}
 
 	public Map<Integer, Path> getApiAllowedBpeResources()
 	{
-		return apiAllowedBpeResources.entrySet().stream().filter(hasVersionKeyAndNotBlankValue())
-				.collect(Collectors.toMap(toVersion(), toPath()));
+		return apiAllowedBpeResources.entrySet().stream().filter(this::hasVersionKeyAndNotBlankValue)
+				.collect(Collectors.toMap(this::toVersion, this::toPath));
 	}
 
 	public Map<Integer, Path> getApiResourcesWithPriority()
 	{
-		return apiResourcesWithPriority.entrySet().stream().filter(hasVersionKeyAndNotBlankValue())
-				.collect(Collectors.toMap(toVersion(), toPath()));
+		return apiResourcesWithPriority.entrySet().stream().filter(this::hasVersionKeyAndNotBlankValue)
+				.collect(Collectors.toMap(this::toVersion, this::toPath));
 	}
 
-	private Predicate<Entry<String, String>> hasVersionKeyAndNotBlankValue()
+	private boolean hasVersionKeyAndNotBlankValue(Entry<String, String> entry)
 	{
-		return e -> API_VERSION_PATTERN.matcher(e.getKey()).matches() && e.getValue() != null
-				&& !e.getValue().isBlank();
+		return toVersion(entry) > 0 && toPath(entry) != null;
 	}
 
-	private Function<Entry<String, String>, Integer> toVersion()
+	private int toVersion(Entry<String, String> entry)
 	{
-		return e ->
+		if (entry == null || entry.getKey() == null || entry.getKey().isBlank())
+			return Integer.MIN_VALUE;
+
+		try
 		{
-			Matcher matcher = API_VERSION_PATTERN.matcher(e.getKey());
+			Matcher matcher = API_VERSION_PATTERN.matcher(entry.getKey());
 			return matcher.matches() ? Integer.parseInt(matcher.group(1)) : Integer.MIN_VALUE;
-		};
+		}
+		catch (NumberFormatException e)
+		{
+			return Integer.MIN_VALUE;
+		}
 	}
 
-	private Function<Entry<String, String>, Path> toPath()
+	private Path toPath(Entry<String, String> entry)
 	{
-		return e -> Paths.get(e.getValue());
+		if (entry == null || entry.getValue() == null || entry.getValue().isBlank())
+			return null;
+		else
+			return Paths.get(entry.getValue());
 	}
 
 	public List<String> getProcessExcluded()
