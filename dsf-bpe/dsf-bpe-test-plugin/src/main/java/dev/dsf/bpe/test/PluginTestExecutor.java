@@ -66,119 +66,112 @@ public final class PluginTestExecutor
 		updateStartTask.run();
 	}
 
-	public static void isNotNull(Object test)
+	public static void expectNotNull(Object actual)
 	{
-		if (test == null)
+		if (actual == null)
 			throw new TestAssertException("Object is null, expected not null");
 	}
 
-	public static void isNull(Object test)
+	public static void expectNull(Object actual)
 	{
-		if (test != null)
-			throw new TestAssertException("Object is not null, expected null");
+		if (actual != null)
+			throw new TestAssertException(actual.getClass().getSimpleName() + " is not null, expected null");
 	}
 
-	public static void isTrue(boolean test)
+	public static void expectTrue(boolean actual)
 	{
-		if (!test)
+		if (!actual)
 			throw new TestAssertException("Boolean value is false, expected true");
 	}
 
-	public static void isFalse(boolean test)
+	public static void expectFalse(boolean actual)
 	{
-		if (test)
+		if (actual)
 			throw new TestAssertException("Boolean value is true, expected false");
 	}
 
-	public static void isSame(Object expected, Object test)
+	public static void expectSame(Object expected, Object actual)
 	{
-		if (!Objects.equals(expected, test))
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Objects.toString(expected) + ", actual: " + Objects.toString(test) + "]");
+		if (!Objects.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("Object", Objects.toString(expected), Objects.toString(actual));
 	}
 
-	public static void isSame(byte expected, byte test)
+	public static void expectSame(byte expected, byte actual)
 	{
-		if (expected != test)
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Objects.toString(expected) + ", actual: " + Objects.toString(test) + "]");
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("byte", Objects.toString(expected), Objects.toString(actual));
 	}
 
-	public static void isSame(int expected, int test)
+	public static void expectSame(int expected, int actual)
 	{
-		if (expected != test)
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Objects.toString(expected) + ", actual: " + Objects.toString(test) + "]");
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("int", Objects.toString(expected), Objects.toString(actual));
 	}
 
-	public static void isSame(long expected, long test)
+	public static void expectSame(long expected, long actual)
 	{
-		if (expected != test)
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Objects.toString(expected) + ", actual: " + Objects.toString(test) + "]");
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("long", Objects.toString(expected), Objects.toString(actual));
 	}
 
-	public static void isSame(float expected, float test)
+	public static void expectSame(float expected, float actual)
 	{
-		if (expected != test)
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Objects.toString(expected) + ", actual: " + Objects.toString(test) + "]");
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("float", Objects.toString(expected), Objects.toString(actual));
 	}
 
-	public static void isSame(double expected, double test)
+	public static void expectSame(double expected, double actual)
 	{
-		if (expected != test)
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Objects.toString(expected) + ", actual: " + Objects.toString(test) + "]");
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("double", Objects.toString(expected), Objects.toString(actual));
 	}
 
-	public static void isSame(char expected, char test)
+	public static void expectSame(char expected, char actual)
 	{
-		if (expected != test)
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Objects.toString(expected) + ", actual: " + Objects.toString(test) + "]");
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("char", Objects.toString(expected), Objects.toString(actual));
 	}
 
-	public static void isSame(byte[] expected, byte[] test)
+	public static void expectSame(byte[] expected, byte[] actual)
 	{
-		if (!Arrays.equals(expected, test))
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Arrays.toString(expected) + ", actual: " + Arrays.toString(test) + "]");
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("byte[]", Arrays.toString(expected), Arrays.toString(actual));
 	}
 
-	public static void isSame(int[] expected, int[] test)
+	public static void expectSame(int[] expected, int[] actual)
 	{
-		if (!Arrays.equals(expected, test))
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Arrays.toString(expected) + ", actual: " + Arrays.toString(test) + "]");
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("int[]", Arrays.toString(expected), Arrays.toString(actual));
 	}
 
-	public static void isSame(long[] expected, long[] test)
+	public static void expectSame(long[] expected, long[] actual)
 	{
-		if (!Arrays.equals(expected, test))
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Arrays.toString(expected) + ", actual: " + Arrays.toString(test) + "]");
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("long[]", Arrays.toString(expected), Arrays.toString(actual));
 	}
 
-	public static void isSame(float[] expected, float[] test)
+	public static void expectSame(float[] expected, float[] actual)
 	{
-		if (!Arrays.equals(expected, test))
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Arrays.toString(expected) + ", actual: " + Arrays.toString(test) + "]");
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("float[]", Arrays.toString(expected), Arrays.toString(actual));
 	}
 
-	public static void isSame(double[] expected, double[] test)
+	public static void expectSame(double[] expected, double[] actual)
 	{
-		if (!Arrays.equals(expected, test))
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Arrays.toString(expected) + ", actual: " + Arrays.toString(test) + "]");
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("double[]", Arrays.toString(expected), Arrays.toString(actual));
 	}
 
-	public static void isSame(char[] expected, char[] test)
+	public static void expectSame(char[] expected, char[] actual)
 	{
-		if (!Arrays.equals(expected, test))
-			throw new TestAssertException("Tested object is not same as expected [expected: "
-					+ Arrays.toString(expected) + ", actual: " + Arrays.toString(test) + "]");
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("char[]", Arrays.toString(expected), Arrays.toString(actual));
+	}
+
+	private static TestAssertException createTestAssertExceptionNotSame(String type, String expected, String actual)
+	{
+		throw new TestAssertException(
+				"Tested " + type + " is not same as expected [expected: " + expected + ", actual: " + actual + "]");
 	}
 
 	public static void expectException(Class<?> expectedException, Runnable run)
@@ -193,8 +186,9 @@ public final class PluginTestExecutor
 		catch (Exception e)
 		{
 			if (!expectedException.isInstance(e))
-				throw new TestAssertException(
-						"Expected " + expectedException.getName() + " but caught " + e.getClass().getName());
+				throw new TestAssertException("Expected " + expectedException.getName() + " but caught "
+						+ e.getClass().getName()
+						+ (e.getMessage() != null && !e.getMessage().isBlank() ? " (" + e.getMessage() + ")" : ""));
 		}
 	}
 }

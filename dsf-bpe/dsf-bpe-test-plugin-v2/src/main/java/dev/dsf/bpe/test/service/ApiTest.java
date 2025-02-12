@@ -1,6 +1,6 @@
 package dev.dsf.bpe.test.service;
 
-import static dev.dsf.bpe.test.PluginTestExecutor.isNotNull;
+import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -31,72 +31,72 @@ public class ApiTest extends AbstractTest
 	@PluginTest
 	public void apiNotNull() throws Exception
 	{
-		isNotNull(api);
+		expectNotNull(api);
 	}
 
 	@PluginTest
 	public void apiGetEndpointProviderNotNull() throws Exception
 	{
-		isNotNull(api.getEndpointProvider());
+		expectNotNull(api.getEndpointProvider());
 	}
 
 	@PluginTest
 	public void apiGetFhirContextNotNull() throws Exception
 	{
-		isNotNull(api.getFhirContext());
+		expectNotNull(api.getFhirContext());
 	}
 
 	@PluginTest
 	public void apiGetFhirWebserviceClientProviderNotNull() throws Exception
 	{
-		isNotNull(api.getFhirWebserviceClientProvider());
+		expectNotNull(api.getFhirWebserviceClientProvider());
 	}
 
 	@PluginTest
 	public void apiGetMailServiceNotNull() throws Exception
 	{
-		isNotNull(api.getMailService());
+		expectNotNull(api.getMailService());
 	}
 
 	@PluginTest
 	public void apiGetObjectMapperNotNull() throws Exception
 	{
-		isNotNull(api.getObjectMapper());
+		expectNotNull(api.getObjectMapper());
 	}
 
 	@PluginTest
 	public void apiGetOrganizationProviderNotNull() throws Exception
 	{
-		isNotNull(api.getOrganizationProvider());
+		expectNotNull(api.getOrganizationProvider());
 	}
 
 	@PluginTest
 	public void apiGetProcessAuthorizationHelperNotNull() throws Exception
 	{
-		isNotNull(api.getProcessAuthorizationHelper());
+		expectNotNull(api.getProcessAuthorizationHelper());
 	}
 
 	@PluginTest
 	public void apiGetProxyConfigNotNull() throws Exception
 	{
-		isNotNull(api.getProxyConfig());
+		expectNotNull(api.getProxyConfig());
 	}
 
 	@PluginTest
 	public void apiGetReadAccessHelperNotNull() throws Exception
 	{
-		isNotNull(api.getReadAccessHelper());
+		expectNotNull(api.getReadAccessHelper());
 	}
 
 	@PluginTest
 	public void apiGetTaskHelperNotNull() throws Exception
 	{
-		isNotNull(api.getTaskHelper());
+		expectNotNull(api.getTaskHelper());
 	}
 
 	@PluginTest
 	public void apiGetVariablesNotNull() throws Exception
 	{
-		isNotNull(api.getVariables(execution));
+		expectNotNull(api.getVariables(execution));
 	}
 }
