@@ -24,6 +24,7 @@
       <bpmn:incoming>Flow_1bqddk1</bpmn:incoming>
       <bpmn:outgoing>Flow_14rzc0j</bpmn:outgoing>
       <bpmn:outgoing>Flow_0iy74da</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1h0pa8u</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
     <bpmn:sequenceFlow id="Flow_14rzc0j" sourceRef="Gateway_0eszi2t" targetRef="ProxyTest">
@@ -36,16 +37,39 @@
     <bpmn:exclusiveGateway id="Gateway_056f6tw">
       <bpmn:incoming>Flow_08zzudo</bpmn:incoming>
       <bpmn:incoming>Flow_1mkx5o3</bpmn:incoming>
+      <bpmn:incoming>Flow_0usx9io</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_08zzudo" sourceRef="ProxyTest" targetRef="Gateway_056f6tw" />
     <bpmn:sequenceFlow id="Flow_1mkx5o3" sourceRef="ApiTest" targetRef="Gateway_056f6tw" />
     <bpmn:sequenceFlow id="Flow_0a1kwg9" sourceRef="Gateway_056f6tw" targetRef="EndEvent" />
+    <bpmn:serviceTask id="OrganizationProviderTest" name="OrganizationProviderTest" camunda:class="dev.dsf.bpe.test.service.OrganizationProviderTest">
+      <bpmn:incoming>Flow_1h0pa8u</bpmn:incoming>
+      <bpmn:outgoing>Flow_0usx9io</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1h0pa8u" sourceRef="Gateway_0eszi2t" targetRef="OrganizationProviderTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'OrganizationProvider'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0usx9io" sourceRef="OrganizationProviderTest" targetRef="Gateway_056f6tw" />
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />
   <bpmn:message id="Message_2iq6v5e" name="proxyTest" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dsfdev_test">
+      <bpmndi:BPMNShape id="StartEvent_0x5gijn_di" bpmnElement="StartEvent">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0um3ad2_di" bpmnElement="ApiTest">
+        <dc:Bounds x="480" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_161ssjb" bpmnElement="ProxyTest">
+        <dc:Bounds x="480" y="190" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0xd0x8k_di" bpmnElement="EndEvent">
+        <dc:Bounds x="712" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1x0k0hn_di" bpmnElement="TestActivitySelector">
         <dc:Bounds x="230" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -56,24 +80,10 @@
       <bpmndi:BPMNShape id="Gateway_056f6tw_di" bpmnElement="Gateway_056f6tw" isMarkerVisible="true">
         <dc:Bounds x="625" y="95" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="EndEvent_0xd0x8k_di" bpmnElement="EndEvent">
-        <dc:Bounds x="712" y="102" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_0um3ad2_di" bpmnElement="ApiTest">
-        <dc:Bounds x="480" y="80" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_1n4vu6v" bpmnElement="OrganizationProviderTest">
+        <dc:Bounds x="480" y="300" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_161ssjb" bpmnElement="ProxyTest">
-        <dc:Bounds x="480" y="190" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="StartEvent_0x5gijn_di" bpmnElement="StartEvent">
-        <dc:Bounds x="152" y="102" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_112zq99_di" bpmnElement="Flow_112zq99">
-        <di:waypoint x="188" y="120" />
-        <di:waypoint x="230" y="120" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1bqddk1_di" bpmnElement="Flow_1bqddk1">
         <di:waypoint x="330" y="120" />
         <di:waypoint x="385" y="120" />
@@ -82,6 +92,10 @@
         <di:waypoint x="410" y="145" />
         <di:waypoint x="410" y="230" />
         <di:waypoint x="480" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_112zq99_di" bpmnElement="Flow_112zq99">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="230" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0iy74da_di" bpmnElement="Flow_0iy74da">
         <di:waypoint x="435" y="120" />
@@ -99,6 +113,16 @@
       <bpmndi:BPMNEdge id="Flow_0a1kwg9_di" bpmnElement="Flow_0a1kwg9">
         <di:waypoint x="675" y="120" />
         <di:waypoint x="712" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1h0pa8u_di" bpmnElement="Flow_1h0pa8u">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="340" />
+        <di:waypoint x="480" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0usx9io_di" bpmnElement="Flow_0usx9io">
+        <di:waypoint x="580" y="340" />
+        <di:waypoint x="650" y="340" />
+        <di:waypoint x="650" y="145" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
