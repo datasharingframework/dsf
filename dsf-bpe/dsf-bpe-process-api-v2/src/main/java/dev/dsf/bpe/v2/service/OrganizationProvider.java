@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
+import dev.dsf.bpe.v2.constants.CodeSystems.OrganizationRole;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
 
 /**
@@ -111,7 +112,7 @@ public interface OrganizationProvider
 	/**
 	 * @param parentOrganizationIdentifierValue
 	 *            may be <code>null</code>
-	 * @param memberOrganizationRole
+	 * @param memberOrganizationRoleCode
 	 *            may be <code>null</code>
 	 * @return Organizations configured as participatingOrganization for a parent {@link Organization} with the given
 	 *         <b>parentOrganizationIdentifier</b> and role equal to the given <b>memberOrganizationRole</b>, empty
@@ -120,15 +121,27 @@ public interface OrganizationProvider
 	 *         <code>null</code>
 	 * @see OrganizationIdentifier
 	 */
-	default List<Organization> getOrganizations(String parentOrganizationIdentifierValue, Coding memberOrganizationRole)
+	default List<Organization> getOrganizations(String parentOrganizationIdentifierValue,
+			String memberOrganizationRoleCode)
 	{
-		return getOrganizations(parentOrganizationIdentifierValue == null ? null
-				: OrganizationIdentifier.withValue(parentOrganizationIdentifierValue), memberOrganizationRole);
+		return getOrganizations(
+				parentOrganizationIdentifierValue == null ? null
+						: OrganizationIdentifier.withValue(parentOrganizationIdentifierValue),
+				memberOrganizationRoleCode == null ? null : OrganizationRole.withCode(memberOrganizationRoleCode));
 	}
 
 	/**
-	 * @return All {@link Organization} resources except the local {@link Organization}
+	 * @return All {@link Organization} resources except the local {@link Organization} and parent {@link Organization}
+	 *         resources
 	 * @see #getLocalOrganization()
+	 * @see #getParentOrganizations()
 	 */
 	List<Organization> getRemoteOrganizations();
+
+	/**
+	 * @return All parent {@link Organization} resources
+	 * @see #getLocalOrganization()
+	 * @see #getRemoteOrganizations()
+	 */
+	List<Organization> getParentOrganizations();
 }
