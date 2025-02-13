@@ -40,7 +40,7 @@ import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.ProcessPluginDefinition;
 import dev.dsf.bpe.v2.ProcessPluginDeploymentListener;
-import dev.dsf.bpe.v2.constants.CodeSystems;
+import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v2.constants.NamingSystems.TaskIdentifier;
 import dev.dsf.bpe.v2.variables.FhirResourceValues;
@@ -142,21 +142,16 @@ public class ProcessPluginImpl extends AbstractProcessPlugin implements ProcessP
 						})
 						: Optional.empty();
 
-		Predicate<Task> hasTaskInputMessageName = t -> t
-				.getInput().stream().filter(
-						i -> i.getType().getCoding().stream()
-								.anyMatch(c -> CodeSystems.BpmnMessage.URL.equals(c.getSystem())
-										&& CodeSystems.BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
-				.count() == 1;
+		Predicate<Task> hasTaskInputMessageName = t -> t.getInput().stream()
+				.filter(i -> i.getType().getCoding().stream().anyMatch(BpmnMessage::isMssageName)).count() == 1;
 
 		return new ProcessPluginFhirConfig<>(ActivityDefinition.class, CodeSystem.class, Library.class, Measure.class,
 				NamingSystem.class, Questionnaire.class, StructureDefinition.class, Task.class, ValueSet.class,
-				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), CodeSystems.BpmnMessage.URL,
-				CodeSystems.BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName,
-				hasMetadataResourceUrl, hasMetadataResourceVersion, getMetadataResourceVersion,
-				getActivityDefinitionUrl, NamingSystem::hasName, getTaskInstantiatesCanonical, getTaskIdentifierValue,
-				isTaskStatusDraft, getRequester, getRecipient, Task::hasInput, hasTaskInputMessageName,
-				Task::hasOutput);
+				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), BpmnMessage.SYSTEM,
+				BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName, hasMetadataResourceUrl,
+				hasMetadataResourceVersion, getMetadataResourceVersion, getActivityDefinitionUrl, NamingSystem::hasName,
+				getTaskInstantiatesCanonical, getTaskIdentifierValue, isTaskStatusDraft, getRequester, getRecipient,
+				Task::hasInput, hasTaskInputMessageName, Task::hasOutput);
 	}
 
 	private IParser newXmlParser()

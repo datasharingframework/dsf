@@ -41,7 +41,7 @@ import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
 import dev.dsf.bpe.v1.ProcessPluginDeploymentStateListener;
-import dev.dsf.bpe.v1.constants.CodeSystems;
+import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
 import dev.dsf.bpe.v1.variables.FhirResourceValues;
@@ -143,21 +143,18 @@ public class ProcessPluginImpl extends AbstractProcessPlugin implements ProcessP
 						})
 						: Optional.empty();
 
-		Predicate<Task> hasTaskInputMessageName = t -> t
-				.getInput().stream().filter(
-						i -> i.getType().getCoding().stream()
-								.anyMatch(c -> CodeSystems.BpmnMessage.URL.equals(c.getSystem())
-										&& CodeSystems.BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
+		Predicate<Task> hasTaskInputMessageName = t -> t.getInput().stream()
+				.filter(i -> i.getType().getCoding().stream().anyMatch(c -> BpmnMessage.URL.equals(c.getSystem())
+						&& BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
 				.count() == 1;
 
 		return new ProcessPluginFhirConfig<>(ActivityDefinition.class, CodeSystem.class, Library.class, Measure.class,
 				NamingSystem.class, Questionnaire.class, StructureDefinition.class, Task.class, ValueSet.class,
-				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), CodeSystems.BpmnMessage.URL,
-				CodeSystems.BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName,
-				hasMetadataResourceUrl, hasMetadataResourceVersion, getMetadataResourceVersion,
-				getActivityDefinitionUrl, NamingSystem::hasName, getTaskInstantiatesCanonical, getTaskIdentifierValue,
-				isTaskStatusDraft, getRequester, getRecipient, Task::hasInput, hasTaskInputMessageName,
-				Task::hasOutput);
+				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), BpmnMessage.URL,
+				BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName, hasMetadataResourceUrl,
+				hasMetadataResourceVersion, getMetadataResourceVersion, getActivityDefinitionUrl, NamingSystem::hasName,
+				getTaskInstantiatesCanonical, getTaskIdentifierValue, isTaskStatusDraft, getRequester, getRecipient,
+				Task::hasInput, hasTaskInputMessageName, Task::hasOutput);
 	}
 
 	private IParser newXmlParser()
