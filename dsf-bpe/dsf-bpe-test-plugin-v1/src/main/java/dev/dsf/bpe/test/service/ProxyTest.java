@@ -17,19 +17,13 @@ public class ProxyTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void testGetProxyConfigNotNull() throws Exception
-	{
-		expectNotNull(api.getProxyConfig());
-	}
-
-	@PluginTest
-	public void testGetProxyConfigProxyEnabled() throws Exception
+	public void isEnabled() throws Exception
 	{
 		expectTrue(api.getProxyConfig().isEnabled());
 	}
 
 	@PluginTest
-	public void testGetNoProxyUrls() throws Exception
+	public void getNoProxyUrls() throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getNoProxyUrls());
 		expectSame(2, api.getProxyConfig().getNoProxyUrls().size());
@@ -38,28 +32,28 @@ public class ProxyTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void testGetPassword() throws Exception
+	public void getPassword() throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getPassword());
 		expectSame("proxy_password".toCharArray(), api.getProxyConfig().getPassword());
 	}
 
 	@PluginTest
-	public void testGetUrl() throws Exception
+	public void getUrl() throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getUrl());
 		expectSame("http://proxy:8080", api.getProxyConfig().getUrl());
 	}
 
 	@PluginTest
-	public void testGetUsername() throws Exception
+	public void getUsername() throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getUsername());
 		expectSame("proxy_username", api.getProxyConfig().getUsername());
 	}
 
 	@PluginTest
-	public void testIsNotProxyUrl() throws Exception
+	public void isNotProxyUrl() throws Exception
 	{
 		expectTrue(api.getProxyConfig().isNoProxyUrl("https://localhost"));
 		expectTrue(api.getProxyConfig().isNoProxyUrl("http://localhost"));

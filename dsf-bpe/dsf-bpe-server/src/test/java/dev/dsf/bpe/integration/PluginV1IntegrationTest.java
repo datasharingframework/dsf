@@ -29,4 +29,10 @@ public class PluginV1IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("ProxyTest"));
 	}
+
+	@Test
+	public void startOrganizationProviderTestProcess() throws Exception
+	{
+		executePluginTest(createTestTask("OrganizationProvider"));
+	}
 }

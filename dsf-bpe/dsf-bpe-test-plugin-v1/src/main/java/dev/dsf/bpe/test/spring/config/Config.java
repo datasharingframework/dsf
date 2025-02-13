@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import dev.dsf.bpe.test.service.ApiTest;
+import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
 import dev.dsf.bpe.v1.ProcessPluginApi;
@@ -36,5 +37,12 @@ public class Config
 	public ApiTest apiTest()
 	{
 		return new ApiTest(api);
+	}
+
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public OrganizationProviderTest organizationProviderTest()
+	{
+		return new OrganizationProviderTest(api);
 	}
 }
