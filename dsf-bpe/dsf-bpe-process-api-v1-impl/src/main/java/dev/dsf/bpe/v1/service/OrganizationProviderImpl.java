@@ -1,6 +1,5 @@
 package dev.dsf.bpe.v1.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,9 +29,8 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 	public Optional<Organization> getLocalOrganization()
 	{
 		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
-				Map.of("status", Collections.singletonList("active"), "address",
-						Collections.singletonList(localEndpointAddress), "_include",
-						Collections.singletonList("Endpoint:organization")));
+				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress), "_include",
+						List.of("Endpoint:organization")));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 2
 				|| resultBundle.getEntry().get(0).getResource() == null
@@ -40,12 +38,12 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 				|| resultBundle.getEntry().get(1).getResource() == null
 				|| !(resultBundle.getEntry().get(1).getResource() instanceof Organization))
 		{
-			logger.warn("No active (or more than one) Endpoint found for address '{}'", localEndpointAddress);
+			logger.warn("No active (or more than one) endpoint found for address '{}'", localEndpointAddress);
 			return Optional.empty();
 		}
 		else if (getActiveOrganizationFromIncludes(resultBundle).count() != 1)
 		{
-			logger.warn("No active (or more than one) Organization found by active Endpoint with address '{}'",
+			logger.warn("No active (or more than one) organization found by active endpoint with address '{}'",
 					localEndpointAddress);
 			return Optional.empty();
 		}
@@ -73,14 +71,13 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 		String organizationIdSp = toSearchParameter(organizationIdentifier);
 
 		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
-				Map.of("active", Collections.singletonList("true"), "identifier",
-						Collections.singletonList(organizationIdSp)));
+				Map.of("active", List.of("true"), "identifier", List.of(organizationIdSp)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1
 				|| resultBundle.getEntryFirstRep().getResource() == null
 				|| !(resultBundle.getEntryFirstRep().getResource() instanceof Organization))
 		{
-			logger.warn("No active (or more than one) Organization found for identifier '{}'", organizationIdSp);
+			logger.warn("No active (or more than one) organization found for identifier '{}'", organizationIdSp);
 			return Optional.empty();
 		}
 
@@ -92,15 +89,15 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 	{
 		if (parentOrganizationIdentifier == null)
 		{
-			logger.debug("Parent organiztion identifier is null");
-			return Collections.emptyList();
+			logger.debug("Parent organization identifier is null");
+			return List.of();
 		}
 
 		String parentOrganizationIdSp = toSearchParameter(parentOrganizationIdentifier);
 
-		Map<String, List<String>> parameters = Map.of("active", Collections.singletonList("true"),
-				"primary-organization:identifier", Collections.singletonList(parentOrganizationIdSp), "_include",
-				Collections.singletonList("OrganizationAffiliation:participating-organization"));
+		Map<String, List<String>> parameters = Map.of("active", List.of("true"), "primary-organization:identifier",
+				List.of(parentOrganizationIdSp), "_include",
+				List.of("OrganizationAffiliation:participating-organization"));
 
 		return search(OrganizationAffiliation.class, parameters, SearchEntryMode.INCLUDE, Organization.class,
 				Organization::getActive);
@@ -111,22 +108,21 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 	{
 		if (parentOrganizationIdentifier == null)
 		{
-			logger.debug("Parent organiztion identifier is null");
-			return Collections.emptyList();
+			logger.debug("Parent organization identifier is null");
+			return List.of();
 		}
 		else if (memberOrganizationRole == null)
 		{
-			logger.debug("Member organiztion role is null");
-			return Collections.emptyList();
+			logger.debug("Member organization role is null");
+			return List.of();
 		}
 
 		String parentOrganizationIdSp = toSearchParameter(parentOrganizationIdentifier);
 		String memberOrganizationRoleSp = toSearchParameter(memberOrganizationRole);
 
-		Map<String, List<String>> parameters = Map.of("active", Collections.singletonList("true"),
-				"primary-organization:identifier", Collections.singletonList(parentOrganizationIdSp), "role",
-				Collections.singletonList(memberOrganizationRoleSp), "_include",
-				Collections.singletonList("OrganizationAffiliation:participating-organization"));
+		Map<String, List<String>> parameters = Map.of("active", List.of("true"), "primary-organization:identifier",
+				List.of(parentOrganizationIdSp), "role", List.of(memberOrganizationRoleSp), "_include",
+				List.of("OrganizationAffiliation:participating-organization"));
 
 		return search(OrganizationAffiliation.class, parameters, SearchEntryMode.INCLUDE, Organization.class,
 				Organization::getActive);
@@ -139,12 +135,12 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 
 		if (localOrganizationIdentifier.isEmpty())
 		{
-			logger.debug("Local organiztion identifier unknown");
-			return Collections.emptyList();
+			logger.debug("Local organization identifier unknown");
+			return List.of();
 		}
 
-		Map<String, List<String>> searchParameters = Map.of("active", Collections.singletonList("true"),
-				"identifier:not", Collections.singletonList(toSearchParameter(localOrganizationIdentifier.get())));
+		Map<String, List<String>> searchParameters = Map.of("active", List.of("true"), "identifier:not",
+				List.of(toSearchParameter(localOrganizationIdentifier.get())));
 		return search(Organization.class, searchParameters, SearchEntryMode.MATCH, Organization.class, o -> true);
 	}
 }
