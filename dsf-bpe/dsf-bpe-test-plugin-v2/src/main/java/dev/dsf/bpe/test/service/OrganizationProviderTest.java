@@ -13,17 +13,24 @@ import org.hl7.fhir.r4.model.Organization;
 
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.constants.CodeSystems.OrganizationRole;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
 
 public class OrganizationProviderTest extends AbstractTest
 {
-	private static final String LOCAL_ORGANIZATION_IDENTIFIER_VALUE = "Test_Organization";
-	private static final Identifier LOCAL_ORGANIZATION_IDENTIFIER = OrganizationIdentifier
-			.withValue(LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
-	private static final String PARENT_ORGANIZATION_IDENTIFIER_VALUE = "Parent_Organization";
-	private static final Identifier PARENT_ORGANIZATION_IDENTIFIER = OrganizationIdentifier
-			.withValue(PARENT_ORGANIZATION_IDENTIFIER_VALUE);
-	private static final String EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE = "External_Test_Organization";
+	private static final String ORGANIZATION_IDENTIFIER_LOCAL_VALUE = "Test_Organization";
+	private static final Identifier ORGANIZATION_IDENTIFIER_LOCAL = OrganizationIdentifier
+			.withValue(ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
+	private static final String ORGANIZATION_IDENTIFIER_PARENT_VALUE = "Parent_Organization";
+	private static final Identifier ORGANIZATION_IDENTIFIER_PARENT = OrganizationIdentifier
+			.withValue(ORGANIZATION_IDENTIFIER_PARENT_VALUE);
+	private static final String ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE = "External_Test_Organization";
+
+	private static final String ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE = "not-existing-identifier-value";
+	private static final Identifier ORGANIZATION_IDENTIFIER_NOT_EXISTING = OrganizationIdentifier
+			.withValue(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE);
+	private static final String MEMBER_ROLE_NOT_EXISTING_CODE = "not-existing-role";
+	private static final Coding MEMBER_ROLE_NOT_EXISTING = OrganizationRole.withCode(MEMBER_ROLE_NOT_EXISTING_CODE);
 
 	public OrganizationProviderTest(ProcessPluginApi api)
 	{
@@ -56,7 +63,7 @@ public class OrganizationProviderTest extends AbstractTest
 	public void getLocalOrganization() throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider().getLocalOrganization();
-		testOrganization(oO, LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		testOrganization(oO, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 	}
 
 	@PluginTest
@@ -65,7 +72,7 @@ public class OrganizationProviderTest extends AbstractTest
 		expectNotNull(api.getOrganizationProvider().getLocalOrganizationIdentifier());
 		expectTrue(api.getOrganizationProvider().getLocalOrganizationIdentifier().isPresent());
 		expectNotNull(api.getOrganizationProvider().getLocalOrganizationIdentifier().get());
-		expectSame(LOCAL_ORGANIZATION_IDENTIFIER_VALUE,
+		expectSame(ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				api.getOrganizationProvider().getLocalOrganizationIdentifier().get().getValue());
 	}
 
@@ -74,28 +81,80 @@ public class OrganizationProviderTest extends AbstractTest
 	{
 		expectNotNull(api.getOrganizationProvider().getLocalOrganizationIdentifierValue());
 		expectTrue(api.getOrganizationProvider().getLocalOrganizationIdentifierValue().isPresent());
-		expectSame(LOCAL_ORGANIZATION_IDENTIFIER_VALUE,
+		expectSame(ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				api.getOrganizationProvider().getLocalOrganizationIdentifierValue().get());
+	}
+
+	@PluginTest
+	public void getOrganizationByIdentifierNull() throws Exception
+	{
+		Optional<Organization> oO = api.getOrganizationProvider().getOrganization((Identifier) null);
+		expectNotNull(oO);
+		expectTrue(oO.isEmpty());
+	}
+
+	@PluginTest
+	public void getOrganizationByIdentifierNotExisting() throws Exception
+	{
+		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(ORGANIZATION_IDENTIFIER_NOT_EXISTING);
+		expectNotNull(oO);
+		expectTrue(oO.isEmpty());
 	}
 
 	@PluginTest
 	public void getOrganizationByIdentifier() throws Exception
 	{
-		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(LOCAL_ORGANIZATION_IDENTIFIER);
-		testOrganization(oO, LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(ORGANIZATION_IDENTIFIER_LOCAL);
+		testOrganization(oO, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
+	}
+
+	@PluginTest
+	public void getOrganizationByIdentifierValueNull() throws Exception
+	{
+		Optional<Organization> oO = api.getOrganizationProvider().getOrganization((String) null);
+		expectNotNull(oO);
+		expectTrue(oO.isEmpty());
+	}
+
+	@PluginTest
+	public void getOrganizationByIdentifierValueNotExisting() throws Exception
+	{
+		Optional<Organization> oO = api.getOrganizationProvider()
+				.getOrganization(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE);
+		expectNotNull(oO);
+		expectTrue(oO.isEmpty());
 	}
 
 	@PluginTest
 	public void getOrganizationByIdentifierValue() throws Exception
 	{
-		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
-		testOrganization(oO, LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
+		testOrganization(oO, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierNull() throws Exception
+	{
+		getOrganizationsByParentIdentifierExpectEmpty(null);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierNotExisting() throws Exception
+	{
+		getOrganizationsByParentIdentifierExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING);
+	}
+
+	private void getOrganizationsByParentIdentifierExpectEmpty(Identifier parentIdentifier)
+	{
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifier);
+		expectNotNull(os);
+		expectTrue(os.isEmpty());
 	}
 
 	@PluginTest
 	public void getOrganizationsByParentIdentifier() throws Exception
 	{
-		List<Organization> os = api.getOrganizationProvider().getOrganizations(PARENT_ORGANIZATION_IDENTIFIER);
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(ORGANIZATION_IDENTIFIER_PARENT);
 		expectNotNull(os);
 		expectSame(2, os.size());
 
@@ -103,19 +162,38 @@ public class OrganizationProviderTest extends AbstractTest
 				.map(OrganizationIdentifier::findFirst).flatMap(Optional::stream).map(Identifier::getValue).toList();
 		expectSame(2, memberIdentifiers.size());
 
-		int localOrgIndex = memberIdentifiers.indexOf(LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		int localOrgIndex = memberIdentifiers.indexOf(ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 		expectTrue(localOrgIndex >= 0);
-		testOrganization(os.get(localOrgIndex), LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		testOrganization(os.get(localOrgIndex), ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 
-		int externalOrgIndex = memberIdentifiers.indexOf(EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE);
+		int externalOrgIndex = memberIdentifiers.indexOf(ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
 		expectTrue(externalOrgIndex >= 0);
-		testOrganization(os.get(externalOrgIndex), EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE);
+		testOrganization(os.get(externalOrgIndex), ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueNull() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueExpectEmpty(null);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueNotExisting() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE);
+	}
+
+	private void getOrganizationsByParentIdentifierValueExpectEmpty(String parentIdentifierValue)
+	{
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifierValue);
+		expectNotNull(os);
+		expectTrue(os.isEmpty());
 	}
 
 	@PluginTest
 	public void getOrganizationsByParentIdentifierValue() throws Exception
 	{
-		List<Organization> os = api.getOrganizationProvider().getOrganizations(PARENT_ORGANIZATION_IDENTIFIER_VALUE);
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(ORGANIZATION_IDENTIFIER_PARENT_VALUE);
 		expectNotNull(os);
 		expectSame(2, os.size());
 
@@ -123,45 +201,153 @@ public class OrganizationProviderTest extends AbstractTest
 				.map(OrganizationIdentifier::findFirst).flatMap(Optional::stream).map(Identifier::getValue).toList();
 		expectSame(2, memberIdentifiers.size());
 
-		int localOrgIndex = memberIdentifiers.indexOf(LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		int localOrgIndex = memberIdentifiers.indexOf(ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 		expectTrue(localOrgIndex >= 0);
-		testOrganization(os.get(localOrgIndex), LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		testOrganization(os.get(localOrgIndex), ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 
-		int externalOrgIndex = memberIdentifiers.indexOf(EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE);
+		int externalOrgIndex = memberIdentifiers.indexOf(ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
 		expectTrue(externalOrgIndex >= 0);
-		testOrganization(os.get(externalOrgIndex), EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE);
+		testOrganization(os.get(externalOrgIndex), ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndRole() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNull1() throws Exception
 	{
-		List<Organization> lO = api.getOrganizationProvider().getOrganizations(PARENT_ORGANIZATION_IDENTIFIER,
-				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DIC", null));
-		expectNotNull(lO);
-		expectSame(1, lO.size());
-		testOrganization(lO.get(0), LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
-
-		List<Organization> eO = api.getOrganizationProvider().getOrganizations(PARENT_ORGANIZATION_IDENTIFIER,
-				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "TTP", null));
-		expectNotNull(eO);
-		expectSame(1, eO.size());
-		testOrganization(eO.get(0), EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE);
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(null, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndRole() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNull2() throws Exception
 	{
-		List<Organization> lO = api.getOrganizationProvider().getOrganizations(PARENT_ORGANIZATION_IDENTIFIER_VALUE,
-				"DIC");
-		expectNotNull(lO);
-		expectSame(1, lO.size());
-		testOrganization(lO.get(0), LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT, null);
+	}
 
-		List<Organization> eO = api.getOrganizationProvider().getOrganizations(PARENT_ORGANIZATION_IDENTIFIER_VALUE,
-				"TTP");
-		expectNotNull(eO);
-		expectSame(1, eO.size());
-		testOrganization(eO.get(0), EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE);
+	@PluginTest
+	public void getOrganizationsByParentIdentifierAndMemberRoleNull3() throws Exception
+	{
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(null, null);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting1() throws Exception
+	{
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
+				OrganizationRole.dic());
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting2() throws Exception
+	{
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+				MEMBER_ROLE_NOT_EXISTING);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting3() throws Exception
+	{
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
+				MEMBER_ROLE_NOT_EXISTING);
+	}
+
+	private void getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(Identifier parentIdentifier,
+			Coding memberRole)
+	{
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifier, memberRole);
+		expectNotNull(os);
+		expectTrue(os.isEmpty());
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierAndMemberRoleDic() throws Exception
+	{
+		getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+				OrganizationRole.dic(), ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierAndMemberRoleTtp() throws Exception
+	{
+		getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+				OrganizationRole.ttp(), ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
+	}
+
+	private void getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(Identifier parentIdentifier,
+			Coding memberRole, String expectedOrganizationIdentifierValue)
+	{
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifier, memberRole);
+		expectNotNull(os);
+		expectSame(1, os.size());
+		testOrganization(os.get(0), expectedOrganizationIdentifierValue);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull1() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(null, OrganizationRole.Codes.DIC);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull2() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE, null);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull3() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(null, null);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting1() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
+				OrganizationRole.Codes.DIC);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting2() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+				MEMBER_ROLE_NOT_EXISTING_CODE);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting3() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
+				MEMBER_ROLE_NOT_EXISTING_CODE);
+	}
+
+	private void getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(String parentIdentifierValue,
+			String memberRoleCode)
+	{
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifierValue, memberRoleCode);
+		expectNotNull(os);
+		expectTrue(os.isEmpty());
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeDic() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+				OrganizationRole.Codes.DIC, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
+	}
+
+	@PluginTest
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeTtp() throws Exception
+	{
+		getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+				OrganizationRole.Codes.TTP, ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
+	}
+
+	private void getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(String parentIdentifierValue,
+			String memberRoleCode, String expectedOrganizationIdentifierValue)
+	{
+		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifierValue, memberRoleCode);
+		expectNotNull(os);
+		expectSame(1, os.size());
+		testOrganization(os.get(0), expectedOrganizationIdentifierValue);
 	}
 
 	@PluginTest
@@ -169,7 +355,7 @@ public class OrganizationProviderTest extends AbstractTest
 	{
 		List<Organization> os = api.getOrganizationProvider().getRemoteOrganizations();
 		expectSame(1, os.size());
-		testOrganization(os.get(0), EXTERNAL_ORGANIZATION_IDENTIFIER_VALUE);
+		testOrganization(os.get(0), ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
 	}
 
 	@PluginTest
@@ -177,6 +363,6 @@ public class OrganizationProviderTest extends AbstractTest
 	{
 		List<Organization> os = api.getOrganizationProvider().getParentOrganizations();
 		expectSame(1, os.size());
-		testOrganization(os.get(0), PARENT_ORGANIZATION_IDENTIFIER_VALUE);
+		testOrganization(os.get(0), ORGANIZATION_IDENTIFIER_PARENT_VALUE);
 	}
 }

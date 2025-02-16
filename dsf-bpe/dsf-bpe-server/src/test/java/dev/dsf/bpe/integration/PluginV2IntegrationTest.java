@@ -19,20 +19,26 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
-	public void startTestProcess() throws Exception
+	public void startApiTestProcess() throws Exception
 	{
-		executePluginTest(createTestTask("ApiTest"));
+		executePluginTest(createTestTask("Api"));
 	}
 
 	@Test
 	public void startProxyTestProcess() throws Exception
 	{
-		executePluginTest(createTestTask("ProxyTest"));
+		executePluginTest(createTestTask("Proxy"));
 	}
 
 	@Test
 	public void startOrganizationProviderTestProcess() throws Exception
 	{
 		executePluginTest(createTestTask("OrganizationProvider"));
+	}
+
+	@Test
+	public void startEndpointProviderTestProcess() throws Exception
+	{
+		executePluginTest(createTestTask("EndpointProvider"));
 	}
 }
