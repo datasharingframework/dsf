@@ -62,7 +62,7 @@ public final class CodeSystems
 			return new Coding(SYSTEM, Codes.ERROR, null);
 		}
 
-		public static final boolean isMssageName(Coding coding)
+		public static final boolean isMessageName(Coding coding)
 		{
 			return isSame(SYSTEM, Codes.MESSAGE_NAME, coding);
 		}

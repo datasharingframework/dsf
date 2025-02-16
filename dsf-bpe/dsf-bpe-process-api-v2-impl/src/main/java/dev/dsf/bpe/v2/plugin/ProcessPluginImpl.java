@@ -143,7 +143,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin implements ProcessP
 						: Optional.empty();
 
 		Predicate<Task> hasTaskInputMessageName = t -> t.getInput().stream()
-				.filter(i -> i.getType().getCoding().stream().anyMatch(BpmnMessage::isMssageName)).count() == 1;
+				.filter(i -> i.getType().getCoding().stream().anyMatch(BpmnMessage::isMessageName)).count() == 1;
 
 		return new ProcessPluginFhirConfig<>(ActivityDefinition.class, CodeSystem.class, Library.class, Measure.class,
 				NamingSystem.class, Questionnaire.class, StructureDefinition.class, Task.class, ValueSet.class,
