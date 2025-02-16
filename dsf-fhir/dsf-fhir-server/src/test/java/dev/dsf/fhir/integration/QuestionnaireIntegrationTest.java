@@ -4,7 +4,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -34,7 +34,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 		questionnaireDao.create(questionnaire);
 
 		Bundle searchBundle = getWebserviceClient().search(Questionnaire.class,
-				Map.of("date", Collections.singletonList("le2022-02-01")));
+				Map.of("date", List.of("le2022-02-01")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -55,7 +55,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 		questionnaireDao.create(questionnaire);
 
 		Bundle searchBundle = getWebserviceClient().search(Questionnaire.class,
-				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
+				Map.of("identifier", List.of(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -77,7 +77,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 		questionnaireDao.create(questionnaire);
 
 		Bundle searchBundle = getWebserviceClient().search(Questionnaire.class,
-				Map.of("status", Collections.singletonList(QUESTIONNAIRE_STATUS.toCode())));
+				Map.of("status", List.of(QUESTIONNAIRE_STATUS.toCode())));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -98,8 +98,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 		questionnaireDao.create(questionnaire);
 
 		Bundle searchBundle = getWebserviceClient().search(Questionnaire.class,
-				Map.of("url", Collections.singletonList(QUESTIONNAIRE_URL), "version",
-						Collections.singletonList(QUESTIONNAIRE_VERSION)));
+				Map.of("url", List.of(QUESTIONNAIRE_URL), "version", List.of(QUESTIONNAIRE_VERSION)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());

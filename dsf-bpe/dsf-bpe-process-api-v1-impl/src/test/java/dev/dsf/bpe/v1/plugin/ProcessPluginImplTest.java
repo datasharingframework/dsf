@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -207,8 +206,7 @@ public class ProcessPluginImplTest
 	@Test
 	public void testInitializeAndValidateResourcesEmptySpringConfigBpmnAndFhirResources() throws Exception
 	{
-		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), Collections.emptyList(),
-				Collections.emptyList(), Collections.emptyMap());
+		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(), List.of(), Map.of());
 		AbstractProcessPlugin plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));

@@ -2,7 +2,6 @@ package dev.dsf.fhir.help;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -176,7 +175,7 @@ public class ParameterConverter
 
 	public Integer getFirstInt(Map<String, List<String>> queryParameters, String key)
 	{
-		List<String> listForKey = queryParameters.getOrDefault(key, Collections.emptyList());
+		List<String> listForKey = queryParameters.getOrDefault(key, List.of());
 		if (listForKey.isEmpty())
 			return null;
 		else

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +63,7 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		Measure measure = measureDao.create(createMeasure());
 
 		Bundle searchBundle = getWebserviceClient().search(Measure.class,
-				Map.of("_id", Collections.singletonList(measure.getIdElement().getIdPart()), "_include",
-						Collections.singletonList("Measure:depends-on")));
+				Map.of("_id", List.of(measure.getIdElement().getIdPart()), "_include", List.of("Measure:depends-on")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -99,8 +97,8 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
 		String measureId = measureDao.create(createMeasure()).getIdElement().getIdPart();
 
-		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class, Map.of("depends-on",
-				Collections.singletonList("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
+		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class,
+				Map.of("depends-on", List.of("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
 
 		assertNotNull(resultBundle);
 		assertEquals(1, resultBundle.getTotal());
@@ -116,7 +114,7 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		measureDao.create(createMeasure()).getIdElement().getIdPart();
 
 		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Measure.class,
-				Map.of("depends-on", Collections.singletonList("0a887526-2b9f-413a-8842-5e9252e2d7f7"))));
+				Map.of("depends-on", List.of("0a887526-2b9f-413a-8842-5e9252e2d7f7"))));
 	}
 
 	@Test
@@ -132,8 +130,8 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
 		String measureId = measureDao.create(measure).getIdElement().getIdPart();
 
-		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class, Map.of("depends-on",
-				Collections.singletonList("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
+		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class,
+				Map.of("depends-on", List.of("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
 
 		assertNotNull(resultBundle);
 		assertEquals(1, resultBundle.getTotal());

@@ -1,7 +1,6 @@
 package dev.dsf.fhir.webservice.impl;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -305,7 +304,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
+		var resources = List.of(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
 				DocumentReference.class, Endpoint.class, Group.class, HealthcareService.class, Library.class,
 				Location.class, Measure.class, MeasureReport.class, NamingSystem.class, Organization.class,
 				OrganizationAffiliation.class, Patient.class, PractitionerRole.class, Practitioner.class,
@@ -316,95 +315,93 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameter>>>();
 
 		searchParameters.put(ActivityDefinition.class,
-				Arrays.asList(ActivityDefinitionDate.class, ActivityDefinitionUrl.class,
-						ActivityDefinitionIdentifier.class, ActivityDefinitionVersion.class,
-						ActivityDefinitionName.class, ActivityDefinitionStatus.class));
+				List.of(ActivityDefinitionDate.class, ActivityDefinitionUrl.class, ActivityDefinitionIdentifier.class,
+						ActivityDefinitionVersion.class, ActivityDefinitionName.class, ActivityDefinitionStatus.class));
 
-		searchParameters.put(Binary.class, Arrays.asList(BinaryContentType.class));
+		searchParameters.put(Binary.class, List.of(BinaryContentType.class));
 
-		searchParameters.put(Bundle.class, Arrays.asList(BundleIdentifier.class));
+		searchParameters.put(Bundle.class, List.of(BundleIdentifier.class));
 
-		searchParameters.put(CodeSystem.class, Arrays.asList(CodeSystemDate.class, CodeSystemIdentifier.class,
+		searchParameters.put(CodeSystem.class, List.of(CodeSystemDate.class, CodeSystemIdentifier.class,
 				CodeSystemName.class, CodeSystemUrl.class, CodeSystemVersion.class, CodeSystemStatus.class));
 
-		searchParameters.put(DocumentReference.class, Arrays.asList(DocumentReferenceIdentifier.class));
+		searchParameters.put(DocumentReference.class, List.of(DocumentReferenceIdentifier.class));
 
-		searchParameters.put(Endpoint.class, Arrays.asList(EndpointAddress.class, EndpointIdentifier.class,
+		searchParameters.put(Endpoint.class, List.of(EndpointAddress.class, EndpointIdentifier.class,
 				EndpointName.class, EndpointOrganization.class, EndpointStatus.class));
-		revIncludeParameters.put(Endpoint.class, Arrays.asList(OrganizationEndpointRevInclude.class));
+		revIncludeParameters.put(Endpoint.class, List.of(OrganizationEndpointRevInclude.class));
 
-		searchParameters.put(Group.class, Arrays.asList(GroupIdentifier.class));
-		revIncludeParameters.put(Group.class, Arrays.asList(ResearchStudyEnrollmentRevInclude.class));
+		searchParameters.put(Group.class, List.of(GroupIdentifier.class));
+		revIncludeParameters.put(Group.class, List.of(ResearchStudyEnrollmentRevInclude.class));
 
-		searchParameters.put(HealthcareService.class, Arrays.asList(HealthcareServiceActive.class,
-				HealthcareServiceIdentifier.class, HealthcareServiceName.class));
+		searchParameters.put(HealthcareService.class,
+				List.of(HealthcareServiceActive.class, HealthcareServiceIdentifier.class, HealthcareServiceName.class));
 
-		searchParameters.put(Library.class, Arrays.asList(LibraryDate.class, LibraryIdentifier.class, LibraryName.class,
+		searchParameters.put(Library.class, List.of(LibraryDate.class, LibraryIdentifier.class, LibraryName.class,
 				LibraryStatus.class, LibraryUrl.class, LibraryVersion.class));
 
-		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class, LocationName.class));
+		searchParameters.put(Location.class, List.of(LocationIdentifier.class, LocationName.class));
 
-		searchParameters.put(Measure.class,
-				Arrays.asList(MeasureDate.class, MeasureDependsOn.class, MeasureIdentifier.class, MeasureName.class,
-						MeasureStatus.class, MeasureUrl.class, MeasureVersion.class));
+		searchParameters.put(Measure.class, List.of(MeasureDate.class, MeasureDependsOn.class, MeasureIdentifier.class,
+				MeasureName.class, MeasureStatus.class, MeasureUrl.class, MeasureVersion.class));
 
-		searchParameters.put(MeasureReport.class, Arrays.asList(MeasureReportIdentifier.class));
+		searchParameters.put(MeasureReport.class, List.of(MeasureReportIdentifier.class));
 
 		searchParameters.put(NamingSystem.class,
-				Arrays.asList(NamingSystemDate.class, NamingSystemName.class, NamingSystemStatus.class));
+				List.of(NamingSystemDate.class, NamingSystemName.class, NamingSystemStatus.class));
 
-		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
+		searchParameters.put(Organization.class, List.of(OrganizationActive.class, OrganizationEndpoint.class,
 				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));
 		revIncludeParameters.put(Organization.class,
-				Arrays.asList(EndpointOrganizationRevInclude.class,
+				List.of(EndpointOrganizationRevInclude.class,
 						OrganizationAffiliationParticipatingOrganizationRevInclude.class,
 						OrganizationAffiliationPrimaryOrganizationRevInclude.class));
 
 		searchParameters.put(OrganizationAffiliation.class,
-				Arrays.asList(OrganizationAffiliationActive.class, OrganizationAffiliationEndpoint.class,
+				List.of(OrganizationAffiliationActive.class, OrganizationAffiliationEndpoint.class,
 						OrganizationAffiliationIdentifier.class, OrganizationAffiliationParticipatingOrganization.class,
 						OrganizationAffiliationPrimaryOrganization.class, OrganizationAffiliationRole.class));
 
-		searchParameters.put(Patient.class, Arrays.asList(PatientActive.class, PatientIdentifier.class));
+		searchParameters.put(Patient.class, List.of(PatientActive.class, PatientIdentifier.class));
 
-		searchParameters.put(Practitioner.class, Arrays.asList(PractitionerActive.class, PractitionerIdentifier.class));
+		searchParameters.put(Practitioner.class, List.of(PractitionerActive.class, PractitionerIdentifier.class));
 
 		searchParameters.put(PractitionerRole.class,
-				Arrays.asList(PractitionerRoleActive.class, PractitionerRoleIdentifier.class,
+				List.of(PractitionerRoleActive.class, PractitionerRoleIdentifier.class,
 						PractitionerRoleOrganization.class, PractitionerRolePractitioner.class));
 
 		searchParameters.put(Questionnaire.class,
-				Arrays.asList(QuestionnaireDate.class, QuestionnaireIdentifier.class, QuestionnaireName.class,
+				List.of(QuestionnaireDate.class, QuestionnaireIdentifier.class, QuestionnaireName.class,
 						QuestionnaireStatus.class, QuestionnaireUrl.class, QuestionnaireVersion.class));
 
-		searchParameters.put(QuestionnaireResponse.class, Arrays.asList(QuestionnaireResponseAuthored.class,
+		searchParameters.put(QuestionnaireResponse.class, List.of(QuestionnaireResponseAuthored.class,
 				QuestionnaireResponseIdentifier.class, QuestionnaireResponseStatus.class));
 
-		searchParameters.put(ResearchStudy.class, Arrays.asList(ResearchStudyIdentifier.class,
-				ResearchStudyEnrollment.class, ResearchStudyPrincipalInvestigator.class));
+		searchParameters.put(ResearchStudy.class, List.of(ResearchStudyIdentifier.class, ResearchStudyEnrollment.class,
+				ResearchStudyPrincipalInvestigator.class));
 
 		searchParameters.put(StructureDefinition.class,
-				Arrays.asList(StructureDefinitionDate.class, StructureDefinitionIdentifier.class,
+				List.of(StructureDefinitionDate.class, StructureDefinitionIdentifier.class,
 						StructureDefinitionName.class, StructureDefinitionStatus.class, StructureDefinitionUrl.class,
 						StructureDefinitionVersion.class));
 
-		searchParameters.put(Subscription.class, Arrays.asList(SubscriptionCriteria.class, SubscriptionPayload.class,
+		searchParameters.put(Subscription.class, List.of(SubscriptionCriteria.class, SubscriptionPayload.class,
 				SubscriptionStatus.class, SubscriptionType.class));
 
-		searchParameters.put(Task.class, Arrays.asList(TaskAuthoredOn.class, TaskIdentifier.class, TaskModified.class,
+		searchParameters.put(Task.class, List.of(TaskAuthoredOn.class, TaskIdentifier.class, TaskModified.class,
 				TaskRequester.class, TaskStatus.class));
 
-		searchParameters.put(ValueSet.class, Arrays.asList(ValueSetDate.class, ValueSetIdentifier.class,
-				ValueSetName.class, ValueSetUrl.class, ValueSetVersion.class, ValueSetStatus.class));
+		searchParameters.put(ValueSet.class, List.of(ValueSetDate.class, ValueSetIdentifier.class, ValueSetName.class,
+				ValueSetUrl.class, ValueSetVersion.class, ValueSetStatus.class));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 
 		var snapshotOperation = createOperation("snapshot",
 				"http://hl7.org/fhir/OperationDefinition/StructureDefinition-snapshot",
 				"Generates a StructureDefinition instance with a snapshot, based on a differential in a specified StructureDefinition");
-		operations.put(StructureDefinition.class, Arrays.asList(snapshotOperation));
+		operations.put(StructureDefinition.class, List.of(snapshotOperation));
 
-		var standardSortableSearchParameters = Arrays.asList(ResourceId.class, ResourceLastUpdated.class,
+		var standardSortableSearchParameters = List.of(ResourceId.class, ResourceLastUpdated.class,
 				ResourceProfile.class);
 
 		Map<String, List<CanonicalType>> profileUrlsByResource = validationSupport.fetchAllStructureDefinitions()
@@ -439,7 +436,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
-			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
+			var resourceSearchParameters = searchParameters.getOrDefault(resource, List.of());
 			resourceSearchParameters.stream().map(this::createSearchParameter)
 					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
 					.forEach(r::addSearchParam);
@@ -465,7 +462,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addSearchParam(createSinceParameter());
 			r.addSearchParam(createAtParameter());
 
-			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
+			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, List.of());
 			var revIncludes = resourceRevIncludeParameters.stream()
 					.map(p -> p.getAnnotation(IncludeParameterDefinition.class)).filter(def -> def != null)
 					.collect(Collectors.toList());
@@ -481,10 +478,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 			r.getSearchParam().sort(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName));
 
-			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
+			operations.getOrDefault(resource, List.of()).forEach(r::addOperation);
 
-			r.setSupportedProfile(
-					profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(), Collections.emptyList()));
+			r.setSupportedProfile(profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(), List.of()));
 		}
 
 		return statement;

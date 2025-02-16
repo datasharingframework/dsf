@@ -1,7 +1,6 @@
 package dev.dsf.common.auth.conf;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +25,8 @@ public class RoleConfig
 	private static final String PROPERTY_DSF_ROLE = "dsf-role";
 	private static final String PROPERTY_PRACTITIONER_ROLE = "practitioner-role";
 
-	private static final List<String> PROPERTIES = Arrays.asList(PROPERTY_THUMBPRINT, PROPERTY_EMAIL,
-			PROPERTY_TOKEN_ROLE, PROPERTY_TOKEN_GROUP, PROPERTY_DSF_ROLE, PROPERTY_PRACTITIONER_ROLE);
+	private static final List<String> PROPERTIES = List.of(PROPERTY_THUMBPRINT, PROPERTY_EMAIL, PROPERTY_TOKEN_ROLE,
+			PROPERTY_TOKEN_GROUP, PROPERTY_DSF_ROLE, PROPERTY_PRACTITIONER_ROLE);
 
 	private static final String THUMBPRINT_PATTERN_STRING = "^[a-f0-9]{128}$";
 	private static final Pattern THUMBPRINT_PATTERN = Pattern.compile(THUMBPRINT_PATTERN_STRING);
@@ -290,9 +289,9 @@ public class RoleConfig
 	{
 		return switch (o)
 		{
-			case String s -> Collections.singletonList(s);
+			case String s -> List.of(s);
 			case @SuppressWarnings("rawtypes") List l -> l;
-			default -> Collections.emptyList();
+			default -> List.of();
 		};
 	}
 

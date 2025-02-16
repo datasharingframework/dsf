@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -47,7 +46,7 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 	public List<Subscription> readByStatus(Subscription.SubscriptionStatus status) throws SQLException
 	{
 		if (status == null)
-			return Collections.emptyList();
+			return List.of();
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(

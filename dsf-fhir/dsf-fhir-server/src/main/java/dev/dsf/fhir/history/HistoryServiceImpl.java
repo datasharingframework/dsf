@@ -1,7 +1,6 @@
 package dev.dsf.fhir.history;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -95,7 +94,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 
 		List<SearchQueryParameterError> errors = new ArrayList<>();
 
-		List<String> atValues = queryParameters.getOrDefault(AtParameter.PARAMETER_NAME, Collections.emptyList());
+		List<String> atValues = queryParameters.getOrDefault(AtParameter.PARAMETER_NAME, List.of());
 		atValues.stream().filter(v -> v != null && !v.isBlank()).forEach(atValue ->
 		{
 			AtParameter atParameter = new AtParameter();

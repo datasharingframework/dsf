@@ -3,7 +3,6 @@ package dev.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -146,10 +145,9 @@ public class OrganizationAffiliationAuthorizationRule
 
 	private Map<String, List<String>> queryParameters(OrganizationAffiliation newResource, String param, String value)
 	{
-		return Map.of("primary-organization", Collections.singletonList(newResource.getOrganization().getReference()),
-				"participating-organization",
-				Collections.singletonList(newResource.getParticipatingOrganization().getReference()), param,
-				Collections.singletonList(value));
+		return Map.of("primary-organization", List.of(newResource.getOrganization().getReference()),
+				"participating-organization", List.of(newResource.getParticipatingOrganization().getReference()), param,
+				List.of(value));
 	}
 
 	private boolean organizationAffiliationExists(Connection connection, Map<String, List<String>> queryParameters)

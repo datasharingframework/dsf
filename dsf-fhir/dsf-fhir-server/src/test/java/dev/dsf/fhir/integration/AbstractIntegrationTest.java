@@ -18,8 +18,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,7 +225,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel, caCertificate,
 				serverCertificateKeyStore, keyStorePassword, false);
 		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
-		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = Arrays.asList(
+		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = List.of(
 				JakartaWebSocketServletContainerInitializer.class, JerseyServletContainerInitializer.class,
 				SpringServletContainerInitializer.class);
 
@@ -389,9 +387,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static WebsocketClient getWebsocketClient()
 	{
 		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
-				Map.of("criteria", Collections.singletonList("Task?status=requested"), "status",
-						Collections.singletonList("active"), "type", Collections.singletonList("websocket"), "payload",
-						Collections.singletonList("application/fhir+json")));
+				Map.of("criteria", List.of("Task?status=requested"), "status", List.of("active"), "type",
+						List.of("websocket"), "payload", List.of("application/fhir+json")));
 
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());

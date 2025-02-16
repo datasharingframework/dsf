@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -330,7 +329,7 @@ public class PropertiesConfig implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		URL url = new URI(fhirServerBaseUrl).toURL();
-		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
+		if (!List.of("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
 					fhirServerBaseUrl);

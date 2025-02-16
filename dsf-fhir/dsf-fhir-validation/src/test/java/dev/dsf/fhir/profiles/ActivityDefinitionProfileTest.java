@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionKind;
@@ -31,7 +31,7 @@ public class ActivityDefinitionProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-activity-definition-1.0.0.xml", "dsf-extension-process-authorization-1.0.0.xml",
+			List.of("dsf-activity-definition-1.0.0.xml", "dsf-extension-process-authorization-1.0.0.xml",
 					"dsf-extension-process-authorization-practitioner-1.0.0.xml",
 					"dsf-extension-process-authorization-organization-1.0.0.xml",
 					"dsf-extension-process-authorization-organization-practitioner-1.0.0.xml",
@@ -46,9 +46,9 @@ public class ActivityDefinitionProfileTest
 					"dsf-coding-process-authorization-remote-all-1.0.0.xml",
 					"dsf-coding-process-authorization-remote-organization-1.0.0.xml",
 					"dsf-coding-process-authorization-remote-parent-organization-role-1.0.0.xml"),
-			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml",
+			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml",
 					"dsf-practitioner-role-1.0.0.xml", "dsf-process-authorization-1.0.0.xml"),
-			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml",
+			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml",
 					"dsf-practitioner-role-1.0.0.xml", "dsf-process-authorization-recipient-1.0.0.xml",
 					"dsf-process-authorization-requester-1.0.0.xml"));
 

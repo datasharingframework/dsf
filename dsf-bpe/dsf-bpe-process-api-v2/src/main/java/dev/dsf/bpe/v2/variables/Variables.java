@@ -1,7 +1,6 @@
 package dev.dsf.bpe.v2.variables;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -117,7 +116,7 @@ public interface Variables
 	 */
 	default Targets createTargets(Target... targets)
 	{
-		return createTargets(Arrays.asList(targets));
+		return createTargets(List.of(targets));
 	}
 
 	/**

@@ -20,7 +20,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -274,14 +273,12 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE)).thenReturn(Optional.empty());
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
-		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(FhirServerRole.CREATE));
+		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(FhirServerRole.CREATE));
 		when(roleConfig.getDsfRolesForThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT))
-				.thenReturn(Collections.singletonList(FhirServerRole.DELETE));
-		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE1));
+				.thenReturn(List.of(FhirServerRole.DELETE));
+		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(PRACTIONER_ROLE1));
 		when(roleConfig.getPractitionerRolesForThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE2));
+				.thenReturn(List.of(PRACTIONER_ROLE2));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { LOCAL_PRACTITIONER_CERTIFICATE });
 		assertNotNull(i);
@@ -366,23 +363,17 @@ public class IdentityProviderTest
 				Map.of("resource_access", Map.of(TOKEN_ROLE2_CLIENT, Map.of("roles", new String[] { TOKEN_ROLE2 })),
 						"groups", new String[] { TOKEN_GROUP }));
 
-		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(FhirServerRole.CREATE));
-		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE1))
-				.thenReturn(Collections.singletonList(FhirServerRole.DELETE));
+		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(FhirServerRole.CREATE));
+		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE1)).thenReturn(List.of(FhirServerRole.DELETE));
 		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE2_CLIENT + "." + TOKEN_ROLE2))
-				.thenReturn(Collections.singletonList(FhirServerRole.HISTORY));
-		when(roleConfig.getDsfRolesForTokenGroup(TOKEN_GROUP))
-				.thenReturn(Collections.singletonList(FhirServerRole.PERMANENT_DELETE));
+				.thenReturn(List.of(FhirServerRole.HISTORY));
+		when(roleConfig.getDsfRolesForTokenGroup(TOKEN_GROUP)).thenReturn(List.of(FhirServerRole.PERMANENT_DELETE));
 
-		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE1));
-		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE1))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE2));
+		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(PRACTIONER_ROLE1));
+		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE1)).thenReturn(List.of(PRACTIONER_ROLE2));
 		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE2_CLIENT + "." + TOKEN_ROLE2))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE3));
-		when(roleConfig.getPractitionerRolesForTokenGroup(TOKEN_GROUP))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE4));
+				.thenReturn(List.of(PRACTIONER_ROLE3));
+		when(roleConfig.getPractitionerRolesForTokenGroup(TOKEN_GROUP)).thenReturn(List.of(PRACTIONER_ROLE4));
 
 		Identity i = provider.getIdentity(credentials);
 		assertNotNull(i);

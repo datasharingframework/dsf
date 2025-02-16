@@ -2,7 +2,7 @@ package dev.dsf.bpe.mail;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.mail.Message.RecipientType;
@@ -40,7 +40,7 @@ public interface BpeMailService
 	 */
 	default void send(String subject, String message, String to)
 	{
-		send(subject, message, to == null ? null : Collections.singleton(to));
+		send(subject, message, to == null ? null : List.of(to));
 	}
 
 	/**
@@ -95,7 +95,7 @@ public interface BpeMailService
 	 */
 	default void send(String subject, MimeBodyPart body, String to)
 	{
-		send(subject, body, to == null ? null : Collections.singleton(to));
+		send(subject, body, to == null ? null : List.of(to));
 	}
 
 	/**

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -25,7 +25,7 @@ public class TargetsJsonSerializationTest
 	{
 		ObjectMapper mapper = ObjectMapperFactory.createObjectMapper(FhirContext.forR4());
 
-		Targets targets = new TargetsImpl(Collections.emptyList());
+		Targets targets = new TargetsImpl(List.of());
 
 		String targetsAsString = mapper.writeValueAsString(targets);
 		assertNotNull(targetsAsString);
@@ -44,7 +44,7 @@ public class TargetsJsonSerializationTest
 
 		TargetImpl target = new TargetImpl("target.org", "endpoint.target.org", "https://endpoint.target.org/fhir",
 				UUID.randomUUID().toString());
-		Targets targets = new TargetsImpl(Collections.singletonList(target));
+		Targets targets = new TargetsImpl(List.of(target));
 
 		String targetsAsString = mapper.writeValueAsString(targets);
 		assertNotNull(targetsAsString);
@@ -67,7 +67,7 @@ public class TargetsJsonSerializationTest
 
 		TargetImpl target = new TargetImpl("target.org", "endpoint.target.org", "https://endpoint.target.org/fhir",
 				null);
-		Targets targets = new TargetsImpl(Collections.singletonList(target));
+		Targets targets = new TargetsImpl(List.of(target));
 
 		String targetsAsString = mapper.writeValueAsString(targets);
 		assertNotNull(targetsAsString);

@@ -111,7 +111,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	public Targets createTargets(List<? extends Target> targets)
 	{
 		if (targets == null)
-			return new TargetsImpl(Collections.emptyList());
+			return new TargetsImpl(List.of());
 
 		Optional<? extends Target> firstNonMatch = targets.stream().filter(t -> !(t instanceof TargetImpl)).findFirst();
 		if (firstNonMatch.isPresent())
@@ -219,7 +219,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 		Stream<Task> start = execution.getParentId() == null ? Stream.of(getStartTask()) : Stream.empty();
 		Stream<Task> current = getResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
-				Collections.<Task> emptyList()).stream();
+				List.<Task> of()).stream();
 
 		return Collections.unmodifiableList(Stream.concat(start, current).toList());
 	}
@@ -237,7 +237,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 			else
 			{
 				String instanceId = execution.getParentActivityInstanceId();
-				List<Task> tasks = getResourceListOrDefault(TASKS_PREFIX + instanceId, Collections.emptyList());
+				List<Task> tasks = getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of());
 
 				if (tasks.stream().anyMatch(t -> t.getIdElement().getIdPart().equals(task.getIdElement().getIdPart())))
 					setResourceList(TASKS_PREFIX + instanceId, tasks);
@@ -292,8 +292,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		{
 			String instanceId = execution.getParentActivityInstanceId();
 
-			List<Task> tasks = new ArrayList<>(
-					getResourceListOrDefault(TASKS_PREFIX + instanceId, Collections.emptyList()));
+			List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
 			tasks.add(task);
 
 			setResourceList(TASKS_PREFIX + instanceId, tasks);
@@ -308,8 +307,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("onEnd");
 
 		String instanceId = execution.getParentActivityInstanceId();
-		List<Task> tasks = new ArrayList<>(
-				getResourceListOrDefault(TASKS_PREFIX + instanceId, Collections.emptyList()));
+		List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
 		tasks.removeAll(getCurrentTasks());
 		setResourceList(TASKS_PREFIX + instanceId, tasks);
 	}

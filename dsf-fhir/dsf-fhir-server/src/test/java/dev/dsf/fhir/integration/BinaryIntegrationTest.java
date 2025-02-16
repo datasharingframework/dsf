@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -225,7 +224,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -268,7 +267,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -305,7 +304,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -343,7 +342,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
+						.configureParameters(Map.of("name", List.of("Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -402,7 +401,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -494,7 +493,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -723,7 +722,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testSearchAllowedLocalUserNotFound() throws Exception
 	{
 		Bundle resultBundle = getWebserviceClient().search(Binary.class,
-				Map.of("_id", Collections.singletonList(UUID.randomUUID().toString())));
+				Map.of("_id", List.of(UUID.randomUUID().toString())));
 
 		assertNotNull(resultBundle);
 		assertEquals(0, resultBundle.getTotal());
@@ -1017,7 +1016,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -1103,7 +1102,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-						.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
 		assertNotNull(result);
 		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
@@ -2359,7 +2358,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		b3 = binaryDao.create(b3);
 		b4 = binaryDao.create(b4);
 
-		Bundle searchBundle = getWebserviceClient().search(Binary.class, Collections.emptyMap());
+		Bundle searchBundle = getWebserviceClient().search(Binary.class, Map.of());
 		assertNotNull(searchBundle);
 		assertEquals(4, searchBundle.getTotal());
 		assertTrue(searchBundle.getEntry().stream()
@@ -2368,8 +2367,8 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		String actualIds = searchBundle.getEntry().stream().map(BundleEntryComponent::getResource)
 				.map(r -> "Binary/" + r.getIdElement().getIdPart() + "/_history/" + r.getMeta().getVersionId()).sorted()
 				.collect(Collectors.joining(", "));
-		String expectedIds = Arrays.asList(b1, b2, b3, b4).stream().map(b -> b.getIdElement().getValueAsString())
-				.sorted().collect(Collectors.joining(", "));
+		String expectedIds = List.of(b1, b2, b3, b4).stream().map(b -> b.getIdElement().getValueAsString()).sorted()
+				.collect(Collectors.joining(", "));
 		assertEquals(expectedIds, actualIds);
 	}
 
@@ -2428,7 +2427,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		b4 = binaryDao.create(b4);
 		b5 = binaryDao.create(b5);
 
-		Bundle searchBundle = getExternalWebserviceClient().search(Binary.class, Collections.emptyMap());
+		Bundle searchBundle = getExternalWebserviceClient().search(Binary.class, Map.of());
 		assertNotNull(searchBundle);
 		assertEquals(3, searchBundle.getTotal());
 		assertTrue(searchBundle.getEntry().stream()
@@ -2437,7 +2436,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		String actualIds = searchBundle.getEntry().stream().map(BundleEntryComponent::getResource)
 				.map(r -> "Binary/" + r.getIdElement().getIdPart() + "/_history/" + r.getMeta().getVersionId()).sorted()
 				.collect(Collectors.joining(", "));
-		String expectedIds = Arrays.asList(b2, b3, b5).stream().map(b -> b.getIdElement().getValueAsString()).sorted()
+		String expectedIds = List.of(b2, b3, b5).stream().map(b -> b.getIdElement().getValueAsString()).sorted()
 				.collect(Collectors.joining(", "));
 		assertEquals(expectedIds, actualIds);
 	}

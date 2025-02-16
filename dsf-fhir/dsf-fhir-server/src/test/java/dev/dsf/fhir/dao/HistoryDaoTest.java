@@ -3,7 +3,7 @@ package dev.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -80,7 +80,7 @@ public class HistoryDaoTest extends AbstractDbTest
 
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilters(TestOrganizationIdentity.local(createdOrganization)),
-				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter());
+				PageAndCount.from(1, 1000), List.of(new AtParameter()), new SinceParameter());
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -99,8 +99,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
-				Organization.class);
+				PageAndCount.from(1, 1000), List.of(new AtParameter()), new SinceParameter(), Organization.class);
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -119,8 +118,8 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
-				Organization.class, UUID.fromString(createdOrganization.getIdElement().getIdPart()));
+				PageAndCount.from(1, 1000), List.of(new AtParameter()), new SinceParameter(), Organization.class,
+				UUID.fromString(createdOrganization.getIdElement().getIdPart()));
 
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());

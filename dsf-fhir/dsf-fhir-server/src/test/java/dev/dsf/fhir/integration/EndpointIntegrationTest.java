@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,7 +56,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchAll() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient().search(Endpoint.class, Collections.emptyMap());
+		Bundle searchBundle = getWebserviceClient().search(Endpoint.class, Map.of());
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 
@@ -79,14 +79,14 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	public void testSearchWithUnsupportedQueryParameterStrictHandling() throws Exception
 	{
 		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Endpoint.class,
-				Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value"))));
+				Map.of("not-supported-parameter", List.of("not-supported-parameter-value"))));
 	}
 
 	@Test
 	public void testSearchWithUnsupportedQueryParameterLenientHandling() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value")));
+				Map.of("not-supported-parameter", List.of("not-supported-parameter-value")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(3, searchBundle.getEntry().size());
@@ -113,7 +113,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	public void testSearchEndpointIncludeOrganization() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("_include", Collections.singletonList("Endpoint:organization")));
+				Map.of("_include", List.of("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -147,7 +147,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	public void testSearchEndpointRevIncludeOrganization() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("_revinclude", Collections.singletonList("Organization:endpoint")));
+				Map.of("_revinclude", List.of("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -330,8 +330,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
 		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-				.configureParameters(Map.of("identifier",
-						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
+				.configureParameters(
+						Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
 		assertEquals(1, organizationResult.getTotal());
@@ -358,8 +358,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
 		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-				.configureParameters(Map.of("identifier",
-						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
+				.configureParameters(
+						Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
 		assertEquals(1, organizationResult.getTotal());

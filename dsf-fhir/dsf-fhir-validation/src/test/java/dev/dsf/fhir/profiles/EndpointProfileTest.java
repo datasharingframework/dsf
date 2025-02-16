@@ -2,7 +2,7 @@ package dev.dsf.fhir.profiles;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Endpoint;
@@ -25,9 +25,8 @@ public class EndpointProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-endpoint-1.0.0.xml"),
-			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "urn_ietf_bcp_13.xml"),
-			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "valueset-mimetypes.xml"));
+			List.of("dsf-endpoint-1.0.0.xml"), List.of("dsf-read-access-tag-1.0.0.xml", "urn_ietf_bcp_13.xml"),
+			List.of("dsf-read-access-tag-1.0.0.xml", "valueset-mimetypes.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

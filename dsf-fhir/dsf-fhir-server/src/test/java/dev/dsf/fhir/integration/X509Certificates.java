@@ -19,7 +19,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -302,7 +301,7 @@ public class X509Certificates extends ExternalResource
 		this.practitionerClientCertificateFile = practitionerClientCertificateFile;
 		this.practitionerClientCertificatePrivateKeyFile = practitionerClientCertificatePrivateKeyFile;
 
-		filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, serverCertificatePrivateKeyFile,
+		filesToDelete = List.of(caCertificateFile, serverCertificateFile, serverCertificatePrivateKeyFile,
 				clientCertificateFile, clientCertificatePrivateKeyFile, externalClientCertificateFile,
 				externalClientCertificatePrivateKeyFile, practitionerClientCertificateFile,
 				practitionerClientCertificatePrivateKeyFile);

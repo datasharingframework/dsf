@@ -1,7 +1,7 @@
 package dev.dsf.fhir.authorization.process;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -62,8 +62,7 @@ public interface ProcessAuthorizationHelper
 	default Stream<Requester> getRequesters(ActivityDefinition activityDefinition, String processUrl,
 			String processVersion, String messageName, String taskProfile)
 	{
-		return getRequesters(activityDefinition, processUrl, processVersion, messageName,
-				Collections.singleton(taskProfile));
+		return getRequesters(activityDefinition, processUrl, processVersion, messageName, List.of(taskProfile));
 	}
 
 	Stream<Requester> getRequesters(ActivityDefinition activityDefinition, String processUrl, String processVersion,
@@ -72,8 +71,7 @@ public interface ProcessAuthorizationHelper
 	default Stream<Recipient> getRecipients(ActivityDefinition activityDefinition, String processUrl,
 			String processVersion, String messageName, String taskProfiles)
 	{
-		return getRecipients(activityDefinition, processUrl, processVersion, messageName,
-				Collections.singleton(taskProfiles));
+		return getRecipients(activityDefinition, processUrl, processVersion, messageName, List.of(taskProfiles));
 	}
 
 	Stream<Recipient> getRecipients(ActivityDefinition activityDefinition, String processUrl, String processVersion,

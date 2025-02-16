@@ -1,6 +1,5 @@
 package dev.dsf.bpe.camunda;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +115,7 @@ public class FallbackSerializerFactoryImpl implements FallbackSerializerFactory
 		{
 			logger.debug("Getting serializer for {} from class loader {}", getName(value), classLoader.getName());
 
-			return serializersByClassLoader.getOrDefault(classLoader, Collections.emptyList()).stream()
+			return serializersByClassLoader.getOrDefault(classLoader, List.of()).stream()
 					.filter(s -> s.canHandle(value)).findFirst().orElse(null);
 		}
 		else

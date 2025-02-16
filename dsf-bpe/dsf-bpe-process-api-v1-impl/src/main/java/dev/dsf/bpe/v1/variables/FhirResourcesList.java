@@ -1,7 +1,6 @@
 package dev.dsf.bpe.v1.variables;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +25,7 @@ public class FhirResourcesList
 
 	public FhirResourcesList(Resource... resources)
 	{
-		this(Arrays.asList(resources));
+		this(List.of(resources));
 	}
 
 	@JsonProperty("resources")

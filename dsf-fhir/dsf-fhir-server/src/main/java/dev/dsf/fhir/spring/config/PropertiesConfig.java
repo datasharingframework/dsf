@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -182,7 +181,7 @@ public class PropertiesConfig implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		URL url = new URI(serverBaseUrl).toURL();
-		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
+		if (!List.of("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
 					serverBaseUrl);

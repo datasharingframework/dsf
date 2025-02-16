@@ -1,6 +1,5 @@
 package dev.dsf.fhir.webservice.impl;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -230,9 +229,8 @@ public class StructureDefinitionServiceImpl extends
 		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentIdentity(),
 				PageAndCount.single());
 		Map<String, List<String>> searchParameters = new HashMap<>();
-		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, Collections.singletonList(url));
-		searchParameters.put(SearchQuery.PARAMETER_SORT,
-				Collections.singletonList("-" + ResourceLastUpdated.PARAMETER_NAME));
+		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, List.of(url));
+		searchParameters.put(SearchQuery.PARAMETER_SORT, List.of("-" + ResourceLastUpdated.PARAMETER_NAME));
 		query.configureParameters(searchParameters);
 
 		PartialResult<StructureDefinition> result = exceptionHandler

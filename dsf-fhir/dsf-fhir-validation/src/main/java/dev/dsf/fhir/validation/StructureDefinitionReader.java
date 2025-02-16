@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -57,12 +56,12 @@ public class StructureDefinitionReader
 
 	public List<StructureDefinition> readXml(Path... xmlPaths)
 	{
-		return readXml(Arrays.asList(xmlPaths));
+		return readXml(List.of(xmlPaths));
 	}
 
 	public List<StructureDefinition> readXml(String... xmlOnClassPaths)
 	{
-		return readXmlFromClassPath(Arrays.asList(xmlOnClassPaths));
+		return readXmlFromClassPath(List.of(xmlOnClassPaths));
 	}
 
 	public List<StructureDefinition> readXml(List<Path> xmlPaths)

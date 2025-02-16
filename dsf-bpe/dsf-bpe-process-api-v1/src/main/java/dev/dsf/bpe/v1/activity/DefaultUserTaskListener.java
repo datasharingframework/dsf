@@ -130,7 +130,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		return questionnaires.get(0);
 	}
 
-
 	private QuestionnaireResponse createDefaultQuestionnaireResponse(String questionnaireUrlWithVersion,
 			String businessKey, String userTaskId)
 	{

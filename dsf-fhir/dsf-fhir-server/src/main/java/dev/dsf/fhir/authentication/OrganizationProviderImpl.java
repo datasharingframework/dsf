@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -84,6 +84,6 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public Optional<Identity> getLocalOrganizationAsIdentity()
 	{
-		return getLocalOrganization().map(o -> new OrganizationIdentityImpl(true, o, Collections.emptySet(), null));
+		return getLocalOrganization().map(o -> new OrganizationIdentityImpl(true, o, List.of(), null));
 	}
 }

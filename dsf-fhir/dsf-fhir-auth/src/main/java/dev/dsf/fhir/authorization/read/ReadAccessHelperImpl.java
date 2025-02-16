@@ -1,6 +1,5 @@
 package dev.dsf.fhir.authorization.read;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,7 +18,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 public class ReadAccessHelperImpl implements ReadAccessHelper
 {
-	private static final List<String> READ_ACCESS_TAG_VALUES = Arrays.asList(READ_ACCESS_TAG_VALUE_LOCAL,
+	private static final List<String> READ_ACCESS_TAG_VALUES = List.of(READ_ACCESS_TAG_VALUE_LOCAL,
 			READ_ACCESS_TAG_VALUE_ORGANIZATION, READ_ACCESS_TAG_VALUE_ROLE, READ_ACCESS_TAG_VALUE_ALL);
 
 	private Predicate<Coding> matchesTagValue(String value)

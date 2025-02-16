@@ -3,7 +3,6 @@ package dev.dsf.fhir.subscription;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,8 +160,8 @@ public class WebSocketSubscriptionManagerImpl
 					}
 					else
 					{
-						matchers.put(matcher.get().getResourceType(), new ArrayList<>(
-								Collections.singletonList(new SubscriptionAndMatcher(subscription, matcher.get()))));
+						matchers.put(matcher.get().getResourceType(),
+								new ArrayList<>(List.of(new SubscriptionAndMatcher(subscription, matcher.get()))));
 					}
 				}
 			}

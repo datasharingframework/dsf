@@ -2,7 +2,7 @@ package dev.dsf.bpe.service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAmount;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -70,9 +70,8 @@ public class LocalOrganizationProviderImpl implements LocalOrganizationProvider,
 	private Optional<Organization> doGetLocalOrganization()
 	{
 		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
-				Map.of("status", Collections.singletonList("active"), "address",
-						Collections.singletonList(localEndpointAddress), "_include",
-						Collections.singletonList("Endpoint:organization")));
+				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress), "_include",
+						List.of("Endpoint:organization")));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 2
 				|| resultBundle.getEntry().get(0).getResource() == null

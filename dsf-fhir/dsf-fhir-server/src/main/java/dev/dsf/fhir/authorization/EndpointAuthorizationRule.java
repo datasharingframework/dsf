@@ -3,7 +3,6 @@ package dev.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -110,7 +109,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 
 	private boolean endpointWithAddressExists(Connection connection, String address)
 	{
-		Map<String, List<String>> queryParameters = Map.of("address", Collections.singletonList(address));
+		Map<String, List<String>> queryParameters = Map.of("address", List.of(address));
 		EndpointDao dao = getDao();
 		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
 				.configureParameters(queryParameters);
@@ -140,7 +139,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	private boolean endpointWithIdentifierExists(Connection connection, String identifierValue)
 	{
 		Map<String, List<String>> queryParameters = Map.of("identifier",
-				Collections.singletonList(ENDPOINT_IDENTIFIER_SYSTEM + "|" + identifierValue));
+				List.of(ENDPOINT_IDENTIFIER_SYSTEM + "|" + identifierValue));
 		EndpointDao dao = getDao();
 		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
 				.configureParameters(queryParameters);

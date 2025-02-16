@@ -1,7 +1,6 @@
 package dev.dsf.bpe.subscription;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -266,7 +265,7 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 		Objects.requireNonNull(processDefinitionId, "processDefinitionId");
 
 		if (variables == null)
-			variables = Collections.emptyMap();
+			variables = Map.of();
 
 		if (businessKey == null)
 		{
@@ -287,7 +286,7 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 			if (instances.size() + instancesWithAlternativeBusinessKey.size() <= 0)
 			{
 				BpmnModelInstance model = repositoryService.getBpmnModelInstance(processDefinitionId);
-				Collection<StartEvent> startEvents = model == null ? Collections.emptySet()
+				Collection<StartEvent> startEvents = model == null ? List.of()
 						: model.getModelElementsByType(StartEvent.class);
 				Stream<String> startEventMesssageNames = startEvents.stream().flatMap(e ->
 				{
