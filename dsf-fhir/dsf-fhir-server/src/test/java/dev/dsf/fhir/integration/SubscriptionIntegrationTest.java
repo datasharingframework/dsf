@@ -62,6 +62,35 @@ public class SubscriptionIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateOkNoPayloadAllreadyExistsWithPayload() throws Exception
+	{
+		Subscription t = newSubscription("Task?status=completed");
+
+		SubscriptionDao dao = getSpringWebApplicationContext().getBean(SubscriptionDao.class);
+		dao.create(t);
+
+		t = newSubscription("Task?status=completed");
+		t.getChannel().setPayload(null);
+
+		Subscription created = getWebserviceClient().create(t);
+		assertNotNull(created);
+		assertTrue(created.getIdElement().hasValue());
+		assertEquals("1", created.getMeta().getVersionId());
+	}
+
+	@Test
+	public void testCreateNotOkNoPayloadAllreadyExistsWithoutPayload() throws Exception
+	{
+		Subscription t = newSubscription("Task?status=completed");
+		t.getChannel().setPayload(null);
+
+		SubscriptionDao dao = getSpringWebApplicationContext().getBean(SubscriptionDao.class);
+		dao.create(t);
+
+		expectForbidden(() -> getWebserviceClient().create(t));
+	}
+
+	@Test
 	public void testCreateInvalid() throws Exception
 	{
 		Subscription noStatus = newSubscription("Task?status=completed");
