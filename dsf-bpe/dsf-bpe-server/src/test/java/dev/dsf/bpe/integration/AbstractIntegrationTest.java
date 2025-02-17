@@ -110,9 +110,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-	protected static final String BPE_CONTEXT_PATH = "/bpe";
-
 	protected static final String FHIR_CONTEXT_PATH = "/fhir";
+	protected static final String BPE_CONTEXT_PATH = "/bpe";
 
 	private static final Path EMPTY_PROCESS_DIRECTORY = Paths.get("target", UUID.randomUUID().toString());
 	private static final List<Path> DIRECTORIES_TO_DELETE = List.of(EMPTY_PROCESS_DIRECTORY);
@@ -159,12 +158,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		// --- bpe ---
 
+		// allowed bpe classes override to enable access to classes from dsf-bpe-test-plugin module for v1 test plugins
 		List<String> allowedBpeClassesV1 = readListFile(
 				Paths.get("src/main/resources/bpe/api/v1/allowed-bpe-classes.list"));
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTest");
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTestExecutor");
 		writeListFile(ALLOWED_BPE_CLASSES_LIST_FILE_V1, allowedBpeClassesV1);
 
+		// allowed bpe classes override to enable access to classes from dsf-bpe-test-plugin module for v2 test plugins
 		List<String> allowedBpeClassesV2 = readListFile(
 				Paths.get("src/main/resources/bpe/api/v2/allowed-bpe-classes.list"));
 		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTest");

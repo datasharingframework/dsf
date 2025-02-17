@@ -201,11 +201,14 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- access to classes from dsf-bpe-test-plugin by test plugins enabled via allowed bpe classes override in AbstractIntegrationTest -->
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-test-plugin</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- dependencies dsf-bpe-test-plugin-v1 and dsf-bpe-test-plugin-v2 to force build order -->
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-test-plugin-v1</artifactId>
