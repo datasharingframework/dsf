@@ -413,7 +413,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.server.base.url", bpeBaseUrl);
 		initParameters.put("dev.dsf.bpe.fhir.server.base.url", fhirBaseUrl);
 
-		initParameters.put("dev.dsf.bpe.process.api.directroy", "../dsf-bpe-server-jetty/docker/api");
+		initParameters.put("dev.dsf.bpe.process.api.directory", "../dsf-bpe-server-jetty/docker/api");
 		initParameters.put("dev.dsf.bpe.process.plugin.directory", EMPTY_PROCESS_DIRECTORY.toString());
 		initParameters.put("dev.dsf.bpe.process.plugin.exploded",
 				"../dsf-bpe-test-plugin-v1/target/classes, ../dsf-bpe-test-plugin-v2/target/classes");

@@ -142,7 +142,7 @@ public class PropertiesConfig implements InitializingBean
 	private List<String> explodedPluginDirectories;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugin api jar files", recommendation = "Change only during development")
-	@Value("${dev.dsf.bpe.process.api.directroy:api}")
+	@Value("${dev.dsf.bpe.process.api.directory:api}")
 	private String apiClassPathBaseDirectory;
 
 	@Documentation(description = "Map with files containing qualified classs names allowed to be loaded by plugins for api versions; map key must match "
