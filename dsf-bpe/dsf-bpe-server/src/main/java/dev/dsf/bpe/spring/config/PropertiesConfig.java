@@ -134,7 +134,7 @@ public class PropertiesConfig implements InitializingBean
 	private long websocketRetrySleepMillis;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
-	@Value("${dev.dsf.bpe.process.plugin.directroy:process}")
+	@Value("${dev.dsf.bpe.process.plugin.directory:process}")
 	private String processPluginDirectory;
 
 	@Documentation(description = "Directories containing exploded DSF BPE process plugins for deployment on startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only for testing")
