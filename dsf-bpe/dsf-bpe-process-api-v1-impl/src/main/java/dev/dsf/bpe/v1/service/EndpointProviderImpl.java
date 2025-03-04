@@ -79,17 +79,17 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 	{
 		if (parentOrganizationIdentifier == null)
 		{
-			logger.debug("Parent organiztion identifier is null");
+			logger.debug("Parent organization identifier is null");
 			return Optional.empty();
 		}
 		else if (memberOrganizationIdentifier == null)
 		{
-			logger.debug("Member organiztion identifier is null");
+			logger.debug("Member organization identifier is null");
 			return Optional.empty();
 		}
 		else if (memberOrganizationRole == null)
 		{
-			logger.debug("Member organiztion role is null");
+			logger.debug("Member organization role is null");
 			return Optional.empty();
 		}
 
@@ -137,12 +137,12 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 	{
 		if (parentOrganizationIdentifier == null)
 		{
-			logger.debug("Parent organiztion identifier is null");
+			logger.debug("Parent organization identifier is null");
 			return List.of();
 		}
 		else if (memberOrganizationRole == null)
 		{
-			logger.debug("Member organiztion role is null");
+			logger.debug("Member organization role is null");
 			return List.of();
 		}
 
