@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
 import dev.dsf.bpe.v1.constants.NamingSystems.EndpointIdentifier;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
@@ -52,15 +53,15 @@ public interface EndpointProvider
 	/**
 	 * @param endpointIdentifier
 	 *            may be <code>null</code>
-	 * @return {@link Endpoint} resource from the local DSF FHIR server with the given <b>endpointIdentifier</b>, empty
-	 *         {@link Optional} if no such resource exists or the given identifier is <code>null</code>
+	 * @return Active {@link Endpoint} resource from the local DSF FHIR server with the given <b>endpointIdentifier</b>,
+	 *         empty {@link Optional} if no such resource exists or the given identifier is <code>null</code>
 	 */
 	Optional<Endpoint> getEndpoint(Identifier endpointIdentifier);
 
 	/**
 	 * @param endpointIdentifierValue
 	 *            may be <code>null</code>
-	 * @return {@link Endpoint} resource from the local DSF FHIR server with the given DSF
+	 * @return Active {@link Endpoint} resource from the local DSF FHIR server with the given DSF
 	 *         <b>endpointIdentifierValue</b>, empty {@link Optional} if no such resource exists or the given identifier
 	 *         value is <code>null</code>
 	 * @see EndpointIdentifier
@@ -74,7 +75,7 @@ public interface EndpointProvider
 	/**
 	 * @param endpointIdentifier
 	 *            may be <code>null</code>
-	 * @return Address (base URL) of the {@link Endpoint} resource from the local DSF FHIR server with the given
+	 * @return Address (base URL) of the active {@link Endpoint} resource from the local DSF FHIR server with the given
 	 *         <b>endpointIdentifier</b>, empty {@link Optional} if no such resource exists or the given identifier is
 	 *         <code>null</code>
 	 */
@@ -86,9 +87,9 @@ public interface EndpointProvider
 	/**
 	 * @param endpointIdentifierValue
 	 *            may be <code>null</code>
-	 * @return Address (base URL) of the {@link Endpoint} resource from the local DSF FHIR server with the given DSF
-	 *         <b>endpointIdentifierValue</b>, empty {@link Optional} if no such resource exists or the given identifier
-	 *         value is <code>null</code>
+	 * @return Address (base URL) of the active {@link Endpoint} resource from the local DSF FHIR server with the given
+	 *         DSF <b>endpointIdentifierValue</b>, empty {@link Optional} if no such resource exists or the given
+	 *         identifier value is <code>null</code>
 	 */
 	default Optional<String> getEndpointAddress(String endpointIdentifierValue)
 	{
@@ -103,10 +104,11 @@ public interface EndpointProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return {@link Endpoint} resource from the local DSF FHIR server associated with the given
+	 * @return Active {@link Endpoint} resource from the local DSF FHIR server associated with the given
 	 *         <b>memberOrganizationIdentifier</b> and <b>memberOrganizationRole</b> in a parent organization with the
 	 *         given <b>parentOrganizationIdentifier</b>, empty {@link Optional} if no such resource exists or one of
-	 *         the parameters is <code>null</code>
+	 *         the parameters is <code>null</code>; only considers Endpoints from active {@link OrganizationAffiliation}
+	 *         resources
 	 */
 	Optional<Endpoint> getEndpoint(Identifier parentOrganizationIdentifier, Identifier memberOrganizationIdentifier,
 			Coding memberOrganizationRole);
@@ -118,10 +120,11 @@ public interface EndpointProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return {@link Endpoint} resource from the local DSF FHIR server associated with the given DSF
+	 * @return Active {@link Endpoint} resource from the local DSF FHIR server associated with the given DSF
 	 *         <b>memberOrganizationIdentifierValue</b> and <b>memberOrganizationRole</b> in a parent organization with
 	 *         the given DSF <b>parentOrganizationIdentifierValue</b>, empty {@link Optional} if no such resource exists
-	 *         or one of the parameters is <code>null</code>
+	 *         or one of the parameters is <code>null</code>; only considers Endpoints from active
+	 *         {@link OrganizationAffiliation} resources
 	 * @see OrganizationIdentifier
 	 */
 	default Optional<Endpoint> getEndpoint(String parentOrganizationIdentifierValue,
@@ -142,10 +145,11 @@ public interface EndpointProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return Address (base URL) of the {@link Endpoint} resource from the local DSF FHIR server associated with the
-	 *         given <b>memberOrganizationIdentifier</b> and <b>memberOrganizationRole</b> in a parent organization with
-	 *         the given <b>parentOrganizationIdentifier</b>, empty {@link Optional} if no such resource exists or one
-	 *         of the parameters is <code>null</code>
+	 * @return Address (base URL) of the active {@link Endpoint} resource from the local DSF FHIR server associated with
+	 *         the given <b>memberOrganizationIdentifier</b> and <b>memberOrganizationRole</b> in a parent organization
+	 *         with the given <b>parentOrganizationIdentifier</b>, empty {@link Optional} if no such resource exists or
+	 *         one of the parameters is <code>null</code>; only considers Endpoints from active
+	 *         {@link OrganizationAffiliation} resources
 	 */
 	default Optional<String> getEndpointAddress(Identifier parentOrganizationIdentifier,
 			Identifier memberOrganizationIdentifier, Coding memberOrganizationRole)
@@ -161,10 +165,11 @@ public interface EndpointProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return Address (base URL) of the {@link Endpoint} resource from the local DSF FHIR server associated with the
-	 *         given DSF <b>memberOrganizationIdentifierValue</b> and <b>memberOrganizationRole</b> in a parent
+	 * @return Address (base URL) of the active {@link Endpoint} resource from the local DSF FHIR server associated with
+	 *         the given DSF <b>memberOrganizationIdentifierValue</b> and <b>memberOrganizationRole</b> in a parent
 	 *         organization with the given DSF <b>parentOrganizationIdentifierValue</b>, empty {@link Optional} if no
-	 *         such resource exists or one of the parameters is <code>null</code>
+	 *         such resource exists or one of the parameters is <code>null</code>; only considers Endpoints from active
+	 *         {@link OrganizationAffiliation} resources
 	 * @see OrganizationIdentifier
 	 */
 	default Optional<String> getEndpointAddress(String parentOrganizationIdentifierValue,
@@ -183,10 +188,10 @@ public interface EndpointProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return {@link Endpoint} resources from the local DSF FHIR server associated with the given
+	 * @return Active {@link Endpoint} resources from the local DSF FHIR server associated with the given
 	 *         <b>memberOrganizationRole</b> in a parent organization with the given
 	 *         <b>parentOrganizationIdentifier</b>, empty {@link List} if no resources exist or one of the parameters is
-	 *         <code>null</code>
+	 *         <code>null</code>; only considers Endpoints from active {@link OrganizationAffiliation} resources
 	 */
 	List<Endpoint> getEndpoints(Identifier parentOrganizationIdentifier, Coding memberOrganizationRole);
 
@@ -195,10 +200,11 @@ public interface EndpointProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return {@link Endpoint} resources from the local DSF FHIR server associated with the given
+	 * @return Active {@link Endpoint} resources from the local DSF FHIR server associated with the given
 	 *         <b>memberOrganizationRole</b> in a parent organization with the given DSF
 	 *         <b>parentOrganizationIdentifierValue</b>, empty {@link List} if no resources exist or one of the
-	 *         parameters is <code>null</code>
+	 *         parameters is <code>null</code>; only considers Endpoints from active {@link OrganizationAffiliation}
+	 *         resources
 	 * @see OrganizationIdentifier
 	 */
 	default List<Endpoint> getEndpoints(String parentOrganizationIdentifierValue, Coding memberOrganizationRole)
