@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.LastEventTimeDao;
 import jakarta.ws.rs.core.UriBuilder;
 
@@ -31,13 +31,13 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 	private static final int RESULT_PAGE_COUNT = 20;
 
 	private final LastEventTimeDao lastEventTimeDao;
-	private final FhirWebserviceClient webserviceClient;
+	private final WebserviceClient webserviceClient;
 	private final ResourceHandler<R> handler;
 	private final String resourceName;
 	private final Class<R> resourceClass;
 
 	public ExistingResourceLoaderImpl(LastEventTimeDao lastEventTimeDao, ResourceHandler<R> handler,
-			FhirWebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
+			WebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
 	{
 		this.lastEventTimeDao = lastEventTimeDao;
 		this.handler = handler;

@@ -5,7 +5,7 @@ import java.util.Objects;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.LastEventTimeDao;
 
 public class TaskSubscriptionHandlerFactory implements SubscriptionHandlerFactory<Task>, InitializingBean
@@ -27,7 +27,7 @@ public class TaskSubscriptionHandlerFactory implements SubscriptionHandlerFactor
 	}
 
 	@Override
-	public ExistingResourceLoader<Task> createExistingResourceLoader(FhirWebserviceClient client)
+	public ExistingResourceLoader<Task> createExistingResourceLoader(WebserviceClient client)
 	{
 		return new ExistingResourceLoaderImpl<>(lastEventTimeDao, resourceHandler, client, "Task", Task.class);
 	}

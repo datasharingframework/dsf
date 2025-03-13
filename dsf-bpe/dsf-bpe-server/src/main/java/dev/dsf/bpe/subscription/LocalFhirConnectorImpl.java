@@ -22,8 +22,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.bpe.client.FhirWebserviceClient;
-import dev.dsf.bpe.client.LocalFhirClientProvider;
+import dev.dsf.bpe.client.dsf.ClientProvider;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.fhir.client.WebsocketClient;
 
 public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConnector, InitializingBean
@@ -32,14 +32,14 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 
 	private final Class<R> resourceType;
 	private final String resourceName;
-	private final LocalFhirClientProvider clientProvider;
+	private final ClientProvider clientProvider;
 	private final FhirContext fhirContext;
 	private final SubscriptionHandlerFactory<R> subscriptionHandlerFactory;
 	private final long retrySleepMillis;
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
-	public LocalFhirConnectorImpl(Class<R> resourceType, LocalFhirClientProvider clientProvider,
+	public LocalFhirConnectorImpl(Class<R> resourceType, ClientProvider clientProvider,
 			SubscriptionHandlerFactory<R> subscriptionHandlerFactory, FhirContext fhirContext,
 			String subscriptionSearchParameter, long retrySleepMillis, int maxRetries)
 	{
@@ -177,7 +177,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	{
 		logger.debug("Retrieving {} websocket subscription ...", resourceName);
 
-		Bundle bundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Subscription.class,
+		Bundle bundle = clientProvider.getWebserviceClient().searchWithStrictHandling(Subscription.class,
 				subscriptionSearchParameter);
 
 		if (!Bundle.BundleType.SEARCHSET.equals(bundle.getType()))
@@ -203,7 +203,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		{
 			logger.info("Downloading new {} resources ...", resourceName);
 
-			FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
+			WebserviceClient client = clientProvider.getWebserviceClient();
 			ExistingResourceLoader<R> existingResourceLoader = subscriptionHandlerFactory
 					.createExistingResourceLoader(client);
 			Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(),
@@ -228,7 +228,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	{
 		try
 		{
-			WebsocketClient client = clientProvider.getLocalWebsocketClient(this::connect,
+			WebsocketClient client = clientProvider.getWebsocketClient(this::connect,
 					subscription.getIdElement().getIdPart());
 
 			EventType eventType = toEventType(subscription.getChannel().getPayload());
@@ -289,7 +289,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	private void setPingEventHandler(WebsocketClient client, String subscriptionIdPart,
 			Map<String, List<String>> searchCriteriaQueryParameters)
 	{
-		FhirWebserviceClient webserviceClient = clientProvider.getLocalWebserviceClient();
+		WebserviceClient webserviceClient = clientProvider.getWebserviceClient();
 		ExistingResourceLoader<R> existingResourceLoader = subscriptionHandlerFactory
 				.createExistingResourceLoader(webserviceClient);
 		PingEventResourceHandler<R> pingHandler = subscriptionHandlerFactory

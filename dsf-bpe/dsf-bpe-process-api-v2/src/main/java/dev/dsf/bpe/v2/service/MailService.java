@@ -12,6 +12,10 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
+/**
+ * Service for sending e-mail if a connection to an SMPT mail server is configured. If no connection is configured
+ * content will be logged.
+ */
 public interface MailService
 {
 	/**

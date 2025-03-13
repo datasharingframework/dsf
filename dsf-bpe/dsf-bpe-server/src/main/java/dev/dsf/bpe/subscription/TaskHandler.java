@@ -37,7 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.Constants;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
-import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 
 public class TaskHandler extends AbstractResourceHandler implements ResourceHandler<Task>, InitializingBean
@@ -97,10 +97,10 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 	}
 
 	private final RuntimeService runtimeService;
-	private final FhirWebserviceClient webserviceClient;
+	private final WebserviceClient webserviceClient;
 
 	public TaskHandler(RepositoryService repositoryService, ProcessPluginManager processPluginManager,
-			FhirContext fhirContext, RuntimeService runtimeService, FhirWebserviceClient webserviceClient)
+			FhirContext fhirContext, RuntimeService runtimeService, WebserviceClient webserviceClient)
 	{
 		super(repositoryService, processPluginManager, fhirContext);
 

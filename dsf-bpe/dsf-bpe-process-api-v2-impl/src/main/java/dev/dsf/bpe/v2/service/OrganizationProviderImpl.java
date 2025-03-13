@@ -20,7 +20,7 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationProviderImpl.class);
 
-	public OrganizationProviderImpl(FhirWebserviceClientProvider clientProvider, String localEndpointAddress)
+	public OrganizationProviderImpl(DsfClientProvider clientProvider, String localEndpointAddress)
 	{
 		super(clientProvider, localEndpointAddress);
 	}
@@ -28,7 +28,7 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 	@Override
 	public Optional<Organization> getLocalOrganization()
 	{
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
+		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress), "_include",
 						List.of("Endpoint:organization")));
 
@@ -70,7 +70,7 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 
 		String organizationIdSp = toSearchParameter(organizationIdentifier);
 
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
+		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Organization.class,
 				Map.of("active", List.of("true"), "identifier", List.of(organizationIdSp)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1

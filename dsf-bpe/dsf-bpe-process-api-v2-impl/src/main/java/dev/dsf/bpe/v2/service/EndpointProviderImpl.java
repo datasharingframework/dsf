@@ -20,7 +20,7 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointProviderImpl.class);
 
-	public EndpointProviderImpl(FhirWebserviceClientProvider clientProvider, String localEndpointAddress)
+	public EndpointProviderImpl(DsfClientProvider clientProvider, String localEndpointAddress)
 	{
 		super(clientProvider, localEndpointAddress);
 	}
@@ -28,7 +28,7 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 	@Override
 	public Optional<Endpoint> getLocalEndpoint()
 	{
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
+		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 1
@@ -59,7 +59,7 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 
 		String endpointIdSp = toSearchParameter(endpointIdentifier);
 
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
+		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", List.of("active"), "identifier", List.of(endpointIdSp)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1
@@ -97,8 +97,7 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 		String memberOrganizationIdSp = toSearchParameter(memberOrganizationIdentifier);
 		String memberOrganizationRoleSp = toSearchParameter(memberOrganizationRole);
 
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(
-				OrganizationAffiliation.class,
+		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(OrganizationAffiliation.class,
 				Map.of("active", List.of("true"), "primary-organization:identifier", List.of(parentOrganizationIdSp),
 						"participating-organization:identifier", List.of(memberOrganizationIdSp), "role",
 						List.of(memberOrganizationRoleSp), "_include", List.of("OrganizationAffiliation:endpoint")));

@@ -27,8 +27,8 @@ import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.camunda.ProcessPluginConsumer;
-import dev.dsf.bpe.client.BasicFhirWebserviceClient;
-import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.dsf.BasicWebserviceClient;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 
 public class ProcessPluginManagerImpl implements ProcessPluginManager, InitializingBean
 {
@@ -47,7 +47,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	private final FhirResourceHandler fhirResourceHandler;
 
 	private final String localEndpointAddress;
-	private final FhirWebserviceClient localWebserviceClient;
+	private final WebserviceClient localWebserviceClient;
 	private final int fhirServerRequestMaxRetries;
 	private final long fhirServerRetryDelayMillis;
 
@@ -56,8 +56,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	public ProcessPluginManagerImpl(List<ProcessPluginConsumer> processPluginConsumers,
 			ProcessPluginLoader processPluginLoader, BpmnProcessStateChangeService bpmnProcessStateChangeService,
 			FhirResourceHandler fhirResourceHandler, String localEndpointAddress,
-			FhirWebserviceClient localWebserviceClient, int fhirServerRequestMaxRetries,
-			long fhirServerRetryDelayMillis)
+			WebserviceClient localWebserviceClient, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis)
 	{
 		if (processPluginConsumers != null)
 			this.processPluginConsumers.addAll(processPluginConsumers);
@@ -116,9 +115,9 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 						ProcessIdAndVersionAndProcessPlugin::plugin));
 	}
 
-	private BasicFhirWebserviceClient retryClient()
+	private BasicWebserviceClient retryClient()
 	{
-		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
+		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
 			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
 		else
 			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);

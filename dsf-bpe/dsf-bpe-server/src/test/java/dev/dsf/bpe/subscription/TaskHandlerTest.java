@@ -33,14 +33,14 @@ import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.Constants;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
-import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskHandlerTest
 {
 	@Mock
-	private FhirWebserviceClient webserviceClient;
+	private WebserviceClient webserviceClient;
 
 	@Mock
 	private RepositoryService repositoryService;

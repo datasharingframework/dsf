@@ -15,9 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,11 +51,9 @@ import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-import de.rwh.utils.crypto.io.PemIo;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
 import dev.dsf.common.auth.DsfLoginService;
@@ -74,7 +69,7 @@ import dev.dsf.fhir.client.FhirWebserviceClientJersey;
 import dev.dsf.fhir.client.WebsocketClient;
 import dev.dsf.fhir.client.WebsocketClientTyrus;
 import dev.dsf.fhir.dao.AbstractDbTest;
-import dev.dsf.fhir.integration.X509Certificates.ClientCertificate;
+import dev.dsf.fhir.integration.X509Certificates.CertificateAndPrivateKey;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceCleanerImpl;
 import dev.dsf.fhir.service.ReferenceExtractorImpl;
@@ -136,20 +131,20 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		logger.info("Creating webservice client ...");
 		webserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
-				certificates.getClientCertificate().getTrustStore(), certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
+				certificates.getClientCertificate().trustStore(), certificates.getClientCertificate().keyStore(),
+				certificates.getClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Creating external webservice client ...");
 		externalWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
-				certificates.getExternalClientCertificate().getTrustStore(),
-				certificates.getExternalClientCertificate().getKeyStore(),
-				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
+				certificates.getExternalClientCertificate().trustStore(),
+				certificates.getExternalClientCertificate().keyStore(),
+				certificates.getExternalClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Creating practitioner client ...");
 		practitionerWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
-				certificates.getPractitionerClientCertificate().getTrustStore(),
-				certificates.getPractitionerClientCertificate().getKeyStore(),
-				certificates.getPractitionerClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
+				certificates.getPractitionerClientCertificate().trustStore(),
+				certificates.getPractitionerClientCertificate().keyStore(),
+				certificates.getPractitionerClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer(statusConnectorChannel, apiConnectorChannel, baseUrl);
@@ -212,18 +207,15 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				      - HISTORY
 				    practitioner-role:
 				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
-				""", certificates.getPractitionerClientCertificate().getCertificateSha512ThumbprintHex()));
+				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex()));
 
-		KeyStore caCertificate = CertificateReader.allFromCer(certificates.getCaCertificateFile());
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(certificates.getServerCertificatePrivateKeyFile(),
-				X509Certificates.PASSWORD);
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificates.getServerCertificateFile());
-		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore serverCertificateKeyStore = CertificateHelper.toJksKeyStore(privateKey,
-				new Certificate[] { certificate }, UUID.randomUUID().toString(), keyStorePassword);
+		KeyStore clientCertificateTrustStore = KeyStoreCreator
+				.jksForTrustedCertificates(certificates.getCaCertificate());
+		KeyStore serverCertificateKeyStore = certificates.getServerCertificate().keyStore();
 
-		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel, caCertificate,
-				serverCertificateKeyStore, keyStorePassword, false);
+		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel,
+				clientCertificateTrustStore, serverCertificateKeyStore,
+				certificates.getServerCertificate().keyStorePassword(), false);
 		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
 		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = List.of(
 				JakartaWebSocketServletContainerInitializer.class, JerseyServletContainerInitializer.class,
@@ -236,7 +228,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 			StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPortSupplier);
 			ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
-					caCertificate);
+					clientCertificateTrustStore);
 			DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,
 					statusPortAuthenticator, clientCertificateAuthenticator, null, null, null, null);
 
@@ -301,8 +293,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return p;
 	}
 
-	private static void createTestBundle(ClientCertificate clientCertificate,
-			ClientCertificate externalClientCertificate)
+	private static void createTestBundle(CertificateAndPrivateKey clientCertificate,
+			CertificateAndPrivateKey externalClientCertificate)
 	{
 		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
 
@@ -312,14 +304,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		Extension thumbprintExtension = organization
 				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 
-		thumbprintExtension.setValue(new StringType(clientCertificate.getCertificateSha512ThumbprintHex()));
+		thumbprintExtension.setValue(new StringType(clientCertificate.certificateSha512ThumbprintHex()));
 
 		Organization externalOrganization = (Organization) testBundle.getEntry().get(2).getResource();
 		Extension externalThumbprintExtension = externalOrganization
 				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 
 		externalThumbprintExtension
-				.setValue(new StringType(externalClientCertificate.getCertificateSha512ThumbprintHex()));
+				.setValue(new StringType(externalClientCertificate.certificateSha512ThumbprintHex()));
 
 		writeBundle(FHIR_BUNDLE_FILE, testBundle);
 	}
@@ -399,9 +391,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		assertNotNull(subscription.getIdElement());
 		assertNotNull(subscription.getIdElement().getIdPart());
 
-		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().getTrustStore(),
-				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), subscription.getIdElement().getIdPart());
+		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().trustStore(),
+				certificates.getClientCertificate().keyStore(), certificates.getClientCertificate().keyStorePassword(),
+				subscription.getIdElement().getIdPart());
 	}
 
 	protected static final ReadAccessHelper getReadAccessHelper()

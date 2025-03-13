@@ -18,5 +18,10 @@
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-process-api-v1</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>crypto-utils</artifactId>
+			<version>${crypto-utils.version.v1}</version>
+		</dependency>
 	</dependencies>
 </project>

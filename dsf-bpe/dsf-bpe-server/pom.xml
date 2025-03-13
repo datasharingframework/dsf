@@ -53,6 +53,7 @@
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>crypto-utils</artifactId>
+			<version>${crypto-utils.version}</version>
 		</dependency>
 
 		<dependency>
@@ -66,6 +67,15 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+    		<groupId>com.fasterxml.jackson.dataformat</groupId>
+    		<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
 
 		<dependency>
@@ -161,6 +171,13 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk18on</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.icegreen</groupId>
+			<artifactId>greenmail-junit4</artifactId>
+			<version>1.6.15</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

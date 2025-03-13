@@ -1,14 +1,11 @@
 package dev.dsf.tools.generator;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -31,7 +28,8 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.rwh.utils.crypto.io.PemIo;
+import de.hsheilbronn.mi.utils.crypto.io.PemReader;
+import de.hsheilbronn.mi.utils.crypto.io.PemWriter;
 
 public class DefaultCaFilesGenerator
 {
@@ -205,7 +203,7 @@ public class DefaultCaFilesGenerator
 			try
 			{
 				logger.debug("Reading certificate from {}", file.toString());
-				X509CertificateHolder certificate = new X509CertificateHolder(PemIo.readX509CertificateFromPem(file));
+				X509CertificateHolder certificate = new X509CertificateHolder(PemReader.readCertificate(file));
 
 				if (!certificate.isCa())
 					throw new RuntimeException("Certificate in " + file.toString() + " is not a CA certificate");
@@ -228,7 +226,7 @@ public class DefaultCaFilesGenerator
 
 				certificates.add(certificate);
 			}
-			catch (CertificateException | IOException e)
+			catch (IOException e)
 			{
 				throw new RuntimeException(e);
 			}
@@ -237,20 +235,20 @@ public class DefaultCaFilesGenerator
 
 	private static void writeClientIssuingCas(List<X509CertificateHolder> certificates, Path file)
 	{
-		List<X509CertificateHolder> certs = certificates.stream().filter(X509CertificateHolder::isIssuingCa)
-				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).toList();
+		List<X509Certificate> certs = certificates.stream().filter(X509CertificateHolder::isIssuingCa)
+				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName))
+				.map(X509CertificateHolder::getCertificate).toList();
 
-		logger.info("Writing default client issuing CAs file to {}", file.toString());
-		writeCas(certs, file);
+		writeCas(certs, file, "client issuing CAs");
 	}
 
 	private static void writeClientCaChains(List<X509CertificateHolder> certificates, Path file)
 	{
-		List<X509CertificateHolder> certs = certificates.stream().filter(X509CertificateHolder::isRoot)
-				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).flatMap(childern()).toList();
+		List<X509Certificate> certs = certificates.stream().filter(X509CertificateHolder::isRoot)
+				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).flatMap(childern())
+				.map(X509CertificateHolder::getCertificate).toList();
 
-		logger.info("Writing default client CA chains file to {}", file.toString());
-		writeCas(certs, file);
+		writeCas(certs, file, "client CA chains");
 	}
 
 	private static Function<X509CertificateHolder, Stream<X509CertificateHolder>> childern()
@@ -261,25 +259,22 @@ public class DefaultCaFilesGenerator
 
 	private static void writeServerRootCas(List<X509CertificateHolder> certificates, Path file)
 	{
-		List<X509CertificateHolder> certs = certificates.stream().filter(X509CertificateHolder::isRoot)
+		List<X509Certificate> certs = certificates.stream().filter(X509CertificateHolder::isRoot)
 				.filter(Predicate.not(X509CertificateHolder::isClientOnly))
-				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).toList();
+				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName))
+				.map(X509CertificateHolder::getCertificate).toList();
 
-		logger.info("Writing default server root CAs file to {}", file.toString());
-		writeCas(certs, file);
+		writeCas(certs, file, "server root CAs");
 	}
 
-	private static void writeCas(List<X509CertificateHolder> certificates, Path file)
+	private static void writeCas(List<X509Certificate> certs, Path file, String logMessage)
 	{
-		try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8))
+		try
 		{
-			for (X509CertificateHolder c : certificates)
-			{
-				writer.write("Subject: " + c.getSubject().toString() + "\n");
-				writer.write(PemIo.writeX509Certificate(c.getCertificate()));
-			}
+			logger.info("Writing default {} file to {}", logMessage, file.toString());
+			PemWriter.writeCertificates(certs, file);
 		}
-		catch (IOException | CertificateEncodingException e)
+		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}

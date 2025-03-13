@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.client.LocalFhirClientProvider;
+import dev.dsf.bpe.client.dsf.ClientProvider;
 
 public class LocalOrganizationProviderImpl implements LocalOrganizationProvider, InitializingBean
 {
@@ -31,10 +31,10 @@ public class LocalOrganizationProviderImpl implements LocalOrganizationProvider,
 	private final AtomicReference<OrganizationEntry> organization = new AtomicReference<>();
 
 	private final TemporalAmount cacheTimeout;
-	private final LocalFhirClientProvider clientProvider;
+	private final ClientProvider clientProvider;
 	private final String localEndpointAddress;
 
-	public LocalOrganizationProviderImpl(TemporalAmount cacheTimeout, LocalFhirClientProvider clientProvider,
+	public LocalOrganizationProviderImpl(TemporalAmount cacheTimeout, ClientProvider clientProvider,
 			String localEndpointAddress)
 	{
 		this.cacheTimeout = cacheTimeout;
@@ -69,7 +69,7 @@ public class LocalOrganizationProviderImpl implements LocalOrganizationProvider,
 
 	private Optional<Organization> doGetLocalOrganization()
 	{
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
+		Bundle resultBundle = clientProvider.getWebserviceClient().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress), "_include",
 						List.of("Endpoint:organization")));
 

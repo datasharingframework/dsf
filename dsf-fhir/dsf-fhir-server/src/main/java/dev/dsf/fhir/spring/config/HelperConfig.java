@@ -23,7 +23,7 @@ public class HelperConfig
 	@Bean
 	public ResponseGenerator responseGenerator()
 	{
-		return new ResponseGenerator(propertiesConfig.getServerBaseUrl());
+		return new ResponseGenerator(propertiesConfig.getDsfServerBaseUrl());
 	}
 
 	@Bean

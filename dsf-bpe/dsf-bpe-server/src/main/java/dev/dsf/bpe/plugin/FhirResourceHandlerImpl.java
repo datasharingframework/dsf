@@ -25,22 +25,22 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.client.BasicFhirWebserviceClient;
-import dev.dsf.bpe.client.FhirWebserviceClient;
-import dev.dsf.bpe.client.PreferReturnMinimal;
+import dev.dsf.bpe.client.dsf.BasicWebserviceClient;
+import dev.dsf.bpe.client.dsf.PreferReturnMinimal;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
 
 public class FhirResourceHandlerImpl implements FhirResourceHandler, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirResourceHandlerImpl.class);
 
-	private final FhirWebserviceClient localWebserviceClient;
+	private final WebserviceClient localWebserviceClient;
 	private final ProcessPluginResourcesDao dao;
 	private final FhirContext fhirContext;
 	private final int fhirServerRequestMaxRetries;
 	private final long fhirServerRetryDelayMillis;
 
-	public FhirResourceHandlerImpl(FhirWebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
+	public FhirResourceHandlerImpl(WebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
 			FhirContext fhirContext, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis)
 	{
 		this.localWebserviceClient = localWebserviceClient;
@@ -64,16 +64,16 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 
 	private PreferReturnMinimal minimalReturnRetryClient()
 	{
-		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
+		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
 			return localWebserviceClient.withMinimalReturn().withRetryForever(fhirServerRetryDelayMillis);
 		else
 			return localWebserviceClient.withMinimalReturn().withRetry(fhirServerRequestMaxRetries,
 					fhirServerRetryDelayMillis);
 	}
 
-	private BasicFhirWebserviceClient retryClient()
+	private BasicWebserviceClient retryClient()
 	{
-		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
+		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
 			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
 		else
 			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);

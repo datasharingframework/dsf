@@ -4,6 +4,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,6 +22,9 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
+import de.hsheilbronn.mi.utils.crypto.io.PemReader;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.documentation.Documentation;
@@ -76,31 +83,31 @@ public class PropertiesConfig implements InitializingBean
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
-	private String webserviceClientCertificateTrustCertificatesFile;
+	private String dsfClientTrustedServerCasFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
 	@Value("${dev.dsf.fhir.client.certificate}")
-	private String webserviceClientCertificateFile;
+	private String dsfClientCertificateFile;
 
 	@Documentation(required = true, description = "Private key corresponding to the local client certificate as PEM encoded file. Use *${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate_private_key.pem")
 	@Value("${dev.dsf.fhir.client.certificate.private.key}")
-	private String webserviceClientCertificatePrivateKeyFile;
+	private String dsfClientCertificatePrivateKeyFile;
 
 	@Documentation(description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${dev.dsf.fhir.client.certificate.private.key.password:#{null}}")
-	private char[] webserviceClientCertificatePrivateKeyFilePassword;
+	private char[] dsfClientCertificatePrivateKeyFilePassword;
 
 	@Documentation(description = "Timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.fhir.client.timeout.read:10000}")
-	private int webserviceClientReadTimeout;
+	private int dsfClientReadTimeout;
 
 	@Documentation(description = "Timeout in milliseconds until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.fhir.client.timeout.connect:2000}")
-	private int webserviceClientConnectTimeout;
+	private int dsfClientConnectTimeout;
 
 	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
 	@Value("${dev.dsf.fhir.client.verbose:false}")
-	private boolean webserviceClientVerbose;
+	private boolean dsfClientVerbose;
 
 	@Documentation(description = "To disable static resource caching, set to `false`", recommendation = "Only set to `false` for development")
 	@Value("${dev.dsf.fhir.server.static.resource.cache:true}")
@@ -145,6 +152,10 @@ public class PropertiesConfig implements InitializingBean
 	// documentation in dev.dsf.common.config.AbstractJettyConfig
 	@Value("${dev.dsf.server.auth.oidc.bearer.token:false}")
 	private boolean oidcBearerTokenEnabled;
+
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
+	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_cert_ca_chains.pem}")
+	private String dsfClientTrustedClientCasFile;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
@@ -200,6 +211,20 @@ public class PropertiesConfig implements InitializingBean
 
 		if (serverBaseUrl.endsWith("/"))
 			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'", serverBaseUrl);
+
+		try
+		{
+			X509Certificate clientCertiticate = PemReader.readCertificate(Paths.get(getDsfClientCertificateFile()));
+			List<X509Certificate> certificates = PemReader
+					.readCertificates(Paths.get(getDsfClientTrustedClientCasFile()));
+			KeyStore dsfClientTrustedClientCas = KeyStoreCreator.jksForTrustedCertificates(certificates);
+			CertificateValidator.vaildateClientCertificate(dsfClientTrustedClientCas, clientCertiticate);
+		}
+		catch (CertificateException e)
+		{
+			logger.warn("Unable to validate DSF client certificate against trusted client certificate CAs: {}",
+					e.getMessage());
+		}
 	}
 
 	public String getDbUrl()
@@ -227,7 +252,7 @@ public class PropertiesConfig implements InitializingBean
 		return dbPermanentDeletePassword;
 	}
 
-	public String getServerBaseUrl()
+	public String getDsfServerBaseUrl()
 	{
 		return serverBaseUrl.endsWith("/") ? serverBaseUrl.substring(serverBaseUrl.length() - 1) : serverBaseUrl;
 	}
@@ -257,39 +282,44 @@ public class PropertiesConfig implements InitializingBean
 		return initBundleFile;
 	}
 
-	public String getWebserviceClientCertificateTrustCertificatesFile()
+	public String getDsfClientTrustedServerCasFile()
 	{
-		return webserviceClientCertificateTrustCertificatesFile;
+		return dsfClientTrustedServerCasFile;
 	}
 
-	public String getWebserviceClientCertificateFile()
+	public String getDsfClientCertificateFile()
 	{
-		return webserviceClientCertificateFile;
+		return dsfClientCertificateFile;
 	}
 
-	public String getWebserviceClientCertificatePrivateKeyFile()
+	public String getDsfClientCertificatePrivateKeyFile()
 	{
-		return webserviceClientCertificatePrivateKeyFile;
+		return dsfClientCertificatePrivateKeyFile;
 	}
 
-	public char[] getWebserviceClientCertificatePrivateKeyFilePassword()
+	public char[] getDsfClientCertificatePrivateKeyFilePassword()
 	{
-		return webserviceClientCertificatePrivateKeyFilePassword;
+		return dsfClientCertificatePrivateKeyFilePassword;
 	}
 
-	public int getWebserviceClientReadTimeout()
+	public int getDsfClientReadTimeout()
 	{
-		return webserviceClientReadTimeout;
+		return dsfClientReadTimeout;
 	}
 
-	public int getWebserviceClientConnectTimeout()
+	public int getDsfClientConnectTimeout()
 	{
-		return webserviceClientConnectTimeout;
+		return dsfClientConnectTimeout;
 	}
 
-	public boolean getWebserviceClientVerbose()
+	public boolean getDsfClientVerbose()
 	{
-		return webserviceClientVerbose;
+		return dsfClientVerbose;
+	}
+
+	public String getDsfClientTrustedClientCasFile()
+	{
+		return dsfClientTrustedClientCasFile;
 	}
 
 	public boolean getStaticResourceCacheEnabled()

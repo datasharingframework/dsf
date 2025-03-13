@@ -1,6 +1,7 @@
 package dev.dsf.bpe.v1.service;
 
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -8,7 +9,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.bpe.api.config.ProxyConfig;
+import dev.dsf.bpe.api.config.BpeProxyConfig;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClientJersey;
@@ -23,43 +24,43 @@ public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientPro
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;
 
-	private final String localWebserviceBaseUrl;
-	private final int localWebserviceReadTimeout;
-	private final int localWebserviceConnectTimeout;
-	private final boolean localWebserviceLogRequests;
+	private final String baseUrlLocal;
+	private final Duration readTimeoutLocal;
+	private final Duration connectTimeoutLocal;
+	private final boolean logRequestsAndResponsesLocal;
 
-	private final KeyStore webserviceTrustStore;
-	private final KeyStore webserviceKeyStore;
-	private final char[] webserviceKeyStorePassword;
+	private final KeyStore trustStore;
+	private final KeyStore keyStore;
+	private final char[] keyStorePassword;
 
-	private final int remoteWebserviceReadTimeout;
-	private final int remoteWebserviceConnectTimeout;
-	private final boolean remoteWebserviceLogRequests;
+	private final Duration readTimeoutRemote;
+	private final Duration connectTimeoutRemote;
+	private final boolean logRequestsAndResponsesRemote;
 
-	private final ProxyConfig proxyConfig;
+	private final BpeProxyConfig proxyConfig;
 	private final BuildInfoProvider buildInfoProvider;
 
 	public FhirWebserviceClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
-			String localWebserviceBaseUrl, int localWebserviceReadTimeout, int localWebserviceConnectTimeout,
-			boolean localWebserviceLogRequests, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
-			char[] webserviceKeyStorePassword, int remoteWebserviceReadTimeout, int remoteWebserviceConnectTimeout,
-			boolean remoteWebserviceLogRequests, ProxyConfig proxyConfig, BuildInfoProvider buildInfoProvider)
+			String baseUrlLocal, Duration readTimeoutLocal, Duration connectTimeoutLocal,
+			boolean logRequestsAndResponsesLocal, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
+			Duration readTimeoutRemote, Duration connectTimeoutRemote, boolean logRequestsAndResponsesRemote,
+			BpeProxyConfig proxyConfig, BuildInfoProvider buildInfoProvider)
 	{
 		this.fhirContext = fhirContext;
 		this.referenceCleaner = referenceCleaner;
 
-		this.localWebserviceBaseUrl = localWebserviceBaseUrl;
-		this.localWebserviceReadTimeout = localWebserviceReadTimeout;
-		this.localWebserviceConnectTimeout = localWebserviceConnectTimeout;
-		this.localWebserviceLogRequests = localWebserviceLogRequests;
+		this.baseUrlLocal = baseUrlLocal;
+		this.readTimeoutLocal = readTimeoutLocal;
+		this.connectTimeoutLocal = connectTimeoutLocal;
+		this.logRequestsAndResponsesLocal = logRequestsAndResponsesLocal;
 
-		this.webserviceTrustStore = webserviceTrustStore;
-		this.webserviceKeyStore = webserviceKeyStore;
-		this.webserviceKeyStorePassword = webserviceKeyStorePassword;
+		this.trustStore = trustStore;
+		this.keyStore = keyStore;
+		this.keyStorePassword = keyStorePassword;
 
-		this.remoteWebserviceReadTimeout = remoteWebserviceReadTimeout;
-		this.remoteWebserviceConnectTimeout = remoteWebserviceConnectTimeout;
-		this.remoteWebserviceLogRequests = remoteWebserviceLogRequests;
+		this.readTimeoutRemote = readTimeoutRemote;
+		this.connectTimeoutRemote = connectTimeoutRemote;
+		this.logRequestsAndResponsesRemote = logRequestsAndResponsesRemote;
 
 		this.proxyConfig = proxyConfig;
 		this.buildInfoProvider = buildInfoProvider;
@@ -69,26 +70,22 @@ public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientPro
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(localWebserviceBaseUrl, "localBaseUrl");
-		if (localWebserviceReadTimeout < 0)
-			throw new IllegalArgumentException("localReadTimeout < 0");
-		if (localWebserviceConnectTimeout < 0)
-			throw new IllegalArgumentException("localConnectTimeout < 0");
-		Objects.requireNonNull(webserviceTrustStore, "webserviceTrustStore");
-		Objects.requireNonNull(webserviceKeyStore, "webserviceKeyStore");
-		Objects.requireNonNull(webserviceKeyStorePassword, "webserviceKeyStorePassword");
-		if (remoteWebserviceReadTimeout < 0)
-			throw new IllegalArgumentException("remoteReadTimeout < 0");
-		if (remoteWebserviceConnectTimeout < 0)
-			throw new IllegalArgumentException("remoteConnectTimeout < 0");
-
+		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		Objects.requireNonNull(baseUrlLocal, "baseUrlLocal");
+		Objects.requireNonNull(readTimeoutLocal, "readTimeoutLocal");
+		Objects.requireNonNull(connectTimeoutLocal, "connectTimeoutLocal");
+		Objects.requireNonNull(trustStore, "trustStore");
+		Objects.requireNonNull(keyStore, "keyStore");
+		Objects.requireNonNull(keyStorePassword, "keyStorePassword");
+		Objects.requireNonNull(readTimeoutRemote, "readTimeoutRemote");
+		Objects.requireNonNull(connectTimeoutRemote, "connectTimeoutRemote");
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
 		Objects.requireNonNull(buildInfoProvider, "buildInfoReader");
 	}
 
 	public String getLocalBaseUrl()
 	{
-		return localWebserviceBaseUrl;
+		return baseUrlLocal;
 	}
 
 	private FhirWebserviceClient getClient(String webserviceUrl)
@@ -104,16 +101,16 @@ public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientPro
 				char[] proxyPassword = proxyConfig.isEnabled(webserviceUrl) ? proxyConfig.getPassword() : null;
 
 				FhirWebserviceClient client;
-				if (localWebserviceBaseUrl.equals(webserviceUrl))
-					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
-							webserviceKeyStorePassword, null, proxyUrl, proxyUsername, proxyPassword,
-							localWebserviceConnectTimeout, localWebserviceReadTimeout, localWebserviceLogRequests,
-							USER_AGENT_VALUE + buildInfoProvider.getProjectVersion(), fhirContext, referenceCleaner);
+				if (baseUrlLocal.equals(webserviceUrl))
+					client = new FhirWebserviceClientJersey(webserviceUrl, trustStore, keyStore, keyStorePassword, null,
+							proxyUrl, proxyUsername, proxyPassword, connectTimeoutLocal, readTimeoutLocal,
+							logRequestsAndResponsesLocal, USER_AGENT_VALUE + buildInfoProvider.getProjectVersion(),
+							fhirContext, referenceCleaner);
 				else
-					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
-							webserviceKeyStorePassword, null, proxyUrl, proxyUsername, proxyPassword,
-							remoteWebserviceConnectTimeout, remoteWebserviceReadTimeout, remoteWebserviceLogRequests,
-							USER_AGENT_VALUE + buildInfoProvider.getProjectVersion(), fhirContext, referenceCleaner);
+					client = new FhirWebserviceClientJersey(webserviceUrl, trustStore, keyStore, keyStorePassword, null,
+							proxyUrl, proxyUsername, proxyPassword, connectTimeoutRemote, readTimeoutRemote,
+							logRequestsAndResponsesRemote, USER_AGENT_VALUE + buildInfoProvider.getProjectVersion(),
+							fhirContext, referenceCleaner);
 
 				webserviceClientsByUrl.put(webserviceUrl, client);
 				return client;
@@ -124,7 +121,7 @@ public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientPro
 	@Override
 	public FhirWebserviceClient getLocalWebserviceClient()
 	{
-		return getWebserviceClient(localWebserviceBaseUrl);
+		return getWebserviceClient(baseUrlLocal);
 	}
 
 	@Override

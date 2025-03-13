@@ -20,4 +20,6 @@ public interface BuildInfoReader
 	void logSystemDefaultTimezone();
 
 	void logBuildInfo();
+
+	String getUserAgentValue();
 }

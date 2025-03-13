@@ -11,8 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.DefaultUserTaskListener;
+import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
-import dev.dsf.bpe.v2.service.FhirWebserviceClientProvider;
+import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
@@ -46,9 +47,15 @@ public class ApiServicesSpringConfiguration
 	}
 
 	@Bean
-	public FhirWebserviceClientProvider getFhirWebserviceClientProvider()
+	public DsfClientProvider getDsfClientProvider()
 	{
-		return api.getFhirWebserviceClientProvider();
+		return api.getDsfClientProvider();
+	}
+
+	@Bean
+	public FhirClientProvider getFhirClientProvider()
+	{
+		return api.getFhirClientProvider();
 	}
 
 	@Bean

@@ -1,1 +1,0 @@
-Empty `bundle` directory, will contain FHIR test bundle after maven build

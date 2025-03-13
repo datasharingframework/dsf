@@ -31,6 +31,7 @@
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>crypto-utils</artifactId>
+			<version>${crypto-utils.version}</version>
 		</dependency>
 
 		<dependency>

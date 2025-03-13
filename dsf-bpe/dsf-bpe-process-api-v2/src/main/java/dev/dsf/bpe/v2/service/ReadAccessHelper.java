@@ -5,12 +5,14 @@ import java.util.function.Predicate;
 
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Resource;
 
 /**
- * Helper with methods to configure read access to FHIR resources.
+ * Methods to configure read access for FHIR resources on a DSF FHIR server. Methods add and check resource {@link Meta}
+ * tags.
  */
 public interface ReadAccessHelper
 {

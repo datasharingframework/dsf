@@ -8,18 +8,20 @@ services:
       - 127.0.0.1:8080:80
       - 127.0.0.1:8443:443
     secrets:
-      - proxy_server_certificate.pem
-      - proxy_server_certificate_private_key.pem
-      - proxy_client_certificate_trusted_cas_full_chains.pem
+      - bpe.crt
+      - bpe.key.plain
+      - issuing_ca.crt
+      - ca_chain.crt
     environment:
       TZ: Europe/Berlin
       HTTPS_SERVER_NAME_PORT: localhost:443
       APP_SERVER_IP: 172.28.1.27
-      SSL_CERTIFICATE_FILE: /run/secrets/proxy_server_certificate.pem
-      SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_server_certificate_private_key.pem
-      SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
-      SSL_CA_DN_REQUEST_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
-      SSL_EXPECTED_CLIENT_I_DN_CN_VALUES: "'Test'"
+      SSL_CERTIFICATE_FILE: /run/secrets/bpe.crt
+      SSL_CERTIFICATE_KEY_FILE: /run/secrets/bpe.key.plain
+      SSL_CERTIFICATE_CHAIN_FILE: /run/secrets/issuing_ca.crt
+      SSL_CA_CERTIFICATE_FILE: /run/secrets/ca_chain.crt
+      SSL_CA_DN_REQUEST_FILE: /run/secrets/issuing_ca.crt
+      SSL_EXPECTED_CLIENT_I_DN_CN_VALUES: "'DSF Dev Issuing CA'"
     networks:
       frontend:
         ipv4_address: 172.28.1.26
@@ -36,11 +38,10 @@ services:
       - db_liquibase.password
       - db_user.password
       - db_user_camunda.password
-      - app_server_trust_certificates.pem
-      - app_client_trust_certificates.pem
-      - app_client_certificate.pem
-      - app_client_certificate_private_key.pem
-      - app_client_certificate_private_key.pem.password
+      - root_ca.crt
+      - bpe.crt
+      - bpe.key
+      - ca_chain.crt
     volumes:
       - type: bind
         source: ./process
@@ -56,10 +57,10 @@ services:
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
       DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_user_camunda.password
-      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/bpe.crt
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/bpe.key
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD: 'password'
       DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_SERVER_BASE_URL: https://bpe:8443/bpe
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://fhir/fhir
@@ -68,7 +69,7 @@ services:
             thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
             dsf-role:
               - ADMIN
-      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/ca_chain.crt
     networks:
       frontend:
         ipv4_address: 172.28.1.27
@@ -101,12 +102,18 @@ services:
       - db_liquibase.password
 
 secrets:
-  proxy_server_certificate.pem:
-    file: ./secrets/server_certificate.pem
-  proxy_server_certificate_private_key.pem:
-    file: ./secrets/server_certificate_private_key.pem
-  proxy_client_certificate_trusted_cas_full_chains.pem:
-    file: ./secrets/testca_certificate.pem 
+  bpe.crt:
+    file: ./secrets/bpe.crt
+  bpe.key:
+    file: ./secrets/bpe.key
+  bpe.key.plain:
+    file: ./secrets/bpe.key.plain
+  issuing_ca.crt:
+    file: ./secrets/issuing_ca.crt
+  root_ca.crt:
+    file: ./secrets/root_ca.crt
+  ca_chain.crt:
+    file: ./secrets/ca_chain.crt
 
   db_liquibase.password:
     file: ./secrets/db_liquibase.password
@@ -114,17 +121,6 @@ secrets:
     file: ./secrets/db_user.password
   db_user_camunda.password:
     file: ./secrets/db_user_camunda.password
-
-  app_server_trust_certificates.pem:
-    file: ./secrets/testca_certificate.pem
-  app_client_trust_certificates.pem:
-    file: ./secrets/testca_certificate.pem
-  app_client_certificate.pem:
-    file: ./secrets/client_certificate.pem
-  app_client_certificate_private_key.pem:
-    file: ./secrets/client_certificate_private_key.pem
-  app_client_certificate_private_key.pem.password:
-    file: ./secrets/client_certificate_private_key.pem.password
 
 networks:
   frontend:

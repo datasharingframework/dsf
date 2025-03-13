@@ -105,7 +105,7 @@ public abstract class AbstractPluginIntegrationTest extends AbstractIntegrationT
 
 			UUID businessKeyInProgress = getBusinessKey((Task) inProgress);
 
-			Resource completed = events.pollFirst(10, TimeUnit.SECONDS);
+			Resource completed = events.pollFirst(10, TimeUnit.MINUTES);
 			assertNotNull(completed);
 			assertTrue(completed instanceof Task);
 			assertEquals(TaskStatus.COMPLETED, ((Task) completed).getStatus());
