@@ -189,6 +189,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.client.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
+		initParameters.put("dev.dsf.server.auth.trust.client.certificate.cas",
+				certificates.getCaCertificateFile().toString());
 		initParameters.put("dev.dsf.fhir.client.certificate", certificates.getClientCertificateFile().toString());
 		initParameters.put("dev.dsf.fhir.client.certificate.private.key",
 				certificates.getClientCertificatePrivateKeyFile().toString());
