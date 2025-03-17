@@ -2,7 +2,6 @@ package dev.dsf.fhir.spring.config;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ public class InitialDataMigratorConfig
 	{
 		// currently no migration jobs
 		// add future migration jobs here
-		return Collections.emptyList();
+		return List.of();
 	}
 
 	@Bean

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<include file="fhir/db/db.create-db-users.changelog-1.0.0.xml" />
+
+	<include file="fhir/db/db.activity_definitions.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.binaries.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.bundles.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.code_systems.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.document_references.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.endpoints.changelog-1.0.0.xml"/>
+	<include file="fhir/db/db.groups.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.healthcare_services.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.libraries.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.locations.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.measure_reports.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.measures.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.naming_systems.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.organization_affiliations.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.organizations.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.patients.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.practitioner_roles.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.practitioners.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.provenances.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.questionnaire_responses.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.questionnaires.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.research_studies.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.structure_definition_snapshots.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.structure_definitions.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.subscriptions.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.tasks.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.value_sets.changelog-1.0.0.xml" />
+
+	<include file="fhir/db/db.history.changelog-1.0.0.xml" />
+	<include file="fhir/db/db.read_access.changelog-1.0.0.xml" />
+
+	<include file="fhir/db/db.read_access.changelog-1.5.0.xml" />
+
+	<include file="fhir/db/db.read_access.changelog-1.6.0.xml" />
+
+	<include file="fhir/db/db.constraint_trigger.changelog-1.6.1.xml" />
+	<include file="fhir/db/db.delete_duplicate_resources.changelog-1.6.1.xml" />
+
+</databaseChangeLog>

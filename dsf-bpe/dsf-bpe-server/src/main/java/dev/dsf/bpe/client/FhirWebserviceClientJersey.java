@@ -2,7 +2,6 @@ package dev.dsf.bpe.client;
 
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,9 +42,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			ObjectMapper objectMapper, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
 			int connectTimeout, int readTimeout, boolean logRequests, String userAgentValue, FhirContext fhirContext)
 	{
-		super(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper,
-				Collections.singleton(new FhirAdapter(fhirContext)), proxySchemeHostPort, proxyUserName, proxyPassword,
-				connectTimeout, readTimeout, logRequests, userAgentValue);
+		super(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper, List.of(new FhirAdapter(fhirContext)),
+				proxySchemeHostPort, proxyUserName, proxyPassword, connectTimeout, readTimeout, logRequests,
+				userAgentValue);
 
 		preferReturnMinimal = new PreferReturnMinimalWithRetryImpl(this);
 	}

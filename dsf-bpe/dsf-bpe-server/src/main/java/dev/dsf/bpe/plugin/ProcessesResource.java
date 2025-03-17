@@ -3,7 +3,6 @@ package dev.dsf.bpe.plugin;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -369,9 +368,9 @@ public final class ProcessesResource
 			case MISSING -> switch (getNewProcessState())
 			{
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case ACTIVE -> Arrays.asList("200", "201");
+				case ACTIVE -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case RETIRED -> Arrays.asList("200", "201");
+				case RETIRED -> List.of("200", "201");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -379,11 +378,11 @@ public final class ProcessesResource
 			case NEW -> switch (getNewProcessState())
 			{
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case ACTIVE -> Arrays.asList("200", "201");
+				case ACTIVE -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case DRAFT -> Arrays.asList("200", "201");
+				case DRAFT -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case RETIRED -> Arrays.asList("200", "201");
+				case RETIRED -> List.of("200", "201");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -391,11 +390,11 @@ public final class ProcessesResource
 			case ACTIVE -> switch (getNewProcessState())
 			{
 				// standard update with resource id
-				case DRAFT -> Collections.singletonList("200");
+				case DRAFT -> List.of("200");
 				// standard update with resource id
-				case RETIRED -> Collections.singletonList("200");
+				case RETIRED -> List.of("200");
 				// standard delete with resource id
-				case EXCLUDED -> Arrays.asList("200", "204");
+				case EXCLUDED -> List.of("200", "204");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -403,13 +402,13 @@ public final class ProcessesResource
 			case DRAFT -> switch (getNewProcessState())
 			{
 				// standard update with resource id
-				case ACTIVE -> Collections.singletonList("200");
+				case ACTIVE -> List.of("200");
 				// standard update with resource id
-				case DRAFT -> Collections.singletonList("200");
+				case DRAFT -> List.of("200");
 				// standard update with resource id
-				case RETIRED -> Collections.singletonList("200");
+				case RETIRED -> List.of("200");
 				// standard delete with resource id
-				case EXCLUDED -> Arrays.asList("200", "204");
+				case EXCLUDED -> List.of("200", "204");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -417,11 +416,11 @@ public final class ProcessesResource
 			case RETIRED -> switch (getNewProcessState())
 			{
 				// standard update with resource id
-				case ACTIVE -> Collections.singletonList("200");
+				case ACTIVE -> List.of("200");
 				// standard update with resource id
-				case DRAFT -> Collections.singletonList("200");
+				case DRAFT -> List.of("200");
 				// standard delete with resource id
-				case EXCLUDED -> Arrays.asList("200", "204");
+				case EXCLUDED -> List.of("200", "204");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -429,11 +428,11 @@ public final class ProcessesResource
 			case EXCLUDED -> switch (getNewProcessState())
 			{
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case ACTIVE -> Arrays.asList("200", "201");
+				case ACTIVE -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case DRAFT -> Arrays.asList("200", "201");
+				case DRAFT -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case RETIRED -> Arrays.asList("200", "201");
+				case RETIRED -> List.of("200", "201");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");

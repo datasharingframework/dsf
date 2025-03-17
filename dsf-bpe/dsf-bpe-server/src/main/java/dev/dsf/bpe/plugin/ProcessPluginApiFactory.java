@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,10 +58,10 @@ public class ProcessPluginApiFactory implements InitializingBean
 
 	public List<ProcessPluginFactory> initialize()
 	{
-		return Stream.of("1", "2").map(this::init).toList();
+		return IntStream.of(1, 2).mapToObj(this::init).toList();
 	}
 
-	private ProcessPluginFactory init(String apiVersion)
+	private ProcessPluginFactory init(int apiVersion)
 	{
 		ClassLoader apiClassLoader = classLoaderFactory.createApiClassLoader(apiVersion);
 		ProcessPluginApiBuilder apiBuilder = loadProcessPluginApiBuilder(apiClassLoader);
@@ -77,7 +77,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 				.get();
 	}
 
-	private ApplicationContext createApiApplicationContext(String apiVersion, ClassLoader apiClassLoader,
+	private ApplicationContext createApiApplicationContext(int apiVersion, ClassLoader apiClassLoader,
 			Class<?> springServiceConfigClass)
 	{
 		try

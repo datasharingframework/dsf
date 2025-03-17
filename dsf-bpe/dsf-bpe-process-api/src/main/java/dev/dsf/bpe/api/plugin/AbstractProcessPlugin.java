@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.engine.delegate.TaskListener;
@@ -584,7 +583,7 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 					return null;
 				}
 
-				String content = IOUtils.toString(in, StandardCharsets.UTF_8);
+				String content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 
 				content = VERSION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(getDefinitionResourceVersion());
 				content = DATE_PLACEHOLDER_PATTERN.matcher(content).replaceAll(resourceDateValue);
@@ -795,7 +794,7 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 	public boolean taskFieldsAvailable(Process process, String elementType, String elementId,
 			ExtensionElements extensionElements)
 	{
-		Collection<CamundaField> fields = extensionElements == null ? Collections.emptySet()
+		Collection<CamundaField> fields = extensionElements == null ? List.of()
 				: extensionElements.getChildElementsByType(CamundaField.class);
 
 		String instantiatesCanonical = null;
@@ -954,7 +953,7 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 					return null;
 				}
 
-				String content = IOUtils.toString(in, StandardCharsets.UTF_8);
+				String content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 
 				content = VERSION_PLACEHOLDER_PATTERN.matcher(content).replaceAll(getDefinitionResourceVersion());
 				content = DATE_PLACEHOLDER_PATTERN.matcher(content).replaceAll(resourceDateValue);
@@ -1241,7 +1240,7 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 		{
 			ProcessIdAndVersion processIdAndVersion = model.getProcessIdAndVersion();
 
-			List<FileAndResource> resources = fhirResources.getOrDefault(processIdAndVersion, Collections.emptyList());
+			List<FileAndResource> resources = fhirResources.getOrDefault(processIdAndVersion, List.of());
 			if (resources.isEmpty())
 			{
 				logger.warn(

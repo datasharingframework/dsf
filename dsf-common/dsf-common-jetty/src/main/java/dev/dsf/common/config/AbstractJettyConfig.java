@@ -20,7 +20,6 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -230,7 +229,7 @@ public abstract class AbstractJettyConfig
 	{
 		org.springframework.core.env.PropertySource<?> jettyProperties = environment.getPropertySources()
 				.get("URL [file:conf/jetty.properties]");
-		Map<String, String> initParameters = jettyProperties == null ? Collections.emptyMap()
+		Map<String, String> initParameters = jettyProperties == null ? Map.of()
 				: ((Properties) jettyProperties.getSource()).entrySet().stream().collect(
 						Collectors.toMap(e -> Objects.toString(e.getKey()), e -> Objects.toString(e.getValue())));
 

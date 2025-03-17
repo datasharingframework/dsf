@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -164,7 +163,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("authored", Collections.singletonList("le2022-02-01")));
+				Map.of("authored", List.of("le2022-02-01")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -187,7 +186,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
+				Map.of("identifier", List.of(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -211,7 +210,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getExternalWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
+				Map.of("identifier", List.of(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(0, searchBundle.getEntry().size());
@@ -240,9 +239,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("questionnaire", Collections.singletonList(questionnaireUrl), "_include",
-						Collections.singletonList("QuestionnaireResponse:questionnaire")));
+		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class, Map.of("questionnaire",
+				List.of(questionnaireUrl), "_include", List.of("QuestionnaireResponse:questionnaire")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -278,9 +276,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("questionnaire", Collections.singletonList(QUESTIONNAIRE_URL), "_include",
-						Collections.singletonList("QuestionnaireResponse:questionnaire")));
+		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class, Map.of("questionnaire",
+				List.of(QUESTIONNAIRE_URL), "_include", List.of("QuestionnaireResponse:questionnaire")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -325,9 +322,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("questionnaire", Collections.singletonList(QUESTIONNAIRE_URL), "_include",
-						Collections.singletonList("QuestionnaireResponse:questionnaire")));
+		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class, Map.of("questionnaire",
+				List.of(QUESTIONNAIRE_URL), "_include", List.of("QuestionnaireResponse:questionnaire")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -362,7 +358,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("status", Collections.singletonList(QUESTIONNAIRE_RESPONSE_STATUS.toCode())));
+				Map.of("status", List.of(QUESTIONNAIRE_RESPONSE_STATUS.toCode())));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -389,9 +385,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		Organization localOrganization = organizationProvider.getLocalOrganization().get();
 		String organizationReference = "Organization/" + localOrganization.getIdElement().getIdPart();
 
-		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("subject", Collections.singletonList(organizationReference), "_include",
-						Collections.singletonList("QuestionnaireResponse:subject:Organization")));
+		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class, Map.of("subject",
+				List.of(organizationReference), "_include", List.of("QuestionnaireResponse:subject:Organization")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());

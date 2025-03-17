@@ -1,6 +1,5 @@
 package dev.dsf.fhir.search.parameters.basic;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Resource;
@@ -23,7 +22,7 @@ public abstract class AbstractCanonicalUrlParameter<R extends Resource> extends 
 
 	public static List<String> getNameModifiers()
 	{
-		return Collections.singletonList(UriSearchType.BELOW.modifier);
+		return List.of(UriSearchType.BELOW.modifier);
 	}
 
 	protected static class CanonicalUrlAndSearchType

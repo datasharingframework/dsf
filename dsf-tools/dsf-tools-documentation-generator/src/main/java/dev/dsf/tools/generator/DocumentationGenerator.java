@@ -17,7 +17,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -136,7 +135,7 @@ public class DocumentationGenerator extends AbstractMojo
 		if (pluginDefinitionClasses.size() < 1)
 		{
 			logger.warn("No ProcessPluginDefinitions found in package {}", workingPackage);
-			return Collections.emptyList();
+			return List.of();
 		}
 
 		if (pluginDefinitionClasses.size() > 1)
@@ -157,7 +156,7 @@ public class DocumentationGenerator extends AbstractMojo
 			logger.error("Could not read process names from package {} and ProcessPluginDefinition with name {}: {} {}",
 					workingPackage, pluginDefinitionClasses.get(0).getName(), e.getClass().getSimpleName(),
 					e.getMessage());
-			return Collections.emptyList();
+			return List.of();
 		}
 	}
 

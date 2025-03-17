@@ -16,7 +16,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -147,7 +148,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		assertNotNull(createdB);
 
 		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), PageAndCount.single());
-		query.configureParameters(Collections.emptyMap());
+		query.configureParameters(Map.of());
 		assertNotNull(query);
 
 		PartialResult<Binary> result = dao.search(query);
@@ -174,7 +175,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		assertNotNull(createdB);
 
 		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(org), PageAndCount.single());
-		query.configureParameters(Collections.emptyMap());
+		query.configureParameters(Map.of());
 		assertNotNull(query);
 
 		PartialResult<Binary> result = dao.search(query);
@@ -213,7 +214,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdOrg),
 				PageAndCount.single());
-		query.configureParameters(Collections.emptyMap());
+		query.configureParameters(Map.of());
 		assertNotNull(query);
 
 		PartialResult<Binary> result = dao.search(query);
@@ -272,7 +273,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		SearchQuery<Binary> query = dao.createSearchQuery(TestOrganizationIdentity.local(createdMemberOrg),
 				PageAndCount.single());
-		query.configureParameters(Collections.emptyMap());
+		query.configureParameters(Map.of());
 		assertNotNull(query);
 
 		PartialResult<Binary> result = dao.search(query);
@@ -630,7 +631,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		assertReadAccessEntryCount(2, 1, v1, accessType);
 		assertReadAccessEntryCount(2, 1, createdB, accessType);
 
-		v1.getMeta().setTag(Collections.emptyList());
+		v1.getMeta().setTag(List.of());
 		ResearchStudy v2 = researchStudyDao.update(v1);
 		assertEquals(2L, (long) v2.getIdElement().getVersionIdPartAsLong());
 
@@ -680,7 +681,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		assertReadAccessEntryCount(2, 1, v1, accessType);
 		assertReadAccessEntryCount(2, 1, createdB, accessType);
 
-		v1.getMeta().setTag(Collections.emptyList());
+		v1.getMeta().setTag(List.of());
 		ResearchStudy v2 = researchStudyDao.update(v1);
 		assertEquals(2L, (long) v2.getIdElement().getVersionIdPartAsLong());
 

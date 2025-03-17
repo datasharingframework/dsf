@@ -18,6 +18,9 @@
 		<module>dsf-bpe-process-api-v2-impl</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
+		<module>dsf-bpe-test-plugin</module>
+		<module>dsf-bpe-test-plugin-v1</module>
+		<module>dsf-bpe-test-plugin-v2</module>
 	</modules>
 	
 	<properties>
@@ -56,16 +59,6 @@
 		<dependencies>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-jetty</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -89,7 +82,37 @@
 				<artifactId>dsf-bpe-process-api-v2-impl</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-server-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-test-plugin</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-test-plugin-v1</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-test-plugin-v2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+	logicalFilePath="db/db.camunda_identity.changelog-1.0.0.xml">
+
+	<changeSet author="camunda.org" id="db.camunda_identity.changelog-1.0.0">
+		<sqlFile dbms="postgresql" encoding="utf8" path="bpe/db/camunda/postgres_identity_7.19.0.sql" />
+			
+		<sql dbms="postgresql">
+			GRANT ALL ON TABLE ACT_ID_GROUP TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_GROUP TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_MEMBERSHIP TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_MEMBERSHIP TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_USER TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_USER TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_INFO TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_INFO TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_TENANT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_TENANT_MEMBER TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT_MEMBER TO ${db.camunda_users_group};
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

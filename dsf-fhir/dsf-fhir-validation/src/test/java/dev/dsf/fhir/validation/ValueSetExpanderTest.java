@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -43,8 +42,7 @@ public class ValueSetExpanderTest
 		});
 
 		var validationSupport = new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirContext),
-				new ValidationSupportWithCustomResources(fhirContext, Collections.emptyList(), readCodeSystems(),
-						Collections.emptyList()),
+				new ValidationSupportWithCustomResources(fhirContext, List.of(), readCodeSystems(), List.of()),
 				new DefaultProfileValidationSupport(fhirContext));
 
 		valueSetExpander = new ValueSetExpanderImpl(fhirContext, validationSupport);

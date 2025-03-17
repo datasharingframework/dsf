@@ -19,5 +19,5 @@ public interface ProcessPluginFactory
 
 	Class<? extends TaskListener> getDefaultUserTaskListener();
 
-	ProcessPlugin load(Path jar);
+	ProcessPlugin load(Path pluginPath);
 }

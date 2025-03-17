@@ -11,10 +11,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -592,7 +591,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		String taskId = taskDao.create(t).getIdElement().getIdPart();
 
 		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Task.class,
-				Map.of("requester", Collections.singletonList(orgId)));
+				Map.of("requester", List.of(orgId)));
 
 		assertNotNull(resultBundle);
 		assertEquals(1, resultBundle.getTotal());
@@ -1233,13 +1232,13 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	public void testDateTimeQueryParameter() throws Exception
 	{
 		Bundle r1 = getWebserviceClient().search(Task.class,
-				Map.of("_lastUpdated", Arrays.asList("gt2021-12-02T10:00:00", "lt2021-12-02T12:00:00")));
+				Map.of("_lastUpdated", List.of("gt2021-12-02T10:00:00", "lt2021-12-02T12:00:00")));
 		assertNotNull(r1);
 		assertEquals(0, r1.getTotal());
 		assertEquals(0, r1.getEntry().size());
 
 		Bundle r2 = getWebserviceClient().search(Task.class,
-				Map.of("_lastUpdated", Arrays.asList("lt2021-12-02T12:00:00", "gt2021-12-02T10:00:00")));
+				Map.of("_lastUpdated", List.of("lt2021-12-02T12:00:00", "gt2021-12-02T10:00:00")));
 		assertNotNull(r2);
 		assertEquals(0, r2.getTotal());
 		assertEquals(0, r2.getEntry().size());
@@ -1273,8 +1272,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Task createdTask2 = taskDao.create(task2);
 		assertNotNull(createdTask2);
 
-		Bundle result1 = getWebserviceClient().search(Task.class,
-				Map.of("_profile", Collections.singletonList(profile)));
+		Bundle result1 = getWebserviceClient().search(Task.class, Map.of("_profile", List.of(profile)));
 		assertNotNull(result1);
 		assertEquals(2, result1.getTotal());
 		assertTrue(result1.hasEntry());
@@ -1282,8 +1280,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertTrue(result1.getEntry().get(0).hasResource());
 		assertTrue(result1.getEntry().get(0).getResource() instanceof Task);
 
-		Bundle result2 = getWebserviceClient().search(Task.class,
-				Map.of("_profile", Collections.singletonList(profile + "|0.1.0")));
+		Bundle result2 = getWebserviceClient().search(Task.class, Map.of("_profile", List.of(profile + "|0.1.0")));
 		assertNotNull(result2);
 		assertEquals(1, result2.getTotal());
 		assertTrue(result2.hasEntry());
@@ -1296,17 +1293,16 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				result2.getEntry().get(0).getResource().getMeta().getProfile().get(0).getValue());
 
 		Bundle result3 = getWebserviceClient().search(Task.class,
-				Map.of("_profile", Collections.singletonList("http://foo.bar/fhir/StructureDefinition/test")));
+				Map.of("_profile", List.of("http://foo.bar/fhir/StructureDefinition/test")));
 		assertNotNull(result3);
 		assertEquals(0, result3.getTotal());
 
-		Bundle result4 = getWebserviceClient().search(Task.class,
-				Map.of("_profile", Collections.singletonList(profile + "|0.2.0")));
+		Bundle result4 = getWebserviceClient().search(Task.class, Map.of("_profile", List.of(profile + "|0.2.0")));
 		assertNotNull(result4);
 		assertEquals(0, result4.getTotal());
 
 		Bundle result5 = getWebserviceClient().search(Task.class,
-				Map.of("_profile:below", Collections.singletonList("http://foo.bar/fhir/StructureDefinition")));
+				Map.of("_profile:below", List.of("http://foo.bar/fhir/StructureDefinition")));
 		assertNotNull(result5);
 		assertEquals(2, result5.getTotal());
 		assertTrue(result5.hasEntry());
@@ -1315,7 +1311,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertTrue(result5.getEntry().get(0).getResource() instanceof Task);
 
 		Bundle result6 = getWebserviceClient().search(Task.class,
-				Map.of("_profile:below", Collections.singletonList("http://foo.bar/fhir/StructureDefinition|0.1.0")));
+				Map.of("_profile:below", List.of("http://foo.bar/fhir/StructureDefinition|0.1.0")));
 		assertNotNull(result6);
 		assertEquals(1, result6.getTotal());
 		assertTrue(result6.hasEntry());

@@ -1,0 +1,22 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>dsf-bpe-test-plugin-v1</artifactId>
+
+	<parent>
+		<groupId>dev.dsf</groupId>
+		<artifactId>dsf-bpe-pom</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
+	
+	<dependencies>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-bpe-test-plugin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-bpe-process-api-v1</artifactId>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,7 +1,6 @@
 package dev.dsf.bpe.subscription;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -122,6 +122,9 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 	{
 		Objects.requireNonNull(task, "task");
 		Objects.requireNonNull(task.getInstantiatesCanonical(), "task.instantiatesCanonical");
+
+		if (!TaskStatus.REQUESTED.equals(task.getStatus()))
+			throw new IllegalArgumentException("Task.status != " + TaskStatus.REQUESTED.toCode());
 
 		Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(task.getInstantiatesCanonical());
 		if (!matcher.matches())
@@ -262,7 +265,7 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 		Objects.requireNonNull(processDefinitionId, "processDefinitionId");
 
 		if (variables == null)
-			variables = Collections.emptyMap();
+			variables = Map.of();
 
 		if (businessKey == null)
 		{
@@ -283,7 +286,7 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 			if (instances.size() + instancesWithAlternativeBusinessKey.size() <= 0)
 			{
 				BpmnModelInstance model = repositoryService.getBpmnModelInstance(processDefinitionId);
-				Collection<StartEvent> startEvents = model == null ? Collections.emptySet()
+				Collection<StartEvent> startEvents = model == null ? List.of()
 						: model.getModelElementsByType(StartEvent.class);
 				Stream<String> startEventMesssageNames = startEvents.stream().flatMap(e ->
 				{

@@ -1,15 +1,22 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toSet;
+
+import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -64,14 +71,16 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-//copied and modified from hapi-fhir-validation version 7.4.0
+//copied and modified from https://github.com/hapifhir/hapi-fhir/blob/v7.6.1/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/validator/VersionSpecificWorkerContextWrapper.java
 public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext
 {
 	private static final Logger ourLog = LoggerFactory.getLogger(FixedVersionSpecificWorkerContextWrapper.class);
 	private final ValidationSupportContext myValidationSupportContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
+	private final Map<String, StructureDefinition> myStructureDefinitionNonExpiringCache;
 	private volatile List<StructureDefinition> myAllStructures;
+	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
 
 	public FixedVersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext,
@@ -79,6 +88,7 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 	{
 		myValidationSupportContext = theValidationSupportContext;
 		myVersionCanonicalizer = theVersionCanonicalizer;
+		myStructureDefinitionNonExpiringCache = new ConcurrentHashMap<>();
 
 		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
 
@@ -108,24 +118,7 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 			IBaseResource fetched = myValidationSupportContext.getRootValidationSupport()
 					.fetchResource(fetchResourceType, key.getUri());
 
-			Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-
-			if (canonical instanceof StructureDefinition)
-			{
-				StructureDefinition canonicalSd = (StructureDefinition) canonical;
-				if (canonicalSd.getSnapshot().isEmpty())
-				{
-					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-					fetched = myValidationSupportContext.getRootValidationSupport()
-							.generateSnapshot(theValidationSupportContext, fetched, "", null, "");
-					Validate.isTrue(fetched != null,
-							"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-							key.getUri());
-					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-				}
-			}
-
-			return canonical;
+			return myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 		});
 
 		setValidationMessageLanguage(getLocale());
@@ -324,8 +317,7 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 			}
 
 			retVal = new ValidationResult(issueSeverity, message, theSystem, theResult.getCodeSystemVersion(),
-					conceptDefinitionComponent, display,
-					getIssuesForCodeValidation(theResult.getCodeValidationIssues()));
+					conceptDefinitionComponent, display, getIssuesForCodeValidation(theResult.getIssues()));
 		}
 
 		if (retVal == null)
@@ -337,78 +329,29 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 	}
 
 	private List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesForCodeValidation(
-			List<IValidationSupport.CodeValidationIssue> codeValidationIssues)
+			List<IValidationSupport.CodeValidationIssue> theIssues)
 	{
-		List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
+		List<OperationOutcome.OperationOutcomeIssueComponent> issueComponents = new ArrayList<>();
 
-		for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeValidationIssues)
+		for (IValidationSupport.CodeValidationIssue issue : theIssues)
 		{
+			OperationOutcome.IssueSeverity severity = OperationOutcome.IssueSeverity
+					.fromCode(issue.getSeverity().getCode());
+			OperationOutcome.IssueType issueType = OperationOutcome.IssueType.fromCode(issue.getType().getCode());
+			String diagnostics = issue.getDiagnostics();
 
-			CodeableConcept codeableConcept = new CodeableConcept().setText(codeValidationIssue.getMessage());
-			codeableConcept.addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
-					getIssueCodingFromCodeValidationIssue(codeValidationIssue), null);
+			IValidationSupport.CodeValidationIssueDetails details = issue.getDetails();
+			CodeableConcept codeableConcept = new CodeableConcept().setText(details.getText());
+			details.getCodings().forEach(detailCoding -> codeableConcept.addCoding().setSystem(detailCoding.getSystem())
+					.setCode(detailCoding.getCode()));
 
-			OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
-					.setSeverity(getIssueSeverityFromCodeValidationIssue(codeValidationIssue))
-					.setCode(getIssueTypeFromCodeValidationIssue(codeValidationIssue)).setDetails(codeableConcept);
-			issue.getDetails().setText(codeValidationIssue.getMessage());
-			issue.addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
+			OperationOutcome.OperationOutcomeIssueComponent issueComponent = new OperationOutcome.OperationOutcomeIssueComponent()
+					.setSeverity(severity).setCode(issueType).setDetails(codeableConcept).setDiagnostics(diagnostics);
+			issueComponent.addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
 					.setValue(new StringType("Terminology_PassThrough_TX_Message"));
-			issues.add(issue);
+			issueComponents.add(issueComponent);
 		}
-		return issues;
-	}
-
-	@SuppressWarnings("incomplete-switch")
-	private String getIssueCodingFromCodeValidationIssue(IValidationSupport.CodeValidationIssue codeValidationIssue)
-	{
-		switch (codeValidationIssue.getCoding())
-		{
-			case VS_INVALID:
-				return "vs-invalid";
-			case NOT_FOUND:
-				return "not-found";
-			case NOT_IN_VS:
-				return "not-in-vs";
-			case INVALID_CODE:
-				return "invalid-code";
-			case INVALID_DISPLAY:
-				return "invalid-display";
-		}
-		return null;
-	}
-
-	@SuppressWarnings("incomplete-switch")
-	private OperationOutcome.IssueType getIssueTypeFromCodeValidationIssue(
-			IValidationSupport.CodeValidationIssue codeValidationIssue)
-	{
-		switch (codeValidationIssue.getCode())
-		{
-			case NOT_FOUND:
-				return OperationOutcome.IssueType.NOTFOUND;
-			case CODE_INVALID:
-				return OperationOutcome.IssueType.CODEINVALID;
-			case INVALID:
-				return OperationOutcome.IssueType.INVALID;
-		}
-		return null;
-	}
-
-	private OperationOutcome.IssueSeverity getIssueSeverityFromCodeValidationIssue(
-			IValidationSupport.CodeValidationIssue codeValidationIssue)
-	{
-		switch (codeValidationIssue.getSeverity())
-		{
-			case FATAL:
-				return OperationOutcome.IssueSeverity.FATAL;
-			case ERROR:
-				return OperationOutcome.IssueSeverity.ERROR;
-			case WARNING:
-				return OperationOutcome.IssueSeverity.WARNING;
-			case INFORMATION:
-				return OperationOutcome.IssueSeverity.INFORMATION;
-		}
-		return null;
+		return issueComponents;
 	}
 
 	@Override
@@ -493,7 +436,8 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 	@Override
 	public CodeSystem fetchCodeSystem(String system, String verison)
 	{
-		IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
+		IBaseResource fetched = myValidationSupportContext.getRootValidationSupport()
+				.fetchCodeSystem(system + "|" + verison);
 		if (fetched == null)
 		{
 			return null;
@@ -558,11 +502,48 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 			return null;
 		}
 
+		if (StructureDefinition.class.equals(class_))
+		{
+			@SuppressWarnings("unchecked")
+			T structureDefinition = (T) myStructureDefinitionNonExpiringCache.computeIfAbsent(theUri,
+					k -> fetchStructureDefinition(theUri));
+			return structureDefinition;
+		}
+
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), theUri);
 		@SuppressWarnings("unchecked")
 		T retVal = (T) myFetchResourceCache.get(key);
 
 		return retVal;
+	}
+
+	private StructureDefinition fetchStructureDefinition(String theUri)
+	{
+		// Fetch the resourceType
+		Class<? extends IBaseResource> resourceType = myValidationSupportContext.getRootValidationSupport()
+				.getFhirContext().getResourceDefinition(StructureDefinition.class.getSimpleName())
+				.getImplementingClass();
+
+		// Fetch the resource
+		IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchResource(resourceType,
+				theUri);
+
+		// Canonicalize the resource
+		Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
+
+		// Ensure snapshot is present
+		StructureDefinition canonicalSd = (StructureDefinition) canonical;
+		if (canonicalSd != null && canonicalSd.getSnapshot().isEmpty())
+		{
+			ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
+			fetched = myValidationSupportContext.getRootValidationSupport().generateSnapshot(myValidationSupportContext,
+					fetched, "", null, "");
+			Validate.isTrue(fetched != null,
+					"StructureDefinition %s has no snapshot, and no snapshot generator is configured", theUri);
+			canonicalSd = (StructureDefinition) myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
+		}
+
+		return canonicalSd;
 	}
 
 	@Override
@@ -681,11 +662,24 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 	@Override
 	public boolean isPrimitiveType(String theType)
 	{
-		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
-		return allStructures.stream()
-				.filter(structureDefinition -> structureDefinition
-						.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
-				.anyMatch(structureDefinition -> theType.equals(structureDefinition.getName()));
+		return allPrimitiveTypes().contains(theType);
+	}
+
+	private Set<String> allPrimitiveTypes()
+	{
+		Set<String> retVal = myAllPrimitiveTypes;
+		if (retVal == null)
+		{
+			// Collector may be changed to Collectors.toUnmodifiableSet() when switching to Android API level >= 33
+			retVal = allStructures().stream()
+					.filter(structureDefinition -> structureDefinition
+							.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
+					.map(StructureDefinition::getName).filter(Objects::nonNull)
+					.collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+			myAllPrimitiveTypes = retVal;
+		}
+
+		return retVal;
 	}
 
 	@Override
@@ -719,6 +713,14 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 		if (isBlank(uri))
 		{
 			return false;
+		}
+
+		if (StructureDefinition.class.equals(class_))
+		{
+			@SuppressWarnings("unchecked")
+			T structureDefinition = (T) myStructureDefinitionNonExpiringCache.computeIfAbsent(uri,
+					k -> fetchStructureDefinition(uri));
+			return structureDefinition != null;
 		}
 
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
@@ -919,7 +921,7 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport()
 				.validateCodeInValueSet(myValidationSupportContext, theValidationOptions, theSystem, theCode,
 						theDisplay, theValueSet);
-		if (result != null)
+		if (result != null && theSystem != null)
 		{
 			/*
 			 * We got a value set result, which could be successful, or could contain errors/warnings. The code might
@@ -927,27 +929,29 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 			 */
 			IValidationSupport.CodeValidationResult codeSystemResult = validateCodeInCodeSystem(theValidationOptions,
 					theSystem, theCode, theDisplay);
-			final boolean valueSetResultContainsInvalidDisplay = result.getCodeValidationIssues().stream()
-					.anyMatch(codeValidationIssue -> codeValidationIssue
-							.getCoding() == IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY);
+			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
+					.anyMatch(FixedVersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null)
 			{
-				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult
-						.getCodeValidationIssues())
+				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues())
 				{
 					/*
 					 * Value set validation should already have checked the display name. If we get INVALID_DISPLAY
 					 * issues from code system validation, they will only repeat what was already caught.
 					 */
-					if (codeValidationIssue.getCoding() != IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY
-							|| !valueSetResultContainsInvalidDisplay)
+					if (!hasInvalidDisplayDetailCode(codeValidationIssue) || !valueSetResultContainsInvalidDisplay)
 					{
-						result.addCodeValidationIssue(codeValidationIssue);
+						result.addIssue(codeValidationIssue);
 					}
 				}
 			}
 		}
 		return result;
+	}
+
+	private static boolean hasInvalidDisplayDetailCode(IValidationSupport.CodeValidationIssue theIssue)
+	{
+		return theIssue.hasIssueDetailCode(INVALID_DISPLAY.getCode());
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
@@ -1013,6 +1017,7 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 	public void invalidateCaches()
 	{
 		myFetchResourceCache.invalidateAll();
+		myStructureDefinitionNonExpiringCache.clear();
 	}
 
 	@SuppressWarnings("unchecked")

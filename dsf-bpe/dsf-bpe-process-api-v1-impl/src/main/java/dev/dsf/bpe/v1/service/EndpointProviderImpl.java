@@ -1,6 +1,5 @@
 package dev.dsf.bpe.v1.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,8 +29,7 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 	public Optional<Endpoint> getLocalEndpoint()
 	{
 		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
-				Map.of("status", Collections.singletonList("active"), "address",
-						Collections.singletonList(localEndpointAddress)));
+				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 1
 				|| resultBundle.getEntryFirstRep().getResource() == null
@@ -61,8 +59,8 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 
 		String endpointIdSp = toSearchParameter(endpointIdentifier);
 
-		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class, Map.of(
-				"status", Collections.singletonList("active"), "identifier", Collections.singletonList(endpointIdSp)));
+		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
+				Map.of("status", List.of("active"), "identifier", List.of(endpointIdSp)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1
 				|| resultBundle.getEntryFirstRep().getResource() == null
@@ -81,17 +79,17 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 	{
 		if (parentOrganizationIdentifier == null)
 		{
-			logger.debug("Parent organiztion identifier is null");
+			logger.debug("Parent organization identifier is null");
 			return Optional.empty();
 		}
 		else if (memberOrganizationIdentifier == null)
 		{
-			logger.debug("Member organiztion identifier is null");
+			logger.debug("Member organization identifier is null");
 			return Optional.empty();
 		}
 		else if (memberOrganizationRole == null)
 		{
-			logger.debug("Member organiztion role is null");
+			logger.debug("Member organization role is null");
 			return Optional.empty();
 		}
 
@@ -101,11 +99,9 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 
 		Bundle resultBundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(
 				OrganizationAffiliation.class,
-				Map.of("active", Collections.singletonList("true"), "primary-organization:identifier",
-						Collections.singletonList(parentOrganizationIdSp), "participating-organization:identifier",
-						Collections.singletonList(memberOrganizationIdSp), "role",
-						Collections.singletonList(memberOrganizationRoleSp), "_include",
-						Collections.singletonList("OrganizationAffiliation:endpoint")));
+				Map.of("active", List.of("true"), "primary-organization:identifier", List.of(parentOrganizationIdSp),
+						"participating-organization:identifier", List.of(memberOrganizationIdSp), "role",
+						List.of(memberOrganizationRoleSp), "_include", List.of("OrganizationAffiliation:endpoint")));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1
 				|| resultBundle.getEntryFirstRep().getResource() == null
@@ -141,22 +137,21 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 	{
 		if (parentOrganizationIdentifier == null)
 		{
-			logger.debug("Parent organiztion identifier is null");
-			return Collections.emptyList();
+			logger.debug("Parent organization identifier is null");
+			return List.of();
 		}
 		else if (memberOrganizationRole == null)
 		{
-			logger.debug("Member organiztion role is null");
-			return Collections.emptyList();
+			logger.debug("Member organization role is null");
+			return List.of();
 		}
 
 		String parentOrganizationIdSp = toSearchParameter(parentOrganizationIdentifier);
 		String memberOrganizationRoleSp = toSearchParameter(memberOrganizationRole);
 
-		Map<String, List<String>> parameters = Map.of("active", Collections.singletonList("true"),
-				"primary-organization:identifier", Collections.singletonList(parentOrganizationIdSp), "role",
-				Collections.singletonList(memberOrganizationRoleSp), "_include",
-				Collections.singletonList("OrganizationAffiliation:endpoint"));
+		Map<String, List<String>> parameters = Map.of("active", List.of("true"), "primary-organization:identifier",
+				List.of(parentOrganizationIdSp), "role", List.of(memberOrganizationRoleSp), "_include",
+				List.of("OrganizationAffiliation:endpoint"));
 
 		return search(OrganizationAffiliation.class, parameters, SearchEntryMode.INCLUDE, Endpoint.class,
 				e -> EndpointStatus.ACTIVE.equals(e.getStatus()));

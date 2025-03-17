@@ -3,7 +3,6 @@ package dev.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +132,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	protected List<OrganizationAffiliation> getAffiliations(Connection connection, String organizationIdentifierValue)
 	{
 		if (organizationIdentifierValue == null)
-			return Collections.emptyList();
+			return List.of();
 
 		try
 		{
@@ -187,8 +186,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		String iSystem = organizationIdentifier.getSystem();
 		String iValue = organizationIdentifier.getValue();
 
-		Map<String, List<String>> queryParameters = Map.of("identifier",
-				Collections.singletonList(iSystem + "|" + iValue));
+		Map<String, List<String>> queryParameters = Map.of("identifier", List.of(iSystem + "|" + iValue));
 		OrganizationDao dao = daoProvider.getOrganizationDao();
 		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
 				.configureParameters(queryParameters);
@@ -222,7 +220,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		String cCode = coding.getCode();
 
 		Map<String, List<String>> queryParameters = Map.of("url",
-				Collections.singletonList(cSystem + (coding.hasVersion() ? "|" + cVersion : "")));
+				List.of(cSystem + (coding.hasVersion() ? "|" + cVersion : "")));
 		CodeSystemDao dao = daoProvider.getCodeSystemDao();
 		SearchQuery<CodeSystem> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.single())
 				.configureParameters(queryParameters);

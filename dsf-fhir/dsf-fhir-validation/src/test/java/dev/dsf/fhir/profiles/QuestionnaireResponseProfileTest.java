@@ -2,9 +2,8 @@ package dev.dsf.fhir.profiles;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.BooleanType;
@@ -36,7 +35,7 @@ public class QuestionnaireResponseProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-questionnaire-response-1.0.0.xml"), Collections.emptyList(), Collections.emptyList());
+			List.of("dsf-questionnaire-response-1.0.0.xml"), List.of(), List.of());
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

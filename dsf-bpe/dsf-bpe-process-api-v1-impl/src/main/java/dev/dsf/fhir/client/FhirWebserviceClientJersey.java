@@ -3,7 +3,6 @@ package dev.dsf.fhir.client;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -80,8 +79,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			ReferenceCleaner referenceCleaner)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper,
-				Collections.singleton(new FhirAdapter(fhirContext, referenceCleaner)), proxySchemeHostPort,
-				proxyUserName, proxyPassword, connectTimeout, readTimeout, logRequests, userAgentValue);
+				List.of(new FhirAdapter(fhirContext, referenceCleaner)), proxySchemeHostPort, proxyUserName,
+				proxyPassword, connectTimeout, readTimeout, logRequests, userAgentValue);
 
 		preferReturnMinimal = new PreferReturnMinimalWithRetryImpl(this);
 		preferReturnOutcome = new PreferReturnOutcomeWithRetryImpl(this);

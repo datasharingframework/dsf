@@ -43,6 +43,11 @@
 		<dependencies>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-rest-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -58,7 +63,7 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-client</artifactId>
+				<artifactId>dsf-fhir-validation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -69,16 +74,6 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-validation</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-auth</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

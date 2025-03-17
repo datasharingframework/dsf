@@ -4,9 +4,13 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +33,9 @@ import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 public class PropertiesConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
+
+	private static final String API_VERSION_PATTERN_STRING = "v([1-9]+[0-9]*)";
+	private static final Pattern API_VERSION_PATTERN = Pattern.compile(API_VERSION_PATTERN_STRING);
 
 	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
 	@Value("${dev.dsf.bpe.db.url}")
@@ -111,11 +118,11 @@ public class PropertiesConfig implements InitializingBean
 	private boolean webserviceClientLocalVerbose;
 
 	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria:exact=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String taskSubscriptionSearchParameter;
 
 	@Documentation(description = "Subscription to receive notifications about questionnaire response resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria:exact=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String questionnaireResponseSubscriptionSearchParameter;
 
 	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
@@ -127,8 +134,31 @@ public class PropertiesConfig implements InitializingBean
 	private long websocketRetrySleepMillis;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
-	@Value("${dev.dsf.bpe.process.plugin.directroy:process}")
+	@Value("${dev.dsf.bpe.process.plugin.directory:process}")
 	private String processPluginDirectory;
+
+	@Documentation(description = "Directories containing exploded DSF BPE process plugins for deployment on startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only for testing")
+	@Value("#{'${dev.dsf.bpe.process.plugin.exploded:}'.trim().split('(,[ ]?)|(\\n)')}")
+	private List<String> explodedPluginDirectories;
+
+	@Documentation(description = "Directory containing the DSF BPE process plugin api jar files", recommendation = "Change only during development")
+	@Value("${dev.dsf.bpe.process.api.directory:api}")
+	private String apiClassPathBaseDirectory;
+
+	@Documentation(description = "Map with files containing qualified classs names allowed to be loaded by plugins for api versions; map key must match "
+			+ API_VERSION_PATTERN_STRING, recommendation = "Change only during development", example = "{v1: 'some/example.file', v2: 'other.file'}")
+	@Value("#{${dev.dsf.bpe.process.api.allowed.bpe.classes:{:}}}")
+	private Map<String, String> apiAllowedBpeClasses;
+
+	@Documentation(description = "Map with files containing api/plugin resource with priority over bpe resources for plugins for api versions; map key must match "
+			+ API_VERSION_PATTERN_STRING, recommendation = "Change only during development", example = "{v1: 'some/example.file', v2: 'other.file'}")
+	@Value("#{${dev.dsf.bpe.process.api.resources.with.priority:{:}}}")
+	private Map<String, String> apiResourcesWithPriority;
+
+	@Documentation(description = "Map with files containing resources allowed to be loaded by plugins for api versions; map key must match "
+			+ API_VERSION_PATTERN_STRING, recommendation = "Change only during development", example = "{v1: 'some/example.file', v2: 'other.file'}")
+	@Value("#{${dev.dsf.bpe.process.api.allowed.bpe.resource:{:}}}")
+	private Map<String, String> apiAllowedBpeResources;
 
 	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List", example = "dsfdev_updateAllowList|1.0, another_process|x.y")
 	@Value("#{'${dev.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
@@ -299,7 +329,7 @@ public class PropertiesConfig implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		URL url = new URI(fhirServerBaseUrl).toURL();
-		if (!Arrays.asList("http", "https").contains(url.getProtocol()))
+		if (!List.of("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
 					fhirServerBaseUrl);
@@ -453,6 +483,63 @@ public class PropertiesConfig implements InitializingBean
 	public Path getProcessPluginDirectory()
 	{
 		return Paths.get(processPluginDirectory);
+	}
+
+	public List<Path> getExplodedPluginDirectories()
+	{
+		return explodedPluginDirectories.stream().filter(s -> s != null && !s.isBlank()).map(Paths::get).toList();
+	}
+
+	public Path getApiClassPathBaseDirectory()
+	{
+		return Paths.get(apiClassPathBaseDirectory);
+	}
+
+	public Map<Integer, Path> getApiAllowedBpeClasses()
+	{
+		return apiAllowedBpeClasses.entrySet().stream().filter(this::hasVersionKeyAndNotBlankValue)
+				.collect(Collectors.toMap(this::toVersion, this::toPath));
+	}
+
+	public Map<Integer, Path> getApiAllowedBpeResources()
+	{
+		return apiAllowedBpeResources.entrySet().stream().filter(this::hasVersionKeyAndNotBlankValue)
+				.collect(Collectors.toMap(this::toVersion, this::toPath));
+	}
+
+	public Map<Integer, Path> getApiResourcesWithPriority()
+	{
+		return apiResourcesWithPriority.entrySet().stream().filter(this::hasVersionKeyAndNotBlankValue)
+				.collect(Collectors.toMap(this::toVersion, this::toPath));
+	}
+
+	private boolean hasVersionKeyAndNotBlankValue(Entry<String, String> entry)
+	{
+		return toVersion(entry) > 0 && toPath(entry) != null;
+	}
+
+	private int toVersion(Entry<String, String> entry)
+	{
+		if (entry == null || entry.getKey() == null || entry.getKey().isBlank())
+			return Integer.MIN_VALUE;
+
+		try
+		{
+			Matcher matcher = API_VERSION_PATTERN.matcher(entry.getKey());
+			return matcher.matches() ? Integer.parseInt(matcher.group(1)) : Integer.MIN_VALUE;
+		}
+		catch (NumberFormatException e)
+		{
+			return Integer.MIN_VALUE;
+		}
+	}
+
+	private Path toPath(Entry<String, String> entry)
+	{
+		if (entry == null || entry.getValue() == null || entry.getValue().isBlank())
+			return null;
+		else
+			return Paths.get(entry.getValue());
 	}
 
 	public List<String> getProcessExcluded()

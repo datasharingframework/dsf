@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -47,7 +46,7 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 	public List<Subscription> readByStatus(Subscription.SubscriptionStatus status) throws SQLException
 	{
 		if (status == null)
-			return Collections.emptyList();
+			return List.of();
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(
@@ -63,6 +62,30 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 					all.add(getResource(result, 1));
 
 				return all;
+			}
+		}
+	}
+
+	@Override
+	public boolean existsByCriteriaChannelTypeAndChannelPayload(String criteria, String channelType,
+			String channelPayload) throws SQLException
+	{
+		try (Connection connection = getDataSource().getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("SELECT count(*) FROM current_subscriptions WHERE "
+								+ "subscription->>'criteria' = ? AND subscription->'channel'->>'type' = ? AND "
+								+ (channelPayload == null ? "NOT subscription->'channel' ?? 'payload'"
+										: "subscription->'channel'->>'payload' = ?")))
+		{
+			statement.setString(1, criteria);
+			statement.setString(2, channelType);
+
+			if (channelPayload != null)
+				statement.setString(3, channelPayload);
+
+			try (ResultSet result = statement.executeQuery())
+			{
+				return result.next() && result.getInt(1) > 0;
 			}
 		}
 	}

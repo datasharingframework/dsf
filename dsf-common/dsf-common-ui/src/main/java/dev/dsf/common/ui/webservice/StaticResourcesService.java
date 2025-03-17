@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -73,28 +74,42 @@ public class StaticResourcesService
 
 	private static abstract class AbstractCache
 	{
+		final String baseFolder;
+
+		AbstractCache(String baseFolder)
+		{
+			this.baseFolder = Objects.requireNonNull(baseFolder, "baseFolder");
+		}
+
 		abstract Optional<CacheEntry> get(String fileName);
 
-		protected CacheEntry read(InputStream stream, String fileName) throws IOException
+		CacheEntry read(InputStream stream, String fileName) throws IOException
 		{
 			byte[] data = stream.readAllBytes();
 
 			return new CacheEntry(data, fileName);
 		}
 
-		protected InputStream getStream(String fileName) throws IOException
+		InputStream getStream(String fileName) throws IOException
 		{
-			java.nio.file.Path target = OVERRIDE_RESOURCE_FOLDER.resolve(fileName);
-			if (Files.isReadable(target))
+			java.nio.file.Path target = OVERRIDE_RESOURCE_FOLDER.resolve(fileName).normalize();
+			if (target.getParent() == null || !target.getParent().equals(OVERRIDE_RESOURCE_FOLDER))
+				return null;
+			else if (Files.isReadable(target))
 				return Files.newInputStream(target);
 			else
-				return StaticResourcesService.class.getResourceAsStream("/static/" + fileName);
+				return StaticResourcesService.class.getResourceAsStream(baseFolder + "/static/" + fileName);
 		}
 	}
 
 	private static final class Cache extends AbstractCache
 	{
 		private final Map<String, SoftReference<CacheEntry>> entries = new HashMap<>();
+
+		Cache(String baseFolder)
+		{
+			super(baseFolder);
+		}
 
 		@Override
 		Optional<CacheEntry> get(String fileName)
@@ -128,6 +143,11 @@ public class StaticResourcesService
 
 	private static final class NoCache extends AbstractCache
 	{
+		NoCache(String baseFolder)
+		{
+			super(baseFolder);
+		}
+
 		@Override
 		Optional<CacheEntry> get(String fileName)
 		{
@@ -155,9 +175,13 @@ public class StaticResourcesService
 	private final AbstractCache cache;
 	private final CacheControl cacheControl;
 
-	public StaticResourcesService(boolean cacheEnabled)
+	public StaticResourcesService(String baseFolder, boolean cacheEnabled)
 	{
-		cache = cacheEnabled ? new Cache() : new NoCache();
+		Objects.requireNonNull(baseFolder, "baseFolder");
+		if (!baseFolder.startsWith("/") || baseFolder.endsWith("/"))
+			throw new IllegalArgumentException("baseFolder must start with '/' and not end with '/'");
+
+		cache = cacheEnabled ? new Cache(baseFolder) : new NoCache(baseFolder);
 		cacheControl = cacheEnabled ? NO_TRANSFORM : NO_CACHE_NO_TRANSFORM;
 	}
 

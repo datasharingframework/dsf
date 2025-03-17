@@ -4,8 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,8 +47,7 @@ public class GroupIntegrationTest extends AbstractIntegrationTest
 		assertTrue(created.hasIdentifier());
 		assertEquals(identifier, created.getIdentifierFirstRep().getValue());
 
-		Bundle bundle = getWebserviceClient().search(Group.class,
-				Map.of("identifier", Collections.singletonList(identifier)));
+		Bundle bundle = getWebserviceClient().search(Group.class, Map.of("identifier", List.of(identifier)));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertTrue(bundle.hasEntry());
@@ -80,7 +78,7 @@ public class GroupIntegrationTest extends AbstractIntegrationTest
 		assertTrue(created2.hasIdElement());
 
 		Bundle bundle = getWebserviceClient().search(Group.class,
-				Map.of("identifier", Arrays.asList(identifier1, identifier2)));
+				Map.of("identifier", List.of(identifier1, identifier2)));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertTrue(bundle.hasEntry());

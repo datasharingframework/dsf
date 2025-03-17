@@ -67,12 +67,12 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 	}
 
 	@Override
-	public ProcessPlugin load(Path jar)
+	public ProcessPlugin load(Path pluginPath)
 	{
 		try
 		{
-			URLClassLoader pluginClassLoader = new URLClassLoader(jar.getFileName().toString(),
-					new URL[] { toUrl(jar) }, apiClassLoader);
+			URLClassLoader pluginClassLoader = new URLClassLoader(pluginPath.getFileName().toString(),
+					new URL[] { toUrl(pluginPath) }, apiClassLoader);
 
 			List<Provider<?>> definitions = ServiceLoader.load(processPluginDefinitionType, pluginClassLoader).stream()
 					.collect(Collectors.toList());
@@ -80,20 +80,20 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 			if (definitions.size() != 1)
 				return null;
 
-			String filename = jar.getFileName().toString();
+			String filename = pluginPath.getFileName().toString();
 			boolean isSnapshot = filename.endsWith(SNAPSHOT_FILE_SUFFIX);
 			boolean isMilestone = filename.matches(MILESTONE_FILE_PATTERN);
 			boolean isReleaseCandidate = filename.matches(RELEASE_CANDIDATE_FILE_PATTERN);
 
 			boolean draft = isSnapshot || isMilestone || isReleaseCandidate;
 
-			return createProcessPlugin(definitions.get(0).get(), draft, jar, pluginClassLoader);
+			return createProcessPlugin(definitions.get(0).get(), draft, pluginPath, pluginClassLoader);
 		}
 		catch (Exception e)
 		{
-			logger.debug("Ignoring {}: Unable to load process plugin", jar.toString(), e);
-			logger.warn("Ignoring {}: Unable to load process plugin: {} - {}", jar.toString(), e.getClass().getName(),
-					e.getMessage());
+			logger.debug("Ignoring {}: Unable to load process plugin", pluginPath.toString(), e);
+			logger.warn("Ignoring {}: Unable to load process plugin: {} - {}", pluginPath.toString(),
+					e.getClass().getName(), e.getMessage());
 
 			return null;
 		}

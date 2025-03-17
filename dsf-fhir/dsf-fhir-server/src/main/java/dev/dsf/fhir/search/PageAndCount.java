@@ -1,6 +1,5 @@
 package dev.dsf.fhir.search;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public class PageAndCount
 
 	private static Integer getFirstInt(Map<String, List<String>> queryParameters, String key)
 	{
-		List<String> values = queryParameters.getOrDefault(key, Collections.emptyList());
+		List<String> values = queryParameters.getOrDefault(key, List.of());
 		if (values.isEmpty())
 			return null;
 		else

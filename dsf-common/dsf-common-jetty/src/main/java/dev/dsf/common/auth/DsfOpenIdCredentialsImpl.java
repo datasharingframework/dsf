@@ -22,7 +22,7 @@ public class DsfOpenIdCredentialsImpl implements DsfOpenIdCredentials
 
 	public DsfOpenIdCredentialsImpl(String accessToken)
 	{
-		this.idToken = Collections.emptyMap();
+		this.idToken = Map.of();
 		this.accessToken = JwtDecoder.decode(accessToken);
 	}
 

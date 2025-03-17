@@ -3,7 +3,6 @@ package dev.dsf.bpe.plugin;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -227,7 +226,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 					&& ProcessState.DRAFT.equals(change.getNewProcessState()))
 			{
 				List<ResourceInfo> dbResources = dbResourcesByProcess.getOrDefault(change.getProcessKeyAndVersion(),
-						Collections.emptyList());
+						List.of());
 
 				dbResources.forEach(dbRes ->
 				{
@@ -366,7 +365,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			if (resources == null)
 			{
 				logger.debug("No resources found in BPE DB for process {}", process);
-				resources = Collections.emptyList();
+				resources = List.of();
 			}
 
 			return resources.stream().map(info -> ProcessesResource.from(info).add(process));
@@ -391,8 +390,8 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private Optional<UUID> getResourceId(Map<ProcessIdAndVersion, List<ResourceInfo>> dbResourcesByProcess,
 			ProcessIdAndVersion process, ResourceInfo resourceInfo)
 	{
-		return dbResourcesByProcess.getOrDefault(process, Collections.emptyList()).stream()
-				.filter(r -> r.equals(resourceInfo)).findFirst().map(ResourceInfo::getResourceId);
+		return dbResourcesByProcess.getOrDefault(process, List.of()).stream().filter(r -> r.equals(resourceInfo))
+				.findFirst().map(ResourceInfo::getResourceId);
 	}
 
 	private Map<ProcessIdAndVersion, List<ResourceInfo>> getResourceInfosFromDb()

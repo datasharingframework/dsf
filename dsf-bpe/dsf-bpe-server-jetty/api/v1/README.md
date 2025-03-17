@@ -1,1 +1,0 @@
-Empty v1 directory for jar-files used in dev setup 

@@ -5,8 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -139,44 +139,42 @@ public class DocumentReferenceIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getIdElement().getVersionIdPart());
 
 		Bundle bundle1 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier", Collections.singletonList(system + "|" + value1)));
+				Map.of("identifier", List.of(system + "|" + value1)));
 		assertFound(bundle1, created);
 		Bundle bundle1not = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList(system + "|" + value1)));
+				Map.of("identifier:not", List.of(system + "|" + value1)));
 		assertNotFound(bundle1not);
-		Bundle bundle2 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier", Collections.singletonList(value1)));
+		Bundle bundle2 = getWebserviceClient().search(DocumentReference.class, Map.of("identifier", List.of(value1)));
 		assertFound(bundle2, created);
 		Bundle bundle2not = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList(value1)));
+				Map.of("identifier:not", List.of(value1)));
 		assertNotFound(bundle2not);
 		Bundle bundle3 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList(system + "|Baz")));
+				Map.of("identifier:not", List.of(system + "|Baz")));
 		assertFound(bundle3, created);
 		Bundle bundle4 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList("Something|Baz")));
+				Map.of("identifier:not", List.of("Something|Baz")));
 		assertFound(bundle4, created);
 		Bundle bundle5 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList("Baz")));
+				Map.of("identifier:not", List.of("Baz")));
 		assertFound(bundle5, created);
 
 		Bundle bundle6 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier", Collections.singletonList(system + "|" + value2)));
+				Map.of("identifier", List.of(system + "|" + value2)));
 		assertFound(bundle6, created);
 		Bundle bundle6not = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList(system + "|" + value2)));
+				Map.of("identifier:not", List.of(system + "|" + value2)));
 		assertNotFound(bundle6not);
-		Bundle bundle7 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier", Collections.singletonList(value2)));
+		Bundle bundle7 = getWebserviceClient().search(DocumentReference.class, Map.of("identifier", List.of(value2)));
 		assertFound(bundle7, created);
 		Bundle bundle7not = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList(value2)));
+				Map.of("identifier:not", List.of(value2)));
 		assertNotFound(bundle7not);
 		Bundle bundle8 = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier", Collections.singletonList(system + "|")));
+				Map.of("identifier", List.of(system + "|")));
 		assertFound(bundle8, created);
 		Bundle bundle8not = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList(system + "|")));
+				Map.of("identifier:not", List.of(system + "|")));
 		assertNotFound(bundle8not);
 	}
 
@@ -195,11 +193,10 @@ public class DocumentReferenceIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getIdElement().getIdPart());
 		assertNotNull(created.getIdElement().getVersionIdPart());
 
-		Bundle bundle = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier", Collections.singletonList("|Foo")));
+		Bundle bundle = getWebserviceClient().search(DocumentReference.class, Map.of("identifier", List.of("|Foo")));
 		assertFound(bundle, created);
 		Bundle bundleNot = getWebserviceClient().search(DocumentReference.class,
-				Map.of("identifier:not", Collections.singletonList("|Foo")));
+				Map.of("identifier:not", List.of("|Foo")));
 		assertNotFound(bundleNot);
 	}
 

@@ -8,8 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -117,7 +115,7 @@ public class ProcessAuthorizationHelperTest
 					requestersList.get(0).getProcessAuthorizationCode().getCode());
 			assertTrue(requestersList.get(0).isRequesterAuthorized(
 					TestOrganizationIdentity.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)),
-					Collections.emptyList()));
+					List.of()));
 
 			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
@@ -129,7 +127,7 @@ public class ProcessAuthorizationHelperTest
 					recipientsList.get(0).getProcessAuthorizationCode().getCode());
 			assertTrue(recipientsList.get(0).isRecipientAuthorized(
 					TestOrganizationIdentity.local(new org.hl7.fhir.r4.model.Organization().setActive(true)),
-					Collections.emptyList()));
+					List.of()));
 		}
 	}
 
@@ -154,7 +152,7 @@ public class ProcessAuthorizationHelperTest
 							.addIdentifier(new Identifier()
 									.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
 									.setValue("organization.com")));
-			assertTrue(requestersList.get(0).isRequesterAuthorized(remoteUser, Collections.emptyList()));
+			assertTrue(requestersList.get(0).isRequesterAuthorized(remoteUser, List.of()));
 
 			Stream<Recipient> recipients = helper.getRecipients(ad, "http://dsf.dev/bpe/Process/test", "1.0.0", "foo",
 					"http://bar.org/fhir/StructureDefinition/baz");
@@ -175,7 +173,7 @@ public class ProcessAuthorizationHelperTest
 					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 			affiliation.getCodeFirstRep().getCodingFirstRep()
 					.setSystem("http://dsf.dev/fhir/CodeSystem/organization-role").setCode("DIC");
-			assertTrue(recipientsList.get(0).isRecipientAuthorized(localUser, Collections.singleton(affiliation)));
+			assertTrue(recipientsList.get(0).isRecipientAuthorized(localUser, List.of(affiliation)));
 		}
 	}
 
@@ -268,8 +266,8 @@ public class ProcessAuthorizationHelperTest
 
 		var ad = createActivityDefinition();
 
-		ad = helper.add(ad, messageName, taskProfile, Arrays.asList(requesterLocalAll, requesterRemoteAll),
-				Collections.singleton(recipientLocalAll));
+		ad = helper.add(ad, messageName, taskProfile, List.of(requesterLocalAll, requesterRemoteAll),
+				List.of(recipientLocalAll));
 
 		assertNotNull(ad);
 		assertTrue(ad.hasExtension());
@@ -370,8 +368,8 @@ public class ProcessAuthorizationHelperTest
 
 		var ad = createActivityDefinition();
 
-		ad = helper.add(ad, messageName, taskProfile, Arrays.asList(requesterLocalOrg, requesterRemoteOrg),
-				Collections.singleton(recipientLocalOrg));
+		ad = helper.add(ad, messageName, taskProfile, List.of(requesterLocalOrg, requesterRemoteOrg),
+				List.of(recipientLocalOrg));
 
 		assertNotNull(ad);
 		assertTrue(ad.hasExtension());
@@ -528,8 +526,8 @@ public class ProcessAuthorizationHelperTest
 
 		var ad = createActivityDefinition();
 
-		ad = helper.add(ad, messageName, taskProfile, Arrays.asList(requesterLocalRole, requesterRemoteRole),
-				Collections.singleton(recipientLocalRole));
+		ad = helper.add(ad, messageName, taskProfile, List.of(requesterLocalRole, requesterRemoteRole),
+				List.of(recipientLocalRole));
 
 		assertNotNull(ad);
 		assertTrue(ad.hasExtension());
@@ -734,8 +732,8 @@ public class ProcessAuthorizationHelperTest
 
 		var ad = createActivityDefinition();
 
-		ad = helper.add(ad, messageName, taskProfile, Collections.singleton(requesterLocalAllPractitioner),
-				Collections.singleton(recipientLocalAll));
+		ad = helper.add(ad, messageName, taskProfile, List.of(requesterLocalAllPractitioner),
+				List.of(recipientLocalAll));
 
 		assertNotNull(ad);
 		assertTrue(ad.hasExtension());
@@ -835,8 +833,8 @@ public class ProcessAuthorizationHelperTest
 
 		var ad = createActivityDefinition();
 
-		ad = helper.add(ad, messageName, taskProfile, Collections.singleton(requesterLocalOrganizationPractitioner),
-				Collections.singleton(recipientLocalAll));
+		ad = helper.add(ad, messageName, taskProfile, List.of(requesterLocalOrganizationPractitioner),
+				List.of(recipientLocalAll));
 
 		assertNotNull(ad);
 		assertTrue(ad.hasExtension());
@@ -956,8 +954,8 @@ public class ProcessAuthorizationHelperTest
 
 		var ad = createActivityDefinition();
 
-		ad = helper.add(ad, messageName, taskProfile, Collections.singleton(requesterLocalRolePractitioner),
-				Collections.singleton(recipientLocalAll));
+		ad = helper.add(ad, messageName, taskProfile, List.of(requesterLocalRolePractitioner),
+				List.of(recipientLocalAll));
 
 		logger.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(ad));
 

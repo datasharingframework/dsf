@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -76,8 +75,7 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 		Objects.requireNonNull(sinceParameter, "sinceParameter");
 		Objects.requireNonNull(resource, "resource");
 
-		return readHistory(Collections.singletonList(filter), pageAndCount, atParameters, sinceParameter, resource,
-				null);
+		return readHistory(List.of(filter), pageAndCount, atParameters, sinceParameter, resource, null);
 	}
 
 	@Override
@@ -91,7 +89,7 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(id, "id");
 
-		return readHistory(Collections.singletonList(filter), pageAndCount, atParameters, sinceParameter, resource, id);
+		return readHistory(List.of(filter), pageAndCount, atParameters, sinceParameter, resource, id);
 	}
 
 	private History readHistory(List<HistoryIdentityFilter> filter, PageAndCount pageAndCount,

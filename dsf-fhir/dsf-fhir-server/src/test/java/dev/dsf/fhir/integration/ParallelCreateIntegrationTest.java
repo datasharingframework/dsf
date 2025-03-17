@@ -311,17 +311,33 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionsViaTransactionBundle() throws Exception
+	public void testCreateDuplicateSubscriptionsWithPayloadViaTransactionBundle() throws Exception
 	{
-		Bundle bundle = createBundle(BundleType.TRANSACTION, createSubscription(), null, 2);
+		Bundle bundle = createBundle(BundleType.TRANSACTION, createSubscription(true), null, 2);
 
 		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionsViaBatchBundle() throws Exception
+	public void testCreateDuplicateSubscriptionsWithPayloadViaBatchBundle() throws Exception
 	{
-		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(), null, 2);
+		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(true), null, 2);
+
+		checkReturnBatchBundle(getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testCreateDuplicateSubscriptionsWithoutPayloadViaTransactionBundle() throws Exception
+	{
+		Bundle bundle = createBundle(BundleType.TRANSACTION, createSubscription(false), null, 2);
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testCreateDuplicateSubscriptionsWithoutPayloadViaBatchBundle() throws Exception
+	{
+		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(false), null, 2);
 
 		checkReturnBatchBundle(getWebserviceClient().postBundle(bundle));
 	}
@@ -585,9 +601,9 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionsViaTransactionBundleWithIfNoneExists() throws Exception
+	public void testCreateDuplicateSubscriptionsWithPayloadViaTransactionBundleWithIfNoneExists() throws Exception
 	{
-		Bundle bundle = createBundle(BundleType.TRANSACTION, createSubscription(),
+		Bundle bundle = createBundle(BundleType.TRANSACTION, createSubscription(true),
 				(s, r) -> r
 						.setIfNoneExist("criteria=" + s.getCriteria() + "&type=" + s.getChannel().getType().toCode()),
 				2);
@@ -596,9 +612,31 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionsViaBatchBundleWithIfNoneExists() throws Exception
+	public void testCreateDuplicateSubscriptionsWithPayloadViaBatchBundleWithIfNoneExists() throws Exception
 	{
-		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(),
+		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(true),
+				(s, r) -> r
+						.setIfNoneExist("criteria=" + s.getCriteria() + "&type=" + s.getChannel().getType().toCode()),
+				2);
+
+		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.BATCHRESPONSE);
+	}
+
+	@Test
+	public void testCreateDuplicateSubscriptionsWithoutPayloadViaTransactionBundleWithIfNoneExists() throws Exception
+	{
+		Bundle bundle = createBundle(BundleType.TRANSACTION, createSubscription(false),
+				(s, r) -> r
+						.setIfNoneExist("criteria=" + s.getCriteria() + "&type=" + s.getChannel().getType().toCode()),
+				2);
+
+		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.TRANSACTIONRESPONSE);
+	}
+
+	@Test
+	public void testCreateDuplicateSubscriptionsWithoutPayloadViaBatchBundleWithIfNoneExists() throws Exception
+	{
+		Bundle bundle = createBundle(BundleType.BATCH, createSubscription(false),
 				(s, r) -> r
 						.setIfNoneExist("criteria=" + s.getCriteria() + "&type=" + s.getChannel().getType().toCode()),
 				2);
@@ -825,16 +863,27 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionsParallelDirect() throws Exception
+	public void testCreateDuplicateSubscriptionsWithPayloadParallelDirect() throws Exception
 	{
 		testCreateDuplicatesParallel(() ->
 		{
-			Subscription returnS = getWebserviceClient().create(createSubscription());
+			Subscription returnS = getWebserviceClient().create(createSubscription(true));
 			assertNotNull(returnS);
 		}, SubscriptionDao.class,
 				s -> SUBSCRIPTION_CRITERIA.equals(s.getCriteria())
 						&& SUBSCRIPTION_CHANNEL_TYPE.equals(s.getChannel().getType())
 						&& SUBSCRIPTION_CHANNEL_PAYLOAD.equals(s.getChannel().getPayload()));
+	}
+
+	@Test
+	public void testCreateDuplicateSubscriptionsWithoutPayloadParallelDirect() throws Exception
+	{
+		testCreateDuplicatesParallel(() ->
+		{
+			Subscription returnS = getWebserviceClient().create(createSubscription(false));
+			assertNotNull(returnS);
+		}, SubscriptionDao.class, s -> SUBSCRIPTION_CRITERIA.equals(s.getCriteria())
+				&& SUBSCRIPTION_CHANNEL_TYPE.equals(s.getChannel().getType()) && s.getChannel().getPayload() == null);
 	}
 
 	@Test
@@ -1235,12 +1284,12 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionsParallelTransactionBundle() throws Exception
+	public void testCreateDuplicateSubscriptionsWithPayloadParallelTransactionBundle() throws Exception
 	{
 		testCreateDuplicatesParallel(() ->
 		{
 			Bundle returnBundle = getWebserviceClient()
-					.postBundle(createBundle(BundleType.TRANSACTION, createSubscription(), null, 1));
+					.postBundle(createBundle(BundleType.TRANSACTION, createSubscription(true), null, 1));
 			assertNotNull(returnBundle);
 		}, SubscriptionDao.class,
 				s -> SUBSCRIPTION_CRITERIA.equals(s.getCriteria())
@@ -1249,12 +1298,12 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateDuplicateSubscriptionsParallelBatchBundle() throws Exception
+	public void testCreateDuplicateSubscriptionsWithPayloadParallelBatchBundle() throws Exception
 	{
 		testCreateDuplicatesParallel(() ->
 		{
 			Bundle returnBundle = getWebserviceClient()
-					.postBundle(createBundle(BundleType.BATCH, createSubscription(), null, 1));
+					.postBundle(createBundle(BundleType.BATCH, createSubscription(true), null, 1));
 			assertNotNull(returnBundle);
 
 			assertNotNull(returnBundle.getEntry());
@@ -1268,6 +1317,38 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				s -> SUBSCRIPTION_CRITERIA.equals(s.getCriteria())
 						&& SUBSCRIPTION_CHANNEL_TYPE.equals(s.getChannel().getType())
 						&& SUBSCRIPTION_CHANNEL_PAYLOAD.equals(s.getChannel().getPayload()));
+	}
+
+	@Test
+	public void testCreateDuplicateSubscriptionsWithoutPayloadParallelTransactionBundle() throws Exception
+	{
+		testCreateDuplicatesParallel(() ->
+		{
+			Bundle returnBundle = getWebserviceClient()
+					.postBundle(createBundle(BundleType.TRANSACTION, createSubscription(false), null, 1));
+			assertNotNull(returnBundle);
+		}, SubscriptionDao.class, s -> SUBSCRIPTION_CRITERIA.equals(s.getCriteria())
+				&& SUBSCRIPTION_CHANNEL_TYPE.equals(s.getChannel().getType()) && s.getChannel().getPayload() == null);
+	}
+
+	@Test
+	public void testCreateDuplicateSubscriptionsWithoutPayloadParallelBatchBundle() throws Exception
+	{
+		testCreateDuplicatesParallel(() ->
+		{
+			Bundle returnBundle = getWebserviceClient()
+					.postBundle(createBundle(BundleType.BATCH, createSubscription(false), null, 1));
+			assertNotNull(returnBundle);
+
+			assertNotNull(returnBundle.getEntry());
+			assertEquals(1, returnBundle.getEntry().size());
+			assertNotNull(returnBundle.getEntry().get(0).getResponse());
+			assertNotNull(returnBundle.getEntry().get(0).getResponse().getStatus());
+
+			if ("403 Forbidden".equals(returnBundle.getEntry().get(0).getResponse().getStatus()))
+				throw new WebApplicationException(403);
+		}, SubscriptionDao.class, s -> SUBSCRIPTION_CRITERIA.equals(s.getCriteria())
+				&& SUBSCRIPTION_CHANNEL_TYPE.equals(s.getChannel().getType()) && s.getChannel().getPayload() == null);
 	}
 
 	@Test
@@ -1574,11 +1655,14 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 		return sD;
 	}
 
-	private Subscription createSubscription()
+	private Subscription createSubscription(boolean withPayload)
 	{
 		Subscription s = new Subscription().setStatus(SubscriptionStatus.ACTIVE).setReason("some reason")
-				.setCriteria(SUBSCRIPTION_CRITERIA).setChannel(new SubscriptionChannelComponent()
-						.setType(SUBSCRIPTION_CHANNEL_TYPE).setPayload(SUBSCRIPTION_CHANNEL_PAYLOAD));
+				.setCriteria(SUBSCRIPTION_CRITERIA)
+				.setChannel(new SubscriptionChannelComponent().setType(SUBSCRIPTION_CHANNEL_TYPE));
+
+		if (withPayload)
+			s.getChannel().setPayload(SUBSCRIPTION_CHANNEL_PAYLOAD);
 
 		getReadAccessHelper().addAll(s);
 

@@ -1,6 +1,5 @@
 package dev.dsf.bpe.v2.service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,7 +32,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private static final String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION = "parent-organization";
 	private static final String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE = "organization-role";
 
-	private static final List<String> READ_ACCESS_TAG_VALUES = Arrays.asList(READ_ACCESS_TAG_VALUE_LOCAL,
+	private static final List<String> READ_ACCESS_TAG_VALUES = List.of(READ_ACCESS_TAG_VALUE_LOCAL,
 			READ_ACCESS_TAG_VALUE_ORGANIZATION, READ_ACCESS_TAG_VALUE_ROLE, READ_ACCESS_TAG_VALUE_ALL);
 
 	private Predicate<Coding> matchesTagValue(String value)

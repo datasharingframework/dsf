@@ -23,19 +23,19 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginApiClassLoader.class);
 
 	private final Set<String> allowedBpeClasses = new HashSet<>();
-	private final Set<String> apiResourcesWithPriority = new HashSet<>();
+	private final Set<String> resourcesWithPriority = new HashSet<>();
 	private final Set<String> allowedBpeResources = new HashSet<>();
 
 	public ProcessPluginApiClassLoader(String name, URL[] urls, ClassLoader bpeLoader, Set<String> allowedBpeClasses,
-			Set<String> apiResourcesWithPriority, Set<String> allowedBpeResources)
+			Set<String> resourcesWithPriority, Set<String> allowedBpeResources)
 	{
 		super(name, urls, bpeLoader);
 
 		if (allowedBpeClasses != null)
 			this.allowedBpeClasses.addAll(allowedBpeClasses);
 
-		if (apiResourcesWithPriority != null)
-			this.apiResourcesWithPriority.addAll(apiResourcesWithPriority);
+		if (resourcesWithPriority != null)
+			this.resourcesWithPriority.addAll(resourcesWithPriority);
 
 		if (allowedBpeResources != null)
 			this.allowedBpeResources.addAll(allowedBpeResources);
@@ -67,7 +67,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 			if (isBpeClassAllowed(bpeClass))
 				return bpeClass;
 
-			logger.warn("Class " + className + " not found or hidden");
+			logger.debug("Class " + className + " not found or hidden");
 			throw new ClassNotFoundException(className);
 		}
 	}
@@ -152,21 +152,22 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 				|| allowedBpeClasses.contains(className))
 			return true;
 
-		logger.debug("{} TODO: Should bpe class {} be allowed?", getName(), className);
+		logger.debug("{} TODO: Should bpe class {} be allowed? [default: false]", getName(), className);
 		return false;
 	}
 
 	/**
 	 * @param name
 	 * @param apiResourceUrl
-	 * @return <code>true</code> if resource from from api or process plugins has priority over resource from bpe
+	 * @return <code>true</code> if resource from api or process plugins has priority over resource from bpe
 	 */
 	private boolean hasApiResourcePriority(String name, URL apiResourceUrl)
 	{
-		if ("jar".equals(apiResourceUrl.getProtocol()) && apiResourcesWithPriority.contains(name))
+		if ("jar".equals(apiResourceUrl.getProtocol()) && resourcesWithPriority.contains(name))
 			return true;
 
-		logger.debug("{} TODO: Should api resource {} / {} have priority?", getName(), name, apiResourceUrl);
+		logger.debug("{} TODO: Should api resource {} / {} have priority? [default: false]", getName(), name,
+				apiResourceUrl);
 		return false;
 	}
 
@@ -180,7 +181,8 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 		if ("jar".equals(bpeResourcetUrl.getProtocol()) && allowedBpeResources.contains(name))
 			return true;
 
-		logger.debug("{} TODO: Should bpe resource {} / {} be allowed?", getName(), name, bpeResourcetUrl);
+		logger.debug("{} TODO: Should bpe resource {} / {} be allowed? [default: false]", getName(), name,
+				bpeResourcetUrl);
 		return false;
 	}
 }

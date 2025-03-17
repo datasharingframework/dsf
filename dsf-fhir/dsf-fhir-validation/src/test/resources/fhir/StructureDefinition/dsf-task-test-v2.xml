@@ -1,0 +1,86 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://dsf.dev/fhir/StructureDefinition/task-test" />
+  <version value="2.0" />
+  <name value="testProcess" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2025-02-04" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesUri">
+      <path value="Task.instantiatesUri" />
+      <fixedUri value="http://dsf.dev/bpe/Process/test/2.0" />
+    </element>
+    <element id="Task.input">
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Parameter" />
+      </extension>
+      <path value="Task.input" />
+    </element>
+    <element id="Task.input:message-name">
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Parameter" />
+      </extension>
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="test_v2" />
+    </element>
+    <element id="Task.input:correlation-key">
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Parameter" />
+      </extension>
+      <path value="Task.input" />
+      <sliceName value="correlation-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:integer-example">
+      <path value="Task.input" />
+      <sliceName value="integer-example" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:integer-example.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://dsf.dev/fhir/ValueSet/test|2.0" />
+      </binding>
+    </element>
+    <element id="Task.input:string-example.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:string-example.system">
+      <path value="Task.input.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://dsf.dev/fhir/CodeSystem/test|2.0" />
+    </element>
+    <element id="Task.input:string-example.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="integer-example" />
+    </element>
+    <element id="Task.input:string-example.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="integer" />
+      </type>
+      <min value="1" />
+    </element>
+  </differential>
+</StructureDefinition>

@@ -44,12 +44,20 @@ public class PluginConfig
 	public ProcessPluginLoader processPluginLoader()
 	{
 		Path processPluginDirectoryPath = propertiesConfig.getProcessPluginDirectory();
+		List<Path> explodedPluginDirectories = propertiesConfig.getExplodedPluginDirectories();
 
 		if (!Files.isDirectory(processPluginDirectoryPath))
 			throw new RuntimeException(
-					"Process plug in directory '" + processPluginDirectoryPath.toString() + "' not readable");
+					"Process plugin directory '" + processPluginDirectoryPath.toString() + "' not readable");
 
-		return new ProcessPluginLoaderImpl(processPluginFactories, processPluginDirectoryPath);
+		explodedPluginDirectories.stream().forEach(p ->
+		{
+			if (!Files.isDirectory(p))
+				throw new RuntimeException("Exploded process plugin directory '" + p.toString() + "' not readable");
+		});
+
+		return new ProcessPluginLoaderImpl(processPluginFactories, processPluginDirectoryPath,
+				explodedPluginDirectories);
 	}
 
 	@Bean

@@ -121,11 +121,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			throw new IllegalArgumentException("ReferenceType " + expected + " expected, but was " + type);
 	}
 
-	private void throwIfReferenceTypeUnexpected(ReferenceType type, ReferenceType... expected)
+	private void throwIfReferenceTypeUnexpected(ReferenceType type, EnumSet<ReferenceType> expected)
 	{
-		if (!EnumSet.copyOf(Arrays.asList(expected)).contains(type))
-			throw new IllegalArgumentException(
-					"ReferenceTypes " + Arrays.toString(expected) + " expected, but was " + type);
+		if (!expected.contains(type))
+			throw new IllegalArgumentException("ReferenceTypes " + expected + " expected, but was " + type);
 	}
 
 	private Optional<Resource> resolveLiteralInternalReference(ResourceReference reference, Connection connection)
@@ -176,8 +175,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	private Optional<Resource> resolveLiteralExternalReference(ResourceReference reference)
 	{
 		Objects.requireNonNull(reference, "reference");
-		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LITERAL_EXTERNAL,
-				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL);
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), EnumSet.of(ReferenceType.LITERAL_EXTERNAL,
+				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL));
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
@@ -222,8 +221,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(reference, "reference");
 
 		ReferenceType referenceType = reference.getType(serverBase);
-		throwIfReferenceTypeUnexpected(referenceType, ReferenceType.CONDITIONAL,
-				ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL, ReferenceType.ATTACHMENT_CONDITIONAL_URL);
+		throwIfReferenceTypeUnexpected(referenceType, EnumSet.of(ReferenceType.CONDITIONAL,
+				ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL, ReferenceType.ATTACHMENT_CONDITIONAL_URL));
 
 		String referenceValue = reference.getValue();
 		String referenceLocation = reference.getLocation();
@@ -375,8 +374,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
-		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LITERAL_INTERNAL,
-				ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL);
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), EnumSet.of(ReferenceType.LITERAL_INTERNAL,
+				ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL));
 
 		IdType id = new IdType(reference.getValue());
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
@@ -413,8 +412,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	{
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
-		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LITERAL_EXTERNAL,
-				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL);
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), EnumSet.of(ReferenceType.LITERAL_EXTERNAL,
+				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL));
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 		String referenceValue = reference.getValue();

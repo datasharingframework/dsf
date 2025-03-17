@@ -4,7 +4,6 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +44,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 		String researchStudyId = researchStudyDao.create(rs).getIdElement().getIdPart();
 
 		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(ResearchStudy.class,
-				Map.of("enrollment", Collections.singletonList(groupId)));
+				Map.of("enrollment", List.of(groupId)));
 
 		assertNotNull(resultBundle);
 		assertEquals(1, resultBundle.getTotal());

@@ -1,6 +1,5 @@
 package dev.dsf.bpe.v2.service.process;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -85,7 +84,7 @@ public class Organization implements Recipient, Requester
 		if (identity instanceof PractitionerIdentity p)
 			return p.getPractionerRoles();
 		else
-			return Collections.emptySet();
+			return Set.of();
 	}
 
 	private boolean hasPractitionerRole(Set<Coding> practitionerRoles)

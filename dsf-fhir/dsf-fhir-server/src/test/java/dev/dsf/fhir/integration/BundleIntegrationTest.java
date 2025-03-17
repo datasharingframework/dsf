@@ -9,8 +9,6 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,8 +56,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
+		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList,
+				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(updatedBundle);
 	}
@@ -72,8 +70,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
+		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList,
+				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(id);
 	}
@@ -87,8 +85,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(allowList,
-				Map.of("identifier",
-						Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
+				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(outcome);
 	}
@@ -182,8 +179,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		Bundle rBundle = getWebserviceClient().postBundle(bundle);
 
-		checkReturnBundle(BundleType.TRANSACTIONRESPONSE, rBundle, bundle.getEntry().size(), Arrays.asList("200 OK",
-				"201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
+		checkReturnBundle(BundleType.TRANSACTIONRESPONSE, rBundle, bundle.getEntry().size(),
+				List.of("200 OK", "201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
 
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 		try (Connection connection = dataSource.getConnection();
@@ -206,8 +203,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		Bundle rBundle = getWebserviceClient().postBundle(bundle);
 
-		checkReturnBundle(BundleType.BATCHRESPONSE, rBundle, bundle.getEntry().size(), Arrays.asList("200 OK",
-				"201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
+		checkReturnBundle(BundleType.BATCHRESPONSE, rBundle, bundle.getEntry().size(),
+				List.of("200 OK", "201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
 
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 		try (Connection connection = dataSource.getConnection();
@@ -315,7 +312,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		Bundle rBundle = getWebserviceClient().postBundle(bundle);
 
 		checkReturnBundle(BundleType.BATCHRESPONSE, rBundle, bundle.getEntry().size(),
-				Arrays.asList("200 OK", "405 Method Not Allowed"));
+				List.of("200 OK", "405 Method Not Allowed"));
 
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 		try (Connection connection = dataSource.getConnection();

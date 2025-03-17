@@ -198,7 +198,10 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						connection.rollback();
 
 						if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
-							throw new WebApplicationException(responseGenerator.duplicateResourceExists());
+						{
+							Response response = responseGenerator.duplicateResourceExists();
+							throw new WebApplicationException(response);
+						}
 						else
 							throw e;
 					}

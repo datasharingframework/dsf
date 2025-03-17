@@ -1,6 +1,5 @@
 package dev.dsf.fhir.authorization.process;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +60,7 @@ public class All implements Recipient, Requester
 		if (identity instanceof PractitionerIdentity p)
 			return p.getPractionerRoles();
 		else
-			return Collections.emptySet();
+			return Set.of();
 	}
 
 	private boolean hasPractitionerRole(Set<Coding> practitionerRoles)

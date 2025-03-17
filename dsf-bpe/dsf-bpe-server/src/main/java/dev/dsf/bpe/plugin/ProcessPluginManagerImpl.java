@@ -2,7 +2,6 @@ package dev.dsf.bpe.plugin;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -127,10 +126,8 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 
 	private Optional<String> getLocalOrganizationIdentifierValue()
 	{
-		Bundle resultBundle = retryClient().searchWithStrictHandling(Endpoint.class,
-				Map.of("status", Collections.singletonList("active"), "address",
-						Collections.singletonList(localEndpointAddress), "_include",
-						Collections.singletonList("Endpoint:organization")));
+		Bundle resultBundle = retryClient().searchWithStrictHandling(Endpoint.class, Map.of("status", List.of("active"),
+				"address", List.of(localEndpointAddress), "_include", List.of("Endpoint:organization")));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 2
 				|| resultBundle.getEntry().get(0).getResource() == null

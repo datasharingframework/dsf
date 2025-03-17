@@ -3,7 +3,6 @@ package dev.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -108,7 +107,7 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 				.findFirst().orElseThrow();
 
 		return (newResource.getMeta().hasProfile(DSF_ORGANIZATION)
-				&& resourceExistsWithThumbprint(connection, newResource, Collections.emptyList()))
+				&& resourceExistsWithThumbprint(connection, newResource, List.of()))
 				|| organizationWithIdentifierExists(connection, organizationIdentifier);
 	}
 

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
@@ -29,10 +29,10 @@ public class CodeSystemProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-code-system-1.0.0.xml", "dsf-extension-read-access-organization-1.0.0.xml",
+			List.of("dsf-code-system-1.0.0.xml", "dsf-extension-read-access-organization-1.0.0.xml",
 					"dsf-extension-read-access-parent-organization-role-1.0.0.xml"),
-			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"),
-			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"));
+			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"),
+			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

@@ -36,6 +36,8 @@ public final class FhirJettyServerHttps
 				FhirHttpsJettyConfig.class))
 		{
 			JettyServer server = context.getBean(JettyServer.class);
+
+			server.addShutdownHook();
 			server.start();
 		}
 	}

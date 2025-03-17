@@ -3,7 +3,6 @@ package dev.dsf.bpe.v1.service;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,9 +71,9 @@ public abstract class AbstractResourceProvider implements InitializingBean
 	private Bundle search(Class<? extends Resource> searchType, Map<String, List<String>> parameters, int page)
 	{
 		Map<String, List<String>> parametersAndPage = new HashMap<>(parameters);
-		parametersAndPage.put("_page", Collections.singletonList(String.valueOf(page)));
+		parametersAndPage.put("_page", List.of(String.valueOf(page)));
 		if (!parameters.containsKey("_sort"))
-			parametersAndPage.put("_sort", Collections.singletonList("_id"));
+			parametersAndPage.put("_sort", List.of("_id"));
 
 		return clientProvider.getLocalWebserviceClient().searchWithStrictHandling(searchType, parametersAndPage);
 	}

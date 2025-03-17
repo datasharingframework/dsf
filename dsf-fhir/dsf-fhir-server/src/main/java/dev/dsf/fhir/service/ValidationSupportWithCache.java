@@ -267,7 +267,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	@Override
 	public IBaseResource fetchStructureDefinition(String url)
 	{
-		logger.trace("Fetiching structure-definition '{}'", url);
+		logger.trace("Fetching structure-definition '{}'", url);
 
 		if (url == null || url.isBlank())
 			return null;
@@ -284,7 +284,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	@Override
 	public IBaseResource fetchCodeSystem(String url)
 	{
-		logger.trace("Fetiching code-system '{}'", url);
+		logger.trace("Fetching code-system '{}'", url);
 
 		if (url == null || url.isBlank())
 			return null;
@@ -301,7 +301,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	@Override
 	public IBaseResource fetchValueSet(String url)
 	{
-		logger.trace("Fetiching value-set '{}'", url);
+		logger.trace("Fetching value-set '{}'", url);
 
 		if (url == null || url.isBlank())
 			return null;

@@ -2,8 +2,6 @@ package dev.dsf.fhir.search.parameters.basic;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +23,7 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 
 	public static List<String> getNameModifiers()
 	{
-		return Collections.singletonList(PARAMETER_NAME_IDENTIFIER_MODIFIER);
+		return List.of(PARAMETER_NAME_IDENTIFIER_MODIFIER);
 	}
 
 	protected enum ReferenceSearchType
@@ -181,7 +179,7 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	{
 		super(resourceType, parameterName);
 
-		this.targetResourceTypeNames = Arrays.asList(targetResourceTypeNames);
+		this.targetResourceTypeNames = List.of(targetResourceTypeNames);
 	}
 
 	@Override

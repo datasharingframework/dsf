@@ -98,6 +98,12 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	}
 
 	@Override
+	public String getChangelogFile()
+	{
+		return "bpe/db/db.changelog.xml";
+	}
+
+	@Override
 	public Map<String, String> getChangeLogParameters()
 	{
 		return Map.of(DB_LIQUIBASE_USER, dbLiquibaseUsername, DB_SERVER_USERS_GROUP, dbUsersGroup, DB_SERVER_USER,

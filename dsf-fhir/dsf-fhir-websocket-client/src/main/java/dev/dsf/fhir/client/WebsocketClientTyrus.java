@@ -5,8 +5,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -174,7 +174,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 			@Override
 			public void beforeRequest(Map<String, java.util.List<String>> headers)
 			{
-				headers.put(HttpHeaders.USER_AGENT, Collections.singletonList(userAgentValue));
+				headers.put(HttpHeaders.USER_AGENT, List.of(userAgentValue));
 			}
 		};
 		return ClientEndpointConfig.Builder.create().configurator(configurator).build();
@@ -189,8 +189,11 @@ public class WebsocketClientTyrus implements WebsocketClient
 		logger.debug("Closing websocket {}", wsUri);
 		try
 		{
-			connection.close();
-			connection = null;
+			if (connection != null)
+			{
+				connection.close();
+				connection = null;
+			}
 		}
 		catch (IOException e)
 		{

@@ -72,6 +72,5 @@ public class ContinueListener extends AbstractListener implements ExecutionListe
 				logger.info("Continuing process {} at {} [task: {}, requester: {}, business-key: {}, message: {}]",
 						processUrl, getCurrentTime(), continueTaskUrl, requester, businessKey, messageName);
 		}
-
 	}
 }

@@ -18,8 +18,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,10 +103,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
 	protected static final String CONTEXT_PATH = "/fhir";
-	protected static final String WEBSOCKET_URL = "wss://localhost:8001" + CONTEXT_PATH + "/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
-	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
+	private static final List<Path> FILES_TO_DELETE = List.of(FHIR_BUNDLE_FILE);
 
 	protected static final FhirContext fhirContext = FhirContext.forR4();
 	protected static final ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
@@ -132,8 +129,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		logger.info("Creating Bundle ...");
 		createTestBundle(certificates.getClientCertificate(), certificates.getExternalClientCertificate());
 
-		ServerSocketChannel statusConnectorChannel = JettyServer.serverSocketChannel();
-		ServerSocketChannel apiConnectorChannel = JettyServer.serverSocketChannel();
+		ServerSocketChannel statusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+		ServerSocketChannel apiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
 
 		baseUrl = "https://localhost:" + apiConnectorChannel.socket().getLocalPort() + CONTEXT_PATH;
 
@@ -169,12 +166,12 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				referenceCleaner);
 	}
 
-	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
+	private static WebsocketClient createWebsocketClient(int apiPort, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		return new WebsocketClientTyrus(() ->
-		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, null, null, null,
-				"Integration Test Client", subscriptionIdPart);
+		{}, URI.create("wss://localhost:" + apiPort + CONTEXT_PATH + "/ws"), trustStore, keyStore, keyStorePassword,
+				null, null, null, "Integration Test Client", subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer(ServerSocketChannel statusConnectorChannel,
@@ -228,7 +225,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel, caCertificate,
 				serverCertificateKeyStore, keyStorePassword, false);
 		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
-		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = Arrays.asList(
+		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = List.of(
 				JakartaWebSocketServletContainerInitializer.class, JerseyServletContainerInitializer.class,
 				SpringServletContainerInitializer.class);
 
@@ -271,7 +268,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		}
 	}
 
-	protected static void writeBundle(Path bundleFile, Bundle bundle)
+	private static void writeBundle(Path bundleFile, Bundle bundle)
 	{
 		try (OutputStream out = Files.newOutputStream(bundleFile);
 				OutputStreamWriter writer = new OutputStreamWriter(out))
@@ -330,13 +327,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
-		defaultDataSource.unwrap(BasicDataSource.class).close();
-
 		try
 		{
 			if (fhirServer != null)
 			{
-				logger.info("Stoping FHIR Server ...");
+				logger.info("Stopping FHIR Server ...");
 				fhirServer.stop();
 			}
 		}
@@ -344,6 +339,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		{
 			logger.error("Error while stopping FHIR Server", e);
 		}
+
+		defaultDataSource.unwrap(BasicDataSource.class).close();
 
 		logger.info("Deleting files {} ...", FILES_TO_DELETE);
 		FILES_TO_DELETE.forEach(AbstractIntegrationTest::deleteFile);
@@ -390,9 +387,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static WebsocketClient getWebsocketClient()
 	{
 		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
-				Map.of("criteria", Collections.singletonList("Task?status=requested"), "status",
-						Collections.singletonList("active"), "type", Collections.singletonList("websocket"), "payload",
-						Collections.singletonList("application/fhir+json")));
+				Map.of("criteria", List.of("Task?status=requested"), "status", List.of("active"), "type",
+						List.of("websocket"), "payload", List.of("application/fhir+json")));
 
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
@@ -403,7 +399,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		assertNotNull(subscription.getIdElement());
 		assertNotNull(subscription.getIdElement().getIdPart());
 
-		return createWebsocketClient(certificates.getClientCertificate().getTrustStore(),
+		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
 				certificates.getClientCertificate().getKeyStorePassword(), subscription.getIdElement().getIdPart());
 	}

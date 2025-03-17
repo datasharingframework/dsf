@@ -1,6 +1,5 @@
 package dev.dsf.bpe.v2.activity;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +25,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
-import dev.dsf.bpe.v2.activity.DefaultUserTaskListener;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnUserTask;
 import dev.dsf.bpe.v2.variables.Variables;
@@ -116,7 +114,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	private Questionnaire readQuestionnaire(String urlWithVersion)
 	{
 		Bundle search = api.getFhirWebserviceClientProvider().getLocalWebserviceClient().search(Questionnaire.class,
-				Map.of("url", Collections.singletonList(urlWithVersion)));
+				Map.of("url", List.of(urlWithVersion)));
 
 		List<Questionnaire> questionnaires = search.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)
 				.map(Bundle.BundleEntryComponent::getResource).filter(r -> r instanceof Questionnaire)
@@ -131,7 +129,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 		return questionnaires.get(0);
 	}
-
 
 	private QuestionnaireResponse createDefaultQuestionnaireResponse(String questionnaireUrlWithVersion,
 			String businessKey, String userTaskId)

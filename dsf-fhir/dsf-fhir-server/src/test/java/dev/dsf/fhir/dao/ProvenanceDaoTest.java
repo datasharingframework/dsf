@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Signature;
@@ -40,7 +40,7 @@ public class ProvenanceDaoTest extends AbstractReadAccessDaoTest<Provenance, Pro
 	@Override
 	protected Provenance updateResource(Provenance resource)
 	{
-		resource.setSignature(Collections.singletonList(new Signature().setData(signatureData)));
+		resource.setSignature(List.of(new Signature().setData(signatureData)));
 		return resource;
 	}
 

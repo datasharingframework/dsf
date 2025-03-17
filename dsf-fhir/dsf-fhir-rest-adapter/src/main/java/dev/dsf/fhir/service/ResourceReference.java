@@ -165,12 +165,12 @@ public class ResourceReference
 
 	public ResourceReference(String location, RelatedArtifact relatedArtifact)
 	{
-		this(location, null, relatedArtifact, null, null, Collections.emptyList());
+		this(location, null, relatedArtifact, null, null, List.of());
 	}
 
 	public ResourceReference(String location, Attachment attachment)
 	{
-		this(location, null, null, attachment, null, Collections.emptyList());
+		this(location, null, null, attachment, null, List.of());
 	}
 
 	@SafeVarargs

@@ -2,7 +2,6 @@ package dev.dsf.common.auth.jwk;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ public class Jwks
 		if (jwksJson instanceof Map)
 			return new Jwks((Map<String, Object>) jwksJson);
 		else
-			return new Jwks(Collections.emptyMap());
+			return new Jwks(Map.of());
 	}
 
 	public Jwk getKey(String id)

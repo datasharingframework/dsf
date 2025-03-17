@@ -25,4 +25,4 @@ jobs:
       - name: Publish with Maven
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn --batch-mode --fail-at-end --threads 1C -DforkCount=2 -Dgpg.skip clean deploy
+        run: mvn --batch-mode --fail-at-end -DforkCount=2 -Dgpg.skip clean deploy

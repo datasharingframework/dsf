@@ -1,9 +1,9 @@
 package dev.dsf.fhir.authorization.process;
 
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,7 +30,7 @@ public class TestPractitionerIdentity implements PractitionerIdentity
 
 	public static TestPractitionerIdentity practitioner(Organization organization, Coding... roles)
 	{
-		return new TestPractitionerIdentity(organization, Arrays.asList(roles));
+		return new TestPractitionerIdentity(organization, List.of(roles));
 	}
 
 	@Override

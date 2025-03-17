@@ -44,7 +44,9 @@ public class PluginFactoryConfig extends AbstractConfig
 	@Bean
 	public ProcessPluginApiClassLoaderFactory pluginApiClassLoaderFactory()
 	{
-		return new ProcessPluginApiClassLoaderFactory();
+		return new ProcessPluginApiClassLoaderFactory(propertiesConfig.getApiClassPathBaseDirectory(),
+				propertiesConfig.getApiAllowedBpeClasses(), propertiesConfig.getApiResourcesWithPriority(),
+				propertiesConfig.getApiAllowedBpeResources());
 	}
 
 	@Bean

@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -170,7 +169,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		if (propertyValue != null && propertyValue instanceof Map m)
 			return m;
 		else
-			return Collections.emptyMap();
+			return Map.of();
 	}
 
 	private List<String> getPropertyArray(Map<String, Object> map, String property)
@@ -179,7 +178,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		if (propertyValue != null && propertyValue instanceof Object[] o)
 			return Arrays.stream(o).filter(v -> v instanceof String).map(v -> (String) v).toList();
 		else
-			return Collections.emptyList();
+			return List.of();
 	}
 
 	// thumbprint from certificate, token roles and groups from jwt
@@ -306,7 +305,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		List<String> email2 = getValues(subject, BCStyle.EmailAddress);
 
 		Extension subjectAlternativeNames = certificate.getExtension(Extension.subjectAlternativeName);
-		List<String> rfc822Names = subjectAlternativeNames == null ? Collections.emptyList()
+		List<String> rfc822Names = subjectAlternativeNames == null ? List.of()
 				: Stream.of(GeneralNames.getInstance(subjectAlternativeNames.getParsedValue()).getNames())
 						.filter(n -> n.getTagNo() == GeneralName.rfc822Name).map(GeneralName::getName)
 						.map(IETFUtils::valueToString).toList();

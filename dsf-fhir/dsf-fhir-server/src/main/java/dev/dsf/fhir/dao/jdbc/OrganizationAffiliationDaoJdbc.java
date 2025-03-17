@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -68,7 +67,7 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 	{
 		Objects.requireNonNull(connection, "connection");
 		if (identifierValue == null || identifierValue.isBlank())
-			return Collections.emptyList();
+			return List.of();
 
 		try (PreparedStatement statement = connection.prepareStatement("SELECT organization_affiliation"
 				+ ",(SELECT identifiers->>'value' FROM current_organizations, jsonb_array_elements(organization->'identifier') AS identifiers "

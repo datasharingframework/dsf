@@ -68,7 +68,7 @@
     <element id="Task.input:string-example.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
-      <fixedUri value="http://dsf.dev/fhir/CodeSystem/test" />
+      <fixedUri value="http://dsf.dev/fhir/CodeSystem/test|1.4" />
     </element>
     <element id="Task.input:string-example.type.coding.code">
       <path value="Task.input.type.coding.code" />

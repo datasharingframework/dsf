@@ -1,7 +1,6 @@
 package dev.dsf.fhir.search.parameters.rev.include;
 
 import java.sql.Connection;
-import java.util.Arrays;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Organization;
@@ -20,7 +19,7 @@ public class OrganizationAffiliationPrimaryOrganizationRevInclude extends Abstra
 
 	public static List<String> getRevIncludeParameterValues()
 	{
-		return Arrays.asList(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
+		return List.of(RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME,
 				RESOURCE_TYPE_NAME + ":" + PARAMETER_NAME + ":" + TARGET_RESOURCE_TYPE_NAME);
 	}
 

@@ -3,7 +3,6 @@ package dev.dsf.bpe.subscription;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -61,11 +60,11 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 		Optional<LocalDateTime> readLastEventTime = readLastEventTime();
 
 		readLastEventTime.ifPresent(lastEventTime -> queryParams.put(PARAM_LAST_UPDATED,
-				Collections.singletonList("gt" + lastEventTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
+				List.of("gt" + lastEventTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
 
-		queryParams.put(PARAM_COUNT, Collections.singletonList(String.valueOf(RESULT_PAGE_COUNT)));
-		queryParams.put(PARAM_PAGE, Collections.singletonList("1"));
-		queryParams.put(PARAM_SORT, Collections.singletonList(PARAM_LAST_UPDATED));
+		queryParams.put(PARAM_COUNT, List.of(String.valueOf(RESULT_PAGE_COUNT)));
+		queryParams.put(PARAM_PAGE, List.of("1"));
+		queryParams.put(PARAM_SORT, List.of(PARAM_LAST_UPDATED));
 
 		UriBuilder builder = UriBuilder.fromPath(resourceName);
 		queryParams.forEach((k, v) -> builder.replaceQueryParam(k, v.toArray()));
