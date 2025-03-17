@@ -91,11 +91,28 @@ public class ResponseGenerator
 		return response(status, resource, mediaType, PreferReturnType.REPRESENTATION, null);
 	}
 
+	/**
+	 * @param status
+	 *            not <code>null</code>
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            may be <code>null</code>
+	 * @param prefer
+	 *            not <code>null</code>
+	 * @param operationOutcomeCreator
+	 *            not <code>null</code> if given <b>prefer</b> is {@link PreferReturnType#OPERATION_OUTCOME}
+	 * @return never <code>null</code>
+	 */
 	public ResponseBuilder response(Status status, Resource resource, MediaType mediaType, PreferReturnType prefer,
 			Supplier<OperationOutcome> operationOutcomeCreator)
 	{
 		Objects.requireNonNull(status, "status");
 		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(prefer, "prefer");
+
+		if (PreferReturnType.OPERATION_OUTCOME.equals(prefer))
+			Objects.requireNonNull(operationOutcomeCreator, "operationOutcomeCreator");
 
 		ResponseBuilder b = Response.status(status);
 
