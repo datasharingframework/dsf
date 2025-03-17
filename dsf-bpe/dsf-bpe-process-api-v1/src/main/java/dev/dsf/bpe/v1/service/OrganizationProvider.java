@@ -52,16 +52,16 @@ public interface OrganizationProvider
 	/**
 	 * @param organizationIdentifier
 	 *            may be <code>null</code>
-	 * @return {@link Organization} with the given <b>organizationIdentifier</b>, empty {@link Optional} if no such
-	 *         resource exists or the given identifier is <code>null</code>
+	 * @return Active {@link Organization} with the given <b>organizationIdentifier</b>, empty {@link Optional} if no
+	 *         such resource exists or the given identifier is <code>null</code>
 	 */
 	Optional<Organization> getOrganization(Identifier organizationIdentifier);
 
 	/**
 	 * @param organizationIdentifierValue
 	 *            may be <code>null</code>
-	 * @return {@link Organization} with the given DSF <b>organizationIdentifier</b>, empty {@link Optional} if no such
-	 *         resource exists or the given identifier value is <code>null</code>
+	 * @return Active {@link Organization} with the given DSF <b>organizationIdentifier</b>, empty {@link Optional} if
+	 *         no such resource exists or the given identifier value is <code>null</code>
 	 * @see OrganizationIdentifier
 	 */
 	default Optional<Organization> getOrganization(String organizationIdentifierValue)
@@ -73,20 +73,20 @@ public interface OrganizationProvider
 	/**
 	 * @param parentOrganizationIdentifier
 	 *            may be <code>null</code>
-	 * @return Organizations configured as participatingOrganization for a parent {@link Organization} with the given
-	 *         <b>parentOrganizationIdentifier</b>, empty {@link List} if no parent organization found, parent has no
-	 *         participating organizations configured via {@link OrganizationAffiliation} resources or the given
-	 *         identifier is <code>null</code>
+	 * @return Active Organizations configured as participatingOrganization for an active parent {@link Organization}
+	 *         with the given <b>parentOrganizationIdentifier</b>, empty {@link List} if no parent organization found,
+	 *         parent has no participating organizations configured via {@link OrganizationAffiliation} resources or the
+	 *         given identifier is <code>null</code>
 	 */
 	List<Organization> getOrganizations(Identifier parentOrganizationIdentifier);
 
 	/**
 	 * @param parentOrganizationIdentifierValue
 	 *            may be <code>null</code>
-	 * @return Organizations configured as participatingOrganization for a parent {@link Organization} with the given
-	 *         DSF <b>parentOrganizationIdentifierValue</b>, empty {@link List} if no parent organization found, parent
-	 *         has no participating organizations configured via {@link OrganizationAffiliation} resources or the given
-	 *         identifier is <code>null</code>
+	 * @return Active Organizations configured as participatingOrganization for an active parent {@link Organization}
+	 *         with the given DSF <b>parentOrganizationIdentifierValue</b>, empty {@link List} if no parent organization
+	 *         found, parent has no participating organizations configured via {@link OrganizationAffiliation} resources
+	 *         or the given identifier is <code>null</code>
 	 * @see OrganizationIdentifier
 	 */
 	default List<Organization> getOrganizations(String parentOrganizationIdentifierValue)
@@ -100,11 +100,11 @@ public interface OrganizationProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return Organizations configured as participatingOrganization for a parent {@link Organization} with the given
-	 *         <b>parentOrganizationIdentifier</b> and role equal to the given <b>memberOrganizationRole</b>, empty
-	 *         {@link List} if no parent organization found, parent has no participating organizations configured via
-	 *         {@link OrganizationAffiliation} resources with the given role or the given identifier is
-	 *         <code>null</code>
+	 * @return Active Organizations configured as participatingOrganization for an active parent {@link Organization}
+	 *         with the given <b>parentOrganizationIdentifier</b> and role equal to the given
+	 *         <b>memberOrganizationRole</b>, empty {@link List} if no parent organization found, parent has no
+	 *         participating organizations configured via {@link OrganizationAffiliation} resources with the given role
+	 *         or the given identifier is <code>null</code>
 	 */
 	List<Organization> getOrganizations(Identifier parentOrganizationIdentifier, Coding memberOrganizationRole);
 
@@ -113,11 +113,11 @@ public interface OrganizationProvider
 	 *            may be <code>null</code>
 	 * @param memberOrganizationRole
 	 *            may be <code>null</code>
-	 * @return Organizations configured as participatingOrganization for a parent {@link Organization} with the given
-	 *         <b>parentOrganizationIdentifier</b> and role equal to the given <b>memberOrganizationRole</b>, empty
-	 *         {@link List} if no parent organization found, parent has no participating organizations configured via
-	 *         {@link OrganizationAffiliation} resources with the given role or the given identifier is
-	 *         <code>null</code>
+	 * @return Active Organizations configured as participatingOrganization for an active parent {@link Organization}
+	 *         with the given <b>parentOrganizationIdentifier</b> and role equal to the given
+	 *         <b>memberOrganizationRole</b>, empty {@link List} if no parent organization found, parent has no
+	 *         participating organizations configured via {@link OrganizationAffiliation} resources with the given role
+	 *         or the given identifier is <code>null</code>
 	 * @see OrganizationIdentifier
 	 */
 	default List<Organization> getOrganizations(String parentOrganizationIdentifierValue, Coding memberOrganizationRole)
@@ -127,7 +127,7 @@ public interface OrganizationProvider
 	}
 
 	/**
-	 * @return All {@link Organization} resources except the local {@link Organization}
+	 * @return All active {@link Organization} resources except the local {@link Organization}
 	 * @see #getLocalOrganization()
 	 */
 	List<Organization> getRemoteOrganizations();

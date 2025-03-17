@@ -15,6 +15,8 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -24,6 +26,8 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class ResourceValidatorImpl implements ResourceValidator
 {
+	private static final Logger logger = LoggerFactory.getLogger(ResourceValidatorImpl.class);
+
 	private static final Pattern AT_DEFAULT_SLICE_PATTERN = Pattern
 			.compile(".*(Questionnaire|QuestionnaireResponse).item:@default.*");
 
@@ -58,7 +62,7 @@ public class ResourceValidatorImpl implements ResourceValidator
 					|| path.startsWith("Task")))
 				return true;
 
-			System.err.println("!!!!!!! " + path + ", " + url + ", " + type + ", " + canonical);
+			logger.debug("Not resolving [path: {}, url: {}, type: {}, canonical: {}]", path, url, type, canonical);
 			return false;
 		}
 
