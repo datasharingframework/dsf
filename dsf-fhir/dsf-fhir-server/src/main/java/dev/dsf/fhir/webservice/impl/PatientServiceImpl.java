@@ -14,6 +14,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.PatientService;
 
 public class PatientServiceImpl extends AbstractResourceServiceImpl<PatientDao, Patient> implements PatientService
@@ -23,10 +24,10 @@ public class PatientServiceImpl extends AbstractResourceServiceImpl<PatientDao, 
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider,
-			HistoryService historyService)
+			HistoryService historyService, ValidationRules validationRules)
 	{
 		super(path, Patient.class, serverBase, defaultPageCount, dao, validator, eventHandler, exceptionHandler,
 				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver,
-				referenceCleaner, authorizationRuleProvider, historyService);
+				referenceCleaner, authorizationRuleProvider, historyService, validationRules);
 	}
 }

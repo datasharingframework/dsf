@@ -12,6 +12,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
@@ -25,11 +26,12 @@ public class StructureDefinitionServiceSecure
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, StructureDefinitionDao structureDefinitionDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<StructureDefinition> authorizationRule, ResourceValidator resourceValidator)
+			AuthorizationRule<StructureDefinition> authorizationRule, ResourceValidator resourceValidator,
+			ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				StructureDefinition.class, structureDefinitionDao, exceptionHandler, parameterConverter,
-				authorizationRule, resourceValidator);
+				authorizationRule, resourceValidator, validationRules);
 	}
 
 	@Override

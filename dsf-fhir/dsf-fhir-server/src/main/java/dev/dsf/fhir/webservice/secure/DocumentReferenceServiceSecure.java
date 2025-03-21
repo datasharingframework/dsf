@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.DocumentReferenceService;
 
 public class DocumentReferenceServiceSecure
@@ -21,10 +22,11 @@ public class DocumentReferenceServiceSecure
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, DocumentReferenceDao documentReferenceDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<DocumentReference> authorizationRule, ResourceValidator resourceValidator)
+			AuthorizationRule<DocumentReference> authorizationRule, ResourceValidator resourceValidator,
+			ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				DocumentReference.class, documentReferenceDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator);
+				resourceValidator, validationRules);
 	}
 }

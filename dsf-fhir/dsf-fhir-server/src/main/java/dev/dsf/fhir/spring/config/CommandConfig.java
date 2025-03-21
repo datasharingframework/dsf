@@ -59,7 +59,7 @@ public class CommandConfig
 				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				eventConfig.eventManager(), eventConfig.eventGenerator(), authorizationConfig.authorizationHelper(),
 				validationConfig.validationHelper(), snapshotConfig.snapshotGenerator(),
-				this::transactionResourceFactory);
+				validationConfig.validationRules(), this::transactionResourceFactory);
 	}
 
 	@Bean
@@ -70,7 +70,7 @@ public class CommandConfig
 
 		ValidationHelper validationHelper = new ValidationHelperImpl(
 				new ResourceValidatorImpl(fhirConfig.fhirContext(), validationSupport),
-				helperConfig.responseGenerator());
+				helperConfig.responseGenerator(), validationConfig.validationRules());
 
 		SnapshotGenerator snapshotGenerator = new SnapshotGeneratorImpl(fhirConfig.fhirContext(), validationSupport);
 
