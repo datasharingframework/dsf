@@ -1,0 +1,55 @@
+<Task xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/test-task|1.7"></profile>
+	</meta>
+	<instantiatesCanonical value="http://dsf.dev/bpe/Process/test|1.7"></instantiatesCanonical>
+	<status value="requested"></status>
+	<intent value="order"></intent>
+	<requester>
+		<type value="Organization"></type>
+		<identifier>
+			<system value="http://dsf.dev/sid/organization-identifier"></system>
+			<value value="External_Test_Organization"></value>
+		</identifier>
+	</requester>
+	<restriction>
+		<recipient>
+			<type value="Organization"></type>
+			<identifier>
+				<system value="http://dsf.dev/sid/organization-identifier"></system>
+				<value value="Test_Organization"></value>
+			</identifier>
+		</recipient>
+	</restriction>
+	<input>
+		<type>
+			<coding>
+				<system value="http://dsf.dev/fhir/CodeSystem/bpmn-message"></system>
+				<code value="message-name"></code>
+			</coding>
+		</type>
+		<valueString value="test-message"></valueString>
+	</input>
+	<input>
+		<type>
+			<coding>
+				<system value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
+				<code value="business-key" />
+			</coding>
+		</type>
+		<valueString value="fdc8218e-ef55-4fc6-9c4f-a20883d569cc" />
+	</input>
+	<input>
+		<type>
+			<coding>
+				<system value="http://dsf.dev/fhir/CodeSystem/test" />
+				<version value="1.7" />
+				<code value="binary-ref" />
+			</coding>
+		</type>
+		<valueReference>
+			<reference
+				value="https://localhost:80010/fhir/Binary/941683ea-7670-4d1a-8e0d-75698c433204" />
+		</valueReference>
+	</input>
+</Task>
