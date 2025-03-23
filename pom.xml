@@ -34,6 +34,9 @@
 		<hapi.fhir.org.hl7.version.v2>6.4.0</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>7.6.1</hapi.fhir.version>
 		<bouncycastle.version>1.80</bouncycastle.version>
+		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
+		<crypto-utils.version.v2>5.0.0</crypto-utils.version.v2>
+		<crypto-utils.version>5.0.0</crypto-utils.version>
 	</properties>
 
 	<name>DSF</name>
@@ -170,12 +173,6 @@
 			<!-- hhn rwh -->
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
-				<artifactId>crypto-utils</artifactId>
-				<!-- Can't update to 4.0.0 as renamed packages in crypto-utils would break existing process plugins -->
-				<version>3.8.0</version>
-			</dependency>
-			<dependency>
-				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
 				<version>1.0.0</version>
 			</dependency>
@@ -276,6 +273,11 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+	    		<groupId>com.fasterxml.jackson.dataformat</groupId>
+	    		<artifactId>jackson-dataformat-yaml</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
 

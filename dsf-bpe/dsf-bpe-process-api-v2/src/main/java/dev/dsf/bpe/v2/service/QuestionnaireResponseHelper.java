@@ -9,6 +9,9 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Type;
 
+/**
+ * Methods for manipulating {@link QuestionnaireResponse} resources.
+ */
 public interface QuestionnaireResponseHelper
 {
 	default Optional<QuestionnaireResponse.QuestionnaireResponseItemComponent> getFirstItemLeaveMatchingLinkId(

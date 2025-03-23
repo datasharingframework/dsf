@@ -1,5 +1,6 @@
 package dev.dsf.bpe.subscription;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,8 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.bpe.client.FhirWebserviceClient;
-import dev.dsf.bpe.client.LocalFhirClientProvider;
+import dev.dsf.bpe.client.dsf.ClientProvider;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.fhir.client.WebsocketClient;
 
 public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConnector, InitializingBean
@@ -32,16 +33,16 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 
 	private final Class<R> resourceType;
 	private final String resourceName;
-	private final LocalFhirClientProvider clientProvider;
+	private final ClientProvider clientProvider;
 	private final FhirContext fhirContext;
 	private final SubscriptionHandlerFactory<R> subscriptionHandlerFactory;
-	private final long retrySleepMillis;
+	private final Duration retrySleep;
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
-	public LocalFhirConnectorImpl(Class<R> resourceType, LocalFhirClientProvider clientProvider,
+	public LocalFhirConnectorImpl(Class<R> resourceType, ClientProvider clientProvider,
 			SubscriptionHandlerFactory<R> subscriptionHandlerFactory, FhirContext fhirContext,
-			String subscriptionSearchParameter, long retrySleepMillis, int maxRetries)
+			String subscriptionSearchParameter, Duration retrySleep, int maxRetries)
 	{
 		this.resourceType = resourceType;
 		this.resourceName = resourceType == null ? null : resourceType.getAnnotation(ResourceDef.class).name();
@@ -49,7 +50,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		this.subscriptionHandlerFactory = subscriptionHandlerFactory;
 		this.fhirContext = fhirContext;
 		this.subscriptionSearchParameter = parse(subscriptionSearchParameter, null);
-		this.retrySleepMillis = retrySleepMillis;
+		this.retrySleep = retrySleep;
 		this.maxRetries = maxRetries;
 	}
 
@@ -81,8 +82,8 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(subscriptionSearchParameter, "subscriptionSearchParameter");
 
-		if (retrySleepMillis < 0)
-			throw new IllegalArgumentException("retrySleepMillis < 0");
+		if (retrySleep.isNegative())
+			throw new IllegalArgumentException("retrySleepMillis negative");
 
 		// maxRetries < 0 => retry forever
 	}
@@ -129,11 +130,11 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 				if (retryCounter < maxRetries)
 				{
 					logger.warn(
-							"Error while retrieving {} websocket subscription ({}), trying again in {} ms (retry {} of {})",
-							resourceName, e.getMessage(), retrySleepMillis, retryCounter + 1, maxRetries);
+							"Error while retrieving {} websocket subscription ({}), trying again in {}s (retry {} of {})",
+							resourceName, e.getMessage(), retrySleep.toSeconds(), retryCounter + 1, maxRetries);
 					try
 					{
-						Thread.sleep(retrySleepMillis);
+						Thread.sleep(retrySleep);
 					}
 					catch (InterruptedException e1)
 					{
@@ -160,11 +161,11 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 			}
 			catch (RuntimeException e)
 			{
-				logger.warn("Error while retrieving {} websocket subscription ({}), trying again in {} ms (retry {})",
-						resourceName, e.getMessage(), retrySleepMillis, retryCounter);
+				logger.warn("Error while retrieving {} websocket subscription ({}), trying again in {}s (retry {})",
+						resourceName, e.getMessage(), retrySleep.toSeconds(), retryCounter);
 				try
 				{
-					Thread.sleep(retrySleepMillis);
+					Thread.sleep(retrySleep);
 				}
 				catch (InterruptedException e1)
 				{
@@ -177,7 +178,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	{
 		logger.debug("Retrieving {} websocket subscription ...", resourceName);
 
-		Bundle bundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Subscription.class,
+		Bundle bundle = clientProvider.getWebserviceClient().searchWithStrictHandling(Subscription.class,
 				subscriptionSearchParameter);
 
 		if (!Bundle.BundleType.SEARCHSET.equals(bundle.getType()))
@@ -203,7 +204,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		{
 			logger.info("Downloading new {} resources ...", resourceName);
 
-			FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
+			WebserviceClient client = clientProvider.getWebserviceClient();
 			ExistingResourceLoader<R> existingResourceLoader = subscriptionHandlerFactory
 					.createExistingResourceLoader(client);
 			Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(),
@@ -228,7 +229,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	{
 		try
 		{
-			WebsocketClient client = clientProvider.getLocalWebsocketClient(this::connect,
+			WebsocketClient client = clientProvider.getWebsocketClient(this::connect,
 					subscription.getIdElement().getIdPart());
 
 			EventType eventType = toEventType(subscription.getChannel().getPayload());
@@ -289,7 +290,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	private void setPingEventHandler(WebsocketClient client, String subscriptionIdPart,
 			Map<String, List<String>> searchCriteriaQueryParameters)
 	{
-		FhirWebserviceClient webserviceClient = clientProvider.getLocalWebserviceClient();
+		WebserviceClient webserviceClient = clientProvider.getWebserviceClient();
 		ExistingResourceLoader<R> existingResourceLoader = subscriptionHandlerFactory
 				.createExistingResourceLoader(webserviceClient);
 		PingEventResourceHandler<R> pingHandler = subscriptionHandlerFactory

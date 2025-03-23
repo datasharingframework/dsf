@@ -1,6 +1,7 @@
 package dev.dsf.fhir.client;
 
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,8 +25,8 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	private final KeyStore webserviceKeyStore;
 	private final char[] webserviceKeyStorePassword;
 
-	private final int remoteReadTimeout;
-	private final int remoteConnectTimeout;
+	private final Duration remoteReadTimeout;
+	private final Duration remoteConnectTimeout;
 	private final ProxyConfig proxyConfig;
 	private final boolean logRequests;
 	private final FhirContext fhirContext;
@@ -35,9 +36,9 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	private final BuildInfoReader buildInfoReader;
 
 	public ClientProviderImpl(KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
-			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout, ProxyConfig proxyConfig,
-			boolean logRequests, FhirContext fhirContext, ReferenceCleaner referenceCleaner, EndpointDao endpointDao,
-			ExceptionHandler exceptionHandler, BuildInfoReader buildInfoReader)
+			char[] webserviceKeyStorePassword, Duration remoteReadTimeout, Duration remoteConnectTimeout,
+			ProxyConfig proxyConfig, boolean logRequests, FhirContext fhirContext, ReferenceCleaner referenceCleaner,
+			EndpointDao endpointDao, ExceptionHandler exceptionHandler, BuildInfoReader buildInfoReader)
 	{
 		this.webserviceTrustStore = webserviceTrustStore;
 		this.webserviceKeyStore = webserviceKeyStore;

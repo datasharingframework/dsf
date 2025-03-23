@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.ProcessPluginDefinition;
-import dev.dsf.bpe.v2.client.FhirWebserviceClient;
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
@@ -338,7 +338,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 			logger.debug("Updating Task {}, new status: {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
 					task.getStatus().toCode());
 
-			api.getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+			api.getDsfClientProvider().getLocalDsfClient().withMinimalReturn().update(task);
 		}
 		catch (Exception e)
 		{
@@ -460,8 +460,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 		if (additionalInputParameters != null)
 			additionalInputParameters.forEach(task.getInput()::add);
 
-		FhirWebserviceClient client = api.getFhirWebserviceClientProvider()
-				.getWebserviceClient(target.getEndpointUrl());
+		DsfClient client = api.getDsfClientProvider().getDsfClient(target.getEndpointUrl());
 
 		if (correlationKey != null)
 			logger.info(
@@ -501,7 +500,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 	 *            not <code>null</code>
 	 * @return id of created task
 	 */
-	protected IdType doSend(FhirWebserviceClient client, Task task)
+	protected IdType doSend(DsfClient client, Task task)
 	{
 		return client.withMinimalReturn().create(task);
 	}

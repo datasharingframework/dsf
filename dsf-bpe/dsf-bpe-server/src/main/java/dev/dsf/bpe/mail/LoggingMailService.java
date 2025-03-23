@@ -14,6 +14,8 @@ import javax.mail.internet.MimeMultipart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.bpe.api.service.BpeMailService;
+
 public class LoggingMailService implements BpeMailService
 {
 	private static final Logger logger = LoggerFactory.getLogger(LoggingMailService.class);

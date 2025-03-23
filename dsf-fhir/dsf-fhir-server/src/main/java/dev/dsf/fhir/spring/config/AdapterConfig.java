@@ -68,7 +68,7 @@ public class AdapterConfig
 	{
 		List<ThymeleafContext> thymeleafContexts = List.of(new ResourceActivityDefinition(), new ResourceCodeSystem(),
 				new ResourceEndpoint(), new ResourceLibrary(), new ResourceMeasure(),
-				new ResourceMeasureReport(propertiesConfig.getServerBaseUrl()), new ResourceNamingSystem(),
+				new ResourceMeasureReport(propertiesConfig.getDsfServerBaseUrl()), new ResourceNamingSystem(),
 				new ResourceOrganizationAffiliation(), new ResourceOrganization(), new ResourceQuestionnaire(),
 				new ResourceQuestionnaireResponse(), new ResourceStructureDefinition(), new ResourceSubscription(),
 				new ResourceTask(), new ResourceValueSet(),
@@ -88,7 +88,7 @@ public class AdapterConfig
 				new SearchSetTask(propertiesConfig.getDefaultPageCount()),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), ValueSet.class));
 
-		return new ThymeleafTemplateServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getUiTheme(),
+		return new ThymeleafTemplateServiceImpl(propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getUiTheme(),
 				fhirConfig.fhirContext(), thymeleafContexts, propertiesConfig.getStaticResourceCacheEnabled(),
 				modCssExists());
 	}

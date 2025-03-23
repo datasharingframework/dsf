@@ -1,7 +1,6 @@
 package dev.dsf.bpe.v2.spring;
 
 import java.util.Locale;
-import java.util.UUID;
 
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,29 +11,39 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import dev.dsf.bpe.api.config.ClientConfig;
+import dev.dsf.bpe.api.config.BpeProxyConfig;
+import dev.dsf.bpe.api.config.DsfClientConfig;
+import dev.dsf.bpe.api.config.FhirClientConfigs;
 import dev.dsf.bpe.api.listener.ListenerFactory;
 import dev.dsf.bpe.api.listener.ListenerFactoryImpl;
 import dev.dsf.bpe.api.service.BpeMailService;
+import dev.dsf.bpe.api.service.BpeOidcClientProvider;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.ProcessPluginApiImpl;
-import dev.dsf.bpe.v2.client.ReferenceCleaner;
-import dev.dsf.bpe.v2.client.ReferenceCleanerImpl;
-import dev.dsf.bpe.v2.client.ReferenceExtractor;
-import dev.dsf.bpe.v2.client.ReferenceExtractorImpl;
+import dev.dsf.bpe.v2.client.dsf.ReferenceCleaner;
+import dev.dsf.bpe.v2.client.dsf.ReferenceCleanerImpl;
+import dev.dsf.bpe.v2.client.dsf.ReferenceExtractor;
+import dev.dsf.bpe.v2.client.dsf.ReferenceExtractorImpl;
+import dev.dsf.bpe.v2.client.fhir.ClientConfigs;
+import dev.dsf.bpe.v2.client.fhir.ClientConfigsDelegate;
 import dev.dsf.bpe.v2.config.ProxyConfig;
 import dev.dsf.bpe.v2.config.ProxyConfigDelegate;
 import dev.dsf.bpe.v2.listener.ContinueListener;
 import dev.dsf.bpe.v2.listener.EndListener;
 import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
+import dev.dsf.bpe.v2.service.DsfClientProvider;
+import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.EndpointProviderImpl;
-import dev.dsf.bpe.v2.service.FhirWebserviceClientProvider;
-import dev.dsf.bpe.v2.service.FhirWebserviceClientProviderImpl;
+import dev.dsf.bpe.v2.service.FhirClientProvider;
+import dev.dsf.bpe.v2.service.FhirClientProviderImpl;
+import dev.dsf.bpe.v2.service.FhirClientProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.MailService;
-import dev.dsf.bpe.v2.service.MailServiceImpl;
+import dev.dsf.bpe.v2.service.MailServiceDelegate;
+import dev.dsf.bpe.v2.service.OidcClientProvider;
+import dev.dsf.bpe.v2.service.OidcClientProviderDelegate;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.OrganizationProviderImpl;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
@@ -56,10 +65,13 @@ import dev.dsf.bpe.v2.variables.VariablesImpl;
 public class ApiServiceConfig
 {
 	@Autowired
-	private ClientConfig environmentConfig;
+	private DsfClientConfig dsfClientConfig;
 
 	@Autowired
-	private dev.dsf.bpe.api.config.ProxyConfig proxyConfig;
+	private FhirClientConfigs fhirClientConfigs;
+
+	@Autowired
+	private BpeProxyConfig proxyConfig;
 
 	@Autowired
 	private BuildInfoProvider buildInfoProvider;
@@ -67,57 +79,27 @@ public class ApiServiceConfig
 	@Autowired
 	private BpeMailService bpeMailService;
 
+	@Autowired
+	private BpeOidcClientProvider bpeOidcClientProvider;
+
 	@Bean
 	public ProcessPluginApi processPluginApiV2()
 	{
-		ProxyConfig proxyConfig = new ProxyConfigDelegate(this.proxyConfig);
-
-		FhirWebserviceClientProvider clientProvider = clientProvider();
-		EndpointProvider endpointProvider = new EndpointProviderImpl(clientProvider,
-				environmentConfig.getFhirServerBaseUrl());
-		FhirContext fhirContext = fhirContext();
-		MailService mailService = new MailServiceImpl(bpeMailService);
-		ObjectMapper objectMapper = objectMapper();
-		OrganizationProvider organizationProvider = new OrganizationProviderImpl(clientProvider,
-				environmentConfig.getFhirServerBaseUrl());
-
-		ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
-		QuestionnaireResponseHelper questionnaireResponseHelper = new QuestionnaireResponseHelperImpl(
-				environmentConfig.getFhirServerBaseUrl());
-		ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
-		TaskHelper taskHelper = new TaskHelperImpl(environmentConfig.getFhirServerBaseUrl());
-
-		return new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext, clientProvider, mailService,
-				objectMapper, organizationProvider, processAuthorizationHelper, questionnaireResponseHelper,
-				readAccessHelper, taskHelper);
+		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
+				fhirClientProvider(), oidcClientProvider(), mailService(), objectMapper(), organizationProvider(),
+				processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(), taskHelper());
 	}
 
 	@Bean
-	public ReferenceExtractor referenceExtractor()
+	public ProxyConfig proxyConfigDelegate()
 	{
-		return new ReferenceExtractorImpl();
+		return new ProxyConfigDelegate(proxyConfig);
 	}
 
 	@Bean
-	public ReferenceCleaner referenceCleaner()
+	public EndpointProvider endpointProvider()
 	{
-		return new ReferenceCleanerImpl(referenceExtractor());
-	}
-
-	@Bean
-	public FhirWebserviceClientProvider clientProvider()
-	{
-		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-
-		return new FhirWebserviceClientProviderImpl(fhirContext(), environmentConfig.getFhirServerBaseUrl(),
-				environmentConfig.getWebserviceClientLocalReadTimeout(),
-				environmentConfig.getWebserviceClientLocalConnectTimeout(),
-				environmentConfig.getWebserviceClientLocalVerbose(), environmentConfig.getWebserviceTrustStore(),
-				environmentConfig.getWebserviceKeyStore(keyStorePassword), keyStorePassword,
-				environmentConfig.getWebserviceClientRemoteReadTimeout(),
-				environmentConfig.getWebserviceClientRemoteConnectTimeout(),
-				environmentConfig.getWebserviceClientRemoteVerbose(), this.proxyConfig, buildInfoProvider,
-				referenceCleaner());
+		return new EndpointProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
 	}
 
 	@Bean
@@ -137,9 +119,84 @@ public class ApiServiceConfig
 	}
 
 	@Bean
+	public DsfClientProvider dsfClientProvider()
+	{
+		return new DsfClientProviderImpl(fhirContext(), referenceCleaner(), dsfClientConfig, proxyConfig,
+				buildInfoProvider);
+	}
+
+	@Bean
+	public FhirClientProvider fhirClientProvider()
+	{
+		return new FhirClientProviderWithEndpointSupport(endpointProvider(),
+				new FhirClientProviderImpl(fhirContext(), proxyConfigDelegate(), oidcClientProvider(),
+						buildInfoProvider.getUserAgentValue(), clientConfigsDelegate()));
+	}
+
+	@Bean
+	public OidcClientProvider oidcClientProvider()
+	{
+		return new OidcClientProviderDelegate(bpeOidcClientProvider);
+	}
+
+	@Bean
+	public MailService mailService()
+	{
+		return new MailServiceDelegate(bpeMailService);
+	}
+
+	@Bean
 	public ObjectMapper objectMapper()
 	{
 		return ObjectMapperFactory.createObjectMapper(fhirContext());
+	}
+
+	@Bean
+	public OrganizationProvider organizationProvider()
+	{
+		return new OrganizationProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
+	}
+
+	@Bean
+	public ProcessAuthorizationHelper processAuthorizationHelper()
+	{
+		return new ProcessAuthorizationHelperImpl();
+	}
+
+	@Bean
+	public QuestionnaireResponseHelper questionnaireResponseHelper()
+	{
+		return new QuestionnaireResponseHelperImpl(dsfClientConfig.getLocalConfig().getBaseUrl());
+	}
+
+	@Bean
+	public ReadAccessHelper readAccessHelper()
+	{
+		return new ReadAccessHelperImpl();
+	}
+
+	@Bean
+	public TaskHelper taskHelper()
+	{
+		return new TaskHelperImpl(dsfClientConfig.getLocalConfig().getBaseUrl());
+	}
+
+	@Bean
+	public ReferenceCleaner referenceCleaner()
+	{
+		return new ReferenceCleanerImpl(referenceExtractor());
+	}
+
+	@Bean
+	public ClientConfigs clientConfigsDelegate()
+	{
+		return new ClientConfigsDelegate(fhirClientConfigs, proxyConfig);
+	}
+
+	@Bean
+	public ReferenceExtractor referenceExtractor()
+	{
+		return new ReferenceExtractorImpl();
 	}
 
 	@Bean
@@ -169,20 +226,20 @@ public class ApiServiceConfig
 	@Bean
 	public ExecutionListener startListener()
 	{
-		return new StartListener(environmentConfig.getFhirServerBaseUrl(), VariablesImpl::new);
+		return new StartListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean
 	public ExecutionListener endListener()
 	{
-		return new EndListener(environmentConfig.getFhirServerBaseUrl(), VariablesImpl::new,
-				clientProvider().getLocalWebserviceClient());
+		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new,
+				dsfClientProvider().getLocalDsfClient());
 	}
 
 	@Bean
 	public ExecutionListener continueListener()
 	{
-		return new ContinueListener(environmentConfig.getFhirServerBaseUrl(), VariablesImpl::new);
+		return new ContinueListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean

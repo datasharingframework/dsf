@@ -53,7 +53,7 @@ public class CommandConfig
 	@Bean
 	public CommandFactory commandFactory()
 	{
-		return new CommandFactoryImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+		return new CommandFactoryImpl(propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				daoConfig.dataSource(), daoConfig.daoProvider(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),

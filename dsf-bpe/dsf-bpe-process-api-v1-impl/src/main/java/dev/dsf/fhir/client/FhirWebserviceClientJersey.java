@@ -3,6 +3,7 @@ package dev.dsf.fhir.client;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -75,12 +76,12 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			ObjectMapper objectMapper, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
-			int connectTimeout, int readTimeout, boolean logRequests, String userAgentValue, FhirContext fhirContext,
-			ReferenceCleaner referenceCleaner)
+			Duration connectTimeout, Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue,
+			FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper,
 				List.of(new FhirAdapter(fhirContext, referenceCleaner)), proxySchemeHostPort, proxyUserName,
-				proxyPassword, connectTimeout, readTimeout, logRequests, userAgentValue);
+				proxyPassword, connectTimeout, readTimeout, logRequestsAndResponses, userAgentValue);
 
 		preferReturnMinimal = new PreferReturnMinimalWithRetryImpl(this);
 		preferReturnOutcome = new PreferReturnOutcomeWithRetryImpl(this);
@@ -731,7 +732,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delayMillis);
+		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, Duration.ofMillis(delayMillis));
 	}
 
 	@Override
@@ -740,7 +741,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, delayMillis);
+		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, Duration.ofMillis(delayMillis));
 	}
 
 	@Override

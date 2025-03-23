@@ -10,6 +10,9 @@ import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 
+/**
+ * Methods for manipulating {@link Task} resources.
+ */
 public interface TaskHelper
 {
 	/**

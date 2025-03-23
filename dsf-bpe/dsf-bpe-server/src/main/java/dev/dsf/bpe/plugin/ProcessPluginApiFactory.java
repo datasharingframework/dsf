@@ -15,11 +15,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import dev.dsf.bpe.api.config.ClientConfig;
-import dev.dsf.bpe.api.config.ProxyConfig;
+import dev.dsf.bpe.api.config.BpeProxyConfig;
+import dev.dsf.bpe.api.config.DsfClientConfig;
+import dev.dsf.bpe.api.config.FhirClientConfigs;
 import dev.dsf.bpe.api.plugin.ProcessPluginApiBuilder;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.api.service.BpeMailService;
+import dev.dsf.bpe.api.service.BpeOidcClientProvider;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
 
 public class ProcessPluginApiFactory implements InitializingBean
@@ -27,21 +29,26 @@ public class ProcessPluginApiFactory implements InitializingBean
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginApiFactory.class);
 
 	private final ConfigurableEnvironment environment;
-	private final ClientConfig clientConfig;
-	private final ProxyConfig proxyConfig;
+	private final DsfClientConfig dsfClientConfig;
+	private final FhirClientConfigs fhirClientConfigs;
+	private final BpeProxyConfig bpeProxyConfig;
 	private final BuildInfoProvider buildInfoProvider;
 	private final BpeMailService bpeMailService;
+	private final BpeOidcClientProvider bpeOidcClientProvider;
 	private final ProcessPluginApiClassLoaderFactory classLoaderFactory;
 
-	public ProcessPluginApiFactory(ConfigurableEnvironment environment, ClientConfig clientConfig,
-			ProxyConfig proxyConfig, BuildInfoProvider buildInfoProvider, BpeMailService bpeMailService,
+	public ProcessPluginApiFactory(ConfigurableEnvironment environment, DsfClientConfig dsfClientConfig,
+			FhirClientConfigs fhirClientConfigs, BpeProxyConfig bpeProxyConfig, BuildInfoProvider buildInfoProvider,
+			BpeMailService bpeMailService, BpeOidcClientProvider bpeOidcClientProvider,
 			ProcessPluginApiClassLoaderFactory classLoaderFactory)
 	{
 		this.environment = environment;
-		this.clientConfig = clientConfig;
-		this.proxyConfig = proxyConfig;
+		this.dsfClientConfig = dsfClientConfig;
+		this.fhirClientConfigs = fhirClientConfigs;
+		this.bpeProxyConfig = bpeProxyConfig;
 		this.buildInfoProvider = buildInfoProvider;
 		this.bpeMailService = bpeMailService;
+		this.bpeOidcClientProvider = bpeOidcClientProvider;
 		this.classLoaderFactory = classLoaderFactory;
 	}
 
@@ -49,10 +56,12 @@ public class ProcessPluginApiFactory implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(environment, "environment");
-		Objects.requireNonNull(clientConfig, "clientConfig");
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
+		Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
+		Objects.requireNonNull(fhirClientConfigs, "fhirClientConfigs");
+		Objects.requireNonNull(bpeProxyConfig, "bpeProxyConfig");
 		Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
 		Objects.requireNonNull(bpeMailService, "bpeMailService");
+		Objects.requireNonNull(bpeOidcClientProvider, "bpeOidcClientProvider");
 		Objects.requireNonNull(classLoaderFactory, "classLoaderFactory");
 	}
 
@@ -83,10 +92,12 @@ public class ProcessPluginApiFactory implements InitializingBean
 		try
 		{
 			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-			factory.registerSingleton("clientConfig", clientConfig);
-			factory.registerSingleton("proxyConfig", proxyConfig);
+			factory.registerSingleton("dsfClientConfig", dsfClientConfig);
+			factory.registerSingleton("fhirClientConfigs", fhirClientConfigs);
+			factory.registerSingleton("bpeProxyConfig", bpeProxyConfig);
 			factory.registerSingleton("buildInfoReader", buildInfoProvider);
 			factory.registerSingleton("bpeMailService", bpeMailService);
+			factory.registerSingleton("bpeOidcClientProvider", bpeOidcClientProvider);
 
 			var context = new AnnotationConfigApplicationContext(factory);
 			context.setClassLoader(apiClassLoader);

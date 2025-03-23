@@ -32,7 +32,7 @@ public class WebsocketConfig
 	private FhirConfig fhirConfig;
 
 	@Autowired
-	private FhirClientConfig fhirClientConfig;
+	private DsfClientConfig dsfClientConfig;
 
 	@Autowired
 	private PluginConfig pluginConfig;
@@ -43,7 +43,7 @@ public class WebsocketConfig
 		return new TaskHandler(camundaConfig.processEngine().getRepositoryService(),
 				pluginConfig.processPluginManager(), fhirConfig.fhirContext(),
 				camundaConfig.processEngine().getRuntimeService(),
-				fhirClientConfig.clientProvider().getLocalWebserviceClient());
+				dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
 	@Bean
@@ -56,7 +56,7 @@ public class WebsocketConfig
 	@Bean
 	public LocalFhirConnector fhirConnectorTask()
 	{
-		return new LocalFhirConnectorImpl<>(Task.class, fhirClientConfig.clientProvider(),
+		return new LocalFhirConnectorImpl<>(Task.class, dsfClientConfig.clientProvider(),
 				taskSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getTaskSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
 				propertiesConfig.getWebsocketMaxRetries());
@@ -81,7 +81,7 @@ public class WebsocketConfig
 	@Bean
 	public LocalFhirConnector fhirConnectorQuestionnaireResponse()
 	{
-		return new LocalFhirConnectorImpl<>(QuestionnaireResponse.class, fhirClientConfig.clientProvider(),
+		return new LocalFhirConnectorImpl<>(QuestionnaireResponse.class, dsfClientConfig.clientProvider(),
 				questionnaireResponseSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
 				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());

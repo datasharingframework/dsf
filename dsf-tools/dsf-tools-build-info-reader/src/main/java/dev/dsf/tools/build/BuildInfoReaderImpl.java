@@ -18,6 +18,8 @@ public class BuildInfoReaderImpl implements BuildInfoReader
 {
 	private static final Logger logger = LoggerFactory.getLogger(BuildInfoReaderImpl.class);
 
+	private static final String USER_AGENT_VALUE = "DSF/";
+
 	private static final String VERSION_PROPERTIES_FILE = "/version.properties";
 
 	private static final String PROPERTY_PROJECT_ARTIFACT = "project.artifact";
@@ -140,5 +142,11 @@ public class BuildInfoReaderImpl implements BuildInfoReader
 				getProjectVersion(), getBuildDate().withZoneSameInstant(ZoneId.systemDefault())
 						.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
 				getBuildBranch(), getBuildNumber());
+	}
+
+	@Override
+	public String getUserAgentValue()
+	{
+		return USER_AGENT_VALUE + getProjectVersion();
 	}
 }

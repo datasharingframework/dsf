@@ -29,7 +29,7 @@ public class PluginConfig
 	private FhirConfig fhirConfig;
 
 	@Autowired
-	private FhirClientConfig fhirClientConfig;
+	private DsfClientConfig dsfClientConfig;
 
 	@Autowired
 	private DaoConfig daoConfig;
@@ -71,9 +71,9 @@ public class PluginConfig
 	@Bean
 	public FhirResourceHandler fhirResourceHandler()
 	{
-		return new FhirResourceHandlerImpl(fhirClientConfig.clientProvider().getLocalWebserviceClient(),
+		return new FhirResourceHandlerImpl(dsfClientConfig.clientProvider().getWebserviceClient(),
 				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
-				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());
 	}
 
 	@Bean
@@ -82,7 +82,7 @@ public class PluginConfig
 		return new ProcessPluginManagerImpl(
 				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory()),
 				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler(),
-				propertiesConfig.getFhirServerBaseUrl(), fhirClientConfig.clientProvider().getLocalWebserviceClient(),
-				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
+				propertiesConfig.getDsfServerBaseUrl(), dsfClientConfig.clientProvider().getWebserviceClient(),
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());
 	}
 }

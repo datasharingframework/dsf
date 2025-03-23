@@ -35,7 +35,7 @@ public class ReferenceConfig
 	@Bean
 	public ReferenceResolver referenceResolver()
 	{
-		return new ReferenceResolverImpl(propertiesConfig.getServerBaseUrl(), daoConfig.daoProvider(),
+		return new ReferenceResolverImpl(propertiesConfig.getDsfServerBaseUrl(), daoConfig.daoProvider(),
 				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), clientConfig.clientProvider(),
 				helperConfig.parameterConverter());
 	}

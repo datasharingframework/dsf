@@ -18,9 +18,6 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +28,8 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
@@ -59,13 +58,11 @@ import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-import de.rwh.utils.crypto.io.PemIo;
 import dev.dsf.bpe.dao.AbstractDbTest;
-import dev.dsf.bpe.integration.X509Certificates.ClientCertificate;
+import dev.dsf.bpe.integration.X509Certificates.CertificateAndPrivateKey;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
 import dev.dsf.common.auth.DsfLoginService;
@@ -149,9 +146,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		String fhirBaseUrl = "https://localhost:" + fhirApiConnectorChannel.socket().getLocalPort() + FHIR_CONTEXT_PATH;
 
 		logger.info("Creating webservice client ...");
-		webserviceClient = createWebserviceClient(fhirBaseUrl, certificates.getClientCertificate().getTrustStore(),
-				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
+		webserviceClient = createWebserviceClient(fhirBaseUrl, certificates.getClientCertificate().trustStore(),
+				certificates.getClientCertificate().keyStore(), certificates.getClientCertificate().keyStorePassword(),
+				fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer(fhirStatusConnectorChannel, fhirApiConnectorChannel, fhirBaseUrl);
@@ -200,7 +197,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			KeyStore keyStore, char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		return new FhirWebserviceClientJersey(fhirBaseUrl, trustStore, keyStore, keyStorePassword, null, null, null,
-				null, 0, 0, false, "DSF Integration Test Client", fhirContext, referenceCleaner);
+				null, Duration.ZERO, Duration.ZERO, false, "DSF Integration Test Client", fhirContext,
+				referenceCleaner);
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()
@@ -223,9 +221,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		assertNotNull(subscription.getIdElement());
 		assertNotNull(subscription.getIdElement().getIdPart());
 
-		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().getTrustStore(),
-				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), subscription.getIdElement().getIdPart());
+		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().trustStore(),
+				certificates.getClientCertificate().keyStore(), certificates.getClientCertificate().keyStorePassword(),
+				subscription.getIdElement().getIdPart());
 	}
 
 	private static WebsocketClient createWebsocketClient(int fhirApiPort, KeyStore trustStore, KeyStore keyStore,
@@ -255,8 +253,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return p;
 	}
 
-	private static void createTestBundle(ClientCertificate clientCertificate,
-			ClientCertificate externalClientCertificate, int fhirApiPort)
+	private static void createTestBundle(CertificateAndPrivateKey clientCertificate,
+			CertificateAndPrivateKey externalClientCertificate, int fhirApiPort)
 	{
 		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
 
@@ -265,7 +263,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
 				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
-		thumbprintExtension.setValue(new StringType(clientCertificate.getCertificateSha512ThumbprintHex()));
+		thumbprintExtension.setValue(new StringType(clientCertificate.certificateSha512ThumbprintHex()));
 
 		Endpoint endpoint = (Endpoint) testBundle.getEntry().get(1).getResource();
 		endpoint.setAddress("https://localhost:" + fhirApiPort + "/fhir");
@@ -274,7 +272,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		Extension externalThumbprintExtension = externalOrganization
 				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
 		externalThumbprintExtension
-				.setValue(new StringType(externalClientCertificate.getCertificateSha512ThumbprintHex()));
+				.setValue(new StringType(externalClientCertificate.certificateSha512ThumbprintHex()));
 
 		writeBundle(FHIR_BUNDLE_FILE, testBundle);
 	}
@@ -327,6 +325,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.client.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
+		initParameters.put("dev.dsf.server.auth.trust.client.certificate.cas",
+				certificates.getCaCertificateFile().toString());
 		initParameters.put("dev.dsf.fhir.client.certificate", certificates.getClientCertificateFile().toString());
 		initParameters.put("dev.dsf.fhir.client.certificate.private.key",
 				certificates.getClientCertificatePrivateKeyFile().toString());
@@ -345,18 +345,15 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				      - HISTORY
 				    practitioner-role:
 				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
-				""", certificates.getPractitionerClientCertificate().getCertificateSha512ThumbprintHex()));
+				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex()));
 
-		KeyStore caCertificate = CertificateReader.allFromCer(certificates.getCaCertificateFile());
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(certificates.getFhirServerCertificatePrivateKeyFile(),
-				X509Certificates.PASSWORD);
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificates.getFhirServerCertificateFile());
-		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore serverCertificateKeyStore = CertificateHelper.toJksKeyStore(privateKey,
-				new Certificate[] { certificate }, UUID.randomUUID().toString(), keyStorePassword);
+		KeyStore clientCertificateTrustStore = KeyStoreCreator
+				.jksForTrustedCertificates(certificates.getCaCertificate());
+		KeyStore fhirServerCertificateKeyStore = certificates.getFhirServerCertificate().keyStore();
 
-		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel, caCertificate,
-				serverCertificateKeyStore, keyStorePassword, false);
+		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel,
+				clientCertificateTrustStore, fhirServerCertificateKeyStore,
+				certificates.getFhirServerCertificate().keyStorePassword(), false);
 		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
 		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = List.of(
 				JakartaWebSocketServletContainerInitializer.class, JerseyServletContainerInitializer.class,
@@ -369,7 +366,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 			StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPortSupplier);
 			ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
-					caCertificate);
+					clientCertificateTrustStore);
 			DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,
 					statusPortAuthenticator, clientCertificateAuthenticator, null, null, null, null);
 
@@ -409,6 +406,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				String.valueOf(X509Certificates.PASSWORD));
 		initParameters.put("dev.dsf.bpe.fhir.client.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
+		initParameters.put("dev.dsf.bpe.mail.trust.server.certificate.cas",
+				certificates.getCaCertificateFile().toString());
+		initParameters.put("dev.dsf.server.auth.trust.client.certificate.cas",
+				certificates.getCaCertificateFile().toString());
 
 		initParameters.put("dev.dsf.bpe.server.base.url", bpeBaseUrl);
 		initParameters.put("dev.dsf.bpe.fhir.server.base.url", fhirBaseUrl);
@@ -426,16 +427,35 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.proxy.password", "proxy_password");
 		initParameters.put("dev.dsf.proxy.noProxy", "localhost, noproxy:443");
 
-		KeyStore caCertificate = CertificateReader.allFromCer(certificates.getCaCertificateFile());
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(certificates.getBpeServerCertificatePrivateKeyFile(),
-				X509Certificates.PASSWORD);
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificates.getBpeServerCertificateFile());
-		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore serverCertificateKeyStore = CertificateHelper.toJksKeyStore(privateKey,
-				new Certificate[] { certificate }, UUID.randomUUID().toString(), keyStorePassword);
+		final String fhirConnectionsYaml = """
+				dsf-fhir-server:
+				  base-url: '#[fhirBaseUrl]'
+				  test-connection-on-startup: yes
+				  enable-debug-logging: yes
+				  cert-auth:
+				    private-key-file: '#[client.key]'
+				    certificate-file: '#[client.crt]'
+				    password: '#[password]'
+				via-proxy:
+				  base-url: 'http://via.proxy/fhir'
+				""".replaceAll(Pattern.quote("#[fhirBaseUrl]"), Matcher.quoteReplacement(fhirBaseUrl))
+				.replaceAll(Pattern.quote("#[client.key]"),
+						Matcher.quoteReplacement(certificates.getClientCertificatePrivateKeyFile().toString()))
+				.replaceAll(Pattern.quote("#[client.crt]"),
+						Matcher.quoteReplacement(certificates.getClientCertificateFile().toString()))
+				.replaceAll(Pattern.quote("#[password]"),
+						Matcher.quoteReplacement(String.valueOf(X509Certificates.PASSWORD)));
+		initParameters.put("dev.dsf.bpe.fhir.client.connections.config", fhirConnectionsYaml);
+		initParameters.put("dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas",
+				certificates.getCaCertificateFile().toString());
 
-		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel, caCertificate,
-				serverCertificateKeyStore, keyStorePassword, false);
+		KeyStore clientCertificateTrustStore = KeyStoreCreator
+				.jksForTrustedCertificates(certificates.getCaCertificate());
+		KeyStore bpeServerCertificateKeyStore = certificates.getBpeServerCertificate().keyStore();
+
+		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel,
+				clientCertificateTrustStore, bpeServerCertificateKeyStore,
+				certificates.getBpeServerCertificate().keyStorePassword(), false);
 		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
 		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = Arrays
 				.asList(JerseyServletContainerInitializer.class, SpringServletContainerInitializer.class);
@@ -447,7 +467,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 			StatusPortAuthenticator statusPortAuthenticator = new StatusPortAuthenticator(statusPortSupplier);
 			ClientCertificateAuthenticator clientCertificateAuthenticator = new ClientCertificateAuthenticator(
-					caCertificate);
+					clientCertificateTrustStore);
 			DelegatingAuthenticator delegatingAuthenticator = new DelegatingAuthenticator(sessionHandler,
 					statusPortAuthenticator, clientCertificateAuthenticator, null, null, null, null);
 

@@ -1,6 +1,7 @@
 package dev.dsf.bpe.plugin;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -25,29 +26,29 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.client.BasicFhirWebserviceClient;
-import dev.dsf.bpe.client.FhirWebserviceClient;
-import dev.dsf.bpe.client.PreferReturnMinimal;
+import dev.dsf.bpe.client.dsf.BasicWebserviceClient;
+import dev.dsf.bpe.client.dsf.PreferReturnMinimal;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
 
 public class FhirResourceHandlerImpl implements FhirResourceHandler, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirResourceHandlerImpl.class);
 
-	private final FhirWebserviceClient localWebserviceClient;
+	private final WebserviceClient localWebserviceClient;
 	private final ProcessPluginResourcesDao dao;
 	private final FhirContext fhirContext;
 	private final int fhirServerRequestMaxRetries;
-	private final long fhirServerRetryDelayMillis;
+	private final Duration fhirServerRetryDelay;
 
-	public FhirResourceHandlerImpl(FhirWebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
-			FhirContext fhirContext, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis)
+	public FhirResourceHandlerImpl(WebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
+			FhirContext fhirContext, int fhirServerRequestMaxRetries, Duration fhirServerRetryDelay)
 	{
 		this.localWebserviceClient = localWebserviceClient;
 		this.dao = dao;
 		this.fhirContext = fhirContext;
 		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
-		this.fhirServerRetryDelayMillis = fhirServerRetryDelayMillis;
+		this.fhirServerRetryDelay = fhirServerRetryDelay;
 	}
 
 	@Override
@@ -58,25 +59,24 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		if (fhirServerRequestMaxRetries < -1)
 			throw new IllegalArgumentException("fhirServerRequestMaxRetries < -1");
-		if (fhirServerRetryDelayMillis < 0)
-			throw new IllegalArgumentException("fhirServerRetryDelayMillis < 0");
+		Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
 	}
 
 	private PreferReturnMinimal minimalReturnRetryClient()
 	{
-		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
-			return localWebserviceClient.withMinimalReturn().withRetryForever(fhirServerRetryDelayMillis);
+		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
+			return localWebserviceClient.withMinimalReturn().withRetryForever(fhirServerRetryDelay);
 		else
 			return localWebserviceClient.withMinimalReturn().withRetry(fhirServerRequestMaxRetries,
-					fhirServerRetryDelayMillis);
+					fhirServerRetryDelay);
 	}
 
-	private BasicFhirWebserviceClient retryClient()
+	private BasicWebserviceClient retryClient()
 	{
-		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
-			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
+		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
+			return localWebserviceClient.withRetryForever(fhirServerRetryDelay);
 		else
-			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);
+			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelay);
 	}
 
 	@Override

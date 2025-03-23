@@ -1,7 +1,6 @@
 package dev.dsf.common.config;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,12 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -30,8 +24,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.pkcs.PKCSException;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.Origin.Address;
@@ -54,9 +46,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-import de.rwh.utils.crypto.io.PemIo;
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
+import de.hsheilbronn.mi.utils.crypto.io.PemReader;
+import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import dev.dsf.common.auth.BackChannelLogoutAuthenticator;
 import dev.dsf.common.auth.BearerTokenAuthenticator;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
@@ -77,8 +70,6 @@ import jakarta.servlet.ServletContainerInitializer;
 public abstract class AbstractJettyConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractJettyConfig.class);
-
-	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
 	@Documentation(description = "Status connector host")
 	@Value("${dev.dsf.server.status.host:127.0.0.1}")
@@ -249,33 +240,30 @@ public abstract class AbstractJettyConfig
 			return readKeyStore(serverCertificatePath, serverCertificateChainPath, serverCertificateKeyPath,
 					serverCertificateKeyFilePassword, keyStorePassword);
 		}
-		catch (CertificateException | KeyStoreException | NoSuchAlgorithmException | IOException | PKCSException e)
+		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
 	}
 
 	private KeyStore readKeyStore(Path certificatePath, Path certificateChainPath, Path keyPath, char[] keyPassword,
-			char[] keyStorePassword)
-			throws IOException, PKCSException, CertificateException, KeyStoreException, NoSuchAlgorithmException
+			char[] keyStorePassword) throws IOException
 	{
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(keyPath, keyPassword);
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
+		PrivateKey privateKey = PemReader.readPrivateKey(keyPath, keyPassword);
 
-		List<Certificate> certificateChain = new ArrayList<>();
-		certificateChain.add(certificate);
+		List<X509Certificate> certificates = new ArrayList<>();
+		certificates.add(PemReader.readCertificate(certificatePath));
+		certificates.addAll(PemReader.readCertificates(certificateChainPath));
 
-		if (certificateChainPath != null)
-		{
-			try (InputStream chainStream = Files.newInputStream(certificateChainPath))
-			{
-				CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
-				certificateChain.addAll(certificateFactory.generateCertificates(chainStream));
-			}
-		}
+		if (!CertificateValidator.isServerCertificate(certificates.get(0)))
+			throw new IOException("Certificate from '" + certificatePath.normalize().toAbsolutePath().toString()
+					+ "' not a server certificate");
+		else if (!KeyPairValidator.matches(privateKey, certificates.get(0).getPublicKey()))
+			throw new IOException("Private-key at '" + keyPath.normalize().toAbsolutePath().toString()
+					+ "' not matching Public-key from certificate at '"
+					+ certificatePath.normalize().toAbsolutePath().toString() + "'");
 
-		return CertificateHelper.toJksKeyStore(privateKey, certificateChain.toArray(Certificate[]::new),
-				UUID.randomUUID().toString(), keyStorePassword);
+		return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, keyStorePassword, certificates);
 	}
 
 	private KeyStore clientCertificateTrustStore()
@@ -285,9 +273,10 @@ public abstract class AbstractJettyConfig
 			Path clientCertificateTrustStorePath = checkFile(clientCertificateTrustStoreFile,
 					"Client certificate trust store file");
 
-			return CertificateReader.allFromCer(clientCertificateTrustStorePath);
+			return KeyStoreCreator
+					.jksForTrustedCertificates(PemReader.readCertificates(clientCertificateTrustStorePath));
 		}
-		catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException e)
+		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -485,9 +474,10 @@ public abstract class AbstractJettyConfig
 					"OIDC provider client certificate trust store file");
 
 			return clientCertificateTrustStorePath == null ? null
-					: CertificateReader.allFromCer(clientCertificateTrustStorePath);
+					: KeyStoreCreator
+							.jksForTrustedCertificates(PemReader.readCertificates(clientCertificateTrustStorePath));
 		}
-		catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException e)
+		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -510,18 +500,26 @@ public abstract class AbstractJettyConfig
 						"OIDC provider client certificate file defined but OIDC provider client certificate key file not defined");
 			else if (certificatePath != null && privateKeyPath != null)
 			{
-				X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
-				PrivateKey privateKey = PemIo.readPrivateKeyFromPem(provider, privateKeyPath,
-						oidcProviderClientCertificatePrivateKeyPassword);
+				List<X509Certificate> certificates = PemReader.readCertificates(certificatePath);
+				PrivateKey privateKey = PemReader.readPrivateKey(privateKeyPath, keyStorePassword);
 
-				String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
-				return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
-						keyStorePassword);
+				if (certificates.isEmpty())
+					throw new IOException(
+							"No certificates in '" + certificatePath.normalize().toAbsolutePath().toString() + "'");
+				else if (!CertificateValidator.isClientCertificate(certificates.get(0)))
+					throw new IOException("First certificate from '"
+							+ certificatePath.normalize().toAbsolutePath().toString() + "' not a client certificate");
+				else if (!KeyPairValidator.matches(privateKey, certificates.get(0).getPublicKey()))
+					throw new IOException("Private-key at '" + privateKeyPath.normalize().toAbsolutePath().toString()
+							+ "' not matching Public-key from " + (certificates.size() > 1 ? "first " : "")
+							+ "certificate at '" + certificatePath.normalize().toAbsolutePath().toString() + "'");
+
+				return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, keyStorePassword, certificates);
 			}
 			else
 				return null;
 		}
-		catch (CertificateException | KeyStoreException | NoSuchAlgorithmException | IOException | PKCSException e)
+		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}

@@ -2,11 +2,13 @@ package dev.dsf.bpe.v1.config;
 
 import java.util.List;
 
+import dev.dsf.bpe.api.config.BpeProxyConfig;
+
 public class ProxyConfigDelegate implements ProxyConfig
 {
-	private final dev.dsf.bpe.api.config.ProxyConfig delegate;
+	private final BpeProxyConfig delegate;
 
-	public ProxyConfigDelegate(dev.dsf.bpe.api.config.ProxyConfig delegate)
+	public ProxyConfigDelegate(BpeProxyConfig delegate)
 	{
 		this.delegate = delegate;
 	}

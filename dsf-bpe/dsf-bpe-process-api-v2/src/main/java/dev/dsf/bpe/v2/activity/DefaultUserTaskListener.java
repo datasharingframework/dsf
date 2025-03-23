@@ -1,5 +1,6 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,8 +85,8 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
 			checkQuestionnaireResponse(questionnaireResponse);
 
-			QuestionnaireResponse created = api.getFhirWebserviceClientProvider().getLocalWebserviceClient()
-					.withRetryForever(60000).create(questionnaireResponse);
+			QuestionnaireResponse created = api.getDsfClientProvider().getLocalDsfClient()
+					.withRetryForever(Duration.ofSeconds(60)).create(questionnaireResponse);
 
 			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
 					api.getQuestionnaireResponseHelper().getLocalVersionlessAbsoluteUrl(created));
@@ -113,7 +114,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 	private Questionnaire readQuestionnaire(String urlWithVersion)
 	{
-		Bundle search = api.getFhirWebserviceClientProvider().getLocalWebserviceClient().search(Questionnaire.class,
+		Bundle search = api.getDsfClientProvider().getLocalDsfClient().search(Questionnaire.class,
 				Map.of("url", List.of(urlWithVersion)));
 
 		List<Questionnaire> questionnaires = search.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)
@@ -249,7 +250,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			logger.debug("Updating Task {}, new status: {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
 					task.getStatus().toCode());
 
-			api.getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+			api.getDsfClientProvider().getLocalDsfClient().withMinimalReturn().update(task);
 		}
 		catch (Exception e)
 		{
