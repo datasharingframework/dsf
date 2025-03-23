@@ -7,7 +7,7 @@ import java.util.Objects;
 public class EnvGenerator
 {
 	private static final String BUNDLE_USER_THUMBPRINT = "BUNDLE_USER_THUMBPRINT";
-	private static final String WEBBROSER_TEST_USER_THUMBPRINT = "WEBBROSER_TEST_USER_THUMBPRINT";
+	private static final String WEBBROWSER_TEST_USER_THUMBPRINT = "WEBBROWSER_TEST_USER_THUMBPRINT";
 
 	private static record EnvEntry(String userThumbprintVariableName, String userThumbprint)
 	{
@@ -26,7 +26,7 @@ public class EnvGenerator
 	{
 		Map<String, String> thumbprints = certificateGenerator.getCertificateThumbprintsByCommonNameAsHex();
 
-		return generateEnvFile(List.of(new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT,
+		return generateEnvFile(List.of(new EnvEntry(WEBBROWSER_TEST_USER_THUMBPRINT,
 				thumbprints.get(CertificateGenerator.SUBJECT_CN_WEBBROWSER_TEST_USER))));
 	}
 
@@ -36,7 +36,7 @@ public class EnvGenerator
 
 		return generateEnvFile(
 				List.of(new EnvEntry(BUNDLE_USER_THUMBPRINT, thumbprints.get(CertificateGenerator.SUBJECT_CN_BPE)),
-						new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT,
+						new EnvEntry(WEBBROWSER_TEST_USER_THUMBPRINT,
 								thumbprints.get(CertificateGenerator.SUBJECT_CN_WEBBROWSER_TEST_USER))));
 	}
 
@@ -45,7 +45,7 @@ public class EnvGenerator
 		Map<String, String> thumbprints = certificateGenerator.getCertificateThumbprintsByCommonNameAsHex();
 
 		return generateEnvFile(List.of(
-				new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT,
+				new EnvEntry(WEBBROWSER_TEST_USER_THUMBPRINT,
 						thumbprints.get(CertificateGenerator.SUBJECT_CN_WEBBROWSER_TEST_USER)),
 				new EnvEntry("DIC1_" + BUNDLE_USER_THUMBPRINT, thumbprints.get(CertificateGenerator.SUBJECT_CN_DIC_1)),
 				new EnvEntry("DIC2_" + BUNDLE_USER_THUMBPRINT, thumbprints.get(CertificateGenerator.SUBJECT_CN_DIC_2)),

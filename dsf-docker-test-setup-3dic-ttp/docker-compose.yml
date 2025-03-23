@@ -168,7 +168,7 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${DIC1_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - CREATE
@@ -256,7 +256,7 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${DIC2_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - CREATE
@@ -338,7 +338,7 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${DIC3_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - CREATE
@@ -427,7 +427,7 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_DIC3: ${DIC3_BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - CREATE
@@ -522,7 +522,7 @@ services:
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       DEV_DSF_BPE_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - ADMIN
@@ -639,7 +639,7 @@ services:
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       DEV_DSF_BPE_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - ADMIN
@@ -726,7 +726,7 @@ services:
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       DEV_DSF_BPE_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - ADMIN
@@ -814,7 +814,7 @@ services:
       DEV_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
       DEV_DSF_BPE_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
               - ADMIN
