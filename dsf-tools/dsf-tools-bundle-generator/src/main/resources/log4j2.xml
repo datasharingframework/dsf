@@ -9,6 +9,7 @@
 	<Loggers>
 		<Logger name="dev.dsf" level="INFO"/>
 		<logger name="de.rwh" level="INFO"/>
+		<logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR"/>
 
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE"/>
