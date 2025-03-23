@@ -133,7 +133,7 @@ public class PluginFactoryConfig
 				return new LocalConfig()
 				{
 					@Override
-					public boolean logRequestsAndResponses()
+					public boolean isDebugLoggingEnabled()
 					{
 						return propertiesConfig.getDsfClientVerboseLocal();
 					}
@@ -164,7 +164,7 @@ public class PluginFactoryConfig
 				return new RemoteConfig()
 				{
 					@Override
-					public boolean logRequestsAndResponses()
+					public boolean isDebugLoggingEnabled()
 					{
 						return propertiesConfig.getDsfClientVerboseRemote();
 					}

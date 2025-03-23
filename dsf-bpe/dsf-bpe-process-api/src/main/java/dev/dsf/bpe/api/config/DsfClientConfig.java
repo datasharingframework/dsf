@@ -11,7 +11,7 @@ public interface DsfClientConfig
 
 		Duration getConnectTimeout();
 
-		boolean logRequestsAndResponses();
+		boolean isDebugLoggingEnabled();
 	}
 
 	interface LocalConfig extends BaseConfig

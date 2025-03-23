@@ -109,6 +109,6 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 		Objects.requireNonNull(config, "config");
 
 		return getOidcClient(config.baseUrl(), config.clientId(), config.clientSecret(), config.discoveryPath(),
-				config.connectTimeout(), config.readTimeout(), config.trustStore(), config.enableDebugLogging());
+				config.connectTimeout(), config.readTimeout(), config.trustStore(), config.debugLoggingEnabled());
 	}
 }

@@ -30,15 +30,15 @@ public class ClientConfigDelegate implements ClientConfig
 	}
 
 	@Override
-	public boolean getTestConnectionOnStartup()
+	public boolean isStartupConnectionTestEnabled()
 	{
-		return delegate.testConnectionOnStartup();
+		return delegate.startupConnectionTestEnabled();
 	}
 
 	@Override
-	public boolean getEnableDebugLogging()
+	public boolean isDebugLoggingEnabled()
 	{
-		return delegate.enableDebugLogging();
+		return delegate.debugLoggingEnabled();
 	}
 
 	@Override
@@ -109,15 +109,15 @@ public class ClientConfigDelegate implements ClientConfig
 		return delegate.oidcAuthentication() == null ? null : new OidcAuthentication()
 		{
 			@Override
-			public boolean testConnectionOnStartup()
+			public boolean isStartupConnectionTestEnabled()
 			{
-				return delegate.oidcAuthentication().testConnectionOnStartup();
+				return delegate.oidcAuthentication().startupConnectionTestEnabled();
 			}
 
 			@Override
-			public boolean enableDebugLogging()
+			public boolean isDebugLoggingEnabled()
 			{
-				return delegate.enableDebugLogging();
+				return delegate.debugLoggingEnabled();
 			}
 
 			@Override

@@ -67,9 +67,8 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 
 			DsfClient client = new DsfClientJersey(webserviceUrl, dsfClientConfig.getTrustStore(),
 					dsfClientConfig.getKeyStore(), dsfClientConfig.getKeyStorePassword(), proxyHost, proxyUsername,
-					proxyPassword, config.getConnectTimeout(), config.getReadTimeout(),
-					config.logRequestsAndResponses(), buildInfoProvider.getUserAgentValue(), fhirContext,
-					referenceCleaner);
+					proxyPassword, config.getConnectTimeout(), config.getReadTimeout(), config.isDebugLoggingEnabled(),
+					buildInfoProvider.getUserAgentValue(), fhirContext, referenceCleaner);
 
 			webserviceClientsByUrl.put(webserviceUrl, client);
 

@@ -147,8 +147,8 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 		try
 		{
 			return new FhirClientConfigImpl(fhirServerId, yConfig.baseUrl(),
-					valueOrDefault(yConfig::testConnectionOnStartup, defaultTestConnectionOnStartup),
-					valueOrDefault(yConfig::enableDebugLogging, defaultEnableDebugLogging),
+					valueOrDefault(yConfig::startupConnectionTestEnabled, defaultTestConnectionOnStartup),
+					valueOrDefault(yConfig::debugLoggingEnabled, defaultEnableDebugLogging),
 					valueOrDefault(yConfig::connectTimeout, defaultConnectTimeout),
 					valueOrDefault(yConfig::readTimeout, defaultReadTimeout),
 					valueOrDefault(yConfig::readTrustStore, defaultTrustStore),
@@ -192,8 +192,8 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 
 		return new OidcAuthenticationImpl(oidcAuth.baseUrl(),
 				valueOrDefault(oidcAuth::discoveryPath, defaultOidcDiscoveryPath),
-				valueOrDefault(oidcAuth::testConnectionOnStartup, defaultTestConnectionOnStartup),
-				valueOrDefault(oidcAuth::enableDebugLogging, defaultEnableDebugLogging),
+				valueOrDefault(oidcAuth::startupConnectionTestEnabled, defaultTestConnectionOnStartup),
+				valueOrDefault(oidcAuth::debugLoggingEnabled, defaultEnableDebugLogging),
 				valueOrDefault(oidcAuth::connectTimeout, defaultConnectTimeout),
 				valueOrDefault(oidcAuth::readTimeout, defaultReadTimeout),
 				valueOrDefault(oidcAuth::readTrustStore, defaultTrustStore), oidcAuth.clientId(),

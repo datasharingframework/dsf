@@ -42,12 +42,12 @@ public class FhirClientProviderTest extends AbstractTest
 			expectNotNull(c.getCertificateAuthentication().getKeyStore());
 			expectNotNull(c.getCertificateAuthentication().getKeyStorePassword());
 			expectNotNull(c.getConnectTimeout());
-			expectTrue(c.getEnableDebugLogging());
+			expectTrue(c.isDebugLoggingEnabled());
 			expectSame("dsf-fhir-server", c.getFhirServerId());
 			expectNull(c.getOidcAuthentication());
 			expectNull(c.getProxy());
 			expectNotNull(c.getReadTimeout());
-			expectTrue(c.getTestConnectionOnStartup());
+			expectTrue(c.isStartupConnectionTestEnabled());
 			expectNotNull(c.getTrustStore());
 
 			try
@@ -76,12 +76,12 @@ public class FhirClientProviderTest extends AbstractTest
 			expectNotNull(c.getCertificateAuthentication().getKeyStore());
 			expectNotNull(c.getCertificateAuthentication().getKeyStorePassword());
 			expectNotNull(c.getConnectTimeout());
-			expectFalse(c.getEnableDebugLogging());
+			expectFalse(c.isDebugLoggingEnabled());
 			expectSame("#Test_Endpoint", c.getFhirServerId());
 			expectNull(c.getOidcAuthentication());
 			expectNull(c.getProxy());
 			expectNotNull(c.getReadTimeout());
-			expectFalse(c.getTestConnectionOnStartup());
+			expectFalse(c.isStartupConnectionTestEnabled());
 			expectNotNull(c.getTrustStore());
 
 			try
@@ -110,12 +110,12 @@ public class FhirClientProviderTest extends AbstractTest
 			expectNotNull(c.getCertificateAuthentication().getKeyStore());
 			expectNotNull(c.getCertificateAuthentication().getKeyStorePassword());
 			expectNotNull(c.getConnectTimeout());
-			expectFalse(c.getEnableDebugLogging());
+			expectFalse(c.isDebugLoggingEnabled());
 			expectSame("#local", c.getFhirServerId());
 			expectNull(c.getOidcAuthentication());
 			expectNull(c.getProxy());
 			expectNotNull(c.getReadTimeout());
-			expectFalse(c.getTestConnectionOnStartup());
+			expectFalse(c.isStartupConnectionTestEnabled());
 			expectNotNull(c.getTrustStore());
 
 			try
@@ -142,7 +142,7 @@ public class FhirClientProviderTest extends AbstractTest
 			expectNull(c.getBearerAuthentication());
 			expectNull(c.getCertificateAuthentication());
 			expectNotNull(c.getConnectTimeout());
-			expectFalse(c.getEnableDebugLogging());
+			expectFalse(c.isDebugLoggingEnabled());
 			expectSame("via-proxy", c.getFhirServerId());
 			expectNull(c.getOidcAuthentication());
 			expectNotNull(c.getProxy());
@@ -150,7 +150,7 @@ public class FhirClientProviderTest extends AbstractTest
 			expectSame("http://proxy:8080", c.getProxy().getUrl());
 			expectSame("proxy_username", c.getProxy().getUsername());
 			expectNotNull(c.getReadTimeout());
-			expectFalse(c.getTestConnectionOnStartup());
+			expectFalse(c.isStartupConnectionTestEnabled());
 			expectNotNull(c.getTrustStore());
 
 			try

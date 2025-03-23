@@ -74,15 +74,15 @@ public class FhirClientProviderWithEndpointSupport implements FhirClientProvider
 			}
 
 			@Override
-			public boolean getTestConnectionOnStartup()
+			public boolean isStartupConnectionTestEnabled()
 			{
-				return delegate.getTestConnectionOnStartup();
+				return delegate.isStartupConnectionTestEnabled();
 			}
 
 			@Override
-			public boolean getEnableDebugLogging()
+			public boolean isDebugLoggingEnabled()
 			{
-				return delegate.getEnableDebugLogging();
+				return delegate.isDebugLoggingEnabled();
 			}
 
 			@Override

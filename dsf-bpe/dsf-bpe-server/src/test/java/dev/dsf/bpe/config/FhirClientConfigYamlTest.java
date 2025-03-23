@@ -76,15 +76,15 @@ public class FhirClientConfigYamlTest
 		assertEquals(Duration.ofMillis(500), configs.get("some-fhir-server-id").connectTimeout());
 		assertEquals(Duration.ofMinutes(10), configs.get("some-fhir-server-id").readTimeout());
 		assertNotNull(configs.get("some-fhir-server-id").oidcAuth());
-		assertNotNull(configs.get("some-fhir-server-id").oidcAuth().testConnectionOnStartup());
-		assertFalse(configs.get("some-fhir-server-id").oidcAuth().testConnectionOnStartup());
-		assertNotNull(configs.get("some-fhir-server-id").oidcAuth().enableDebugLogging());
-		assertTrue(configs.get("some-fhir-server-id").oidcAuth().enableDebugLogging());
+		assertNotNull(configs.get("some-fhir-server-id").oidcAuth().startupConnectionTestEnabled());
+		assertFalse(configs.get("some-fhir-server-id").oidcAuth().startupConnectionTestEnabled());
+		assertNotNull(configs.get("some-fhir-server-id").oidcAuth().debugLoggingEnabled());
+		assertTrue(configs.get("some-fhir-server-id").oidcAuth().debugLoggingEnabled());
 
 		assertNotNull(configs.get("some-other-fhir-server-id"));
 		assertNotNull(configs.get("some-other-fhir-server-id").oidcAuth());
-		assertNull(configs.get("some-other-fhir-server-id").oidcAuth().testConnectionOnStartup());
-		assertNull(configs.get("some-other-fhir-server-id").oidcAuth().enableDebugLogging());
+		assertNull(configs.get("some-other-fhir-server-id").oidcAuth().startupConnectionTestEnabled());
+		assertNull(configs.get("some-other-fhir-server-id").oidcAuth().debugLoggingEnabled());
 	}
 
 	@Test

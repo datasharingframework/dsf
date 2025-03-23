@@ -112,7 +112,7 @@ public class FhirClientConnectionsConfig implements InitializingBean
 		fhirClientConfigs().getConfigs().stream().filter(FhirClientConfig::hasOidcAuthentication)
 				.forEach(this::testConnection);
 
-		fhirClientConfigs().getConfigs().stream().filter(FhirClientConfig::testConnectionOnStartup)
+		fhirClientConfigs().getConfigs().stream().filter(FhirClientConfig::startupConnectionTestEnabled)
 				.map(this::createClient).forEach(FhirConnectionTestClient::testConnection);
 	}
 

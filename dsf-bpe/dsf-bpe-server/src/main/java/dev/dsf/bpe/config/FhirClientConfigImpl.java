@@ -17,8 +17,8 @@ import javax.security.auth.x500.X500Principal;
 
 import dev.dsf.bpe.api.config.FhirClientConfig;
 
-public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean testConnectionOnStartup,
-		boolean enableDebugLogging, Duration connectTimeout, Duration readTimeout, KeyStore trustStore,
+public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean startupConnectionTestEnabled,
+		boolean debugLoggingEnabled, Duration connectTimeout, Duration readTimeout, KeyStore trustStore,
 		CertificateAuthentication certificateAuthentication, BasicAuthentication basicAuthentication,
 		BearerAuthentication bearerAuthentication, OidcAuthentication oidcAuthentication) implements FhirClientConfig
 {
@@ -28,8 +28,8 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 	 *            not <code>null</code>
 	 * @param baseUrl
 	 *            not <code>null</code>
-	 * @param testConnectionOnStartup
-	 * @param enableDebugLogging
+	 * @param startupConnectionTestEnabled
+	 * @param debugLoggingEnabled
 	 * @param connectTimeout
 	 *            not <code>null</code>
 	 * @param readTimeout
@@ -61,8 +61,8 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 	@Override
 	public String toString()
 	{
-		return "[fhirServerId: " + fhirServerId + ", baseUrl: " + baseUrl + ", testConnectionOnStartup: "
-				+ testConnectionOnStartup + ", enableDebugLogging: " + enableDebugLogging + ", connectTimeout: "
+		return "[fhirServerId: " + fhirServerId + ", baseUrl: " + baseUrl + ", startupConnectionTestEnabled: "
+				+ startupConnectionTestEnabled + ", debugLoggingEnabled: " + debugLoggingEnabled + ", connectTimeout: "
 				+ connectTimeout + ", readTimeout: " + readTimeout + ", trusted-certificates: "
 				+ trustStoreToString(trustStore) + ", "
 				+ (certificateAuthentication != null ? "cert-auth: " + certificateAuthentication + ", " : "")
@@ -188,17 +188,18 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 		}
 	}
 
-	public static record OidcAuthenticationImpl(String baseUrl, String discoveryPath, boolean testConnectionOnStartup,
-			boolean enableDebugLogging, Duration connectTimeout, Duration readTimeout, KeyStore trustStore,
-			String clientId, char[] clientSecret) implements OidcAuthentication
+	public static record OidcAuthenticationImpl(String baseUrl, String discoveryPath,
+			boolean startupConnectionTestEnabled, boolean debugLoggingEnabled, Duration connectTimeout,
+			Duration readTimeout, KeyStore trustStore, String clientId, char[] clientSecret)
+			implements OidcAuthentication
 	{
 		/**
 		 * @param baseUrl
 		 *            not <code>null</code>
 		 * @param discoveryPath
 		 *            not <code>null</code>
-		 * @param testConnectionOnStartup
-		 * @param enableDebugLogging
+		 * @param startupConnectionTestEnabled
+		 * @param debugLoggingEnabled
 		 * @param connectTimeout
 		 *            not <code>null</code>
 		 * @param readTimeout
@@ -224,9 +225,9 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 		@Override
 		public String toString()
 		{
-			return "[baseUrl: " + baseUrl + ", discoveryPath: " + discoveryPath + ", testConnectionOnStartup="
-					+ testConnectionOnStartup + ", enableDebugLogging: " + enableDebugLogging + ", connectTimeout: "
-					+ connectTimeout + ", readTimeout: " + readTimeout + ", trustStore: "
+			return "[baseUrl: " + baseUrl + ", discoveryPath: " + discoveryPath + ", startupConnectionTestEnabled: "
+					+ startupConnectionTestEnabled + ", debugLoggingEnabled: " + debugLoggingEnabled
+					+ ", connectTimeout: " + connectTimeout + ", readTimeout: " + readTimeout + ", trustStore: "
 					+ trustStoreToString(trustStore) + ", clientId: " + clientId + ", clientSecret: "
 					+ secretToString(clientSecret) + "]";
 		}

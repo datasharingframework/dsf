@@ -99,10 +99,10 @@ public class ApiServiceConfig
 		return new FhirWebserviceClientProviderImpl(fhirContext(), referenceCleaner(),
 				dsfClientConfig.getLocalConfig().getBaseUrl(), dsfClientConfig.getLocalConfig().getReadTimeout(),
 				dsfClientConfig.getLocalConfig().getConnectTimeout(),
-				dsfClientConfig.getLocalConfig().logRequestsAndResponses(), dsfClientConfig.getTrustStore(),
+				dsfClientConfig.getLocalConfig().isDebugLoggingEnabled(), dsfClientConfig.getTrustStore(),
 				dsfClientConfig.getKeyStore(), dsfClientConfig.getKeyStorePassword(),
 				dsfClientConfig.getLocalConfig().getReadTimeout(), dsfClientConfig.getLocalConfig().getConnectTimeout(),
-				dsfClientConfig.getLocalConfig().logRequestsAndResponses(), proxyConfig, buildInfoProvider);
+				dsfClientConfig.getLocalConfig().isDebugLoggingEnabled(), proxyConfig, buildInfoProvider);
 	}
 
 	@Bean

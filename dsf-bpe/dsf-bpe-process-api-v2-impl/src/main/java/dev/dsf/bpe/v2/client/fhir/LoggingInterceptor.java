@@ -320,12 +320,12 @@ public class LoggingInterceptor extends ca.uhn.fhir.rest.client.interceptor.Logg
 	{
 		setLogger(new DebugAndTraceOnlyLogger());
 
-		boolean logRequests = config.getEnableDebugLogging();
+		boolean logRequests = config.isDebugLoggingEnabled();
 		setLogRequestSummary(logRequests);
 		setLogRequestHeaders(logRequests);
 		setLogRequestBody(logRequests);
 
-		boolean logResponses = config.getEnableDebugLogging();
+		boolean logResponses = config.isDebugLoggingEnabled();
 		setLogResponseSummary(logResponses);
 		setLogResponseHeaders(logResponses);
 		setLogResponseBody(logResponses);

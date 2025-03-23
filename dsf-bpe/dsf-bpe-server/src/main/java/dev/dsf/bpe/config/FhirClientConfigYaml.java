@@ -33,8 +33,8 @@ import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 
 public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_BASE_URL) String baseUrl,
-		@JsonProperty(FhirClientConfigYaml.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean testConnectionOnStartup,
-		@JsonProperty(FhirClientConfigYaml.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean enableDebugLogging,
+		@JsonProperty(FhirClientConfigYaml.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean startupConnectionTestEnabled,
+		@JsonProperty(FhirClientConfigYaml.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean debugLoggingEnabled,
 		@JsonProperty(FhirClientConfigYaml.PROPERTY_CONNECT_TIMEOUT) Duration connectTimeout,
 		@JsonProperty(FhirClientConfigYaml.PROPERTY_READ_TIMEOUT) Duration readTimeout,
 		@JsonProperty(FhirClientConfigYaml.PROPERTY_TRUSTED_ROOT_CERTIFICATES_FILE) String trustedRootCertificatesFile,
@@ -329,8 +329,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 
 	public static record OidcAuth(@JsonProperty(OidcAuth.PROPERTY_BASE_URL) String baseUrl,
 			@JsonProperty(OidcAuth.PROPERTY_DISCOVERY_PATH) String discoveryPath,
-			@JsonProperty(OidcAuth.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean testConnectionOnStartup,
-			@JsonProperty(OidcAuth.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean enableDebugLogging,
+			@JsonProperty(OidcAuth.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean startupConnectionTestEnabled,
+			@JsonProperty(OidcAuth.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean debugLoggingEnabled,
 			@JsonProperty(OidcAuth.PROPERTY_CONNECT_TIMEOUT) Duration connectTimeout,
 			@JsonProperty(OidcAuth.PROPERTY_READ_TIMEOUT) Duration readTimeout,
 			@JsonProperty(OidcAuth.PROPERTY_TRUSTED_ROOT_CERTIFICATES_FILE) String trustedRootCertificatesFile,
@@ -353,8 +353,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 		@JsonCreator
 		public OidcAuth(@JsonProperty(OidcAuth.PROPERTY_BASE_URL) String baseUrl,
 				@JsonProperty(OidcAuth.PROPERTY_DISCOVERY_PATH) String discoveryPath,
-				@JsonProperty(OidcAuth.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean testConnectionOnStartup,
-				@JsonProperty(OidcAuth.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean enableDebugLogging,
+				@JsonProperty(OidcAuth.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean startupConnectionTestEnabled,
+				@JsonProperty(OidcAuth.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean debugLoggingEnabled,
 				@JsonProperty(OidcAuth.PROPERTY_CONNECT_TIMEOUT) Duration connectTimeout,
 				@JsonProperty(OidcAuth.PROPERTY_READ_TIMEOUT) Duration readTimeout,
 				@JsonProperty(OidcAuth.PROPERTY_TRUSTED_ROOT_CERTIFICATES_FILE) String trustedRootCertificatesFile,
@@ -364,8 +364,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 		{
 			this.baseUrl = baseUrl;
 			this.discoveryPath = discoveryPath;
-			this.testConnectionOnStartup = testConnectionOnStartup;
-			this.enableDebugLogging = enableDebugLogging;
+			this.startupConnectionTestEnabled = startupConnectionTestEnabled;
+			this.debugLoggingEnabled = debugLoggingEnabled;
 			this.connectTimeout = connectTimeout;
 			this.readTimeout = readTimeout;
 			this.trustedRootCertificatesFile = trustedRootCertificatesFile;
@@ -393,11 +393,12 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 		@Override
 		public String toString()
 		{
-			return "OidcAuth[baseUrl=" + baseUrl + ", discoveryPath=" + discoveryPath + ", testConnectionOnStartup="
-					+ testConnectionOnStartup + ", enableDebugLogging=" + enableDebugLogging + ", connectTimeout="
-					+ connectTimeout + ", readTimeout=" + readTimeout + ", trustedRootCertificatesFile="
-					+ trustedRootCertificatesFile + ", clientId=" + clientId + ", clientSecret="
-					+ (clientSecret != null ? "***" : "null") + ", clientSecretFile=" + clientSecretFile + "]";
+			return "OidcAuth[baseUrl=" + baseUrl + ", discoveryPath=" + discoveryPath
+					+ ", startupConnectionTestEnabled=" + startupConnectionTestEnabled + ", debugLoggingEnabled="
+					+ debugLoggingEnabled + ", connectTimeout=" + connectTimeout + ", readTimeout=" + readTimeout
+					+ ", trustedRootCertificatesFile=" + trustedRootCertificatesFile + ", clientId=" + clientId
+					+ ", clientSecret=" + (clientSecret != null ? "***" : "null") + ", clientSecretFile="
+					+ clientSecretFile + "]";
 		}
 
 		public KeyStore readTrustStore() throws IOException
@@ -458,8 +459,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 
 	@JsonCreator
 	public FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_BASE_URL) String baseUrl,
-			@JsonProperty(FhirClientConfigYaml.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean testConnectionOnStartup,
-			@JsonProperty(FhirClientConfigYaml.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean enableDebugLogging,
+			@JsonProperty(FhirClientConfigYaml.PROPERTY_TEST_CONNECTION_ON_STARTUP) Boolean startupConnectionTestEnabled,
+			@JsonProperty(FhirClientConfigYaml.PROPERTY_ENABLE_DEBUG_LOGGING) Boolean debugLoggingEnabled,
 			@JsonProperty(FhirClientConfigYaml.PROPERTY_CONNECT_TIMEOUT) Duration connectTimeout,
 			@JsonProperty(FhirClientConfigYaml.PROPERTY_READ_TIMEOUT) Duration readTimeout,
 			@JsonProperty(FhirClientConfigYaml.PROPERTY_TRUSTED_ROOT_CERTIFICATES_FILE) String trustedRootCertificatesFile,
@@ -469,8 +470,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 			@JsonProperty(FhirClientConfigYaml.PROPERTY_OIDC_AUTH) OidcAuth oidcAuth)
 	{
 		this.baseUrl = baseUrl;
-		this.testConnectionOnStartup = testConnectionOnStartup;
-		this.enableDebugLogging = enableDebugLogging;
+		this.startupConnectionTestEnabled = startupConnectionTestEnabled;
+		this.debugLoggingEnabled = debugLoggingEnabled;
 		this.connectTimeout = connectTimeout;
 		this.readTimeout = readTimeout;
 		this.trustedRootCertificatesFile = trustedRootCertificatesFile;
@@ -491,10 +492,11 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 	@Override
 	public String toString()
 	{
-		return "FhirClientYamlConfig[baseUrl=" + baseUrl + ", testConnectionOnStartup=" + testConnectionOnStartup
-				+ ", enableDebugLogging=" + enableDebugLogging + ", connectTimeout=" + connectTimeout + ", readTimeout="
-				+ readTimeout + ", trustedRootCertificatesFile=" + trustedRootCertificatesFile + ", certAuth="
-				+ certAuth + ", basicAuth=" + basicAuth + ", bearerAuth=" + bearerAuth + ", oidcAuth=" + oidcAuth + "]";
+		return "FhirClientYamlConfig[baseUrl=" + baseUrl + ", startupConnectionTestEnabled="
+				+ startupConnectionTestEnabled + ", debugLoggingEnabled=" + debugLoggingEnabled + ", connectTimeout="
+				+ connectTimeout + ", readTimeout=" + readTimeout + ", trustedRootCertificatesFile="
+				+ trustedRootCertificatesFile + ", certAuth=" + certAuth + ", basicAuth=" + basicAuth + ", bearerAuth="
+				+ bearerAuth + ", oidcAuth=" + oidcAuth + "]";
 	}
 
 	private ValidationError validateTrustStore(String propertyPrefix)
