@@ -110,11 +110,11 @@ public class PropertiesConfig implements InitializingBean
 	private boolean webserviceClientLocalVerbose;
 
 	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria:exact=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String taskSubscriptionSearchParameter;
 
 	@Documentation(description = "Subscription to receive notifications about questionnaire response resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria:exact=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String questionnaireResponseSubscriptionSearchParameter;
 
 	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
@@ -126,7 +126,7 @@ public class PropertiesConfig implements InitializingBean
 	private long websocketRetrySleepMillis;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
-	@Value("${dev.dsf.bpe.process.plugin.directroy:process}")
+	@Value("${dev.dsf.bpe.process.plugin.directory:process}")
 	private String processPluginDirectory;
 
 	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List", example = "dsfdev_updateAllowList|1.0, another_process|x.y")

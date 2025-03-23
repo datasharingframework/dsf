@@ -3,9 +3,7 @@ package dev.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,7 +23,6 @@ import dev.dsf.fhir.dao.SubscriptionDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.search.PageAndCount;
-import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -128,26 +125,10 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 	@Override
 	protected boolean resourceExists(Connection connection, Subscription newResource)
 	{
-		Map<String, List<String>> queryParameters = Map.of("criteria",
-				Collections.singletonList(newResource.getCriteria()), "type",
-				Collections.singletonList(newResource.getChannel().getType().toCode()), "payload",
-				Collections.singletonList(newResource.getChannel().getPayload()));
-		SubscriptionDao dao = getDao();
-		SearchQuery<Subscription> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.exists())
-				.configureParameters(queryParameters);
-
-		List<SearchQueryParameterError> uQp = query.getUnsupportedQueryParameters();
-		if (!uQp.isEmpty())
-		{
-			logger.warn("Unable to search for Subscription: Unsupported query parameters: {}", uQp);
-
-			throw new IllegalStateException("Unable to search for Subscription: Unsupported query parameters");
-		}
-
 		try
 		{
-			PartialResult<Subscription> result = dao.searchWithTransaction(connection, query);
-			return result.getTotal() >= 1;
+			return getDao().existsByCriteriaChannelTypeAndChannelPayload(newResource.getCriteria(),
+					newResource.getChannel().getType().toCode(), newResource.getChannel().getPayload());
 		}
 		catch (SQLException e)
 		{
