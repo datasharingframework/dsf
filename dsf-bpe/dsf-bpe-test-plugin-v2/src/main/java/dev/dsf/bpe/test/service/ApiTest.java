@@ -47,9 +47,21 @@ public class ApiTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void apiGetFhirWebserviceClientProviderNotNull() throws Exception
+	public void apiGetDsfClientProviderNotNull() throws Exception
 	{
-		expectNotNull(api.getFhirWebserviceClientProvider());
+		expectNotNull(api.getDsfClientProvider());
+	}
+
+	@PluginTest
+	public void apiGetFhirClientProviderNotNull() throws Exception
+	{
+		expectNotNull(api.getFhirClientProvider());
+	}
+
+	@PluginTest
+	public void apiGetOidcClientProviderrNotNull() throws Exception
+	{
+		expectNotNull(api.getOidcClientProvider());
 	}
 
 	@PluginTest

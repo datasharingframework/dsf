@@ -67,7 +67,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import de.rwh.utils.crypto.context.SSLContextFactory;
+import de.hsheilbronn.mi.utils.crypto.context.SSLContextFactory;
+import dev.dsf.bpe.api.service.BpeMailService;
 
 public class SmtpMailService implements BpeMailService, InitializingBean
 {
@@ -340,7 +341,7 @@ public class SmtpMailService implements BpeMailService, InitializingBean
 		try
 		{
 			// uses default jvm trust / keys if not configured (respective trustStore/keyStore fields null)
-			return new SSLContextFactory().createSSLContext(trustStore, keyStore, keyStorePassword).getSocketFactory();
+			return SSLContextFactory.createSSLContext(trustStore, keyStore, keyStorePassword).getSocketFactory();
 		}
 		catch (UnrecoverableKeyException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException e)
 		{

@@ -22,7 +22,7 @@ public class AuthenticationConfig
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationConfig.class);
 
 	@Autowired
-	private FhirClientConfig fhirClientConfig;
+	private DsfClientConfig dsfClientConfig;
 
 	@Autowired
 	private PropertiesConfig propertiesConfig;
@@ -30,8 +30,8 @@ public class AuthenticationConfig
 	@Bean
 	public LocalOrganizationProvider localOrganizationProvider()
 	{
-		return new LocalOrganizationProviderImpl(Duration.ofSeconds(30), fhirClientConfig.clientProvider(),
-				propertiesConfig.getFhirServerBaseUrl());
+		return new LocalOrganizationProviderImpl(Duration.ofSeconds(30), dsfClientConfig.clientProvider(),
+				propertiesConfig.getDsfServerBaseUrl());
 	}
 
 	@Bean

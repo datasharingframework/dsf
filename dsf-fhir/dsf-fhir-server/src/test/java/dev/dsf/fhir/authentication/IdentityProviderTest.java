@@ -10,16 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.After;
@@ -38,9 +30,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import de.rwh.utils.crypto.CertificateAuthority;
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.CertificationRequestBuilder;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificateAuthority;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest;
 import dev.dsf.common.auth.DsfOpenIdCredentials;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
@@ -85,42 +76,30 @@ public class IdentityProviderTest
 
 	static
 	{
-		CertificateAuthority.registerBouncyCastleProvider();
-
 		try
 		{
-			CA = new CertificateAuthority("DE", null, null, null, null, "CA");
-			CA.initialize(LocalDateTime.now(), LocalDateTime.now().plusDays(1), 1024,
-					CertificateHelper.DEFAULT_SIGNATURE_ALGORITHM);
+			CA = CertificateAuthority.builderSha384EcdsaSecp384r1("DE", null, null, null, null, "CA")
+					.setValidityPeriod(Period.ofDays(1)).build();
 
-			X500Name localOrgSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-					LOCAL_ORGANIZATION_COMMON_NAME);
-			KeyPair localOrgKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM, 1024);
-			JcaPKCS10CertificationRequest localOrgReq = CertificationRequestBuilder
-					.createClientCertificationRequest(localOrgSubject, localOrgKeyPair, "email@local.org");
-			LOCAL_ORGANIZATION_CERTIFICATE = CA.signWebClientCertificate(localOrgReq);
+			CertificationRequest localOrgReq = CertificationRequest
+					.builder(CA, "DE", null, null, null, null, LOCAL_ORGANIZATION_COMMON_NAME).generateKeyPair()
+					.setEmail("email@local.org").build();
+			LOCAL_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(localOrgReq);
 
-			X500Name remoteOrgSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-					REMOTE_ORGANIZATION_COMMON_NAME);
-			KeyPair remoteOrgKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM, 1024);
-			JcaPKCS10CertificationRequest remoteOrgReq = CertificationRequestBuilder
-					.createClientCertificationRequest(remoteOrgSubject, remoteOrgKeyPair, "email@remote.org");
-			REMOTE_ORGANIZATION_CERTIFICATE = CA.signWebClientCertificate(remoteOrgReq);
+			CertificationRequest remoteOrgReq = CertificationRequest
+					.builder(CA, "DE", null, null, null, null, REMOTE_ORGANIZATION_COMMON_NAME).generateKeyPair()
+					.setEmail("email@remote.org").build();
+			REMOTE_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(remoteOrgReq);
 
-			X500Name localPractitionerSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-					LOCAL_PRACTITIONER_COMMON_NAME);
-			KeyPair localPractitionerKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM,
-					1024);
-			JcaPKCS10CertificationRequest localPractitionerReq = CertificationRequestBuilder
-					.createClientCertificationRequest(localPractitionerSubject, localPractitionerKeyPair,
-							LOCAL_PRACTITIONER_MAIL);
-			LOCAL_PRACTITIONER_CERTIFICATE = CA.signWebClientCertificate(localPractitionerReq);
+			CertificationRequest localPractitionerReq = CertificationRequest
+					.builder(CA, "DE", null, null, null, null, LOCAL_PRACTITIONER_COMMON_NAME).generateKeyPair()
+					.setEmail(LOCAL_PRACTITIONER_MAIL).build();
+			LOCAL_PRACTITIONER_CERTIFICATE = CA.signClientCertificate(localPractitionerReq);
+
 			LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT = Hex.encodeHexString(
 					MessageDigest.getInstance("SHA-512").digest(LOCAL_PRACTITIONER_CERTIFICATE.getEncoded()));
-
 		}
-		catch (InvalidKeyException | NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException
-				| OperatorCreationException | IllegalStateException | InvalidKeySpecException e)
+		catch (NoSuchAlgorithmException | CertificateException e)
 		{
 			throw new RuntimeException(e);
 		}

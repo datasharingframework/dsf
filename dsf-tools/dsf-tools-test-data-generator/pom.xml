@@ -13,6 +13,7 @@
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>crypto-utils</artifactId>
+			<version>${crypto-utils.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -63,8 +64,8 @@
 						<argument>-classpath</argument>
 						<classpath/>
 						<argument>dev.dsf.tools.generator.TestDataGenerator</argument>
+						<commandlineArgs>${project.basedir}/../..</commandlineArgs>
 					</arguments>
-					<workingDirectory>${project.basedir}</workingDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -72,20 +73,6 @@
 				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
 					<filesets>
-						<fileset>
-							<directory>bundle</directory>
-							<includes>
-								<include>test-bundle.xml</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-						<fileset>
-							<directory>config</directory>
-							<includes>
-								<include>*.properties</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
 						<fileset>
 							<directory>../../dsf-bpe/dsf-bpe-server-jetty/conf</directory>
 							<includes>
@@ -103,7 +90,12 @@
 						<fileset>
 							<directory>../../dsf-docker-test-setup/bpe/secrets</directory>
 							<includes>
-								<include>*.pem</include>
+								<include>bpe.crt</include>
+								<include>bpe.key</include>
+								<include>bpe.key.plain</include>
+								<include>ca_chain.crt</include>
+								<include>issuing_ca.crt</include>
+								<include>root_ca.crt</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
@@ -117,7 +109,13 @@
 						<fileset>
 							<directory>../../dsf-docker-test-setup/fhir/secrets</directory>
 							<includes>
-								<include>*.pem</include>
+								<include>bpe.crt</include>
+								<include>bpe.key</include>
+								<include>ca_chain.crt</include>
+								<include>fhir.crt</include>
+								<include>fhir.key.plain</include>
+								<include>issuing_ca.crt</include>
+								<include>root_ca.crt</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
@@ -131,14 +129,30 @@
 						<fileset>
 							<directory>../../dsf-docker-test-setup-3dic-ttp/secrets</directory>
 							<includes>
-								<include>*.pem</include>
+								<include>ca_chain.crt</include>
+								<include>dic1.crt</include>
+								<include>dic1.key</include>
+								<include>dic2.crt</include>
+								<include>dic2.key</include>
+								<include>dic3.crt</include>
+								<include>dic3.key</include>
+								<include>issuing_ca.crt</include>
+								<include>keycloak_trust_store.jks</include>
+								<include>keycloak.crt</include>
+								<include>keycloak.key.plain</include>
+								<include>localhost.crt</include>
+								<include>localhost.key.plain</include>
+								<include>root_ca.crt</include>
+								<include>ttp.crt</include>
+								<include>ttp.key</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../../dsf-docker-test-setup-3dic-ttp/secrets</directory>
+							<directory>../../dsf-fhir/dsf-fhir-server-jetty/conf</directory>
 							<includes>
-								<include>keycloak_trust_store.jks</include>
+								<include>config.properties</include>
+								<include>bundle.xml</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>

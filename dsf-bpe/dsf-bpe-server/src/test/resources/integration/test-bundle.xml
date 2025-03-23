@@ -12,7 +12,7 @@
 					</tag>		
 				</meta>
 				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-					<valueString value="TODO"/>
+					<valueString value="injected"/>
 				</extension>
 				<identifier>
 					<system value="http://dsf.dev/sid/organization-identifier"/>
@@ -64,7 +64,7 @@
 				</payloadType>
 				<payloadMimeType value="application/fhir+json"/>
 				<payloadMimeType value="application/fhir+xml"/>
-				<address value="https://localhost:8001/fhir"/>
+				<address value="injected"/>
 			</Endpoint>
 		</resource>
 		<request>
@@ -84,7 +84,7 @@
 					</tag>		
 				</meta>
 				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-					<valueString value="TODO"/>
+					<valueString value="injected"/>
 				</extension>
 				<identifier>
 					<system value="http://dsf.dev/sid/organization-identifier"/>

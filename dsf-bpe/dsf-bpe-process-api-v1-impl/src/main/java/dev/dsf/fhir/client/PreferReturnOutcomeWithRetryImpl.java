@@ -1,6 +1,7 @@
 package dev.dsf.fhir.client;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -75,7 +76,7 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new PreferReturnOutcomeRetryImpl(delegate, nTimes, delayMillis);
+		return new PreferReturnOutcomeRetryImpl(delegate, nTimes, Duration.ofMillis(delayMillis));
 	}
 
 	@Override
@@ -84,6 +85,6 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new PreferReturnOutcomeRetryImpl(delegate, RETRY_FOREVER, delayMillis);
+		return new PreferReturnOutcomeRetryImpl(delegate, RETRY_FOREVER, Duration.ofMillis(delayMillis));
 	}
 }

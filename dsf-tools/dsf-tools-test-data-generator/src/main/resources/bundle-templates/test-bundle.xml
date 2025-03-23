@@ -12,7 +12,7 @@
 					</tag>		
 				</meta>
 				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint">
-					<valueString value="TODO"/>
+					<valueString value="BundleGenerator"/>
 				</extension>
 				<identifier>
 					<system value="http://dsf.dev/sid/organization-identifier"/>
@@ -26,9 +26,9 @@
 			</Organization>
 		</resource>
 		<request>
-			<method value="POST"/>
-			<url value="Organization"/>
-			<ifNoneExist value="identifier=http://dsf.dev/sid/organization-identifier|Test_Organization"/>
+			<method value="PUT"/>
+			<!-- Conditional update as the certificate thumbprint can change -->
+			<url value="Organization?identifier=http://dsf.dev/sid/organization-identifier|Test_Organization"/>
 		</request>
 	</entry>
 	<entry>
@@ -111,12 +111,10 @@
 				<organization>
 					<reference value="urn:uuid:c4a7b553-01b1-4b50-bcb3-1467f5ae6791"/>
 					<type value="Organization"/>
-				<type value="Organization"/>
 				</organization>
 				<participatingOrganization>
 					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 					<type value="Organization"/>
-				<type value="Organization"/>
 				</participatingOrganization>
 				<code>
 					<coding>

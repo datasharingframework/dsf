@@ -1,16 +1,7 @@
 package dev.dsf.bpe.spring.config;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,8 +14,6 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter.Result;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -34,10 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-import de.rwh.utils.crypto.io.PemIo;
-import dev.dsf.bpe.mail.BpeMailService;
+import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.mail.LoggingMailService;
 import dev.dsf.bpe.mail.SmtpMailService;
 import dev.dsf.tools.build.BuildInfoReader;
@@ -47,28 +33,17 @@ public class MailConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(MailConfig.class);
 
-	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
-
 	@Autowired
 	private PropertiesConfig propertiesConfig;
 
 	@Autowired
-	BuildInfoReaderConfig buildInfoReaderConfig;
+	private BuildInfoReaderConfig buildInfoReaderConfig;
 
 	@Bean
-	public BpeMailService mailService()
+	public BpeMailService bpeMailService()
 	{
 		if (isConfigured())
-		{
-			try
-			{
-				return newSmptMailService();
-			}
-			catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | PKCSException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
+			return newSmptMailService();
 		else
 			return new LoggingMailService();
 	}
@@ -79,7 +54,6 @@ public class MailConfig implements InitializingBean
 	}
 
 	private BpeMailService newSmptMailService()
-			throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, PKCSException
 	{
 		String fromAddress = propertiesConfig.getMailFromAddress();
 		List<String> toAddresses = propertiesConfig.getMailToAddresses();
@@ -94,74 +68,16 @@ public class MailConfig implements InitializingBean
 		String mailServerUsername = propertiesConfig.getMailServerUsername();
 		char[] mailServerPassword = propertiesConfig.getMailServerPassword();
 
-		KeyStore trustStore = toTrustStore(propertiesConfig.getMailServerTrustStoreFile());
+		KeyStore trustStore = propertiesConfig.getMailServerTrustStore();
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore keyStore = toKeyStore(propertiesConfig.getMailServerClientCertificateFile(),
-				propertiesConfig.getMailServerClientCertificatePrivateKeyFile(),
-				propertiesConfig.getMailServerClientCertificatePrivateKeyFilePassword(), keyStorePassword);
-
-		KeyStore signStore = toSmimeSigningStore(propertiesConfig.getMailSmimeSigingKeyStoreFile(),
-				propertiesConfig.getMailSmimeSigingKeyStorePassword());
+		KeyStore keyStore = propertiesConfig.getMailServerKeyStore(keyStorePassword).orElse(null);
+		KeyStore signStore = propertiesConfig.getMailSmimeSigingKeyStore().orElse(null);
 
 		return new SmtpMailService(fromAddress, toAddresses, toAddressesCc, replyToAddresses, useSmtps,
 				mailServerHostname, mailServerPort, mailServerUsername, mailServerPassword, trustStore, keyStore,
 				keyStorePassword, signStore, propertiesConfig.getMailSmimeSigingKeyStorePassword(),
 				propertiesConfig.getSendMailOnErrorLogEvent(), propertiesConfig.getMailOnErrorLogEventBufferSize(),
 				propertiesConfig.getMailOnErrorLogEventDebugLogLocation());
-	}
-
-	private KeyStore toTrustStore(String trustStoreFile)
-			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
-	{
-		if (trustStoreFile == null)
-			return null;
-
-		Path trustStorePath = Paths.get(trustStoreFile);
-
-		if (!Files.isReadable(trustStorePath))
-			throw new IOException("Mail server trust store file '" + trustStorePath.toString() + "' not readable");
-
-		return CertificateReader.allFromCer(trustStorePath);
-	}
-
-	private KeyStore toKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
-			char[] keyStorePassword)
-			throws IOException, CertificateException, PKCSException, KeyStoreException, NoSuchAlgorithmException
-	{
-		if (certificateFile == null && privateKeyFile == null)
-			return null;
-
-		Path certificatePath = Paths.get(certificateFile);
-		Path privateKeyPath = Paths.get(privateKeyFile);
-
-		if (!Files.isReadable(certificatePath))
-			throw new IOException(
-					"Mail server client certificate file '" + certificatePath.toString() + "' not readable");
-		if (!Files.isReadable(certificatePath))
-			throw new IOException(
-					"Mail server client certificate private key file '" + privateKeyPath.toString() + "' not readable");
-
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(provider, privateKeyPath, privateKeyPassword);
-
-		String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
-		return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
-				keyStorePassword);
-	}
-
-	private KeyStore toSmimeSigningStore(String mailSmimeSigingKeyStoreFile, char[] mailSmimeSigingKeyStorePassword)
-			throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException
-	{
-		if (mailSmimeSigingKeyStoreFile == null)
-			return null;
-
-		Path keyStorePath = Paths.get(mailSmimeSigingKeyStoreFile);
-
-		if (!Files.isReadable(keyStorePath))
-			throw new IOException(
-					"S/MIME mail signing certificate file '" + keyStorePath.toString() + "' not readable");
-
-		return CertificateReader.fromPkcs12(keyStorePath, mailSmimeSigingKeyStorePassword);
 	}
 
 	@Override
@@ -199,7 +115,7 @@ public class MailConfig implements InitializingBean
 
 		if (isConfigured())
 		{
-			Appender appender = ((SmtpMailService) mailService()).getLog4jAppender();
+			Appender appender = ((SmtpMailService) bpeMailService()).getLog4jAppender();
 			if (appender != null)
 			{
 				appender.start();
@@ -219,7 +135,7 @@ public class MailConfig implements InitializingBean
 			DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 			BuildInfoReader buildInfoReader = buildInfoReaderConfig.buildInfoReader();
-			mailService().send("DSF BPE Test Mail",
+			bpeMailService().send("DSF BPE Test Mail",
 					"BPE startup test mail\n\nArtifact: " + buildInfoReader.getProjectArtifact() + "\nVersion: "
 							+ buildInfoReader.getProjectVersion() + "\nBuild: "
 							+ buildInfoReader.getBuildDate().withZoneSameInstant(ZoneId.systemDefault())

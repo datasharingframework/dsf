@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 
 import dev.dsf.bpe.test.service.ApiTest;
 import dev.dsf.bpe.test.service.EndpointProviderTest;
+import dev.dsf.bpe.test.service.FhirClientProviderTest;
 import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
@@ -52,5 +53,12 @@ public class Config
 	public EndpointProviderTest endpointProviderTest()
 	{
 		return new EndpointProviderTest(api);
+	}
+
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public FhirClientProviderTest fhirClientProviderTest()
+	{
+		return new FhirClientProviderTest(api);
 	}
 }

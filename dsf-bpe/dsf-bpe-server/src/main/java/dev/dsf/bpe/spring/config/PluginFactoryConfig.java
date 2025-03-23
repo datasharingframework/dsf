@@ -5,21 +5,22 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
-import org.bouncycastle.pkcs.PKCSException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 
-import dev.dsf.bpe.api.config.ClientConfig;
-import dev.dsf.bpe.api.config.ProxyConfig;
+import dev.dsf.bpe.api.config.BpeProxyConfig;
+import dev.dsf.bpe.api.config.DsfClientConfig;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
@@ -27,7 +28,7 @@ import dev.dsf.bpe.plugin.ProcessPluginApiClassLoaderFactory;
 import dev.dsf.bpe.plugin.ProcessPluginApiFactory;
 
 @Configuration
-public class PluginFactoryConfig extends AbstractConfig
+public class PluginFactoryConfig
 {
 	@Autowired
 	private Environment environment;
@@ -41,6 +42,12 @@ public class PluginFactoryConfig extends AbstractConfig
 	@Autowired
 	private MailConfig mailConfig;
 
+	@Autowired
+	private FhirClientConnectionsConfig fhirClientConnectionsConfig;
+
+	@Autowired
+	private OidcClientProviderConfig oidcClientProviderConfig;
+
 	@Bean
 	public ProcessPluginApiClassLoaderFactory pluginApiClassLoaderFactory()
 	{
@@ -51,8 +58,9 @@ public class PluginFactoryConfig extends AbstractConfig
 
 	@Bean
 	public ProcessPluginApiFactory processPluginApiFactory()
+			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException
 	{
-		ProxyConfig proxyConfig = new ProxyConfig()
+		BpeProxyConfig proxyConfig = new BpeProxyConfig()
 		{
 			@Override
 			public boolean isNoProxyUrl(String targetUrl)
@@ -97,77 +105,82 @@ public class PluginFactoryConfig extends AbstractConfig
 			}
 		};
 
-		ClientConfig clientConfig = new ClientConfig()
+		DsfClientConfig clientConfig = new DsfClientConfig()
 		{
+			private final char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+
 			@Override
-			public KeyStore getWebserviceKeyStore(char[] keyStorePassword)
+			public KeyStore getTrustStore()
 			{
-				try
+				return propertiesConfig.getDsfClientTrustedServerCas();
+			}
+
+			@Override
+			public KeyStore getKeyStore()
+			{
+				return propertiesConfig.getDsfClientCertificate(keyStorePassword);
+			}
+
+			@Override
+			public char[] getKeyStorePassword()
+			{
+				return keyStorePassword;
+			}
+
+			@Override
+			public LocalConfig getLocalConfig()
+			{
+				return new LocalConfig()
 				{
-					return createKeyStore(propertiesConfig.getClientCertificateFile(),
-							propertiesConfig.getClientCertificatePrivateKeyFile(),
-							propertiesConfig.getClientCertificatePrivateKeyFilePassword(), keyStorePassword);
-				}
-				catch (CertificateException | KeyStoreException | NoSuchAlgorithmException | IOException
-						| PKCSException e)
+					@Override
+					public boolean isDebugLoggingEnabled()
+					{
+						return propertiesConfig.getDsfClientVerboseLocal();
+					}
+
+					@Override
+					public Duration getReadTimeout()
+					{
+						return propertiesConfig.getDsfClientReadTimeoutLocal();
+					}
+
+					@Override
+					public Duration getConnectTimeout()
+					{
+						return propertiesConfig.getDsfClientConnectTimeoutLocal();
+					}
+
+					@Override
+					public String getBaseUrl()
+					{
+						return propertiesConfig.getDsfServerBaseUrl();
+					}
+				};
+			}
+
+			@Override
+			public RemoteConfig getRemoteConfig()
+			{
+				return new RemoteConfig()
 				{
-					throw new RuntimeException(e);
-				}
-			}
+					@Override
+					public boolean isDebugLoggingEnabled()
+					{
+						return propertiesConfig.getDsfClientVerboseRemote();
+					}
 
-			@Override
-			public KeyStore getWebserviceTrustStore()
-			{
-				try
-				{
-					return createTrustStore(propertiesConfig.getClientCertificateTrustStoreFile());
-				}
-				catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException e)
-				{
-					throw new RuntimeException(e);
-				}
-			}
+					@Override
+					public Duration getReadTimeout()
+					{
+						return propertiesConfig.getDsfClientReadTimeoutRemote();
+					}
 
-			@Override
-			public boolean getWebserviceClientRemoteVerbose()
-			{
-				return propertiesConfig.getWebserviceClientRemoteVerbose();
-			}
-
-			@Override
-			public int getWebserviceClientRemoteReadTimeout()
-			{
-				return propertiesConfig.getWebserviceClientRemoteReadTimeout();
-			}
-
-			@Override
-			public int getWebserviceClientRemoteConnectTimeout()
-			{
-				return propertiesConfig.getWebserviceClientRemoteConnectTimeout();
-			}
-
-			@Override
-			public boolean getWebserviceClientLocalVerbose()
-			{
-				return propertiesConfig.getWebserviceClientLocalVerbose();
-			}
-
-			@Override
-			public int getWebserviceClientLocalReadTimeout()
-			{
-				return propertiesConfig.getWebserviceClientLocalReadTimeout();
-			}
-
-			@Override
-			public int getWebserviceClientLocalConnectTimeout()
-			{
-				return propertiesConfig.getWebserviceClientLocalConnectTimeout();
-			}
-
-			@Override
-			public String getFhirServerBaseUrl()
-			{
-				return propertiesConfig.getFhirServerBaseUrl();
+					@Override
+					public Duration getConnectTimeout()
+					{
+						return propertiesConfig.getDsfClientConnectTimeoutRemote();
+					}
+				};
 			}
 		};
 
@@ -178,6 +191,12 @@ public class PluginFactoryConfig extends AbstractConfig
 			{
 				return buildInfoReaderConfig.buildInfoReader().getProjectVersion();
 			}
+
+			@Override
+			public String getUserAgentValue()
+			{
+				return buildInfoReaderConfig.buildInfoReader().getUserAgentValue();
+			}
 		};
 
 		BpeMailService bpeMailService = new BpeMailService()
@@ -185,16 +204,18 @@ public class PluginFactoryConfig extends AbstractConfig
 			@Override
 			public void send(String subject, MimeBodyPart body, Consumer<MimeMessage> messageModifier)
 			{
-				mailConfig.mailService().send(subject, body, messageModifier);
+				mailConfig.bpeMailService().send(subject, body, messageModifier);
 			}
 		};
 
-		return new ProcessPluginApiFactory((ConfigurableEnvironment) environment, clientConfig, proxyConfig,
-				buildInfoProvider, bpeMailService, pluginApiClassLoaderFactory());
+		return new ProcessPluginApiFactory((ConfigurableEnvironment) environment, clientConfig,
+				fhirClientConnectionsConfig.fhirClientConfigs(), proxyConfig, buildInfoProvider, bpeMailService,
+				oidcClientProviderConfig.bpeOidcClientProvider(), pluginApiClassLoaderFactory());
 	}
 
 	@Bean
 	public List<ProcessPluginFactory> processPluginFactories()
+			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException
 	{
 		return processPluginApiFactory().initialize();
 	}

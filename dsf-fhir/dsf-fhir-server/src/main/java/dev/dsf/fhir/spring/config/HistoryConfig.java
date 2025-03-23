@@ -33,7 +33,7 @@ public class HistoryConfig
 	@Bean
 	public HistoryService historyService()
 	{
-		return new HistoryServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+		return new HistoryServiceImpl(propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				helperConfig.parameterConverter(), helperConfig.exceptionHandler(), helperConfig.responseGenerator(),
 				referenceConfig.referenceCleaner(), daoConfig.historyDao(), historyUserFilterFactory());
 	}

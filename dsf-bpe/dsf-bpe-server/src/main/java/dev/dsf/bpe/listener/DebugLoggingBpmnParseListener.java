@@ -76,19 +76,28 @@ public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
 	{
 		if (logActivityStart)
 			logger.warn(
-					"Process activity start debug logging enabled. This should only be activated during process plugin development");
+					"Process activity start debug logging enabled. This should only be activated during process plugin development!");
 
 		if (logActivityEnd)
 			logger.warn(
-					"Process activity end debug logging enabled. This should only be activated during process plugin development");
+					"Process activity end debug logging enabled. This should only be activated during process plugin development!");
 
-		if (logVariables)
-			logger.warn(
-					"Process variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+		if (logVariables || logVariablesLocal)
+		{
+			if (logActivityStart || logActivityEnd)
+			{
+				if (logVariables)
+					logger.warn(
+							"Process variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
 
-		if (logVariablesLocal)
-			logger.warn(
-					"Process local variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+				if (logVariablesLocal)
+					logger.warn(
+							"Process local variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+			}
+			else
+				logger.warn(
+						"Process activity start or end debug logging not enabled, but must be enabled to activate variable or local variable debug logging!");
+		}
 	}
 
 	private void addListeners(ActivityImpl activity)

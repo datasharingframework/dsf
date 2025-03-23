@@ -145,7 +145,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			logger.debug("Updating Task {}, new status: {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
 					task.getStatus().toCode());
 
-			api.getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+			api.getDsfClientProvider().getLocalDsfClient().withMinimalReturn().update(task);
 		}
 		catch (Exception e)
 		{

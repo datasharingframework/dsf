@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 
 public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 		implements SubscriptionHandlerFactory<R>, InitializingBean
@@ -48,7 +48,7 @@ public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 	}
 
 	@Override
-	public ExistingResourceLoader<R> createExistingResourceLoader(FhirWebserviceClient client)
+	public ExistingResourceLoader<R> createExistingResourceLoader(WebserviceClient client)
 	{
 		return delegate.createExistingResourceLoader(client);
 	}

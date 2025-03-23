@@ -11,17 +11,17 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.bpe.v2.client.FhirWebserviceClient;
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
 
 public class EndListener extends AbstractListener implements ExecutionListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndListener.class);
 
-	private final FhirWebserviceClient webserviceClient;
+	private final DsfClient webserviceClient;
 
 	public EndListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory,
-			FhirWebserviceClient fhirWebserviceClient)
+			DsfClient fhirWebserviceClient)
 	{
 		super(serverBaseUrl, variablesFactory);
 

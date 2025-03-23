@@ -5,7 +5,7 @@ import java.util.Objects;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.bpe.client.FhirWebserviceClient;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.LastEventTimeDao;
 
 public class QuestionnaireResponseSubscriptionHandlerFactory
@@ -29,7 +29,7 @@ public class QuestionnaireResponseSubscriptionHandlerFactory
 	}
 
 	@Override
-	public ExistingResourceLoader<QuestionnaireResponse> createExistingResourceLoader(FhirWebserviceClient client)
+	public ExistingResourceLoader<QuestionnaireResponse> createExistingResourceLoader(WebserviceClient client)
 	{
 		return new ExistingResourceLoaderImpl<>(lastEventTimeDao, resourceHandler, client, "QuestionnaireResponse",
 				QuestionnaireResponse.class);

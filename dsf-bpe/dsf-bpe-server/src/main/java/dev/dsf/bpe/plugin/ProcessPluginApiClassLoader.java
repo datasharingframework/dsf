@@ -147,12 +147,30 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 	private boolean isBpeClassAllowed(Class<?> clazz)
 	{
 		final String className = clazz.getName();
+		final String packageName = clazz.getPackageName();
 
-		if (className.startsWith("java.") || className.startsWith("javax.mail.") || className.startsWith("javax.xml.")
-				|| allowedBpeClasses.contains(className))
+		if (className.startsWith("java.") || className.startsWith("javax.") || allowedBpeClasses.contains(className)
+				|| isPackageAllowed(packageName))
 			return true;
 
 		logger.debug("{} TODO: Should bpe class {} be allowed? [default: false]", getName(), className);
+		return false;
+	}
+
+	private boolean isPackageAllowed(String packageName)
+	{
+		if (allowedBpeClasses.contains(packageName))
+			return true;
+
+		String[] split = packageName.split("\\.");
+		StringBuilder b = new StringBuilder(packageName);
+		for (int s = split.length - 1; s > 1; s--)
+		{
+			b.delete(b.length() - split[s].length() - 1, b.length() + split[s].length() + 1);
+			if (allowedBpeClasses.contains(b.toString()))
+				return true;
+		}
+
 		return false;
 	}
 

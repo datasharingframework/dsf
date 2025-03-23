@@ -1,8 +1,6 @@
 package dev.dsf.bpe.v1.spring;
 
-import java.security.KeyStore;
 import java.util.Locale;
-import java.util.UUID;
 
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import dev.dsf.bpe.api.config.ClientConfig;
+import dev.dsf.bpe.api.config.BpeProxyConfig;
+import dev.dsf.bpe.api.config.DsfClientConfig;
 import dev.dsf.bpe.api.listener.ListenerFactory;
 import dev.dsf.bpe.api.listener.ListenerFactoryImpl;
 import dev.dsf.bpe.api.service.BpeMailService;
@@ -58,10 +57,10 @@ import dev.dsf.fhir.service.ReferenceExtractorImpl;
 public class ApiServiceConfig
 {
 	@Autowired
-	private ClientConfig environmentConfig;
+	private DsfClientConfig dsfClientConfig;
 
 	@Autowired
-	private dev.dsf.bpe.api.config.ProxyConfig proxyConfig;
+	private BpeProxyConfig proxyConfig;
 
 	@Autowired
 	private BuildInfoProvider buildInfoProvider;
@@ -76,18 +75,18 @@ public class ApiServiceConfig
 
 		FhirWebserviceClientProvider clientProvider = clientProvider();
 		EndpointProvider endpointProvider = new EndpointProviderImpl(clientProvider,
-				environmentConfig.getFhirServerBaseUrl());
+				dsfClientConfig.getLocalConfig().getBaseUrl());
 		FhirContext fhirContext = fhirContext();
 		MailService mailService = new MailServiceImpl(bpeMailService);
 		ObjectMapper objectMapper = objectMapper();
 		OrganizationProvider organizationProvider = new OrganizationProviderImpl(clientProvider,
-				environmentConfig.getFhirServerBaseUrl());
+				dsfClientConfig.getLocalConfig().getBaseUrl());
 
 		ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
 		QuestionnaireResponseHelper questionnaireResponseHelper = new QuestionnaireResponseHelperImpl(
-				environmentConfig.getFhirServerBaseUrl());
+				dsfClientConfig.getLocalConfig().getBaseUrl());
 		ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
-		TaskHelper taskHelper = new TaskHelperImpl(environmentConfig.getFhirServerBaseUrl());
+		TaskHelper taskHelper = new TaskHelperImpl(dsfClientConfig.getLocalConfig().getBaseUrl());
 
 		return new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext, clientProvider, mailService,
 				objectMapper, organizationProvider, processAuthorizationHelper, questionnaireResponseHelper,
@@ -97,17 +96,13 @@ public class ApiServiceConfig
 	@Bean
 	public FhirWebserviceClientProvider clientProvider()
 	{
-		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore webserviceKeyStore = environmentConfig.getWebserviceKeyStore(keyStorePassword);
-		KeyStore webserviceTrustStore = environmentConfig.getWebserviceTrustStore();
-
 		return new FhirWebserviceClientProviderImpl(fhirContext(), referenceCleaner(),
-				environmentConfig.getFhirServerBaseUrl(), environmentConfig.getWebserviceClientLocalReadTimeout(),
-				environmentConfig.getWebserviceClientLocalConnectTimeout(),
-				environmentConfig.getWebserviceClientLocalVerbose(), webserviceTrustStore, webserviceKeyStore,
-				keyStorePassword, environmentConfig.getWebserviceClientRemoteReadTimeout(),
-				environmentConfig.getWebserviceClientRemoteConnectTimeout(),
-				environmentConfig.getWebserviceClientRemoteVerbose(), proxyConfig, buildInfoProvider);
+				dsfClientConfig.getLocalConfig().getBaseUrl(), dsfClientConfig.getLocalConfig().getReadTimeout(),
+				dsfClientConfig.getLocalConfig().getConnectTimeout(),
+				dsfClientConfig.getLocalConfig().isDebugLoggingEnabled(), dsfClientConfig.getTrustStore(),
+				dsfClientConfig.getKeyStore(), dsfClientConfig.getKeyStorePassword(),
+				dsfClientConfig.getLocalConfig().getReadTimeout(), dsfClientConfig.getLocalConfig().getConnectTimeout(),
+				dsfClientConfig.getLocalConfig().isDebugLoggingEnabled(), proxyConfig, buildInfoProvider);
 	}
 
 	@Bean
@@ -176,20 +171,20 @@ public class ApiServiceConfig
 	@Bean
 	public ExecutionListener startListener()
 	{
-		return new StartListener(environmentConfig.getFhirServerBaseUrl(), VariablesImpl::new);
+		return new StartListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean
 	public ExecutionListener endListener()
 	{
-		return new EndListener(environmentConfig.getFhirServerBaseUrl(), VariablesImpl::new,
+		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new,
 				clientProvider().getLocalWebserviceClient());
 	}
 
 	@Bean
 	public ExecutionListener continueListener()
 	{
-		return new ContinueListener(environmentConfig.getFhirServerBaseUrl(), VariablesImpl::new);
+		return new ContinueListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
 	}
 
 	@Bean

@@ -3,7 +3,6 @@ package dev.dsf.common.jetty;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
 
@@ -13,7 +12,7 @@ import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.rwh.utils.crypto.io.PemIo;
+import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 
 public class ForwardedSecureRequestCustomizer implements Customizer
 {
@@ -82,9 +81,9 @@ public class ForwardedSecureRequestCustomizer implements Customizer
 
 		try
 		{
-			return PemIo.readX509CertificateFromPem(clientCertString);
+			return PemReader.readCertificate(clientCertString);
 		}
-		catch (CertificateException | IOException e)
+		catch (IOException e)
 		{
 			return null;
 		}

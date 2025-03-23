@@ -19,10 +19,10 @@ import org.springframework.beans.factory.InitializingBean;
 
 public abstract class AbstractResourceProvider implements InitializingBean
 {
-	protected final FhirWebserviceClientProvider clientProvider;
+	protected final DsfClientProvider clientProvider;
 	protected final String localEndpointAddress;
 
-	public AbstractResourceProvider(FhirWebserviceClientProvider clientProvider, String localEndpointAddress)
+	public AbstractResourceProvider(DsfClientProvider clientProvider, String localEndpointAddress)
 	{
 		this.clientProvider = clientProvider;
 		this.localEndpointAddress = localEndpointAddress;
@@ -75,6 +75,6 @@ public abstract class AbstractResourceProvider implements InitializingBean
 		if (!parameters.containsKey("_sort"))
 			parametersAndPage.put("_sort", List.of("_id"));
 
-		return clientProvider.getLocalWebserviceClient().searchWithStrictHandling(searchType, parametersAndPage);
+		return clientProvider.getLocalDsfClient().searchWithStrictHandling(searchType, parametersAndPage);
 	}
 }

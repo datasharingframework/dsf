@@ -1,20 +1,14 @@
 package dev.dsf.common.auth;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import javax.security.auth.x500.X500Principal;
 
 import org.eclipse.jetty.security.AuthenticationState;
 import org.eclipse.jetty.security.Authenticator;
@@ -26,6 +20,10 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter;
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 
 public class ClientCertificateAuthenticator extends LoginAuthenticator
 {
@@ -73,7 +71,8 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 		UserIdentity user = login(null, certificates, request, response);
 		if (user == null)
 		{
-			logger.warn("User '{}' not found, sending unauthorized", getSubjectDn(certificates));
+			logger.warn("User '{}' not found, sending unauthorized",
+					CertificateFormatter.toSubjectName(certificates[0], X500PrincipalFormat.RFC1779));
 			return null;
 		}
 
@@ -82,7 +81,8 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 
 	private X509TrustManager createX509TrustManager(KeyStore clientTrustStore)
 	{
-		logger.info("Using [{}] to validate client certificates", getSubjectDn(getCaCertificates(clientTrustStore)));
+		logger.info("Using {} to validate client certificates",
+				KeyStoreFormatter.toSubjectsFromCertificates(clientTrustStore, X500PrincipalFormat.RFC1779).values());
 
 		try
 		{
@@ -98,32 +98,5 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 
 			throw new RuntimeException(e);
 		}
-	}
-
-	private X509Certificate[] getCaCertificates(KeyStore keyStore)
-	{
-		try
-		{
-			PKIXParameters params = new PKIXParameters(keyStore);
-			return params.getTrustAnchors().stream().map(TrustAnchor::getTrustedCert).toArray(X509Certificate[]::new);
-		}
-		catch (KeyStoreException | InvalidAlgorithmParameterException e)
-		{
-			logger.debug("Unable to extract trust anchors", e);
-			logger.warn("Unable to extract trust anchors: {} - {}", e.getClass().getName(), e.getMessage());
-
-			throw new RuntimeException(e);
-		}
-	}
-
-
-	private String getSubjectDn(X509Certificate[] certificates)
-	{
-		return Stream.of(certificates).map(this::getSubjectDn).collect(Collectors.joining(";"));
-	}
-
-	private String getSubjectDn(X509Certificate certificate)
-	{
-		return certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
 	}
 }

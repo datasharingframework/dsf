@@ -26,6 +26,7 @@
       <bpmn:outgoing>Flow_0iy74da</bpmn:outgoing>
       <bpmn:outgoing>Flow_1h0pa8u</bpmn:outgoing>
       <bpmn:outgoing>Flow_1hhwby8</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1m3rjc2</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
     <bpmn:sequenceFlow id="Flow_14rzc0j" sourceRef="Gateway_0eszi2t" targetRef="ProxyTest">
@@ -40,6 +41,7 @@
       <bpmn:incoming>Flow_1mkx5o3</bpmn:incoming>
       <bpmn:incoming>Flow_0usx9io</bpmn:incoming>
       <bpmn:incoming>Flow_1bn9gvv</bpmn:incoming>
+      <bpmn:incoming>Flow_0hdcnjl</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_08zzudo" sourceRef="ProxyTest" targetRef="Gateway_056f6tw" />
@@ -61,6 +63,14 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'EndpointProvider'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1bn9gvv" sourceRef="EndpointProviderTest" targetRef="Gateway_056f6tw" />
+    <bpmn:serviceTask id="FhirClientProviderTest" name="FhirClientProviderTest" camunda:class="dev.dsf.bpe.test.service.FhirClientProviderTest">
+      <bpmn:incoming>Flow_1m3rjc2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hdcnjl</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1m3rjc2" sourceRef="Gateway_0eszi2t" targetRef="FhirClientProviderTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'FhirClientProvider'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0hdcnjl" sourceRef="FhirClientProviderTest" targetRef="Gateway_056f6tw" />
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />
   <bpmn:message id="Message_2iq6v5e" name="proxyTest" />
@@ -96,6 +106,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1xcwytq" bpmnElement="EndpointProviderTest">
         <dc:Bounds x="480" y="410" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0kmbv8n" bpmnElement="FhirClientProviderTest">
+        <dc:Bounds x="480" y="520" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1bqddk1_di" bpmnElement="Flow_1bqddk1">
@@ -146,6 +160,16 @@
       <bpmndi:BPMNEdge id="Flow_1bn9gvv_di" bpmnElement="Flow_1bn9gvv">
         <di:waypoint x="580" y="450" />
         <di:waypoint x="650" y="450" />
+        <di:waypoint x="650" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1m3rjc2_di" bpmnElement="Flow_1m3rjc2">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="560" />
+        <di:waypoint x="480" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hdcnjl_di" bpmnElement="Flow_0hdcnjl">
+        <di:waypoint x="580" y="560" />
+        <di:waypoint x="650" y="560" />
         <di:waypoint x="650" y="145" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>

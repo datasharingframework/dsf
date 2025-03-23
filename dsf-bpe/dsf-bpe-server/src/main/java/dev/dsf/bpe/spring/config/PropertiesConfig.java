@@ -1,13 +1,22 @@
 package dev.dsf.bpe.spring.config;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -16,12 +25,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
+import de.hsheilbronn.mi.utils.crypto.io.KeyStoreReader;
+import de.hsheilbronn.mi.utils.crypto.io.PemReader;
+import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.documentation.Documentation;
@@ -75,47 +92,95 @@ public class PropertiesConfig implements InitializingBean
 
 	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${dev.dsf.bpe.fhir.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
-	private String clientCertificateTrustStoreFile;
+	private String dsfClientTrustedServerCasFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
 	@Value("${dev.dsf.bpe.fhir.client.certificate}")
-	private String clientCertificateFile;
+	private String dsfClientCertificateFile;
 
 	@Documentation(required = true, description = "Private key corresponding to the local client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate_private_key.pem")
 	@Value("${dev.dsf.bpe.fhir.client.certificate.private.key}")
-	private String clientCertificatePrivateKeyFile;
+	private String dsfClientCertificatePrivateKeyFile;
 
 	@Documentation(description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${dev.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
-	private char[] clientCertificatePrivateKeyFilePassword;
+	private char[] dsfClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "Timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.read:60000}")
-	private int webserviceClientRemoteReadTimeout;
+	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.read:PT60S}")
+	private String dsfClientReadTimeoutRemote;
 
-	@Documentation(description = "Timeout in milliseconds until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.connect:5000}")
-	private int webserviceClientRemoteConnectTimeout;
+	@Documentation(description = "Timeout until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.connect:PT5S}")
+	private String dsfClientConnectTimeoutRemote;
 
 	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
 	@Value("${dev.dsf.bpe.fhir.client.remote.verbose:false}")
-	private boolean webserviceClientRemoteVerbose;
+	private boolean dsfClientVerboseRemote;
 
-	@Documentation(required = true, description = "Base address of the local DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
-	@Value("${dev.dsf.bpe.fhir.server.base.url}")
-	private String fhirServerBaseUrl;
+	@Documentation(description = "Timeout until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:PT60S}")
+	private String dsfClientReadTimeoutLocal;
 
-	@Documentation(description = "Timeout in milliseconds until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:60000}")
-	private int webserviceClientLocalReadTimeout;
-
-	@Documentation(description = "Timeout in milliseconds until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.local.timeout.connect:2000}")
-	private int webserviceClientLocalConnectTimeout;
+	@Documentation(description = "Timeout until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.local.timeout.connect:PT2S}")
+	private String dsfClientConnectTimeoutLocal;
 
 	@Documentation(description = "To enable verbose logging of requests to and replies from the local DSF FHIR server, set to `true`")
 	@Value("${dev.dsf.bpe.fhir.client.local.verbose:false}")
-	private boolean webserviceClientLocalVerbose;
+	private boolean dsfClientVerboseLocal;
+
+	@Documentation(required = true, description = "Base address of the local DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
+	@Value("${dev.dsf.bpe.fhir.server.base.url}")
+	private String dsfServerBaseUrl;
+
+	@Documentation(description = "FHIR server connections YAML config for v2 process plugins")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config:}")
+	private String fhirClientConnectionsConfig;
+
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `test-connection-on-startup` and `oidc-auth.test-connection-on-startup`", recommendation = "To perform connection tests on BPE startup to configured FHIR servers by default set to `true`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.test.connection.on.startup:false}")
+	private boolean fhirClientConnectionsConfigDefaultTestConnectionOnStartup;
+
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `enable-debug-logging` and `oidc-auth.enable-debug-logging`", recommendation = "To enable debug logging of requests and reponses to configured FHIR servers by default set to `true`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.enable.debug.logging:false}")
+	private boolean fhirClientConnectionsConfigDefaultEnableDebugLogging;
+
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `connect-timeout` and `oidc-auth.connect-timeout`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.timeout.connect:PT2S}")
+	private String fhirClientConnectionsConfigDefaultConnectTimeout;
+
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `read-timeout` and `oidc-auth.read-timeout`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.timeout.read:PT10M}")
+	private String fhirClientConnectionsConfigDefaultReadTimeout;
+
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `trusted-root-certificates-file` and `oidc-auth.trusted-root-certificates-file`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
+	private String fhirClientConnectionsConfigDefaultTrustStoreFile;
+
+	@Documentation(description = "FHIR server connections YAML: Default value for property `oidc-auth.discovery-path`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.oidc.discovery.path:/.well-known/openid-configuration}")
+	private String fhirClientConnectionsConfigDefaultOidcDiscoveryPath;
+
+	@Documentation(description = "Set `false` to disable caching of OIDC dicovery and jwks resources as well as access tokens in the 'Client Credentials Grant' client; access tokens are evicted 10 seconds before they expire")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache:true}")
+	private boolean fhirClientConnectionsConfigOidcClientCacheEnabled;
+
+	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of the 'openid-configuration' discovery resource")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.configuration.resource:PT1H}")
+	private String fhirClientConnectionsConfigOidcClientCacheConfigurationResourceTimeout;
+
+	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of the jwks resource")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.jwks.resource:PT1H}")
+	private String fhirClientConnectionsConfigOidcClientCacheJwksResourceTimeout;
+
+	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of access tokens before they expire, duration is subtracted from the expires at value of the acess token")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.access.token:PT10S}")
+	private String fhirClientConnectionsConfigOidcClientCacheAccessTokenBeforeExpirationTimeout;
+
+	@Documentation(description = "OIDC 'Client Credentials Grant' client access token time validation leeway for 'Not Before', 'Issued At' and 'Expires At' values")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.time.validation.leeway:PT10S}")
+	private String fhirClientConnectionsConfigOidcClientNotBeforeIssuedAtExpiresAtLeeway;
 
 	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
 	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria:exact=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
@@ -129,9 +194,9 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.max:-1}")
 	private int websocketMaxRetries;
 
-	@Documentation(description = "Milliseconds between two retries to establish a websocket connection with the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.sleep:5000}")
-	private long websocketRetrySleepMillis;
+	@Documentation(description = "Time between two retries to establish a websocket connection with the DSF FHIR server")
+	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.sleep:PT5S}")
+	private String websocketRetrySleep;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
 	@Value("${dev.dsf.bpe.process.plugin.directory:process}")
@@ -188,9 +253,9 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.max:-1}")
 	private int fhirServerRequestMaxRetries;
 
-	@Documentation(description = "Milliseconds between two retries to establish a connection with the local DSF FHIR server during process deployment")
-	@Value("${dev.dsf.bpe.process.fhir.server.retry.sleep:5000}")
-	private long fhirServerRetryDelayMillis;
+	@Documentation(description = "Time between two retries to establish a connection with the local DSF FHIR server during process deployment")
+	@Value("${dev.dsf.bpe.process.fhir.server.retry.sleep:PT5S}")
+	private String fhirServerRetryDelay;
 
 	@Documentation(description = "Mail service sender address", example = "sender@localhost")
 	@Value("${dev.dsf.bpe.mail.fromAddress:}")
@@ -316,6 +381,10 @@ public class PropertiesConfig implements InitializingBean
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> proxyNoProxy;
 
+	// documentation in dev.dsf.common.config.AbstractJettyConfig
+	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_cert_ca_chains.pem}")
+	private String dsfClientTrustedClientCasFile;
+
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
@@ -328,32 +397,137 @@ public class PropertiesConfig implements InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		URL url = new URI(fhirServerBaseUrl).toURL();
+		URL url = new URI(dsfServerBaseUrl).toURL();
 		if (!List.of("http", "https").contains(url.getProtocol()))
 		{
 			logger.warn("Invalid DSF FHIR server base URL: '{}', URL not starting with 'http://' or 'https://'",
-					fhirServerBaseUrl);
+					dsfServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with 'http://' or 'https://'");
 		}
-		else if (fhirServerBaseUrl.endsWith("//"))
+		else if (dsfServerBaseUrl.endsWith("//"))
 		{
-			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", fhirServerBaseUrl);
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL may not end in '//'", dsfServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, ending in //");
 		}
-		else if (!fhirServerBaseUrl.startsWith("https://"))
+		else if (!dsfServerBaseUrl.startsWith("https://"))
 		{
-			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", fhirServerBaseUrl);
+			logger.warn("Invalid DSF FHIR server base URL: '{}', URL must start with 'https://'", dsfServerBaseUrl);
 			throw new IllegalArgumentException("Invalid ServerBaseUrl, not starting with https://");
 		}
 
-		if (fhirServerBaseUrl.endsWith("/"))
+		if (dsfServerBaseUrl.endsWith("/"))
 			logger.warn("DSF FHIR server base URL: '{}', should not end in '/', removing trailing '/'",
-					fhirServerBaseUrl);
+					dsfServerBaseUrl);
 
 		logger.info(
 				"Concurrency config: {process-threads: {}, engine-core-pool: {}, engine-queue: {}, engine-max-pool: {}}",
 				getProcessStartOrContinueThreads(), processEngineJobExecutorCorePoolSize,
 				processEngineJobExecutorQueueSize, processEngineJobExecutorMaxPoolSize);
+
+		try
+		{
+			X509Certificate clientCertiticate = PemReader.readCertificate(Paths.get(getDsfClientCertificateFile()));
+			CertificateValidator.vaildateClientCertificate(getDsfClientTrustedClientCas(), clientCertiticate);
+		}
+		catch (CertificateException e)
+		{
+			logger.warn("Unable to validate DSF client certificate against trusted client certificate CAs: {}",
+					e.getMessage());
+		}
+	}
+
+	private KeyStore createTrustStore(String trustStoreFile)
+	{
+		try
+		{
+			Path trustStorePath = Paths.get(trustStoreFile);
+
+			if (!Files.isReadable(trustStorePath))
+				throw new IOException("Trust store file '" + trustStorePath.normalize().toAbsolutePath().toString()
+						+ "' not readable");
+
+			return KeyStoreCreator.jksForTrustedCertificates(PemReader.readCertificates(trustStorePath));
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
+			char[] keyStorePassword)
+	{
+		try
+		{
+			Path certificatePath = Paths.get(certificateFile);
+			Path privateKeyPath = Paths.get(privateKeyFile);
+
+			if (!Files.isReadable(certificatePath))
+				throw new IOException(
+						"Certificate '" + certificatePath.normalize().toAbsolutePath().toString() + "' not readable");
+			if (!Files.isReadable(privateKeyPath))
+				throw new IOException(
+						"Private key '" + privateKeyPath.normalize().toAbsolutePath().toString() + "' not readable");
+
+			List<X509Certificate> certificates = PemReader.readCertificates(certificatePath);
+			PrivateKey privateKey = PemReader.readPrivateKey(privateKeyPath, privateKeyPassword);
+
+			if (certificates.isEmpty())
+				throw new IOException(
+						"No certificates in '" + certificatePath.normalize().toAbsolutePath().toString() + "'");
+			else if (!CertificateValidator.isClientCertificate(certificates.get(0)))
+				throw new IOException("First certificate from '"
+						+ certificatePath.normalize().toAbsolutePath().toString() + "' not a client certificate");
+			else if (!KeyPairValidator.matches(privateKey, certificates.get(0).getPublicKey()))
+				throw new IOException("Private-key at '" + privateKeyPath.normalize().toAbsolutePath().toString()
+						+ "' not matching Public-key from " + (certificates.size() > 1 ? "first " : "")
+						+ "certificate at '" + certificatePath.normalize().toAbsolutePath().toString() + "'");
+
+			return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, keyStorePassword, certificates);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private KeyStore createKeyStore(String keyStoreFile, char[] keyStorePassword)
+	{
+		try
+		{
+			Path keyStorePath = Paths.get(keyStoreFile);
+
+			if (!Files.isReadable(keyStorePath))
+				throw new IOException("S/MIME mail signing certificate file '"
+						+ keyStorePath.normalize().toAbsolutePath().toString() + "' not readable");
+
+			KeyStore keyStore = KeyStoreReader.readPkcs12(keyStorePath, keyStorePassword);
+
+			List<String> aliases = Collections.list(keyStore.aliases());
+			if (aliases.size() != 1)
+				throw new IOException("KeyStore at '" + keyStorePath.normalize().toAbsolutePath().toString() + "' has "
+						+ aliases.size() + " entries " + aliases + ", expected 1");
+			if (keyStore.getCertificateChain(aliases.get(0)) == null)
+				throw new IOException("KeyStore at '" + keyStorePath.normalize().toAbsolutePath().toString()
+						+ "' has no certificate chain for entry " + aliases.get(0));
+			if (!keyStore.isKeyEntry(aliases.get(0)))
+				throw new IOException("KeyStore at '" + keyStorePath.normalize().toAbsolutePath().toString()
+						+ "' has no key for entry " + aliases.get(0));
+
+			return keyStore;
+		}
+		catch (IOException | KeyStoreException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Duration assertPositive(Duration duration)
+	{
+		if (duration != null && duration.isNegative())
+			throw new IllegalArgumentException("configured duration is negative");
+		else
+			return duration;
 	}
 
 	public String getDbUrl()
@@ -403,61 +577,153 @@ public class PropertiesConfig implements InitializingBean
 		return staticResourceCacheEnabled;
 	}
 
-	public String getClientCertificateTrustStoreFile()
+	public String getDsfClientTrustedServerCasFile()
 	{
-		return clientCertificateTrustStoreFile;
+		return dsfClientTrustedServerCasFile;
 	}
 
-	public String getClientCertificateFile()
+	@Bean
+	public KeyStore getDsfClientTrustedServerCas()
 	{
-		return clientCertificateFile;
+		return createTrustStore(getDsfClientTrustedServerCasFile());
 	}
 
-	public String getClientCertificatePrivateKeyFile()
+	public String getDsfClientCertificateFile()
 	{
-		return clientCertificatePrivateKeyFile;
+		return dsfClientCertificateFile;
 	}
 
-	public char[] getClientCertificatePrivateKeyFilePassword()
+	public String getDsfClientCertificatePrivateKeyFile()
 	{
-		return clientCertificatePrivateKeyFilePassword;
+		return dsfClientCertificatePrivateKeyFile;
 	}
 
-	public int getWebserviceClientRemoteReadTimeout()
+	public char[] getDsfClientCertificatePrivateKeyFilePassword()
 	{
-		return webserviceClientRemoteReadTimeout;
+		return dsfClientCertificatePrivateKeyFilePassword;
 	}
 
-	public int getWebserviceClientRemoteConnectTimeout()
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public KeyStore getDsfClientCertificate(char[] keyStorePassword)
 	{
-		return webserviceClientRemoteConnectTimeout;
+		return createKeyStore(getDsfClientCertificateFile(), getDsfClientCertificatePrivateKeyFile(),
+				getDsfClientCertificatePrivateKeyFilePassword(), keyStorePassword);
 	}
 
-	public boolean getWebserviceClientRemoteVerbose()
+	public Duration getDsfClientReadTimeoutRemote()
 	{
-		return webserviceClientRemoteVerbose;
+		return Duration.parse(dsfClientReadTimeoutRemote);
 	}
 
-	public String getFhirServerBaseUrl()
+	public Duration getDsfClientConnectTimeoutRemote()
 	{
-		return fhirServerBaseUrl != null && fhirServerBaseUrl.endsWith("/")
-				? fhirServerBaseUrl.substring(0, fhirServerBaseUrl.length() - 1)
-				: fhirServerBaseUrl;
+		return Duration.parse(dsfClientConnectTimeoutRemote);
 	}
 
-	public int getWebserviceClientLocalReadTimeout()
+	public boolean getDsfClientVerboseRemote()
 	{
-		return webserviceClientLocalReadTimeout;
+		return dsfClientVerboseRemote;
 	}
 
-	public int getWebserviceClientLocalConnectTimeout()
+	public String getDsfServerBaseUrl()
 	{
-		return webserviceClientLocalConnectTimeout;
+		return dsfServerBaseUrl != null && dsfServerBaseUrl.endsWith("/")
+				? dsfServerBaseUrl.substring(0, dsfServerBaseUrl.length() - 1)
+				: dsfServerBaseUrl;
 	}
 
-	public boolean getWebserviceClientLocalVerbose()
+	public Duration getDsfClientReadTimeoutLocal()
 	{
-		return webserviceClientLocalVerbose;
+		return Duration.parse(dsfClientReadTimeoutLocal);
+	}
+
+	public Duration getDsfClientConnectTimeoutLocal()
+	{
+		return Duration.parse(dsfClientConnectTimeoutLocal);
+	}
+
+	public boolean getDsfClientVerboseLocal()
+	{
+		return dsfClientVerboseLocal;
+	}
+
+	public String getDsfClientTrustedClientCasFile()
+	{
+		return dsfClientTrustedClientCasFile;
+	}
+
+	@Bean
+	public KeyStore getDsfClientTrustedClientCas()
+	{
+		return createTrustStore(getDsfClientTrustedClientCasFile());
+	}
+
+	public String getFhirClientConnectionsConfig()
+	{
+		return fhirClientConnectionsConfig;
+	}
+
+	public boolean getFhirClientConnectionsConfigDefaultTestConnectionOnStartup()
+	{
+		return fhirClientConnectionsConfigDefaultTestConnectionOnStartup;
+	}
+
+	public boolean getFhirClientConnectionsConfigDefaultEnableDebugLogging()
+	{
+		return fhirClientConnectionsConfigDefaultEnableDebugLogging;
+	}
+
+	public Duration getFhirClientConnectionsConfigDefaultConnectTimeout()
+	{
+		return Duration.parse(fhirClientConnectionsConfigDefaultConnectTimeout);
+	}
+
+	public Duration getFhirClientConnectionsConfigDefaultReadTimeout()
+	{
+		return Duration.parse(fhirClientConnectionsConfigDefaultReadTimeout);
+	}
+
+	public String getFhirClientConnectionsConfigDefaultTrustStoreFile()
+	{
+		return fhirClientConnectionsConfigDefaultTrustStoreFile;
+	}
+
+	@Bean
+	public KeyStore getFhirClientConnectionsConfigDefaultTrustStore()
+	{
+		return createTrustStore(getFhirClientConnectionsConfigDefaultTrustStoreFile());
+	}
+
+	public String getFhirClientConnectionsConfigDefaultOidcDiscoveryPath()
+	{
+		return fhirClientConnectionsConfigDefaultOidcDiscoveryPath;
+	}
+
+	public boolean getFhirClientConnectionsConfigOidcClientCacheEnabled()
+	{
+		return fhirClientConnectionsConfigOidcClientCacheEnabled;
+	}
+
+	public Duration getFhirClientConnectionsConfigOidcClientCacheConfigurationResourceTimeout()
+	{
+		return assertPositive(Duration.parse(fhirClientConnectionsConfigOidcClientCacheConfigurationResourceTimeout));
+	}
+
+	public Duration getFhirClientConnectionsConfigOidcClientCacheJwksResourceTimeout()
+	{
+		return assertPositive(Duration.parse(fhirClientConnectionsConfigOidcClientCacheJwksResourceTimeout));
+	}
+
+	public Duration getFhirClientConnectionsConfigOidcClientCacheAccessTokenBeforeExpirationTimeout()
+	{
+		return assertPositive(
+				Duration.parse(fhirClientConnectionsConfigOidcClientCacheAccessTokenBeforeExpirationTimeout));
+	}
+
+	public Duration getFhirClientConnectionsConfigOidcClientNotBeforeIssuedAtExpiresAtLeeway()
+	{
+		return assertPositive(Duration.parse(fhirClientConnectionsConfigOidcClientNotBeforeIssuedAtExpiresAtLeeway));
 	}
 
 	public String getTaskSubscriptionSearchParameter()
@@ -470,9 +736,9 @@ public class PropertiesConfig implements InitializingBean
 		return questionnaireResponseSubscriptionSearchParameter;
 	}
 
-	public long getWebsocketRetrySleepMillis()
+	public Duration getWebsocketRetrySleepMillis()
 	{
-		return websocketRetrySleepMillis;
+		return Duration.parse(websocketRetrySleep);
 	}
 
 	public int getWebsocketMaxRetries()
@@ -580,9 +846,9 @@ public class PropertiesConfig implements InitializingBean
 		return fhirServerRequestMaxRetries;
 	}
 
-	public long getFhirServerRetryDelayMillis()
+	public Duration getFhirServerRetryDelay()
 	{
-		return fhirServerRetryDelayMillis;
+		return Duration.parse(fhirServerRetryDelay);
 	}
 
 	public String getMailFromAddress()
@@ -635,6 +901,13 @@ public class PropertiesConfig implements InitializingBean
 		return mailServerTrustStoreFile;
 	}
 
+	@Bean
+	@Lazy // not always used
+	public KeyStore getMailServerTrustStore()
+	{
+		return createTrustStore(getMailServerTrustStoreFile());
+	}
+
 	public String getMailServerClientCertificateFile()
 	{
 		return mailServerClientCertificateFile;
@@ -650,6 +923,18 @@ public class PropertiesConfig implements InitializingBean
 		return mailServerClientCertificatePrivateKeyFilePassword;
 	}
 
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public Optional<KeyStore> getMailServerKeyStore(char[] keyStorePassword)
+	{
+		if (getMailServerClientCertificateFile() == null || getMailServerClientCertificatePrivateKeyFile() == null)
+			return Optional.empty();
+		else
+			return Optional.of(
+					createKeyStore(getMailServerClientCertificateFile(), getMailServerClientCertificatePrivateKeyFile(),
+							getMailServerClientCertificatePrivateKeyFilePassword(), keyStorePassword));
+	}
+
 	public String getMailSmimeSigingKeyStoreFile()
 	{
 		return mailSmimeSigingKeyStoreFile;
@@ -658,6 +943,15 @@ public class PropertiesConfig implements InitializingBean
 	public char[] getMailSmimeSigingKeyStorePassword()
 	{
 		return mailSmimeSigingKeyStorePassword;
+	}
+
+	@Bean
+	public Optional<KeyStore> getMailSmimeSigingKeyStore()
+	{
+		if (getMailSmimeSigingKeyStoreFile() == null)
+			return Optional.empty();
+		else
+			return Optional.of(createKeyStore(getMailSmimeSigingKeyStoreFile(), getMailSmimeSigingKeyStorePassword()));
 	}
 
 	public boolean getSendTestMailOnStartup()

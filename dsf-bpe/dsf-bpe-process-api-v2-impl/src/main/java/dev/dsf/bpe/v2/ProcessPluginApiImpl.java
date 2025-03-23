@@ -9,9 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
-import dev.dsf.bpe.v2.service.FhirWebserviceClientProvider;
+import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
+import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
@@ -25,7 +27,9 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final ProxyConfig proxyConfig;
 	private final EndpointProvider endpointProvider;
 	private final FhirContext fhirContext;
-	private final FhirWebserviceClientProvider fhirWebserviceClientProvider;
+	private final DsfClientProvider dsfClientProvider;
+	private final FhirClientProvider fhirClientProvider;
+	private final OidcClientProvider oidcClientProvider;
 	private final MailService mailService;
 	private final ObjectMapper objectMapper;
 	private final OrganizationProvider organizationProvider;
@@ -35,16 +39,18 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final TaskHelper taskHelper;
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
-			FhirWebserviceClientProvider fhirWebserviceClientProvider, MailService mailService,
-			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
-			ProcessAuthorizationHelper processAuthorizationHelper,
+			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
+			OidcClientProvider oidcClientProvider, MailService mailService, ObjectMapper objectMapper,
+			OrganizationProvider organizationProvider, ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
 			TaskHelper taskHelper)
 	{
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
 		this.fhirContext = fhirContext;
-		this.fhirWebserviceClientProvider = fhirWebserviceClientProvider;
+		this.dsfClientProvider = dsfClientProvider;
+		this.fhirClientProvider = fhirClientProvider;
+		this.oidcClientProvider = oidcClientProvider;
 		this.mailService = mailService;
 		this.objectMapper = objectMapper;
 		this.organizationProvider = organizationProvider;
@@ -60,7 +66,9 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
 		Objects.requireNonNull(endpointProvider, "endpointProvider");
 		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(fhirWebserviceClientProvider, "fhirWebserviceClientProvider");
+		Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
+		Objects.requireNonNull(fhirClientProvider, "fhirClientProvider");
+		Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
 		Objects.requireNonNull(mailService, "mailService");
 		Objects.requireNonNull(objectMapper, "objectMapper");
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
@@ -89,9 +97,21 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	}
 
 	@Override
-	public FhirWebserviceClientProvider getFhirWebserviceClientProvider()
+	public DsfClientProvider getDsfClientProvider()
 	{
-		return fhirWebserviceClientProvider;
+		return dsfClientProvider;
+	}
+
+	@Override
+	public FhirClientProvider getFhirClientProvider()
+	{
+		return fhirClientProvider;
+	}
+
+	@Override
+	public OidcClientProvider getOidcClientProvider()
+	{
+		return oidcClientProvider;
 	}
 
 	@Override

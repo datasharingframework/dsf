@@ -41,4 +41,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("EndpointProvider"));
 	}
+
+	@Test
+	public void startFhirClientProviderTestProcess() throws Exception
+	{
+		executePluginTest(createTestTask("FhirClientProvider"));
+	}
 }
