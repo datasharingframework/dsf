@@ -116,8 +116,12 @@ public class OidcClientJersey implements OidcClientWithDecodedJwt
 			String proxyUserName, char[] proxyPassword, String userAgentValue, Duration connectTimeout,
 			Duration readTimeout, boolean logRequestsAndResponses, Duration notBeforeIssuedAtExpiresAtLeewaySeconds)
 	{
-		this.baseUrl = Objects.requireNonNull(baseUrl, "baseUrl");
-		this.discoveryPath = Objects.requireNonNull(discoveryPath, "discoveryPath");
+		Objects.requireNonNull(baseUrl, "baseUrl");
+		Objects.requireNonNull(discoveryPath, "discoveryPath");
+
+		this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+		this.discoveryPath = discoveryPath.startsWith("/") ? discoveryPath : ("/" + discoveryPath);
+
 		this.notBeforeIssuedAtExpiresAtLeewaySeconds = Objects.requireNonNull(notBeforeIssuedAtExpiresAtLeewaySeconds,
 				"notBeforeIssuedAtExpiresAtLeewaySeconds");
 
