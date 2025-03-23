@@ -5,7 +5,7 @@
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
-		</tag>		
+		</tag>
 	</meta>
 	<name value="DsfPractitionerIdentifier"/>
 	<status value="active"/>
@@ -18,4 +18,4 @@
 		<type value="other"/>
 		<value value="http://dsf.dev/sid/practitioner-identifier"/>
 	</uniqueId>
-</NamingSystem> 
+</NamingSystem>

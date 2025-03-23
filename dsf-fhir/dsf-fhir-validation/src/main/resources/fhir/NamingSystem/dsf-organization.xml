@@ -5,21 +5,20 @@
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
 			<code value="ALL"/>
-		</tag>		
+		</tag>
 	</meta>
 	<name value="DsfOrganizationIdentifier"/>
 	<status value="active"/>
 	<kind value="identifier"/>
 	<date value="2023-06-28"/>
 	<publisher value="DSF"/>
-	<description
-			value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, ukhd.de, uksh.de"/>
+	<description value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, ukhd.de, uksh.de"/>
 	<usage value="Used withing the DSF to identify organizations"/>
 	<uniqueId>
-		<modifierExtension url="http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference" >
+		<modifierExtension url="http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference">
 			<valueBoolean value="true"/>
 		</modifierExtension>
 		<type value="other"/>
 		<value value="http://dsf.dev/sid/organization-identifier"/>
 	</uniqueId>
-</NamingSystem> 
+</NamingSystem>
