@@ -81,18 +81,18 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 		Objects.requireNonNull(clientSecret, "clientSecret");
 
 		String proxyHost = null, proxyUsername = null;
-		char[] proxyPassowrd = null;
+		char[] proxyPassword = null;
 		if (proxyConfig.isEnabled(baseUrl))
 		{
 			proxyHost = proxyConfig.getUrl();
 			proxyUsername = proxyConfig.getUsername();
-			proxyPassowrd = proxyConfig.getPassword();
+			proxyPassword = proxyConfig.getPassword();
 		}
 
 		OidcClientJersey client = new OidcClientJersey(baseUrl,
 				discoveryPath != null ? discoveryPath : defaultDiscoveryPath, clientId, clientSecret,
 				trustStore != null ? trustStore : defaultTrustedStore, null, null, proxyHost, proxyUsername,
-				proxyPassowrd, userAgent, readTimeout != null ? readTimeout : defaultReadTimeout,
+				proxyPassword, userAgent, readTimeout != null ? readTimeout : defaultReadTimeout,
 				connectTimeout != null ? connectTimeout : defaultConnectTimeout,
 				enableDebugLogging != null ? enableDebugLogging : defaultEnableDebugLogging,
 				notBeforeIssuedAtExpiresAtLeeway);
