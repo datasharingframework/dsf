@@ -1,4 +1,6 @@
-<Bundle xmlns="http://hl7.org/fhir">
+<Bundle xmlns="http://hl7.org/fhir"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<id value="30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9"></id>
 	<meta>
 		<versionId value="2"></versionId>
