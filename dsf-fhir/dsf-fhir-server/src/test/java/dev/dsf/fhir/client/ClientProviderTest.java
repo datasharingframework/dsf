@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -41,8 +42,8 @@ public class ClientProviderTest
 		webserviceTrustStore.load(null);
 
 		char[] webserviceKeyStorePassword = "password".toCharArray();
-		int remoteReadTimeout = 0;
-		int remoteConnectTimeout = 0;
+		Duration remoteReadTimeout = Duration.ZERO;
+		Duration remoteConnectTimeout = Duration.ZERO;
 		char[] remoteProxyPassword = null;
 		String remoteProxyUsername = null;
 		String remoteProxySchemeHostPort = null;

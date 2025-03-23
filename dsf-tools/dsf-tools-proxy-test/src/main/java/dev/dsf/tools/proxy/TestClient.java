@@ -1,5 +1,6 @@
 package dev.dsf.tools.proxy;
 
+import java.time.Duration;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -15,8 +16,8 @@ public class TestClient extends AbstractJerseyClient
 
 	public TestClient(String baseUrl, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword)
 	{
-		super(baseUrl, null, null, null, null, null, proxySchemeHostPort, proxyUserName, proxyPassword, 5_000, 5_000,
-				true, "DSF Proxy Test Client");
+		super(baseUrl, null, null, null, null, null, proxySchemeHostPort, proxyUserName, proxyPassword,
+				Duration.ofSeconds(5), Duration.ofSeconds(5), true, "DSF Proxy Test Client");
 
 		logger.info("baseUrl: {}", baseUrl);
 		logger.info("proxySchemeHostPort: {}", proxySchemeHostPort);

@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,8 +158,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		return new FhirWebserviceClientJersey("https://localhost:" + apiPort + CONTEXT_PATH, trustStore, keyStore,
-				keyStorePassword, null, null, null, null, 0, 0, false, "DSF Integration Test Client", fhirContext,
-				referenceCleaner);
+				keyStorePassword, null, null, null, null, Duration.ZERO, Duration.ZERO, false,
+				"DSF Integration Test Client", fhirContext, referenceCleaner);
 	}
 
 	private static WebsocketClient createWebsocketClient(int apiPort, KeyStore trustStore, KeyStore keyStore,

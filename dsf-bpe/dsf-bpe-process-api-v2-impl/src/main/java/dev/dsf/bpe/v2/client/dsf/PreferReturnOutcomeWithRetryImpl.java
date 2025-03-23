@@ -1,6 +1,7 @@
 package dev.dsf.bpe.v2.client.dsf;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -67,22 +68,22 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 	}
 
 	@Override
-	public PreferReturnOutcome withRetry(int nTimes, long delayMillis)
+	public PreferReturnOutcome withRetry(int nTimes, Duration delay)
 	{
 		if (nTimes < 0)
 			throw new IllegalArgumentException("nTimes < 0");
-		if (delayMillis < 0)
-			throw new IllegalArgumentException("delayMillis < 0");
+		if (delay == null || delay.isNegative())
+			throw new IllegalArgumentException("delay null or negative");
 
-		return new PreferReturnOutcomeRetryImpl(delegate, nTimes, delayMillis);
+		return new PreferReturnOutcomeRetryImpl(delegate, nTimes, delay);
 	}
 
 	@Override
-	public PreferReturnOutcome withRetryForever(long delayMillis)
+	public PreferReturnOutcome withRetryForever(Duration delay)
 	{
-		if (delayMillis < 0)
-			throw new IllegalArgumentException("delayMillis < 0");
+		if (delay == null || delay.isNegative())
+			throw new IllegalArgumentException("delay null or negative");
 
-		return new PreferReturnOutcomeRetryImpl(delegate, RETRY_FOREVER, delayMillis);
+		return new PreferReturnOutcomeRetryImpl(delegate, RETRY_FOREVER, delay);
 	}
 }

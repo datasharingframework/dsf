@@ -197,7 +197,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			KeyStore keyStore, char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		return new FhirWebserviceClientJersey(fhirBaseUrl, trustStore, keyStore, keyStorePassword, null, null, null,
-				null, 0, 0, false, "DSF Integration Test Client", fhirContext, referenceCleaner);
+				null, Duration.ZERO, Duration.ZERO, false, "DSF Integration Test Client", fhirContext,
+				referenceCleaner);
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()

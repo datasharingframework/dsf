@@ -1,6 +1,7 @@
 package dev.dsf.bpe.plugin;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -49,14 +50,14 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	private final String localEndpointAddress;
 	private final WebserviceClient localWebserviceClient;
 	private final int fhirServerRequestMaxRetries;
-	private final long fhirServerRetryDelayMillis;
+	private final Duration fhirServerRetryDelay;
 
 	private Map<ProcessIdAndVersion, ProcessPlugin> pluginsByProcessIdAndVersion;
 
 	public ProcessPluginManagerImpl(List<ProcessPluginConsumer> processPluginConsumers,
 			ProcessPluginLoader processPluginLoader, BpmnProcessStateChangeService bpmnProcessStateChangeService,
 			FhirResourceHandler fhirResourceHandler, String localEndpointAddress,
-			WebserviceClient localWebserviceClient, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis)
+			WebserviceClient localWebserviceClient, int fhirServerRequestMaxRetries, Duration fhirServerRetryDelay)
 	{
 		if (processPluginConsumers != null)
 			this.processPluginConsumers.addAll(processPluginConsumers);
@@ -68,7 +69,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		this.localEndpointAddress = localEndpointAddress;
 		this.localWebserviceClient = localWebserviceClient;
 		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
-		this.fhirServerRetryDelayMillis = fhirServerRetryDelayMillis;
+		this.fhirServerRetryDelay = fhirServerRetryDelay;
 	}
 
 	@Override
@@ -80,6 +81,10 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 
 		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
 		Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
+
+		if (fhirServerRequestMaxRetries < -1)
+			throw new IllegalArgumentException("fhirServerRequestMaxRetries < -1");
+		Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
 	}
 
 	@Override
@@ -118,9 +123,9 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	private BasicWebserviceClient retryClient()
 	{
 		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
-			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
+			return localWebserviceClient.withRetryForever(fhirServerRetryDelay);
 		else
-			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);
+			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelay);
 	}
 
 	private Optional<String> getLocalOrganizationIdentifierValue()

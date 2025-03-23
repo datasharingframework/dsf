@@ -1,5 +1,6 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,8 +85,8 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
 			checkQuestionnaireResponse(questionnaireResponse);
 
-			QuestionnaireResponse created = api.getDsfClientProvider().getLocalDsfClient().withRetryForever(60000)
-					.create(questionnaireResponse);
+			QuestionnaireResponse created = api.getDsfClientProvider().getLocalDsfClient()
+					.withRetryForever(Duration.ofSeconds(60)).create(questionnaireResponse);
 
 			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
 					api.getQuestionnaireResponseHelper().getLocalVersionlessAbsoluteUrl(created));

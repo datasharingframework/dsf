@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
 
@@ -97,13 +98,13 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] dsfClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "Timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.fhir.client.timeout.read:10000}")
-	private int dsfClientReadTimeout;
+	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.fhir.client.timeout.read:PT10S}")
+	private String dsfClientReadTimeout;
 
-	@Documentation(description = "Timeout in milliseconds until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.fhir.client.timeout.connect:2000}")
-	private int dsfClientConnectTimeout;
+	@Documentation(description = "Timeout until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.fhir.client.timeout.connect:PT2S}")
+	private String dsfClientConnectTimeout;
 
 	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
 	@Value("${dev.dsf.fhir.client.verbose:false}")
@@ -302,14 +303,14 @@ public class PropertiesConfig implements InitializingBean
 		return dsfClientCertificatePrivateKeyFilePassword;
 	}
 
-	public int getDsfClientReadTimeout()
+	public Duration getDsfClientReadTimeout()
 	{
-		return dsfClientReadTimeout;
+		return Duration.parse(dsfClientReadTimeout);
 	}
 
-	public int getDsfClientConnectTimeout()
+	public Duration getDsfClientConnectTimeout()
 	{
-		return dsfClientConnectTimeout;
+		return Duration.parse(dsfClientConnectTimeout);
 	}
 
 	public boolean getDsfClientVerbose()

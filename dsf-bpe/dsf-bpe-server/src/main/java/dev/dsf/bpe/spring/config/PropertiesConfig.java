@@ -106,25 +106,25 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] dsfClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "Timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.read:60000}")
-	private int dsfClientReadTimeoutRemote;
+	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.read:PT60S}")
+	private String dsfClientReadTimeoutRemote;
 
-	@Documentation(description = "Timeout in milliseconds until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.connect:5000}")
-	private int dsfClientConnectTimeoutRemote;
+	@Documentation(description = "Timeout until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.connect:PT5S}")
+	private String dsfClientConnectTimeoutRemote;
 
 	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
 	@Value("${dev.dsf.bpe.fhir.client.remote.verbose:false}")
 	private boolean dsfClientVerboseRemote;
 
-	@Documentation(description = "Timeout in milliseconds until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:60000}")
-	private int dsfClientReadTimeoutLocal;
+	@Documentation(description = "Timeout until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:PT60S}")
+	private String dsfClientReadTimeoutLocal;
 
-	@Documentation(description = "Timeout in milliseconds until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.bpe.fhir.client.local.timeout.connect:2000}")
-	private int dsfClientConnectTimeoutLocal;
+	@Documentation(description = "Timeout until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.bpe.fhir.client.local.timeout.connect:PT2S}")
+	private String dsfClientConnectTimeoutLocal;
 
 	@Documentation(description = "To enable verbose logging of requests to and replies from the local DSF FHIR server, set to `true`")
 	@Value("${dev.dsf.bpe.fhir.client.local.verbose:false}")
@@ -194,9 +194,9 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.max:-1}")
 	private int websocketMaxRetries;
 
-	@Documentation(description = "Milliseconds between two retries to establish a websocket connection with the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.sleep:5000}")
-	private long websocketRetrySleepMillis;
+	@Documentation(description = "Time between two retries to establish a websocket connection with the DSF FHIR server")
+	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.sleep:PT5S}")
+	private String websocketRetrySleep;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
 	@Value("${dev.dsf.bpe.process.plugin.directory:process}")
@@ -253,9 +253,9 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.max:-1}")
 	private int fhirServerRequestMaxRetries;
 
-	@Documentation(description = "Milliseconds between two retries to establish a connection with the local DSF FHIR server during process deployment")
-	@Value("${dev.dsf.bpe.process.fhir.server.retry.sleep:5000}")
-	private long fhirServerRetryDelayMillis;
+	@Documentation(description = "Time between two retries to establish a connection with the local DSF FHIR server during process deployment")
+	@Value("${dev.dsf.bpe.process.fhir.server.retry.sleep:PT5S}")
+	private String fhirServerRetryDelay;
 
 	@Documentation(description = "Mail service sender address", example = "sender@localhost")
 	@Value("${dev.dsf.bpe.mail.fromAddress:}")
@@ -613,12 +613,12 @@ public class PropertiesConfig implements InitializingBean
 
 	public Duration getDsfClientReadTimeoutRemote()
 	{
-		return Duration.ofMillis(dsfClientReadTimeoutRemote);
+		return Duration.parse(dsfClientReadTimeoutRemote);
 	}
 
 	public Duration getDsfClientConnectTimeoutRemote()
 	{
-		return Duration.ofMillis(dsfClientConnectTimeoutRemote);
+		return Duration.parse(dsfClientConnectTimeoutRemote);
 	}
 
 	public boolean getDsfClientVerboseRemote()
@@ -635,12 +635,12 @@ public class PropertiesConfig implements InitializingBean
 
 	public Duration getDsfClientReadTimeoutLocal()
 	{
-		return Duration.ofMillis(dsfClientReadTimeoutLocal);
+		return Duration.parse(dsfClientReadTimeoutLocal);
 	}
 
 	public Duration getDsfClientConnectTimeoutLocal()
 	{
-		return Duration.ofMillis(dsfClientConnectTimeoutLocal);
+		return Duration.parse(dsfClientConnectTimeoutLocal);
 	}
 
 	public boolean getDsfClientVerboseLocal()
@@ -736,9 +736,9 @@ public class PropertiesConfig implements InitializingBean
 		return questionnaireResponseSubscriptionSearchParameter;
 	}
 
-	public long getWebsocketRetrySleepMillis()
+	public Duration getWebsocketRetrySleepMillis()
 	{
-		return websocketRetrySleepMillis;
+		return Duration.parse(websocketRetrySleep);
 	}
 
 	public int getWebsocketMaxRetries()
@@ -846,9 +846,9 @@ public class PropertiesConfig implements InitializingBean
 		return fhirServerRequestMaxRetries;
 	}
 
-	public long getFhirServerRetryDelayMillis()
+	public Duration getFhirServerRetryDelay()
 	{
-		return fhirServerRetryDelayMillis;
+		return Duration.parse(fhirServerRetryDelay);
 	}
 
 	public String getMailFromAddress()

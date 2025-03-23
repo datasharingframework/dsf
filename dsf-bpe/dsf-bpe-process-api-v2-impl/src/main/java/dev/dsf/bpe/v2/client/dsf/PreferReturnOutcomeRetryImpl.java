@@ -1,6 +1,7 @@
 package dev.dsf.bpe.v2.client.dsf;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -12,22 +13,21 @@ import jakarta.ws.rs.core.MediaType;
 
 class PreferReturnOutcomeRetryImpl extends AbstractDsfClientJerseyWithRetry implements PreferReturnOutcome
 {
-	PreferReturnOutcomeRetryImpl(DsfClientJersey delegate, int nTimes, long delayMillis)
+	PreferReturnOutcomeRetryImpl(DsfClientJersey delegate, int nTimes, Duration delay)
 	{
-		super(delegate, nTimes, delayMillis);
+		super(delegate, nTimes, delay);
 	}
 
 	@Override
 	public OperationOutcome create(Resource resource)
 	{
-		return retry(nTimes, delayMillis,
-				() -> delegate.create(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome());
+		return retry(() -> delegate.create(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome());
 	}
 
 	@Override
 	public OperationOutcome createConditionaly(Resource resource, String ifNoneExistCriteria)
 	{
-		return retry(nTimes, delayMillis,
+		return retry(
 				() -> delegate.createConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
 						.getOperationOutcome());
 	}
@@ -35,7 +35,7 @@ class PreferReturnOutcomeRetryImpl extends AbstractDsfClientJerseyWithRetry impl
 	@Override
 	public OperationOutcome createBinary(InputStream in, MediaType mediaType, String securityContextReference)
 	{
-		return retry(nTimes, delayMillis,
+		return retry(
 				() -> delegate.createBinary(PreferReturnType.OPERATION_OUTCOME, in, mediaType, securityContextReference)
 						.getOperationOutcome());
 	}
@@ -43,30 +43,28 @@ class PreferReturnOutcomeRetryImpl extends AbstractDsfClientJerseyWithRetry impl
 	@Override
 	public OperationOutcome update(Resource resource)
 	{
-		return retry(nTimes, delayMillis,
-				() -> delegate.update(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome());
+		return retry(() -> delegate.update(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome());
 	}
 
 	@Override
 	public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
 	{
-		return retry(nTimes, delayMillis, () -> delegate
-				.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria).getOperationOutcome());
+		return retry(() -> delegate.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
+				.getOperationOutcome());
 	}
 
 	@Override
 	public OperationOutcome updateBinary(String id, InputStream in, MediaType mediaType,
 			String securityContextReference)
 	{
-		return retry(nTimes, delayMillis,
-				() -> delegate
-						.updateBinary(PreferReturnType.OPERATION_OUTCOME, id, in, mediaType, securityContextReference)
-						.getOperationOutcome());
+		return retry(() -> delegate
+				.updateBinary(PreferReturnType.OPERATION_OUTCOME, id, in, mediaType, securityContextReference)
+				.getOperationOutcome());
 	}
 
 	@Override
 	public Bundle postBundle(Bundle bundle)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.postBundle(PreferReturnType.OPERATION_OUTCOME, bundle));
+		return retry(() -> delegate.postBundle(PreferReturnType.OPERATION_OUTCOME, bundle));
 	}
 }

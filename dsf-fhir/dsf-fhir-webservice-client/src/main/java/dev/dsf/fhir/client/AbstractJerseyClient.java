@@ -1,6 +1,7 @@
 package dev.dsf.fhir.client;
 
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -39,14 +40,14 @@ public class AbstractJerseyClient
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			ObjectMapper objectMapper, Collection<?> componentsToRegister)
 	{
-		this(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper, componentsToRegister, null, null, null, 0,
-				0, false, null);
+		this(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper, componentsToRegister, null, null, null,
+				Duration.ZERO, Duration.ZERO, false, null);
 	}
 
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			ObjectMapper objectMapper, Collection<?> componentsToRegister, String proxySchemeHostPort,
-			String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout, boolean logRequests,
-			String userAgentValue)
+			String proxyUserName, char[] proxyPassword, Duration connectTimeout, Duration readTimeout,
+			boolean logRequests, String userAgentValue)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
@@ -71,8 +72,8 @@ public class AbstractJerseyClient
 			builder = builder.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
 					.add(HttpHeaders.USER_AGENT, userAgentValue));
 
-		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectTimeout,
-				TimeUnit.MILLISECONDS);
+		builder = builder.readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
+				.connectTimeout(connectTimeout.toMillis(), TimeUnit.MILLISECONDS);
 
 		if (objectMapper != null)
 		{
