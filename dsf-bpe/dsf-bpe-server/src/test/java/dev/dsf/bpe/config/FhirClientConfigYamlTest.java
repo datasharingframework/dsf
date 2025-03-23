@@ -10,12 +10,16 @@ import java.time.Duration;
 import java.util.Map;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class FhirClientConfigYamlTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(FhirClientConfigYamlTest.class);
+
 	private static final YAMLMapper mapper = YAMLMapper.builder().addModule(new JavaTimeModule()).build();
 
 	private static final String TEST_YAML = """
@@ -88,7 +92,7 @@ public class FhirClientConfigYamlTest
 	{
 		Map<String, FhirClientConfigYaml> configs = mapper.readValue(TEST_YAML, FhirClientConfigYaml.MAP_OF_CONFIGS);
 
-		configs.get("some-fhir-server-id").validate("some-fhir-server-id").forEach(e -> System.out.println(e));
+		configs.get("some-fhir-server-id").validate("some-fhir-server-id").forEach(e -> logger.debug(e.toString()));
 
 		assertEquals(13, configs.get("some-fhir-server-id").validate("some-fhir-server-id").count());
 		assertEquals(0, configs.get("some-other-fhir-server-id").validate("some-fhir-server-id").count());
