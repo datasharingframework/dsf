@@ -39,22 +39,23 @@
 		<value value="urn:oid:2.16.840.1.113883.4.642.3.1024"/>
 	</identifier>
 	<version value="4.0.1"/>
-	<name value="Mime Types"/>
+	<name value="MimeTypes"/>
 	<title value="MimeType"/>
 	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-07-28"/>
-	<publisher value="HL7 International - FHIR-Infrastructure"/>
+	<publisher value="HL7 International / FHIR Infrastructure"/>
 	<contact>
 		<telecom>
 			<system value="url"/>
-			<value value="http://hl7.org/fhir"/>
+			<value value="http://www.hl7.org/Special/committees/fiwg"/>
 		</telecom>
 	</contact>
 	<description value="This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)"/>
 	<compose>
 		<include>
 			<system value="urn:ietf:bcp:13"/>
+			<version value="4.0.1"/>
 		</include>
 	</compose>
 </ValueSet>

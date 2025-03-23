@@ -30,6 +30,7 @@
 				</discriminator>
 				<rules value="open"/>
 			</slicing>
+			<min value="1"/>
 		</element>
 		<element id="ActivityDefinition.extension:process-authorization">
 			<path value="ActivityDefinition.extension"/>
