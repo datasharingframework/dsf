@@ -1,0 +1,23 @@
+<PractitionerRole xmlns="http://hl7.org/fhir"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<practitioner>
+		<reference value="set-in-test" />
+	</practitioner>
+	<organization>
+		<reference value="set-in-test"/>
+	</organization>
+	<code>
+		<coding>
+			<system value="http://dsf.dev/fhir/CodeSystem/test" />
+			<version value="a" />
+			<code value="test-a" />
+		</coding>
+	</code>
+</PractitionerRole>

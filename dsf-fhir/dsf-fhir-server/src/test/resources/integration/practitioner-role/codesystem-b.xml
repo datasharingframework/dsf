@@ -1,0 +1,28 @@
+<CodeSystem xmlns="http://hl7.org/fhir"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/CodeSystem/test" />
+	<version value="b" />
+	<name value="DSF_Test_B" />
+	<title value="DSF Test B" />
+	<status value="draft" />
+	<experimental value="false" />
+	<date value="2025-03-21" />
+	<publisher value="DSF" />
+	<description value="CodeSystem for integration testing" />
+	<caseSensitive value="true" />
+	<hierarchyMeaning value="grouped-by" />
+	<versionNeeded value="false" />
+	<content value="complete" />
+	<concept>
+		<code value="test-b" />
+		<display value="Test B" />
+		<definition value="Test B" />
+	</concept>
+</CodeSystem> 
