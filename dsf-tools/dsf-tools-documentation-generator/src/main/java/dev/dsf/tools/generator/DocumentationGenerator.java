@@ -222,7 +222,7 @@ public class DocumentationGenerator extends AbstractMojo
 			String property = getDocumentationString("Property", initialProperty);
 
 			String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
-			String environment = initialProperty.endsWith(".password")
+			String environment = initialProperty.endsWith(".password") || initialProperty.endsWith(".secret")
 					? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
 					: initialEnvironment;
 
@@ -261,7 +261,7 @@ public class DocumentationGenerator extends AbstractMojo
 			String property = getDocumentationString("Property", initialProperty);
 
 			String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
-			String environment = initialProperty.endsWith(".password")
+			String environment = initialProperty.endsWith(".password") || initialProperty.endsWith(".secret")
 					? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
 					: initialEnvironment;
 
