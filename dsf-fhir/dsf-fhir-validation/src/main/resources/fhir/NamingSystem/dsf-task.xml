@@ -1,20 +1,21 @@
-<NamingSystem xmlns="http://hl7.org/fhir">
+<NamingSystem xmlns="http://hl7.org/fhir"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
 		<tag>
-			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
-			<code value="ALL" />
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
 		</tag>
 	</meta>
-	<name value="DsfTaskIdentifier" />
-	<status value="active" />
-	<kind value="identifier" />
-	<date value="2023-06-28" />
-	<publisher value="DSF" />
-	<description value="Name identifying a draft Task resource" />
-	<usage
-		value="Used withing the DSF to identify draft Task resources, created as examples using process plugins. Values must be defined in the form {process-url}/{process-version}/{task-example-name} e.g. http://test.org/bpe/Process/someProcessName/1.0/someExampleName" />
+	<name value="DsfTaskIdentifier"/>
+	<status value="active"/>
+	<kind value="identifier"/>
+	<date value="2023-06-28"/>
+	<publisher value="DSF"/>
+	<description value="Name identifying a draft Task resource"/>
+	<usage value="Used withing the DSF to identify draft Task resources, created as examples using process plugins. Values must be defined in the form {process-url}/{process-version}/{task-example-name} e.g. http://test.org/bpe/Process/someProcessName/1.0/someExampleName"/>
 	<uniqueId>
-		<type value="other" />
-		<value value="http://dsf.dev/sid/task-identifier" />
+		<type value="other"/>
+		<value value="http://dsf.dev/sid/task-identifier"/>
 	</uniqueId>
-</NamingSystem> 
+</NamingSystem>

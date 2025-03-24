@@ -281,4 +281,19 @@ public class ActivityDefinitionProfileTest
 		assertFalse(result.isSuccessful());
 		assertEquals(7, result.getMessages().size());
 	}
+
+	@Test
+	public void testActivityDefinitionWithoutProcessAuthorizationNotValid() throws Exception
+	{
+		ActivityDefinition ad = createActivityDefinition();
+
+		logResource(ad);
+
+		ValidationResult result = resourceValidator.validate(ad);
+
+		logMessages(result);
+
+		assertFalse(result.isSuccessful());
+		assertEquals(2, result.getMessages().size());
+	}
 }

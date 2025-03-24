@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -14,11 +15,20 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.ToIntFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -29,8 +39,10 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemUniqueIdComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
@@ -41,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 
 public class BundleGenerator
@@ -69,7 +80,6 @@ public class BundleGenerator
 		IParser parser = fhirContext.newXmlParser();
 		parser.setStripVersionsFromReferences(false);
 		parser.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		parser.setPrettyPrint(true);
 		return parser;
 	}
 
@@ -140,112 +150,147 @@ public class BundleGenerator
 
 	private void sortBundleEntries(Bundle bundle)
 	{
-		List<StructureDefinition> definitions = bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
-				.map(BundleEntryComponent::getResource).filter(r -> r instanceof StructureDefinition)
-				.map(sd -> (StructureDefinition) sd).collect(Collectors.toList());
+		Map<EntryAndLabel, Set<String>> resourcesAndDirectDependencies = bundle.getEntry().stream()
+				.filter(BundleEntryComponent::hasResource)
+				.collect(Collectors.toMap(r -> new EntryAndLabel(r, toLabel(r)), this::listDependencies));
 
-		List<String> urlsSortedByDependencies = getUrlsSortedByDependencies(definitions);
+		List<EntryAndLabel> resources = new ArrayList<>();
+		toSorted(resourcesAndDirectDependencies, resources, 0);
 
-		List<BundleEntryComponent> sortedEntries = bundle.getEntry().stream()
-				.sorted(Comparator.comparingInt(getSortCriteria1())
-						.thenComparing(Comparator.comparingInt(getSortCriteria2(urlsSortedByDependencies)))
-						.thenComparing(Comparator.comparing(getSortCriteria3())))
-				.collect(Collectors.toList());
-		bundle.setEntry(sortedEntries);
+		resources.stream().map(EntryAndLabel::label).forEach(l -> logger.debug(l));
+
+		bundle.setEntry(resources.stream().map(EntryAndLabel::entry).toList());
 	}
 
-	private List<String> getUrlsSortedByDependencies(List<StructureDefinition> definitions)
+	private static record EntryAndLabel(BundleEntryComponent entry, String label)
 	{
-		Map<String, List<String>> dependencies = definitions.stream()
-				.collect(Collectors.toMap(this::toUrlWithVersion,
-						d -> d.getDifferential().getElement().stream().filter(ElementDefinition::hasType)
-								.map(ElementDefinition::getType).flatMap(List::stream)
-								.filter(TypeRefComponent::hasProfile).map(TypeRefComponent::getProfile)
-								.flatMap(List::stream).map(CanonicalType::getValue).collect(Collectors.toList())));
-
-		List<String> handled = new ArrayList<>();
-
-		return dependencies.keySet().stream().sorted().flatMap(urlWithVersion ->
+		@Override
+		public int hashCode()
 		{
-			if (handled.contains(urlWithVersion))
-				return Stream.empty();
-			else
-			{
-				handled.add(urlWithVersion);
-				return getSorted(dependencies, urlWithVersion, handled);
-			}
-		}).collect(Collectors.toList());
-	}
-
-	private String toUrlWithVersion(StructureDefinition structureDefinition)
-	{
-		return structureDefinition.getUrl() + "|" + structureDefinition.getVersion();
-	}
-
-	private Stream<String> getSorted(Map<String, List<String>> allDependencies, String current, List<String> handled)
-	{
-		List<String> dependencies = allDependencies.get(current);
-		if (dependencies.isEmpty())
-		{
-			handled.add(current);
-			return Stream.of(current);
+			return Objects.hash(label);
 		}
-		else
-			return Stream.concat(dependencies.stream().flatMap(c -> getSorted(allDependencies, c, handled)),
-					Stream.of(current));
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			EntryAndLabel other = (EntryAndLabel) obj;
+			return Objects.equals(label, other.label);
+		}
 	}
 
-	private ToIntFunction<BundleEntryComponent> getSortCriteria1()
+	private void toSorted(Map<EntryAndLabel, Set<String>> resourcesAndDirectDependencies, List<EntryAndLabel> resources,
+			int lastResourcesSize)
 	{
-		return (BundleEntryComponent e) ->
+		List<EntryAndLabel> resourcesWithoutDependencies = resourcesAndDirectDependencies.entrySet().stream()
+				.filter(e -> e.getValue().isEmpty()).map(Entry::getKey).toList();
+
+		resources.addAll(resourcesWithoutDependencies);
+		resourcesWithoutDependencies.forEach(resourcesAndDirectDependencies::remove);
+
+		List<String> labels = resourcesWithoutDependencies.stream().map(EntryAndLabel::label).toList();
+		resourcesAndDirectDependencies.values().stream().forEach(v -> v.removeAll(labels));
+
+		if (lastResourcesSize == resources.size())
 		{
-			if (e.getResource() == null)
-				return Integer.MIN_VALUE;
+			List<Entry<EntryAndLabel, Set<String>>> singleCycleEntries = resourcesAndDirectDependencies.entrySet()
+					.stream().filter(hasSingleCycle(resourcesAndDirectDependencies)).toList();
+			singleCycleEntries.forEach(e -> e.getValue().clear());
+
+			if (!singleCycleEntries.isEmpty())
+				toSorted(resourcesAndDirectDependencies, resources, resources.size());
 			else
 			{
-				return switch (e.getResource().getClass().getAnnotation(ResourceDef.class).name())
-				{
-					case "CodeSystem" -> 1;
-					case "NamingSystem" -> 2;
-					case "ValueSet" -> 3;
-					case "StructureDefinition" -> 4;
-					case "Subscription" -> 5;
-					default -> Integer.MAX_VALUE;
-				};
+				resources.addAll(resourcesAndDirectDependencies.keySet());
+				resources.forEach(resourcesAndDirectDependencies::remove);
 			}
+		}
+		else if (!resourcesAndDirectDependencies.isEmpty())
+			toSorted(resourcesAndDirectDependencies, resources, resources.size());
+	}
+
+	private Predicate<Entry<EntryAndLabel, Set<String>>> hasSingleCycle(
+			Map<EntryAndLabel, Set<String>> resourcesAndDirectDependencies)
+	{
+		return entry ->
+		{
+			Set<String> dependencies = resourcesAndDirectDependencies.get(entry.getKey());
+			return !dependencies.isEmpty() && dependencies.stream()
+					.flatMap(d -> resourcesAndDirectDependencies.get(new EntryAndLabel(null, d)).stream())
+					.allMatch(d -> d.equals(entry.getKey().label));
 		};
 	}
 
-	private ToIntFunction<BundleEntryComponent> getSortCriteria2(List<String> urlsSortedByDependencies)
+	private Set<String> listDependencies(BundleEntryComponent entry)
 	{
-		return (BundleEntryComponent e) ->
+		Resource resource = entry.getResource();
+
+		if (resource instanceof CodeSystem || resource instanceof Subscription)
+			return Set.of();
+		else if (resource instanceof ValueSet vs)
 		{
-			if (e.getResource() == null || !(e.getResource() instanceof StructureDefinition))
-				return -1;
-			else
-				return urlsSortedByDependencies.indexOf(((StructureDefinition) e.getResource()).getUrl());
-		};
+			return vs.getCompose().getInclude().stream()
+					.map(c -> c.getSystem()
+							+ ((c.getVersion() == null || c.getVersion().isBlank()) ? "" : ("|" + c.getVersion())))
+					.distinct().collect(Collectors.toSet());
+		}
+		else if (resource instanceof NamingSystem ns)
+		{
+			return ns.getUniqueId().stream().map(NamingSystemUniqueIdComponent::getModifierExtension)
+					.flatMap(List::stream).map(Extension::getUrl).map(url ->
+					{
+						if ("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference".equals(url))
+							return url + "|1.0.0";
+						else
+							return url;
+					}).distinct().collect(Collectors.toSet());
+		}
+		else if (resource instanceof StructureDefinition sd)
+		{
+			return sd.getDifferential().getElement().stream().filter(ElementDefinition::hasType)
+					.map(ElementDefinition::getType).flatMap(List::stream)
+					.filter(t -> t.hasProfile() || t.hasTargetProfile())
+					.flatMap(t -> Stream.concat(t.hasProfile() ? t.getProfile().stream() : Stream.empty(),
+							t.hasTargetProfile() ? t.getTargetProfile().stream() : Stream.empty()))
+					.map(CanonicalType::getValue).distinct().collect(Collectors.toSet());
+		}
+
+		return null;
 	}
 
-	private Function<BundleEntryComponent, String> getSortCriteria3()
+	private String toLabel(BundleEntryComponent entry)
 	{
-		return (BundleEntryComponent e) -> switch (e.getResource())
+		Resource resource = entry.getResource();
+
+		return switch (resource)
 		{
-			case CodeSystem c -> c.getUrl() + "|" + c.getVersion();
-			case NamingSystem n -> n.getName();
-			case ValueSet v -> v.getUrl() + "|" + v.getVersion();
-			case StructureDefinition s -> s.getUrl() + "|" + s.getVersion();
-			case Subscription s -> s.getReason();
+			case NamingSystem ns -> "NamingSystem [" + ns.getName() + "]";
+			case MetadataResource mr -> mr.getUrl() + "|" + mr.getVersion();
+			case Subscription s -> "Subscription [" + s.getCriteria() + "]";
+			case null -> "";
 			default -> "";
 		};
 	}
 
-	private void saveBundle(Bundle bundle) throws IOException
+	private void saveBundle(Bundle bundle) throws IOException, TransformerException
 	{
+		String xml = newXmlParser().encodeResourceToString(bundle);
+
 		try (OutputStream out = Files.newOutputStream(getBundleFilename());
 				OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8))
 		{
-			newXmlParser().encodeResourceToWriter(bundle, writer);
+			// minimized output: empty-element tags, no indentation, no line-breaks
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "no");
+			transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(writer));
 		}
 	}
 

@@ -869,7 +869,11 @@ public class FixedVersionSpecificWorkerContextWrapper extends I18nBase implement
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
 		String system = theCoding.getSystem();
 		String code = theCoding.getCode();
+		String version = theCoding.getVersion();
 		String display = theCoding.getDisplay();
+
+		if (version != null && !version.isBlank())
+			system += ("|" + version);
 
 		return doValidation(convertedVs, validationOptions, system, code, display);
 	}

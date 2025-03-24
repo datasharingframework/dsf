@@ -124,7 +124,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		else
 		{
 			if (!validationResult.getMessages().isEmpty())
-				logger.warn("Resource {} validated with messages: {}", resource.fhirType(),
+				logger.debug("Resource {} validated with messages: {}", resource.fhirType(),
 						toValidationLogMessage(validationResult));
 
 			return delegate.get();

@@ -54,7 +54,7 @@ public class ValidationHelperImpl implements ValidationHelper
 			throw new WebApplicationException(response);
 		}
 		else if (!validationResult.getMessages().isEmpty())
-			logger.info("Resource {} validated with messages: {}", resource.fhirType(),
+			logger.debug("Resource {} validated with messages: {}", resource.fhirType(),
 					toValidationLogMessage(validationResult));
 
 		return validationResult;
