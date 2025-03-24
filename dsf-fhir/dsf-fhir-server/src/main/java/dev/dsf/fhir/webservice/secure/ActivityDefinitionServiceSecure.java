@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.ActivityDefinitionService;
 
 public class ActivityDefinitionServiceSecure
@@ -21,10 +22,11 @@ public class ActivityDefinitionServiceSecure
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, ActivityDefinitionDao activityDefinitionDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<ActivityDefinition> authorizationRule, ResourceValidator resourceValidator)
+			AuthorizationRule<ActivityDefinition> authorizationRule, ResourceValidator resourceValidator,
+			ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				ActivityDefinition.class, activityDefinitionDao, exceptionHandler, parameterConverter,
-				authorizationRule, resourceValidator);
+				authorizationRule, resourceValidator, validationRules);
 	}
 }

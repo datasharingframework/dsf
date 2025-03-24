@@ -14,6 +14,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.OrganizationService;
 
 public class OrganizationServiceImpl extends AbstractResourceServiceImpl<OrganizationDao, Organization>
@@ -24,10 +25,10 @@ public class OrganizationServiceImpl extends AbstractResourceServiceImpl<Organiz
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider,
-			HistoryService historyService)
+			HistoryService historyService, ValidationRules validationRules)
 	{
 		super(path, Organization.class, serverBase, defaultPageCount, dao, validator, eventHandler, exceptionHandler,
 				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver,
-				referenceCleaner, authorizationRuleProvider, historyService);
+				referenceCleaner, authorizationRuleProvider, historyService, validationRules);
 	}
 }

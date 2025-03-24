@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.BundleService;
 
 public class BundleServiceSecure extends AbstractResourceServiceSecure<BundleDao, Bundle, BundleService>
@@ -20,9 +21,10 @@ public class BundleServiceSecure extends AbstractResourceServiceSecure<BundleDao
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, BundleDao bundleDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Bundle> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
-				Bundle.class, bundleDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+				Bundle.class, bundleDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
+				validationRules);
 	}
 }

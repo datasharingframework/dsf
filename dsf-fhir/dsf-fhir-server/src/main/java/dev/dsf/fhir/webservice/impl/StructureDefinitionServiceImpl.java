@@ -41,6 +41,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -62,11 +63,11 @@ public class StructureDefinitionServiceImpl extends
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			AuthorizationRuleProvider authorizationRuleProvider, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SnapshotGenerator sanapshotGenerator, HistoryService historyService)
+			SnapshotGenerator sanapshotGenerator, HistoryService historyService, ValidationRules validationRules)
 	{
 		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService);
+				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService, validationRules);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;

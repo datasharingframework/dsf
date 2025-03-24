@@ -14,6 +14,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.ActivityDefinitionService;
 
 public class ActivityDefinitionServiceImpl extends
@@ -24,10 +25,11 @@ public class ActivityDefinitionServiceImpl extends
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
-			AuthorizationRuleProvider authorizationRuleProvider, HistoryService historyService)
+			AuthorizationRuleProvider authorizationRuleProvider, HistoryService historyService,
+			ValidationRules validationRules)
 	{
 		super(path, ActivityDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService);
+				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService, validationRules);
 	}
 }

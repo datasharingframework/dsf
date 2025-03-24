@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.LocationService;
 
 public class LocationServiceSecure extends AbstractResourceServiceSecure<LocationDao, Location, LocationService>
@@ -20,10 +21,10 @@ public class LocationServiceSecure extends AbstractResourceServiceSecure<Locatio
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, LocationDao locationDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Location> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
-				Location.class, locationDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator);
+				Location.class, locationDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
+				validationRules);
 	}
 }
