@@ -14,6 +14,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.OrganizationAffiliationService;
 
 public class OrganizationAffiliationServiceImpl
@@ -25,10 +26,11 @@ public class OrganizationAffiliationServiceImpl
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
-			AuthorizationRuleProvider authorizationRuleProvider, HistoryService historyService)
+			AuthorizationRuleProvider authorizationRuleProvider, HistoryService historyService,
+			ValidationRules validationRules)
 	{
 		super(path, OrganizationAffiliation.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService);
+				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService, validationRules);
 	}
 }

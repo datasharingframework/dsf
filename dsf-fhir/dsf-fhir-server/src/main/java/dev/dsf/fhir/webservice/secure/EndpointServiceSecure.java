@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.EndpointService;
 
 public class EndpointServiceSecure extends AbstractResourceServiceSecure<EndpointDao, Endpoint, EndpointService>
@@ -20,10 +21,10 @@ public class EndpointServiceSecure extends AbstractResourceServiceSecure<Endpoin
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, EndpointDao endpointDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Endpoint> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
-				Endpoint.class, endpointDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator);
+				Endpoint.class, endpointDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
+				validationRules);
 	}
 }

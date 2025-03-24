@@ -123,49 +123,64 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 		Objects.requireNonNull(task, "task");
 		Objects.requireNonNull(task.getInstantiatesCanonical(), "task.instantiatesCanonical");
 
-		if (!TaskStatus.REQUESTED.equals(task.getStatus()))
-			throw new IllegalArgumentException("Task.status != " + TaskStatus.REQUESTED.toCode());
-
-		Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(task.getInstantiatesCanonical());
-		if (!matcher.matches())
-			throw new IllegalStateException("InstantiatesCanonical of Task with id " + task.getIdElement().getIdPart()
-					+ " does not match " + INSTANTIATES_CANONICAL_PATTERN_STRING);
-
-		String processDomain = matcher.group("domain").replace(".", "");
-		String processDefinitionKey = matcher.group("processName");
-		String processVersion = matcher.group("processVersion");
-
-		ProcessDefinition processDefinition = getProcessDefinition(processDomain, processDefinitionKey, processVersion);
-
-		if (processDefinition == null)
-			throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
-
-		Optional<ProcessPlugin> processPlugin = getProcessPlugin(processDefinition);
-
-		if (processPlugin.isEmpty())
-			throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
-
-		String messageName = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_MESSAGE_NAME);
-		String businessKey = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_BUSINESS_KEY);
-		String correlationKey = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_CORRELATION_KEY);
-
-		if (businessKey == null)
-		{
-			businessKey = UUID.randomUUID().toString();
-			logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getId());
-			task.addInput().setType(new CodeableConcept().addCoding(
-					new Coding().setSystem(Constants.BPMN_MESSAGE_URL).setCode(Constants.BPMN_MESSAGE_BUSINESS_KEY)))
-					.setValue(new StringType(businessKey));
-		}
-		task.setStatus(Task.TaskStatus.INPROGRESS);
-		task = webserviceClient.update(task);
-
-		PrimitiveValue<?> fhirTaskVariable = processPlugin.get()
-				.createFhirTaskVariable(newJsonParser().encodeResourceToString(task));
-		Map<String, Object> variables = Map.of(Constants.TASK_VARIABLE, fhirTaskVariable);
-
 		try
 		{
+			// businessKey is required even if we update the task with status failed
+			String businessKey = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_BUSINESS_KEY);
+			if (businessKey == null)
+			{
+				businessKey = UUID.randomUUID().toString();
+				logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getId());
+				task.addInput().setType(new CodeableConcept().addCoding(new Coding()
+						.setSystem(Constants.BPMN_MESSAGE_URL).setCode(Constants.BPMN_MESSAGE_BUSINESS_KEY)))
+						.setValue(new StringType(businessKey));
+			}
+
+			if (!TaskStatus.REQUESTED.equals(task.getStatus()))
+				throw new IllegalArgumentException("Task.status != " + TaskStatus.REQUESTED.toCode());
+
+			Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(task.getInstantiatesCanonical());
+			if (!matcher.matches())
+				throw new IllegalStateException("InstantiatesCanonical of Task with id "
+						+ task.getIdElement().getIdPart() + " does not match " + INSTANTIATES_CANONICAL_PATTERN_STRING);
+
+			String processDomain = matcher.group("domain").replace(".", "");
+			String processDefinitionKey = matcher.group("processName");
+			String processVersion = matcher.group("processVersion");
+
+			ProcessDefinition processDefinition = getProcessDefinition(processDomain, processDefinitionKey,
+					processVersion);
+
+			if (processDefinition == null)
+				throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
+
+			Optional<ProcessPlugin> processPlugin = getProcessPlugin(processDefinition);
+
+			if (processPlugin.isEmpty())
+				throw new ProcessNotFoundException(processDomain, processDefinitionKey, processVersion, null);
+
+			String messageName = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_MESSAGE_NAME);
+			String correlationKey = getFirstBpmnMessageInputParameter(task, Constants.BPMN_MESSAGE_CORRELATION_KEY);
+
+			task.setStatus(Task.TaskStatus.INPROGRESS);
+
+			try
+			{
+				task = webserviceClient.update(task);
+			}
+			catch (Exception e)
+			{
+				logger.debug("Unable to handle Task with id {}", task.getId(), e);
+				logger.warn("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
+						e.getMessage());
+
+				updateTaskFailed(task, "Unable to update Task to status 'in-progress'");
+			}
+
+			PrimitiveValue<?> fhirTaskVariable = processPlugin.get()
+					.createFhirTaskVariable(newJsonParser().encodeResourceToString(task));
+			Map<String, Object> variables = Map.of(Constants.TASK_VARIABLE, fhirTaskVariable);
+
 			onMessage(businessKey, correlationKey, processDomain, processDefinitionKey, processVersion, messageName,
 					processDefinition.getId(), variables);
 		}

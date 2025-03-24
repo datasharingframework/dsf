@@ -794,6 +794,32 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					}
 				}
 
+				// REQUESTED -> FAILED
+				else if (TaskStatus.REQUESTED.equals(oldResource.getStatus())
+						&& TaskStatus.FAILED.equals(newResource.getStatus()))
+				{
+					final Optional<String> same = reasonNotSame(oldResource, newResource);
+					if (same.isEmpty())
+					{
+						logger.info(
+								"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status requested, new Task.status failed",
+								oldResourceId, oldResourceVersion, TaskStatus.REQUESTED.toCode(),
+								TaskStatus.FAILED.toCode(), identity.getName());
+
+						return Optional
+								.of("Local identity, Task.status failed, Task.restriction.recipient local organization"
+										+ ", Task.instantiatesCanonical not modified, Task.requester not modified, Task.restriction not modified, Task.input not modified");
+					}
+					else
+					{
+						logger.warn(
+								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
+								oldResourceId, oldResourceVersion, TaskStatus.REQUESTED.toCode(),
+								TaskStatus.FAILED.toCode(), identity.getName(), same.get());
+
+						return Optional.empty();
+					}
+				}
 				// INPROGRESS -> FAILED
 				else if (TaskStatus.INPROGRESS.equals(oldResource.getStatus())
 						&& TaskStatus.FAILED.equals(newResource.getStatus()))
@@ -895,9 +921,11 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		List<ParameterComponent> newResourceInputs = newResource.getInput();
 
 		if (TaskStatus.REQUESTED.equals(oldResource.getStatus()) && !hasBusinessKey(oldResource)
-				&& TaskStatus.INPROGRESS.equals(newResource.getStatus()) && hasBusinessKey(newResource))
+				&& (TaskStatus.INPROGRESS.equals(newResource.getStatus())
+						|| TaskStatus.FAILED.equals(newResource.getStatus()))
+				&& hasBusinessKey(newResource))
 		{
-			// business-key added from requested to in-progress: removing for equality check
+			// business-key added from requested to in-progress or failed: removing for equality check
 			newResourceInputs = newResourceInputs.stream().filter(isBusinessKey().negate()).toList();
 		}
 

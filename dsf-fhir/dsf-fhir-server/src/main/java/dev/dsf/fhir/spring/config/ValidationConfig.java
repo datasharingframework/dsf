@@ -20,6 +20,7 @@ import dev.dsf.fhir.service.ValidationSupportWithFetchFromDb;
 import dev.dsf.fhir.service.ValidationSupportWithFetchFromDbWithTransaction;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
+import dev.dsf.fhir.validation.ValidationRules;
 
 @Configuration
 public class ValidationConfig
@@ -32,6 +33,9 @@ public class ValidationConfig
 
 	@Autowired
 	private HelperConfig helperConfig;
+
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Bean
 	public IValidationSupport validationSupport()
@@ -60,9 +64,15 @@ public class ValidationConfig
 	}
 
 	@Bean
+	public ValidationRules validationRules()
+	{
+		return new ValidationRules(propertiesConfig.getDsfServerBaseUrl());
+	}
+
+	@Bean
 	public ValidationHelper validationHelper()
 	{
-		return new ValidationHelperImpl(resourceValidator(), helperConfig.responseGenerator());
+		return new ValidationHelperImpl(resourceValidator(), helperConfig.responseGenerator(), validationRules());
 	}
 
 	@Bean

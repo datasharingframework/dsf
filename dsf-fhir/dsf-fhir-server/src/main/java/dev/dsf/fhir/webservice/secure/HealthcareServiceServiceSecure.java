@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.HealthcareServiceService;
 
 public class HealthcareServiceServiceSecure
@@ -21,10 +22,11 @@ public class HealthcareServiceServiceSecure
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, HealthcareServiceDao healthcareServiceDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<HealthcareService> authorizationRule, ResourceValidator resourceValidator)
+			AuthorizationRule<HealthcareService> authorizationRule, ResourceValidator resourceValidator,
+			ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				HealthcareService.class, healthcareServiceDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator);
+				resourceValidator, validationRules);
 	}
 }
