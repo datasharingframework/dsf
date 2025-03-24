@@ -13,6 +13,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.BinaryService;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
@@ -25,10 +26,11 @@ public class BinaryServiceSecure extends AbstractResourceServiceSecure<BinaryDao
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, BinaryDao binaryDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Binary> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
-				Binary.class, binaryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+				Binary.class, binaryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
+				validationRules);
 	}
 
 	@Override

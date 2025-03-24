@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.QuestionnaireResponseService;
 
 public class QuestionnaireResponseServiceSecure extends
@@ -21,10 +22,11 @@ public class QuestionnaireResponseServiceSecure extends
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, QuestionnaireResponseDao QuestionnaireResponseDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<QuestionnaireResponse> authorizationRule, ResourceValidator resourceValidator)
+			AuthorizationRule<QuestionnaireResponse> authorizationRule, ResourceValidator resourceValidator,
+			ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				QuestionnaireResponse.class, QuestionnaireResponseDao, exceptionHandler, parameterConverter,
-				authorizationRule, resourceValidator);
+				authorizationRule, resourceValidator, validationRules);
 	}
 }

@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.ValueSetService;
 
 public class ValueSetServiceSecure extends AbstractResourceServiceSecure<ValueSetDao, ValueSet, ValueSetService>
@@ -20,10 +21,10 @@ public class ValueSetServiceSecure extends AbstractResourceServiceSecure<ValueSe
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, ValueSetDao valueSetDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<ValueSet> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
-				ValueSet.class, valueSetDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator);
+				ValueSet.class, valueSetDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
+				validationRules);
 	}
 }

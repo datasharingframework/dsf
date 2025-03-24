@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.LibraryService;
 
 public class LibraryServiceSecure extends AbstractResourceServiceSecure<LibraryDao, Library, LibraryService>
@@ -20,9 +21,10 @@ public class LibraryServiceSecure extends AbstractResourceServiceSecure<LibraryD
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, LibraryDao libraryDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Library> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
-				Library.class, libraryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+				Library.class, libraryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
+				validationRules);
 	}
 }
