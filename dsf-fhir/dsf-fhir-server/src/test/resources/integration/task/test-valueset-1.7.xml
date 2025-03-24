@@ -1,0 +1,24 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/ValueSet/test" />
+	<version value="1.7" />
+	<name value="DSF_Test" />
+	<title value="DSF Test" />
+	<status value="draft" />
+	<experimental value="false" />
+	<date value="2025-03-21" />
+	<publisher value="DSF" />
+	<description value="ValueSet for integration testing" />
+	<immutable value="true" />
+	<compose>
+		<include>
+			<system value="http://dsf.dev/fhir/CodeSystem/test" />
+			<version value="1.7" />
+		</include>
+	</compose>
+</ValueSet> 

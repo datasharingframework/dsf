@@ -11,6 +11,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.ProvenanceService;
 
 public class ProvenanceServiceSecure extends AbstractResourceServiceSecure<ProvenanceDao, Provenance, ProvenanceService>
@@ -20,10 +21,10 @@ public class ProvenanceServiceSecure extends AbstractResourceServiceSecure<Prove
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, ProvenanceDao provenanceDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Provenance> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Provenance.class, provenanceDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator);
+				resourceValidator, validationRules);
 	}
 }

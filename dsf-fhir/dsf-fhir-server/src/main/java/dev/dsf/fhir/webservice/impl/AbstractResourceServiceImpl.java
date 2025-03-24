@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.dao.ResourceDao;
-import dev.dsf.fhir.dao.command.CheckReferencesCommand;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -58,6 +57,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.BasicResourceService;
 import jakarta.ws.rs.WebApplicationException;
@@ -92,13 +92,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final ReferenceCleaner referenceCleaner;
 	protected final AuthorizationRuleProvider authorizationRuleProvider;
 	protected final HistoryService historyService;
+	protected final ValidationRules validationRules;
 
 	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
 			D dao, ResourceValidator validator, EventHandler eventHandler, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider,
-			HistoryService historyService)
+			HistoryService historyService, ValidationRules validationRules)
 	{
 		this.path = path;
 		this.resourceType = resourceType;
@@ -117,6 +118,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.referenceCleaner = referenceCleaner;
 		this.authorizationRuleProvider = authorizationRuleProvider;
 		this.historyService = historyService;
+		this.validationRules = validationRules;
 	}
 
 	@Override
@@ -138,6 +140,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
 		Objects.requireNonNull(historyService, "historyService");
+		Objects.requireNonNull(validationRules, "validationRules");
 	}
 
 	@Override
@@ -157,7 +160,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
 
-					checkReferences(resource, connection, ref -> checkReferenceAfterCreate(resource, ref));
+					checkReferences(resource, connection,
+							ref -> validationRules.checkReferenceAfterCreate(resource, ref));
 
 					connection.commit();
 
@@ -193,22 +197,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
 				parameterConverter.getPreferReturn(headers), () -> responseGenerator.created(location, createdResource))
 				.location(location).build();
-	}
-
-	/**
-	 * <i>Override this method to exclude references from being checked after a create, add similar rule to
-	 * {@link CheckReferencesCommand}</i>
-	 *
-	 * @param created
-	 *            not <code>null</code>
-	 * @param ref
-	 *            not <code>null</code>
-	 * @return true if a reference should be checked
-	 * @see CheckReferencesCommand
-	 */
-	protected boolean checkReferenceAfterCreate(R created, ResourceReference ref)
-	{
-		return true;
 	}
 
 	private URI toLocation(R resource)
@@ -525,7 +513,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 							R updated = dao.updateWithTransaction(connection, resource, ifMatch.orElse(null));
 
-							checkReferences(resource, connection, ref -> checkReferenceAfterUpdate(updated, ref));
+							checkReferences(resource, connection,
+									ref -> validationRules.checkReferenceAfterUpdate(updated, ref));
 
 							connection.commit();
 
@@ -561,22 +550,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
 				parameterConverter.getPreferReturn(headers), () -> responseGenerator.updated(location, updatedResource))
 				.location(location).build();
-	}
-
-	/**
-	 * <i>Override this method to exclude references from being checked after an update, add similar rule to
-	 * {@link CheckReferencesCommand}</i>
-	 *
-	 * @param updated
-	 *            not <code>null</code>
-	 * @param ref
-	 *            not <code>null</code>
-	 * @return true if a reference should be checked
-	 * @see CheckReferencesCommand
-	 */
-	protected boolean checkReferenceAfterUpdate(R updated, ResourceReference ref)
-	{
-		return true;
 	}
 
 	/**

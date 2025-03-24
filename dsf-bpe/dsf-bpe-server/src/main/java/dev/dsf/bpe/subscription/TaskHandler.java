@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -121,33 +122,50 @@ public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 		Objects.requireNonNull(task, "task");
 		Objects.requireNonNull(task.getInstantiatesCanonical(), "task.instantiatesCanonical");
 
-		Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(task.getInstantiatesCanonical());
-		if (!matcher.matches())
-			throw new IllegalStateException("InstantiatesCanonical of Task with id " + task.getIdElement().getIdPart()
-					+ " does not match " + INSTANTIATES_CANONICAL_PATTERN_STRING);
-
-		String processDomain = matcher.group("domain").replace(".", "");
-		String processDefinitionKey = matcher.group("processName");
-		String processVersion = matcher.group("processVersion");
-
-		String messageName = getFirstInputParameter(task, BpmnMessage.messageName());
-		String businessKey = getFirstInputParameter(task, BpmnMessage.businessKey());
-		String correlationKey = getFirstInputParameter(task, BpmnMessage.correlationKey());
-
-		if (businessKey == null)
-		{
-			businessKey = UUID.randomUUID().toString();
-			logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getId());
-			task.addInput().setType(new CodeableConcept(BpmnMessage.businessKey()))
-					.setValue(new StringType(businessKey));
-		}
-		task.setStatus(Task.TaskStatus.INPROGRESS);
-		task = webserviceClient.update(task);
-
-		Map<String, Object> variables = Map.of(TASK_VARIABLE, FhirResourceValues.create(task));
-
 		try
 		{
+			// businessKey is required even if we update the task with status failed
+			String businessKey = getFirstInputParameter(task, BpmnMessage.businessKey());
+			if (businessKey == null)
+			{
+				businessKey = UUID.randomUUID().toString();
+				logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getId());
+				task.addInput().setType(new CodeableConcept(BpmnMessage.businessKey()))
+						.setValue(new StringType(businessKey));
+			}
+
+			if (!TaskStatus.REQUESTED.equals(task.getStatus()))
+				throw new IllegalArgumentException("Task.status != " + TaskStatus.REQUESTED.toCode());
+
+			Matcher matcher = INSTANTIATES_CANONICAL_PATTERN.matcher(task.getInstantiatesCanonical());
+			if (!matcher.matches())
+				throw new IllegalStateException("InstantiatesCanonical of Task with id "
+						+ task.getIdElement().getIdPart() + " does not match " + INSTANTIATES_CANONICAL_PATTERN_STRING);
+
+			String processDomain = matcher.group("domain").replace(".", "");
+			String processDefinitionKey = matcher.group("processName");
+			String processVersion = matcher.group("processVersion");
+
+			String messageName = getFirstInputParameter(task, BpmnMessage.messageName());
+			String correlationKey = getFirstInputParameter(task, BpmnMessage.correlationKey());
+
+			task.setStatus(Task.TaskStatus.INPROGRESS);
+
+			try
+			{
+				task = webserviceClient.update(task);
+			}
+			catch (Exception e)
+			{
+				logger.debug("Unable to handle Task with id {}", task.getId(), e);
+				logger.warn("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
+						e.getMessage());
+
+				updateTaskFailed(task, "Unable to update Task to status 'in-progress'");
+			}
+
+			Map<String, Object> variables = Map.of(TASK_VARIABLE, FhirResourceValues.create(task));
+
 			onMessage(businessKey, correlationKey, processDomain, processDefinitionKey, processVersion, messageName,
 					variables);
 		}

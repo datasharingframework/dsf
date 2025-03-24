@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -27,6 +28,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
@@ -37,6 +39,7 @@ import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -609,9 +612,32 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		}
 	}
 
+	private CodeSystem readTestCodeSystem() throws IOException
+	{
+		try (InputStream in = Files
+				.newInputStream(Paths.get("src/test/resources/integration/task", "test-codesystem-1.7.xml")))
+		{
+			return fhirContext.newXmlParser().parseResource(CodeSystem.class, in);
+		}
+	}
+
+	private ValueSet readTestValueSet() throws IOException
+	{
+		try (InputStream in = Files
+				.newInputStream(Paths.get("src/test/resources/integration/task", "test-valueset-1.7.xml")))
+		{
+			return fhirContext.newXmlParser().parseResource(ValueSet.class, in);
+		}
+	}
+
 	private StructureDefinition readTestTaskProfile() throws IOException
 	{
 		return readTestTaskProfile("dsf-test-task-profile-1.0.xml");
+	}
+
+	private StructureDefinition readTestTaskProfileBinaryRef() throws IOException
+	{
+		return readTestTaskProfile("dsf-test-task-profile-binary-ref-1.7.xml");
 	}
 
 	private StructureDefinition readTestTaskProfile(String fileName) throws IOException
@@ -626,6 +652,21 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	{
 		try (InputStream in = Files
 				.newInputStream(Paths.get("src/test/resources/integration/task/dsf-test-task-1.0.xml")))
+		{
+			Task task = fhirContext.newXmlParser().parseResource(Task.class, in);
+			task.setAuthoredOn(new Date());
+			task.getRequester().setType("Organization").getIdentifier()
+					.setSystem("http://dsf.dev/sid/organization-identifier").setValue(requester);
+			task.getRestriction().getRecipientFirstRep().setType("Organization").getIdentifier()
+					.setSystem("http://dsf.dev/sid/organization-identifier").setValue(recipient);
+			return task;
+		}
+	}
+
+	private Task readTestTaskBinary(String requester, String recipient) throws IOException
+	{
+		try (InputStream in = Files
+				.newInputStream(Paths.get("src/test/resources/integration/task/dsf-test-task-1.7.xml")))
 		{
 			Task task = fhirContext.newXmlParser().parseResource(Task.class, in);
 			task.setAuthoredOn(new Date());
@@ -1328,32 +1369,43 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				result6.getEntry().get(0).getResource().getMeta().getProfile().get(0).getValue());
 	}
 
-	@Test
-	public void testUpdateTaskFromInProgressToCompletedWithNonExistingInputReferenceToExternalBinary() throws Exception
+	private Task createTask(TaskStatus createStatus, boolean createPluginResources) throws IOException, SQLException
 	{
-		ActivityDefinition ad2 = readActivityDefinition("dsf-test-activity-definition2-1.0.xml");
-		ActivityDefinition createdAd2 = getWebserviceClient().create(ad2);
-		assertNotNull(createdAd2);
-		assertNotNull(createdAd2.getIdElement().getIdPart());
+		if (createPluginResources)
+		{
+			ActivityDefinition ad = getWebserviceClient()
+					.create(readActivityDefinition("dsf-test-activity-definition2-1.7.xml"));
+			assertNotNull(ad);
+			assertNotNull(ad.getIdElement().getIdPart());
 
-		StructureDefinition testTaskProfile = readTestTaskProfile();
-		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
-		assertNotNull(createdTestTaskProfile);
-		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+			CodeSystem cs = getWebserviceClient().create(readTestCodeSystem());
+			assertNotNull(cs);
+			assertNotNull(cs.getIdElement().getIdPart());
 
-		Task task = readTestTask("External_Test_Organization", "Test_Organization");
-		task.setStatus(TaskStatus.INPROGRESS);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("business-key");
-		task.addInput().setValue(new Reference("https://localhost:80010/fhir/Binary/" + UUID.randomUUID().toString()))
-				.getType().getCodingFirstRep().setSystem("http://test.com/fhir/CodeSystem/test").setCode("binary-ref");
+			ValueSet vs = getWebserviceClient().create(readTestValueSet());
+			assertNotNull(vs);
+			assertNotNull(vs.getIdElement().getIdPart());
 
+			StructureDefinition sd = getWebserviceClient().create(readTestTaskProfileBinaryRef());
+			assertNotNull(sd);
+			assertNotNull(sd.getIdElement().getIdPart());
+		}
+
+		Task task = readTestTaskBinary("External_Test_Organization", "Test_Organization");
+		task.setStatus(createStatus);
 		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
 		Task created = taskDao.create(task);
 
 		ReferenceCleaner cleaner = getSpringWebApplicationContext().getBean(ReferenceCleaner.class);
 		cleaner.cleanLiteralReferences(created);
 
+		return created;
+	}
+
+	@Test
+	public void testUpdateTaskFromInProgressToCompletedWithNonExistingInputReferenceToExternalBinary() throws Exception
+	{
+		Task created = createTask(TaskStatus.INPROGRESS, true);
 		created.setStatus(TaskStatus.COMPLETED);
 
 		Task updatedTask = getWebserviceClient().update(created);
@@ -1362,25 +1414,62 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testUpdateTaskFromInProgressToCompletedWithNonExistingInputReferenceToExternalBinaryViaBundle()
+	public void testUpdateTaskFromRequestedToInProgressWithNonExistingInputReferenceToExternalBinary() throws Exception
+	{
+		Task created = createTask(TaskStatus.REQUESTED, true);
+		created.setStatus(TaskStatus.INPROGRESS);
+
+		expectForbidden(() -> getWebserviceClient().update(created));
+	}
+
+	@Test
+	public void testUpdateTaskFromRequestedToFailedWithNonExistingInputReferenceToExternalBinary() throws Exception
+	{
+		Task created = createTask(TaskStatus.REQUESTED, true);
+		created.setStatus(TaskStatus.FAILED);
+
+		Task updatedTask = getWebserviceClient().update(created);
+		assertNotNull(updatedTask);
+		assertNotNull(updatedTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testUpdateTaskFromRequestedToFailedWithNonExistingInputReferenceToExternalBinaryAndNonExistingPluginValidationResource()
 			throws Exception
 	{
-		ActivityDefinition ad2 = readActivityDefinition("dsf-test-activity-definition2-1.0.xml");
-		ActivityDefinition createdAd2 = getWebserviceClient().create(ad2);
-		assertNotNull(createdAd2);
-		assertNotNull(createdAd2.getIdElement().getIdPart());
+		Task created = createTask(TaskStatus.REQUESTED, false);
+		created.setStatus(TaskStatus.FAILED);
 
-		StructureDefinition testTaskProfile = readTestTaskProfile();
-		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
-		assertNotNull(createdTestTaskProfile);
-		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+		Task updatedTask = getWebserviceClient().update(created);
+		assertNotNull(updatedTask);
+		assertNotNull(updatedTask.getIdElement().getIdPart());
+	}
 
-		Task task = readTestTask("External_Test_Organization", "Test_Organization");
-		task.setStatus(TaskStatus.INPROGRESS);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("business-key");
-		task.addInput().setValue(new Reference("https://localhost:80010/fhir/Binary/" + UUID.randomUUID().toString()))
-				.getType().getCodingFirstRep().setSystem("http://test.com/fhir/CodeSystem/test").setCode("binary-ref");
+	private Bundle createBundle(TaskStatus createStatus, TaskStatus updateStatus, boolean createPluginResources)
+			throws IOException, SQLException
+	{
+		if (createPluginResources)
+		{
+			ActivityDefinition ad = getWebserviceClient()
+					.create(readActivityDefinition("dsf-test-activity-definition2-1.7.xml"));
+			assertNotNull(ad);
+			assertNotNull(ad.getIdElement().getIdPart());
+
+			CodeSystem cs = getWebserviceClient().create(readTestCodeSystem());
+			assertNotNull(cs);
+			assertNotNull(cs.getIdElement().getIdPart());
+
+			ValueSet vs = getWebserviceClient().create(readTestValueSet());
+			assertNotNull(vs);
+			assertNotNull(vs.getIdElement().getIdPart());
+
+			StructureDefinition sd = getWebserviceClient().create(readTestTaskProfileBinaryRef());
+			assertNotNull(sd);
+			assertNotNull(sd.getIdElement().getIdPart());
+		}
+
+		Task task = readTestTaskBinary("External_Test_Organization", "Test_Organization");
+		task.setStatus(createStatus);
 
 		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
 				.getBean(OrganizationProvider.class);
@@ -1404,7 +1493,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		ReferenceCleaner referenceCleaner = getSpringWebApplicationContext().getBean(ReferenceCleaner.class);
 		referenceCleaner.cleanLiteralReferences(created);
-		created.setStatus(TaskStatus.COMPLETED);
+		created.setStatus(updateStatus);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -1412,6 +1501,57 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				.setFullUrl(created.getIdElement().withServerBase(getBaseUrl(), "Task").toVersionless().getValue());
 		entry.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
 				.setUrl("Task/" + created.getIdElement().getIdPart());
+		return bundle;
+	}
+
+	@Test
+	public void testUpdateTaskFromInProgressToCompletedWithNonExistingInputReferenceToExternalBinaryViaBundle()
+			throws Exception
+	{
+		Bundle bundle = createBundle(TaskStatus.INPROGRESS, TaskStatus.COMPLETED, true);
+
+		Bundle response = getWebserviceClient().postBundle(bundle);
+		assertNotNull(response);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, response.getType());
+		assertTrue(response.hasEntry());
+		assertEquals(1, response.getEntry().size());
+		assertTrue(response.getEntryFirstRep().hasResponse());
+		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
+		assertTrue(response.getEntryFirstRep().hasResource());
+		assertTrue(response.getEntryFirstRep().getResource() instanceof Task);
+	}
+
+	@Test
+	public void testUpdateTaskFromRequestedToInProgressWithNonExistingInputReferenceToExternalBinaryViaBundle()
+			throws Exception
+	{
+		Bundle bundle = createBundle(TaskStatus.REQUESTED, TaskStatus.INPROGRESS, true);
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testUpdateTaskFromRequestedToFailedWithNonExistingInputReferenceToExternalBinaryViaBundle()
+			throws Exception
+	{
+		Bundle bundle = createBundle(TaskStatus.REQUESTED, TaskStatus.FAILED, true);
+
+		Bundle response = getWebserviceClient().postBundle(bundle);
+		assertNotNull(response);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, response.getType());
+		assertTrue(response.hasEntry());
+		assertEquals(1, response.getEntry().size());
+		assertTrue(response.getEntryFirstRep().hasResponse());
+		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
+		assertTrue(response.getEntryFirstRep().hasResource());
+		assertTrue(response.getEntryFirstRep().getResource() instanceof Task);
+	}
+
+	@Test
+	public void testUpdateTaskFromRequestedToFailedWithNonExistingInputReferenceToExternalBinaryAndNonExistingPluginValidationResourceViaBundle()
+			throws Exception
+	{
+		Bundle bundle = createBundle(TaskStatus.REQUESTED, TaskStatus.FAILED, false);
 
 		Bundle response = getWebserviceClient().postBundle(bundle);
 		assertNotNull(response);
