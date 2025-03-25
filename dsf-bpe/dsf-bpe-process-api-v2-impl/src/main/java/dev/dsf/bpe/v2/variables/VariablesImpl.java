@@ -358,11 +358,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
-	public Object getVariable(String variableName)
+	@SuppressWarnings("unchecked")
+	public <T> T getVariable(String variableName)
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		return execution.getVariable(variableName);
+		return (T) execution.getVariable(variableName);
 	}
 
 	@Override
@@ -441,11 +442,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
-	public Object getVariableLocal(String variableName)
+	@SuppressWarnings("unchecked")
+	public <T> T getVariableLocal(String variableName)
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		return execution.getVariableLocal(variableName);
+		return (T) execution.getVariableLocal(variableName);
 	}
 
 	@Override

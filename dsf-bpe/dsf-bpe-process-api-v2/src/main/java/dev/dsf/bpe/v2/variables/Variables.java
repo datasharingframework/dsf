@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.dsf.bpe.v2.activity.task.BusinessKeyStrategies;
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
 
 /**
@@ -20,39 +21,60 @@ import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
  */
 public interface Variables
 {
-	// TODO javadoc
+	/**
+	 * @return not <code>null</code>, business key of the current process instance
+	 */
 	String getBusinessKey();
 
-	// TODO javadoc
+	/**
+	 * @return not <code>null</code>, id of the current activity
+	 */
 	String getCurrentActivityId();
 
-	// TODO javadoc
+	/**
+	 * @return not <code>null</code>, id of the current process definition
+	 */
 	String getProcessDefinitionId();
 
-	// TODO javadoc
+	/**
+	 * @return not <code>null</code>, id of the current activity instance
+	 */
 	String getActivityInstanceId();
 
 	/**
-	 * Sets execution variable {@link BpmnExecutionVariables#ALTERNATIVE_BUSINESS_KEY}
+	 * Sets execution variable {@link BpmnExecutionVariables#ALTERNATIVE_BUSINESS_KEY} to the given
+	 * <b>alternativeBusinessKey</b>
 	 *
 	 * @param alternativeBusinessKey
 	 *            may be <code>null</code>
+	 * @see BusinessKeyStrategies#ALTERNATIVE
 	 */
 	void setAlternativeBusinessKey(String alternativeBusinessKey);
 
 	/**
+	 * Retrieves execution variable {@link BpmnExecutionVariables#ALTERNATIVE_BUSINESS_KEY}
+	 *
+	 * @return may be <code>null</code>
+	 * @see BusinessKeyStrategies#ALTERNATIVE
+	 */
+	default String getAlternativeBusinessKey()
+	{
+		return getString(BpmnExecutionVariables.ALTERNATIVE_BUSINESS_KEY);
+	}
+
+	/**
 	 * Creates a new {@link Target} object.
 	 * <p>
-	 * <i>A not</i> <code>null</code> <i><b>correlationKey</b> should be used if return messages aka. Task resources
+	 * <i>A not</i> <code>null</code> <i><b>correlationKey</b> should be used if return messages i.e. Task resources
 	 * from multiple organizations with the same message-name are expected in a following multi instance message receive
 	 * task or intermediate message catch event in a multi instance subprocess.<br>
 	 * Note: The correlationKey needs to be set as a {@link BpmnExecutionVariables#CORRELATION_KEY} variable in the
-	 * message receive task or intermediate message catch event of a subprocess before incoming messages aka. Task
+	 * message receive task or intermediate message catch event of a subprocess before incoming messages i.e. Task
 	 * resources can be correlated. Within a BPMN file this can be accomplished by setting an input variable with name:
 	 * {@link BpmnExecutionVariables#CORRELATION_KEY}, type:</i> <code>string or expression</code><i>, and value:
 	 * </i><code>${target.correlationKey}</code>.
 	 * <p>
-	 * <i>A not</i> <code>null</code> <i><b>correlationKey</b> should also be used when sending a message aka. Task
+	 * <i>A not</i> <code>null</code> <i><b>correlationKey</b> should also be used when sending a message i.e. Task
 	 * resource back to an organization waiting for multiple returns.</i>
 	 *
 	 * @param organizationIdentifierValue
@@ -282,9 +304,13 @@ public interface Variables
 	/**
 	 * Retrieves execution variable with the given <b>variableName</b>
 	 *
+	 * @param <T>
+	 *            target variable type
 	 * @param variableName
 	 *            not <code>null</code>
 	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the returned variable can not be cast to &lt;T&gt;
 	 * @see #getInteger(String)
 	 * @see #getString(String)
 	 * @see #getBoolean(String)
@@ -296,7 +322,7 @@ public interface Variables
 	 * @see #getNumber(String)
 	 * @see #getFile(String)
 	 */
-	Object getVariable(String variableName);
+	<T> T getVariable(String variableName);
 
 	/**
 	 * Sets execution variable with the given <b>variableName</b> to the given {@link Integer}
@@ -316,13 +342,13 @@ public interface Variables
 	 *            not <code>null</code>
 	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
 	 * @throws ClassCastException
-	 *             if the stored value is not a {@link Integer}
+	 *             if the stored value is not an {@link Integer}
 	 * @see #setInteger(String, Integer)
 	 * @see #getVariable(String)
 	 */
 	default Integer getInteger(String variableName)
 	{
-		return (Integer) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -349,7 +375,7 @@ public interface Variables
 	 */
 	default String getString(String variableName)
 	{
-		return (String) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -376,7 +402,7 @@ public interface Variables
 	 */
 	default Boolean getBoolean(String variableName)
 	{
-		return (Boolean) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -403,7 +429,7 @@ public interface Variables
 	 */
 	default byte[] getByteArray(String variableName)
 	{
-		return (byte[]) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -430,7 +456,7 @@ public interface Variables
 	 */
 	default Date getDate(String variableName)
 	{
-		return (Date) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -457,7 +483,7 @@ public interface Variables
 	 */
 	default Long getLong(String variableName)
 	{
-		return (Long) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -484,7 +510,7 @@ public interface Variables
 	 */
 	default Short getShort(String variableName)
 	{
-		return (Short) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -511,7 +537,7 @@ public interface Variables
 	 */
 	default Double getDouble(String variableName)
 	{
-		return (Double) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -538,7 +564,7 @@ public interface Variables
 	 */
 	default Number getNumber(String variableName)
 	{
-		return (Number) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
 	/**
@@ -565,77 +591,277 @@ public interface Variables
 	 */
 	default File getFile(String variableName)
 	{
-		return (File) getVariable(variableName);
+		return getVariable(variableName);
 	}
 
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link Integer}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getIntegerLocal(String)
+	 */
 	void setIntegerLocal(String variableName, Integer value);
 
+	/**
+	 * Retrieves {@link Integer} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not an {@link Integer}
+	 * @see #setIntegerLocal(String, Integer)
+	 * @see #getVariableLocal(String)
+	 */
 	default Integer getIntegerLocal(String variableName)
 	{
-		return (Integer) getVariableLocal(variableName);
+		return getVariableLocal(variableName);
 	}
 
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link String}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getStringLocal(String)
+	 */
 	void setStringLocal(String variableName, String value);
 
+	/**
+	 * Retrieves {@link String} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link String}
+	 * @see #setStringLocal(String, String)
+	 * @see #getVariableLocal(String)
+	 */
 	default String getStringLocal(String variableName)
 	{
-		return (String) getVariableLocal(variableName);
+		return getVariableLocal(variableName);
 	}
 
-	void setByteArrayLocal(String variableName, byte[] value);
-
-	default byte[] getByteArrayLocal(String variableName)
-	{
-		return (byte[]) getVariableLocal(variableName);
-	}
-
-	void setDateLocal(String variableName, Date value);
-
-	default Date getDateLocal(String variableName)
-	{
-		return (Date) getVariableLocal(variableName);
-	}
-
-	void setLongLocal(String variableName, Long value);
-
-	default Long gsetLongLocal(String variableName)
-	{
-		return (Long) getVariableLocal(variableName);
-	}
-
-	void setShortLocal(String variableName, Short value);
-
-	default Short gsetShortLocal(String variableName)
-	{
-		return (Short) getVariableLocal(variableName);
-	}
-
-	void setDoubleLocal(String variableName, Double value);
-
-	default Double getDoubleLocal(String variableName)
-	{
-		return (Double) getVariableLocal(variableName);
-	}
-
-	void setNumberLocal(String variableName, Number value);
-
-	default Number getNumberLocal(String variableName)
-	{
-		return (Number) getVariableLocal(variableName);
-	}
-
-	void setFileLocal(String variableName, File value);
-
-	default File getFileLocal(String variableName)
-	{
-		return (File) getVariableLocal(variableName);
-	}
-
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link Boolean}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getBooleanLocal(String)
+	 */
 	void setBooleanLocal(String variableName, Boolean value);
 
+	/**
+	 * Retrieves {@link Boolean} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link Boolean}
+	 * @see #setBooleanLocal(String, Boolean)
+	 * @see #getVariableLocal(String)
+	 */
 	default Boolean getBooleanLocal(String variableName)
 	{
-		return (Boolean) getVariableLocal(variableName);
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given <code>byte[]</code>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getByteArray(String)
+	 */
+	void setByteArrayLocal(String variableName, byte[] value);
+
+	/**
+	 * Retrieves <code>byte[]</code> local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a <code>byte[]</code>
+	 * @see #setByteArrayLocal(String, byte[])
+	 * @see #getVariableLocal(String)
+	 */
+	default byte[] getByteArrayLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link Date}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getDateLocal(String)
+	 */
+	void setDateLocal(String variableName, Date value);
+
+	/**
+	 * Retrieves {@link Date} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link Date}
+	 * @see #setDateLocal(String, Date)
+	 * @see #getVariableLocal(String)
+	 */
+	default Date getDateLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link Long}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getLongLocal(String)
+	 */
+	void setLongLocal(String variableName, Long value);
+
+	/**
+	 * Retrieves {@link Long} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link Long}
+	 * @see #setLongLocal(String, Long)
+	 * @see #getVariableLocal(String)
+	 */
+	default Long getLongLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link Short}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getShortLocal(String)
+	 */
+	void setShortLocal(String variableName, Short value);
+
+	/**
+	 * Retrieves {@link Short} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link Short}
+	 * @see #setShortLocal(String, Short)
+	 * @see #getVariableLocal(String)
+	 */
+	default Short getShortLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link Double}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getDoubleLocal(String)
+	 */
+	void setDoubleLocal(String variableName, Double value);
+
+	/**
+	 * Retrieves {@link Double} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link Double}
+	 * @see #setDoubleLocal(String, Double)
+	 * @see #getVariableLocal(String)
+	 */
+	default Double getDoubleLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link Number}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getNumberLocal(String)
+	 */
+	void setNumberLocal(String variableName, Number value);
+
+	/**
+	 * Retrieves {@link Number} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link Number}
+	 * @see #setNumberLocal(String, Number)
+	 * @see #getVariableLocal(String)
+	 */
+	default Number getNumberLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link File}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getFileLocal(String)
+	 */
+	void setFileLocal(String variableName, File value);
+
+	/**
+	 * Retrieves {@link File} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link File}
+	 * @see #setFileLocal(String, File)
+	 * @see #getVariableLocal(String)
+	 */
+	default File getFileLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
 	}
 
 	/**
@@ -650,5 +876,26 @@ public interface Variables
 	 */
 	void setJsonVariableLocal(String variableName, Object value);
 
-	Object getVariableLocal(String variableName);
+	/**
+	 * Retrieves local variable with the given <b>variableName</b>
+	 *
+	 * @param <T>
+	 *            target variable type
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from local variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the returned variable can not be cast to &lt;T&gt;
+	 * @see #getIntegerLocal(String)
+	 * @see #getStringLocal(String)
+	 * @see #getBooleanLocal(String)
+	 * @see #getByteArrayLocal(String)
+	 * @see #getDateLocal(String)
+	 * @see #getLongLocal(String)
+	 * @see #getShortLocal(String)
+	 * @see #getDoubleLocal(String)
+	 * @see #getNumberLocal(String)
+	 * @see #getFileLocal(String)
+	 */
+	<T> T getVariableLocal(String variableName);
 }
