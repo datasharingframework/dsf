@@ -71,7 +71,7 @@ public class DefaultTaskSender implements TaskSender
 
 		IdType created = doSend(tc.task(), tc.endpointUrl());
 
-		logger.info("Task {} send [task: {}]", tc.instantiatesCanonical(), created.toVersionless().getValue());
+		logger.info("Task {} sent [task: {}]", tc.instantiatesCanonical(), created.toVersionless().getValue());
 	}
 
 	protected IdType doSend(Task task, String targetEndpointUrl)

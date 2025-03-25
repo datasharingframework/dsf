@@ -383,12 +383,12 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		fieldDeclarations.stream().forEach(fd ->
 		{
 			String name = fd.getName();
-			String setMethodeName = "set" + Character.toTitleCase(name.charAt(0))
+			String setMethodName = "set" + Character.toTitleCase(name.charAt(0))
 					+ (name.length() > 1 ? name.substring(1) : "");
 			Object value = getValue(fd, variableScope);
 
 			Optional<Method> setMethod = Arrays.stream(target.getClass().getMethods())
-					.filter(m -> setMethodeName.equals(m.getName())).filter(m -> m.getParameterCount() == 1)
+					.filter(m -> setMethodName.equals(m.getName())).filter(m -> m.getParameterCount() == 1)
 					.filter(m -> ClassUtils.isAssignable(value.getClass(), m.getParameters()[0].getType(), true))
 					.findFirst();
 
@@ -396,7 +396,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 			{
 				if (setMethod.isEmpty())
 					throw new RuntimeException(
-							"Field inject set-method with name '" + setMethodeName + "' and single parameter of type '"
+							"Field inject set-method with name '" + setMethodName + "' and single parameter of type '"
 									+ value.getClass().getName() + "' missing in class " + target.getClass().getName());
 				else
 					setMethod.get().invoke(target, value);
@@ -404,7 +404,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 			catch (IllegalAccessException | InvocationTargetException e)
 			{
 				throw new RuntimeException(
-						"Unable to inject field using '" + setMethodeName + "' with single parameter of type '"
+						"Unable to inject field using '" + setMethodName + "' with single parameter of type '"
 								+ value.getClass().getName() + "' on class " + target.getClass().getName());
 			}
 		});
@@ -466,6 +466,6 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 	private Supplier<RuntimeException> noOrIncompleteFhirTaskFields(String activityName, String className)
 	{
 		return () -> new RuntimeException(
-				"No or imcomplete FHIR Task messsage activity fields for " + activityName + " (" + className + ")");
+				"No or incomplete FHIR Task message activity fields for " + activityName + " (" + className + ")");
 	}
 }
