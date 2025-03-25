@@ -40,12 +40,12 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 
 			JavaDelegate delegate = switch (e.getBpmnModelElementInstance())
 			{
-				case SendTask st -> delegateProvider.getMessageSendTask(processKeyAndVersion, className,
-						fieldDeclarations, execution);
-				case ServiceTask st -> delegateProvider.getServiceTask(processKeyAndVersion, className,
-						fieldDeclarations, execution);
-				case EndEvent ee -> delegateProvider.getMessageEndEvent(processKeyAndVersion, className,
-						fieldDeclarations, execution);
+				case SendTask st ->
+					delegateProvider.getMessageSendTask(processKeyAndVersion, className, fieldDeclarations, execution);
+				case ServiceTask st ->
+					delegateProvider.getServiceTask(processKeyAndVersion, className, fieldDeclarations, execution);
+				case EndEvent ee ->
+					delegateProvider.getMessageEndEvent(processKeyAndVersion, className, fieldDeclarations, execution);
 				case IntermediateThrowEvent ite -> delegateProvider.getMessageIntermediateThrowEvent(
 						processKeyAndVersion, className, fieldDeclarations, execution);
 

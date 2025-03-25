@@ -77,7 +77,7 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("ContinueSendTest"));
 	}
-	
+
 	@Test
 	public void startJsonVariableTest() throws Exception
 	{

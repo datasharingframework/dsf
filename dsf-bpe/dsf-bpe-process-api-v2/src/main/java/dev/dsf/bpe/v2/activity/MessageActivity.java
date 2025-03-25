@@ -20,7 +20,7 @@ public interface MessageActivity extends Activity
 	 * Default implementation uses a {@link TaskSender} from
 	 * {@link #getTaskSender(ProcessPluginApi, Variables, SendTaskValues)} to send {@link Task} resources with the
 	 * {@link BusinessKeyStrategy} from {@link #getBusinessKeyStrategy()}.
-	 * 
+	 *
 	 * @param api
 	 *            not <code>null</code>
 	 * @param variables

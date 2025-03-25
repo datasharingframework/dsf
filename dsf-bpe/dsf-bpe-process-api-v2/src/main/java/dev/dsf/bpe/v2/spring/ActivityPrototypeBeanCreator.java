@@ -18,12 +18,13 @@ import dev.dsf.bpe.v2.activity.Activity;
  * <p>
  * Usage:
  * <p>
- * 
+ *
  * {@snippet :
- * @Bean
+ * &#64;Bean
  * public ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
  * {
- *     return new ActivityPrototypeBeanCreator(SomeServiceTask.class, AnExecutionListener.class, MyMessageIntermediateThrowEvent.class);
+ * 	return new ActivityPrototypeBeanCreator(SomeServiceTask.class, AnExecutionListener.class,
+ * 			MyMessageIntermediateThrowEvent.class);
  * }
  * }
  */

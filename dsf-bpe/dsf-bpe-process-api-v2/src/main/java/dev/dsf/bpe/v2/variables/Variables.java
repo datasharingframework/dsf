@@ -271,7 +271,7 @@ public interface Variables
 	/**
 	 * Uses {@link ObjectMapper} to serialize the given <b>value</b> into json. Value class needs annotations like
 	 * {@link JsonCreator}, {@link JsonProperty} and {@link JsonGetter}
-	 * 
+	 *
 	 * @param variableName
 	 *            not <code>null</code>
 	 * @param value
@@ -653,7 +653,7 @@ public interface Variables
 	/**
 	 * Uses {@link ObjectMapper} to serialize the given <b>value</b> into json. Value class needs annotations like
 	 * {@link JsonCreator}, {@link JsonProperty} and {@link JsonGetter}
-	 * 
+	 *
 	 * @param variableName
 	 *            not <code>null</code>
 	 * @param value

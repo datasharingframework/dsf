@@ -8,7 +8,7 @@ import dev.dsf.bpe.v2.variables.Variables;
 public interface ExecutionListener extends Activity
 {
 	void notify(ProcessPluginApi api, Variables variables) throws Exception;
-	
+
 	default ExecutionListenerErrorHandler getErrorHandler()
 	{
 		return new DefaultExecutionListenerErrorHandler();
