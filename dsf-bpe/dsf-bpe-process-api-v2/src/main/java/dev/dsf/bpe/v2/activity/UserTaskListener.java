@@ -11,6 +11,7 @@ public interface UserTaskListener extends Activity
 	void notify(ProcessPluginApi api, Variables variables,
 			CreateQuestionnaireResponseValues createQuestionnaireResponse) throws Exception;
 
+	@Override
 	default UserTaskListenerErrorHandler getErrorHandler()
 	{
 		return new DefaultUserTaskListenerErrorHandler();

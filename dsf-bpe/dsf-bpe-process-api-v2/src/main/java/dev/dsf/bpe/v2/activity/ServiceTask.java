@@ -10,6 +10,7 @@ public interface ServiceTask extends Activity
 {
 	void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception;
 
+	@Override
 	default ServiceTaskErrorHandler getErrorHandler()
 	{
 		return new DefaultServiceTaskErrorHandler();

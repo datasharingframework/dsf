@@ -9,6 +9,7 @@ public interface ExecutionListener extends Activity
 {
 	void notify(ProcessPluginApi api, Variables variables) throws Exception;
 
+	@Override
 	default ExecutionListenerErrorHandler getErrorHandler()
 	{
 		return new DefaultExecutionListenerErrorHandler();

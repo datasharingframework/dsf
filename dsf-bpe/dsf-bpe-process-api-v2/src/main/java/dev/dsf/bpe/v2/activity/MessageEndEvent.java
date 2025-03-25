@@ -5,6 +5,7 @@ import dev.dsf.bpe.v2.error.impl.DefaultMessageEndEventErrorHandler;
 
 public interface MessageEndEvent extends MessageActivity
 {
+	@Override
 	default MessageEndEventErrorHandler getErrorHandler()
 	{
 		return new DefaultMessageEndEventErrorHandler();
