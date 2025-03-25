@@ -7,7 +7,6 @@ import java.util.List;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
-import org.springframework.expression.TypedValue;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -286,7 +285,6 @@ public interface Variables
 	 * @param variableName
 	 *            not <code>null</code>
 	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
-	 * @see #setVariable(String, TypedValue)
 	 * @see #getInteger(String)
 	 * @see #getString(String)
 	 * @see #getBoolean(String)
@@ -308,7 +306,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getInteger(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setInteger(String variableName, Integer value);
 
@@ -336,7 +333,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getString(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setString(String variableName, String value);
 
@@ -364,7 +360,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getBoolean(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setBoolean(String variableName, Boolean value);
 
@@ -392,7 +387,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getByteArray(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setByteArray(String variableName, byte[] value);
 
@@ -420,7 +414,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getDate(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setDate(String variableName, Date value);
 
@@ -448,7 +441,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getLong(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setLong(String variableName, Long value);
 
@@ -476,7 +468,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getShort(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setShort(String variableName, Short value);
 
@@ -504,7 +495,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getDouble(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setDouble(String variableName, Double value);
 
@@ -532,7 +522,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getNumber(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setNumber(String variableName, Number value);
 
@@ -560,7 +549,6 @@ public interface Variables
 	 * @param value
 	 *            may be <code>null</code>
 	 * @see #getFile(String)
-	 * @see #setVariable(String, TypedValue)
 	 */
 	void setFile(String variableName, File value);
 
