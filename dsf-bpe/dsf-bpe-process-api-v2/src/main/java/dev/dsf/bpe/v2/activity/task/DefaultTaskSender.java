@@ -38,24 +38,28 @@ public class DefaultTaskSender implements TaskSender
 	protected final ProcessPluginApi api;
 	protected final Variables variables;
 	protected final SendTaskValues sendTaskValues;
+	protected final BusinessKeyStrategy businessKeyStrategy;
 	protected final Function<Target, List<ParameterComponent>> additionalInputParameters;
 
-	public DefaultTaskSender(ProcessPluginApi api, Variables variables, SendTaskValues sendTaskValues)
+	public DefaultTaskSender(ProcessPluginApi api, Variables variables, SendTaskValues sendTaskValues,
+			BusinessKeyStrategy businessKeyStrategy)
 	{
-		this(api, variables, sendTaskValues, t -> List.of());
+		this(api, variables, sendTaskValues, businessKeyStrategy, t -> List.of());
 	}
 
 	public DefaultTaskSender(ProcessPluginApi api, Variables variables, SendTaskValues sendTaskValues,
+			BusinessKeyStrategy businessKeyStrategy,
 			Function<Target, List<ParameterComponent>> additionalInputParameters)
 	{
 		this.api = Objects.requireNonNull(api, "api");
 		this.variables = Objects.requireNonNull(variables, "variables");
 		this.sendTaskValues = Objects.requireNonNull(sendTaskValues, "sendTaskValues");
+		this.businessKeyStrategy = Objects.requireNonNull(businessKeyStrategy, "businessKeyStrategy");
 		this.additionalInputParameters = Objects.requireNonNull(additionalInputParameters, "additionalInputParameters");
 	}
 
 	@Override
-	public void send(BusinessKeyStrategy businessKeyStrategy)
+	public void send()
 	{
 		TaskAndConfig tc = createTaskAndConfig(businessKeyStrategy);
 

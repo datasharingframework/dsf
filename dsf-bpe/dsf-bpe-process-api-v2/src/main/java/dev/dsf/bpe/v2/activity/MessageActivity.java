@@ -32,7 +32,7 @@ public interface MessageActivity extends Activity
 	 */
 	default void execute(ProcessPluginApi api, Variables variables, SendTaskValues sendTaskValues) throws Exception
 	{
-		getTaskSender(api, variables, sendTaskValues).send(getBusinessKeyStrategy());
+		getTaskSender(api, variables, sendTaskValues).send();
 	}
 
 	/**
@@ -46,7 +46,7 @@ public interface MessageActivity extends Activity
 	 */
 	default TaskSender getTaskSender(ProcessPluginApi api, Variables variables, SendTaskValues sendTaskValues)
 	{
-		return new DefaultTaskSender(api, variables, sendTaskValues,
+		return new DefaultTaskSender(api, variables, sendTaskValues, getBusinessKeyStrategy(),
 				target -> getAdditionalInputParameters(api, variables, sendTaskValues, target));
 	}
 
