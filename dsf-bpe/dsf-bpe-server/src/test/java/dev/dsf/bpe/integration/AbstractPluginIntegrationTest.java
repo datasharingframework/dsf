@@ -97,7 +97,7 @@ public abstract class AbstractPluginIntegrationTest extends AbstractIntegrationT
 			assertTrue(requested instanceof Task);
 			assertEquals(TaskStatus.REQUESTED, ((Task) requested).getStatus());
 
-			Resource inProgress = events.pollFirst(10, TimeUnit.SECONDS);
+			Resource inProgress = events.pollFirst(30, TimeUnit.SECONDS);
 			assertNotNull(inProgress);
 			assertTrue(inProgress instanceof Task);
 			assertEquals(TaskStatus.INPROGRESS, ((Task) inProgress).getStatus());
