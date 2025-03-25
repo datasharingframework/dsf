@@ -22,9 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -46,6 +43,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -55,7 +53,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig.Identifier;
 import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig.Reference;
 
-public abstract class AbstractProcessPlugin implements ProcessPlugin
+public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 {
 	private static final class FileAndResource
 	{
@@ -149,6 +147,14 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 	private final ApplicationContext apiApplicationContext;
 	private final Class<?> apiServicesSpringConfiguration;
 
+	private final Class<?> serviceTaskInterface;
+	private final Class<?> messageSendTaskInterface;
+	private final Class<?> userTaskListenerInterface;
+	private final Class<?> executionListenerInterface;
+	private final Class<?> messageIntermediateThrowEventInterface;
+	private final Class<?> messageEndEventInterface;
+	private final Class<?> defaultUserTaskListenerClass;
+
 	private final ProcessPluginFhirConfig<?, ?, ?, ?, ?, ?, ?, ?, ?> fhirConfig;
 
 	private boolean initialized;
@@ -156,9 +162,13 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 	private List<BpmnFileAndModel> processModels;
 	private Map<ProcessIdAndVersion, List<FileAndResource>> fhirResources;
 
+
 	public AbstractProcessPlugin(Class<?> processPluginDefinitionType, int processPluginApiVersion, boolean draft,
 			Path jarFile, ClassLoader processPluginClassLoader, ConfigurableEnvironment environment,
-			ApplicationContext apiApplicationContext, Class<?> apiServicesSpringConfiguration)
+			ApplicationContext apiApplicationContext, Class<?> apiServicesSpringConfiguration,
+			Class<?> serviceTaskInterface, Class<?> messageSendTaskInterface, Class<UTL> userTaskListenerInterface,
+			Class<?> executionListenerInterface, Class<?> messageIntermediateThrowEventInterface,
+			Class<?> messageEndEventInterface, Class<? extends UTL> defaultUserTaskListenerClass)
 	{
 		Objects.requireNonNull(processPluginDefinitionType, "processPluginDefinitionType");
 		Objects.requireNonNull(processPluginApiVersion, "processPluginApiVersion");
@@ -168,6 +178,14 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 		Objects.requireNonNull(apiApplicationContext, "apiApplicationContext");
 		Objects.requireNonNull(apiServicesSpringConfiguration, "apiServicesSpringConfiguration");
 
+		Objects.requireNonNull(serviceTaskInterface, "serviceTaskInterface");
+		Objects.requireNonNull(messageSendTaskInterface, "messageSendTaskInterface");
+		Objects.requireNonNull(userTaskListenerInterface, "userTaskListenerInterface");
+		Objects.requireNonNull(executionListenerInterface, "executionListenerInterface");
+		Objects.requireNonNull(messageIntermediateThrowEventInterface, "messageIntermediateThrowEventInterface");
+		Objects.requireNonNull(messageEndEventInterface, "messageEndEventInterface");
+		Objects.requireNonNull(defaultUserTaskListenerClass, "defaultUserTaskListenerClass");
+
 		this.processPluginDefinitionTypeName = processPluginDefinitionType.getName();
 		this.processPluginApiVersion = processPluginApiVersion;
 		this.draft = draft;
@@ -176,6 +194,14 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 		this.environment = environment;
 		this.apiApplicationContext = apiApplicationContext;
 		this.apiServicesSpringConfiguration = apiServicesSpringConfiguration;
+
+		this.serviceTaskInterface = serviceTaskInterface;
+		this.messageSendTaskInterface = messageSendTaskInterface;
+		this.userTaskListenerInterface = userTaskListenerInterface;
+		this.executionListenerInterface = executionListenerInterface;
+		this.messageIntermediateThrowEventInterface = messageIntermediateThrowEventInterface;
+		this.messageEndEventInterface = messageEndEventInterface;
+		this.defaultUserTaskListenerClass = defaultUserTaskListenerClass;
 
 		this.fhirConfig = createFhirConfig();
 	}
@@ -197,6 +223,31 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 	protected abstract Map<String, List<String>> getDefinitionFhirResourcesByProcessId();
 
 	protected abstract List<String> getDefinitionProcessModels();
+
+	@Override
+	public Class<?> getDefaultUserTaskListenerClass()
+	{
+		return defaultUserTaskListenerClass;
+	}
+
+	@Override
+	public boolean isDefaultUserTaskListenerOrSuperClassOf(String className)
+	{
+		try
+		{
+			Class<?> targetClass = getProcessPluginClassLoader().loadClass(className);
+			return defaultUserTaskListenerClass.isAssignableFrom(targetClass);
+		}
+		catch (BeansException | ClassNotFoundException | ClassCastException e)
+		{
+			logger.debug("Unable check if {} is super class of {}", className,
+					getDefaultUserTaskListenerClass().getName(), e);
+			logger.warn("Unable check if {} is super class of {}: {} - {}", className,
+					getDefaultUserTaskListenerClass().getName(), e.getClass().getName(), e.getMessage());
+
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Override
 	public boolean initializeAndValidateResources(String localOrganizationIdentifierValue)
@@ -738,12 +789,13 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 	{
 		// service tasks
 		boolean serviceTasksOk = parent.getChildElementsByType(ServiceTask.class).stream().filter(Objects::nonNull)
-				.allMatch(t -> beanAvailable(process, t.getId(), t.getCamundaClass(), JavaDelegate.class,
+				.allMatch(t -> beanAvailable(process, t.getId(), t.getCamundaClass(), serviceTaskInterface,
 						applicationContext));
 
 		// message send tasks
-		boolean sendTasksOk = parent.getChildElementsByType(SendTask.class).stream().filter(Objects::nonNull).allMatch(
-				t -> beanAvailable(process, t.getId(), t.getCamundaClass(), JavaDelegate.class, applicationContext)
+		boolean sendTasksOk = parent.getChildElementsByType(SendTask.class).stream().filter(Objects::nonNull)
+				.allMatch(t -> beanAvailable(process, t.getId(), t.getCamundaClass(), messageSendTaskInterface,
+						applicationContext)
 						&& taskFieldsAvailable(process, "SendTask", t.getId(), t.getExtensionElements()));
 
 		// user tasks: task listeners
@@ -752,7 +804,7 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 				.allMatch(t -> t.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
 						.flatMap(e -> e.getChildElementsByType(CamundaTaskListener.class).stream())
 						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, t.getId(), l.getCamundaClass(),
-								TaskListener.class, applicationContext)));
+								userTaskListenerInterface, applicationContext)));
 
 		// all elements: execution listeners
 		boolean allElementsExecutionListenersOk = parent.getChildElementsByType(FlowNode.class).stream()
@@ -760,17 +812,17 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 				.allMatch(n -> n.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
 						.flatMap(e -> e.getChildElementsByType(CamundaExecutionListener.class).stream())
 						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, n.getId(), l.getCamundaClass(),
-								ExecutionListener.class, applicationContext)));
+								executionListenerInterface, applicationContext)));
 
-		// intermediate message throw events
+		// message intermediate throw events
 		boolean intermediateMessageThrowEventsOk = parent.getChildElementsByType(IntermediateThrowEvent.class).stream()
 				.filter(Objects::nonNull)
 				.flatMap(
 						e -> e.getEventDefinitions().stream().filter(Objects::nonNull)
 								.filter(def -> def instanceof MessageEventDefinition))
 				.map(def -> (MessageEventDefinition) def)
-				.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(), JavaDelegate.class,
-						applicationContext)
+				.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(),
+						messageIntermediateThrowEventInterface, applicationContext)
 						&& taskFieldsAvailable(process, "IntermediateThrowEvent", def.getId(),
 								def.getExtensionElements()));
 
@@ -778,12 +830,12 @@ public abstract class AbstractProcessPlugin implements ProcessPlugin
 		boolean endEventsOk = parent.getChildElementsByType(EndEvent.class).stream().filter(Objects::nonNull)
 				.allMatch(e -> e.getEventDefinitions().stream().filter(Objects::nonNull)
 						.filter(def -> def instanceof MessageEventDefinition).map(def -> (MessageEventDefinition) def)
-						.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(), JavaDelegate.class,
-								applicationContext)
+						.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(),
+								messageEndEventInterface, applicationContext)
 								&& taskFieldsAvailable(process, "MessageEndEvent", e.getId(),
 										def.getExtensionElements())));
 
-		// sub processes
+		// sub processes, check recursive
 		boolean subProcessesOk = parent.getChildElementsByType(SubProcess.class).stream().filter(Objects::nonNull)
 				.allMatch(subProcess -> beanAvailable(subProcess, process, applicationContext));
 

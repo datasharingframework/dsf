@@ -1315,9 +1315,9 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Bundle result1 = getWebserviceClient().search(Task.class, Map.of("_profile", List.of(profile)));
 		assertNotNull(result1);
-		assertEquals(2, result1.getTotal());
+		assertEquals(1, result1.getTotal());
 		assertTrue(result1.hasEntry());
-		assertEquals(2, result1.getEntry().size());
+		assertEquals(1, result1.getEntry().size());
 		assertTrue(result1.getEntry().get(0).hasResource());
 		assertTrue(result1.getEntry().get(0).getResource() instanceof Task);
 
@@ -1352,17 +1352,9 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertTrue(result5.getEntry().get(0).getResource() instanceof Task);
 
 		Bundle result6 = getWebserviceClient().search(Task.class,
-				Map.of("_profile:below", List.of("http://foo.bar/fhir/StructureDefinition|0.1.0")));
+				Map.of("_profile:below", List.of("http://foo.bar/fhir/StructureDefinition|0.1.0"))); // missing "baz"
 		assertNotNull(result6);
-		assertEquals(1, result6.getTotal());
-		assertTrue(result6.hasEntry());
-		assertEquals(1, result6.getEntry().size());
-		assertTrue(result6.getEntry().get(0).hasResource());
-		assertTrue(result6.getEntry().get(0).getResource() instanceof Task);
-		assertTrue(result6.getEntry().get(0).getResource().getMeta().hasProfile());
-		assertEquals(1, result6.getEntry().get(0).getResource().getMeta().getProfile().size());
-		assertEquals(task2.getMeta().getProfile().get(0).getValue(),
-				result6.getEntry().get(0).getResource().getMeta().getProfile().get(0).getValue());
+		assertEquals(0, result6.getTotal());
 	}
 
 	private Task createTask(TaskStatus createStatus, boolean createPluginResources) throws IOException, SQLException

@@ -10,7 +10,6 @@ import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -30,18 +29,16 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 	protected final ApplicationContext apiApplicationContext;
 	protected final ConfigurableEnvironment environment;
 	private final Class<?> processPluginDefinitionType;
-	private final Class<? extends TaskListener> defaultUserTaskListener;
 
 	public AbstractProcessPluginFactory(int apiVersion, ClassLoader apiClassLoader,
 			ApplicationContext apiApplicationContext, ConfigurableEnvironment environment,
-			Class<?> processPluginDefinitionType, Class<? extends TaskListener> defaultUserTaskListener)
+			Class<?> processPluginDefinitionType)
 	{
 		this.apiVersion = apiVersion;
 		this.apiClassLoader = apiClassLoader;
 		this.apiApplicationContext = apiApplicationContext;
 		this.environment = environment;
 		this.processPluginDefinitionType = processPluginDefinitionType;
-		this.defaultUserTaskListener = defaultUserTaskListener;
 	}
 
 	@Override
@@ -51,19 +48,12 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 		Objects.requireNonNull(apiApplicationContext, "apiApplicationContext");
 		Objects.requireNonNull(environment, "environment");
 		Objects.requireNonNull(processPluginDefinitionType, "processPluginDefinitionType");
-		Objects.requireNonNull(defaultUserTaskListener, "defaultUserTaskListener");
 	}
 
 	@Override
 	public int getApiVersion()
 	{
 		return apiVersion;
-	}
-
-	@Override
-	public Class<? extends TaskListener> getDefaultUserTaskListener()
-	{
-		return defaultUserTaskListener;
 	}
 
 	@Override

@@ -25,6 +25,26 @@
 			</valueCoding>
 		</extension>
 	</extension>
+	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="continue-send-test" />
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://dsf.dev/fhir/StructureDefinition/task-continue-send-test|#{version}" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ALL" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ALL" />
+			</valueCoding>
+		</extension>
+	</extension>
 	<url value="http://dsf.dev/bpe/Process/test" />
 	<!-- version managed by bpe -->
 	<version value="#{version}" />

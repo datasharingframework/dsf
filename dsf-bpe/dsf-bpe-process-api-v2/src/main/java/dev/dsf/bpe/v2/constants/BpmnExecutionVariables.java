@@ -1,6 +1,6 @@
 package dev.dsf.bpe.v2.constants;
 
-import dev.dsf.bpe.v2.activity.AbstractTaskMessageSend;
+import dev.dsf.bpe.v2.activity.task.BusinessKeyStrategies;
 import dev.dsf.bpe.v2.variables.Target;
 import dev.dsf.bpe.v2.variables.Variables;
 
@@ -51,7 +51,7 @@ public final class BpmnExecutionVariables
 	 * <code>protected</code> method in {@link AbstractTaskMessageSend} on how to create and use an alternative
 	 * business-key.
 	 *
-	 * @see AbstractTaskMessageSend
+	 * @see BusinessKeyStrategies#ALTERNATIVE
 	 */
 	public static final String ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
 }

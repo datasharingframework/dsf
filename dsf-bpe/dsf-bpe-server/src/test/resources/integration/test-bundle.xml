@@ -255,28 +255,28 @@
 		</request>
 	</entry>
 	<entry>
-      <fullUrl value="urn:uuid:70428bb4-2865-4447-8920-b07659a9ff0e"></fullUrl>
+      <fullUrl value="urn:uuid:70428bb4-2865-4447-8920-b07659a9ff0e"/>
       <resource>
          <Subscription xmlns="http://hl7.org/fhir">
             <meta>
                <tag>
-                  <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"></system>
-                  <code value="LOCAL"></code>
+                  <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
+                  <code value="LOCAL"/>
                </tag>
             </meta>
-            <status value="active"></status>
-            <reason value="Test Client"></reason>
-            <criteria value="Task"></criteria>
+            <status value="active"/>
+            <reason value="Test Client"/>
+            <criteria value="Task?_profile:below=http://dsf.dev/fhir/StructureDefinition/task-test"/>
             <channel>
-               <type value="websocket"></type>
-               <payload value="application/fhir+json"></payload>
+               <type value="websocket"/>
+               <payload value="application/fhir+json"/>
             </channel>
          </Subscription>
       </resource>
       <request>
-         <method value="POST"></method>
-         <url value="Subscription"></url>
-         <ifNoneExist value="criteria:exact=Task&amp;status=active&amp;type=websocket&amp;payload=application/fhir%2Bjson"></ifNoneExist>
+         <method value="POST"/>
+         <url value="Subscription"/>
+         <ifNoneExist value="criteria:exact=Task%3F_profile%3Abelow%3Dhttp://dsf.dev/fhir/StructureDefinition/task-test&amp;status=active&amp;type=websocket&amp;payload=application/fhir%2Bjson"/>
       </request>
    </entry>
 </Bundle>

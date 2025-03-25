@@ -10,7 +10,10 @@ org.apache.commons.text
 org.bouncycastle
 org.camunda.bpm.engine.delegate
 org.camunda.bpm.engine.impl.el.FixedValue
+org.camunda.bpm.engine.impl.util.ClassDelegateUtil
 org.camunda.bpm.engine.impl.variable.serializer
+org.camunda.bpm.engine.ProcessEngine
+org.camunda.bpm.engine.RuntimeService
 org.camunda.bpm.engine.variable
 org.camunda.bpm.model.bpmn.instance
 org.glassfish.jersey

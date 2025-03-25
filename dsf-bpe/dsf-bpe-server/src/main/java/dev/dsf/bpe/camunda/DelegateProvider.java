@@ -1,32 +1,36 @@
 package dev.dsf.bpe.camunda;
 
+import java.util.List;
+
+import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.engine.delegate.TaskListener;
-import org.springframework.context.ApplicationContext;
+import org.camunda.bpm.engine.delegate.VariableScope;
+import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
 
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 
 public interface DelegateProvider extends ProcessPluginConsumer
 {
-	/**
-	 * @param processIdAndVersion
-	 *            not <code>null</code>
-	 * @return returns the default class loader if no special class loader is registered for the given
-	 *         <b>processIdAndVersion</b>
-	 */
-	ClassLoader getClassLoader(ProcessIdAndVersion processIdAndVersion);
+	Class<?> getDefaultUserTaskListenerClass(ProcessIdAndVersion processKeyAndVersion);
 
-	/**
-	 * @param processIdAndVersion
-	 *            not <code>null</code>
-	 * @return returns the default application context if no special application context is registered for the given
-	 *         <b>processIdAndVersion</b>
-	 */
-	ApplicationContext getApplicationContext(ProcessIdAndVersion processIdAndVersion);
+	boolean isDefaultUserTaskListenerOrSuperClassOf(ProcessIdAndVersion processKeyAndVersion, String className);
 
-	/**
-	 * @param processPluginApiVersion
-	 *            not <code>null</code>
-	 * @return the default user task listener class for the given process plugin api version
-	 */
-	Class<? extends TaskListener> getDefaultUserTaskListenerClass(String processPluginApiVersion);
+	JavaDelegate getMessageSendTask(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope);
+
+	JavaDelegate getServiceTask(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope);
+
+	JavaDelegate getMessageEndEvent(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope);
+
+	JavaDelegate getMessageIntermediateThrowEvent(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope);
+
+	ExecutionListener getExecutionListener(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope);
+
+	TaskListener getTaskListener(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope);
 }

@@ -3,36 +3,27 @@ package dev.dsf.bpe.v2.activity;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.DelegateTask;
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
-import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
+import dev.dsf.bpe.v2.activity.values.CreateQuestionnaireResponseValues;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnUserTask;
 import dev.dsf.bpe.v2.variables.Variables;
 
 /**
- * Default {@link TaskListener} implementation. This listener will be added to user tasks if no other
- * {@link TaskListener} is defined for the 'create' event type.
+ * Default {@link UserTaskListener} implementation. This listener will be added to user tasks if no other
+ * {@link UserTaskListener} is defined for the 'create' event type.
  * <p>
  * BPMN user tasks need to define the form to be used with type 'Embedded or External Task Forms' and the canonical URL
  * of the a {@link Questionnaire} resource as the form key.
@@ -41,78 +32,37 @@ import dev.dsf.bpe.v2.variables.Variables;
  * {@link QuestionnaireResponse}, extend this class, register it as a prototype {@link Bean} and specify the class name
  * as a task listener with event type 'create' in the BPMN.
  */
-public class DefaultUserTaskListener implements TaskListener, InitializingBean
+public class DefaultUserTaskListener implements UserTaskListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTaskListener.class);
 
-	private final ProcessPluginApi api;
-
-	/**
-	 * @param api
-	 *            not <code>null</code>
-	 */
-	public DefaultUserTaskListener(ProcessPluginApi api)
-	{
-		this.api = api;
-	}
-
 	@Override
-	public void afterPropertiesSet() throws Exception
+	public void notify(ProcessPluginApi api, Variables variables,
+			CreateQuestionnaireResponseValues createQuestionnaireResponseValues) throws Exception
 	{
-		Objects.requireNonNull(api, "api");
+		logger.trace("Execution of user task with id='{}'", variables.getCurrentActivityId());
+
+		Questionnaire questionnaire = readQuestionnaire(api, createQuestionnaireResponseValues.formKey());
+		String businessKey = variables.getBusinessKey();
+
+		QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(api,
+				createQuestionnaireResponseValues.formKey(), businessKey,
+				createQuestionnaireResponseValues.userTaskId());
+		transformQuestionnaireItemsToQuestionnaireResponseItems(api, questionnaireResponse, questionnaire);
+
+		beforeQuestionnaireResponseCreate(api, variables, createQuestionnaireResponseValues, questionnaireResponse);
+		checkQuestionnaireResponse(questionnaireResponse);
+
+		QuestionnaireResponse created = api.getDsfClientProvider().getLocalDsfClient()
+				.withRetryForever(Duration.ofSeconds(60)).create(questionnaireResponse);
+
+		logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
+				api.getQuestionnaireResponseHelper().getLocalVersionlessAbsoluteUrl(created));
+
+		afterQuestionnaireResponseCreate(api, variables, createQuestionnaireResponseValues, created);
 	}
 
-	@Override
-	public final void notify(DelegateTask userTask)
-	{
-		final DelegateExecution execution = userTask.getExecution();
-		final Variables variables = api.getVariables(execution);
-
-		try
-		{
-			logger.trace("Execution of user task with id='{}'", execution.getCurrentActivityId());
-
-			String questionnaireUrlWithVersion = userTask.getBpmnModelElementInstance().getCamundaFormKey();
-			Questionnaire questionnaire = readQuestionnaire(questionnaireUrlWithVersion);
-
-			String businessKey = execution.getBusinessKey();
-			String userTaskId = userTask.getId();
-
-			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(
-					questionnaireUrlWithVersion, businessKey, userTaskId);
-			transformQuestionnaireItemsToQuestionnaireResponseItems(questionnaireResponse, questionnaire);
-
-			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
-			checkQuestionnaireResponse(questionnaireResponse);
-
-			QuestionnaireResponse created = api.getDsfClientProvider().getLocalDsfClient()
-					.withRetryForever(Duration.ofSeconds(60)).create(questionnaireResponse);
-
-			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
-					api.getQuestionnaireResponseHelper().getLocalVersionlessAbsoluteUrl(created));
-
-			afterQuestionnaireResponseCreate(userTask, created);
-		}
-		catch (Exception exception)
-		{
-			logger.debug("Error while executing user task listener {}", getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
-					exception.getClass().getName(), exception.getMessage());
-
-			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
-					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
-
-			updateFailedIfInprogress(variables.getTasks(), errorMessage);
-
-			// TODO evaluate throwing exception as alternative to stopping the process instance
-			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
-					exception.getMessage());
-		}
-	}
-
-	private Questionnaire readQuestionnaire(String urlWithVersion)
+	private Questionnaire readQuestionnaire(ProcessPluginApi api, String urlWithVersion)
 	{
 		Bundle search = api.getDsfClientProvider().getLocalDsfClient().search(Questionnaire.class,
 				Map.of("url", List.of(urlWithVersion)));
@@ -131,8 +81,8 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		return questionnaires.get(0);
 	}
 
-	private QuestionnaireResponse createDefaultQuestionnaireResponse(String questionnaireUrlWithVersion,
-			String businessKey, String userTaskId)
+	private QuestionnaireResponse createDefaultQuestionnaireResponse(ProcessPluginApi api,
+			String questionnaireUrlWithVersion, String businessKey, String userTaskId)
 	{
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
 		questionnaireResponse.setQuestionnaire(questionnaireUrlWithVersion);
@@ -153,15 +103,15 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		return questionnaireResponse;
 	}
 
-	private void transformQuestionnaireItemsToQuestionnaireResponseItems(QuestionnaireResponse questionnaireResponse,
-			Questionnaire questionnaire)
+	private void transformQuestionnaireItemsToQuestionnaireResponseItems(ProcessPluginApi api,
+			QuestionnaireResponse questionnaireResponse, Questionnaire questionnaire)
 	{
 		questionnaire.getItem().stream().filter(i -> !BpmnUserTask.Codes.BUSINESS_KEY.equals(i.getLinkId()))
 				.filter(i -> !BpmnUserTask.Codes.USER_TASK_ID.equals(i.getLinkId()))
-				.forEach(i -> transformItem(questionnaireResponse, i));
+				.forEach(i -> transformItem(api, questionnaireResponse, i));
 	}
 
-	private void transformItem(QuestionnaireResponse questionnaireResponse,
+	private void transformItem(ProcessPluginApi api, QuestionnaireResponse questionnaireResponse,
 			Questionnaire.QuestionnaireItemComponent question)
 	{
 		if (Questionnaire.QuestionnaireItemType.DISPLAY.equals(question.getType()))
@@ -197,13 +147,18 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <i>Override this method to modify the {@link QuestionnaireResponse} before it will be created in state
 	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS} on the DSF FHIR server</i>
 	 *
-	 * @param userTask
-	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
+	 * @param api
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @param createQuestionnaireResponseValues
+	 *            not <code>null</code>
 	 * @param beforeCreate
 	 *            not <code>null</code>, containing an answer placeholder for every item in the corresponding
 	 *            {@link Questionnaire}
 	 */
-	protected void beforeQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse beforeCreate)
+	protected void beforeQuestionnaireResponseCreate(ProcessPluginApi api, Variables variables,
+			CreateQuestionnaireResponseValues createQuestionnaireResponseValues, QuestionnaireResponse beforeCreate)
 	{
 		// Nothing to do in default behavior
 	}
@@ -212,51 +167,19 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <i>Override this method to execute code after the {@link QuestionnaireResponse} resource has been created on the
 	 * DSF FHIR server</i>
 	 *
-	 * @param userTask
-	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
+	 * @param api
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @param createQuestionnaireResponseValues
+	 *            not <code>null</code>
+	 * 
 	 * @param afterCreate
 	 *            not <code>null</code>, created on the DSF FHIR server
 	 */
-	protected void afterQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse afterCreate)
+	protected void afterQuestionnaireResponseCreate(ProcessPluginApi api, Variables variables,
+			CreateQuestionnaireResponseValues createQuestionnaireResponseValues, QuestionnaireResponse afterCreate)
 	{
 		// Nothing to do in default behavior
-	}
-
-	private void updateFailedIfInprogress(List<Task> tasks, String errorMessage)
-	{
-		for (int i = tasks.size() - 1; i >= 0; i--)
-		{
-			Task task = tasks.get(i);
-
-			if (TaskStatus.INPROGRESS.equals(task.getStatus()))
-			{
-				task.setStatus(Task.TaskStatus.FAILED);
-				task.addOutput(new TaskOutputComponent(new CodeableConcept(BpmnMessage.error()),
-						new StringType(errorMessage)));
-				updateAndHandleException(task);
-			}
-			else
-			{
-				logger.debug("Not updating Task {} with status: {}",
-						api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), task.getStatus());
-			}
-		}
-	}
-
-	private void updateAndHandleException(Task task)
-	{
-		try
-		{
-			logger.debug("Updating Task {}, new status: {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
-					task.getStatus().toCode());
-
-			api.getDsfClientProvider().getLocalDsfClient().withMinimalReturn().update(task);
-		}
-		catch (Exception e)
-		{
-			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
-			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
-					e.getClass().getName(), e.getMessage());
-		}
 	}
 }

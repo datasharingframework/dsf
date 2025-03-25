@@ -11,12 +11,16 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 
+import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.constants.CodeSystems.OrganizationRole;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
+import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
+import dev.dsf.bpe.v2.variables.Variables;
 
-public class OrganizationProviderTest extends AbstractTest
+public class OrganizationProviderTest extends AbstractTest implements ServiceTask
 {
 	private static final String ORGANIZATION_IDENTIFIER_LOCAL_VALUE = "Test_Organization";
 	private static final Identifier ORGANIZATION_IDENTIFIER_LOCAL = OrganizationIdentifier
@@ -32,9 +36,10 @@ public class OrganizationProviderTest extends AbstractTest
 	private static final String MEMBER_ROLE_NOT_EXISTING_CODE = "not-existing-role";
 	private static final Coding MEMBER_ROLE_NOT_EXISTING = OrganizationRole.withCode(MEMBER_ROLE_NOT_EXISTING_CODE);
 
-	public OrganizationProviderTest(ProcessPluginApi api)
+	@Override
+	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		super(api);
+		executeTests(api, variables);
 	}
 
 	private void testOrganization(Optional<Organization> oO, String identifierValue)
@@ -60,14 +65,14 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getLocalOrganization() throws Exception
+	public void getLocalOrganization(ProcessPluginApi api) throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider().getLocalOrganization();
 		testOrganization(oO, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 	}
 
 	@PluginTest
-	public void getLocalOrganizationIdentifier() throws Exception
+	public void getLocalOrganizationIdentifier(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getOrganizationProvider().getLocalOrganizationIdentifier());
 		expectTrue(api.getOrganizationProvider().getLocalOrganizationIdentifier().isPresent());
@@ -77,7 +82,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getLocalOrganizationIdentifierValue() throws Exception
+	public void getLocalOrganizationIdentifierValue(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getOrganizationProvider().getLocalOrganizationIdentifierValue());
 		expectTrue(api.getOrganizationProvider().getLocalOrganizationIdentifierValue().isPresent());
@@ -86,7 +91,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationByIdentifierNull() throws Exception
+	public void getOrganizationByIdentifierNull(ProcessPluginApi api) throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider().getOrganization((Identifier) null);
 		expectNotNull(oO);
@@ -94,7 +99,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationByIdentifierNotExisting() throws Exception
+	public void getOrganizationByIdentifierNotExisting(ProcessPluginApi api) throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(ORGANIZATION_IDENTIFIER_NOT_EXISTING);
 		expectNotNull(oO);
@@ -102,14 +107,14 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationByIdentifier() throws Exception
+	public void getOrganizationByIdentifier(ProcessPluginApi api) throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(ORGANIZATION_IDENTIFIER_LOCAL);
 		testOrganization(oO, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 	}
 
 	@PluginTest
-	public void getOrganizationByIdentifierValueNull() throws Exception
+	public void getOrganizationByIdentifierValueNull(ProcessPluginApi api) throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider().getOrganization((String) null);
 		expectNotNull(oO);
@@ -117,7 +122,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationByIdentifierValueNotExisting() throws Exception
+	public void getOrganizationByIdentifierValueNotExisting(ProcessPluginApi api) throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider()
 				.getOrganization(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE);
@@ -126,25 +131,25 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationByIdentifierValue() throws Exception
+	public void getOrganizationByIdentifierValue(ProcessPluginApi api) throws Exception
 	{
 		Optional<Organization> oO = api.getOrganizationProvider().getOrganization(ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 		testOrganization(oO, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierNull() throws Exception
+	public void getOrganizationsByParentIdentifierNull(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierExpectEmpty(null);
+		getOrganizationsByParentIdentifierExpectEmpty(api, null);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierNotExisting() throws Exception
+	public void getOrganizationsByParentIdentifierNotExisting(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING);
+		getOrganizationsByParentIdentifierExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING);
 	}
 
-	private void getOrganizationsByParentIdentifierExpectEmpty(Identifier parentIdentifier)
+	private void getOrganizationsByParentIdentifierExpectEmpty(ProcessPluginApi api, Identifier parentIdentifier)
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifier);
 		expectNotNull(os);
@@ -152,7 +157,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifier() throws Exception
+	public void getOrganizationsByParentIdentifier(ProcessPluginApi api) throws Exception
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(ORGANIZATION_IDENTIFIER_PARENT);
 		expectNotNull(os);
@@ -172,18 +177,18 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueNull() throws Exception
+	public void getOrganizationsByParentIdentifierValueNull(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierValueExpectEmpty(null);
+		getOrganizationsByParentIdentifierValueExpectEmpty(api, null);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueNotExisting() throws Exception
+	public void getOrganizationsByParentIdentifierValueNotExisting(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierValueExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE);
+		getOrganizationsByParentIdentifierValueExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE);
 	}
 
-	private void getOrganizationsByParentIdentifierValueExpectEmpty(String parentIdentifierValue)
+	private void getOrganizationsByParentIdentifierValueExpectEmpty(ProcessPluginApi api, String parentIdentifierValue)
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifierValue);
 		expectNotNull(os);
@@ -191,7 +196,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValue() throws Exception
+	public void getOrganizationsByParentIdentifierValue(ProcessPluginApi api) throws Exception
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(ORGANIZATION_IDENTIFIER_PARENT_VALUE);
 		expectNotNull(os);
@@ -211,46 +216,46 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleNull1() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNull1(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(null, OrganizationRole.dic());
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(api, null, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleNull2() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNull2(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT, null);
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT, null);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleNull3() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNull3(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(null, null);
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(api, null, null);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting1() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting1(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING,
 				OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting2() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting2(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
 				MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting3() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleNotExisting3(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
+		getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING,
 				MEMBER_ROLE_NOT_EXISTING);
 	}
 
-	private void getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(Identifier parentIdentifier,
-			Coding memberRole)
+	private void getOrganizationsByParentIdentifierAndMemberRoleExpectEmpty(ProcessPluginApi api,
+			Identifier parentIdentifier, Coding memberRole)
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifier, memberRole);
 		expectNotNull(os);
@@ -258,21 +263,21 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleDic() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleDic(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+		getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
 				OrganizationRole.dic(), ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierAndMemberRoleTtp() throws Exception
+	public void getOrganizationsByParentIdentifierAndMemberRoleTtp(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+		getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
 				OrganizationRole.ttp(), ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
 	}
 
-	private void getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(Identifier parentIdentifier,
-			Coding memberRole, String expectedOrganizationIdentifierValue)
+	private void getOrganizationsByParentIdentifierAndMemberRoleExpectNotEmpty(ProcessPluginApi api,
+			Identifier parentIdentifier, Coding memberRole, String expectedOrganizationIdentifierValue)
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifier, memberRole);
 		expectNotNull(os);
@@ -281,46 +286,50 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull1() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull1(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(null, OrganizationRole.Codes.DIC);
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(api, null, OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull2() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull2(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE, null);
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+				null);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull3() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNull3(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(null, null);
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(api, null, null);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting1() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting1(ProcessPluginApi api)
+			throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
-				OrganizationRole.Codes.DIC);
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting2() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting2(ProcessPluginApi api)
+			throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting3() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeNotExisting3(ProcessPluginApi api)
+			throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
-				MEMBER_ROLE_NOT_EXISTING_CODE);
+		getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
-	private void getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(String parentIdentifierValue,
-			String memberRoleCode)
+	private void getOrganizationsByParentIdentifierValueAndMemberRoleCodeExpectEmpty(ProcessPluginApi api,
+			String parentIdentifierValue, String memberRoleCode)
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifierValue, memberRoleCode);
 		expectNotNull(os);
@@ -328,21 +337,21 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeDic() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeDic(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+		getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(api, ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				OrganizationRole.Codes.DIC, ORGANIZATION_IDENTIFIER_LOCAL_VALUE);
 	}
 
 	@PluginTest
-	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeTtp() throws Exception
+	public void getOrganizationsByParentIdentifierValueAndMemberRoleCodeTtp(ProcessPluginApi api) throws Exception
 	{
-		getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+		getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(api, ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				OrganizationRole.Codes.TTP, ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE);
 	}
 
-	private void getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(String parentIdentifierValue,
-			String memberRoleCode, String expectedOrganizationIdentifierValue)
+	private void getOrganizationsByParentIdentifierValueAndMemberRoleExpectNotEmpty(ProcessPluginApi api,
+			String parentIdentifierValue, String memberRoleCode, String expectedOrganizationIdentifierValue)
 	{
 		List<Organization> os = api.getOrganizationProvider().getOrganizations(parentIdentifierValue, memberRoleCode);
 		expectNotNull(os);
@@ -351,7 +360,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getRemoteOrganizations() throws Exception
+	public void getRemoteOrganizations(ProcessPluginApi api) throws Exception
 	{
 		List<Organization> os = api.getOrganizationProvider().getRemoteOrganizations();
 		expectSame(1, os.size());
@@ -359,7 +368,7 @@ public class OrganizationProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getParentOrganizations() throws Exception
+	public void getParentOrganizations(ProcessPluginApi api) throws Exception
 	{
 		List<Organization> os = api.getOrganizationProvider().getParentOrganizations();
 		expectSame(1, os.size());

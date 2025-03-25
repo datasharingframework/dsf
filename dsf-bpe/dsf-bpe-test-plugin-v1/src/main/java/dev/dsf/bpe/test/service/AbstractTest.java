@@ -22,7 +22,8 @@ public abstract class AbstractTest extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
 		PluginTestExecutor.execute(this, output(variables, "test-method-succeeded"),
-				output(variables, "test-method-failed"), () -> variables.updateTask(variables.getStartTask()));
+				output(variables, "test-method-failed"), () -> variables.updateTask(variables.getStartTask()),
+				execution, variables);
 	}
 
 	private Consumer<String> output(Variables variables, String code)

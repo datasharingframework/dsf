@@ -11,13 +11,17 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Identifier;
 
+import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.constants.CodeSystems.OrganizationRole;
 import dev.dsf.bpe.v2.constants.NamingSystems.EndpointIdentifier;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
+import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
+import dev.dsf.bpe.v2.variables.Variables;
 
-public class EndpointProviderTest extends AbstractTest
+public class EndpointProviderTest extends AbstractTest implements ServiceTask
 {
 	private static final String ORGANIZATION_IDENTIFIER_LOCAL_VALUE = "Test_Organization";
 	private static final Identifier ORGANIZATION_IDENTIFIER_LOCAL = OrganizationIdentifier
@@ -42,9 +46,10 @@ public class EndpointProviderTest extends AbstractTest
 	private static final String MEMBER_ROLE_NOT_EXISTING_CODE = "not-existing-role";
 	private static final Coding MEMBER_ROLE_NOT_EXISTING = OrganizationRole.withCode(MEMBER_ROLE_NOT_EXISTING_CODE);
 
-	public EndpointProviderTest(ProcessPluginApi api)
+	@Override
+	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		super(api);
+		executeTests(api, variables);
 	}
 
 	private void testEndpointLocal(Optional<Endpoint> oE)
@@ -106,7 +111,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getLocalEndpointAddress() throws Exception
+	public void getLocalEndpointAddress(ProcessPluginApi api) throws Exception
 	{
 		String a = api.getEndpointProvider().getLocalEndpointAddress();
 		expectNotNull(a);
@@ -114,7 +119,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getLocalEndpoint() throws Exception
+	public void getLocalEndpoint(ProcessPluginApi api) throws Exception
 	{
 		Optional<Endpoint> e = api.getEndpointProvider().getLocalEndpoint();
 		expectNotNull(e);
@@ -132,7 +137,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getLocalEndpointIdentifier() throws Exception
+	public void getLocalEndpointIdentifier(ProcessPluginApi api) throws Exception
 	{
 		Optional<Identifier> id = api.getEndpointProvider().getLocalEndpointIdentifier();
 		expectNotNull(id);
@@ -143,7 +148,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getLocalEndpointIdentifierValue() throws Exception
+	public void getLocalEndpointIdentifierValue(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> idV = api.getEndpointProvider().getLocalEndpointIdentifierValue();
 		expectNotNull(idV);
@@ -153,7 +158,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierNull() throws Exception
+	public void getEndpointByEndpointIdentifierNull(ProcessPluginApi api) throws Exception
 	{
 		Optional<Endpoint> e = api.getEndpointProvider().getEndpoint((Identifier) null);
 		expectNotNull(e);
@@ -161,7 +166,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierNotExisting() throws Exception
+	public void getEndpointByEndpointIdentifierNotExisting(ProcessPluginApi api) throws Exception
 	{
 		Optional<Endpoint> e = api.getEndpointProvider()
 				.getEndpoint(EndpointIdentifier.withValue("not-existing-identifier-value"));
@@ -170,21 +175,21 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierLocal() throws Exception
+	public void getEndpointByEndpointIdentifierLocal(ProcessPluginApi api) throws Exception
 	{
 		Optional<Endpoint> e = api.getEndpointProvider().getEndpoint(ENDPOINT_IDENTIFIER_LOCAL);
 		testEndpointLocal(e);
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierExternal() throws Exception
+	public void getEndpointByEndpointIdentifierExternal(ProcessPluginApi api) throws Exception
 	{
 		Optional<Endpoint> e = api.getEndpointProvider().getEndpoint(ENDPOINT_IDENTIFIER_EXTERNAL);
 		testEndpointExternal(e);
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierValueNull() throws Exception
+	public void getEndpointByEndpointIdentifierValueNull(ProcessPluginApi api) throws Exception
 	{
 		Optional<Endpoint> e = api.getEndpointProvider().getEndpoint((String) null);
 		expectNotNull(e);
@@ -192,7 +197,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierValueNotExisting() throws Exception
+	public void getEndpointByEndpointIdentifierValueNotExisting(ProcessPluginApi api) throws Exception
 	{
 		Optional<Endpoint> e = api.getEndpointProvider().getEndpoint("not-existing-identifier-value");
 		expectNotNull(e);
@@ -200,19 +205,19 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierValueLocal() throws Exception
+	public void getEndpointByEndpointIdentifierValueLocal(ProcessPluginApi api) throws Exception
 	{
 		testEndpointLocal(api.getEndpointProvider().getEndpoint(ENDPOINT_IDENTIFIER_LOCAL_VALUE));
 	}
 
 	@PluginTest
-	public void getEndpointByEndpointIdentifierValueExternal() throws Exception
+	public void getEndpointByEndpointIdentifierValueExternal(ProcessPluginApi api) throws Exception
 	{
 		testEndpointExternal(api.getEndpointProvider().getEndpoint(ENDPOINT_IDENTIFIER_EXTERNAL_VALUE));
 	}
 
 	@PluginTest
-	public void getEndpointAddressByEndpointIdentifierNull() throws Exception
+	public void getEndpointAddressByEndpointIdentifierNull(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress((Identifier) null);
 		expectNotNull(a);
@@ -220,7 +225,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointAddressByEndpointIdentifierNotExisting() throws Exception
+	public void getEndpointAddressByEndpointIdentifierNotExisting(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider()
 				.getEndpointAddress(EndpointIdentifier.withValue("not-existing-identifier-value"));
@@ -229,21 +234,21 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointAddressByEndpointIdentifierLocal() throws Exception
+	public void getEndpointAddressByEndpointIdentifierLocal(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress(ENDPOINT_IDENTIFIER_LOCAL);
 		testEndpointAddressLocal(a);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByEndpointIdentifierExternal() throws Exception
+	public void getEndpointAddressByEndpointIdentifierExternal(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress(ENDPOINT_IDENTIFIER_EXTERNAL);
 		testEndpointAddressExternal(a);
 	}
 
 	@PluginTest
-	public void getEndpointAddressbyEndpointIdentifierValueNull() throws Exception
+	public void getEndpointAddressbyEndpointIdentifierValueNull(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress((String) null);
 		expectNotNull(a);
@@ -251,7 +256,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointAddressbyEndpointIdentifierValueNotExisting() throws Exception
+	public void getEndpointAddressbyEndpointIdentifierValueNotExisting(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress("not-existing-identifier-value");
 		expectNotNull(a);
@@ -259,117 +264,132 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointAddressbyEndpointIdentifierValueLocal() throws Exception
+	public void getEndpointAddressbyEndpointIdentifierValueLocal(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress(ENDPOINT_IDENTIFIER_LOCAL_VALUE);
 		testEndpointAddressLocal(a);
 	}
 
 	@PluginTest
-	public void getEndpointAddressbyEndpointIdentifierValueExternal() throws Exception
+	public void getEndpointAddressbyEndpointIdentifierValueExternal(ProcessPluginApi api) throws Exception
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress(ENDPOINT_IDENTIFIER_EXTERNAL_VALUE);
 		testEndpointAddressExternal(a);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull1() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull1(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null, ORGANIZATION_IDENTIFIER_LOCAL,
-				OrganizationRole.dic());
-	}
-
-	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull2() throws Exception
-	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT, null,
-				OrganizationRole.dic());
-	}
-
-	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull3() throws Exception
-	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
-				ORGANIZATION_IDENTIFIER_LOCAL, null);
-	}
-
-	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull4() throws Exception
-	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null, null, OrganizationRole.dic());
-	}
-
-	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull5() throws Exception
-	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT, null,
-				null);
-	}
-
-	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull6() throws Exception
-	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null, ORGANIZATION_IDENTIFIER_LOCAL,
-				null);
-	}
-
-	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull7() throws Exception
-	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null, null, null);
-	}
-
-	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting1() throws Exception
-	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null,
 				ORGANIZATION_IDENTIFIER_LOCAL, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting2() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull2(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
+				null, OrganizationRole.dic());
+	}
+
+	@PluginTest
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull3(ProcessPluginApi api)
+			throws Exception
+	{
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
+				ORGANIZATION_IDENTIFIER_LOCAL, null);
+	}
+
+	@PluginTest
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull4(ProcessPluginApi api)
+			throws Exception
+	{
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null, null,
+				OrganizationRole.dic());
+	}
+
+	@PluginTest
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull5(ProcessPluginApi api)
+			throws Exception
+	{
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
+				null, null);
+	}
+
+	@PluginTest
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull6(ProcessPluginApi api)
+			throws Exception
+	{
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null,
+				ORGANIZATION_IDENTIFIER_LOCAL, null);
+	}
+
+	@PluginTest
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNull7(ProcessPluginApi api)
+			throws Exception
+	{
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null, null, null);
+	}
+
+	@PluginTest
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting1(ProcessPluginApi api)
+			throws Exception
+	{
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_LOCAL, OrganizationRole.dic());
+	}
+
+	@PluginTest
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting2(ProcessPluginApi api)
+			throws Exception
+	{
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting3() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting3(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
 				ORGANIZATION_IDENTIFIER_LOCAL, MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting4() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting4(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
-				ORGANIZATION_IDENTIFIER_NOT_EXISTING, OrganizationRole.dic());
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_NOT_EXISTING, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting5() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting5(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING, MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting6() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting6(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
-				ORGANIZATION_IDENTIFIER_LOCAL, MEMBER_ROLE_NOT_EXISTING);
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_LOCAL, MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting7() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting7(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
-				ORGANIZATION_IDENTIFIER_NOT_EXISTING, MEMBER_ROLE_NOT_EXISTING);
+		getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_NOT_EXISTING, MEMBER_ROLE_NOT_EXISTING);
 	}
 
-	private void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(Identifier parentIdentifier,
-			Identifier memberIdentifier, Coding memberRole)
+	private void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ProcessPluginApi api,
+			Identifier parentIdentifier, Identifier memberIdentifier, Coding memberRole)
 	{
 		Optional<Endpoint> es = api.getEndpointProvider().getEndpoint(parentIdentifier, memberIdentifier, memberRole);
 		expectNotNull(es);
@@ -377,132 +397,139 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleDic() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleDic(ProcessPluginApi api) throws Exception
 	{
 		testEndpointLocal(api.getEndpointProvider().getEndpoint(ORGANIZATION_IDENTIFIER_PARENT,
 				ORGANIZATION_IDENTIFIER_LOCAL, OrganizationRole.dic()));
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleTtp() throws Exception
+	public void getEndpointByParentIdentifierAndMemberIdentifierAndMemberRoleTtp(ProcessPluginApi api) throws Exception
 	{
 		testEndpointExternal(api.getEndpointProvider().getEndpoint(ORGANIZATION_IDENTIFIER_PARENT,
 				ORGANIZATION_IDENTIFIER_EXTERNAL, OrganizationRole.ttp()));
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull1() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull1(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(null,
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api, null,
 				ORGANIZATION_IDENTIFIER_LOCAL_VALUE, OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull2() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull2(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, null, OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull3() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull3(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE, null);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull4() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull4(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(null, null,
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api, null, null,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull5() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull5(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, null, null);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull6() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull6(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(null,
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api, null,
 				ORGANIZATION_IDENTIFIER_LOCAL_VALUE, null);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull7() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNull7(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(null, null, null);
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api, null, null, null);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting()
-			throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting2()
-			throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting2(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting3()
-			throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting3(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting4()
-			throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting4(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting5()
-			throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting5(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting6()
-			throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting6(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting7()
-			throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeNotExisting7(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
+		getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	private void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeExpectEmpty(
-			String parentIdentifierValue, String memberIdentifierValue, String memberRoleCode)
+			ProcessPluginApi api, String parentIdentifierValue, String memberIdentifierValue, String memberRoleCode)
 	{
 		Optional<Endpoint> es = api.getEndpointProvider().getEndpoint(parentIdentifierValue, memberIdentifierValue,
 				memberRoleCode);
@@ -511,117 +538,133 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeDic() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeDic(ProcessPluginApi api)
+			throws Exception
 	{
 		testEndpointLocal(api.getEndpointProvider().getEndpoint(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				ORGANIZATION_IDENTIFIER_LOCAL_VALUE, OrganizationRole.Codes.DIC));
 	}
 
 	@PluginTest
-	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeTtp() throws Exception
+	public void getEndpointByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeTtp(ProcessPluginApi api)
+			throws Exception
 	{
 		testEndpointExternal(api.getEndpointProvider().getEndpoint(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE, OrganizationRole.Codes.TTP));
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull1() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull1(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null,
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null,
 				ORGANIZATION_IDENTIFIER_LOCAL, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull2() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull2(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
-				null, OrganizationRole.dic());
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_PARENT, null, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull3() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull3(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
-				ORGANIZATION_IDENTIFIER_LOCAL, null);
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_PARENT, ORGANIZATION_IDENTIFIER_LOCAL, null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull4() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull4(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null, null,
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null, null,
 				OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull5() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull5(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
-				null, null);
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_PARENT, null, null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull6() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull6(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null,
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null,
 				ORGANIZATION_IDENTIFIER_LOCAL, null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull7() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNull7(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(null, null, null);
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api, null, null, null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting1() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting1(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_LOCAL, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting2() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting2(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
-				ORGANIZATION_IDENTIFIER_NOT_EXISTING, OrganizationRole.dic());
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_PARENT, ORGANIZATION_IDENTIFIER_NOT_EXISTING, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting3() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting3(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
-				ORGANIZATION_IDENTIFIER_LOCAL, MEMBER_ROLE_NOT_EXISTING);
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_PARENT, ORGANIZATION_IDENTIFIER_LOCAL, MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting4() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting4(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_NOT_EXISTING, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting5() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting5(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
-				ORGANIZATION_IDENTIFIER_NOT_EXISTING, MEMBER_ROLE_NOT_EXISTING);
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
+				ORGANIZATION_IDENTIFIER_PARENT, ORGANIZATION_IDENTIFIER_NOT_EXISTING, MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting6() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting6(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_LOCAL, MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting7() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleNotExisting7(ProcessPluginApi api)
+			throws Exception
 	{
-		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING, ORGANIZATION_IDENTIFIER_NOT_EXISTING, MEMBER_ROLE_NOT_EXISTING);
 	}
 
-	private void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(
+	private void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleExpectEmpty(ProcessPluginApi api,
 			Identifier parentIdentifier, Identifier memberIdentifier, Coding memberRole)
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress(parentIdentifier, memberIdentifier,
@@ -631,132 +674,142 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleDic() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleDic(ProcessPluginApi api)
+			throws Exception
 	{
 		testEndpointAddressLocal(api.getEndpointProvider().getEndpointAddress(ORGANIZATION_IDENTIFIER_PARENT,
 				ORGANIZATION_IDENTIFIER_LOCAL, OrganizationRole.dic()));
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleTtp() throws Exception
+	public void getEndpointAddressByParentIdentifierAndMemberIdentifierAndMemberRoleTtp(ProcessPluginApi api)
+			throws Exception
 	{
 		testEndpointAddressExternal(api.getEndpointProvider().getEndpointAddress(ORGANIZATION_IDENTIFIER_PARENT,
 				ORGANIZATION_IDENTIFIER_EXTERNAL, OrganizationRole.ttp()));
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull1() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull1(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(null,
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api, null,
 				ORGANIZATION_IDENTIFIER_LOCAL_VALUE, OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull2() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull2(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, null, OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull3() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull3(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE, null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull4() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull4(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(null, null,
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api, null, null,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull5() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull5(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, null, null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull6() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull6(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(null,
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api, null,
 				ORGANIZATION_IDENTIFIER_LOCAL_VALUE, null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull7() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNull7(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(null, null, null);
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api, null, null,
+				null);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting1()
-			throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting1(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting2()
-			throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting2(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting3()
-			throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting3(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting4()
-			throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting4(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting5()
-			throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting5(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_PARENT_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting6()
-			throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting6(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_LOCAL_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting7()
-			throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleNotExisting7(
+			ProcessPluginApi api) throws Exception
 	{
-		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
+		getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(api,
 				ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	private void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleExpectEmpty(
-			String parentIdentifierValue, String memberIdentifierValue, String memberRole)
+			ProcessPluginApi api, String parentIdentifierValue, String memberIdentifierValue, String memberRole)
 	{
 		Optional<String> a = api.getEndpointProvider().getEndpointAddress(parentIdentifierValue, memberIdentifierValue,
 				memberRole);
@@ -765,60 +818,62 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeDic() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeDic(
+			ProcessPluginApi api) throws Exception
 	{
 		testEndpointAddressLocal(api.getEndpointProvider().getEndpointAddress(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				ORGANIZATION_IDENTIFIER_LOCAL_VALUE, OrganizationRole.Codes.DIC));
 	}
 
 	@PluginTest
-	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeTtp() throws Exception
+	public void getEndpointAddressByParentIdentifierValueAndMemberIdentifierValueAndMemberRoleCodeTtp(
+			ProcessPluginApi api) throws Exception
 	{
 		testEndpointAddressExternal(api.getEndpointProvider().getEndpointAddress(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				ORGANIZATION_IDENTIFIER_EXTERNAL_VALUE, OrganizationRole.Codes.TTP));
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleNull1() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleNull1(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(null, OrganizationRole.dic());
+		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(api, null, OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleNull2() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleNull2(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT, null);
+		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT, null);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleNull3() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleNull3(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(null, null);
+		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(api, null, null);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleNotExisting1() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleNotExisting1(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
+		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING,
 				OrganizationRole.dic());
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleNotExisting2() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleNotExisting2(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT,
+		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT,
 				MEMBER_ROLE_NOT_EXISTING);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleNotExisting3() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleNotExisting3(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING,
+		getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING,
 				MEMBER_ROLE_NOT_EXISTING);
 	}
 
-	private void getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(Identifier parentOrganizationIdentifier,
-			Coding memberOrganizationRole)
+	private void getEndpointsByParentIdentifierAndMemberRoleExpectEmpty(ProcessPluginApi api,
+			Identifier parentOrganizationIdentifier, Coding memberOrganizationRole)
 	{
 		List<Endpoint> es = api.getEndpointProvider().getEndpoints(parentOrganizationIdentifier,
 				memberOrganizationRole);
@@ -827,7 +882,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleDic() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleDic(ProcessPluginApi api) throws Exception
 	{
 		List<Endpoint> es = api.getEndpointProvider().getEndpoints(ORGANIZATION_IDENTIFIER_PARENT,
 				OrganizationRole.dic());
@@ -837,7 +892,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierAndMemberRoleTtp() throws Exception
+	public void getEndpointsByParentIdentifierAndMemberRoleTtp(ProcessPluginApi api) throws Exception
 	{
 		List<Endpoint> es = api.getEndpointProvider().getEndpoints(ORGANIZATION_IDENTIFIER_PARENT,
 				OrganizationRole.ttp());
@@ -847,46 +902,46 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleNull1() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleNull1(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(null, OrganizationRole.Codes.DIC);
+		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(api, null, OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleNull2() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleNull2(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE, null);
+		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT_VALUE, null);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleNull3() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleNull3(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(null, null);
+		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(api, null, null);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleNotExisting1() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleNotExisting1(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
+		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				OrganizationRole.Codes.DIC);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleNotExisting2() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleNotExisting2(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
+		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleNotExisting3() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleNotExisting3(ProcessPluginApi api) throws Exception
 	{
-		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
+		getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(api, ORGANIZATION_IDENTIFIER_NOT_EXISTING_VALUE,
 				MEMBER_ROLE_NOT_EXISTING_CODE);
 	}
 
-	private void getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(String parentOrganizationIdentifierValue,
-			String memberOrganizationRole)
+	private void getEndpointsByParentIdentifierValueAndMemberRoleExpectEmpty(ProcessPluginApi api,
+			String parentOrganizationIdentifierValue, String memberOrganizationRole)
 	{
 		List<Endpoint> es = api.getEndpointProvider().getEndpoints(parentOrganizationIdentifierValue,
 				memberOrganizationRole);
@@ -895,7 +950,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleCodeDic() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleCodeDic(ProcessPluginApi api) throws Exception
 	{
 		List<Endpoint> es = api.getEndpointProvider().getEndpoints(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				OrganizationRole.Codes.DIC);
@@ -905,7 +960,7 @@ public class EndpointProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getEndpointsByParentIdentifierValueAndMemberRoleCodeTtp() throws Exception
+	public void getEndpointsByParentIdentifierValueAndMemberRoleCodeTtp(ProcessPluginApi api) throws Exception
 	{
 		List<Endpoint> es = api.getEndpointProvider().getEndpoints(ORGANIZATION_IDENTIFIER_PARENT_VALUE,
 				OrganizationRole.Codes.TTP);

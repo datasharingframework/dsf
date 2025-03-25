@@ -209,8 +209,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static WebsocketClient getWebsocketClient()
 	{
 		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
-				Map.of("criteria:exact", List.of("Task"), "status", List.of("active"), "type", List.of("websocket"),
-						"payload", List.of("application/fhir+json")));
+				Map.of("criteria:exact",
+						List.of("Task?_profile:below=http://dsf.dev/fhir/StructureDefinition/task-test"), "status",
+						List.of("active"), "type", List.of("websocket"), "payload", List.of("application/fhir+json")));
 
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());

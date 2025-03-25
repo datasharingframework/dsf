@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +24,29 @@ public final class PluginTestExecutor
 	}
 
 	public static final void execute(Object testClass, Consumer<String> addTestSucceededToStartTask,
-			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask)
+			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask, Object testMethodArg0,
+			Object testMethodArg1, Object... testMethodArgs)
 	{
 		Arrays.stream(testClass.getClass().getDeclaredMethods())
 				.filter(m -> m.getAnnotationsByType(PluginTest.class).length == 1)
-				.filter(m -> m.getParameterCount() == 0).forEach(m ->
+				.filter(m -> m.getParameterCount() <= testMethodArgs.length).forEach(m ->
 				{
 					try
 					{
 						logger.info("Executing test method {}.{} ...", testClass.getClass().getName(), m.getName());
-						m.invoke(testClass);
+
+						Class<?>[] parameterTypes = m.getParameterTypes();
+						Object[] values = Arrays.stream(m.getParameterTypes()).flatMap(parameterType -> Stream
+								.concat(Stream.of(testMethodArg0, testMethodArg1), Arrays.stream(testMethodArgs))
+								.filter(value -> parameterType.isAssignableFrom(value.getClass())).findFirst().stream())
+								.toArray();
+
+						if (values.length != parameterTypes.length)
+							throw new IllegalArgumentException(
+									"One or more parameters of test method '" + m.getName() + "' not supported");
+
+						m.invoke(testClass, values);
+
 						logger.info("Executing test method {}.{} [succeeded]", testClass.getClass().getName(),
 								m.getName());
 

@@ -1,7 +1,9 @@
 package dev.dsf.bpe.v2.variables;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,6 +66,30 @@ public class VariablesImpl implements Variables, ListenerVariables
 	public VariablesImpl(DelegateExecution execution)
 	{
 		this.execution = Objects.requireNonNull(execution, "execution");
+	}
+
+	@Override
+	public String getBusinessKey()
+	{
+		return execution.getBusinessKey();
+	}
+
+	@Override
+	public String getCurrentActivityId()
+	{
+		return execution.getCurrentActivityId();
+	}
+
+	@Override
+	public String getProcessDefinitionId()
+	{
+		return execution.getProcessDefinitionId();
+	}
+
+	@Override
+	public String getActivityInstanceId()
+	{
+		return execution.getActivityInstanceId();
 	}
 
 	@Override
@@ -257,7 +283,74 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
-	public void setVariable(String variableName, TypedValue value)
+	public void setInteger(String variableName, Integer value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
+	}
+
+	@Override
+	public void setString(String variableName, String value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+	}
+
+	@Override
+	public void setByteArray(String variableName, byte[] value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
+	}
+
+	@Override
+	public void setDate(String variableName, Date value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
+	}
+
+	@Override
+	public void setLong(String variableName, Long value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
+	}
+
+	@Override
+	public void setShort(String variableName, Short value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
+	}
+
+	@Override
+	public void setDouble(String variableName, Double value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
+	}
+
+	@Override
+	public void setNumber(String variableName, Number value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
+	}
+
+	@Override
+	public void setFile(String variableName, File value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
+	}
+
+	@Override
+	public void setBoolean(String variableName, Boolean value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
+	}
+
+	@Override
+	public void setJsonVariable(String variableName, Object value)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		execution.setVariable(variableName, JsonObjectValues.create(value));
+	}
+
+	private void setVariable(String variableName, TypedValue value)
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
@@ -270,6 +363,89 @@ public class VariablesImpl implements Variables, ListenerVariables
 		Objects.requireNonNull(variableName, "variableName");
 
 		return execution.getVariable(variableName);
+	}
+
+	@Override
+	public void setIntegerLocal(String variableName, Integer value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
+	}
+
+	@Override
+	public void setStringLocal(String variableName, String value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+	}
+
+	@Override
+	public void setByteArrayLocal(String variableName, byte[] value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
+	}
+
+	@Override
+	public void setDateLocal(String variableName, Date value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
+	}
+
+	@Override
+	public void setLongLocal(String variableName, Long value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
+	}
+
+	@Override
+	public void setShortLocal(String variableName, Short value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
+	}
+
+	@Override
+	public void setDoubleLocal(String variableName, Double value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
+	}
+
+	@Override
+	public void setNumberLocal(String variableName, Number value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
+	}
+
+	@Override
+	public void setFileLocal(String variableName, File value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
+	}
+
+	@Override
+	public void setBooleanLocal(String variableName, Boolean value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
+	}
+
+	private void setVariableLocal(String variableName, TypedValue value)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		execution.setVariableLocal(variableName, value);
+	}
+
+	@Override
+	public void setJsonVariableLocal(String variableName, Object value)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		execution.setVariableLocal(variableName, JsonObjectValues.create(value));
+	}
+
+	@Override
+	public Object getVariableLocal(String variableName)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		return execution.getVariableLocal(variableName);
 	}
 
 	@Override

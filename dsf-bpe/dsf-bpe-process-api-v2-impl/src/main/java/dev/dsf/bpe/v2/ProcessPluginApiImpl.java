@@ -2,7 +2,6 @@ package dev.dsf.bpe.v2;
 
 import java.util.Objects;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,8 +18,6 @@ import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
-import dev.dsf.bpe.v2.variables.Variables;
-import dev.dsf.bpe.v2.variables.VariablesImpl;
 
 public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 {
@@ -154,12 +151,5 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public TaskHelper getTaskHelper()
 	{
 		return taskHelper;
-	}
-
-	@Override
-	public Variables getVariables(DelegateExecution execution)
-	{
-		// returning a new VariablesImpl since DelegateExecution is BPMN activity specific
-		return new VariablesImpl(execution);
 	}
 }

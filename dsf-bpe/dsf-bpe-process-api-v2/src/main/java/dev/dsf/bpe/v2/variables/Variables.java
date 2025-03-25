@@ -4,10 +4,15 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.springframework.expression.TypedValue;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
 
@@ -16,6 +21,18 @@ import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
  */
 public interface Variables
 {
+	// TODO javadoc
+	String getBusinessKey();
+
+	// TODO javadoc
+	String getCurrentActivityId();
+
+	// TODO javadoc
+	String getProcessDefinitionId();
+
+	// TODO javadoc
+	String getActivityInstanceId();
+
 	/**
 	 * Sets execution variable {@link BpmnExecutionVariables#ALTERNATIVE_BUSINESS_KEY}
 	 *
@@ -252,25 +269,16 @@ public interface Variables
 	QuestionnaireResponse getLatestReceivedQuestionnaireResponse();
 
 	/**
-	 * Sets execution variable with the given <b>variableName</b> to the given {@link TypedValue}
-	 *
+	 * Uses {@link ObjectMapper} to serialize the given <b>value</b> into json. Value class needs annotations like
+	 * {@link JsonCreator}, {@link JsonProperty} and {@link JsonGetter}
+	 * 
 	 * @param variableName
 	 *            not <code>null</code>
 	 * @param value
-	 *            may be <code>null</code>
+	 *            may be null
 	 * @see #getVariable(String)
-	 * @see #setInteger(String, Integer)
-	 * @see #setString(String, String)
-	 * @see #setBoolean(String, Boolean)
-	 * @see #setByteArray(String, byte[])
-	 * @see #setDate(String, Date)
-	 * @see #setLong(String, Long)
-	 * @see #setShort(String, Short)
-	 * @see #setDouble(String, Double)
-	 * @see #setNumber(String, Number)
-	 * @see #setFile(String, File)
 	 */
-	void setVariable(String variableName, TypedValue value);
+	void setJsonVariable(String variableName, Object value);
 
 	/**
 	 * Retrieves execution variable with the given <b>variableName</b>
@@ -302,10 +310,7 @@ public interface Variables
 	 * @see #getInteger(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setInteger(String variableName, Integer value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
-	}
+	void setInteger(String variableName, Integer value);
 
 	/**
 	 * Retrieves {@link Integer} execution variable with the given <b>variableName</b>
@@ -333,10 +338,7 @@ public interface Variables
 	 * @see #getString(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setString(String variableName, String value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
-	}
+	void setString(String variableName, String value);
 
 	/**
 	 * Retrieves {@link String} execution variable with the given <b>variableName</b>
@@ -364,10 +366,7 @@ public interface Variables
 	 * @see #getBoolean(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setBoolean(String variableName, Boolean value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
-	}
+	void setBoolean(String variableName, Boolean value);
 
 	/**
 	 * Retrieves {@link Boolean} execution variable with the given <b>variableName</b>
@@ -395,10 +394,7 @@ public interface Variables
 	 * @see #getByteArray(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setByteArray(String variableName, byte[] value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
-	}
+	void setByteArray(String variableName, byte[] value);
 
 	/**
 	 * Retrieves <code>byte[]</code> execution variable with the given <b>variableName</b>
@@ -426,10 +422,7 @@ public interface Variables
 	 * @see #getDate(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setDate(String variableName, Date value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
-	}
+	void setDate(String variableName, Date value);
 
 	/**
 	 * Retrieves {@link Date} execution variable with the given <b>variableName</b>
@@ -457,10 +450,7 @@ public interface Variables
 	 * @see #getLong(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setLong(String variableName, Long value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
-	}
+	void setLong(String variableName, Long value);
 
 	/**
 	 * Retrieves {@link Long} execution variable with the given <b>variableName</b>
@@ -488,10 +478,7 @@ public interface Variables
 	 * @see #getShort(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setShort(String variableName, Short value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
-	}
+	void setShort(String variableName, Short value);
 
 	/**
 	 * Retrieves {@link Short} execution variable with the given <b>variableName</b>
@@ -519,10 +506,7 @@ public interface Variables
 	 * @see #getDouble(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setDouble(String variableName, Double value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
-	}
+	void setDouble(String variableName, Double value);
 
 	/**
 	 * Retrieves {@link Double} execution variable with the given <b>variableName</b>
@@ -550,10 +534,7 @@ public interface Variables
 	 * @see #getNumber(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setNumber(String variableName, Number value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
-	}
+	void setNumber(String variableName, Number value);
 
 	/**
 	 * Retrieves {@link Number} execution variable with the given <b>variableName</b>
@@ -581,10 +562,7 @@ public interface Variables
 	 * @see #getFile(String)
 	 * @see #setVariable(String, TypedValue)
 	 */
-	default void setFile(String variableName, File value)
-	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
-	}
+	void setFile(String variableName, File value);
 
 	/**
 	 * Retrieves {@link File} execution variable with the given <b>variableName</b>
@@ -601,4 +579,88 @@ public interface Variables
 	{
 		return (File) getVariable(variableName);
 	}
+
+	void setIntegerLocal(String variableName, Integer value);
+
+	default Integer getIntegerLocal(String variableName)
+	{
+		return (Integer) getVariableLocal(variableName);
+	}
+
+	void setStringLocal(String variableName, String value);
+
+	default String getStringLocal(String variableName)
+	{
+		return (String) getVariableLocal(variableName);
+	}
+
+	void setByteArrayLocal(String variableName, byte[] value);
+
+	default byte[] getByteArrayLocal(String variableName)
+	{
+		return (byte[]) getVariableLocal(variableName);
+	}
+
+	void setDateLocal(String variableName, Date value);
+
+	default Date getDateLocal(String variableName)
+	{
+		return (Date) getVariableLocal(variableName);
+	}
+
+	void setLongLocal(String variableName, Long value);
+
+	default Long gsetLongLocal(String variableName)
+	{
+		return (Long) getVariableLocal(variableName);
+	}
+
+	void setShortLocal(String variableName, Short value);
+
+	default Short gsetShortLocal(String variableName)
+	{
+		return (Short) getVariableLocal(variableName);
+	}
+
+	void setDoubleLocal(String variableName, Double value);
+
+	default Double getDoubleLocal(String variableName)
+	{
+		return (Double) getVariableLocal(variableName);
+	}
+
+	void setNumberLocal(String variableName, Number value);
+
+	default Number getNumberLocal(String variableName)
+	{
+		return (Number) getVariableLocal(variableName);
+	}
+
+	void setFileLocal(String variableName, File value);
+
+	default File getFileLocal(String variableName)
+	{
+		return (File) getVariableLocal(variableName);
+	}
+
+	void setBooleanLocal(String variableName, Boolean value);
+
+	default Boolean getBooleanLocal(String variableName)
+	{
+		return (Boolean) getVariableLocal(variableName);
+	}
+
+	/**
+	 * Uses {@link ObjectMapper} to serialize the given <b>value</b> into json. Value class needs annotations like
+	 * {@link JsonCreator}, {@link JsonProperty} and {@link JsonGetter}
+	 * 
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be null
+	 * @see #getVariable(String)
+	 */
+	void setJsonVariableLocal(String variableName, Object value);
+
+	Object getVariableLocal(String variableName);
 }

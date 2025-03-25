@@ -2,113 +2,96 @@ package dev.dsf.bpe.test.service;
 
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 
-import org.camunda.bpm.engine.delegate.BpmnError;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-
+import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.activity.ServiceTask;
+import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
 import dev.dsf.bpe.v2.variables.Variables;
 
-public class ApiTest extends AbstractTest
+public class ApiTest extends AbstractTest implements ServiceTask
 {
-	private DelegateExecution execution;
-
-	public ApiTest(ProcessPluginApi api)
-	{
-		super(api);
-	}
-
 	@Override
-	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
+	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		this.execution = execution;
-
-		super.doExecute(execution, variables);
-
-		this.execution = null;
+		executeTests(api, variables);
 	}
 
 	@PluginTest
-	public void apiNotNull() throws Exception
+	public void apiNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api);
 	}
 
 	@PluginTest
-	public void apiGetEndpointProviderNotNull() throws Exception
+	public void apiGetEndpointProviderNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getEndpointProvider());
 	}
 
 	@PluginTest
-	public void apiGetFhirContextNotNull() throws Exception
+	public void apiGetFhirContextNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirContext());
 	}
 
 	@PluginTest
-	public void apiGetDsfClientProviderNotNull() throws Exception
+	public void apiGetDsfClientProviderNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getDsfClientProvider());
 	}
 
 	@PluginTest
-	public void apiGetFhirClientProviderNotNull() throws Exception
+	public void apiGetFhirClientProviderNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider());
 	}
 
 	@PluginTest
-	public void apiGetOidcClientProviderrNotNull() throws Exception
+	public void apiGetOidcClientProviderrNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getOidcClientProvider());
 	}
 
 	@PluginTest
-	public void apiGetMailServiceNotNull() throws Exception
+	public void apiGetMailServiceNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getMailService());
 	}
 
 	@PluginTest
-	public void apiGetObjectMapperNotNull() throws Exception
+	public void apiGetObjectMapperNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getObjectMapper());
 	}
 
 	@PluginTest
-	public void apiGetOrganizationProviderNotNull() throws Exception
+	public void apiGetOrganizationProviderNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getOrganizationProvider());
 	}
 
 	@PluginTest
-	public void apiGetProcessAuthorizationHelperNotNull() throws Exception
+	public void apiGetProcessAuthorizationHelperNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getProcessAuthorizationHelper());
 	}
 
 	@PluginTest
-	public void apiGetProxyConfigNotNull() throws Exception
+	public void apiGetProxyConfigNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getProxyConfig());
 	}
 
 	@PluginTest
-	public void apiGetReadAccessHelperNotNull() throws Exception
+	public void apiGetReadAccessHelperNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getReadAccessHelper());
 	}
 
 	@PluginTest
-	public void apiGetTaskHelperNotNull() throws Exception
+	public void apiGetTaskHelperNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getTaskHelper());
-	}
-
-	@PluginTest
-	public void apiGetVariablesNotNull() throws Exception
-	{
-		expectNotNull(api.getVariables(execution));
 	}
 }
