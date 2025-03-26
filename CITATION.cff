@@ -24,8 +24,8 @@ preferred-citation:
   doi: 10.3233/SHTI210060
   type: proceedings
 title: "Data Sharing Framework (DSF)"
-version: 2.0.0
-date-released: 2025-01-22
+version: 2.0.0-M1
+date-released: 2025-03-26
 url: https://dsf.dev
 repository-code: https://github.com/datasharingframework/dsf
 repository-artifact: https://github.com/datasharingframework/dsf/releases
