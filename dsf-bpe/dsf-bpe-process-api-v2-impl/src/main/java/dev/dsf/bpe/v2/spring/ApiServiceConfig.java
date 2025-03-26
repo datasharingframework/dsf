@@ -56,6 +56,7 @@ import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelperImpl;
 import dev.dsf.bpe.v2.variables.FhirResourceSerializer;
 import dev.dsf.bpe.v2.variables.FhirResourcesListSerializer;
+import dev.dsf.bpe.v2.variables.JsonVariableSerializer;
 import dev.dsf.bpe.v2.variables.ObjectMapperFactory;
 import dev.dsf.bpe.v2.variables.TargetSerializer;
 import dev.dsf.bpe.v2.variables.TargetsSerializer;
@@ -221,6 +222,12 @@ public class ApiServiceConfig
 	public TargetsSerializer targetsSerializer()
 	{
 		return new TargetsSerializer(objectMapper());
+	}
+
+	@Bean
+	public JsonVariableSerializer jsonVariableSerializer()
+	{
+		return new JsonVariableSerializer(objectMapper());
 	}
 
 	@Bean

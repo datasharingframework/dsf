@@ -31,7 +31,7 @@ public class ApiServicesSpringConfiguration
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public DefaultUserTaskListener defaultUserTaskListener()
 	{
-		return new DefaultUserTaskListener(api);
+		return new DefaultUserTaskListener();
 	}
 
 	@Bean

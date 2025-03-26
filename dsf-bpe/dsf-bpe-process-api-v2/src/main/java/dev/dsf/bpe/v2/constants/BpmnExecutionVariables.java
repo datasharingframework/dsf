@@ -1,6 +1,9 @@
 package dev.dsf.bpe.v2.constants;
 
-import dev.dsf.bpe.v2.activity.AbstractTaskMessageSend;
+import dev.dsf.bpe.v2.activity.MessageEndEvent;
+import dev.dsf.bpe.v2.activity.MessageIntermediateThrowEvent;
+import dev.dsf.bpe.v2.activity.MessageSendTask;
+import dev.dsf.bpe.v2.activity.task.BusinessKeyStrategies;
 import dev.dsf.bpe.v2.variables.Target;
 import dev.dsf.bpe.v2.variables.Variables;
 
@@ -16,8 +19,8 @@ public final class BpmnExecutionVariables
 	}
 
 	/**
-	 * Values from the <code>target</code> variable are used to configure {@link AbstractTaskMessageSend} activities for
-	 * sending Task resource messages
+	 * Values from the <code>target</code> variable are used to configure {@link MessageEndEvent},
+	 * {@link MessageIntermediateThrowEvent} and {@link MessageSendTask} activities for sending Task resource messages
 	 *
 	 * @see Variables#createTarget(String, String, String, String)
 	 * @see Variables#createTarget(String, String, String)
@@ -47,11 +50,12 @@ public final class BpmnExecutionVariables
 
 	/**
 	 * Value of the <code>alternativeBusinessKey</code> variable is used to correlated incoming Task resource to a
-	 * waiting process instance if an alternative business-key was created for a communication target. See corresponding
-	 * <code>protected</code> method in {@link AbstractTaskMessageSend} on how to create and use an alternative
-	 * business-key.
+	 * waiting process instance if an alternative business-key was created for a communication target.
 	 *
-	 * @see AbstractTaskMessageSend
+	 * @see MessageEndEvent#getBusinessKeyStrategy()
+	 * @see MessageIntermediateThrowEvent#getBusinessKeyStrategy()
+	 * @see MessageEndEvent#getBusinessKeyStrategy()
+	 * @see BusinessKeyStrategies#ALTERNATIVE
 	 */
 	public static final String ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
 }

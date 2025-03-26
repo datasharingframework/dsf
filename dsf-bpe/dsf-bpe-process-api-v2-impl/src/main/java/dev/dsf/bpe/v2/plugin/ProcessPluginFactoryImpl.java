@@ -13,7 +13,6 @@ import dev.dsf.bpe.api.plugin.AbstractProcessPluginFactory;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.v2.ProcessPluginDefinition;
-import dev.dsf.bpe.v2.activity.DefaultUserTaskListener;
 
 public class ProcessPluginFactoryImpl extends AbstractProcessPluginFactory implements ProcessPluginFactory
 {
@@ -22,8 +21,7 @@ public class ProcessPluginFactoryImpl extends AbstractProcessPluginFactory imple
 	public ProcessPluginFactoryImpl(ClassLoader apiClassLoader, ApplicationContext apiApplicationContext,
 			ConfigurableEnvironment environment)
 	{
-		super(API_VERSION, apiClassLoader, apiApplicationContext, environment, ProcessPluginDefinition.class,
-				DefaultUserTaskListener.class);
+		super(API_VERSION, apiClassLoader, apiApplicationContext, environment, ProcessPluginDefinition.class);
 	}
 
 	@Override

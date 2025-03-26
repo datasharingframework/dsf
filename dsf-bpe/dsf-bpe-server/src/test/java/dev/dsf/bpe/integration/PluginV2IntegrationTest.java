@@ -19,32 +19,68 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
-	public void startApiTestProcess() throws Exception
+	public void startApiTest() throws Exception
 	{
 		executePluginTest(createTestTask("Api"));
 	}
 
 	@Test
-	public void startProxyTestProcess() throws Exception
+	public void startProxyTest() throws Exception
 	{
 		executePluginTest(createTestTask("Proxy"));
 	}
 
 	@Test
-	public void startOrganizationProviderTestProcess() throws Exception
+	public void startOrganizationProviderTest() throws Exception
 	{
 		executePluginTest(createTestTask("OrganizationProvider"));
 	}
 
 	@Test
-	public void startEndpointProviderTestProcess() throws Exception
+	public void startEndpointProviderTest() throws Exception
 	{
 		executePluginTest(createTestTask("EndpointProvider"));
 	}
 
 	@Test
-	public void startFhirClientProviderTestProcess() throws Exception
+	public void startFhirClientProviderTest() throws Exception
 	{
 		executePluginTest(createTestTask("FhirClientProvider"));
+	}
+
+	@Test
+	public void startSendTaskTest() throws Exception
+	{
+		executePluginTest(createTestTask("SendTaskTest"));
+	}
+
+	@Test
+	public void startFieldInjectionTest() throws Exception
+	{
+		executePluginTest(createTestTask("FieldInjectionTest"));
+	}
+
+	@Test
+	public void startErrorBoundaryEventTest() throws Exception
+	{
+		executePluginTest(createTestTask("ErrorBoundaryEventTest"));
+	}
+
+	@Test
+	public void startExceptionTest() throws Exception
+	{
+		executePluginTest(createTestTask("ExceptionTest"));
+	}
+
+	@Test
+	public void startContinueSendTest() throws Exception
+	{
+		executePluginTest(createTestTask("ContinueSendTest"));
+	}
+
+	@Test
+	public void startJsonVariableTest() throws Exception
+	{
+		executePluginTest(createTestTask("JsonVariableTest"));
 	}
 }

@@ -1,6 +1,5 @@
 package dev.dsf.bpe.v2;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -53,6 +52,4 @@ public interface ProcessPluginApi
 	ReadAccessHelper getReadAccessHelper();
 
 	TaskHelper getTaskHelper();
-
-	Variables getVariables(DelegateExecution execution);
 }

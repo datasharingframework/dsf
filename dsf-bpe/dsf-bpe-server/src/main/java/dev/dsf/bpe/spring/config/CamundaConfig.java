@@ -119,7 +119,7 @@ public class CamundaConfig
 	@Bean
 	public DelegateProvider delegateProvider()
 	{
-		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext, processPluginFactories);
+		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext);
 	}
 
 	@Bean

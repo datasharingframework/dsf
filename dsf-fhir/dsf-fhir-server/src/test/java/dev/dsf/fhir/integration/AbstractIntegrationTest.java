@@ -211,6 +211,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				    practitioner-role:
 				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
 				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex()));
+		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", "true");
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());

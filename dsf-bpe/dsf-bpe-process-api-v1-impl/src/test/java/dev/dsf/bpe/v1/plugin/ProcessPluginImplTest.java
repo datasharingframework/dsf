@@ -34,7 +34,6 @@ import org.springframework.core.env.StandardEnvironment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
 import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.v1.ProcessPluginApi;
@@ -173,7 +172,7 @@ public class ProcessPluginImplTest
 	public void testInitializeAndValidateResourcesAllNull() throws Exception
 	{
 		var definition = createPluginDefinition(null, null, null, null, null);
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
 		try
@@ -207,7 +206,7 @@ public class ProcessPluginImplTest
 	public void testInitializeAndValidateResourcesEmptySpringConfigBpmnAndFhirResources() throws Exception
 	{
 		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(), List.of(), Map.of());
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
 		try
@@ -243,7 +242,7 @@ public class ProcessPluginImplTest
 		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(TestConfig.class),
 				List.of("test-plugin/does_not_exist.bpmn"),
 				Map.of("testorg_test", List.of("test-plugin/does_not_exist.xml")));
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
 		try
@@ -278,7 +277,7 @@ public class ProcessPluginImplTest
 	{
 		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(TestConfig.class),
 				List.of("test-plugin/test.bpmn"), Map.of("testorg_test", List.of("test-plugin/does_not_exist.xml")));
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
 		try
@@ -314,7 +313,7 @@ public class ProcessPluginImplTest
 		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(TestConfig.class),
 				List.of("test-plugin/test.bpmn"),
 				Map.of("testorg_test", List.of("test-plugin/ActivityDefinition_test.xml")));
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertTrue(plugin.initializeAndValidateResources("test.org"));
 		assertNotNull(plugin.getApplicationContext());
@@ -351,7 +350,7 @@ public class ProcessPluginImplTest
 				releaseDate);
 	}
 
-	private AbstractProcessPlugin createPlugin(ProcessPluginDefinition processPluginDefinition, boolean draft)
+	private ProcessPluginImpl createPlugin(ProcessPluginDefinition processPluginDefinition, boolean draft)
 	{
 		return new ProcessPluginImpl(processPluginDefinition, ProcessPluginFactoryImpl.API_VERSION, draft,
 				Paths.get("test.jar"), getClass().getClassLoader(), environment, apiApplicationContext);

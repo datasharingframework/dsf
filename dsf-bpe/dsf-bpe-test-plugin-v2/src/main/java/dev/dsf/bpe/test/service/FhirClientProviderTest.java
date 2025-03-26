@@ -11,24 +11,29 @@ import java.util.Collections;
 
 import org.hl7.fhir.r4.model.CapabilityStatement;
 
+import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.activity.ServiceTask;
+import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
+import dev.dsf.bpe.v2.variables.Variables;
 
-public class FhirClientProviderTest extends AbstractTest
+public class FhirClientProviderTest extends AbstractTest implements ServiceTask
 {
-	public FhirClientProviderTest(ProcessPluginApi api)
+	@Override
+	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		super(api);
+		executeTests(api, variables);
 	}
 
 	@PluginTest
-	public void getFhirClientProviderNotNull() throws Exception
+	public void getFhirClientProviderNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider());
 	}
 
 	@PluginTest
-	public void getClientConfigDsfFhirServer() throws Exception
+	public void getClientConfigDsfFhirServer(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider().getClientConfig("dsf-fhir-server"));
 		expectTrue(api.getFhirClientProvider().getClientConfig("dsf-fhir-server").isPresent());
@@ -62,7 +67,7 @@ public class FhirClientProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getClientConfigDsfFhirServerViaEndpointIdentifier() throws Exception
+	public void getClientConfigDsfFhirServerViaEndpointIdentifier(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider().getClientConfig("#Test_Endpoint"));
 		expectTrue(api.getFhirClientProvider().getClientConfig("#Test_Endpoint").isPresent());
@@ -96,7 +101,7 @@ public class FhirClientProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getClientConfigDsfFhirServerViaLocal() throws Exception
+	public void getClientConfigDsfFhirServerViaLocal(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider().getClientConfig("#local"));
 		expectTrue(api.getFhirClientProvider().getClientConfig("#local").isPresent());
@@ -130,7 +135,7 @@ public class FhirClientProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getClientConfigViaProxy() throws Exception
+	public void getClientConfigViaProxy(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider().getClientConfig("via-proxy"));
 		expectTrue(api.getFhirClientProvider().getClientConfig("via-proxy").isPresent());
@@ -165,28 +170,28 @@ public class FhirClientProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getClientConfigWithNotConfiguredServerId() throws Exception
+	public void getClientConfigWithNotConfiguredServerId(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider().getClientConfig("not-configured"));
 		expectFalse(api.getFhirClientProvider().getClientConfig("not-configured").isPresent());
 	}
 
 	@PluginTest
-	public void getClientWithConfiguredServerId() throws Exception
+	public void getClientWithConfiguredServerId(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider().getClient("dsf-fhir-server"));
 		expectTrue(api.getFhirClientProvider().getClient("dsf-fhir-server").isPresent());
 	}
 
 	@PluginTest
-	public void getClientWithNotConfiguredServerId() throws Exception
+	public void getClientWithNotConfiguredServerId(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider().getClient("not-configured"));
 		expectFalse(api.getFhirClientProvider().getClient("not-configured").isPresent());
 	}
 
 	@PluginTest
-	public void getClientConfigTestConnection() throws Exception
+	public void getClientConfigTestConnection(ProcessPluginApi api) throws Exception
 	{
 		api.getFhirClientProvider().getClient("dsf-fhir-server").ifPresent(client ->
 		{
@@ -197,7 +202,7 @@ public class FhirClientProviderTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getClientConfigTestConnectionViaEndpointIdentifier() throws Exception
+	public void getClientConfigTestConnectionViaEndpointIdentifier(ProcessPluginApi api) throws Exception
 	{
 		api.getFhirClientProvider().getClient("#Test_Endpoint").ifPresent(client ->
 		{
