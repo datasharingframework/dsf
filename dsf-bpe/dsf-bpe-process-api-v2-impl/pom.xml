@@ -57,6 +57,12 @@
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>crypto-utils</artifactId>
+			<version>${crypto-utils.version.v2}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -92,6 +98,11 @@
 								<artifactItem>
 									<groupId>dev.dsf</groupId>
 									<artifactId>dsf-bpe-process-api-v2-impl</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>de.hs-heilbronn.mi</groupId>
+									<artifactId>crypto-utils</artifactId>
+									<version>${crypto-utils.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>

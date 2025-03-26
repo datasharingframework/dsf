@@ -33,6 +33,8 @@ import dev.dsf.bpe.v2.listener.ContinueListener;
 import dev.dsf.bpe.v2.listener.EndListener;
 import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
+import dev.dsf.bpe.v2.service.CryptoService;
+import dev.dsf.bpe.v2.service.CryptoServiceImpl;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
@@ -88,7 +90,8 @@ public class ApiServiceConfig
 	{
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
 				fhirClientProvider(), oidcClientProvider(), mailService(), objectMapper(), organizationProvider(),
-				processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(), taskHelper());
+				processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(), taskHelper(),
+				cryptoService());
 	}
 
 	@Bean
@@ -254,5 +257,11 @@ public class ApiServiceConfig
 	{
 		return new ListenerFactoryImpl(ProcessPluginFactoryImpl.API_VERSION, startListener(), endListener(),
 				continueListener());
+	}
+
+	@Bean
+	public CryptoService cryptoService()
+	{
+		return new CryptoServiceImpl();
 	}
 }

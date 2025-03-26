@@ -10,6 +10,7 @@ import dev.dsf.bpe.test.message.SendTaskTest;
 import dev.dsf.bpe.test.service.ApiTest;
 import dev.dsf.bpe.test.service.ContinueSendTest;
 import dev.dsf.bpe.test.service.ContinueSendTestEvaluate;
+import dev.dsf.bpe.test.service.CryptoServiceTest;
 import dev.dsf.bpe.test.service.EndpointProviderTest;
 import dev.dsf.bpe.test.service.ErrorBoundaryEventTestThrow;
 import dev.dsf.bpe.test.service.ErrorBoundaryEventTestVerify;
@@ -34,6 +35,6 @@ public class Config
 				StartSendTaskTestListener.class, SendTaskTest.class, StartFieldInjectionTestListener.class,
 				FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class, ErrorBoundaryEventTestVerify.class,
 				ExceptionTest.class, ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
-				JsonVariableTestSet.class, JsonVariableTestGet.class);
+				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class);
 	}
 }
