@@ -347,7 +347,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		execution.setVariable(variableName, JsonObjectValues.create(value));
+		execution.setVariable(variableName, JsonVariableValues.create(new JsonVariable(value)));
 	}
 
 	private void setVariable(String variableName, TypedValue value)
@@ -363,7 +363,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		return (T) execution.getVariable(variableName);
+		Object variable = execution.getVariable(variableName);
+
+		if (variable instanceof JsonVariable jsonVariable)
+			return (T) jsonVariable.getValue();
+		else
+			return (T) variable;
 	}
 
 	@Override
@@ -438,7 +443,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		execution.setVariableLocal(variableName, JsonObjectValues.create(value));
+		execution.setVariableLocal(variableName, JsonVariableValues.create(new JsonVariable(value)));
 	}
 
 	@Override
@@ -447,7 +452,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		return (T) execution.getVariableLocal(variableName);
+		Object variable = execution.getVariable(variableName);
+
+		if (variable instanceof JsonVariable jsonVariable)
+			return (T) jsonVariable.getValue();
+		else
+			return (T) variable;
 	}
 
 	@Override

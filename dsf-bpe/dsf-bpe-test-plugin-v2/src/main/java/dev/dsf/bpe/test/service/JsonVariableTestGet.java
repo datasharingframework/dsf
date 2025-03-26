@@ -22,10 +22,28 @@ public class JsonVariableTestGet extends AbstractTest implements ServiceTask
 	@PluginTest
 	public void getJsonVariable(Variables variables) throws Exception
 	{
-		JsonPojo variable = (JsonPojo) variables.getVariable(JsonVariableTestSet.JSON_VARIABLE);
+		JsonPojo variable = variables.getVariable(JsonVariableTestSet.JSON_VARIABLE);
 
 		expectNotNull(variable);
 		expectSame(JsonVariableTestSet.TEST_VALUE_1, variable.getValue1());
 		expectSame(JsonVariableTestSet.TEST_VALUE_2, variable.getValue2());
+	}
+
+	@PluginTest
+	public void getStringVariable(Variables variables) throws Exception
+	{
+		String variable = variables.getString(JsonVariableTestSet.STRING_VARIABLE);
+
+		expectNotNull(variable);
+		expectSame(JsonVariableTestSet.TEST_STRING, variable);
+	}
+
+	@PluginTest
+	public void getIntegerVariable(Variables variables) throws Exception
+	{
+		Integer variable = variables.getVariable(JsonVariableTestSet.INTEGER_VARIABLE);
+
+		expectNotNull(variable);
+		expectSame(JsonVariableTestSet.TEST_INTEGER, variable);
 	}
 }
