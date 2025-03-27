@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
@@ -34,13 +35,14 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
+	private final CryptoService cryptoService;
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
 			OidcClientProvider oidcClientProvider, MailService mailService, ObjectMapper objectMapper,
 			OrganizationProvider organizationProvider, ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
-			TaskHelper taskHelper)
+			TaskHelper taskHelper, CryptoService cryptoService)
 	{
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
@@ -55,6 +57,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
 		this.readAccessHelper = readAccessHelper;
 		this.taskHelper = taskHelper;
+		this.cryptoService = cryptoService;
 	}
 
 	@Override
@@ -73,6 +76,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(cryptoService, "cryptoService");
 	}
 
 	@Override
@@ -151,5 +155,11 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public TaskHelper getTaskHelper()
 	{
 		return taskHelper;
+	}
+
+	@Override
+	public CryptoService getCryptoService()
+	{
+		return cryptoService;
 	}
 }

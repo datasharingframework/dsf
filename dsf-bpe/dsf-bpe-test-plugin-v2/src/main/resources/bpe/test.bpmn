@@ -33,6 +33,7 @@
       <bpmn:outgoing>Flow_0jv5jil</bpmn:outgoing>
       <bpmn:outgoing>Flow_0xzipbl</bpmn:outgoing>
       <bpmn:outgoing>Flow_0kt0v58</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1g6h0ul</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
     <bpmn:sequenceFlow id="Flow_14rzc0j" sourceRef="Gateway_0eszi2t" targetRef="ProxyTest">
@@ -54,6 +55,7 @@
       <bpmn:incoming>Flow_1p9dw3m</bpmn:incoming>
       <bpmn:incoming>Flow_1n773yf</bpmn:incoming>
       <bpmn:incoming>Flow_0x6aoim</bpmn:incoming>
+      <bpmn:incoming>Flow_0b2eolg</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_08zzudo" sourceRef="ProxyTest" targetRef="Gateway_056f6tw" />
@@ -235,6 +237,14 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'JsonVariableTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0x6aoim" sourceRef="JsonVariableTestGet" targetRef="Gateway_056f6tw" />
+    <bpmn:serviceTask id="CryptoServiceTest" name="CryptoServiceTest" camunda:class="dev.dsf.bpe.test.service.CryptoServiceTest">
+      <bpmn:incoming>Flow_1g6h0ul</bpmn:incoming>
+      <bpmn:outgoing>Flow_0b2eolg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1g6h0ul" sourceRef="Gateway_0eszi2t" targetRef="CryptoServiceTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'CryptoServiceTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0b2eolg" sourceRef="CryptoServiceTest" targetRef="Gateway_056f6tw" />
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />
   <bpmn:message id="Message_2iq6v5e" name="proxyTest" />
@@ -333,6 +343,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_12jwxzn_di" bpmnElement="JsonVariableTestGet">
         <dc:Bounds x="650" y="1300" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1eg5ihs_di" bpmnElement="CryptoServiceTest">
+        <dc:Bounds x="480" y="1410" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1w9i7ga_di" bpmnElement="Event_1dnlmzp">
@@ -501,6 +515,16 @@
       <bpmndi:BPMNEdge id="Flow_0a1kwg9_di" bpmnElement="Flow_0a1kwg9">
         <di:waypoint x="1205" y="120" />
         <di:waypoint x="1242" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g6h0ul_di" bpmnElement="Flow_1g6h0ul">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="1450" />
+        <di:waypoint x="480" y="1450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0b2eolg_di" bpmnElement="Flow_0b2eolg">
+        <di:waypoint x="580" y="1450" />
+        <di:waypoint x="1180" y="1450" />
+        <di:waypoint x="1180" y="145" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

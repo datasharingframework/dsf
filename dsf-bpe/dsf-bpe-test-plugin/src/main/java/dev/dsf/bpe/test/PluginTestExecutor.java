@@ -23,6 +23,12 @@ public final class PluginTestExecutor
 		}
 	}
 
+	@FunctionalInterface
+	public interface RunnableWithException
+	{
+		void run() throws Exception;
+	}
+
 	public static final void execute(Object testClass, Consumer<String> addTestSucceededToStartTask,
 			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask, Object testMethodArg0,
 			Object testMethodArg1, Object... testMethodArgs)
@@ -188,7 +194,7 @@ public final class PluginTestExecutor
 				"Tested " + type + " is not same as expected [expected: " + expected + ", actual: " + actual + "]");
 	}
 
-	public static void expectException(Class<?> expectedException, Runnable run)
+	public static void expectException(Class<?> expectedException, RunnableWithException run)
 	{
 		Objects.requireNonNull(expectedException, "expectedException");
 		Objects.requireNonNull(run, "run");

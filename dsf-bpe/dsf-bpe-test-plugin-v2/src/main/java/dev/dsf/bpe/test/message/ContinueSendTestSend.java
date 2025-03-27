@@ -4,5 +4,5 @@ import dev.dsf.bpe.v2.activity.MessageIntermediateThrowEvent;
 
 public class ContinueSendTestSend implements MessageIntermediateThrowEvent
 {
-	// default implementation;
+	// default implementation
 }

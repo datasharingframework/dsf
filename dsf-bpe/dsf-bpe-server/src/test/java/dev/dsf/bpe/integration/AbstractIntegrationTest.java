@@ -160,6 +160,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				Paths.get("src/main/resources/bpe/api/v1/allowed-bpe-classes.list"));
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTest");
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTestExecutor");
+		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTestExecutor$RunnableWithException");
 		writeListFile(ALLOWED_BPE_CLASSES_LIST_FILE_V1, allowedBpeClassesV1);
 
 		// allowed bpe classes override to enable access to classes from dsf-bpe-test-plugin module for v2 test plugins
@@ -167,6 +168,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				Paths.get("src/main/resources/bpe/api/v2/allowed-bpe-classes.list"));
 		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTest");
 		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTestExecutor");
+		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTestExecutor$RunnableWithException");
 		writeListFile(ALLOWED_BPE_CLASSES_LIST_FILE_V2, allowedBpeClassesV2);
 
 		bpeDefaultDataSource = createBpeDefaultDataSource(bpeLiquibaseRule.getHost(),

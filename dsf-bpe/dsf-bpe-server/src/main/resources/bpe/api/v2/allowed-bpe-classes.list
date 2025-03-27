@@ -12,6 +12,7 @@ org.apache.commons.io
 org.apache.commons.lang3
 org.apache.commons.text
 org.apache.http
+org.bouncycastle
 org.camunda.bpm.engine.delegate
 org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration
 org.camunda.bpm.engine.impl.el.FixedValue
