@@ -147,6 +147,5 @@ public interface ProcessPluginDefinition
 	 * @see FhirResourceModifier
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
-	// TODO javadoc
 	List<Class<?>> getSpringConfigurations();
 }
