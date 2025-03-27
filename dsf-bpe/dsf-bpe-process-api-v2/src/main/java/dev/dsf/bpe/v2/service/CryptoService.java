@@ -31,8 +31,25 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
+/**
+ * Provides methods for:
+ * <ul>
+ * <li>Creating and using RSA and ECDH key encapsulation mechanism</li>
+ * <li>Reading X509 certificates and private-keys (encrypted or not encrypted)</li>
+ * <li>Reading JKS and PKCS12 key-stores</li>
+ * <li>Creating JKS and PKCS12 key-stores based on trusted certificates or private-key and certificate chain</li>
+ * <li>Generating RSA (4096 bit), EC (secp256r1, secp384r1, secp521r1, X25519, X448) key-pairs</li>
+ * <li>Validating key-pairs to check if a private-key belongs to a public-key</li>
+ * <li>Validating certificates</li>
+ * <li>Creating {@link SSLContext}s based on a key-store with trusted certificates and/or a key-store with private-key
+ * and certificate chain</li>
+ * </ul>
+ */
 public interface CryptoService
 {
+	/**
+	 * Key encapsulation mechanism with encrypt and decrypt methods.
+	 */
 	public interface Kem
 	{
 		/**
