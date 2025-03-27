@@ -10,21 +10,28 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.v2.activity.Activity;
 
 /**
- * Helper class to register {@link Activity}s as prototype beans.
+ * Helper class to register {@link Activity}s as prototype beans. Must be configured as a <code>static</code>
+ * {@link Bean} inside a {@link Configuration} classes.
  * <p>
  * Usage:
  * <p>
  *
- * {@snippet :
- * &#64;Bean
- * public ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
+ * {@snippet id = "usage" lang = "java" :
+ * &#64;Configuration
+ * public class Config
  * {
- * 	return new ActivityPrototypeBeanCreator(SomeServiceTask.class, AnExecutionListener.class,
- * 			MyMessageIntermediateThrowEvent.class);
+ * 	&#64;Bean
+ * 	public static ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
+ * 	{
+ * 		return new ActivityPrototypeBeanCreator(SomeServiceTask.class, AnExecutionListener.class,
+ * 				MyMessageIntermediateThrowEvent.class);
+ * 	}
  * }
  * }
  */

@@ -280,14 +280,7 @@ public class ProcessPluginImplTest
 		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
-		try
-		{
-			plugin.getApplicationContext();
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException e)
-		{
-		}
+		assertNotNull(plugin.getApplicationContext());
 
 		try
 		{

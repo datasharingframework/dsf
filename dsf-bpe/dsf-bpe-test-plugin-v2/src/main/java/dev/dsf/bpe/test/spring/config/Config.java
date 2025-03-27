@@ -3,6 +3,7 @@ package dev.dsf.bpe.test.spring.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.dsf.bpe.test.fhir.FhirResourceModifierImpl;
 import dev.dsf.bpe.test.listener.StartFieldInjectionTestListener;
 import dev.dsf.bpe.test.listener.StartSendTaskTestListener;
 import dev.dsf.bpe.test.message.ContinueSendTestSend;
@@ -22,13 +23,14 @@ import dev.dsf.bpe.test.service.JsonVariableTestSet;
 import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
+import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
 import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
 
 @Configuration
 public class Config
 {
 	@Bean
-	public ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
+	public static ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
 	{
 		return new ActivityPrototypeBeanCreator(TestActivitySelector.class, ProxyTest.class, ApiTest.class,
 				OrganizationProviderTest.class, EndpointProviderTest.class, FhirClientProviderTest.class,
@@ -36,5 +38,11 @@ public class Config
 				FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class, ErrorBoundaryEventTestVerify.class,
 				ExceptionTest.class, ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
 				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class);
+	}
+
+	@Bean
+	public FhirResourceModifier fhirResourceModifier()
+	{
+		return new FhirResourceModifierImpl();
 	}
 }

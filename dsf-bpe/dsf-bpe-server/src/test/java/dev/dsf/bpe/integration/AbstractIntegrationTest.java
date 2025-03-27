@@ -434,7 +434,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				dsf-fhir-server:
 				  base-url: '#[fhirBaseUrl]'
 				  test-connection-on-startup: yes
-				  enable-debug-logging: yes
+				  enable-debug-logging: no
 				  cert-auth:
 				    private-key-file: '#[client.key]'
 				    certificate-file: '#[client.crt]'

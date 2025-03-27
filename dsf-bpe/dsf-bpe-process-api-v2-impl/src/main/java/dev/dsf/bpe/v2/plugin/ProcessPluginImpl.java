@@ -50,6 +50,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
+import dev.dsf.bpe.api.plugin.FhirResourceModifier;
+import dev.dsf.bpe.api.plugin.FhirResourceModifiers;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig;
 import dev.dsf.bpe.v2.ProcessPluginApi;
@@ -73,6 +75,7 @@ import dev.dsf.bpe.v2.activity.values.SendTaskValues;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v2.constants.NamingSystems.TaskIdentifier;
+import dev.dsf.bpe.v2.fhir.FhirResourceModifierDelegate;
 import dev.dsf.bpe.v2.variables.FhirResourceValues;
 
 public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> implements ProcessPlugin
@@ -467,5 +470,15 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 	{
 		return () -> new RuntimeException(
 				"No or incomplete FHIR Task message activity fields for " + activityName + " (" + className + ")");
+	}
+
+	@Override
+	public FhirResourceModifier getFhirResourceModifier()
+	{
+		List<FhirResourceModifierDelegate> modifiers = getApplicationContext()
+				.getBeansOfType(dev.dsf.bpe.v2.fhir.FhirResourceModifier.class).values().stream()
+				.map(FhirResourceModifierDelegate::new).toList();
+
+		return new FhirResourceModifiers(modifiers);
 	}
 }

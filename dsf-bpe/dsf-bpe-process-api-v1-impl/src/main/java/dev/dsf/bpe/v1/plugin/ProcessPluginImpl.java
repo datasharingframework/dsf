@@ -44,6 +44,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
+import dev.dsf.bpe.api.plugin.FhirResourceModifier;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.api.plugin.ProcessPluginDeploymentListener;
 import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig;
@@ -327,5 +328,11 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 			VariableScope variableScope)
 	{
 		return get(TaskListener.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public FhirResourceModifier getFhirResourceModifier()
+	{
+		return FhirResourceModifier.identity();
 	}
 }
