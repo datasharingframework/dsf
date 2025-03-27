@@ -62,4 +62,6 @@ public interface ProcessPlugin
 
 	TaskListener getTaskListener(String className, List<FieldDeclaration> fieldDeclarations,
 			VariableScope variableScope);
+
+	FhirResourceModifier getFhirResourceModifier();
 }

@@ -21,6 +21,7 @@ import dev.dsf.bpe.v2.activity.MessageSendTask;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.activity.UserTaskListener;
 import dev.dsf.bpe.v2.documentation.ProcessDocumentation;
+import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
 import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
 
 /**
@@ -142,6 +143,8 @@ public interface ProcessPluginDefinition
 	 * @see ServiceTask
 	 * @see UserTaskListener
 	 * @see ActivityPrototypeBeanCreator
+	 * @see ProcessPluginDeploymentListener
+	 * @see FhirResourceModifier
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
 	// TODO javadoc
