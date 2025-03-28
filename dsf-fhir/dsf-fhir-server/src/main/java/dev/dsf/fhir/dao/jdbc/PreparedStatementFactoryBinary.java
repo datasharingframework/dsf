@@ -1,6 +1,7 @@
 package dev.dsf.fhir.dao.jdbc;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +13,7 @@ import java.util.UUID;
 import org.hl7.fhir.r4.model.Binary;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.util.StreamableBinary;
 
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
@@ -30,18 +32,31 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	@Override
 	public void configureCreateStatement(PreparedStatement statement, Binary resource, UUID uuid) throws SQLException
 	{
-		byte[] data = resource.getData();
-		resource.setData(null);
+		InputStream inputStream;
+		byte[] data = null;
+		if (resource instanceof StreamableBinary sb)
+		{
+			inputStream = sb.getInputStream();
+			sb.setInputStream(null);
+		}
+		else
+		{
+			data = resource.getData();
+			inputStream = new ByteArrayInputStream(data);
+			resource.setData(null);
+		}
+
 
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setObject(2, resourceToPgObject(resource));
 
-		if (data != null)
-			statement.setBinaryStream(3, new ByteArrayInputStream(data));
+		if (inputStream != null)
+			statement.setBinaryStream(3, inputStream);
 		else
 			statement.setNull(3, Types.VARBINARY);
 
-		resource.setData(data);
+		if (data != null)
+			resource.setData(data);
 	}
 
 	@Override
@@ -64,12 +79,17 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	}
 
 	@Override
-	public Binary getReadByIdResource(ResultSet result) throws SQLException
+	public StreamableBinary getReadByIdResource(ResultSet result) throws SQLException
 	{
 		String json = result.getString(3);
-		byte[] data = result.getBytes(4);
+		InputStream inputStream = result.getBinaryStream(4);
 
-		return jsonToResource(json).setData(data);
+		return jsonToStreamableResource(json).setInputStream(inputStream);
+	}
+
+	private StreamableBinary jsonToStreamableResource(String json)
+	{
+		return getJsonParser().parseResource(StreamableBinary.class, json);
 	}
 
 	@Override
@@ -95,50 +115,74 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	}
 
 	@Override
-	public Binary getReadByIdAndVersionResource(ResultSet result) throws SQLException
+	public StreamableBinary getReadByIdAndVersionResource(ResultSet result) throws SQLException
 	{
 		String json = result.getString(3);
-		byte[] data = result.getBytes(4);
+		InputStream inputStream = result.getBinaryStream(4);
 
-		return jsonToResource(json).setData(data);
+		return jsonToStreamableResource(json).setInputStream(inputStream);
 	}
 
 	@Override
 	public void configureUpdateNewRowSqlStatement(PreparedStatement statement, UUID uuid, long version, Binary resource)
 			throws SQLException
 	{
-		byte[] data = resource.getData();
-		resource.setData(null);
+		InputStream inputStream;
+		byte[] data = null;
+		if (resource instanceof StreamableBinary sb)
+		{
+			inputStream = sb.getInputStream();
+			sb.setInputStream(null);
+		}
+		else
+		{
+			data = resource.getData();
+			inputStream = new ByteArrayInputStream(data);
+			resource.setData(null);
+		}
 
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setLong(2, version);
 		statement.setObject(3, resourceToPgObject(resource));
 
 		if (data != null)
-			statement.setBinaryStream(4, new ByteArrayInputStream(data));
+			statement.setBinaryStream(4, inputStream);
 		else
 			statement.setNull(4, Types.VARBINARY);
 
-		resource.setData(data);
+		if (data != null)
+			resource.setData(data);
 	}
 
 	@Override
 	public void configureUpdateSameRowSqlStatement(PreparedStatement statement, UUID uuid, long version,
 			Binary resource) throws SQLException
 	{
-		byte[] data = resource.getData();
-		resource.setData(null);
+		InputStream inputStream;
+		byte[] data = null;
+		if (resource instanceof StreamableBinary sb)
+		{
+			inputStream = sb.getInputStream();
+			sb.setInputStream(null);
+		}
+		else
+		{
+			data = resource.getData();
+			inputStream = new ByteArrayInputStream(data);
+			resource.setData(null);
+		}
 
 		statement.setObject(1, resourceToPgObject(resource));
 
 		if (data != null)
-			statement.setBinaryStream(2, new ByteArrayInputStream(data));
+			statement.setBinaryStream(2, inputStream);
 		else
 			statement.setNull(2, Types.VARBINARY);
 
 		statement.setObject(3, uuidToPgObject(uuid));
 		statement.setLong(4, version);
 
-		resource.setData(data);
+		if (data != null)
+			resource.setData(data);
 	}
 }

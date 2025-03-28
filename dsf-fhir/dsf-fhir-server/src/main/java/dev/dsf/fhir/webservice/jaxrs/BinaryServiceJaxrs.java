@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.util.StreamableBinary;
 import dev.dsf.fhir.webservice.specification.BinaryService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -70,9 +71,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		{
 			String securityContext = getSecurityContext(headers);
 			String contentType = getContentType(headers);
-			byte[] content = in.readAllBytes();
 
-			Binary resource = createBinary(contentType, content, securityContext);
+			Binary resource = createBinary(contentType, in, securityContext);
 			return delegate.create(resource, uri, headers);
 		}
 		catch (IOException e)
@@ -81,11 +81,11 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		}
 	}
 
-	private Binary createBinary(String contentType, byte[] content, String securityContextReference)
+	private StreamableBinary createBinary(String contentType, InputStream inputStream, String securityContextReference)
 	{
-		Binary resource = new Binary();
+		StreamableBinary resource = new StreamableBinary();
 		resource.setContentType(contentType);
-		resource.setContent(content);
+		resource.setInputStream(inputStream);
 		resource.setSecurityContext(new Reference(securityContextReference));
 		return resource;
 	}
@@ -245,9 +245,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		{
 			String securityContext = getSecurityContext(headers);
 			String contentType = getContentType(headers);
-			byte[] content = in.readAllBytes();
 
-			Binary resource = createBinary(contentType, content, securityContext);
+			StreamableBinary resource = createBinary(contentType, in, securityContext);
 			return delegate.update(id, resource, uri, headers);
 		}
 		catch (IOException e)
