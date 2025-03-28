@@ -83,4 +83,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("JsonVariableTest"));
 	}
+
+	@Test
+	public void startMimetypeServiceTest() throws Exception
+	{
+		executePluginTest(createTestTask("MimetypeServiceTest"));
+	}
 }

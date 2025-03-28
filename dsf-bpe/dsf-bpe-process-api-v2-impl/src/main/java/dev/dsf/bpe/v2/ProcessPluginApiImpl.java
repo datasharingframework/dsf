@@ -12,6 +12,7 @@ import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
+import dev.dsf.bpe.v2.service.MimetypeService;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
@@ -28,6 +29,8 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final FhirClientProvider fhirClientProvider;
 	private final OidcClientProvider oidcClientProvider;
 	private final MailService mailService;
+
+	private final MimetypeService mimetypeService;
 	private final ObjectMapper objectMapper;
 	private final OrganizationProvider organizationProvider;
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
@@ -37,8 +40,9 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
-			OidcClientProvider oidcClientProvider, MailService mailService, ObjectMapper objectMapper,
-			OrganizationProvider organizationProvider, ProcessAuthorizationHelper processAuthorizationHelper,
+			OidcClientProvider oidcClientProvider, MailService mailService, MimetypeService mimetypeService,
+			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
+			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
 			TaskHelper taskHelper)
 	{
@@ -49,6 +53,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.fhirClientProvider = fhirClientProvider;
 		this.oidcClientProvider = oidcClientProvider;
 		this.mailService = mailService;
+		this.mimetypeService = mimetypeService;
 		this.objectMapper = objectMapper;
 		this.organizationProvider = organizationProvider;
 		this.processAuthorizationHelper = processAuthorizationHelper;
@@ -115,6 +120,12 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public MailService getMailService()
 	{
 		return mailService;
+	}
+
+	@Override
+	public MimetypeService getMimetypeService()
+	{
+		return mimetypeService;
 	}
 
 	@Override
