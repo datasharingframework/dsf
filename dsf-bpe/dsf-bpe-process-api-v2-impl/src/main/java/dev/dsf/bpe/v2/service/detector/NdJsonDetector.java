@@ -15,6 +15,8 @@ import org.apache.tika.mime.MediaType;
 
 public class NdJsonDetector implements Detector
 {
+	private static final long serialVersionUID = 1L;
+
 	private static final MediaType MEDIA_TYPE_JSON = MediaType.application("json");
 	private static final MediaType MEDIA_TYPE_NDJSON = MediaType.application("x-ndjson");
 

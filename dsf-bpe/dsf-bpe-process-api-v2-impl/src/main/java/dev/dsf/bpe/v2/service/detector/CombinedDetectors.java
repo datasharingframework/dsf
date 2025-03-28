@@ -14,6 +14,8 @@ import org.apache.tika.mime.MediaType;
 
 public class CombinedDetectors implements Detector
 {
+	private static final long serialVersionUID = 1L;
+
 	public static CombinedDetectors withDefaultAndNdJson(int ndJsonLinesToCheck)
 	{
 		Detector defaultDetector = TikaConfig.getDefaultConfig().getDetector();
