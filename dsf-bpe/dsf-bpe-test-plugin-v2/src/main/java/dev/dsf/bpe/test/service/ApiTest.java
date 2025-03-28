@@ -60,6 +60,12 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
+	public void apiGetMimetypeService(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getMimetypeService());
+	}
+
+	@PluginTest
 	public void apiGetObjectMapperNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getObjectMapper());

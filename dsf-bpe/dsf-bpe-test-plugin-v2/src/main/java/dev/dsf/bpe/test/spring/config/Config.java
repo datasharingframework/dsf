@@ -20,6 +20,7 @@ import dev.dsf.bpe.test.service.FhirClientProviderTest;
 import dev.dsf.bpe.test.service.FieldInjectionTest;
 import dev.dsf.bpe.test.service.JsonVariableTestGet;
 import dev.dsf.bpe.test.service.JsonVariableTestSet;
+import dev.dsf.bpe.test.service.MimetypeServiceTest;
 import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
@@ -37,7 +38,8 @@ public class Config
 				StartSendTaskTestListener.class, SendTaskTest.class, StartFieldInjectionTestListener.class,
 				FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class, ErrorBoundaryEventTestVerify.class,
 				ExceptionTest.class, ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
-				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class);
+				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
+				MimetypeServiceTest.class);
 	}
 
 	@Bean

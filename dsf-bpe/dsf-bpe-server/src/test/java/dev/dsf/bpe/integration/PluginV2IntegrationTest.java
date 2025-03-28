@@ -186,4 +186,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 			throw new RuntimeException(e);
 		}
 	}
+
+	@Test
+	public void startMimetypeServiceTest() throws Exception
+	{
+		executePluginTest(createTestTask("MimetypeServiceTest"));
+	}
 }
