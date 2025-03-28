@@ -12,11 +12,6 @@ org.apache.commons.io
 org.apache.commons.lang3
 org.apache.commons.text
 org.apache.http
-org.apache.tika.config.TikaConfig
-org.apache.tika.detect.Detector
-org.apache.tika.io.TikaInputStream
-org.apache.tika.metadata.Metadata
-org.apache.tika.mime.MediaType
 org.camunda.bpm.engine.delegate
 org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration
 org.camunda.bpm.engine.impl.el.FixedValue

@@ -32,7 +32,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	public void testAttachmentBundle(MimetypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
-				"/fhir/Bundle/DocumentReference-with-Attachment-Bundle.xml");
+				"fhir/Bundle/DocumentReference-with-Attachment-Bundle.xml");
 		testResourcesStream(resources, mimetypeService);
 	}
 
@@ -40,7 +40,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	public void testAttachmentCsv(MimetypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
-				"/fhir/Bundle/DocumentReference-with-Attachment-CSV.xml");
+				"fhir/Bundle/DocumentReference-with-Attachment-CSV.xml");
 		testResourcesStream(resources, mimetypeService);
 	}
 
@@ -48,7 +48,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	public void testAttachmentMeasureReport(MimetypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
-				"/fhir/Bundle/DocumentReference-with-Attachment-MeasureReport.xml");
+				"fhir/Bundle/DocumentReference-with-Attachment-MeasureReport.xml");
 		testResourcesStream(resources, mimetypeService);
 	}
 
@@ -56,7 +56,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	public void testAttachmentNdJson(MimetypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
-				"/fhir/Bundle/DocumentReference-with-Attachment-NdJson.xml");
+				"fhir/Bundle/DocumentReference-with-Attachment-NdJson.xml");
 		testResourcesStream(resources, mimetypeService);
 	}
 
@@ -64,13 +64,13 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	public void testAttachmentZip(MimetypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
-				"/fhir/Bundle/DocumentReference-with-Attachment-ZIP.xml");
+				"fhir/Bundle/DocumentReference-with-Attachment-ZIP.xml");
 		testResourcesStream(resources, mimetypeService);
 	}
 
 	private List<Resource> getResourcesNotDocumentReferenceFromPath(String pathToBundle)
 	{
-		try (InputStream input = getClass().getResourceAsStream(pathToBundle))
+		try (InputStream input = MimetypeServiceTest.class.getClassLoader().getResourceAsStream(pathToBundle))
 		{
 			Bundle bundle = FhirContext.forR4().newXmlParser().parseResource(Bundle.class, input);
 			return bundle.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)
