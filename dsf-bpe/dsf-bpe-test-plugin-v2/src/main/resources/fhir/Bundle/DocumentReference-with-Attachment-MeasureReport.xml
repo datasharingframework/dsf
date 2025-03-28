@@ -1,0 +1,5081 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<type value="transaction"/>
+	<entry>
+		<fullUrl value="urn:uuid:76e62d33-4d93-4684-9a2c-58939d2a7ade"/>
+		<resource>
+			<DocumentReference xmlns="http://hl7.org/fhir">
+				<masterIdentifier>
+					<system value="http://medizininformatik-initiative.de/sid/project-identifier"/>
+					<value value="Test_PROJECT_Evaluation"/>
+				</masterIdentifier>
+				<status value="current"/>
+				<docStatus value="final"/>
+				<author>
+					<type value="Organization"/>
+					<identifier>
+						<system value="http://dsf.dev/sid/organization-identifier"/>
+						<value value="Test_DIC1"/>
+					</identifier>
+				</author>
+				<date value="2022-10-21T10:00:00+01:00"/>
+				<content>
+					<attachment>
+						<contentType value="application/fhir+xml"/>
+						<url value="urn:uuid:2b7267f6-fd7c-481a-b5ec-52f55dfc49bi"/>
+					</attachment>
+				</content>
+			</DocumentReference>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="DocumentReference"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:2b7267f6-fd7c-481a-b5ec-52f55dfc49bi"/>
+		<resource>
+			<MeasureReport xmlns='http://hl7.org/fhir'>
+				<extension url='http://fhir-evaluator/StructureDefinition/eval-duration'>
+					<valueQuantity>
+						<value value='5.642859'/>
+						<unit value='u'/>
+						<system value='http://unitsofmeasure.org'/>
+						<code value='s'/>
+					</valueQuantity>
+				</extension>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<measureScore>
+						<value value='1'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='procedure-ops-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/ops'/>
+									<code value='6-00g.33'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/ops'/>
+									<code value='5-323.51'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='procedure-sct-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='281790008'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='726427004'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='1'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='1'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='1'/>
+					</population>
+					<measureScore>
+						<value value='1'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-data-evaluator/strat/system'/>
+								<code value='patient-pseudonymised-birthdate-exists'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<code value='true'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-data-evaluator/strat/system'/>
+								<code value='patient-pseudonymised-gender'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<code value='male'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<measureScore>
+						<value value='1'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-data-evaluator/strat/system'/>
+								<code value='medicationadministration-medication-code-pzn'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-data-evaluator/strat/system'/>
+								<code value='medicationadministration-medication-code-atc'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='3'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='3'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='3'/>
+					</population>
+					<measureScore>
+						<value value='3'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-patientendaten-erheben,-speichern,-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-idat-erheben'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-idat-speichern,-verarbeiten'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-idat-zusammenfuehren-dritte'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-idat-bereitstellen-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-erheben'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'/>
+									<code value='2.16.840.1.113883.3.1937.777.24.5.3.6'/>
+									<display value='MDAT erheben'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-speichern,-verarbeiten'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'/>
+									<code value='2.16.840.1.113883.3.1937.777.24.5.3.7'/>
+									<display value='MDAT speichern, verarbeiten'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-wissenschaftlich-nutzen-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'/>
+									<code value='2.16.840.1.113883.3.1937.777.24.5.3.8'/>
+									<display value='MDAT wissenschaftlich nutzen EU DSGVO NIVEAU'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-zusammenfuehren-dritte'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'/>
+									<code value='2.16.840.1.113883.3.1937.777.24.5.3.9'/>
+									<display value='MDAT zusammenfuehren Dritte'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<measureScore>
+								<value value='2'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-rekontaktierung-ergebnisse-erheblicher-bedeutung'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-patientendaten-retrospektiv-verarbeiten,-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-retrospektiv-speichern-verarbeiten'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-retrospektiv-wissenschaftlich-nutzen-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-retrospektiv-zusammenfuehren-dritte'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-patientendaten-weitergabe-non-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-bereitstellen-non-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-krankenkassendaten-retrospektiv-uebertragen,-speichern,-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-retrospektiv-uebertragen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-retrospektiv-speichern-verarbeiten'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-retrospektiv-wissenschaftlich-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-retrospektiv-uebertragen-kvnr'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-prospektiv-uebertragen-speichern-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-prospektiv-uebertragen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-prospektiv-speichern-verarbeiten'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-prospektiv-wissenschaftlich-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-kkdat-5j-prospektiv-uebertragen-kvnr'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomaterial-erheben,-lagern,-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-erheben'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'/>
+									<code value='2.16.840.1.113883.3.1937.777.24.5.3.19'/>
+									<display value='BIOMAT erheben'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-lagern-verarbeiten'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'/>
+									<code value='2.16.840.1.113883.3.1937.777.24.5.3.20'/>
+									<display value='BIOMAT lagern verarbeiten'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-eigentum-übertragen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-wissenschaftlich-nutzen-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'/>
+									<code value='2.16.840.1.113883.3.1937.777.24.5.3.22'/>
+									<display value='BIOMAT wissenschaftlich nutzen EU DSGVO NIVEAU'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-analysedaten-zusammenfuehren-dritte'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomaterial-zusatzentnahme'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-zusatzmengen-entnehmen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomaterial-retrospektiv-speichern,-nutzen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-retrospektiv-lagern-verarbeiten'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-retrospektiv-wissenschaftlich-nutzen-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-retrospektiv-analysedaten-zusammenfuehren-dritte'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomaterial-weitergabe-non-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-biomat-bereitstellen-ohne-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-rekontaktierung-ergänzungen'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-rekontaktierung-verknüpfung-datenbanken'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-rekontaktierung-weitere-erhebung'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-rekontaktierung-weitere-studien'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-rekontaktierung-zusatzbefund'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-rekontaktierung-zusatzbefund'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-z1-gecco83-nutzung-num/codex'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-komplettieren-einmalig'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-erheben'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-bereitstellen-num/codex'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-speichern-verarbeiten-num/codex'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-wissenschaftlich-nutzen-covid-19-forschung-eu-dsgvo-konform'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-wissenschaftlich-nutzen-pandemie-forschung-eu-dsgvo-konform'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-wissenschaftlich-nutzen-num/codex-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-z1-gecco83-weitergabe-num/codex-non-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='consent-mdat-gecco83-bereitstellen-num/codex-ohne-eu-dsgvo-niveau'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='3'/>
+							</population>
+							<measureScore>
+								<value value='3'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='2'/>
+					</population>
+					<measureScore>
+						<value value='1'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='specimen-type-sct-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='122555007'/>
+									<display value='Venous blood specimen (specimen)'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='258503004'/>
+									<display value='Skin swab (specimen)'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='specimen-bodysite-sct-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='45206002'/>
+									<display value='Nasal structure (body structure)'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='789218009'/>
+									<display value='Structure of dorsum of left hand (body structure)'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='specimen-bodysite-icdo3-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='2'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='12042'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='12042'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='12042'/>
+					</population>
+					<measureScore>
+						<value value='12042'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-data-evaluator/strat/system'/>
+								<code value='patient-birthdate-exists'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<code value='true'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='12042'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='12042'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='12042'/>
+							</population>
+							<measureScore>
+								<value value='12042'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-data-evaluator/strat/system'/>
+								<code value='patient-gender'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<code value='other'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<code value='female'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='6291'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='6291'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='6291'/>
+							</population>
+							<measureScore>
+								<value value='6291'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<code value='male'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='5750'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='5750'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='5750'/>
+							</population>
+							<measureScore>
+								<value value='5750'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='12075'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='12075'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='12075'/>
+					</population>
+					<measureScore>
+						<value value='12041'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='condition-icd10-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='I95.0'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='10803'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='10803'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='10803'/>
+							</population>
+							<measureScore>
+								<value value='10795'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='I60.1'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<measureScore>
+								<value value='4'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='I22.8'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<measureScore>
+								<value value='4'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='C16.9'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='H67.1'/>
+									<display value='Otitis media bei anderenorts klassifizierten Viruskrankheiten'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='F73.1'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1000'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1000'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1000'/>
+							</population>
+							<measureScore>
+								<value value='1000'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='I48.0'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='108'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='108'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='108'/>
+							</population>
+							<measureScore>
+								<value value='108'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='I48.1'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='140'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='140'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='140'/>
+							</population>
+							<measureScore>
+								<value value='140'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='B05.3'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='C21.8'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/icd-10-gm'/>
+									<code value='I50.14'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='12'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='12'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='12'/>
+							</population>
+							<measureScore>
+								<value value='4'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='condition-sct-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='12073'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='12073'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='12073'/>
+							</population>
+							<measureScore>
+								<value value='12041'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='447886005'/>
+									<display value='Adenocarcinoma of anorectum (disorder)'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://snomed.info/sct'/>
+									<code value='13420004'/>
+									<display value='Post measles otitis media (disorder)'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='condition-alhpaid-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='12073'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='12073'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='12073'/>
+							</population>
+							<measureScore>
+								<value value='12041'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/alpha-id'/>
+									<code value='I29578'/>
+									<display value='Masern mit Otitis'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir.de/CodeSystem/bfarm/alpha-id'/>
+									<code value='I29975'/>
+									<display value='Bösartige anorektale Neubildung'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='condition-orphanet-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='12075'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='12075'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='12075'/>
+							</population>
+							<measureScore>
+								<value value='12041'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='condition-icdo3-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://terminology.hl7.org/CodeSystem/icd-o-3'/>
+									<code value='8140/3'/>
+									<display value='Adenokarzinom o.n.A.'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='12074'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='12074'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='12074'/>
+							</population>
+							<measureScore>
+								<value value='12041'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+				<group>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='initial-population'/>
+								<display value='display'/>
+							</coding>
+						</code>
+						<count value='12173'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-population'/>
+							</coding>
+						</code>
+						<count value='12173'/>
+					</population>
+					<population>
+						<code>
+							<coding>
+								<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+								<code value='measure-observation'/>
+							</coding>
+						</code>
+						<count value='12173'/>
+					</population>
+					<measureScore>
+						<value value='12040'/>
+					</measureScore>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='observation-lab-loinc-code'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='26515-7'/>
+									<display value='Platelets [#/volume] in Blood'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='26453-1'/>
+									<display value='Erythrocytes [#/volume] in Blood'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='10336-6'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1004'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1004'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1004'/>
+							</population>
+							<measureScore>
+								<value value='1004'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='33762-6'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='11163'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='11163'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='11163'/>
+							</population>
+							<measureScore>
+								<value value='11039'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='788-0'/>
+									<display value='Erythrocyte distribution width [Ratio] by Automated count'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='20570-8'/>
+									<display value='Hematocrit [Volume Fraction] of Blood'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='26464-8'/>
+									<display value='Leukocytes [#/volume] in Blood'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://loinc.org'/>
+									<code value='718-7'/>
+									<display value='Hemoglobin [Mass/volume] in Blood'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+					<stratifier>
+						<code>
+							<coding>
+								<system value='http://fhir-evaluator/strat/system'/>
+								<code value='observation-lab-interpretation'/>
+							</coding>
+						</code>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation'/>
+									<code value='N'/>
+									<display value='Normal'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='4'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://fhir-evaluator/strat/system'/>
+									<code value='fail-no-value-found'/>
+									<display value='Expected one value, but found none'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='12168'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='12168'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='12168'/>
+							</population>
+							<measureScore>
+								<value value='12040'/>
+							</measureScore>
+						</stratum>
+						<stratum>
+							<value>
+								<coding>
+									<system value='http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation'/>
+									<code value='H'/>
+									<display value='High'/>
+								</coding>
+							</value>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='initial-population'/>
+										<display value='display'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-population'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<population>
+								<code>
+									<coding>
+										<system value='http://terminology.hl7.org/CodeSystem/measure-population'/>
+										<code value='measure-observation'/>
+									</coding>
+								</code>
+								<count value='1'/>
+							</population>
+							<measureScore>
+								<value value='1'/>
+							</measureScore>
+						</stratum>
+					</stratifier>
+				</group>
+			</MeasureReport>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="MeasureReport"/>
+		</request>
+	</entry>
+</Bundle>
