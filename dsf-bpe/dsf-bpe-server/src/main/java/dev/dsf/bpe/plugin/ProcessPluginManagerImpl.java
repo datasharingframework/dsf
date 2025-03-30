@@ -206,6 +206,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.forEach(plugin -> plugin.getProcessPluginDeploymentListener().onProcessesDeployed(activeProcesses));
 	}
 
+	@Override
 	public Optional<ProcessPlugin> getProcessPlugin(ProcessIdAndVersion processIdAndVersion)
 	{
 		if (pluginsByProcessIdAndVersion == null)

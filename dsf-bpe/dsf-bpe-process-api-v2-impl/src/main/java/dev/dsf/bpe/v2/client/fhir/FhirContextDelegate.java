@@ -46,298 +46,357 @@ public class FhirContextDelegate extends FhirContext
 		this.delegate = delegate;
 	}
 
+	@Override
 	public int hashCode()
 	{
 		return delegate.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj)
 	{
 		return delegate.equals(obj);
 	}
 
+	@Override
 	public AddProfileTagEnum getAddProfileTagWhenEncoding()
 	{
 		return delegate.getAddProfileTagWhenEncoding();
 	}
 
+	@Override
 	public void setAddProfileTagWhenEncoding(AddProfileTagEnum theAddProfileTagWhenEncoding)
 	{
 		delegate.setAddProfileTagWhenEncoding(theAddProfileTagWhenEncoding);
 	}
 
+	@Override
 	public Class<? extends IBaseResource> getDefaultTypeForProfile(String theProfile)
 	{
 		return delegate.getDefaultTypeForProfile(theProfile);
 	}
 
+	@Override
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IBase> theElementType)
 	{
 		return delegate.getElementDefinition(theElementType);
 	}
 
+	@Override
 	public BaseRuntimeElementDefinition<?> getElementDefinition(String theElementName)
 	{
 		return delegate.getElementDefinition(theElementName);
 	}
 
+	@Override
 	public Collection<BaseRuntimeElementDefinition<?>> getElementDefinitions()
 	{
 		return delegate.getElementDefinitions();
 	}
 
+	@Override
 	public HapiLocalizer getLocalizer()
 	{
 		return delegate.getLocalizer();
 	}
 
+	@Override
 	public void setLocalizer(HapiLocalizer theMessages)
 	{
 		delegate.setLocalizer(theMessages);
 	}
 
+	@Override
 	public INarrativeGenerator getNarrativeGenerator()
 	{
 		return delegate.getNarrativeGenerator();
 	}
 
+	@Override
 	public FhirContext setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator)
 	{
 		return delegate.setNarrativeGenerator(theNarrativeGenerator);
 	}
 
+	@Override
 	public ParserOptions getParserOptions()
 	{
 		return delegate.getParserOptions();
 	}
 
+	@Override
 	public void setParserOptions(ParserOptions theParserOptions)
 	{
 		delegate.setParserOptions(theParserOptions);
 	}
 
+	@Override
 	public Set<PerformanceOptionsEnum> getPerformanceOptions()
 	{
 		return delegate.getPerformanceOptions();
 	}
 
+	@Override
 	public void setPerformanceOptions(Collection<PerformanceOptionsEnum> theOptions)
 	{
 		delegate.setPerformanceOptions(theOptions);
 	}
 
+	@Override
 	public void setPerformanceOptions(PerformanceOptionsEnum... thePerformanceOptions)
 	{
 		delegate.setPerformanceOptions(thePerformanceOptions);
 	}
 
+	@Override
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IBaseResource> theResourceType)
 	{
 		return delegate.getResourceDefinition(theResourceType);
 	}
 
+	@Override
 	public RuntimeResourceDefinition getResourceDefinition(FhirVersionEnum theVersion, String theResourceName)
 	{
 		return delegate.getResourceDefinition(theVersion, theResourceName);
 	}
 
+	@Override
 	public RuntimeResourceDefinition getResourceDefinition(IBaseResource theResource)
 	{
 		return delegate.getResourceDefinition(theResource);
 	}
 
+	@Override
 	public String getResourceType(Class<? extends IBaseResource> theResourceType)
 	{
 		return delegate.getResourceType(theResourceType);
 	}
 
+	@Override
 	public String getResourceType(IBaseResource theResource)
 	{
 		return delegate.getResourceType(theResource);
 	}
 
+	@Override
 	public String getResourceType(String theResourceName) throws DataFormatException
 	{
 		return delegate.getResourceType(theResourceName);
 	}
 
+	@Override
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) throws DataFormatException
 	{
 		return delegate.getResourceDefinition(theResourceName);
 	}
 
+	@Override
 	public RuntimeResourceDefinition getResourceDefinitionById(String theId)
 	{
 		return delegate.getResourceDefinitionById(theId);
 	}
 
+	@Override
 	public Collection<RuntimeResourceDefinition> getResourceDefinitionsWithExplicitId()
 	{
 		return delegate.getResourceDefinitionsWithExplicitId();
 	}
 
+	@Override
 	public Set<String> getResourceTypes()
 	{
 		return delegate.getResourceTypes();
 	}
 
+	@Override
 	public IRestfulClientFactory getRestfulClientFactory()
 	{
 		return restfulClientFactory;
 	}
 
+	@Override
 	public void setRestfulClientFactory(IRestfulClientFactory restfulClientFactory)
 	{
 		this.restfulClientFactory = restfulClientFactory;
 	}
 
+	@Override
 	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition()
 	{
 		return delegate.getRuntimeChildUndeclaredExtensionDefinition();
 	}
 
+	@Override
 	public IValidationSupport getValidationSupport()
 	{
 		return delegate.getValidationSupport();
 	}
 
+	@Override
 	public void setValidationSupport(IValidationSupport theValidationSupport)
 	{
 		delegate.setValidationSupport(theValidationSupport);
 	}
 
+	@Override
 	public IFhirVersion getVersion()
 	{
 		return delegate.getVersion();
 	}
 
+	@Override
 	public boolean hasDefaultTypeForProfile()
 	{
 		return delegate.hasDefaultTypeForProfile();
 	}
 
+	@Override
 	public boolean isFormatXmlSupported()
 	{
 		return delegate.isFormatXmlSupported();
 	}
 
+	@Override
 	public boolean isFormatJsonSupported()
 	{
 		return delegate.isFormatJsonSupported();
 	}
 
+	@Override
 	public boolean isFormatNDJsonSupported()
 	{
 		return delegate.isFormatNDJsonSupported();
 	}
 
+	@Override
 	public boolean isFormatRdfSupported()
 	{
 		return delegate.isFormatRdfSupported();
 	}
 
+	@Override
 	public IVersionSpecificBundleFactory newBundleFactory()
 	{
 		return delegate.newBundleFactory();
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public IFhirPath newFluentPath()
 	{
 		return delegate.newFluentPath();
 	}
 
+	@Override
 	public IFhirPath newFhirPath()
 	{
 		return delegate.newFhirPath();
 	}
 
+	@Override
 	public IParser newJsonParser()
 	{
 		return delegate.newJsonParser();
 	}
 
+	@Override
 	public IParser newNDJsonParser()
 	{
 		return delegate.newNDJsonParser();
 	}
 
+	@Override
 	public IParser newRDFParser()
 	{
 		return delegate.newRDFParser();
 	}
 
+	@Override
 	public <T extends IRestfulClient> T newRestfulClient(Class<T> theClientType, String theServerBase)
 	{
 		return delegate.newRestfulClient(theClientType, theServerBase);
 	}
 
+	@Override
 	public IGenericClient newRestfulGenericClient(String theServerBase)
 	{
 		return delegate.newRestfulGenericClient(theServerBase);
 	}
 
+	@Override
 	public FhirTerser newTerser()
 	{
 		return delegate.newTerser();
 	}
 
+	@Override
 	public FhirValidator newValidator()
 	{
 		return delegate.newValidator();
 	}
 
+	@Override
 	public ViewGenerator newViewGenerator()
 	{
 		return delegate.newViewGenerator();
 	}
 
+	@Override
 	public IParser newXmlParser()
 	{
 		return delegate.newXmlParser();
 	}
 
+	@Override
 	public void registerCustomType(Class<? extends IBase> theType)
 	{
 		delegate.registerCustomType(theType);
 	}
 
+	@Override
 	public void registerCustomTypes(Collection<Class<? extends IBase>> theTypes)
 	{
 		delegate.registerCustomTypes(theTypes);
 	}
 
+	@Override
 	public void setDefaultTypeForProfile(String theProfile, Class<? extends IBaseResource> theClass)
 	{
 		delegate.setDefaultTypeForProfile(theProfile, theClass);
 	}
 
+	@Override
 	public FhirContext setParserErrorHandler(IParserErrorHandler theParserErrorHandler)
 	{
 		return delegate.setParserErrorHandler(theParserErrorHandler);
 	}
 
+	@Override
 	public FhirContext setFhirValidatorFactory(IFhirValidatorFactory theFhirValidatorFactory)
 	{
 		return delegate.setFhirValidatorFactory(theFhirValidatorFactory);
 	}
 
+	@Override
 	public String toString()
 	{
 		return delegate.toString();
 	}
 
+	@Override
 	@SuppressWarnings("removal")
 	public IPrimitiveType<Boolean> getPrimitiveBoolean(Boolean theValue)
 	{
 		return delegate.getPrimitiveBoolean(theValue);
 	}
 
+	@Override
 	public IPrimitiveType<Boolean> newPrimitiveBoolean(Boolean theValue)
 	{
 		return delegate.newPrimitiveBoolean(theValue);
 	}
 
+	@Override
 	public IPrimitiveType<String> newPrimitiveString(String theValue)
 	{
 		return delegate.newPrimitiveString(theValue);

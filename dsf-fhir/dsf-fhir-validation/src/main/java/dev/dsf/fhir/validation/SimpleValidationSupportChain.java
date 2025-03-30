@@ -71,73 +71,87 @@ public class SimpleValidationSupportChain implements IValidationSupport
 		return false;
 	}
 
+	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext validationSupportContext,
 			ValueSetExpansionOptions expansionOptions, IBaseResource valueSetToExpand)
 	{
 		return firstNonNull(c -> c.expandValueSet(validationSupportContext, expansionOptions, valueSetToExpand));
 	}
 
+	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext validationSupportContext,
 			ValueSetExpansionOptions expansionOptions, String valueSetUrlToExpand) throws ResourceNotFoundException
 	{
 		return firstNonNull(c -> c.expandValueSet(validationSupportContext, expansionOptions, valueSetUrlToExpand));
 	}
 
+	@Override
 	public List<IBaseResource> fetchAllConformanceResources()
 	{
 		return all(IValidationSupport::fetchAllConformanceResources);
 	}
 
+	@Override
 	public <T extends IBaseResource> List<T> fetchAllSearchParameters()
 	{
 		return all(IValidationSupport::fetchAllSearchParameters);
 	}
 
+	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions()
 	{
 		return all(IValidationSupport::fetchAllStructureDefinitions);
 	}
 
+	@Override
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions()
 	{
 		return all(IValidationSupport::fetchAllNonBaseStructureDefinitions);
 	}
 
+	@Override
 	public IBaseResource fetchCodeSystem(String system)
 	{
 		return firstNonNull(c -> c.fetchCodeSystem(system));
 	}
 
+	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> clazz, String uri)
 	{
 		return firstNonNull(c -> c.fetchResource(clazz, uri));
 	}
 
+	@Override
 	public IBaseResource fetchStructureDefinition(String url)
 	{
 		return firstNonNull(c -> c.fetchStructureDefinition(url));
 	}
 
+	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext validationSupportContext, String system)
 	{
 		return checkAll(c -> c.isCodeSystemSupported(validationSupportContext, system));
 	}
 
+	@Override
 	public boolean isRemoteTerminologyServiceConfigured()
 	{
 		return checkAll(IValidationSupport::isRemoteTerminologyServiceConfigured);
 	}
 
+	@Override
 	public IBaseResource fetchValueSet(String url)
 	{
 		return firstNonNull(c -> c.fetchValueSet(url));
 	}
 
+	@Override
 	public byte[] fetchBinary(String binaryKey)
 	{
 		return firstNonNull(c -> c.fetchBinary(binaryKey));
 	}
 
+	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext validationSupportContext,
 			ConceptValidationOptions options, String codeSystem, String code, String display, String valueSetUrl)
 	{
@@ -145,6 +159,7 @@ public class SimpleValidationSupportChain implements IValidationSupport
 				c -> c.validateCode(validationSupportContext, options, codeSystem, code, display, valueSetUrl));
 	}
 
+	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext validationSupportContext,
 			ConceptValidationOptions options, String codeSystem, String code, String display, IBaseResource valueSet)
 	{
@@ -157,6 +172,7 @@ public class SimpleValidationSupportChain implements IValidationSupport
 	}
 
 	@Deprecated
+	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext validationSupportContext, String system, String code,
 			String displayLanguage)
 	{
@@ -164,11 +180,13 @@ public class SimpleValidationSupportChain implements IValidationSupport
 	}
 
 	@Deprecated
+	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext validationSupportContext, String system, String code)
 	{
 		return firstNonNull(c -> c.lookupCode(validationSupportContext, system, code));
 	}
 
+	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext validationSupportContext,
 			LookupCodeRequest lookupCodeRequest)
 	{
@@ -177,32 +195,38 @@ public class SimpleValidationSupportChain implements IValidationSupport
 				: null);
 	}
 
+	@Override
 	public boolean isValueSetSupported(ValidationSupportContext validationSupportContext, String valueSetUrl)
 	{
 		return firstNonNull(c -> c.isValueSetSupported(validationSupportContext, valueSetUrl));
 	}
 
+	@Override
 	public IBaseResource generateSnapshot(ValidationSupportContext validationSupportContext, IBaseResource input,
 			String url, String webUrl, String profileName)
 	{
 		return firstNonNull(c -> c.generateSnapshot(validationSupportContext, input, url, webUrl, profileName));
 	}
 
+	@Override
 	public void invalidateCaches()
 	{
 		chain.forEach(IValidationSupport::invalidateCaches);
 	}
 
+	@Override
 	public TranslateConceptResults translateConcept(TranslateCodeRequest request)
 	{
 		return firstNonNull(c -> c.translateConcept(request));
 	}
 
+	@Override
 	public String getName()
 	{
 		return SimpleValidationSupportChain.class.getSimpleName();
 	}
 
+	@Override
 	public boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()
 	{
 		return false;
