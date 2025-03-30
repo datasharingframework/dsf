@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ResourceInResourceValidator implements ResourceValidator
@@ -26,9 +27,7 @@ public class ResourceInResourceValidator implements ResourceValidator
 	public ValidationResult validate(Resource resource)
 	{
 		if (resource instanceof Bundle b)
-		{
 			return validateBundle(b);
-		}
 		else
 			return delegate.validate(resource);
 	}
@@ -42,11 +41,11 @@ public class ResourceInResourceValidator implements ResourceValidator
 		ValidationResult bundleResult = delegate.validate(bundle);
 		bundle.setEntry(entries);
 
+		Stream<SingleValidationMessage> entryResults = entries.stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).map(this::validate).map(ValidationResult::getMessages)
+				.flatMap(List::stream);
+
 		return new ValidationResult(fhirContext,
-				Stream.concat(bundleResult.getMessages().stream(),
-						entries.stream().filter(BundleEntryComponent::hasResource)
-								.map(BundleEntryComponent::getResource).map(this::validate)
-								.map(ValidationResult::getMessages).flatMap(List::stream))
-						.toList());
+				Stream.concat(bundleResult.getMessages().stream(), entryResults).toList());
 	}
 }
