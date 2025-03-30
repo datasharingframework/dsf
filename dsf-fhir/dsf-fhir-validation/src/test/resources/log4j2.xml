@@ -10,6 +10,7 @@
 		<Logger name="de.rwh" level="INFO"/>
 		<Logger name="dev.dsf" level="TRACE"/>
 		<Logger name="org.eclipse.jetty" level="INFO"/>
+		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR"/>
 		
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE"/>

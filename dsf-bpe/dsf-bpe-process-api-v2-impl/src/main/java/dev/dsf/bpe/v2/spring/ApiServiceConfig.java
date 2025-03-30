@@ -2,6 +2,7 @@ package dev.dsf.bpe.v2.spring;
 
 import java.util.Locale;
 
+import org.apache.tika.detect.Detector;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,8 @@ import dev.dsf.bpe.v2.listener.ContinueListener;
 import dev.dsf.bpe.v2.listener.EndListener;
 import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
+import dev.dsf.bpe.v2.service.CryptoService;
+import dev.dsf.bpe.v2.service.CryptoServiceImpl;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
@@ -42,6 +45,8 @@ import dev.dsf.bpe.v2.service.FhirClientProviderImpl;
 import dev.dsf.bpe.v2.service.FhirClientProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MailServiceDelegate;
+import dev.dsf.bpe.v2.service.MimetypeService;
+import dev.dsf.bpe.v2.service.MimetypeServiceImpl;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OidcClientProviderDelegate;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
@@ -52,6 +57,8 @@ import dev.dsf.bpe.v2.service.ReadAccessHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelperImpl;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.TaskHelperImpl;
+import dev.dsf.bpe.v2.service.detector.CombinedDetectors;
+import dev.dsf.bpe.v2.service.detector.NdJsonDetector;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelperImpl;
 import dev.dsf.bpe.v2.variables.FhirResourceSerializer;
@@ -83,12 +90,14 @@ public class ApiServiceConfig
 	@Autowired
 	private BpeOidcClientProvider bpeOidcClientProvider;
 
+
 	@Bean
 	public ProcessPluginApi processPluginApiV2()
 	{
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
-				fhirClientProvider(), oidcClientProvider(), mailService(), objectMapper(), organizationProvider(),
-				processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(), taskHelper());
+				fhirClientProvider(), oidcClientProvider(), mailService(), mimetypeService(), objectMapper(),
+				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
+				taskHelper(), cryptoService());
 	}
 
 	@Bean
@@ -144,6 +153,13 @@ public class ApiServiceConfig
 	public MailService mailService()
 	{
 		return new MailServiceDelegate(bpeMailService);
+	}
+
+	@Bean
+	public MimetypeService mimetypeService()
+	{
+		Detector detector = CombinedDetectors.withDefaultAndNdJson(NdJsonDetector.DEFAULT_LINES_TO_CHECK);
+		return new MimetypeServiceImpl(detector);
 	}
 
 	@Bean
@@ -254,5 +270,11 @@ public class ApiServiceConfig
 	{
 		return new ListenerFactoryImpl(ProcessPluginFactoryImpl.API_VERSION, startListener(), endListener(),
 				continueListener());
+	}
+
+	@Bean
+	public CryptoService cryptoService()
+	{
+		return new CryptoServiceImpl();
 	}
 }

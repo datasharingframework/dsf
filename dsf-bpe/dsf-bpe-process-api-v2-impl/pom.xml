@@ -46,6 +46,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>${apache.tika.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -56,6 +61,12 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>crypto-utils</artifactId>
+			<version>${crypto-utils.version.v2}</version>
 		</dependency>
 
 		<dependency>
@@ -92,6 +103,11 @@
 								<artifactItem>
 									<groupId>dev.dsf</groupId>
 									<artifactId>dsf-bpe-process-api-v2-impl</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>de.hs-heilbronn.mi</groupId>
+									<artifactId>crypto-utils</artifactId>
+									<version>${crypto-utils.version.v2}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
@@ -239,6 +255,11 @@
 									<groupId>io.opentelemetry.instrumentation</groupId>
 									<artifactId>opentelemetry-instrumentation-annotations</artifactId>
 									<version>2.4.0</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.tika</groupId>
+									<artifactId>tika-core</artifactId>
+									<version>${apache.tika.version}</version>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

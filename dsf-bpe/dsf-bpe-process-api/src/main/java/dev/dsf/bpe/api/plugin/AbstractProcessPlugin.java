@@ -157,11 +157,9 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 	private final ProcessPluginFhirConfig<?, ?, ?, ?, ?, ?, ?, ?, ?> fhirConfig;
 
-	private boolean initialized;
 	private AnnotationConfigApplicationContext applicationContext;
 	private List<BpmnFileAndModel> processModels;
 	private Map<ProcessIdAndVersion, List<FileAndResource>> fhirResources;
-
 
 	public AbstractProcessPlugin(Class<?> processPluginDefinitionType, int processPluginApiVersion, boolean draft,
 			Path jarFile, ClassLoader processPluginClassLoader, ConfigurableEnvironment environment,
@@ -252,20 +250,12 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	@Override
 	public boolean initializeAndValidateResources(String localOrganizationIdentifierValue)
 	{
-		if (initialized)
+		if (apiApplicationContext != null && processModels != null && fhirResources != null)
 			return true;
 
 		boolean pluginDefinitionOk = validatePluginDefinitionValues();
 		if (!pluginDefinitionOk)
 			return false;
-
-		Map<ProcessIdAndVersion, List<FileAndResource>> resources = loadFhirResources(localOrganizationIdentifierValue);
-		if (resources.isEmpty())
-		{
-			logger.warn("Ignoring process plugin {}-{} from {}: No valid FHIR resources", getDefinitionName(),
-					getDefinitionVersion(), getJarFile().toString());
-			return false;
-		}
 
 		List<BpmnFileAndModel> models = filterNonValidBpmnModels(loadBpmnModels(localOrganizationIdentifierValue));
 		if (models.isEmpty())
@@ -285,16 +275,25 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			return false;
 		}
 
-		AnnotationConfigApplicationContext context = createApplicationContext();
-		if (context == null)
+		applicationContext = createApplicationContext();
+		if (applicationContext == null)
 		{
 			logger.warn("Ignoring process plugin {}-{} from {}: Unable to initialize spring context",
 					getDefinitionName(), getDefinitionVersion(), getJarFile().toString());
 			return false;
 		}
 
+		Map<ProcessIdAndVersion, List<FileAndResource>> resources = loadFhirResources(localOrganizationIdentifierValue,
+				getFhirResourceModifier());
+		if (resources.isEmpty())
+		{
+			logger.warn("Ignoring process plugin {}-{} from {}: No valid FHIR resources", getDefinitionName(),
+					getDefinitionVersion(), getJarFile().toString());
+			return false;
+		}
+
 		models = filterBpmnModelsWithoutMatchingActivityDefinitions(resources,
-				filterBpmnModelsWithNotAvailableBeans(models, context));
+				filterBpmnModelsWithNotAvailableBeans(models, applicationContext));
 		if (models.isEmpty())
 		{
 			logger.warn("Ignoring process plugin {}-{} from {}: No valid processes", getDefinitionName(),
@@ -302,10 +301,8 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			return false;
 		}
 
-		applicationContext = context;
 		processModels = models;
 		fhirResources = filterResourcesOfNotAvailableProcesses(resources, models);
-		initialized = true;
 
 		return true;
 	}
@@ -522,7 +519,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	@Override
 	public ApplicationContext getApplicationContext()
 	{
-		if (!initialized)
+		if (applicationContext == null)
 			throw new IllegalStateException("not initialized");
 
 		return applicationContext;
@@ -532,7 +529,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	@SuppressWarnings("rawtypes")
 	public Stream<TypedValueSerializer> getTypedValueSerializers()
 	{
-		if (!initialized)
+		if (applicationContext == null)
 			throw new IllegalStateException("not initialized");
 
 		return applicationContext.getBeansOfType(TypedValueSerializer.class).values().stream().distinct();
@@ -547,7 +544,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	@Override
 	public List<BpmnFileAndModel> getProcessModels()
 	{
-		if (!initialized)
+		if (processModels == null)
 			throw new IllegalStateException("not initialized");
 
 		return Collections.unmodifiableList(processModels);
@@ -556,7 +553,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	@Override
 	public Map<ProcessIdAndVersion, List<byte[]>> getFhirResources()
 	{
-		if (!initialized)
+		if (fhirResources == null)
 			throw new IllegalStateException("not initialized");
 
 		return fhirResources.entrySet().stream().collect(Collectors.toUnmodifiableMap(Entry::getKey,
@@ -962,12 +959,13 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		}
 	}
 
-	private Map<ProcessIdAndVersion, List<FileAndResource>> loadFhirResources(String localOrganizationIdentifierValue)
+	private Map<ProcessIdAndVersion, List<FileAndResource>> loadFhirResources(String localOrganizationIdentifierValue,
+			FhirResourceModifier fhirResourceModifier)
 	{
 		Map<String, FileAndResource> resourcesByFilename = getDefinitionFhirResourcesByProcessId().entrySet().stream()
 				.map(Entry::getValue).flatMap(List::stream).distinct()
-				.map(loadFhirResourceOrNull(localOrganizationIdentifierValue)).filter(Objects::nonNull)
-				.collect(Collectors.toMap(FileAndResource::getFile, Function.identity()));
+				.map(loadFhirResourceOrNull(localOrganizationIdentifierValue, fhirResourceModifier))
+				.filter(Objects::nonNull).collect(Collectors.toMap(FileAndResource::getFile, Function.identity()));
 
 		return getDefinitionFhirResourcesByProcessId().entrySet().stream()
 				.collect(Collectors.toMap(e -> new ProcessIdAndVersion(e.getKey(), getDefinitionResourceVersion()),
@@ -975,7 +973,8 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 								.map(resourcesByFilename::get).toList()));
 	}
 
-	private Function<String, FileAndResource> loadFhirResourceOrNull(String localOrganizationIdentifierValue)
+	private Function<String, FileAndResource> loadFhirResourceOrNull(String localOrganizationIdentifierValue,
+			FhirResourceModifier fhirResourceModifier)
 	{
 		return file ->
 		{
@@ -1018,32 +1017,68 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 				Object resource = fhirConfig.parseResource(file, content);
 
-				if (fhirConfig.isActivityDefinition(resource) && isValidActivityDefinition(resource, file))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isCodeSystem(resource) && isValidCodeSystem(resource, file))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isLibrary(resource) && isValidLibrary(resource, file))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isMeasure(resource) && isValidMeasure(resource, file))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isNamingSystem(resource) && isValidNamingSystem(resource, file))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isQuestionnaire(resource) && isValidQuestionnaire(resource, file))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isStructureDefinition(resource) && isValidStructureDefinition(resource, file))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isTask(resource) && isValidTask(resource, file, localOrganizationIdentifierValue))
-					return FileAndResource.of(file, resource);
-				else if (fhirConfig.isValueSet(resource) && isValidValueSet(resource, file))
-					return FileAndResource.of(file, resource);
+				if (fhirConfig.isActivityDefinition(resource))
+				{
+					resource = fhirResourceModifier.modifyActivityDefinition(file, resource);
+					if (isValidActivityDefinition(resource, file))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isCodeSystem(resource))
+				{
+					resource = fhirResourceModifier.modifyCodeSystem(file, resource);
+					if (isValidCodeSystem(resource, file))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isLibrary(resource))
+				{
+					resource = fhirResourceModifier.modifyLibrary(file, resource);
+					if (isValidLibrary(resource, file))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isMeasure(resource))
+				{
+					resource = fhirResourceModifier.modifyMeasure(file, resource);
+					if (isValidMeasure(resource, file))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isNamingSystem(resource))
+				{
+					resource = fhirResourceModifier.modifyNamingSystem(file, resource);
+					if (isValidNamingSystem(resource, file))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isQuestionnaire(resource))
+				{
+					resource = fhirResourceModifier.modifyQuestionnaire(file, resource);
+					if (isValidQuestionnaire(resource, file))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isStructureDefinition(resource))
+				{
+					resource = fhirResourceModifier.modifyStructureDefinition(file, resource);
+					if (isValidStructureDefinition(resource, file))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isTask(resource))
+				{
+					resource = fhirResourceModifier.modifyTask(file, resource);
+					if (isValidTask(resource, file, localOrganizationIdentifierValue))
+						return FileAndResource.of(file, resource);
+				}
+				else if (fhirConfig.isValueSet(resource))
+				{
+					resource = fhirResourceModifier.modifyValueSet(file, resource);
+					if (isValidValueSet(resource, file))
+						return FileAndResource.of(file, resource);
+				}
 				else
 				{
 					logger.warn(
 							"Ignoring FHIR resource {} from process plugin {}-{}: Not a ActivityDefinition, CodeSystem, Library, Measure, NamingSystem, Questionnaire, StructureDefinition, Task or ValueSet",
 							file, getDefinitionName(), getDefinitionVersion());
-
-					return null;
 				}
+
+				return null;
 			}
 			catch (IOException e)
 			{

@@ -7,10 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
+import dev.dsf.bpe.v2.service.MimetypeService;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
@@ -41,6 +43,8 @@ public interface ProcessPluginApi
 
 	MailService getMailService();
 
+	MimetypeService getMimetypeService();
+
 	ObjectMapper getObjectMapper();
 
 	OrganizationProvider getOrganizationProvider();
@@ -52,4 +56,6 @@ public interface ProcessPluginApi
 	ReadAccessHelper getReadAccessHelper();
 
 	TaskHelper getTaskHelper();
+
+	CryptoService getCryptoService();
 }

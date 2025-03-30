@@ -22,6 +22,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
@@ -35,6 +37,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.db.PreparedStatementWithLogger;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
@@ -43,6 +46,7 @@ import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
+import jakarta.ws.rs.core.MediaType;
 
 public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 {
@@ -1277,5 +1281,26 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		assertReadAccessEntryCount(2, 0, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 		assertReadAccessEntryCount(2, 0, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	public void testCreateLarge() throws Exception
+	{
+		// making sure logging is enabled to test for PostgreSQL bug https://github.com/pgjdbc/pgjdbc/issues/3365
+		org.apache.logging.log4j.Logger psL = LogManager.getLogger(PreparedStatementWithLogger.class);
+		Level oldLevel = psL.getLevel();
+
+		if (psL instanceof org.apache.logging.log4j.core.Logger l)
+			l.setLevel(Level.DEBUG);
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.APPLICATION_JSON);
+		binary.setData(("{\"data\": \"" + "a".repeat(14999999) + "\"}").getBytes());
+
+		Binary created = dao.create(binary);
+		assertNotNull(created);
+
+		if (psL instanceof org.apache.logging.log4j.core.Logger l)
+			l.setLevel(oldLevel);
 	}
 }

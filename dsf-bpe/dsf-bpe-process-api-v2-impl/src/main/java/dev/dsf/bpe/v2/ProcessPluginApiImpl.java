@@ -8,10 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
+import dev.dsf.bpe.v2.service.MimetypeService;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
@@ -28,19 +30,23 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final FhirClientProvider fhirClientProvider;
 	private final OidcClientProvider oidcClientProvider;
 	private final MailService mailService;
+
+	private final MimetypeService mimetypeService;
 	private final ObjectMapper objectMapper;
 	private final OrganizationProvider organizationProvider;
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
+	private final CryptoService cryptoService;
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
-			OidcClientProvider oidcClientProvider, MailService mailService, ObjectMapper objectMapper,
-			OrganizationProvider organizationProvider, ProcessAuthorizationHelper processAuthorizationHelper,
+			OidcClientProvider oidcClientProvider, MailService mailService, MimetypeService mimetypeService,
+			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
+			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
-			TaskHelper taskHelper)
+			TaskHelper taskHelper, CryptoService cryptoService)
 	{
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
@@ -49,12 +55,14 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.fhirClientProvider = fhirClientProvider;
 		this.oidcClientProvider = oidcClientProvider;
 		this.mailService = mailService;
+		this.mimetypeService = mimetypeService;
 		this.objectMapper = objectMapper;
 		this.organizationProvider = organizationProvider;
 		this.processAuthorizationHelper = processAuthorizationHelper;
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
 		this.readAccessHelper = readAccessHelper;
 		this.taskHelper = taskHelper;
+		this.cryptoService = cryptoService;
 	}
 
 	@Override
@@ -73,6 +81,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(cryptoService, "cryptoService");
 	}
 
 	@Override
@@ -118,6 +127,12 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	}
 
 	@Override
+	public MimetypeService getMimetypeService()
+	{
+		return mimetypeService;
+	}
+
+	@Override
 	public ObjectMapper getObjectMapper()
 	{
 		return objectMapper;
@@ -151,5 +166,11 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public TaskHelper getTaskHelper()
 	{
 		return taskHelper;
+	}
+
+	@Override
+	public CryptoService getCryptoService()
+	{
+		return cryptoService;
 	}
 }

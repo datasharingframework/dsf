@@ -1,4 +1,4 @@
-<Configuration status="INFO" monitorInterval="30" verbose="false">
+<Configuration status="WARN" monitorInterval="30" verbose="false">
 
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
@@ -9,6 +9,7 @@
 	<Loggers>
 		<AsyncLogger name="dev.dsf" level="INFO"/>
 		<AsyncLogger name="org.eclipse.jetty" level="INFO"/>
+		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR"/>
 
 		<AsyncRoot level="WARN">
 			<AppenderRef ref="CONSOLE"/>
