@@ -1,4 +1,4 @@
-package dev.dsf.fhir.service;
+package dev.dsf.fhir.validation;
 
 import java.lang.ref.SoftReference;
 import java.util.List;
@@ -16,8 +16,6 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -25,16 +23,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import dev.dsf.fhir.event.Event;
-import dev.dsf.fhir.event.EventHandler;
-import dev.dsf.fhir.event.ResourceCreatedEvent;
-import dev.dsf.fhir.event.ResourceDeletedEvent;
-import dev.dsf.fhir.event.ResourceUpdatedEvent;
 
-public class ValidationSupportWithCache implements IValidationSupport, EventHandler
+public class ValidationSupportWithCache implements IValidationSupport
 {
-	private static final Logger logger = LoggerFactory.getLogger(ValidationSupportWithCache.class);
-
 	private static final class CacheEntry<R extends Resource>
 	{
 		final Supplier<R> resourceSupplier;
@@ -83,8 +74,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 
 	public ValidationSupportWithCache populateCache(List<IBaseResource> cacheValues)
 	{
-		logger.trace("populating cache");
-
 		cacheValues.stream().filter(r -> r instanceof Resource).map(r -> (Resource) r).forEach(this::add);
 
 		fetchAllConformanceResourcesDone.set(true);
@@ -99,35 +88,19 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		return context;
 	}
 
-	@Override
-	public void handleEvent(Event event)
-	{
-		if (event == null)
-			return;
-
-		logger.trace("handling event {}", event.getClass().getSimpleName());
-
-		if (event instanceof ResourceCreatedEvent && resourceSupported(event.getResource()))
-			add(event.getResource());
-		else if (event instanceof ResourceDeletedEvent && resourceSupported(event.getResourceType(), event.getId()))
-			remove(event.getResourceType(), event.getId());
-		else if (event instanceof ResourceUpdatedEvent && resourceSupported(event.getResource()))
-			update(event.getResource());
-	}
-
-	private boolean resourceSupported(Resource resource)
+	protected boolean resourceSupported(Resource resource)
 	{
 		return resource != null && (resource instanceof CodeSystem || resource instanceof StructureDefinition
 				|| resource instanceof ValueSet);
 	}
 
-	private boolean resourceSupported(Class<? extends Resource> type, String resourceId)
+	protected boolean resourceSupported(Class<? extends Resource> type, String resourceId)
 	{
 		return urlAndVersionsById.containsKey(resourceId) && (CodeSystem.class.equals(type)
 				|| StructureDefinition.class.equals(type) || ValueSet.class.equals(type));
 	}
 
-	private void add(Resource resource)
+	protected void add(Resource resource)
 	{
 		if (resource instanceof CodeSystem c)
 			doAdd(c, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion,
@@ -158,7 +131,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 			urlAndVersionsById.put(resource.getIdElement().getIdPart(), url + "|" + version);
 	}
 
-	private void update(Resource resource)
+	protected void update(Resource resource)
 	{
 		remove(resource);
 		add(resource);
@@ -184,7 +157,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		cache.remove(url + "|" + version);
 	}
 
-	private void remove(Class<? extends Resource> type, String id)
+	protected void remove(Class<? extends Resource> type, String id)
 	{
 		if (CodeSystem.class.equals(type))
 			doRemove(id, codeSystems);
@@ -214,8 +187,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	{
 		if (!fetchAllConformanceResourcesDone.get())
 		{
-			logger.trace("Fetching all conformance resources");
-
 			List<IBaseResource> allConformanceResources = delegate.fetchAllConformanceResources();
 
 			allConformanceResources.stream().filter(r -> r instanceof Resource).map(r -> (Resource) r)
@@ -228,8 +199,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		}
 		else
 		{
-			logger.trace("Fetching all conformance resources from cache");
-
 			return Stream
 					.concat(codeSystems.values().stream(),
 							Stream.concat(structureDefinitions.values().stream(), valueSets.values().stream()))
@@ -242,8 +211,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	{
 		if (!fetchAllStructureDefinitionsDone.get())
 		{
-			logger.trace("Fetching all structure-definitions");
-
 			List<T> allStructureDefinitions = delegate.fetchAllStructureDefinitions();
 
 			allStructureDefinitions.stream().filter(r -> r instanceof Resource).map(r -> (Resource) r)
@@ -255,8 +222,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		}
 		else
 		{
-			logger.trace("Fetching all structure-definitions from cache");
-
 			@SuppressWarnings("unchecked")
 			List<T> all = (List<T>) structureDefinitions.values().stream().map(c -> (IBaseResource) c.get())
 					.collect(Collectors.toList());
@@ -267,8 +232,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	@Override
 	public IBaseResource fetchStructureDefinition(String url)
 	{
-		logger.trace("Fetching structure-definition '{}'", url);
-
 		if (url == null || url.isBlank())
 			return null;
 
@@ -284,8 +247,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	@Override
 	public IBaseResource fetchCodeSystem(String url)
 	{
-		logger.trace("Fetching code-system '{}'", url);
-
 		if (url == null || url.isBlank())
 			return null;
 
@@ -301,8 +262,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	@Override
 	public IBaseResource fetchValueSet(String url)
 	{
-		logger.trace("Fetching value-set '{}'", url);
-
 		if (url == null || url.isBlank())
 			return null;
 
@@ -330,10 +289,18 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		return delegate.expandValueSet(theRootValidationSupport, theExpansionOptions, theValueSetToExpand);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri)
 	{
-		return delegate.fetchResource(theClass, theUri);
+		if (StructureDefinition.class.equals(theClass))
+			return (T) fetchStructureDefinition(theUri);
+		else if (CodeSystem.class.equals(theClass))
+			return (T) fetchCodeSystem(theUri);
+		else if (ValueSet.class.equals(theClass))
+			return (T) fetchValueSet(theUri);
+		else
+			return delegate.fetchResource(theClass, theUri);
 	}
 
 	@Override
