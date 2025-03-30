@@ -66,6 +66,13 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 		return new ArrayList<>(structureDefinitionsByUrl.values());
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<StructureDefinition> fetchAllNonBaseStructureDefinitions()
+	{
+		return new ArrayList<>(structureDefinitionsByUrl.values());
+	}
+
 	@Override
 	public StructureDefinition fetchStructureDefinition(String url)
 	{

@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -351,5 +353,21 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		update.setResource(updatePatient);
 
 		return bundle;
+	}
+
+	@Test
+	public void createBundleInBundle() throws Exception
+	{
+		Bundle b = new Bundle().setType(BundleType.BATCHRESPONSE);
+		b.addEntry()
+				.setResource(new Bundle().setType(BundleType.SEARCHSET)
+						.addLink(new BundleLinkComponent().setRelation("self").setUrl("Medication")).setTotal(0))
+				.setResponse(new BundleEntryResponseComponent().setStatus("200"));
+		getReadAccessHelper().addAll(b);
+
+		Bundle created = getWebserviceClient().create(b);
+		assertNotNull(created);
+		assertNotNull(created.getIdElement());
+		assertNotNull(created.getIdElement().getIdPart());
 	}
 }
