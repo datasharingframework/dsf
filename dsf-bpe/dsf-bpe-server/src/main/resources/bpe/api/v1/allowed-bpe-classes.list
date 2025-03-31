@@ -28,3 +28,5 @@ org.springframework.lang
 org.springframework.util
 org.springframework.web.util.UriComponents
 org.springframework.web.util.UriComponentsBuilder
+org.w3c.dom
+org.xml.sax
