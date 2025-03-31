@@ -16,6 +16,8 @@ import dev.dsf.bpe.test.service.EndpointProviderTest;
 import dev.dsf.bpe.test.service.ErrorBoundaryEventTestThrow;
 import dev.dsf.bpe.test.service.ErrorBoundaryEventTestVerify;
 import dev.dsf.bpe.test.service.ExceptionTest;
+import dev.dsf.bpe.test.service.FhirBinaryVariableTestGet;
+import dev.dsf.bpe.test.service.FhirBinaryVariableTestSet;
 import dev.dsf.bpe.test.service.FhirClientProviderTest;
 import dev.dsf.bpe.test.service.FieldInjectionTest;
 import dev.dsf.bpe.test.service.JsonVariableTestGet;
@@ -39,7 +41,7 @@ public class Config
 				FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class, ErrorBoundaryEventTestVerify.class,
 				ExceptionTest.class, ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
 				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
-				MimetypeServiceTest.class);
+				MimetypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class);
 	}
 
 	@Bean

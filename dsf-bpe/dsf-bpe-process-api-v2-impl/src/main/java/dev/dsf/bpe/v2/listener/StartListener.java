@@ -23,7 +23,7 @@ public class StartListener extends AbstractListener implements ExecutionListener
 	@Override
 	public void doNotify(DelegateExecution execution, ListenerVariables variables) throws Exception
 	{
-		Task task = variables.getResource(Constants.TASK_VARIABLE);
+		Task task = variables.getFhirResource(Constants.TASK_VARIABLE);
 		execution.removeVariable(Constants.TASK_VARIABLE);
 
 		if (task != null)

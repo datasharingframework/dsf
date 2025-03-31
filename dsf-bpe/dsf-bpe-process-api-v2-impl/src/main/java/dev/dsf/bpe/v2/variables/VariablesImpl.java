@@ -168,27 +168,27 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
-	public void setResourceList(String variableName, List<? extends Resource> resources)
+	public void setFhirResourceList(String variableName, List<? extends Resource> resources)
 	{
 		FhirResourcesListValue variable = resources == null ? null : FhirResourcesListValues.create(resources);
 		execution.setVariable(variableName, variable);
 	}
 
 	@Override
-	public <R extends Resource> List<R> getResourceList(String variableName)
+	public <R extends Resource> List<R> getFhirResourceList(String variableName)
 	{
 		FhirResourcesList list = (FhirResourcesList) execution.getVariable(variableName);
 		return list != null ? list.getResourcesAndCast() : null;
 	}
 
-	private <R extends Resource> List<R> getResourceListOrDefault(String variableName, List<R> defaultList)
+	private <R extends Resource> List<R> getFhirResourceListOrDefault(String variableName, List<R> defaultList)
 	{
-		List<R> list = getResourceList(variableName);
+		List<R> list = getFhirResourceList(variableName);
 		return list != null ? list : defaultList;
 	}
 
 	@Override
-	public void setResource(String variableName, Resource resource)
+	public void setFhirResource(String variableName, Resource resource)
 	{
 		FhirResourceValue variable = resource == null ? null : FhirResourceValues.create(resource);
 		execution.setVariable(variableName, variable);
@@ -196,9 +196,38 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <R extends Resource> R getResource(String variableName)
+	public <R extends Resource> R getFhirResource(String variableName)
 	{
 		Resource resource = (Resource) execution.getVariable(variableName);
+		return (R) resource;
+	}
+
+	@Override
+	public void setFhirResourceListLocal(String variableName, List<? extends Resource> resources)
+	{
+		FhirResourcesListValue variable = resources == null ? null : FhirResourcesListValues.create(resources);
+		execution.setVariableLocal(variableName, variable);
+	}
+
+	@Override
+	public <R extends Resource> List<R> getFhirResourceListLocal(String variableName)
+	{
+		FhirResourcesList list = (FhirResourcesList) execution.getVariableLocal(variableName);
+		return list != null ? list.getResourcesAndCast() : null;
+	}
+
+	@Override
+	public void setFhirResourceLocal(String variableName, Resource resource)
+	{
+		FhirResourceValue variable = resource == null ? null : FhirResourceValues.create(resource);
+		execution.setVariableLocal(variableName, variable);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends Resource> R getFhirResourceLocal(String variableName)
+	{
+		Resource resource = (Resource) execution.getVariableLocal(variableName);
 		return (R) resource;
 	}
 
@@ -208,7 +237,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("getStartTask - parentActivityInstanceId: {}, parentId: {}",
 				execution.getParentActivityInstanceId(), execution.getParentId());
 
-		return getResource(START_TASK);
+		return getFhirResource(START_TASK);
 	}
 
 	@Override
@@ -230,7 +259,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		List<Task> tasks = Stream
 				.concat(Stream.of(getStartTask()),
 						execution.getVariables().keySet().stream().filter(k -> k.startsWith(TASKS_PREFIX))
-								.map(this::getResourceList).flatMap(List::stream).filter(r -> r instanceof Task)
+								.map(this::getFhirResourceList).flatMap(List::stream).filter(r -> r instanceof Task)
 								.map(r -> (Task) r))
 				.filter(t -> t != null).map(DistinctTask::new).distinct().map(DistinctTask::getTask).toList();
 
@@ -244,7 +273,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 				execution.getParentActivityInstanceId(), execution.getParentId());
 
 		Stream<Task> start = execution.getParentId() == null ? Stream.of(getStartTask()) : Stream.empty();
-		Stream<Task> current = getResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
+		Stream<Task> current = getFhirResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
 				List.<Task> of()).stream();
 
 		return Collections.unmodifiableList(Stream.concat(start, current).toList());
@@ -259,14 +288,14 @@ public class VariablesImpl implements Variables, ListenerVariables
 		{
 			if (getStartTask() != null
 					&& Objects.equals(getStartTask().getIdElement().getIdPart(), task.getIdElement().getIdPart()))
-				setResource(START_TASK, task);
+				setFhirResource(START_TASK, task);
 			else
 			{
 				String instanceId = execution.getParentActivityInstanceId();
-				List<Task> tasks = getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of());
+				List<Task> tasks = getFhirResourceListOrDefault(TASKS_PREFIX + instanceId, List.of());
 
 				if (tasks.stream().anyMatch(t -> t.getIdElement().getIdPart().equals(task.getIdElement().getIdPart())))
-					setResourceList(TASKS_PREFIX + instanceId, tasks);
+					setFhirResourceList(TASKS_PREFIX + instanceId, tasks);
 				else
 					logger.warn("Given task {} not part of tasks list '{}', ignoring task",
 							task.getIdElement().getIdPart(), instanceId);
@@ -279,7 +308,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public QuestionnaireResponse getLatestReceivedQuestionnaireResponse()
 	{
-		return (QuestionnaireResponse) getResource(Constants.QUESTIONNAIRE_RESPONSE_VARIABLE);
+		return (QuestionnaireResponse) getFhirResource(Constants.QUESTIONNAIRE_RESPONSE_VARIABLE);
 	}
 
 	@Override
@@ -466,7 +495,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("onStart - Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
 
 		if (task != null)
-			setResource(START_TASK, task);
+			setFhirResource(START_TASK, task);
 		else
 			logger.warn("Given task is null");
 	}
@@ -480,10 +509,10 @@ public class VariablesImpl implements Variables, ListenerVariables
 		{
 			String instanceId = execution.getParentActivityInstanceId();
 
-			List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
+			List<Task> tasks = new ArrayList<>(getFhirResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
 			tasks.add(task);
 
-			setResourceList(TASKS_PREFIX + instanceId, tasks);
+			setFhirResourceList(TASKS_PREFIX + instanceId, tasks);
 		}
 		else
 			logger.warn("Given task is null");
@@ -495,8 +524,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("onEnd");
 
 		String instanceId = execution.getParentActivityInstanceId();
-		List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
+		List<Task> tasks = new ArrayList<>(getFhirResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
 		tasks.removeAll(getCurrentTasks());
-		setResourceList(TASKS_PREFIX + instanceId, tasks);
+		setFhirResourceList(TASKS_PREFIX + instanceId, tasks);
 	}
 }
