@@ -11,6 +11,15 @@ public class DeferredBase64BinaryType extends Base64BinaryType
 {
 	private Supplier<InputStream> valueSupplier;
 
+	/**
+	 * @deprecated only for java serialization
+	 */
+	@Deprecated
+	public DeferredBase64BinaryType()
+	{
+		this(null);
+	}
+
 	public DeferredBase64BinaryType(Supplier<InputStream> valueSupplier)
 	{
 		this.valueSupplier = valueSupplier;

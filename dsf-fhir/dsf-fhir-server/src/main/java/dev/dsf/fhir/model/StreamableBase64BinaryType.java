@@ -9,6 +9,15 @@ public class StreamableBase64BinaryType extends Base64BinaryType
 {
 	private InputStream inputStream;
 
+	/**
+	 * @deprecated only for java serialization
+	 */
+	@Deprecated
+	public StreamableBase64BinaryType()
+	{
+		this((InputStream) null);
+	}
+
 	public StreamableBase64BinaryType(byte[] value)
 	{
 		super(value);
