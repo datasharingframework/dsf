@@ -68,7 +68,10 @@ public class RandomInputStream extends InputStream
 	@Override
 	public long skip(long n) throws IOException
 	{
-		long bytesSkipped = Math.min(n, length - position);
+		if (n > Integer.MAX_VALUE)
+			n = Integer.MAX_VALUE;
+
+		int bytesSkipped = Math.min((int) n, length - position);
 		position += bytesSkipped;
 		return bytesSkipped;
 	}
