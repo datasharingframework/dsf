@@ -192,4 +192,16 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("MimetypeServiceTest"));
 	}
+
+	@Test
+	public void startFhirBinaryVariableTest() throws Exception
+	{
+		executePluginTest(createTestTask("FhirBinaryVariableTest"));
+	}
+
+	@Test
+	public void startEnvironmentVariableTest() throws Exception
+	{
+		executePluginTest(createTestTask("EnvironmentVariableTest"));
+	}
 }

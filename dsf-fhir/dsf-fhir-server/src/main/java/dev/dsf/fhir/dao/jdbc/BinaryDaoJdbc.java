@@ -1,10 +1,17 @@
 package dev.dsf.fhir.dao.jdbc;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -13,11 +20,154 @@ import org.postgresql.util.PGobject;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.BinaryDao;
+import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
+import dev.dsf.fhir.model.DeferredBase64BinaryType;
+import dev.dsf.fhir.model.StreamableBase64BinaryType;
 import dev.dsf.fhir.search.filter.BinaryIdentityFilter;
 import dev.dsf.fhir.search.parameters.BinaryContentType;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
+	public static final class DataInputStream extends InputStream
+	{
+		private final Connection connection;
+		private final PreparedStatement statement;
+		private final ResultSet resultSet;
+		private final InputStream data;
+
+		public DataInputStream(Connection connection, PreparedStatement statement, ResultSet resultSet,
+				InputStream data)
+		{
+			this.connection = Objects.requireNonNull(connection, "connection");
+			this.statement = Objects.requireNonNull(statement, "statement");
+			this.resultSet = Objects.requireNonNull(resultSet, "resultSet");
+			this.data = Objects.requireNonNull(data, "data");
+		}
+
+		@Override
+		public int read() throws IOException
+		{
+			return data.read();
+		}
+
+		@Override
+		public int read(byte[] b) throws IOException
+		{
+			return data.read(b);
+		}
+
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException
+		{
+			return data.read(b, off, len);
+		}
+
+		@Override
+		public byte[] readAllBytes() throws IOException
+		{
+			return data.readAllBytes();
+		}
+
+		@Override
+		public byte[] readNBytes(int len) throws IOException
+		{
+			return data.readNBytes(len);
+		}
+
+		@Override
+		public int readNBytes(byte[] b, int off, int len) throws IOException
+		{
+			return data.readNBytes(b, off, len);
+		}
+
+		@Override
+		public long skip(long n) throws IOException
+		{
+			return data.skip(n);
+		}
+
+		@Override
+		public void skipNBytes(long n) throws IOException
+		{
+			data.skipNBytes(n);
+		}
+
+		@Override
+		public int available() throws IOException
+		{
+			return data.available();
+		}
+
+		@Override
+		public void close() throws IOException
+		{
+			try
+			{
+				data.close();
+			}
+			finally
+			{
+				try
+				{
+					resultSet.close();
+				}
+				catch (SQLException e)
+				{
+					throw new IOException(e);
+				}
+				finally
+				{
+					try
+					{
+						statement.close();
+					}
+					catch (SQLException e)
+					{
+						throw new IOException(e);
+					}
+					finally
+					{
+						try
+						{
+							connection.close();
+						}
+						catch (SQLException e)
+						{
+							throw new IOException(e);
+						}
+					}
+				}
+			}
+		}
+
+		@Override
+		public void mark(int readlimit)
+		{
+			data.mark(readlimit);
+		}
+
+		@Override
+		public void reset() throws IOException
+		{
+			data.reset();
+		}
+
+		@Override
+		public boolean markSupported()
+		{
+			return data.markSupported();
+		}
+
+		@Override
+		public long transferTo(OutputStream out) throws IOException
+		{
+			return data.transferTo(out);
+		}
+	}
+
+
 	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, Binary.class, "binaries", "binary_json", "binary_id",
@@ -25,6 +175,77 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 				List.of(factory(BinaryContentType.PARAMETER_NAME, BinaryContentType::new,
 						BinaryContentType.getNameModifiers())),
 				List.of());
+	}
+
+	private InputStream readData(Binary resource)
+	{
+		try
+		{
+			Connection connection = getDataSource().getConnection();
+			PreparedStatement statement = connection
+					.prepareStatement("SELECT binary_data FROM binaries WHERE binary_id = ? AND version = ?");
+			PGobject uuidObject = getPreparedStatementFactory()
+					.uuidToPgObject(toUuid(resource.getIdElement().getIdPart()));
+			Long version = resource.getMeta().getVersionIdElement().getIdPartAsLong();
+
+			statement.setObject(1, uuidObject);
+			statement.setLong(2, version);
+
+			ResultSet result = statement.executeQuery();
+			if (result.next())
+			{
+				InputStream data = result.getBinaryStream(1);
+				if (data == null)
+					data = new ByteArrayInputStream(new byte[0]);
+
+				return new DataInputStream(connection, statement, result, data);
+			}
+			else
+				throw new SQLException("Binary resource with id " + resource.getIdElement().getIdPart() + " not found");
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public Binary createWithTransactionAndId(Connection connection, Binary resource, UUID uuid) throws SQLException
+	{
+		Binary created = super.createWithTransactionAndId(connection, resource, uuid);
+
+		if (created.getDataElement() instanceof StreamableBase64BinaryType)
+			created.setDataElement(new DeferredBase64BinaryType(() -> readData(created)));
+
+		return created;
+	}
+
+	@Override
+	public Binary updateWithTransaction(Connection connection, Binary resource, Long expectedVersion)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	{
+		Binary updated = super.updateWithTransaction(connection, resource, expectedVersion);
+
+		if (updated.getDataElement() instanceof StreamableBase64BinaryType)
+			updated.setDataElement(new DeferredBase64BinaryType(() -> readData(updated)));
+
+		return updated;
+	}
+
+	@Override
+	public Optional<Binary> readWithTransaction(Connection connection, UUID uuid)
+			throws SQLException, ResourceDeletedException
+	{
+		Optional<Binary> read = super.readWithTransaction(connection, uuid);
+		return read.map(r -> r.setDataElement(new DeferredBase64BinaryType(() -> readData(r))));
+	}
+
+	@Override
+	public Optional<Binary> readVersionWithTransaction(Connection connection, UUID uuid, long version)
+			throws SQLException, ResourceDeletedException
+	{
+		Optional<Binary> read = super.readVersionWithTransaction(connection, uuid, version);
+		return read.map(r -> r.setDataElement(new DeferredBase64BinaryType(() -> readData(r))));
 	}
 
 	@Override

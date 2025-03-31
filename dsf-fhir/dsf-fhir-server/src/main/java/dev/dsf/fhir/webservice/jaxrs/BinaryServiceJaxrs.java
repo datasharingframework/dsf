@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.model.DeferredBase64BinaryType;
+import dev.dsf.fhir.model.StreamableBase64BinaryType;
 import dev.dsf.fhir.webservice.specification.BinaryService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -60,6 +62,19 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	}
 
 	@POST
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
+	@Override
+	public Response create(Binary resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		resource.setDataElement(resource.getData() == null ? null : new StreamableBase64BinaryType(resource.getData()));
+
+		return delegate.create(resource, uri, headers);
+	}
+
+	@POST
 	@Consumes
 	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
 			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
@@ -70,9 +85,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		{
 			String securityContext = getSecurityContext(headers);
 			String contentType = getContentType(headers);
-			byte[] content = in.readAllBytes();
 
-			Binary resource = createBinary(contentType, content, securityContext);
+			Binary resource = createBinary(contentType, in, securityContext);
 			return delegate.create(resource, uri, headers);
 		}
 		catch (IOException e)
@@ -81,11 +95,11 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		}
 	}
 
-	private Binary createBinary(String contentType, byte[] content, String securityContextReference)
+	private Binary createBinary(String contentType, InputStream inputStream, String securityContextReference)
 	{
 		Binary resource = new Binary();
 		resource.setContentType(contentType);
-		resource.setContent(content);
+		resource.setDataElement(inputStream == null ? null : new StreamableBase64BinaryType(inputStream));
 		resource.setSecurityContext(new Reference(securityContextReference));
 		return resource;
 	}
@@ -171,9 +185,11 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	private Response toStream(Binary binary)
 	{
 		String contentType = binary.getContentType();
-		byte[] content = binary.getContent();
 
-		ResponseBuilder b = Response.status(Status.OK).entity(new ByteArrayInputStream(content));
+		InputStream stream = binary.getDataElement() instanceof DeferredBase64BinaryType s ? s.getValueAsStream()
+				: new ByteArrayInputStream(binary.getData());
+
+		ResponseBuilder b = Response.status(Status.OK).entity(stream);
 		b = b.type(contentType);
 
 		if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
@@ -234,6 +250,34 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	@PUT
 	@Path("/{id}")
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
+	@Override
+	public Response update(@PathParam("id") String id, Binary resource, @Context UriInfo uri,
+			@Context HttpHeaders headers)
+	{
+		resource.setDataElement(resource.getData() == null ? null : new StreamableBase64BinaryType(resource.getData()));
+
+		return delegate.update(id, resource, uri, headers);
+	}
+
+	@PUT
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
+	@Override
+	public Response update(Binary resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		resource.setDataElement(resource.getData() == null ? null : new StreamableBase64BinaryType(resource.getData()));
+
+		return delegate.update(resource, uri, headers);
+	}
+
+	@PUT
+	@Path("/{id}")
 	@Consumes
 	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
 			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
@@ -245,9 +289,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		{
 			String securityContext = getSecurityContext(headers);
 			String contentType = getContentType(headers);
-			byte[] content = in.readAllBytes();
 
-			Binary resource = createBinary(contentType, content, securityContext);
+			Binary resource = createBinary(contentType, in, securityContext);
 			return delegate.update(id, resource, uri, headers);
 		}
 		catch (IOException e)

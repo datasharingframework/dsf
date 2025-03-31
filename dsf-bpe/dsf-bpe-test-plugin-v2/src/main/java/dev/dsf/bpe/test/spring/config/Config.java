@@ -1,7 +1,13 @@
 package dev.dsf.bpe.test.spring.config;
 
+import java.util.Objects;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import dev.dsf.bpe.test.fhir.FhirResourceModifierImpl;
 import dev.dsf.bpe.test.listener.StartFieldInjectionTestListener;
@@ -13,9 +19,12 @@ import dev.dsf.bpe.test.service.ContinueSendTest;
 import dev.dsf.bpe.test.service.ContinueSendTestEvaluate;
 import dev.dsf.bpe.test.service.CryptoServiceTest;
 import dev.dsf.bpe.test.service.EndpointProviderTest;
+import dev.dsf.bpe.test.service.EnvironmentVariableTest;
 import dev.dsf.bpe.test.service.ErrorBoundaryEventTestThrow;
 import dev.dsf.bpe.test.service.ErrorBoundaryEventTestVerify;
 import dev.dsf.bpe.test.service.ExceptionTest;
+import dev.dsf.bpe.test.service.FhirBinaryVariableTestGet;
+import dev.dsf.bpe.test.service.FhirBinaryVariableTestSet;
 import dev.dsf.bpe.test.service.FhirClientProviderTest;
 import dev.dsf.bpe.test.service.FieldInjectionTest;
 import dev.dsf.bpe.test.service.JsonVariableTestGet;
@@ -28,8 +37,23 @@ import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
 import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
 
 @Configuration
-public class Config
+public class Config implements InitializingBean
 {
+	@Value("${dev.dsf.bpe.test.env.mandatory:#{null}}")
+	private String envVariableMandatory;
+
+	@Value("${dev.dsf.bpe.test.env.optional:default-value}")
+	private String envVariableOptional;
+
+	@Value("${dev.dsf.proxy.url}")
+	private String envVariableProxyUrl;
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(envVariableMandatory, "envVariableMandatory");
+	}
+
 	@Bean
 	public static ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
 	{
@@ -39,12 +63,19 @@ public class Config
 				FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class, ErrorBoundaryEventTestVerify.class,
 				ExceptionTest.class, ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
 				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
-				MimetypeServiceTest.class);
+				MimetypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class);
 	}
 
 	@Bean
 	public FhirResourceModifier fhirResourceModifier()
 	{
 		return new FhirResourceModifierImpl();
+	}
+
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public EnvironmentVariableTest environmentVariableTest()
+	{
+		return new EnvironmentVariableTest(envVariableMandatory, envVariableOptional, envVariableProxyUrl);
 	}
 }

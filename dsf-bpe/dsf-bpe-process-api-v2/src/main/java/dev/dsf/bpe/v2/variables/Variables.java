@@ -203,7 +203,7 @@ public interface Variables
 	 *            not <code>null</code>
 	 * @param resources
 	 */
-	void setResourceList(String variableName, List<? extends Resource> resources);
+	void setFhirResourceList(String variableName, List<? extends Resource> resources);
 
 	/**
 	 * Retrieves FHIR {@link Resource} list execution variable with the given <b>variableName</b>
@@ -215,7 +215,7 @@ public interface Variables
 	 * @return list of FHIR resources from execution variables for the given <b>variableName</b>, may be
 	 *         <code>null</code>
 	 */
-	<R extends Resource> List<R> getResourceList(String variableName);
+	<R extends Resource> List<R> getFhirResourceList(String variableName);
 
 	/**
 	 * Sets execution variable with the given <b>variableName</b> to the given FHIR {@link Resource}
@@ -225,7 +225,7 @@ public interface Variables
 	 * @param resource
 	 *            may be <code>null</code>
 	 */
-	void setResource(String variableName, Resource resource);
+	void setFhirResource(String variableName, Resource resource);
 
 	/**
 	 * Retrieves FHIR {@link Resource} execution variable with the given <b>variableName</b>
@@ -236,7 +236,7 @@ public interface Variables
 	 *            not <code>null</code>
 	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
 	 */
-	<R extends Resource> R getResource(String variableName);
+	<R extends Resource> R getFhirResource(String variableName);
 
 	/**
 	 * Returns the {@link Task} associated with the message start event of the process.
@@ -898,4 +898,46 @@ public interface Variables
 	 * @see #getFileLocal(String)
 	 */
 	<T> T getVariableLocal(String variableName);
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given FHIR {@link Resource} list
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param resources
+	 */
+	void setFhirResourceListLocal(String variableName, List<? extends Resource> resources);
+
+	/**
+	 * Retrieves FHIR {@link Resource} list local variable with the given <b>variableName</b>
+	 *
+	 * @param <R>
+	 *            FHIR resource type
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return list of FHIR resources from execution variables for the given <b>variableName</b>, may be
+	 *         <code>null</code>
+	 */
+	<R extends Resource> List<R> getFhirResourceListLocal(String variableName);
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given FHIR {@link Resource}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param resource
+	 *            may be <code>null</code>
+	 */
+	void setFhirResourceLocal(String variableName, Resource resource);
+
+	/**
+	 * Retrieves FHIR {@link Resource} local variable with the given <b>variableName</b>
+	 *
+	 * @param <R>
+	 *            FHIR resource type
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 */
+	<R extends Resource> R getFhirResourceLocal(String variableName);
 }

@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
@@ -43,6 +45,8 @@ import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
+import dev.dsf.fhir.model.DeferredBase64BinaryType;
+import dev.dsf.fhir.model.StreamableBase64BinaryType;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
@@ -67,6 +71,37 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 	public BinaryDaoTest()
 	{
 		super(Binary.class, BinaryDaoJdbc::new);
+	}
+
+	@Override
+	protected boolean isSame(Binary d1, Binary d2)
+	{
+		setDefaultDetaElement(d1);
+		setDefaultDetaElement(d2);
+
+		return super.isSame(d1, d2);
+	}
+
+	private void setDefaultDetaElement(Binary binary)
+	{
+		try
+		{
+			Base64BinaryType data = binary.getDataElement();
+			if (data instanceof DeferredBase64BinaryType d)
+			{
+				byte[] bytes = d.getValueAsStream().readAllBytes();
+				binary.setDataElement(new Base64BinaryType(bytes));
+			}
+			else if (data instanceof StreamableBase64BinaryType s)
+			{
+				byte[] bytes = s.getValueAsStream().readAllBytes();
+				binary.setDataElement(new Base64BinaryType(bytes));
+			}
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -1299,6 +1334,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		Binary created = dao.create(binary);
 		assertNotNull(created);
+		assertNotNull(created.getData());
+		assertEquals(binary.getData().length, created.getData().length);
 
 		if (psL instanceof org.apache.logging.log4j.core.Logger l)
 			l.setLevel(oldLevel);

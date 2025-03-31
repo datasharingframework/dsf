@@ -452,6 +452,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
 
+		initParameters.put("dev.dsf.bpe.test.env.mandatory", "test-value");
+
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());
 		KeyStore bpeServerCertificateKeyStore = certificates.getBpeServerCertificate().keyStore();
