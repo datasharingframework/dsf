@@ -3,6 +3,7 @@ package dev.dsf.fhir.validation;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,6 +17,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class ResourceInResourceValidator implements ResourceValidator
 {
+	private static final Pattern BUNDLE_MIN_REQUIRED_FOUND_ZERO_PATTERN = Pattern
+			.compile("Bundle.entry: minimum required = (?:[1-9]{1}(?:[0-9]+)?), but only found 0");
+
 	private final FhirContext fhirContext;
 	private final ResourceValidator delegate;
 
@@ -57,8 +61,8 @@ public class ResourceInResourceValidator implements ResourceValidator
 			List<BundleEntryComponent> entries)
 	{
 		return message -> !(!entries.isEmpty() && ResultSeverityEnum.ERROR.equals(message.getSeverity())
-				&& "Bundle".equals(message.getLocationString()) && message.getMessage() != null
-				&& message.getMessage().startsWith("Bundle.entry: minimum required = 1, but only found 0")
-				&& "Validation_VAL_Profile_Minimum".equals(message.getMessageId()));
+				&& "Bundle".equals(message.getLocationString())
+				&& "Validation_VAL_Profile_Minimum".equals(message.getMessageId()) && message.getMessage() != null
+				&& BUNDLE_MIN_REQUIRED_FOUND_ZERO_PATTERN.matcher(message.getMessage()).find());
 	}
 }
