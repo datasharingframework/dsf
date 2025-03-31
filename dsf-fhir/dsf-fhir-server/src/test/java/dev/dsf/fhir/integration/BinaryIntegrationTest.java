@@ -11,7 +11,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,7 @@ import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.PatientDao;
 import dev.dsf.fhir.dao.ResearchStudyDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.integration.random.RandomInputStream;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import jakarta.ws.rs.core.MediaType;
@@ -2891,14 +2895,48 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	public void testCreateLargeBinaryDirect() throws Exception
 	{
 		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
-		Patient p = new Patient();
-		getReadAccessHelper().addAll(p);
-		Patient created = dao.create(p);
+		Patient patient = new Patient();
+		getReadAccessHelper().addAll(patient);
+		Patient createdPatient = dao.create(patient);
 
 		byte[] data = new byte[1024 * 1024 * 8]; // 8 MiB
-		String securityContext = "Patient/" + created.getIdElement().getIdPart();
+		String securityContext = "Patient/" + createdPatient.getIdElement().getIdPart();
 
-		getWebserviceClient().createBinary(new ByteArrayInputStream(data), MediaType.APPLICATION_OCTET_STREAM_TYPE,
-				securityContext);
+		Binary created = getWebserviceClient().createBinary(new ByteArrayInputStream(data),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, securityContext);
+
+		assertNotNull(created);
+		assertNotNull(created.getData());
+		assertEquals(data.length, created.getData().length);
+	}
+
+	@Test
+	public void testCreateFiveHundredMebibyteDirect() throws Exception
+	{
+		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		Patient patient = new Patient();
+		getReadAccessHelper().addAll(patient);
+		Patient createdPatient = dao.create(patient);
+
+		String securityContext = "Patient/" + createdPatient.getIdElement().getIdPart();
+		IdType created = getWebserviceClient().withMinimalReturn().createBinary(
+				RandomInputStream.zeros(RandomInputStream.FIVE_HUNDRED_MEBIBYTE),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, securityContext);
+		assertNotNull(created);
+
+		InputStream readBinary = getWebserviceClient().readBinary(created.getIdPart(), created.getVersionIdPart(),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		byte[] allBytes = readBinary.readAllBytes();
+		assertNotNull(allBytes);
+		assertEquals(RandomInputStream.FIVE_HUNDRED_MEBIBYTE, allBytes.length);
+
+		// 500 MiB zeros sha256 hash
+		assertEquals("oIqSJY9iG1XQitHoTJDC6mKG/Gtsmk36cVavsWwZAXA=", createHash(allBytes));
+	}
+
+	private String createHash(byte[] data) throws NoSuchAlgorithmException
+	{
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		return Base64.getEncoder().encodeToString(digest.digest(data));
 	}
 }
