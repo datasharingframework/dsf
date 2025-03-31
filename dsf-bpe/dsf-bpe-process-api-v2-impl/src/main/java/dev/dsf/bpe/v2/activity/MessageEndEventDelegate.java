@@ -21,7 +21,7 @@ public class MessageEndEventDelegate extends AbstractMessageDelegate<MessageEndE
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		Variables variables = creatVariables(execution);
+		Variables variables = createVariables(execution);
 
 		try
 		{

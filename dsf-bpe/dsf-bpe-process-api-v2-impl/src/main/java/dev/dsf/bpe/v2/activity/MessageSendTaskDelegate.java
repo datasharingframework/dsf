@@ -23,7 +23,7 @@ public class MessageSendTaskDelegate extends AbstractMessageDelegate<MessageSend
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		Variables variables = creatVariables(execution);
+		Variables variables = createVariables(execution);
 
 		try
 		{

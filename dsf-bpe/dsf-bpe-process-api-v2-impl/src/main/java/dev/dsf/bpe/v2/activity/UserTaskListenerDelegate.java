@@ -22,7 +22,7 @@ public class UserTaskListenerDelegate extends AbstractProcessPluginDelegate<User
 	public void notify(DelegateTask delegateTask)
 	{
 		DelegateExecution execution = delegateTask.getExecution();
-		Variables variables = creatVariables(execution);
+		Variables variables = createVariables(execution);
 
 		try
 		{

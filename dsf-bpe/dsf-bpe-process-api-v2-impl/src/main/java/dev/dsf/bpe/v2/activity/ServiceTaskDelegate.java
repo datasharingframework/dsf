@@ -21,7 +21,7 @@ public class ServiceTaskDelegate extends AbstractProcessPluginDelegate<ServiceTa
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		Variables variables = creatVariables(execution);
+		Variables variables = createVariables(execution);
 
 		try
 		{

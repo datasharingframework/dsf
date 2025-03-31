@@ -23,7 +23,7 @@ public abstract class AbstractProcessPluginDelegate<D>
 		this.delegate = Objects.requireNonNull(delegate, "delegate");
 	}
 
-	protected Variables creatVariables(DelegateExecution execution)
+	protected Variables createVariables(DelegateExecution execution)
 	{
 		return new VariablesImpl(execution, objectMapper);
 	}

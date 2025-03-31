@@ -22,7 +22,7 @@ public class MessageIntermediateThrowEventDelegate extends AbstractMessageDelega
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		Variables variables = creatVariables(execution);
+		Variables variables = createVariables(execution);
 
 		try
 		{

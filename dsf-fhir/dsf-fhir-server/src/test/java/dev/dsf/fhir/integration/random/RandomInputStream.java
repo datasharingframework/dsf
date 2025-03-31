@@ -11,9 +11,9 @@ public class RandomInputStream extends InputStream
 		return new RandomInputStream(length, null);
 	}
 
-	public static RandomInputStream rand(int lenght)
+	public static RandomInputStream rand(int length)
 	{
-		return new RandomInputStream(lenght, new Random());
+		return new RandomInputStream(length, new Random());
 	}
 
 	public static final int ONE_GIBIBYTE = (int) Math.pow(2, 30);

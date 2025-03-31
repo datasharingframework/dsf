@@ -19,7 +19,7 @@ public class ExecutionListenerDelegate extends AbstractProcessPluginDelegate<Exe
 	@Override
 	public void notify(DelegateExecution execution) throws Exception
 	{
-		Variables variables = creatVariables(execution);
+		Variables variables = createVariables(execution);
 
 		try
 		{
