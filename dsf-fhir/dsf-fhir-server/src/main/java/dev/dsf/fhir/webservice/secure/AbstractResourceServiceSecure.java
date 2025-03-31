@@ -543,9 +543,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
-					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					"Query contains parameter not applicable in this conditional update context: standard parameters {} will be ignored",
 					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
 			queryParameters = queryParameters.entrySet().stream()

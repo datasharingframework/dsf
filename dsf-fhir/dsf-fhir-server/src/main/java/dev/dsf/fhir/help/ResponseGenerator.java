@@ -362,8 +362,8 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.warn("Bad request '{}', unsupported query parameter{} {}", queryParameters,
-				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+		logger.warn("Bad request '{}', {} unsupported query parameter{}", queryParameters,
+				unsupportedQueryParameters.size(), unsupportedQueryParameters.size() != 1 ? "s" : "");
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad request '" + queryParameters + "', unsupported query parameter"
