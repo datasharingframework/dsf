@@ -4,26 +4,24 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
 import dev.dsf.bpe.v2.error.ServiceTaskErrorHandler;
-import dev.dsf.bpe.v2.variables.VariablesImpl;
+import dev.dsf.bpe.v2.variables.Variables;
 
-public class ServiceTaskDelegate implements JavaDelegate
+public class ServiceTaskDelegate extends AbstractProcessPluginDelegate<ServiceTask> implements JavaDelegate
 {
-	private final ProcessPluginApi api;
-	private final ServiceTask delegate;
-
-	public ServiceTaskDelegate(ProcessPluginApi api, ServiceTask delegate)
+	public ServiceTaskDelegate(ProcessPluginApi api, ObjectMapper objectMapper, ServiceTask delegate)
 	{
-		this.api = api;
-		this.delegate = delegate;
+		super(api, objectMapper, delegate);
 	}
 
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		final VariablesImpl variables = new VariablesImpl(execution);
+		Variables variables = creatVariables(execution);
 
 		try
 		{
@@ -52,7 +50,7 @@ public class ServiceTaskDelegate implements JavaDelegate
 		}
 	}
 
-	private void handleErrorBoundaryEvent(final VariablesImpl variables, ErrorBoundaryEvent event)
+	private void handleErrorBoundaryEvent(Variables variables, ErrorBoundaryEvent event)
 	{
 		ServiceTaskErrorHandler handler = delegate.getErrorHandler();
 		if (handler != null)

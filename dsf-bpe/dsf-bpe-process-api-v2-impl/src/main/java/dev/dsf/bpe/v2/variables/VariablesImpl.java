@@ -1,6 +1,7 @@
 package dev.dsf.bpe.v2.variables;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -16,6 +17,9 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.api.Constants;
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
@@ -62,10 +66,55 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	private final DelegateExecution execution;
+	private final ObjectMapper objectMapper;
 
-	public VariablesImpl(DelegateExecution execution)
+	/**
+	 * @param execution
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 */
+	public VariablesImpl(DelegateExecution execution, ObjectMapper objectMapper)
 	{
 		this.execution = Objects.requireNonNull(execution, "execution");
+		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
+	}
+
+	private JsonHolder toJsonHolder(Object json)
+	{
+		try
+		{
+			byte[] data = objectMapper.writeValueAsBytes(json);
+			String dataClassName = json.getClass().getName();
+
+			return new JsonHolder(dataClassName, data);
+		}
+		catch (JsonProcessingException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T fromJsonJolder(JsonHolder holder)
+	{
+		try
+		{
+			byte[] data = holder.getData();
+			Class<?> dataClass = getClassLoader().loadClass(holder.getDataClassName());
+
+			return (T) objectMapper.readValue(data, dataClass);
+		}
+		catch (ClassNotFoundException | IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private ClassLoader getClassLoader()
+	{
+		ClassLoader l = objectMapper.getTypeFactory().getClassLoader();
+		return l != null ? l : getClass().getClassLoader(); // fallback for start/end/continue listeners
 	}
 
 	@Override
@@ -376,7 +425,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		execution.setVariable(variableName, JsonVariableValues.create(new JsonVariable(value)));
+		execution.setVariable(variableName, JsonHolderValues.create(toJsonHolder(value)));
 	}
 
 	private void setVariable(String variableName, TypedValue value)
@@ -394,8 +443,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 		Object variable = execution.getVariable(variableName);
 
-		if (variable instanceof JsonVariable jsonVariable)
-			return (T) jsonVariable.getValue();
+		if (variable instanceof JsonHolder jsonVariable)
+			return (T) fromJsonJolder(jsonVariable);
 		else
 			return (T) variable;
 	}
@@ -472,7 +521,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		execution.setVariableLocal(variableName, JsonVariableValues.create(new JsonVariable(value)));
+		execution.setVariableLocal(variableName, JsonHolderValues.create(toJsonHolder(value)));
 	}
 
 	@Override
@@ -483,8 +532,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 		Object variable = execution.getVariable(variableName);
 
-		if (variable instanceof JsonVariable jsonVariable)
-			return (T) jsonVariable.getValue();
+		if (variable instanceof JsonHolder jsonHolder)
+			return (T) fromJsonJolder(jsonHolder);
 		else
 			return (T) variable;
 	}
