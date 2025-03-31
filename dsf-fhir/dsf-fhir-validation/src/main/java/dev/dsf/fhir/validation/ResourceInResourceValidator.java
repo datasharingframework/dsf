@@ -2,6 +2,7 @@ package dev.dsf.fhir.validation;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -9,6 +10,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -46,6 +48,17 @@ public class ResourceInResourceValidator implements ResourceValidator
 				.flatMap(List::stream);
 
 		return new ValidationResult(fhirContext,
-				Stream.concat(bundleResult.getMessages().stream(), entryResults).toList());
+				Stream.concat(
+						bundleResult.getMessages().stream().filter(filterBundleEntryMinimumIfEntriesPresent(entries)),
+						entryResults).toList());
+	}
+
+	private Predicate<SingleValidationMessage> filterBundleEntryMinimumIfEntriesPresent(
+			List<BundleEntryComponent> entries)
+	{
+		return message -> !(!entries.isEmpty() && ResultSeverityEnum.ERROR.equals(message.getSeverity())
+				&& "Bundle".equals(message.getLocationString()) && message.getMessage() != null
+				&& message.getMessage().startsWith("Bundle.entry: minimum required = 1, but only found 0")
+				&& "Validation_VAL_Profile_Minimum".equals(message.getMessageId()));
 	}
 }

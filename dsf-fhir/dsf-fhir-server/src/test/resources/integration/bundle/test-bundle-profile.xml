@@ -1,0 +1,39 @@
+
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dev.dsf/fhir/Bundle/test-bundle" />
+	<name value="SearchBundleReport" />
+	<fhirVersion value="4.0.1" />
+	<version value="2.0.0" />
+	<status value="active" />
+	<date value="2025-03-31" />
+	<experimental value="false" />
+	<abstract value="false" />
+	<kind value="resource" />
+	<type value="Bundle" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Bundle" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Bundle.type">
+			<path value="Bundle.type" />
+			<fixedCode value="batch" />
+		</element>
+		<element id="Bundle.entry">
+			<path value="Bundle.entry" />
+			<min value="1" />
+		</element>
+		<element id="Bundle.entry.request">
+			<path value="Bundle.entry.request" />
+			<min value="1" />
+		</element>
+		<element id="Bundle.entry.request.method">
+			<path value="Bundle.entry.request.method" />
+			<fixedCode value="GET" />
+		</element>
+	</differential>
+</StructureDefinition>

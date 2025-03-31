@@ -5,6 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -358,7 +361,11 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void createBundleInBundle() throws Exception
 	{
-		Bundle b = new Bundle().setType(BundleType.BATCHRESPONSE);
+		StructureDefinition sd = readTestBundleProfile();
+		getWebserviceClient().create(sd);
+
+		Bundle b = new Bundle().setType(BundleType.BATCH);
+		b.getMeta().addProfile(sd.getUrl() + "|" + sd.getVersion());
 		b.addEntry()
 				.setResource(new Bundle().setType(BundleType.SEARCHSET)
 						.addLink(new BundleLinkComponent().setRelation("self").setUrl("Medication")).setTotal(0))
@@ -369,5 +376,14 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created);
 		assertNotNull(created.getIdElement());
 		assertNotNull(created.getIdElement().getIdPart());
+	}
+
+	private StructureDefinition readTestBundleProfile() throws IOException
+	{
+		try (InputStream in = Files
+				.newInputStream(Paths.get("src/test/resources/integration/bundle/test-bundle-profile.xml")))
+		{
+			return fhirContext.newXmlParser().parseResource(StructureDefinition.class, in);
+		}
 	}
 }
