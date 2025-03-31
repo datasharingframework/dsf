@@ -198,4 +198,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("FhirBinaryVariableTest"));
 	}
+
+	@Test
+	public void startEnvironmentVariableTest() throws Exception
+	{
+		executePluginTest(createTestTask("EnvironmentVariableTest"));
+	}
 }

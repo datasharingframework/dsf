@@ -41,4 +41,10 @@ public class PluginV1IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("EndpointProvider"));
 	}
+
+	@Test
+	public void startEnvironmentVariableTest() throws Exception
+	{
+		executePluginTest(createTestTask("EnvironmentVariableTest"));
+	}
 }
