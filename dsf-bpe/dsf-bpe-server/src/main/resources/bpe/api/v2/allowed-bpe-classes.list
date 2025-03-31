@@ -28,5 +28,7 @@ org.slf4j.LoggerFactory
 org.springframework.beans
 org.springframework.cglib
 org.springframework.context
+org.springframework.lang
+org.springframework.util
 org.w3c.dom
 org.xml.sax

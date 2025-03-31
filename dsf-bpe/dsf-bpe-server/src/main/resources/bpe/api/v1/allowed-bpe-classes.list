@@ -1,12 +1,14 @@
 com.fasterxml.jackson.annotation
 com.fasterxml.jackson.core
 com.fasterxml.jackson.databind
+com.google.common
 dev.dsf.bpe.api
 jakarta.ws.rs
 org.apache.commons.codec
 org.apache.commons.io
 org.apache.commons.lang3
 org.apache.commons.text
+org.apache.http
 org.bouncycastle
 org.camunda.bpm.engine.delegate
 org.camunda.bpm.engine.impl.el.FixedValue
@@ -22,5 +24,7 @@ org.slf4j.LoggerFactory
 org.springframework.beans
 org.springframework.cglib
 org.springframework.context
+org.springframework.lang
+org.springframework.util
 org.springframework.web.util.UriComponents
 org.springframework.web.util.UriComponentsBuilder

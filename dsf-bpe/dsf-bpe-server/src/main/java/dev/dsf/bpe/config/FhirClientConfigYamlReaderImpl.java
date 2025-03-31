@@ -50,6 +50,7 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 			super(cause);
 		}
 
+		@Override
 		public IOException getCause()
 		{
 			return (IOException) super.getCause();
