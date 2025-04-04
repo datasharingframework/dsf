@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,6 +31,116 @@ import dev.dsf.fhir.search.parameters.BinaryContentType;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
+	public static final class BlobInputStream extends InputStream
+	{
+		private final Blob blob;
+		private final InputStream stream;
+
+		public BlobInputStream(Blob blob) throws SQLException
+		{
+			this.blob = blob;
+			this.stream = blob.getBinaryStream();
+		}
+
+		public static InputStream nullInputStream()
+		{
+			return InputStream.nullInputStream();
+		}
+
+		@Override
+		public int read() throws IOException
+		{
+			return stream.read();
+		}
+
+		@Override
+		public int read(byte[] b) throws IOException
+		{
+			return stream.read(b);
+		}
+
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException
+		{
+			return stream.read(b, off, len);
+		}
+
+		@Override
+		public byte[] readAllBytes() throws IOException
+		{
+			return stream.readAllBytes();
+		}
+
+		@Override
+		public byte[] readNBytes(int len) throws IOException
+		{
+			return stream.readNBytes(len);
+		}
+
+		@Override
+		public int readNBytes(byte[] b, int off, int len) throws IOException
+		{
+			return stream.readNBytes(b, off, len);
+		}
+
+		@Override
+		public long skip(long n) throws IOException
+		{
+			return stream.skip(n);
+		}
+
+		@Override
+		public void skipNBytes(long n) throws IOException
+		{
+			stream.skipNBytes(n);
+		}
+
+		@Override
+		public int available() throws IOException
+		{
+			return stream.available();
+		}
+
+		@Override
+		public void close() throws IOException
+		{
+			stream.close();
+
+			try
+			{
+				blob.free();
+			}
+			catch (SQLException e)
+			{
+				throw new IOException(e);
+			}
+		}
+
+		@Override
+		public void mark(int readlimit)
+		{
+			stream.mark(readlimit);
+		}
+
+		@Override
+		public void reset() throws IOException
+		{
+			stream.reset();
+		}
+
+		@Override
+		public boolean markSupported()
+		{
+			return stream.markSupported();
+		}
+
+		@Override
+		public long transferTo(OutputStream out) throws IOException
+		{
+			return stream.transferTo(out);
+		}
+	}
+
 	public static final class DataInputStream extends InputStream
 	{
 		private final Connection connection;
@@ -167,7 +278,6 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		}
 	}
 
-
 	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
 		super(dataSource, permanentDeleteDataSource, Binary.class, "binaries", "binary_json", "binary_id",
@@ -177,13 +287,22 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 				List.of());
 	}
 
+	@Override
+	protected DataSource getPermanentDeleteDataSource()
+	{
+		// TODO evaluate having own datasource for create, update, delete of blob data
+		return getDataSource();
+	}
+
 	private InputStream readData(Binary resource)
 	{
 		try
 		{
 			Connection connection = getDataSource().getConnection();
+			connection.setAutoCommit(false);
+
 			PreparedStatement statement = connection
-					.prepareStatement("SELECT binary_data FROM binaries WHERE binary_id = ? AND version = ?");
+					.prepareStatement("SELECT binary_oid FROM binaries WHERE binary_id = ? AND version = ?");
 			PGobject uuidObject = getPreparedStatementFactory()
 					.uuidToPgObject(toUuid(resource.getIdElement().getIdPart()));
 			Long version = resource.getMeta().getVersionIdElement().getIdPartAsLong();
@@ -194,9 +313,8 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 			ResultSet result = statement.executeQuery();
 			if (result.next())
 			{
-				InputStream data = result.getBinaryStream(1);
-				if (data == null)
-					data = new ByteArrayInputStream(new byte[0]);
+				Blob blob = result.getBlob(1);
+				InputStream data = blob == null ? new ByteArrayInputStream(new byte[0]) : new BlobInputStream(blob);
 
 				return new DataInputStream(connection, statement, result, data);
 			}
@@ -257,27 +375,6 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	@Override
 	protected void modifySearchResultResource(Binary resource, Connection connection) throws SQLException
 	{
-		try (PreparedStatement statement = connection
-				.prepareStatement("SELECT binary_data FROM binaries WHERE binary_id = ? AND version = ?"))
-		{
-			PGobject uuidObject = getPreparedStatementFactory()
-					.uuidToPgObject(toUuid(resource.getIdElement().getIdPart()));
-			Long version = resource.getMeta().getVersionIdElement().getIdPartAsLong();
-
-			statement.setObject(1, uuidObject);
-			statement.setLong(2, version);
-
-			try (ResultSet result = statement.executeQuery())
-			{
-				if (result.next())
-				{
-					byte[] data = result.getBytes(1);
-					resource.setData(data);
-				}
-				else
-					throw new SQLException(
-							"Binary resource with id " + resource.getIdElement().getIdPart() + " not found");
-			}
-		}
+		resource.setDataElement(new DeferredBase64BinaryType(() -> readData(resource)));
 	}
 }

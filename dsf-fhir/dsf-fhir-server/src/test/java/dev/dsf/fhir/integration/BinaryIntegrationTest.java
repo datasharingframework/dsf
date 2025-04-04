@@ -2934,6 +2934,30 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals("oIqSJY9iG1XQitHoTJDC6mKG/Gtsmk36cVavsWwZAXA=", createHash(allBytes));
 	}
 
+	@Test
+	public void testCreateOneGibibyteDirect() throws Exception
+	{
+		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		Patient patient = new Patient();
+		getReadAccessHelper().addAll(patient);
+		Patient createdPatient = dao.create(patient);
+
+		String securityContext = "Patient/" + createdPatient.getIdElement().getIdPart();
+		IdType created = getWebserviceClient().withMinimalReturn().createBinary(
+				RandomInputStream.zeros(RandomInputStream.ONE_GIBIBYTE), MediaType.APPLICATION_OCTET_STREAM_TYPE,
+				securityContext);
+		assertNotNull(created);
+
+		InputStream readBinary = getWebserviceClient().readBinary(created.getIdPart(), created.getVersionIdPart(),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		byte[] allBytes = readBinary.readAllBytes();
+		assertNotNull(allBytes);
+		assertEquals(RandomInputStream.ONE_GIBIBYTE, allBytes.length);
+
+		// 1 GiB zeros sha256 hash
+		assertEquals("Sbwg3xXkEqZEckIeE/6G/xxRZeGLKvzPFg1NwZ/mihQ=", createHash(allBytes));
+	}
+
 	private String createHash(byte[] data) throws NoSuchAlgorithmException
 	{
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");

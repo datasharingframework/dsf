@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -150,11 +151,12 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		assertEquals("1", createdResource.getIdElement().getVersionIdPart());
 		assertEquals("1", createdResource.getMeta().getVersionId());
 
-		try (Connection connection = defaultDataSource.getConnection();
-				PreparedStatement statement = connection
-						.prepareStatement("SELECT binary_json, binary_data FROM binaries");
-				ResultSet result = statement.executeQuery())
+		try (Connection connection = defaultDataSource.getConnection())
 		{
+			connection.setAutoCommit(false);
+
+			PreparedStatement statement = connection.prepareStatement("SELECT binary_json, binary_oid FROM binaries");
+			ResultSet result = statement.executeQuery();
 			assertTrue(result.next());
 
 			String json = result.getString(1);
@@ -162,7 +164,10 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 			assertNotNull(readResource);
 			assertNull(readResource.getData());
 
-			byte[] data = result.getBytes(2);
+			Blob blob = result.getBlob(2);
+			byte[] data = blob.getBinaryStream().readAllBytes();
+			blob.free();
+
 			assertNotNull(data);
 			assertTrue(Arrays.equals(DATA1, data));
 

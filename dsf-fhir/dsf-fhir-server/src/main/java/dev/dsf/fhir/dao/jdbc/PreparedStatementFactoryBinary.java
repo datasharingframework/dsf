@@ -17,11 +17,11 @@ import dev.dsf.fhir.model.StreamableBase64BinaryType;
 
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
-	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_data) VALUES (?, ?, ?)";
+	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_oid) VALUES (?, ?, ?)";
 	private static final String readByIdSql = "SELECT deleted, version, binary_json FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
 	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
-	private static final String updateNewRowSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_data) VALUES (?, ?, ?, ?)";
-	private static final String updateSameRowSql = "UPDATE binaries SET binary_json = ?, binary_data = ? WHERE binary_id = ? AND version = ?";
+	private static final String updateNewRowSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_oid) VALUES (?, ?, ?, ?)";
+	private static final String updateSameRowSql = "UPDATE binaries SET binary_json = ?, binary_oid = ? WHERE binary_id = ? AND version = ?";
 
 	PreparedStatementFactoryBinary(FhirContext fhirContext)
 	{
@@ -39,11 +39,11 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 		statement.setObject(2, resourceToPgObject(resource));
 
 		if (data instanceof StreamableBase64BinaryType s)
-			statement.setBinaryStream(3, s.getValueAsStream());
+			statement.setBlob(3, s.getValueAsStream());
 		else if (data != null && data.getValue() != null)
-			statement.setBinaryStream(3, new ByteArrayInputStream(data.getValue()));
+			statement.setBlob(3, new ByteArrayInputStream(data.getValue()));
 		else
-			statement.setNull(3, Types.VARBINARY);
+			statement.setNull(3, Types.BLOB);
 
 		resource.setDataElement(data);
 	}
@@ -117,11 +117,11 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 		statement.setObject(3, resourceToPgObject(resource));
 
 		if (data instanceof StreamableBase64BinaryType s)
-			statement.setBinaryStream(4, s.getValueAsStream());
+			statement.setBlob(4, s.getValueAsStream());
 		else if (data != null && data.getValue() != null)
-			statement.setBinaryStream(4, new ByteArrayInputStream(data.getValue()));
+			statement.setBlob(4, new ByteArrayInputStream(data.getValue()));
 		else
-			statement.setNull(4, Types.VARBINARY);
+			statement.setNull(4, Types.BLOB);
 
 		resource.setDataElement(data);
 	}
@@ -136,11 +136,11 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 		statement.setObject(1, resourceToPgObject(resource));
 
 		if (data instanceof StreamableBase64BinaryType s)
-			statement.setBinaryStream(2, s.getValueAsStream());
+			statement.setBlob(2, s.getValueAsStream());
 		else if (data != null && data.getValue() != null)
-			statement.setBinaryStream(2, new ByteArrayInputStream(data.getValue()));
+			statement.setBlob(2, new ByteArrayInputStream(data.getValue()));
 		else
-			statement.setNull(2, Types.VARBINARY);
+			statement.setNull(2, Types.BLOB);
 
 		statement.setObject(3, uuidToPgObject(uuid));
 		statement.setLong(4, version);

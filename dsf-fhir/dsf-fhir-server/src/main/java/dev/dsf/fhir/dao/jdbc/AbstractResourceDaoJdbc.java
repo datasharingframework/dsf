@@ -215,6 +215,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return dataSource;
 	}
 
+	protected DataSource getPermanentDeleteDataSource()
+	{
+		return permanentDeleteDataSource;
+	}
+
 	protected String getResourceTable()
 	{
 		return resourceTable;
@@ -272,10 +277,20 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(uuid, "uuid");
 
-		try (Connection connection = dataSource.getConnection())
+		try (Connection connection = newReadWriteTransaction())
 		{
-			connection.setReadOnly(false);
-			return createWithTransactionAndId(connection, resource, uuid);
+			try
+			{
+				R createdResource = createWithTransactionAndId(connection, resource, uuid);
+				connection.commit();
+
+				return createdResource;
+			}
+			catch (Exception e)
+			{
+				connection.rollback();
+				throw e;
+			}
 		}
 	}
 
@@ -287,6 +302,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(uuid, "uuid");
 		if (connection.isReadOnly())
 			throw new IllegalArgumentException("Connection is read-only");
+		if (connection.getTransactionIsolation() != Connection.TRANSACTION_READ_COMMITTED)
+			throw new IllegalArgumentException("Connection transaction isolation not READ_COMMITTED");
+		if (connection.getAutoCommit())
+			throw new IllegalArgumentException("Connection transaction is in auto commit mode");
 
 		R inserted = create(connection, resource, uuid);
 
@@ -786,9 +805,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	{
 		Objects.requireNonNull(query, "query");
 
-		try (Connection connection = dataSource.getConnection())
+		try (Connection connection = newReadWriteTransaction())
 		{
-			return searchWithTransaction(connection, query);
+			PartialResult<R> result = searchWithTransaction(connection, query);
+			connection.commit();
+			connection.commit();
+			return result;
 		}
 	}
 
@@ -912,11 +934,13 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	public void deletePermanently(UUID uuid)
 			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
 	{
-		try (Connection connection = permanentDeleteDataSource.getConnection())
+		try (Connection connection = getPermanentDeleteDataSource().getConnection())
 		{
 			connection.setReadOnly(false);
+			connection.setAutoCommit(false);
 
 			deletePermanentlyWithTransaction(connection, uuid);
+			connection.commit();
 		}
 	}
 
