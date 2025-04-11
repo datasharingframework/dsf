@@ -154,28 +154,25 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		try (Connection connection = defaultDataSource.getConnection())
 		{
 			connection.setAutoCommit(false);
-			try (PreparedStatement statement = connection.prepareStatement("SELECT binary_json, binary_oid FROM binaries"))
+			try (PreparedStatement statement = connection.prepareStatement("SELECT binary_json, binary_oid FROM binaries"); ResultSet result = statement.executeQuery())
 			{
-				try (ResultSet result = statement.executeQuery())
-				{
-					connection.commit();
+				connection.commit();
 
-					assertTrue(result.next());
+				assertTrue(result.next());
 
-					String json = result.getString(1);
-					Binary readResource = fhirContext.newJsonParser().parseResource(Binary.class, json);
-					assertNotNull(readResource);
-					assertNull(readResource.getData());
+				String json = result.getString(1);
+				Binary readResource = fhirContext.newJsonParser().parseResource(Binary.class, json);
+				assertNotNull(readResource);
+				assertNull(readResource.getData());
 
-					Blob blob = result.getBlob(2);
-					byte[] data = blob.getBinaryStream().readAllBytes();
-					blob.free();
+				Blob blob = result.getBlob(2);
+				byte[] data = blob.getBinaryStream().readAllBytes();
+				blob.free();
 
-					assertNotNull(data);
-					assertTrue(Arrays.equals(DATA1, data));
+				assertNotNull(data);
+				assertTrue(Arrays.equals(DATA1, data));
 
-					assertFalse(result.next());
-				}
+				assertFalse(result.next());
 			}
 		}
 	}
