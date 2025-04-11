@@ -4,7 +4,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
 				   logicalFilePath="db/db.binaries.changelog-2.0.0.xml">
 
-	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.add-binary-oid">
+	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.add-binary_oid-column">
 
 		<sql dbms="postgresql">
 			CREATE EXTENSION IF NOT EXISTS lo;
