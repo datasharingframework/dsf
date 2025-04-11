@@ -10,6 +10,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.sql.Blob;
@@ -59,8 +60,7 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 	private static final String CONTENT_TYPE = "text/plain";
 	private static final byte[] DATA1 = "1234567890".getBytes();
-	private static final byte[] DATA2 = "VBERi0xLjUNJeLjz9MNCjEwIDAgb2JqDTw8L0xpbmVhcml6ZWQgMS9MIDEzMDA2OC9PIDEyL0UgMTI1NzM1L04gMS9UIDEyOTc2NC9IIFsgNTQ2IDIwNF"
-			.getBytes();
+	private static final byte[] DATA2 = "VBERi0xLjUNJeLjz9MNCjEwIDAgb2JqDTw8L0xpbmVhcml6ZWQgMS9MIDEzMDA2OC9PIDEyL0UgMTI1NzM1L04gMS9UIDEyOTc2NC9IIFsgNTQ2IDIwNF".getBytes();
 
 	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource,
 			permanentDeleteDataSource, fhirContext);
@@ -154,24 +154,29 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		try (Connection connection = defaultDataSource.getConnection())
 		{
 			connection.setAutoCommit(false);
+			try (PreparedStatement statement = connection.prepareStatement("SELECT binary_json, binary_oid FROM binaries"))
+			{
+				try (ResultSet result = statement.executeQuery())
+				{
+					connection.commit();
 
-			PreparedStatement statement = connection.prepareStatement("SELECT binary_json, binary_oid FROM binaries");
-			ResultSet result = statement.executeQuery();
-			assertTrue(result.next());
+					assertTrue(result.next());
 
-			String json = result.getString(1);
-			Binary readResource = fhirContext.newJsonParser().parseResource(Binary.class, json);
-			assertNotNull(readResource);
-			assertNull(readResource.getData());
+					String json = result.getString(1);
+					Binary readResource = fhirContext.newJsonParser().parseResource(Binary.class, json);
+					assertNotNull(readResource);
+					assertNull(readResource.getData());
 
-			Blob blob = result.getBlob(2);
-			byte[] data = blob.getBinaryStream().readAllBytes();
-			blob.free();
+					Blob blob = result.getBlob(2);
+					byte[] data = blob.getBinaryStream().readAllBytes();
+					blob.free();
 
-			assertNotNull(data);
-			assertTrue(Arrays.equals(DATA1, data));
+					assertNotNull(data);
+					assertTrue(Arrays.equals(DATA1, data));
 
-			assertFalse(result.next());
+					assertFalse(result.next());
+				}
+			}
 		}
 	}
 
@@ -336,8 +341,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 	{
 		ResearchStudy rS = new ResearchStudy();
 		readAccessModifier.accept(rS);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		assertReadAccessEntryCount(1, 1, createdRs, accessType);
 
@@ -383,13 +388,13 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		Organization org = new Organization();
 		org.setActive(true);
 		org.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("org.com");
-		Organization createdOrg = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(org);
+		Organization createdOrg = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(org);
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(securityContext.apply(createdRs)));
@@ -431,8 +436,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg1);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -465,8 +470,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg1);
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg2);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -507,8 +512,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(securityContext.apply(createdRs)));
@@ -577,8 +582,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -638,8 +643,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -770,8 +775,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
 		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
@@ -831,8 +836,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -892,8 +897,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -950,8 +955,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -1008,8 +1013,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -1098,8 +1103,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -1147,8 +1152,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -1198,8 +1203,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -1249,8 +1254,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -1300,8 +1305,8 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://dsf.dev/fhir/CodeSystem/organization-role", "DIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext).create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
