@@ -17,7 +17,7 @@ import dev.dsf.bpe.v2.activity.Activity;
 
 /**
  * Helper class to register {@link Activity}s as prototype beans. Must be configured as a <code>static</code>
- * {@link Bean} inside a {@link Configuration} classes.
+ * {@link Bean} inside a {@link Configuration} class.
  * <p>
  * Usage:
  * <p>
