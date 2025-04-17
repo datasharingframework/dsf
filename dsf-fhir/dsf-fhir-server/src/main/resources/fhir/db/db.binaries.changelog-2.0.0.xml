@@ -182,6 +182,6 @@
 	</changeSet>
 
 	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.update-on_binaries_delete_function" runOnChange="true">
-		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_binaries_delete_lo.sql" splitStatements="false" />
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_binaries_delete.sql" splitStatements="false" />
 	</changeSet>
 </databaseChangeLog>

@@ -809,7 +809,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		{
 			PartialResult<R> result = searchWithTransaction(connection, query);
 			connection.commit();
-			connection.commit();
 			return result;
 		}
 	}
@@ -898,7 +897,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				includeResources.add(r);
 			}
 			else
-				logger.warn("parsed resouce of type {} not instance of {}, ignoring include resource",
+				logger.warn("parsed resource of type {} not instance of {}, ignoring include resource",
 						resource.getClass().getName(), Resource.class.getName());
 		}
 	}
