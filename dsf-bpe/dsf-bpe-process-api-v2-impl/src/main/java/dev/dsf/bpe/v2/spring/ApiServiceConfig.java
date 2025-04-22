@@ -93,7 +93,6 @@ public class ApiServiceConfig
 	@Autowired
 	private BpeOidcClientProvider bpeOidcClientProvider;
 
-
 	@Bean
 	public ProcessPluginApi processPluginApiV2()
 	{
