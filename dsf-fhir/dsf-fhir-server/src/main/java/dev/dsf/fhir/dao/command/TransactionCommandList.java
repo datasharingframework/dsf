@@ -116,8 +116,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					{
 						logger.debug("Running execute of command {} for entry at index {}", c.getClass().getName(),
 								c.getIndex());
-						c.execute(idTranslationTable, largeObjectManager, connection, validationHelper,
-								snapshotGenerator);
+						c.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
 					}
 					catch (Exception e)
 					{

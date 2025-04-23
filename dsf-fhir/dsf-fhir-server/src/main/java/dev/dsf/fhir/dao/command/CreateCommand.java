@@ -135,8 +135,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 	@Override
 	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
-			Connection connection, ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		// always resolve temp and conditional references, necessary if conditional create and resource exists
 		referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(

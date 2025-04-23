@@ -152,8 +152,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				{
 					logger.debug("Running execute of command {} for entry at index {}", command.getClass().getName(),
 							command.getIndex());
-					command.execute(idTranslationTable, largeObjectManager, connection, validationHelper,
-							snapshotGenerator);
+					command.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
 				}
 				else
 				{

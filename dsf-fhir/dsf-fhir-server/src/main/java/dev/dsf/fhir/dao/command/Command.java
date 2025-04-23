@@ -28,8 +28,7 @@ public interface Command
 	}
 
 	void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException;
+			ValidationHelper validationHelper) throws SQLException, WebApplicationException;
 
 	default Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{

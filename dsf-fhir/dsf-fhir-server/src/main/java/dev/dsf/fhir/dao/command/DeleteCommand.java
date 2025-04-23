@@ -36,7 +36,6 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
-import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -72,8 +71,7 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 
 	@Override
 	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
-			Connection connection, ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 		resourceTypeName = componentes.getPathSegments().get(0);

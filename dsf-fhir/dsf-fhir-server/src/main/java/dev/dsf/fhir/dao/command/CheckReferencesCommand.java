@@ -20,7 +20,6 @@ import dev.dsf.fhir.prefer.PreferReturnType;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
-import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.ValidationRules;
 import jakarta.ws.rs.WebApplicationException;
 
@@ -45,8 +44,7 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 
 	@Override
 	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
-			Connection connection, ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		referencesHelper.checkReferences(idTranslationTable, connection, this::checkReferenceAfterUpdate);
 	}

@@ -264,8 +264,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 	@Override
 	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
-			Connection connection, ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
