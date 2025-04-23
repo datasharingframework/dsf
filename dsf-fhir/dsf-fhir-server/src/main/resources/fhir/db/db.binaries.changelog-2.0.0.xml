@@ -14,9 +14,21 @@
 		</addColumn>
 
 		<sql>
-			UPDATE binaries
-			SET binary_oid = lo_from_bytea(0, binary_data)
-			WHERE binary_data IS NOT NULL;
+			GRANT UPDATE ON TABLE binaries TO ${db.server_permanent_delete_users_group};
+			GRANT ${db.server_permanent_delete_user} TO ${db.liquibase_user};
+			SET ROLE ${db.server_permanent_delete_user};
+			UPDATE binaries SET binary_oid = lo_from_bytea(0, binary_data) WHERE binary_data IS NOT NULL;
+			DO '
+			DECLARE
+				lo_oid oid;
+			BEGIN
+				FOR lo_oid IN SELECT binary_oid FROM binaries LOOP
+					EXECUTE format(''GRANT SELECT, UPDATE ON LARGE OBJECT %s TO ${db.server_users_group};'', lo_oid);
+				END LOOP;
+			END ';
+			RESET ROLE;
+			REVOKE ${db.server_permanent_delete_user} FROM ${db.liquibase_user};
+			REVOKE UPDATE ON TABLE binaries FROM ${db.server_permanent_delete_users_group};
 		</sql>
 	</changeSet>
 
