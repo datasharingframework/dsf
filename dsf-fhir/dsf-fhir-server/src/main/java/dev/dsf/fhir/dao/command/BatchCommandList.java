@@ -21,6 +21,7 @@ import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -36,11 +37,11 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 	private final EventHandler eventHandler;
 	private final ResponseGenerator responseGenerator;
 
-	public BatchCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<? extends Command> commands,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator, EventHandler eventHandler,
-			ResponseGenerator responseGenerator)
+	public BatchCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String selectUpdateUser,
+			ExceptionHandler exceptionHandler, List<? extends Command> commands, ValidationHelper validationHelper,
+			SnapshotGenerator snapshotGenerator, EventHandler eventHandler, ResponseGenerator responseGenerator)
 	{
-		super(dataSource, exceptionHandler, commands);
+		super(dataSource, permanentDeleteDataSource, selectUpdateUser, exceptionHandler, commands);
 
 		this.validationHelper = validationHelper;
 		this.snapshotGenerator = snapshotGenerator;
@@ -141,13 +142,18 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 	{
 		return command ->
 		{
+			LargeObjectManager largeObjectManager = command instanceof ModifyingCommand m
+					? m.createLargeObjectManager(connection)
+					: LargeObjectManager.NO_OP;
+
 			try
 			{
 				if (!caughtExceptions.containsKey(command.getIndex()))
 				{
 					logger.debug("Running execute of command {} for entry at index {}", command.getClass().getName(),
 							command.getIndex());
-					command.execute(idTranslationTable, connection, validationHelper, snapshotGenerator);
+					command.execute(idTranslationTable, largeObjectManager, connection, validationHelper,
+							snapshotGenerator);
 				}
 				else
 				{
@@ -160,35 +166,55 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				if (!connection.getAutoCommit())
 					connection.commit();
 			}
-			catch (Exception e)
+			catch (Exception exception)
 			{
 				logger.debug("Error while executing command {}, rolling back transaction for entry at index {}",
-						command.getClass().getName(), command.getIndex(), e);
+						command.getClass().getName(), command.getIndex(), exception);
 				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {} - {}",
-						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+						command.getClass().getName(), command.getIndex(), exception.getClass().getName(),
+						exception.getMessage());
 
-				if (e instanceof PSQLException s && PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
+				if (exception instanceof PSQLException s
+						&& PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
 					caughtExceptions.put(command.getIndex(),
 							new WebApplicationException(responseGenerator.duplicateResourceExists()));
 				else
-					caughtExceptions.put(command.getIndex(), e);
-
+					caughtExceptions.put(command.getIndex(), exception);
 
 				try
 				{
 					if (!connection.getAutoCommit())
 						connection.rollback();
 				}
-				catch (SQLException e1)
+				catch (SQLException rollbackException)
 				{
 					logger.debug(
 							"Error while executing command {}, error while rolling back transaction for entry at index {}",
-							command.getClass().getName(), command.getIndex(), e1);
+							command.getClass().getName(), command.getIndex(), rollbackException);
 					logger.warn(
 							"Error while executing command {}, error while rolling back transaction for entry at index {}: {} - {}",
-							command.getClass().getName(), command.getIndex(), e1.getClass().getName(), e1.getMessage());
+							command.getClass().getName(), command.getIndex(), rollbackException.getClass().getName(),
+							rollbackException.getMessage());
 
-					caughtExceptions.put(command.getIndex(), e1);
+					caughtExceptions.put(command.getIndex(), rollbackException);
+				}
+
+				try
+				{
+					if (!connection.getAutoCommit())
+						largeObjectManager.rollback();
+				}
+				catch (SQLException rollbackException)
+				{
+					logger.debug(
+							"Error while executing command {}, error while rolling back DB large object for entry at index {}",
+							command.getClass().getName(), command.getIndex(), rollbackException);
+					logger.warn(
+							"Error while executing command {}, error while rolling back DB large object for entry at index {}: {} - {}",
+							command.getClass().getName(), command.getIndex(), rollbackException.getClass().getName(),
+							rollbackException.getMessage());
+
+					caughtExceptions.put(command.getIndex(), rollbackException);
 				}
 			}
 		};

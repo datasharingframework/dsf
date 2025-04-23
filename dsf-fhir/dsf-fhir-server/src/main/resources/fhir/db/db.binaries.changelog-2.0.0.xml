@@ -5,10 +5,8 @@
 				   logicalFilePath="db/db.binaries.changelog-2.0.0.xml">
 
 	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.add-binary_oid-column">
-
 		<sql dbms="postgresql">
 			CREATE EXTENSION IF NOT EXISTS lo;
-			GRANT DELETE ON TABLE binaries TO ${db.server_users_group};
 		</sql>
 
 		<addColumn tableName="binaries">
@@ -179,9 +177,5 @@
 
 	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.drop-binary_data-column">
 		<dropColumn tableName="binaries" columnName="binary_data"/>
-	</changeSet>
-
-	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.update-on_binaries_delete_function" runOnChange="true">
-		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_binaries_delete.sql" splitStatements="false" />
 	</changeSet>
 </databaseChangeLog>

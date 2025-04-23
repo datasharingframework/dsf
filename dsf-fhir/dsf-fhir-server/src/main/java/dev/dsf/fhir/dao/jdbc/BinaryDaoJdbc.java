@@ -278,20 +278,24 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		}
 	}
 
-	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	private final String selectUpdateUser;
+
+	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			String selectUpdateUser)
 	{
 		super(dataSource, permanentDeleteDataSource, Binary.class, "binaries", "binary_json", "binary_id",
 				new PreparedStatementFactoryBinary(fhirContext), BinaryIdentityFilter::new,
 				List.of(factory(BinaryContentType.PARAMETER_NAME, BinaryContentType::new,
 						BinaryContentType.getNameModifiers())),
 				List.of());
+
+		this.selectUpdateUser = selectUpdateUser;
 	}
 
 	@Override
-	protected DataSource getPermanentDeleteDataSource()
+	public LargeObjectManager createLargeObjectManager(Connection connection)
 	{
-		// TODO evaluate having own datasource for create, update, delete of blob data
-		return getDataSource();
+		return new LargeObjectManagerJdbc(getPermanentDeleteDataSource(), selectUpdateUser, connection);
 	}
 
 	private InputStream readData(Binary resource)
@@ -328,9 +332,10 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	}
 
 	@Override
-	public Binary createWithTransactionAndId(Connection connection, Binary resource, UUID uuid) throws SQLException
+	public Binary createWithTransactionAndId(LargeObjectManager largeObjectManager, Connection connection,
+			Binary resource, UUID uuid) throws SQLException
 	{
-		Binary created = super.createWithTransactionAndId(connection, resource, uuid);
+		Binary created = super.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 
 		if (created.getDataElement() instanceof StreamableBase64BinaryType)
 			created.setDataElement(new DeferredBase64BinaryType(() -> readData(created)));
@@ -339,10 +344,10 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	}
 
 	@Override
-	public Binary updateWithTransaction(Connection connection, Binary resource, Long expectedVersion)
-			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	public Binary updateWithTransaction(LargeObjectManager largeObjectManager, Connection connection, Binary resource,
+			Long expectedVersion) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
-		Binary updated = super.updateWithTransaction(connection, resource, expectedVersion);
+		Binary updated = super.updateWithTransaction(largeObjectManager, connection, resource, expectedVersion);
 
 		if (updated.getDataElement() instanceof StreamableBase64BinaryType)
 			updated.setDataElement(new DeferredBase64BinaryType(() -> readData(updated)));

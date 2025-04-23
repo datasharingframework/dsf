@@ -264,6 +264,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
+	public LargeObjectManager createLargeObjectManager(Connection connection)
+	{
+		return LargeObjectManager.NO_OP;
+	}
+
+	@Override
 	public final R create(R resource) throws SQLException
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -279,9 +285,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		try (Connection connection = newReadWriteTransaction())
 		{
+			LargeObjectManager largeObjectManager = createLargeObjectManager(connection);
+
 			try
 			{
-				R createdResource = createWithTransactionAndId(connection, resource, uuid);
+				R createdResource = createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 				connection.commit();
 
 				return createdResource;
@@ -289,14 +297,26 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			catch (Exception e)
 			{
 				connection.rollback();
+
+				try
+				{
+					largeObjectManager.rollback();
+				}
+				catch (SQLException suppressed)
+				{
+					e.addSuppressed(suppressed);
+				}
+
 				throw e;
 			}
 		}
 	}
 
 	@Override
-	public R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	public R createWithTransactionAndId(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			UUID uuid) throws SQLException
 	{
+		Objects.requireNonNull(largeObjectManager, "largeObjectManager");
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(uuid, "uuid");
@@ -307,13 +327,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		if (connection.getAutoCommit())
 			throw new IllegalArgumentException("Connection transaction is in auto commit mode");
 
-		R inserted = create(connection, resource, uuid);
+		R inserted = create(largeObjectManager, connection, resource, uuid);
 
 		logger.debug("{} with ID {} created", resourceTypeName, inserted.getId());
 		return inserted;
 	}
 
-	private R create(Connection connection, R resource, UUID uuid) throws SQLException
+	private R create(LargeObjectManager largeObjectManager, Connection connection, R resource, UUID uuid)
+			throws SQLException
 	{
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
 		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), FIRST_VERSION_STRING));
@@ -322,7 +343,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getCreateSql()))
 		{
-			preparedStatementFactory.configureCreateStatement(statement, resource, uuid);
+			preparedStatementFactory.configureCreateStatement(largeObjectManager, statement, resource, uuid);
 
 			statement.execute();
 		}
@@ -586,9 +607,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		try (Connection connection = newReadWriteTransaction())
 		{
+			LargeObjectManager largeObjectManager = createLargeObjectManager(connection);
+
 			try
 			{
-				R updatedResource = updateWithTransaction(connection, resource, expectedVersion);
+				R updatedResource = updateWithTransaction(largeObjectManager, connection, resource, expectedVersion);
 
 				connection.commit();
 
@@ -597,15 +620,26 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			catch (Exception e)
 			{
 				connection.rollback();
+
+				try
+				{
+					largeObjectManager.rollback();
+				}
+				catch (SQLException suppressed)
+				{
+					e.addSuppressed(suppressed);
+				}
+
 				throw e;
 			}
 		}
 	}
 
 	@Override
-	public R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
-			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	public R updateWithTransaction(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			Long expectedVersion) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
+		Objects.requireNonNull(largeObjectManager, "largeObjectManager");
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resource, "resource");
 		// expectedVersion may be null
@@ -630,7 +664,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		// latestVersion gives stored latest version +1 if resource is deleted
 		long newVersion = latestVersion.version + 1;
 
-		R updated = update(connection, resource, newVersion);
+		R updated = update(largeObjectManager, connection, resource, newVersion);
 
 		logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName, updated.getIdElement().getIdPart(),
 				newVersion);
@@ -669,7 +703,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		}
 	}
 
-	private R update(Connection connection, R resource, long version) throws SQLException
+	private R update(LargeObjectManager largeObjectManager, Connection connection, R resource, long version)
+			throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
@@ -681,9 +716,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		resource.getMeta().setVersionId(versionAsString);
 		resource.getMeta().setLastUpdated(new Date());
 
-		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getUpdateNewRowSql()))
+		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getUpdateSql()))
 		{
-			preparedStatementFactory.configureUpdateNewRowSqlStatement(statement, uuid, version, resource);
+			preparedStatementFactory.configureUpdateSqlStatement(largeObjectManager, statement, uuid, version,
+					resource);
 
 			statement.execute();
 		}

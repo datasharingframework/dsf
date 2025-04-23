@@ -124,7 +124,8 @@ public class DaoConfig
 	@Bean
 	public BinaryDao binaryDao()
 	{
-		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				propertiesConfig.getDbUsersGroup());
 	}
 
 	@Bean

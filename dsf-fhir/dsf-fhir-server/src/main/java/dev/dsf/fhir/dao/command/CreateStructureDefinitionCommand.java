@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
@@ -77,16 +78,16 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	}
 
 	@Override
-	protected StructureDefinition createWithTransactionAndId(Connection connection, StructureDefinition resource,
-			UUID uuid) throws SQLException
+	protected StructureDefinition createWithTransactionAndId(LargeObjectManager largeObjectManager,
+			Connection connection, StructureDefinition resource, UUID uuid) throws SQLException
 	{
-		StructureDefinition created = super.createWithTransactionAndId(connection, resource, uuid);
+		StructureDefinition created = super.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 
 		if (resourceWithSnapshot != null)
 		{
 			try
 			{
-				snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
+				snapshotDao.createWithTransactionAndId(largeObjectManager, connection, resourceWithSnapshot, uuid);
 			}
 			catch (SQLException e)
 			{

@@ -250,7 +250,8 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		binary.setData("1234567890".getBytes());
 		new ReadAccessHelperImpl().addOrganization(binary, "organization.com");
 
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		Binary createdBinary = binaryDao.create(binary);
 		assertNotNull(createdBinary);
 

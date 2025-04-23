@@ -24,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
@@ -70,8 +71,8 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
@@ -244,5 +245,12 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 	public String getResourceTypeName()
 	{
 		return resourceTypeName;
+	}
+
+	@Override
+	public LargeObjectManager createLargeObjectManager(Connection connection)
+	{
+		// delete does not need LargeObjectManager
+		return LargeObjectManager.NO_OP;
 	}
 }

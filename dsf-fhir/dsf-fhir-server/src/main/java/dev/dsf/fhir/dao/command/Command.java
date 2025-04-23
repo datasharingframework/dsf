@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
@@ -26,8 +27,9 @@ public interface Command
 	{
 	}
 
-	void execute(Map<String, IdType> idTranslationTable, Connection connection, ValidationHelper validationHelper,
-			SnapshotGenerator snapshotGenerator) throws SQLException, WebApplicationException;
+	void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
+			throws SQLException, WebApplicationException;
 
 	default Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{

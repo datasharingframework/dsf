@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -43,8 +44,8 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException
 	{
 		referencesHelper.checkReferences(idTranslationTable, connection, this::checkReferenceAfterUpdate);

@@ -2963,4 +2963,28 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		return Base64.getEncoder().encodeToString(digest.digest(data));
 	}
+
+	@Test
+	public void testCreateViaTransactionBundleExpectRollback() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		Organization organization = new Organization();
+		getReadAccessHelper().addLocal(organization);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(binary).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Binary");
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(organization).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Organization");
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
 }

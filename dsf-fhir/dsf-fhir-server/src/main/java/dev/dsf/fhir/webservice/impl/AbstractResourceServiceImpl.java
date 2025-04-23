@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -154,11 +155,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		{
 			try (Connection connection = dao.newReadWriteTransaction())
 			{
+				LargeObjectManager largeObjectManager = dao.createLargeObjectManager(connection);
+
 				try
 				{
 					resolveLogicalReferences(resource, connection);
 
-					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
+					R created = dao.createWithTransactionAndId(largeObjectManager, connection, resource,
+							UUID.randomUUID());
 
 					checkReferences(resource, connection,
 							ref -> validationRules.checkReferenceAfterCreate(resource, ref));
@@ -169,19 +173,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				}
 				catch (SQLException e)
 				{
-					connection.rollback();
+					tryRollback(connection, largeObjectManager, e);
 
 					if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 					{
 						Response response = responseGenerator.duplicateResourceExists(resourceTypeName);
 						throw new WebApplicationException(response);
 					}
-					else
-						throw e;
+
+					throw e;
 				}
 				catch (WebApplicationException e)
 				{
-					connection.rollback();
+					tryRollback(connection, largeObjectManager, e);
+
 					throw e;
 				}
 			}
@@ -200,6 +205,27 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
 				parameterConverter.getPreferReturn(headers), () -> responseGenerator.created(location, createdResource))
 				.location(location).build();
+	}
+
+	private void tryRollback(Connection connection, LargeObjectManager largeObjectManager, Exception e)
+	{
+		try
+		{
+			connection.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
+
+		try
+		{
+			largeObjectManager.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
 	}
 
 	private URI toLocation(R resource)
@@ -531,11 +557,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				{
 					try (Connection connection = dao.newReadWriteTransaction())
 					{
+						LargeObjectManager largeObjectManager = dao.createLargeObjectManager(connection);
+
 						try
 						{
 							resolveLogicalReferences(resource, connection);
 
-							R updated = dao.updateWithTransaction(connection, resource, ifMatch.orElse(null));
+							R updated = dao.updateWithTransaction(largeObjectManager, connection, resource,
+									ifMatch.orElse(null));
 
 							checkReferences(resource, connection,
 									ref -> validationRules.checkReferenceAfterUpdate(updated, ref));
@@ -546,18 +575,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						}
 						catch (SQLException e)
 						{
+							tryRollback(connection, largeObjectManager, e);
+
 							if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 							{
 								Response response = responseGenerator.duplicateResourceExists(resourceTypeName);
 								throw new WebApplicationException(response);
 							}
 
-							connection.rollback();
 							throw e;
 						}
 						catch (WebApplicationException e)
 						{
-							connection.rollback();
+							tryRollback(connection, largeObjectManager, e);
+
 							throw e;
 						}
 					}

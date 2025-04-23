@@ -71,7 +71,9 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 	public BinaryDaoTest()
 	{
-		super(Binary.class, BinaryDaoJdbc::new);
+		super(Binary.class,
+				(defaultDataSource, permanentDeleteDataSource, fhirContext) -> new BinaryDaoJdbc(defaultDataSource,
+						permanentDeleteDataSource, fhirContext, DATABASE_USERS_GROUP));
 	}
 
 	@Override

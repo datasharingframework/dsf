@@ -27,6 +27,7 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -133,8 +134,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException
 	{
 		// always resolve temp and conditional references, necessary if conditional create and resource exists
@@ -154,7 +155,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			authorizationHelper.checkCreateAllowed(index, connection, identity, resource);
 
-			createdResource = createWithTransactionAndId(connection, resource, getId(idTranslationTable));
+			createdResource = createWithTransactionAndId(largeObjectManager, connection, resource,
+					getId(idTranslationTable));
 		}
 		else if (responseResult == null)
 		{
@@ -162,9 +164,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 	}
 
-	protected R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	protected R createWithTransactionAndId(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			UUID uuid) throws SQLException
 	{
-		return dao.createWithTransactionAndId(connection, resource, uuid);
+		return dao.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 	}
 
 	private UUID getId(Map<String, IdType> idTranslationTable)
@@ -319,5 +322,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public LargeObjectManager createLargeObjectManager(Connection connection)
+	{
+		return dao.createLargeObjectManager(connection);
 	}
 }

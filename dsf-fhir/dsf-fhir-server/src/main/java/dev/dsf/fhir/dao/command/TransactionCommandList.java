@@ -22,6 +22,8 @@ import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManagerJdbc;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
@@ -36,11 +38,11 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 	private final Function<Connection, TransactionResources> transactionResourceFactory;
 	private final ResponseGenerator responseGenerator;
 
-	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler,
-			List<? extends Command> commands, Function<Connection, TransactionResources> transactionResourceFactory,
-			ResponseGenerator responseGenerator)
+	public TransactionCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
+			ExceptionHandler exceptionHandler, List<? extends Command> commands,
+			Function<Connection, TransactionResources> transactionResourceFactory, ResponseGenerator responseGenerator)
 	{
-		super(dataSource, exceptionHandler, commands);
+		super(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler, commands);
 
 		this.transactionResourceFactory = transactionResourceFactory;
 		this.responseGenerator = responseGenerator;
@@ -69,6 +71,10 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 				transactionEventHandler = transactionResources.getTransactionEventHandler();
 				ValidationHelper validationHelper = transactionResources.getValidationHelper();
 				SnapshotGenerator snapshotGenerator = transactionResources.getSnapshotGenerator();
+
+				LargeObjectManager largeObjectManager = hasBinaryModifyingCommands
+						? new LargeObjectManagerJdbc(permanentDeleteDataSource, dbUsersGroup, connection)
+						: LargeObjectManager.NO_OP;
 
 				Map<String, IdType> idTranslationTable = new HashMap<>();
 				for (Command c : commands)
@@ -110,7 +116,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					{
 						logger.debug("Running execute of command {} for entry at index {}", c.getClass().getName(),
 								c.getIndex());
-						c.execute(idTranslationTable, connection, validationHelper, snapshotGenerator);
+						c.execute(idTranslationTable, largeObjectManager, connection, validationHelper,
+								snapshotGenerator);
 					}
 					catch (Exception e)
 					{
@@ -123,7 +130,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						if (hasModifyingCommands)
 						{
 							logger.debug("Rolling back DB transaction");
-							connection.rollback();
+							tryRollback(connection, largeObjectManager, e);
 						}
 
 						if (e instanceof PSQLException s
@@ -167,7 +174,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						if (hasModifyingCommands)
 						{
 							logger.debug("Rolling back DB transaction");
-							connection.rollback();
+							tryRollback(connection, largeObjectManager, e);
 						}
 
 						try
@@ -195,7 +202,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (SQLException e)
 					{
-						connection.rollback();
+						logger.debug("Rolling back DB transaction");
+						tryRollback(connection, largeObjectManager, e);
 
 						if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 						{
@@ -252,6 +260,27 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 		catch (Exception e)
 		{
 			throw exceptionHandler.internalServerErrorBundleTransaction(e);
+		}
+	}
+
+	private void tryRollback(Connection connection, LargeObjectManager largeObjectManager, Exception e)
+	{
+		try
+		{
+			connection.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
+
+		try
+		{
+			largeObjectManager.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
 		}
 	}
 
