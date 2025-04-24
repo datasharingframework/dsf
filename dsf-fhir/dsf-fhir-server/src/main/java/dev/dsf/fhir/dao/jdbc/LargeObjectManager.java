@@ -6,12 +6,16 @@ import java.sql.SQLException;
 
 public interface LargeObjectManager
 {
+	final record OidAndSize(long oid, long size)
+	{
+	}
+
 	LargeObjectManager NO_OP = new LargeObjectManager()
 	{
 		@Override
-		public long create(InputStream inputStream) throws SQLException
+		public OidAndSize create(InputStream inputStream) throws SQLException
 		{
-			return Long.MIN_VALUE;
+			return null;
 		}
 
 		@Override
@@ -20,9 +24,9 @@ public interface LargeObjectManager
 		}
 	};
 
-	long create(InputStream inputStream) throws SQLException;
+	OidAndSize create(InputStream inputStream) throws SQLException;
 
-	default long create(byte[] value) throws SQLException
+	default OidAndSize create(byte[] value) throws SQLException
 	{
 		return create(new ByteArrayInputStream(value));
 	}

@@ -44,21 +44,23 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 	}
 
 	@Override
-	public long create(InputStream inputStream) throws SQLException
+	public OidAndSize create(InputStream inputStream) throws SQLException
 	{
 		long oid = createLargeObject();
 
 		LargeObject largeObject = getLargeObjectManager(connection).open(oid);
 		try (inputStream; OutputStream outputStream = largeObject.getOutputStream())
 		{
-			copy(inputStream, outputStream);
+			logger.info("Writing to large object '{}' ...", oid);
+			long size = copy(inputStream, outputStream);
+			logger.info("Writing to large object '{}' [Done, {} bytes]", oid, size);
+
+			return new OidAndSize(oid, size);
 		}
 		catch (IOException e)
 		{
 			throw new SQLException("Unable to copy input stream with data to large object: " + e.getMessage(), e);
 		}
-
-		return oid;
 	}
 
 	private long createLargeObject() throws SQLException

@@ -12,18 +12,19 @@ import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.Binary;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager.OidAndSize;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
 
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
-	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_oid) VALUES (?, ?, ?)";
+	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?)";
 	private static final String readByIdSql = "SELECT deleted, version, binary_json FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
 	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
-	private static final String updateNewRowSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_oid) VALUES (?, ?, ?, ?)";
+	private static final String updateSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?, ?)";
 
 	PreparedStatementFactoryBinary(FhirContext fhirContext)
 	{
-		super(fhirContext, Binary.class, createSql, readByIdSql, readByIdAndVersionSql, updateNewRowSql);
+		super(fhirContext, Binary.class, createSql, readByIdSql, readByIdAndVersionSql, updateSql);
 	}
 
 	@Override
@@ -37,11 +38,22 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 		statement.setObject(2, resourceToPgObject(resource));
 
 		if (data instanceof StreamableBase64BinaryType s)
-			statement.setLong(3, largeObjectManager.create(s.getValueAsStream()));
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(s.getValueAsStream());
+			statement.setLong(3, oidAndSize.oid());
+			statement.setLong(4, oidAndSize.size());
+		}
 		else if (data != null && data.getValue() != null)
-			statement.setLong(3, largeObjectManager.create(data.getValue()));
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(data.getValue());
+			statement.setLong(3, oidAndSize.oid());
+			statement.setLong(4, oidAndSize.size());
+		}
 		else
+		{
 			statement.setNull(3, Types.BLOB);
+			statement.setLong(4, 0);
+		}
 
 		resource.setDataElement(data);
 	}
@@ -115,11 +127,22 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 		statement.setObject(3, resourceToPgObject(resource));
 
 		if (data instanceof StreamableBase64BinaryType s)
-			statement.setLong(4, largeObjectManager.create(s.getValueAsStream()));
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(s.getValueAsStream());
+			statement.setLong(4, oidAndSize.oid());
+			statement.setLong(5, oidAndSize.size());
+		}
 		else if (data != null && data.getValue() != null)
-			statement.setLong(4, largeObjectManager.create(data.getValue()));
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(data.getValue());
+			statement.setLong(4, oidAndSize.oid());
+			statement.setLong(5, oidAndSize.size());
+		}
 		else
+		{
 			statement.setNull(4, Types.BLOB);
+			statement.setLong(4, 0);
+		}
 
 		resource.setDataElement(data);
 	}

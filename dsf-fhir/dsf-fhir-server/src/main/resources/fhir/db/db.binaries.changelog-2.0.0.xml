@@ -12,6 +12,11 @@
 		<addColumn tableName="binaries">
 			<column name="binary_oid" type="oid"/>
 		</addColumn>
+		<addColumn tableName="binaries">
+			<column name="binary_size" type="bigint" defaultValueNumeric="0"/>
+		</addColumn>
+		
+		<addNotNullConstraint tableName="binaries" columnName="binary_size"/>
 
 		<sql>
 			GRANT UPDATE ON TABLE binaries TO ${db.server_permanent_delete_users_group};
@@ -26,6 +31,11 @@
 					EXECUTE format(''GRANT SELECT, UPDATE ON LARGE OBJECT %s TO ${db.server_users_group};'', lo_oid);
 				END LOOP;
 			END ';
+			UPDATE binaries SET binary_size = b.size
+			FROM (
+    			SELECT binary_id, lo_lseek(lo_open(binary_oid, 262144), 0, 2) AS size FROM binaries
+			) AS b
+			WHERE binaries.binary_id = b.binary_id;
 			RESET ROLE;
 			REVOKE ${db.server_permanent_delete_user} FROM ${db.liquibase_user};
 			REVOKE UPDATE ON TABLE binaries FROM ${db.server_permanent_delete_users_group};
