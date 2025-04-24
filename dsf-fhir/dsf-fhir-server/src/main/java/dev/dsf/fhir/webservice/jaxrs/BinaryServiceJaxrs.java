@@ -3,6 +3,7 @@ package dev.dsf.fhir.webservice.jaxrs;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.StreamingOutput;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path(BinaryServiceJaxrs.PATH)
@@ -189,7 +191,22 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		InputStream stream = binary.getDataElement() instanceof DeferredBase64BinaryType s ? s.getValueAsStream()
 				: new ByteArrayInputStream(binary.getData());
 
-		ResponseBuilder b = Response.status(Status.OK).entity(stream);
+		ResponseBuilder b = Response.status(Status.OK).entity(new StreamingOutput()
+		{
+			@Override
+			public void write(OutputStream output) throws IOException, WebApplicationException
+			{
+				try (stream)
+				{
+					byte[] buffer = new byte[1024 * 100];
+					int n;
+					while (-1 != (n = stream.read(buffer)))
+					{
+						output.write(buffer, 0, n);
+					}
+				}
+			}
+		});
 		b = b.type(contentType);
 
 		if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
