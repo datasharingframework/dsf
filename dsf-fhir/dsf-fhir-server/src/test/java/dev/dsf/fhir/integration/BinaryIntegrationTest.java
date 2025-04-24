@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
@@ -38,6 +37,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.DocumentReferenceDao;
@@ -52,6 +53,8 @@ import jakarta.ws.rs.core.MediaType;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(BinaryIntegrationTest.class);
+
 	@Test
 	public void testReadAllowedLocalUser() throws Exception
 	{
@@ -2892,7 +2895,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateLargeBinaryDirect() throws Exception
+	public void testCreate8MiB() throws Exception
 	{
 		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
 		Patient patient = new Patient();
@@ -2911,57 +2914,44 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateFiveHundredMebibyteDirect() throws Exception
+	public void testCreate4GiB() throws Exception
 	{
+		long payloadSize = RandomInputStream.ONE_GIBIBYTE * 4;
+
+		logger.info(
+				"Executing create / read test for binary with {} GiB payload, test will run for about 2 minutes ...",
+				(payloadSize / RandomInputStream.ONE_GIBIBYTE));
+
 		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
 		Patient patient = new Patient();
 		getReadAccessHelper().addAll(patient);
 		Patient createdPatient = dao.create(patient);
 
 		String securityContext = "Patient/" + createdPatient.getIdElement().getIdPart();
-		IdType created = getWebserviceClient().withMinimalReturn().createBinary(
-				RandomInputStream.zeros(RandomInputStream.FIVE_HUNDRED_MEBIBYTE),
+		IdType created = getWebserviceClient().withMinimalReturn().createBinary(RandomInputStream.zeros(payloadSize),
 				MediaType.APPLICATION_OCTET_STREAM_TYPE, securityContext);
 		assertNotNull(created);
 
 		InputStream readBinary = getWebserviceClient().readBinary(created.getIdPart(), created.getVersionIdPart(),
 				MediaType.APPLICATION_OCTET_STREAM_TYPE);
-		byte[] allBytes = readBinary.readAllBytes();
-		assertNotNull(allBytes);
-		assertEquals(RandomInputStream.FIVE_HUNDRED_MEBIBYTE, allBytes.length);
+		assertNotNull(readBinary);
 
-		// 500 MiB zeros sha256 hash
-		assertEquals("oIqSJY9iG1XQitHoTJDC6mKG/Gtsmk36cVavsWwZAXA=", createHash(allBytes));
-	}
-
-	@Test
-	public void testCreateOneGibibyteDirect() throws Exception
-	{
-		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
-		Patient patient = new Patient();
-		getReadAccessHelper().addAll(patient);
-		Patient createdPatient = dao.create(patient);
-
-		String securityContext = "Patient/" + createdPatient.getIdElement().getIdPart();
-		IdType created = getWebserviceClient().withMinimalReturn().createBinary(
-				RandomInputStream.zeros(RandomInputStream.ONE_GIBIBYTE), MediaType.APPLICATION_OCTET_STREAM_TYPE,
-				securityContext);
-		assertNotNull(created);
-
-		InputStream readBinary = getWebserviceClient().readBinary(created.getIdPart(), created.getVersionIdPart(),
-				MediaType.APPLICATION_OCTET_STREAM_TYPE);
-		byte[] allBytes = readBinary.readAllBytes();
-		assertNotNull(allBytes);
-		assertEquals(RandomInputStream.ONE_GIBIBYTE, allBytes.length);
-
-		// 1 GiB zeros sha256 hash
-		assertEquals("Sbwg3xXkEqZEckIeE/6G/xxRZeGLKvzPFg1NwZ/mihQ=", createHash(allBytes));
-	}
-
-	private String createHash(byte[] data) throws NoSuchAlgorithmException
-	{
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		return Base64.getEncoder().encodeToString(digest.digest(data));
+
+		byte[] buffer = new byte[1024 * 100];
+		int n;
+		long readSize = 0;
+		while (-1 != (n = readBinary.read(buffer)))
+		{
+			digest.digest(buffer, 0, n);
+			readSize += n;
+		}
+
+		byte[] sha256 = digest.digest();
+
+		assertEquals(payloadSize, readSize);
+		// 4 GiB zeros sha256 hash
+		assertEquals("47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", Base64.getEncoder().encodeToString(sha256));
 	}
 
 	@Test

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +21,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -46,6 +48,7 @@ import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
+import dev.dsf.fhir.integration.random.RandomInputStream;
 import dev.dsf.fhir.model.DeferredBase64BinaryType;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
 import dev.dsf.fhir.search.PageAndCount;
@@ -1350,5 +1353,40 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 
 		if (psL instanceof org.apache.logging.log4j.core.Logger l)
 			l.setLevel(oldLevel);
+	}
+
+	@Test
+	public void testCreateRead4Gib() throws Exception
+	{
+		long payloadSize = RandomInputStream.ONE_GIBIBYTE * 4;
+
+		logger.info(
+				"Executing create / read test for binary with {} GiB payload, test will run for about 2 minutes ...",
+				(payloadSize / RandomInputStream.ONE_GIBIBYTE));
+
+		Binary resource = new Binary();
+		resource.setContentType("text/plain");
+		resource.setDataElement(new StreamableBase64BinaryType(RandomInputStream.zeros(payloadSize)));
+
+		Binary binary = dao.create(resource);
+		assertNotNull(binary);
+		assertNotNull(binary.getIdElement());
+		assertNotNull(binary.getIdElement().getIdPart());
+
+		Optional<Binary> read = dao.read(UUID.fromString(binary.getIdElement().getIdPart()));
+		assertTrue(read.isPresent());
+		assertTrue(read.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferred = (DeferredBase64BinaryType) read.get().getDataElement();
+
+		long readSize = 0;
+		try (InputStream stream = deferred.getValueAsStream())
+		{
+			byte[] buffer = new byte[1024 * 500];
+			int n;
+			while (-1 != (n = stream.read(buffer)))
+				readSize += n;
+		}
+
+		assertEquals(payloadSize, readSize);
 	}
 }
