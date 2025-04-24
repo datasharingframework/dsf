@@ -6,24 +6,24 @@ import java.util.Random;
 
 public class RandomInputStream extends InputStream
 {
-	public static RandomInputStream zeros(int length)
+	public static RandomInputStream zeros(long length)
 	{
 		return new RandomInputStream(length, null);
 	}
 
-	public static RandomInputStream rand(int length)
+	public static RandomInputStream rand(long length)
 	{
 		return new RandomInputStream(length, new Random());
 	}
 
-	public static final int ONE_GIBIBYTE = (int) Math.pow(2, 30);
-	public static final int FIVE_HUNDRED_MEBIBYTE = (int) (Math.pow(2, 20) * 500);
+	public static final long ONE_GIBIBYTE = (long) Math.pow(2, 30);
+	public static final long FIVE_HUNDRED_MEBIBYTE = (long) (Math.pow(2, 20) * 500);
 
 	private final Random random;
-	private final int length;
-	private int position = 0;
+	private final long length;
+	private long position = 0;
 
-	private RandomInputStream(int length, Random random)
+	private RandomInputStream(long length, Random random)
 	{
 		if (length < 0)
 			throw new IllegalArgumentException("length < 0");
@@ -52,7 +52,7 @@ public class RandomInputStream extends InputStream
 		if (position >= length)
 			return -1;
 
-		int bytesToRead = Math.min(len, length - position);
+		int bytesToRead = (int) Math.min(len, length - position);
 
 		byte[] data = new byte[bytesToRead];
 
@@ -68,10 +68,7 @@ public class RandomInputStream extends InputStream
 	@Override
 	public long skip(long n) throws IOException
 	{
-		if (n > Integer.MAX_VALUE)
-			n = Integer.MAX_VALUE;
-
-		int bytesSkipped = Math.min((int) n, length - position);
+		long bytesSkipped = Math.min(n, length - position);
 		position += bytesSkipped;
 		return bytesSkipped;
 	}
@@ -79,6 +76,10 @@ public class RandomInputStream extends InputStream
 	@Override
 	public int available() throws IOException
 	{
-		return length - position;
+		long remaining = length - position;
+		if (remaining > Integer.MAX_VALUE)
+			return Integer.MAX_VALUE;
+		else
+			return (int) remaining;
 	}
 }
