@@ -154,9 +154,6 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 
 			while ((n = largeObject.read(buffer, 0, (int) Math.min(requestedLength - total, buffer.length))) > 0)
 			{
-				if (n == -1)
-					throw new IOException("EOF");
-
 				total += n;
 				if (out != null)
 					out.write(buffer, 0, n);

@@ -21,18 +21,25 @@ public class RangeRequestImpl implements RangeRequest
 		Matcher matcher = RANGE_PATTERN.matcher(rangeHeaderValue);
 		if (matcher.matches())
 		{
-			String start = matcher.group("start");
-			String end = matcher.group("end");
-			if (start != null && end != null)
-				return new RangeRequestImpl(Long.parseLong(start), Long.parseLong(end));
+			try
+			{
+				String start = matcher.group("start");
+				String end = matcher.group("end");
+				if (start != null && end != null)
+					return new RangeRequestImpl(Long.parseLong(start), Long.parseLong(end));
 
-			String prefix = matcher.group("prefix");
-			if (prefix != null)
-				return new RangeRequestImpl(Long.parseLong(prefix), null);
+				String prefix = matcher.group("prefix");
+				if (prefix != null)
+					return new RangeRequestImpl(Long.parseLong(prefix), null);
 
-			String suffix = matcher.group("suffix");
-			if (suffix != null)
-				return new RangeRequestImpl(null, Long.parseLong(suffix));
+				String suffix = matcher.group("suffix");
+				if (suffix != null)
+					return new RangeRequestImpl(null, Long.parseLong(suffix));
+			}
+			catch (NumberFormatException e)
+			{
+				return new RangeRequestImpl(null, null);
+			}
 		}
 
 		return new RangeRequestImpl(null, null);
@@ -47,17 +54,20 @@ public class RangeRequestImpl implements RangeRequest
 		this.endInclusive = endInclusive;
 	}
 
+	@Override
 	public boolean isRangeNotDefined()
 	{
 		return start == null && endInclusive == null; // invalid cases guarded by regex
 	}
 
+	@Override
 	public boolean isRangeSatisfiable(long dataSize)
 	{
 		return isRangeNotDefined() || isFromGivenStartToEndOfFile(dataSize) || isFromGivenStartToGivenEnd(dataSize)
 				|| isFromEndOfFileMinusGivenEndToEndOfFile(dataSize);
 	}
 
+	@Override
 	public String createRangeHeaderValue(long dataSize)
 	{
 		if (isFromGivenStartToEndOfFile(dataSize))
@@ -70,6 +80,7 @@ public class RangeRequestImpl implements RangeRequest
 			return null;
 	}
 
+	@Override
 	public String createContentRangeHeaderValue(long dataSize)
 	{
 		return "bytes */" + dataSize;
