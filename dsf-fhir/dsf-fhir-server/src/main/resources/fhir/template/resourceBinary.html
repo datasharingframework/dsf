@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="resource-data" th:fragment="resource-data">
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Content Type',string=${binary.contentType}"></th:block>
+			<th:block th:insert="~{resourceElements::id}" th:with="label='Security Context',id=${binary.securityContext}" th:if="${binary.securityContext}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Data Size',string=${binary.dataSize}">foo</th:block>
+			<div>
+				<a id="download" th:href="${binary.download}" title="Download Data">Download Data</a>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

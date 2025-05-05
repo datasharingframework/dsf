@@ -47,7 +47,6 @@ abstract class AbstractResource<R extends Resource> extends AbstractThymeleafCon
 			this.getActive = getActive;
 			this.hasStatus = hasStatus;
 			this.getStatus = getStatus;
-
 		}
 
 		Boolean getActive(R resource)
@@ -97,8 +96,8 @@ abstract class AbstractResource<R extends Resource> extends AbstractThymeleafCon
 						.map(s -> s.replace("|", " | ")).collect(Collectors.joining(", "))
 				: null;
 
-		Boolean active = activeOrStatus.getActive(resource);
-		String status = activeOrStatus.getStatus(resource);
+		Boolean active = activeOrStatus == null ? null : activeOrStatus.getActive(resource);
+		String status = activeOrStatus == null ? null : activeOrStatus.getStatus(resource);
 
 		variables.accept("htmlResourceFragment", htmlResourceFragment);
 		variables.accept("resource", new ResourceData(type, id, version, lastUpdated, profiles, active, status));

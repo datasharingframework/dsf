@@ -370,7 +370,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		}
 	}
 
-	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
+	protected final Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
 	{
 		return Arrays.stream(headerNames).map(name -> headers.getHeaderString(name)).filter(h -> h != null).findFirst();
 	}
@@ -398,6 +398,25 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
+		return createReadResponse(uri, headers, read);
+	}
+
+	@Override
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
+	{
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
+
+		return createReadResponse(uri, headers, read);
+	}
+
+	protected final Response createReadResponse(UriInfo uri, HttpHeaders headers, Optional<R> read)
+	{
+		Optional<Long> ifMatch = getHeaderString(headers, Constants.HEADER_IF_MATCH, Constants.HEADER_IF_MATCH_LC)
+				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
+		Optional<Date> ifUnmodifiedSince = getHeaderString(headers, HttpHeaders.IF_UNMODIFIED_SINCE,
+				HttpHeaders.IF_UNMODIFIED_SINCE.toLowerCase()).flatMap(this::toDate);
+
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
 				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
@@ -408,6 +427,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			referenceCleaner.cleanLiteralReferences(resource);
 
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
+
+			// not conform to rfc9110 as we are evaluating against a weak ETag here
+			if (ifMatch.map(v -> !v.equals(resource.getIdElement().getVersionIdPartAsLong())).orElse(false))
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.status(Status.PRECONDITION_FAILED).entity(resource).build();
+			}
+			else if (ifUnmodifiedSince.map(d -> !equalsWithSecondsPrecision(d, resource.getMeta().getLastUpdated()))
+					.orElse(false))
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.status(Status.PRECONDITION_FAILED).entity(resource).build();
+			}
+
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
 			{
 				// entity removed by AbstractResourceServiceSecure
@@ -422,9 +455,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				return Response.notModified(resourceTag).entity(resource)
 						.lastModified(resource.getMeta().getLastUpdated()).build();
 			}
+			else if (isSpecialCase(uri, headers, resource))
+				return createSpecialCaseResponse(uri, headers, resource);
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
-
 		}).orElseGet(() ->
 		{
 			// TODO return OperationOutcome
@@ -443,6 +477,26 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		return aLdt.isAfter(bLdt);
 	}
 
+	protected final boolean equalsWithSecondsPrecision(Date a, Date b)
+	{
+		LocalDateTime aLdt = a.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+		LocalDateTime bLdt = b.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+
+		return aLdt.equals(bLdt);
+	}
+
+	protected boolean isSpecialCase(UriInfo uri, HttpHeaders headers, R resource)
+	{
+		return false;
+	}
+
+	protected Response createSpecialCaseResponse(UriInfo uri, HttpHeaders headers, R resource)
+	{
+		return null;
+	}
+
 	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
 	{
 		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
@@ -454,7 +508,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	 * @return {@link Optional} of {@link Date} in system default timezone or {@link Optional#empty()} if the given
 	 *         value could not be parsed or was null/blank
 	 */
-	private Optional<Date> toDate(String rfc1123DateValue)
+	protected final Optional<Date> toDate(String rfc1123DateValue)
 	{
 		if (rfc1123DateValue == null || rfc1123DateValue.isBlank())
 			return Optional.empty();
@@ -472,51 +526,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 			return Optional.empty();
 		}
-	}
-
-	@Override
-	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
-	{
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
-
-		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
-				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
-		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
-				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
-
-		return read.map(resource ->
-		{
-			referenceCleaner.cleanLiteralReferences(resource);
-
-			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
-			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
-			{
-				// entity removed by AbstractResourceServiceSecure
-				return Response.notModified(resourceTag).entity(resource)
-						.lastModified(resource.getMeta().getLastUpdated()).build();
-			}
-			// If-Modified-Since is ignored, when used in combination with If-None-Match
-			else if (ifNoneMatch.isEmpty() && ifModifiedSince
-					.map(d -> !afterWithSecondsPrecision(resource.getMeta().getLastUpdated(), d)).orElse(false))
-			{
-				// entity removed by AbstractResourceServiceSecure
-				return Response.notModified(resourceTag).entity(resource)
-						.lastModified(resource.getMeta().getLastUpdated()).build();
-			}
-			else
-				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();
-		}).orElseGet(() ->
-		{
-			// TODO return OperationOutcome
-			Response response = Response.status(Status.NOT_FOUND).build();
-			return response;
-		});
-	}
-
-	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
-	{
-		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
 
 	@Override

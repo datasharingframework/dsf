@@ -11,8 +11,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,6 +27,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.hl7.fhir.r4.model.Base64BinaryType;
@@ -43,17 +46,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.common.db.PreparedStatementWithLogger;
+import dev.dsf.fhir.adapter.DeferredBase64BinaryType;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
 import dev.dsf.fhir.integration.random.RandomInputStream;
-import dev.dsf.fhir.model.DeferredBase64BinaryType;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
+import dev.dsf.fhir.webservice.RangeRequestImpl;
 import jakarta.ws.rs.core.MediaType;
 
 public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
@@ -95,7 +99,18 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 			Base64BinaryType data = binary.getDataElement();
 			if (data instanceof DeferredBase64BinaryType d)
 			{
-				byte[] bytes = d.getValueAsStream().readAllBytes();
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+				try
+				{
+					d.writeExternal(out);
+				}
+				catch (IOException e)
+				{
+					throw new RuntimeException(e);
+				}
+
+				byte[] bytes = out.toByteArray();
 				binary.setDataElement(new Base64BinaryType(bytes));
 			}
 			else if (data instanceof StreamableBase64BinaryType s)
@@ -1377,16 +1392,111 @@ public class BinaryDaoTest extends AbstractReadAccessDaoTest<Binary, BinaryDao>
 		assertTrue(read.isPresent());
 		assertTrue(read.get().getDataElement() instanceof DeferredBase64BinaryType);
 		DeferredBase64BinaryType deferred = (DeferredBase64BinaryType) read.get().getDataElement();
+		CountingOutputStream countingOutputStream = new CountingOutputStream(NullOutputStream.INSTANCE);
+		deferred.writeExternal(countingOutputStream);
+		long count = countingOutputStream.getByteCount();
+		assertEquals(payloadSize, count);
 
-		long readSize = 0;
-		try (InputStream stream = deferred.getValueAsStream())
-		{
-			byte[] buffer = new byte[1024 * 500];
-			int n;
-			while (-1 != (n = stream.read(buffer)))
-				readSize += n;
-		}
+		Optional<Binary> readFirst2000Bytes = dao.read(UUID.fromString(binary.getIdElement().getIdPart()),
+				new RangeRequestImpl(0L, 1999L));
+		assertTrue(readFirst2000Bytes.isPresent());
+		assertTrue(readFirst2000Bytes.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferredFirst2000Bytes = (DeferredBase64BinaryType) readFirst2000Bytes.get()
+				.getDataElement();
+		CountingOutputStream countingOutputStreamFirst2000Bytes = new CountingOutputStream(NullOutputStream.INSTANCE);
+		deferredFirst2000Bytes.writeExternal(countingOutputStreamFirst2000Bytes);
+		long countFirst2000Bytes = countingOutputStreamFirst2000Bytes.getByteCount();
+		assertEquals(2000, countFirst2000Bytes);
 
-		assertEquals(payloadSize, readSize);
+		Optional<Binary> readLast2000Bytes = dao.read(UUID.fromString(binary.getIdElement().getIdPart()),
+				new RangeRequestImpl(null, -2000L));
+		assertTrue(readLast2000Bytes.isPresent());
+		assertTrue(readLast2000Bytes.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferredLast2000Bytes = (DeferredBase64BinaryType) readLast2000Bytes.get()
+				.getDataElement();
+		CountingOutputStream countingOutputStreamLast2000Bytes = new CountingOutputStream(NullOutputStream.INSTANCE);
+		deferredLast2000Bytes.writeExternal(countingOutputStreamLast2000Bytes);
+		long countLast2000Bytes = countingOutputStreamLast2000Bytes.getByteCount();
+		assertEquals(2000, countLast2000Bytes);
+
+		Optional<Binary> readAllFrom4GibMinus100Bytes = dao.read(UUID.fromString(binary.getIdElement().getIdPart()),
+				new RangeRequestImpl(payloadSize - 100, null));
+		assertTrue(readAllFrom4GibMinus100Bytes.isPresent());
+		assertTrue(readAllFrom4GibMinus100Bytes.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferredAllFrom4GibMinus100Bytes = (DeferredBase64BinaryType) readAllFrom4GibMinus100Bytes
+				.get().getDataElement();
+		CountingOutputStream countingOutputStreamAllFrom4GibMinus100Bytes = new CountingOutputStream(
+				NullOutputStream.INSTANCE);
+		deferredAllFrom4GibMinus100Bytes.writeExternal(countingOutputStreamAllFrom4GibMinus100Bytes);
+		long countAllFrom4GibMinus100Bytes = countingOutputStreamAllFrom4GibMinus100Bytes.getByteCount();
+		assertEquals(100, countAllFrom4GibMinus100Bytes);
+	}
+
+	@Test
+	public void testCreateReadTestRanges() throws Exception
+	{
+		byte[] data = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+		Binary resource = new Binary();
+		resource.setContentType("text/plain");
+		resource.setDataElement(new StreamableBase64BinaryType(new ByteArrayInputStream(data)));
+
+		Binary binary = dao.create(resource);
+		assertNotNull(binary);
+		assertNotNull(binary.getIdElement());
+		assertNotNull(binary.getIdElement().getIdPart());
+
+		Optional<Binary> readRange01 = dao.read(UUID.fromString(binary.getIdElement().getIdPart()),
+				new RangeRequestImpl(0L, 1L));
+		assertTrue(readRange01.isPresent());
+		assertTrue(readRange01.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferredRange01Bytes = (DeferredBase64BinaryType) readRange01.get().getDataElement();
+		ByteArrayOutputStream outRange01 = new ByteArrayOutputStream();
+		deferredRange01Bytes.writeExternal(outRange01);
+		byte[] readOutRange01 = outRange01.toByteArray();
+		assertEquals(2, readOutRange01.length);
+		assertEquals(0, readOutRange01[0]);
+		assertEquals(1, readOutRange01[1]);
+
+		Optional<Binary> readRange23 = dao.read(UUID.fromString(binary.getIdElement().getIdPart()),
+				new RangeRequestImpl(2L, 3L));
+		assertTrue(readRange23.isPresent());
+		assertTrue(readRange23.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferredRange23Bytes = (DeferredBase64BinaryType) readRange23.get().getDataElement();
+		ByteArrayOutputStream outRange23 = new ByteArrayOutputStream();
+		deferredRange23Bytes.writeExternal(outRange23);
+		byte[] readOutRange23 = outRange23.toByteArray();
+		assertEquals(2, readOutRange23.length);
+		assertEquals(2, readOutRange23[0]);
+		assertEquals(3, readOutRange23[1]);
+
+		Optional<Binary> readLast2Bytes = dao.read(UUID.fromString(binary.getIdElement().getIdPart()),
+				new RangeRequestImpl(null, -2L));
+		assertTrue(readLast2Bytes.isPresent());
+		assertTrue(readLast2Bytes.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferredLast2Bytes = (DeferredBase64BinaryType) readLast2Bytes.get().getDataElement();
+		ByteArrayOutputStream outLast2Bytes = new ByteArrayOutputStream();
+		deferredLast2Bytes.writeExternal(outLast2Bytes);
+		byte[] last2Bytes = outLast2Bytes.toByteArray();
+		assertEquals(2, last2Bytes.length);
+		assertEquals(8, last2Bytes[0]);
+		assertEquals(9, last2Bytes[1]);
+
+		Optional<Binary> readRange4End = dao.read(UUID.fromString(binary.getIdElement().getIdPart()),
+				new RangeRequestImpl(4L, null));
+		assertTrue(readRange4End.isPresent());
+		assertTrue(readRange4End.get().getDataElement() instanceof DeferredBase64BinaryType);
+		DeferredBase64BinaryType deferredRange4EndBytes = (DeferredBase64BinaryType) readRange4End.get()
+				.getDataElement();
+		ByteArrayOutputStream outRange4EndBytes = new ByteArrayOutputStream();
+		deferredRange4EndBytes.writeExternal(outRange4EndBytes);
+		byte[] readOutRange4EndBytes = outRange4EndBytes.toByteArray();
+		assertEquals(6, readOutRange4EndBytes.length);
+		assertEquals(4, readOutRange4EndBytes[0]);
+		assertEquals(5, readOutRange4EndBytes[1]);
+		assertEquals(6, readOutRange4EndBytes[2]);
+		assertEquals(7, readOutRange4EndBytes[3]);
+		assertEquals(8, readOutRange4EndBytes[4]);
+		assertEquals(9, readOutRange4EndBytes[5]);
 	}
 }

@@ -1,16 +1,12 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,265 +14,23 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.postgresql.util.PGobject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import dev.dsf.fhir.model.DeferredBase64BinaryType;
+import dev.dsf.fhir.model.DeferredBase64BinaryTypeImpl;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
 import dev.dsf.fhir.search.filter.BinaryIdentityFilter;
 import dev.dsf.fhir.search.parameters.BinaryContentType;
+import dev.dsf.fhir.webservice.RangeRequest;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
-	public static final class BlobInputStream extends InputStream
-	{
-		private final Blob blob;
-		private final InputStream stream;
-
-		public BlobInputStream(Blob blob) throws SQLException
-		{
-			this.blob = blob;
-			this.stream = blob.getBinaryStream();
-		}
-
-		public static InputStream nullInputStream()
-		{
-			return InputStream.nullInputStream();
-		}
-
-		@Override
-		public int read() throws IOException
-		{
-			return stream.read();
-		}
-
-		@Override
-		public int read(byte[] b) throws IOException
-		{
-			return stream.read(b);
-		}
-
-		@Override
-		public int read(byte[] b, int off, int len) throws IOException
-		{
-			return stream.read(b, off, len);
-		}
-
-		@Override
-		public byte[] readAllBytes() throws IOException
-		{
-			return stream.readAllBytes();
-		}
-
-		@Override
-		public byte[] readNBytes(int len) throws IOException
-		{
-			return stream.readNBytes(len);
-		}
-
-		@Override
-		public int readNBytes(byte[] b, int off, int len) throws IOException
-		{
-			return stream.readNBytes(b, off, len);
-		}
-
-		@Override
-		public long skip(long n) throws IOException
-		{
-			return stream.skip(n);
-		}
-
-		@Override
-		public void skipNBytes(long n) throws IOException
-		{
-			stream.skipNBytes(n);
-		}
-
-		@Override
-		public int available() throws IOException
-		{
-			return stream.available();
-		}
-
-		@Override
-		public void close() throws IOException
-		{
-			stream.close();
-
-			try
-			{
-				blob.free();
-			}
-			catch (SQLException e)
-			{
-				throw new IOException(e);
-			}
-		}
-
-		@Override
-		public void mark(int readlimit)
-		{
-			stream.mark(readlimit);
-		}
-
-		@Override
-		public void reset() throws IOException
-		{
-			stream.reset();
-		}
-
-		@Override
-		public boolean markSupported()
-		{
-			return stream.markSupported();
-		}
-
-		@Override
-		public long transferTo(OutputStream out) throws IOException
-		{
-			return stream.transferTo(out);
-		}
-	}
-
-	public static final class DataInputStream extends InputStream
-	{
-		private final Connection connection;
-		private final PreparedStatement statement;
-		private final ResultSet resultSet;
-		private final InputStream data;
-
-		public DataInputStream(Connection connection, PreparedStatement statement, ResultSet resultSet,
-				InputStream data)
-		{
-			this.connection = Objects.requireNonNull(connection, "connection");
-			this.statement = Objects.requireNonNull(statement, "statement");
-			this.resultSet = Objects.requireNonNull(resultSet, "resultSet");
-			this.data = Objects.requireNonNull(data, "data");
-		}
-
-		@Override
-		public int read() throws IOException
-		{
-			return data.read();
-		}
-
-		@Override
-		public int read(byte[] b) throws IOException
-		{
-			return data.read(b);
-		}
-
-		@Override
-		public int read(byte[] b, int off, int len) throws IOException
-		{
-			return data.read(b, off, len);
-		}
-
-		@Override
-		public byte[] readAllBytes() throws IOException
-		{
-			return data.readAllBytes();
-		}
-
-		@Override
-		public byte[] readNBytes(int len) throws IOException
-		{
-			return data.readNBytes(len);
-		}
-
-		@Override
-		public int readNBytes(byte[] b, int off, int len) throws IOException
-		{
-			return data.readNBytes(b, off, len);
-		}
-
-		@Override
-		public long skip(long n) throws IOException
-		{
-			return data.skip(n);
-		}
-
-		@Override
-		public void skipNBytes(long n) throws IOException
-		{
-			data.skipNBytes(n);
-		}
-
-		@Override
-		public int available() throws IOException
-		{
-			return data.available();
-		}
-
-		@Override
-		public void close() throws IOException
-		{
-			try
-			{
-				data.close();
-			}
-			finally
-			{
-				try
-				{
-					resultSet.close();
-				}
-				catch (SQLException e)
-				{
-					throw new IOException(e);
-				}
-				finally
-				{
-					try
-					{
-						statement.close();
-					}
-					catch (SQLException e)
-					{
-						throw new IOException(e);
-					}
-					finally
-					{
-						try
-						{
-							connection.close();
-						}
-						catch (SQLException e)
-						{
-							throw new IOException(e);
-						}
-					}
-				}
-			}
-		}
-
-		@Override
-		public void mark(int readlimit)
-		{
-			data.mark(readlimit);
-		}
-
-		@Override
-		public void reset() throws IOException
-		{
-			data.reset();
-		}
-
-		@Override
-		public boolean markSupported()
-		{
-			return data.markSupported();
-		}
-
-		@Override
-		public long transferTo(OutputStream out) throws IOException
-		{
-			return data.transferTo(out);
-		}
-	}
+	private static final Logger logger = LoggerFactory.getLogger(BinaryDaoJdbc.class);
 
 	private final String selectUpdateUser;
 
@@ -293,41 +47,62 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	}
 
 	@Override
+	protected PreparedStatementFactoryBinary getPreparedStatementFactory()
+	{
+		return (PreparedStatementFactoryBinary) super.getPreparedStatementFactory();
+	}
+
+	@Override
 	public LargeObjectManager createLargeObjectManager(Connection connection)
 	{
 		return new LargeObjectManagerJdbc(getPermanentDeleteDataSource(), selectUpdateUser, connection);
 	}
 
-	private InputStream readData(Binary resource)
+	private void readData(Binary resource, OutputStream out) throws IOException
 	{
-		try
+		RangeRequest rangeRequest = (RangeRequest) resource.getUserData(RangeRequest.USER_DATA_VALUE_RANGE_REQUEST);
+
+		try (Connection connection = getDataSource().getConnection())
 		{
-			Connection connection = getDataSource().getConnection();
 			connection.setAutoCommit(false);
 
-			PreparedStatement statement = connection
-					.prepareStatement("SELECT binary_oid FROM binaries WHERE binary_id = ? AND version = ?");
-			PGobject uuidObject = getPreparedStatementFactory()
-					.uuidToPgObject(toUuid(resource.getIdElement().getIdPart()));
-			Long version = resource.getMeta().getVersionIdElement().getIdPartAsLong();
-
-			statement.setObject(1, uuidObject);
-			statement.setLong(2, version);
-
-			ResultSet result = statement.executeQuery();
-			if (result.next())
+			try (PreparedStatement statement = connection.prepareStatement(
+					"SELECT binary_oid, binary_size FROM binaries WHERE binary_id = ? AND version = ?"))
 			{
-				Blob blob = result.getBlob(1);
-				InputStream data = blob == null ? new ByteArrayInputStream(new byte[0]) : new BlobInputStream(blob);
+				PGobject uuidObject = getPreparedStatementFactory()
+						.uuidToPgObject(toUuid(resource.getIdElement().getIdPart()));
+				Long version = resource.getMeta().getVersionIdElement().getIdPartAsLong();
 
-				return new DataInputStream(connection, statement, result, data);
+				statement.setObject(1, uuidObject);
+				statement.setLong(2, version);
+
+				try (ResultSet result = statement.executeQuery())
+				{
+					if (result.next())
+					{
+						long oid = result.getLong(1);
+						long dataSize = result.getLong(2);
+
+						if (dataSize <= 0)
+							return;
+
+						LargeObjectManager largeObjectManager = createLargeObjectManager(connection);
+						largeObjectManager.read(oid, dataSize, rangeRequest, out);
+					}
+					else
+						throw new SQLException(
+								"Binary resource with id " + resource.getIdElement().getIdPart() + " not found");
+				}
 			}
-			else
-				throw new SQLException("Binary resource with id " + resource.getIdElement().getIdPart() + " not found");
+
+			connection.commit();
 		}
 		catch (SQLException e)
 		{
-			throw new RuntimeException(e);
+			logger.debug("Unable to read data for Binary resource", e);
+			logger.warn("Unable to read data for Binary resource: {} - {}", e.getClass().getName(), e.getMessage());
+
+			throw new IOException(e);
 		}
 	}
 
@@ -338,7 +113,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		Binary created = super.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 
 		if (created.getDataElement() instanceof StreamableBase64BinaryType)
-			created.setDataElement(new DeferredBase64BinaryType(() -> readData(created)));
+			created.setDataElement(new DeferredBase64BinaryTypeImpl(out -> readData(created, out)));
 
 		return created;
 	}
@@ -350,7 +125,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		Binary updated = super.updateWithTransaction(largeObjectManager, connection, resource, expectedVersion);
 
 		if (updated.getDataElement() instanceof StreamableBase64BinaryType)
-			updated.setDataElement(new DeferredBase64BinaryType(() -> readData(updated)));
+			updated.setDataElement(new DeferredBase64BinaryTypeImpl(out -> readData(updated, out)));
 
 		return updated;
 	}
@@ -360,7 +135,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 			throws SQLException, ResourceDeletedException
 	{
 		Optional<Binary> read = super.readWithTransaction(connection, uuid);
-		return read.map(r -> r.setDataElement(new DeferredBase64BinaryType(() -> readData(r))));
+		return read.map(r -> r.setDataElement(new DeferredBase64BinaryTypeImpl(out -> readData(r, out))));
 	}
 
 	@Override
@@ -368,7 +143,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 			throws SQLException, ResourceDeletedException
 	{
 		Optional<Binary> read = super.readVersionWithTransaction(connection, uuid, version);
-		return read.map(r -> r.setDataElement(new DeferredBase64BinaryType(() -> readData(r))));
+		return read.map(r -> r.setDataElement(new DeferredBase64BinaryTypeImpl(out -> readData(r, out))));
 	}
 
 	@Override
@@ -380,6 +155,48 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	@Override
 	protected void modifySearchResultResource(Binary resource, Connection connection) throws SQLException
 	{
-		resource.setDataElement(new DeferredBase64BinaryType(() -> readData(resource)));
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT binary_size FROM binaries WHERE binary_id = ? AND version = ?"))
+		{
+			PGobject uuidObject = getPreparedStatementFactory()
+					.uuidToPgObject(toUuid(resource.getIdElement().getIdPart()));
+			Long version = resource.getMeta().getVersionIdElement().getIdPartAsLong();
+
+			statement.setObject(1, uuidObject);
+			statement.setLong(2, version);
+
+			try (ResultSet result = statement.executeQuery())
+			{
+				if (result.next())
+				{
+					long dataSize = result.getLong(1);
+					resource.setUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE, dataSize);
+				}
+				else
+					throw new SQLException(
+							"Binary resource with id " + resource.getIdElement().getIdPart() + " not found");
+			}
+		}
+
+		resource.setDataElement(new DeferredBase64BinaryTypeImpl(out -> readData(resource, out)));
+	}
+
+	@Override
+	public Optional<Binary> read(UUID uuid, RangeRequest rangeRequest) throws SQLException, ResourceDeletedException
+	{
+		Optional<Binary> binary = read(uuid);
+		binary.ifPresent(b -> b.setUserData(RangeRequest.USER_DATA_VALUE_RANGE_REQUEST, rangeRequest));
+
+		return binary;
+	}
+
+	@Override
+	public Optional<Binary> readVersion(UUID uuid, long version, RangeRequest rangeRequest)
+			throws SQLException, ResourceDeletedException
+	{
+		Optional<Binary> binary = readVersion(uuid, version);
+		binary.ifPresent(b -> b.setUserData(RangeRequest.USER_DATA_VALUE_RANGE_REQUEST, rangeRequest));
+
+		return binary;
 	}
 }

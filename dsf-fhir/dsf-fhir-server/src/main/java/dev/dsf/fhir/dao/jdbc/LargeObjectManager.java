@@ -1,8 +1,12 @@
 package dev.dsf.fhir.dao.jdbc;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
+
+import dev.dsf.fhir.webservice.RangeRequest;
 
 public interface LargeObjectManager
 {
@@ -22,6 +26,12 @@ public interface LargeObjectManager
 		public void rollback() throws SQLException
 		{
 		}
+
+		@Override
+		public void read(long oid, long length, RangeRequest rangeRequest, OutputStream out)
+				throws SQLException, IOException
+		{
+		}
 	};
 
 	OidAndSize create(InputStream inputStream) throws SQLException;
@@ -32,4 +42,6 @@ public interface LargeObjectManager
 	}
 
 	void rollback() throws SQLException;
+
+	void read(long oid, long length, RangeRequest rangeRequest, OutputStream out) throws SQLException, IOException;
 }

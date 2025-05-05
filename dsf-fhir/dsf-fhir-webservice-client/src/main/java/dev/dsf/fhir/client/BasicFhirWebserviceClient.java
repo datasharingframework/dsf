@@ -55,6 +55,20 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	InputStream readBinary(String id, MediaType mediaType);
 
 	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @param rangeStart
+	 *            <code>null</code> if suffix range (<b>rangeEndInclusive</b> <code>&lt;0</code>), else <code>>=0</code>
+	 * @param rangeEndInclusive
+	 *            <code>null</code> if range from <b>rangeStart</b> to end of file, <code>&lt;0</code> if suffix range
+	 *            (<b>rangeStart</b> <code>null</code>), <code>>=rangeStart</code> for range end
+	 * @return {@link InputStream} needs to be closed
+	 */
+	InputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive);
+
+	/**
 	 * @param resourceTypeName
 	 *            not <code>null</code>
 	 * @param id
@@ -79,6 +93,22 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	 * @return {@link InputStream} needs to be closed
 	 */
 	InputStream readBinary(String id, String version, MediaType mediaType);
+
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param version
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @param rangeStart
+	 *            <code>null</code> if suffix range (<b>rangeEndInclusive</b> <code>&lt;0</code>), else <code>>=0</code>
+	 * @param rangeEndInclusive
+	 *            <code>null</code> if range from <b>rangeStart</b> to end of file, <code>&lt;0</code> if suffix range
+	 *            (<b>rangeStart</b> <code>null</code>), <code>>=rangeStart</code> for range end
+	 * @return {@link InputStream} needs to be closed
+	 */
+	InputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart, Long rangeEndInclusive);
 
 	boolean exists(IdType resourceTypeIdVersion);
 

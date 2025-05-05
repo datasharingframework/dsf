@@ -18,11 +18,14 @@ import org.postgresql.largeobject.LargeObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.webservice.RangeRequest;
+
 public class LargeObjectManagerJdbc implements LargeObjectManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(LargeObjectManagerJdbc.class);
 
-	private static final int BUFFER_SIZE = 8192; // postgres default page size
+	private static final int CREAT_BUFFER_SIZE = 8192; // postgres default page size
+	private static final int READ_BUFFER_SIZE = 8192 * 10;
 
 	private final DataSource permanentDeleteDataSource;
 	private final String dbUsersGroup;
@@ -87,7 +90,7 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 
 	private static long copy(InputStream inputStream, OutputStream outputStream) throws IOException
 	{
-		byte[] buffer = new byte[BUFFER_SIZE];
+		byte[] buffer = new byte[CREAT_BUFFER_SIZE];
 
 		long count = 0;
 		int n;
@@ -131,5 +134,33 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 				logger.warn("Unable to delete large object {}: {}", oid, e.getMessage());
 			}
 		};
+	}
+
+	@Override
+	public void read(long oid, long dataSize, RangeRequest rangeRequest, OutputStream out)
+			throws SQLException, IOException
+	{
+		try (LargeObject largeObject = getLargeObjectManager(connection).open(oid,
+				org.postgresql.largeobject.LargeObjectManager.READ))
+		{
+			long requestedLength = (rangeRequest == null) ? dataSize : rangeRequest.getRequestedLength(dataSize);
+			long start = (rangeRequest == null) ? 0 : rangeRequest.getStart(dataSize);
+
+			largeObject.seek64(start, start < 0 ? LargeObject.SEEK_END : LargeObject.SEEK_SET);
+
+			byte[] buffer = new byte[READ_BUFFER_SIZE];
+			int n;
+			long total = 0;
+
+			while ((n = largeObject.read(buffer, 0, (int) Math.min(requestedLength - total, buffer.length))) > 0)
+			{
+				if (n == -1)
+					throw new IOException("EOF");
+
+				total += n;
+				if (out != null)
+					out.write(buffer, 0, n);
+			}
+		}
 	}
 }

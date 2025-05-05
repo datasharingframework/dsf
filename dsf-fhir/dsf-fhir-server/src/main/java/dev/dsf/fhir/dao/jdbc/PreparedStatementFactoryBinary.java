@@ -14,12 +14,13 @@ import org.hl7.fhir.r4.model.Binary;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager.OidAndSize;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
+import dev.dsf.fhir.webservice.RangeRequest;
 
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
 	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?)";
-	private static final String readByIdSql = "SELECT deleted, version, binary_json FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
-	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
+	private static final String readByIdSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
+	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
 	private static final String updateSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?, ?)";
 
 	PreparedStatementFactoryBinary(FhirContext fhirContext)
@@ -81,8 +82,12 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	public Binary getReadByIdResource(ResultSet result) throws SQLException
 	{
 		String json = result.getString(3);
+		long size = result.getLong(4);
 
-		return jsonToResource(json);
+		Binary binary = jsonToResource(json);
+		binary.setUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE, size);
+
+		return binary;
 	}
 
 	@Override
@@ -111,8 +116,12 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	public Binary getReadByIdAndVersionResource(ResultSet result) throws SQLException
 	{
 		String json = result.getString(3);
+		long size = result.getLong(4);
 
-		return jsonToResource(json);
+		Binary binary = jsonToResource(json);
+		binary.setUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE, size);
+
+		return binary;
 	}
 
 	@Override
@@ -141,7 +150,7 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 		else
 		{
 			statement.setNull(4, Types.BLOB);
-			statement.setLong(4, 0);
+			statement.setLong(5, 0);
 		}
 
 		resource.setDataElement(data);

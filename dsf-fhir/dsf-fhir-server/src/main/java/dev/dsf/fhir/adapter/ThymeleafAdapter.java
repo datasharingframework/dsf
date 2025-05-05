@@ -6,6 +6,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -53,6 +58,25 @@ public class ThymeleafAdapter implements MessageBodyWriter<Resource>, Initializi
 			MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
+		if (resource instanceof Binary b)
+			modifyBinary(b);
+		else if (resource instanceof Bundle b && BundleType.SEARCHSET.equals(b.getType())
+				&& b.getEntry().stream().anyMatch(c -> c.hasResource() && c.getResource() instanceof Binary))
+			modifyBinaries(b);
+
 		thymeleafTemplateService.writeTo(resource, type, mediaType, uriInfo, securityContext, entityStream);
+	}
+
+	private void modifyBinary(Binary b)
+	{
+		b.setData(null);
+		b.getDataElement().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason")
+				.setValue(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked", null));
+	}
+
+	private void modifyBinaries(Bundle b)
+	{
+		b.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.filter(r -> r instanceof Binary).map(r -> (Binary) r).forEach(this::modifyBinary);
 	}
 }

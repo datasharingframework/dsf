@@ -409,7 +409,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		}
 	}
 
-	private ResourceDeletedException newResourceDeletedException(UUID uuid, LocalDateTime deleted, long version)
+	protected final ResourceDeletedException newResourceDeletedException(UUID uuid, LocalDateTime deleted, long version)
 	{
 		return new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString(), String.valueOf(version + 1)),
 				deleted);

@@ -83,9 +83,22 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
+	public InputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive)
+	{
+		return retry(() -> delegate.readBinary(id, version, mediaType, rangeStart, rangeEndInclusive));
+	}
+
+	@Override
 	public InputStream readBinary(String id, MediaType mediaType)
 	{
 		return retry(() -> delegate.readBinary(id, mediaType));
+	}
+
+	@Override
+	public InputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive)
+	{
+		return retry(() -> delegate.readBinary(id, mediaType, rangeStart, rangeEndInclusive));
 	}
 
 	@Override

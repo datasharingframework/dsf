@@ -523,6 +523,50 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
+	public InputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive)
+	{
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(mediaType, "mediaType");
+
+		Builder builder = getResource().path("Binary").path(id).request().accept(mediaType);
+
+		String range = getRangeHeader(rangeStart, rangeEndInclusive);
+		if (range != null)
+			builder = builder.header("Range", range);
+
+		Response response = builder.get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus()
+				|| Status.PARTIAL_CONTENT.getStatusCode() == response.getStatus())
+			return response.readEntity(InputStream.class);
+		else
+			throw handleError(response);
+	}
+
+	private String getRangeHeader(Long rangeStart, Long rangeEndInclusive)
+	{
+		// from given start to end of file
+		if (rangeStart != null && rangeStart >= 0 && rangeEndInclusive == null)
+		{
+			return "bytes=" + rangeStart + "-";
+		}
+		// from given start to given end (inclusive)
+		else if (rangeStart != null && rangeStart >= 0 && rangeEndInclusive != null && rangeEndInclusive > rangeStart)
+		{
+			return "bytes=" + rangeStart + "-" + rangeEndInclusive;
+		}
+		// from length + end to end of file
+		else if (rangeStart == null && rangeEndInclusive != null && rangeEndInclusive < 0)
+		{
+			return "bytes=" + rangeEndInclusive;
+		}
+		else
+			return null;
+	}
+
+	@Override
 	public Resource read(String resourceTypeName, String id, String version)
 	{
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
@@ -593,6 +637,32 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(InputStream.class);
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public InputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive)
+	{
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+		Objects.requireNonNull(mediaType, "mediaType");
+
+		Builder builder = getResource().path("Binary").path(id).path("_history").path(version).request()
+				.accept(mediaType);
+
+		String range = getRangeHeader(rangeStart, rangeEndInclusive);
+		if (range != null)
+			builder = builder.header("Range", range);
+
+		Response response = builder.get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus()
+				|| Status.PARTIAL_CONTENT.getStatusCode() == response.getStatus())
 			return response.readEntity(InputStream.class);
 		else
 			throw handleError(response);
