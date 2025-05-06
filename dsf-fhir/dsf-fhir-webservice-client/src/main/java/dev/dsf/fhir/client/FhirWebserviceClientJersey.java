@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,6 +37,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.adapter.FhirAdapter;
+import dev.dsf.fhir.client.BinaryInputStream.Range;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import dev.dsf.fhir.service.ReferenceCleaner;
@@ -58,6 +61,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	private static final Map<String, Class<?>> RESOURCE_TYPES_BY_NAME = Stream.of(ResourceType.values())
 			.filter(type -> !ResourceType.List.equals(type))
 			.collect(Collectors.toMap(ResourceType::name, FhirWebserviceClientJersey::getFhirClass));
+	private static final String CONTENT_RANGE_PATTERN_TEXT = "bytes (?<start>\\d+)-(?<end>\\d+)\\/(?<size>\\d+)";
+	private static final Pattern CONTENT_RANGE_PATTERN = Pattern.compile(CONTENT_RANGE_PATTERN_TEXT);
 
 	private static Class<?> getFhirClass(ResourceType type)
 	{
@@ -507,7 +512,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public InputStream readBinary(String id, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, MediaType mediaType)
 	{
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(mediaType, "mediaType");
@@ -517,13 +522,14 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(InputStream.class);
+			return toBinaryInputStream(response);
 		else
 			throw handleError(response);
 	}
 
 	@Override
-	public InputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive)
+	public BinaryInputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive,
+			Map<String, String> additionalHeaders)
 	{
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(mediaType, "mediaType");
@@ -534,13 +540,19 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (range != null)
 			builder = builder.header("Range", range);
 
+		if (additionalHeaders != null)
+		{
+			for (Entry<String, String> e : additionalHeaders.entrySet())
+				builder = builder.header(e.getKey(), e.getValue());
+		}
+
 		Response response = builder.get();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus()
 				|| Status.PARTIAL_CONTENT.getStatusCode() == response.getStatus())
-			return response.readEntity(InputStream.class);
+			return toBinaryInputStream(response);
 		else
 			throw handleError(response);
 	}
@@ -564,6 +576,52 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		}
 		else
 			return null;
+	}
+
+	private BinaryInputStream toBinaryInputStream(Response response)
+	{
+		long contentLength = getContentLength(response);
+		Range range = getRange(response);
+		InputStream input = response.readEntity(InputStream.class);
+
+		return new BinaryInputStream(input, contentLength, range);
+	}
+
+	private long getContentLength(Response response)
+	{
+		try
+		{
+			return Long.parseLong(response.getHeaderString("Content-Length"));
+		}
+		catch (NumberFormatException e)
+		{
+			return Long.MIN_VALUE;
+		}
+	}
+
+	private Range getRange(Response response)
+	{
+		String contentRange = response.getHeaderString("Content-Range");
+		if (contentRange == null)
+			return null;
+
+		Matcher matcher = CONTENT_RANGE_PATTERN.matcher(contentRange);
+		if (matcher.matches())
+		{
+			try
+			{
+				long start = Long.parseLong(matcher.group("start"));
+				long end = Long.parseLong(matcher.group("end"));
+				long size = Long.parseLong(matcher.group("size"));
+
+				return new Range(size, start, end);
+			}
+			catch (NumberFormatException e)
+			{
+			}
+		}
+
+		return null;
 	}
 
 	@Override
@@ -625,7 +683,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public InputStream readBinary(String id, String version, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType)
 	{
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(version, "version");
@@ -637,14 +695,14 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(InputStream.class);
+			return toBinaryInputStream(response);
 		else
 			throw handleError(response);
 	}
 
 	@Override
-	public InputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
-			Long rangeEndInclusive)
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive, Map<String, String> additionalHeaders)
 	{
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(version, "version");
@@ -657,13 +715,19 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (range != null)
 			builder = builder.header("Range", range);
 
+		if (additionalHeaders != null)
+		{
+			for (Entry<String, String> e : additionalHeaders.entrySet())
+				builder = builder.header(e.getKey(), e.getValue());
+		}
+
 		Response response = builder.get();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus()
 				|| Status.PARTIAL_CONTENT.getStatusCode() == response.getStatus())
-			return response.readEntity(InputStream.class);
+			return toBinaryInputStream(response);
 		else
 			throw handleError(response);
 	}
