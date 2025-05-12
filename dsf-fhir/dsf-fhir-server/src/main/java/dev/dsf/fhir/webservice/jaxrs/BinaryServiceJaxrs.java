@@ -347,8 +347,10 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 			case "application/gzip" -> ".gz";
 			case "application/json" -> ".json";
 			case "application/pdf" -> ".pdf";
+			case "application/pem-certificate-chain" -> ".pem";
 			case "application/x-ndjson" -> ".ndjson";
 			case "application/xml" -> ".xml";
+			case "application/zip" -> ".zip";
 			default -> ".bin";
 		};
 	}
