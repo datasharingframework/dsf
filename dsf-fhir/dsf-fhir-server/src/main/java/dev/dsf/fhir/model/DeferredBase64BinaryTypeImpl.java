@@ -13,7 +13,7 @@ import dev.dsf.fhir.adapter.DeferredBase64BinaryType;
 
 public class DeferredBase64BinaryTypeImpl extends Base64BinaryType implements DeferredBase64BinaryType
 {
-	private static final String USER_DATA_BINARY_DATA_PLACEHOLDER_VALUE = "binary_data_value_placeholder";
+	private static final String USER_DATA_BINARY_DATA_VALUE_PLACEHOLDER = "binary_data_value_placeholder";
 
 	@FunctionalInterface
 	public static interface ConsumerWithIoException<T>
@@ -60,7 +60,7 @@ public class DeferredBase64BinaryTypeImpl extends Base64BinaryType implements De
 	@Override
 	public String getValueAsString()
 	{
-		String placeholderValue = (String) getUserData(USER_DATA_BINARY_DATA_PLACEHOLDER_VALUE);
+		String placeholderValue = (String) getUserData(USER_DATA_BINARY_DATA_VALUE_PLACEHOLDER);
 
 		if (placeholderValue != null)
 			return placeholderValue;
@@ -93,7 +93,7 @@ public class DeferredBase64BinaryTypeImpl extends Base64BinaryType implements De
 	{
 		String placeHolder = "===" + UUID.randomUUID().toString().replaceAll("-", "") + "===";
 
-		setUserData(USER_DATA_BINARY_DATA_PLACEHOLDER_VALUE, placeHolder);
+		setUserData(USER_DATA_BINARY_DATA_VALUE_PLACEHOLDER, placeHolder);
 
 		return placeHolder;
 	}
