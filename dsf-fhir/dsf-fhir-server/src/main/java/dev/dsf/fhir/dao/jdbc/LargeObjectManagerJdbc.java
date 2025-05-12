@@ -24,7 +24,7 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(LargeObjectManagerJdbc.class);
 
-	private static final int CREAT_BUFFER_SIZE = 8192; // postgres default page size
+	private static final int CREATE_BUFFER_SIZE = 8192; // postgres default page size
 	private static final int READ_BUFFER_SIZE = 8192 * 10;
 
 	private final DataSource permanentDeleteDataSource;
@@ -90,7 +90,7 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 
 	private static long copy(InputStream inputStream, OutputStream outputStream) throws IOException
 	{
-		byte[] buffer = new byte[CREAT_BUFFER_SIZE];
+		byte[] buffer = new byte[CREATE_BUFFER_SIZE];
 
 		long count = 0;
 		int n;

@@ -266,14 +266,14 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
 			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
-		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		UriComponents components = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
-		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
+		if (components.getPathSegments().size() == 2 && components.getQueryParams().isEmpty())
 			updateById(idTranslationTable, largeObjectManager, connection, validationHelper,
-					componentes.getPathSegments().get(0), componentes.getPathSegments().get(1));
-		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
+					components.getPathSegments().get(0), components.getPathSegments().get(1));
+		else if (components.getPathSegments().size() == 1 && !components.getQueryParams().isEmpty())
 			updateByCondition(idTranslationTable, largeObjectManager, connection, validationHelper,
-					componentes.getPathSegments().get(0));
+					components.getPathSegments().get(0));
 		else
 		{
 			Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
