@@ -24,4 +24,25 @@
 			<version>${crypto-utils.version.v1}</version>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<workingPackages>
+						<workingPackage>dev.dsf.bpe.test.spring.config</workingPackage>
+					</workingPackages>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
