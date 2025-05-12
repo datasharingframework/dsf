@@ -1,5 +1,6 @@
 package dev.dsf.fhir.integration;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -11,10 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +36,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.DocumentReferenceDao;
@@ -52,6 +52,8 @@ import jakarta.ws.rs.core.MediaType;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(BinaryIntegrationTest.class);
+
 	@Test
 	public void testReadAllowedLocalUser() throws Exception
 	{
@@ -1260,7 +1262,8 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
-		assertTrue(Arrays.equals(data, created.getData()));
+		assertArrayEquals("'" + new String(data, StandardCharsets.UTF_8) + "' vs. '"
+				+ new String(created.getData(), StandardCharsets.UTF_8) + "'", data, created.getData());
 	}
 
 	@Test
@@ -1325,7 +1328,8 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
-		assertTrue(Arrays.equals(data, created.getData()));
+		assertArrayEquals("'" + new String(data, StandardCharsets.UTF_8) + "' vs. '"
+				+ new String(created.getData(), StandardCharsets.UTF_8) + "'", data, created.getData());
 
 		assertNotNull(created.getSecurityContext());
 		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
@@ -2892,7 +2896,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateLargeBinaryDirect() throws Exception
+	public void testCreate8MiB() throws Exception
 	{
 		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
 		Patient patient = new Patient();
@@ -2911,32 +2915,118 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateFiveHundredMebibyteDirect() throws Exception
+	public void testCreate4GiB() throws Exception
 	{
+		long payloadSize = RandomInputStream.ONE_GIBIBYTE * 4;
+
+		logger.info(
+				"Executing create / read test for binary with {} GiB payload, test will run for about 2 minutes ...",
+				(payloadSize / RandomInputStream.ONE_GIBIBYTE));
+
 		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
 		Patient patient = new Patient();
 		getReadAccessHelper().addAll(patient);
 		Patient createdPatient = dao.create(patient);
 
 		String securityContext = "Patient/" + createdPatient.getIdElement().getIdPart();
-		IdType created = getWebserviceClient().withMinimalReturn().createBinary(
-				RandomInputStream.zeros(RandomInputStream.FIVE_HUNDRED_MEBIBYTE),
+		IdType created = getWebserviceClient().withMinimalReturn().createBinary(RandomInputStream.zeros(payloadSize),
 				MediaType.APPLICATION_OCTET_STREAM_TYPE, securityContext);
 		assertNotNull(created);
 
-		InputStream readBinary = getWebserviceClient().readBinary(created.getIdPart(), created.getVersionIdPart(),
+		InputStream in = getWebserviceClient().readBinary(created.getIdPart(), created.getVersionIdPart(),
 				MediaType.APPLICATION_OCTET_STREAM_TYPE);
-		byte[] allBytes = readBinary.readAllBytes();
-		assertNotNull(allBytes);
-		assertEquals(RandomInputStream.FIVE_HUNDRED_MEBIBYTE, allBytes.length);
 
-		// 500 MiB zeros sha256 hash
-		assertEquals("oIqSJY9iG1XQitHoTJDC6mKG/Gtsmk36cVavsWwZAXA=", createHash(allBytes));
+		assertNotNull(in);
+
+		try (in)
+		{
+			byte[] buffer = new byte[8192 * 100];
+			int n;
+			long readSize = 0;
+			while ((n = in.read(buffer)) != -1)
+				readSize += n;
+
+			assertEquals(payloadSize, readSize);
+		}
 	}
 
-	private String createHash(byte[] data) throws NoSuchAlgorithmException
+	@Test
+	public void testCreateViaTransactionBundleExpectRollback() throws Exception
 	{
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		return Base64.getEncoder().encodeToString(digest.digest(data));
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		Organization organization = new Organization();
+		getReadAccessHelper().addLocal(organization);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(binary).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Binary");
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(organization).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Organization");
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testCreateReadRange() throws Exception
+	{
+		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		Patient patient = new Patient();
+		getReadAccessHelper().addAll(patient);
+		Patient createdPatient = dao.create(patient);
+
+		byte[] data = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		String securityContext = "Patient/" + createdPatient.getIdElement().getIdPart();
+
+		Binary created = getWebserviceClient().createBinary(new ByteArrayInputStream(data),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, securityContext);
+
+		assertNotNull(created);
+		assertNotNull(created.getData());
+		assertEquals(data.length, created.getData().length);
+
+		InputStream readAllIn = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, null, null);
+		byte[] readAll = readAllIn.readAllBytes();
+		assertEquals(data.length, readAll.length);
+
+		InputStream read01In = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, 0L, 1L);
+		byte[] read01 = read01In.readAllBytes();
+		assertEquals(2, read01.length);
+		assertEquals(0, read01[0]);
+		assertEquals(1, read01[1]);
+
+		InputStream read23In = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, 2L, 3L);
+		byte[] read23 = read23In.readAllBytes();
+		assertEquals(2, read23.length);
+		assertEquals(2, read23[0]);
+		assertEquals(3, read23[1]);
+
+		InputStream readFrom4In = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, 4L, null);
+		byte[] readFrom4 = readFrom4In.readAllBytes();
+		assertEquals(6, readFrom4.length);
+		assertEquals(4, readFrom4[0]);
+		assertEquals(5, readFrom4[1]);
+		assertEquals(6, readFrom4[2]);
+		assertEquals(7, readFrom4[3]);
+		assertEquals(8, readFrom4[4]);
+		assertEquals(9, readFrom4[5]);
+
+		InputStream readLast2In = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				MediaType.APPLICATION_OCTET_STREAM_TYPE, null, -2L);
+		byte[] readLast2 = readLast2In.readAllBytes();
+		assertEquals(2, readLast2.length);
+		assertEquals(8, readLast2[0]);
+		assertEquals(9, readLast2[1]);
 	}
 }

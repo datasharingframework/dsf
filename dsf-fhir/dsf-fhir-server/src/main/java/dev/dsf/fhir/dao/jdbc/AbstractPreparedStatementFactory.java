@@ -19,19 +19,17 @@ abstract class AbstractPreparedStatementFactory<R extends Resource> implements P
 	private final String createSql;
 	private final String readByIdSql;
 	private final String readByIdAndVersionSql;
-	private final String updateNewRowSql;
-	private final String updateSameRowSql;
+	private final String updateSql;
 
 	protected AbstractPreparedStatementFactory(FhirContext fhirContext, Class<R> resourceType, String createSql,
-			String readByIdSql, String readByIdAndVersionSql, String updateNewRowSql, String updateSameRowSql)
+			String readByIdSql, String readByIdAndVersionSql, String updateSql)
 	{
 		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 		this.resourceType = Objects.requireNonNull(resourceType, "resourceType");
 		this.createSql = Objects.requireNonNull(createSql, "createSql");
 		this.readByIdSql = Objects.requireNonNull(readByIdSql, "readByIdSql");
 		this.readByIdAndVersionSql = Objects.requireNonNull(readByIdAndVersionSql, "readByIdAndVersionSql");
-		this.updateNewRowSql = Objects.requireNonNull(updateNewRowSql, "updateNewRowSql");
-		this.updateSameRowSql = Objects.requireNonNull(updateSameRowSql, "updateSameRowSql");
+		this.updateSql = Objects.requireNonNull(updateSql, "updateSql");
 	}
 
 	@Override
@@ -104,14 +102,8 @@ abstract class AbstractPreparedStatementFactory<R extends Resource> implements P
 	}
 
 	@Override
-	public final String getUpdateNewRowSql()
+	public final String getUpdateSql()
 	{
-		return updateNewRowSql;
-	}
-
-	@Override
-	public final String getUpdateSameRowSql()
-	{
-		return updateSameRowSql;
+		return updateSql;
 	}
 }

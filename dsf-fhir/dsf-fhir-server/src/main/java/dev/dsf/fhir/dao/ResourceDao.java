@@ -13,6 +13,7 @@ import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.search.DbSearchQuery;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
@@ -28,6 +29,8 @@ public interface ResourceDao<R extends Resource>
 	Class<R> getResourceType();
 
 	Connection newReadWriteTransaction() throws SQLException;
+
+	LargeObjectManager createLargeObjectManager(Connection connection);
 
 	/**
 	 * @param resource
@@ -50,6 +53,8 @@ public interface ResourceDao<R extends Resource>
 	R createWithId(R resource, UUID uuid) throws SQLException;
 
 	/**
+	 * @param largeObjectManager
+	 *            not <code>null</code>
 	 * @param connection
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
 	 * @param resource
@@ -62,7 +67,8 @@ public interface ResourceDao<R extends Resource>
 	 * @throws IllegalArgumentException
 	 *             if the given connection is {@link Connection#isReadOnly()}
 	 */
-	R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException;
+	R createWithTransactionAndId(LargeObjectManager largeObjectManager, Connection connection, R resource, UUID uuid)
+			throws SQLException;
 
 	/**
 	 * @param uuid
@@ -246,6 +252,8 @@ public interface ResourceDao<R extends Resource>
 	 *
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
 	 *
+	 * @param largeObjectManager
+	 *            not <code>null</code>
 	 * @param connection
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
 	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
@@ -262,11 +270,12 @@ public interface ResourceDao<R extends Resource>
 	 *             or {@link Connection#getTransactionIsolation()} is not one of
 	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}
 	 */
-	default R updateWithTransaction(Connection connection, R resource) throws SQLException, ResourceNotFoundException
+	default R updateWithTransaction(LargeObjectManager largeObjectManager, Connection connection, R resource)
+			throws SQLException, ResourceNotFoundException
 	{
 		try
 		{
-			return updateWithTransaction(connection, resource, null);
+			return updateWithTransaction(largeObjectManager, connection, resource, null);
 		}
 		catch (ResourceVersionNoMatchException e)
 		{
@@ -283,6 +292,8 @@ public interface ResourceDao<R extends Resource>
 	 *
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
 	 *
+	 * @param largeObjectManager
+	 *            not <code>null</code>
 	 * @param connection
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
 	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
@@ -303,8 +314,8 @@ public interface ResourceDao<R extends Resource>
 	 *             or {@link Connection#getTransactionIsolation()} is not one of
 	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}
 	 */
-	R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
-			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
+	R updateWithTransaction(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			Long expectedVersion) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
 
 	/**
 	 * Returns <code>false</code> if a matching resource was already marked as deleted

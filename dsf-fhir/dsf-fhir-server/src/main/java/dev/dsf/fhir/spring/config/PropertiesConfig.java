@@ -47,6 +47,10 @@ public class PropertiesConfig implements InitializingBean
 	private String dbUsername;
 
 	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
+	@Value("${dev.dsf.fhir.db.user.group:fhir_users}")
+	private String dbUsersGroup;
+
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
@@ -236,6 +240,11 @@ public class PropertiesConfig implements InitializingBean
 	public String getDbUsername()
 	{
 		return dbUsername;
+	}
+
+	public String getDbUsersGroup()
+	{
+		return dbUsersGroup;
 	}
 
 	public char[] getDbPassword()

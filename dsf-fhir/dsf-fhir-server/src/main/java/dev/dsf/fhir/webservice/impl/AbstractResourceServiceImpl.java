@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -154,11 +155,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		{
 			try (Connection connection = dao.newReadWriteTransaction())
 			{
+				LargeObjectManager largeObjectManager = dao.createLargeObjectManager(connection);
+
 				try
 				{
 					resolveLogicalReferences(resource, connection);
 
-					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
+					R created = dao.createWithTransactionAndId(largeObjectManager, connection, resource,
+							UUID.randomUUID());
 
 					checkReferences(resource, connection,
 							ref -> validationRules.checkReferenceAfterCreate(resource, ref));
@@ -169,19 +173,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				}
 				catch (SQLException e)
 				{
-					connection.rollback();
+					tryRollback(connection, largeObjectManager, e);
 
 					if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 					{
 						Response response = responseGenerator.duplicateResourceExists(resourceTypeName);
 						throw new WebApplicationException(response);
 					}
-					else
-						throw e;
+
+					throw e;
 				}
 				catch (WebApplicationException e)
 				{
-					connection.rollback();
+					tryRollback(connection, largeObjectManager, e);
+
 					throw e;
 				}
 			}
@@ -200,6 +205,27 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
 				parameterConverter.getPreferReturn(headers), () -> responseGenerator.created(location, createdResource))
 				.location(location).build();
+	}
+
+	private void tryRollback(Connection connection, LargeObjectManager largeObjectManager, Exception e)
+	{
+		try
+		{
+			connection.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
+
+		try
+		{
+			largeObjectManager.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
 	}
 
 	private URI toLocation(R resource)
@@ -344,7 +370,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		}
 	}
 
-	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
+	protected final Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
 	{
 		return Arrays.stream(headerNames).map(name -> headers.getHeaderString(name)).filter(h -> h != null).findFirst();
 	}
@@ -372,6 +398,25 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
+		return createReadResponse(uri, headers, read);
+	}
+
+	@Override
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
+	{
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
+
+		return createReadResponse(uri, headers, read);
+	}
+
+	protected final Response createReadResponse(UriInfo uri, HttpHeaders headers, Optional<R> read)
+	{
+		Optional<Long> ifMatch = getHeaderString(headers, Constants.HEADER_IF_MATCH, Constants.HEADER_IF_MATCH_LC)
+				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
+		Optional<Date> ifUnmodifiedSince = getHeaderString(headers, HttpHeaders.IF_UNMODIFIED_SINCE,
+				HttpHeaders.IF_UNMODIFIED_SINCE.toLowerCase()).flatMap(this::toDate);
+
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
 				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
@@ -382,6 +427,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			referenceCleaner.cleanLiteralReferences(resource);
 
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
+
+			// not conform to rfc9110 as we are evaluating against a weak ETag here
+			if (ifMatch.map(v -> !v.equals(resource.getIdElement().getVersionIdPartAsLong())).orElse(false))
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.status(Status.PRECONDITION_FAILED).entity(resource).build();
+			}
+			else if (ifUnmodifiedSince.map(d -> !equalsWithSecondsPrecision(d, resource.getMeta().getLastUpdated()))
+					.orElse(false))
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.status(Status.PRECONDITION_FAILED).entity(resource).build();
+			}
+
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
 			{
 				// entity removed by AbstractResourceServiceSecure
@@ -396,9 +455,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				return Response.notModified(resourceTag).entity(resource)
 						.lastModified(resource.getMeta().getLastUpdated()).build();
 			}
+			else if (isSpecialCase(uri, headers, resource))
+				return createSpecialCaseResponse(uri, headers, resource);
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
-
 		}).orElseGet(() ->
 		{
 			// TODO return OperationOutcome
@@ -417,6 +477,26 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		return aLdt.isAfter(bLdt);
 	}
 
+	protected final boolean equalsWithSecondsPrecision(Date a, Date b)
+	{
+		LocalDateTime aLdt = a.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+		LocalDateTime bLdt = b.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+
+		return aLdt.equals(bLdt);
+	}
+
+	protected boolean isSpecialCase(UriInfo uri, HttpHeaders headers, R resource)
+	{
+		return false;
+	}
+
+	protected Response createSpecialCaseResponse(UriInfo uri, HttpHeaders headers, R resource)
+	{
+		return null;
+	}
+
 	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
 	{
 		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
@@ -428,7 +508,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	 * @return {@link Optional} of {@link Date} in system default timezone or {@link Optional#empty()} if the given
 	 *         value could not be parsed or was null/blank
 	 */
-	private Optional<Date> toDate(String rfc1123DateValue)
+	protected final Optional<Date> toDate(String rfc1123DateValue)
 	{
 		if (rfc1123DateValue == null || rfc1123DateValue.isBlank())
 			return Optional.empty();
@@ -446,51 +526,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 			return Optional.empty();
 		}
-	}
-
-	@Override
-	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
-	{
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
-
-		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
-				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
-		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
-				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
-
-		return read.map(resource ->
-		{
-			referenceCleaner.cleanLiteralReferences(resource);
-
-			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
-			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
-			{
-				// entity removed by AbstractResourceServiceSecure
-				return Response.notModified(resourceTag).entity(resource)
-						.lastModified(resource.getMeta().getLastUpdated()).build();
-			}
-			// If-Modified-Since is ignored, when used in combination with If-None-Match
-			else if (ifNoneMatch.isEmpty() && ifModifiedSince
-					.map(d -> !afterWithSecondsPrecision(resource.getMeta().getLastUpdated(), d)).orElse(false))
-			{
-				// entity removed by AbstractResourceServiceSecure
-				return Response.notModified(resourceTag).entity(resource)
-						.lastModified(resource.getMeta().getLastUpdated()).build();
-			}
-			else
-				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();
-		}).orElseGet(() ->
-		{
-			// TODO return OperationOutcome
-			Response response = Response.status(Status.NOT_FOUND).build();
-			return response;
-		});
-	}
-
-	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
-	{
-		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
 
 	@Override
@@ -531,11 +566,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				{
 					try (Connection connection = dao.newReadWriteTransaction())
 					{
+						LargeObjectManager largeObjectManager = dao.createLargeObjectManager(connection);
+
 						try
 						{
 							resolveLogicalReferences(resource, connection);
 
-							R updated = dao.updateWithTransaction(connection, resource, ifMatch.orElse(null));
+							R updated = dao.updateWithTransaction(largeObjectManager, connection, resource,
+									ifMatch.orElse(null));
 
 							checkReferences(resource, connection,
 									ref -> validationRules.checkReferenceAfterUpdate(updated, ref));
@@ -546,18 +584,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						}
 						catch (SQLException e)
 						{
+							tryRollback(connection, largeObjectManager, e);
+
 							if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 							{
 								Response response = responseGenerator.duplicateResourceExists(resourceTypeName);
 								throw new WebApplicationException(response);
 							}
 
-							connection.rollback();
 							throw e;
 						}
 						catch (WebApplicationException e)
 						{
-							connection.rollback();
+							tryRollback(connection, largeObjectManager, e);
+
 							throw e;
 						}
 					}

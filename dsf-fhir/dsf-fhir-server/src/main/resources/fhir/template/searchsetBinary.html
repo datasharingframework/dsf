@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<table>
+		<tr th:fragment="header"><th>ID</th><th>Content Type</th><th>Security Context</th><th>Data Size</th><th>Last Updated</th></tr>
+		<tr th:fragment="row" title="Open" th:title="'Open ' + ${element.id.resourceType}" th:attr="resource-type=${element.id.resourceType}">
+			<td class="id-value"><a href="#" title="Open" th:href="${element.id.href} + '?_format=html'" th:title="'Open ' + ${element.id.resourceType}" th:text="${element.id.value}">id</a></td>
+			<td th:text="${element.contentType}">contentType</td>
+			<td class="id-value"><a href="#" title="Open" th:if="${element.securityContext}" th:href="${element.securityContext.href}" th:title="'Open ' + ${element.securityContext.resourceType}" th:text="${element.securityContext.value}">securityContext</a></td>
+			<td th:text="${element.dataSize}">dataSize</td>
+			<td th:text="${element.lastUpdated}">lastUpdated</td>
+		</tr>
+	</table>
+</body>
+</html>

@@ -276,21 +276,23 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		content = versionMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(resource, result.group(1));
-			return resourceName.map(rN -> "&lt;id value=\"<a href=\"" + rN + "/" + result.group(1) + "\">"
-					+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
-					+ "&lt;versionId value=\"" + "<a href=\"" + rN + "/" + result.group(1) + "/_history/"
-					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\"/&gt;").orElse(result.group(0));
+			return resourceName
+					.map(rN -> "&lt;id value=\"<a href=\"" + rN + "/" + result.group(1) + "?_format=html\">"
+							+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
+							+ "&lt;versionId value=\"" + "<a href=\"" + rN + "/" + result.group(1) + "/_history/"
+							+ result.group(4) + "?_format=html\">" + result.group(4) + "</a>" + "\"/&gt;")
+					.orElse(result.group(0));
 		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
 		content = urlMatcher.replaceAll(result -> "<a href=\""
 				+ result.group().replace("&amp;amp;", "&amp;").replace("&amp;apos;", "&apos;")
 						.replace("&amp;gt;", "&gt;").replace("&amp;lt;", "&lt;").replace("&amp;quot;", "&quot;")
-				+ "\">" + result.group() + "</a>");
+				+ "?_format=html\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
-		content = referenceUuidMatcher.replaceAll(
-				result -> "&lt;reference value=\"<a href=\"" + result.group(1) + "\">" + result.group(1) + "</a>\"&gt");
+		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"" + result.group(1)
+				+ "?_format=html\">" + result.group(1) + "</a>\"&gt");
 
 		return content;
 	}
@@ -374,20 +376,23 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		String content = parser.encodeResourceToString(resource).replace("<", "&lt;").replace(">", "&gt;");
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
-		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
+		content = urlMatcher
+				.replaceAll(result -> "<a href=\"" + result.group() + "?_format=html\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = JSON_REFERENCE_UUID_PATTERN.matcher(content);
-		content = referenceUuidMatcher.replaceAll(
-				result -> "\"reference\": \"<a href=\"" + result.group(1) + "\">" + result.group(1) + "</a>\",");
+		content = referenceUuidMatcher.replaceAll(result -> "\"reference\": \"<a href=\"" + result.group(1)
+				+ "?_format=html\">" + result.group(1) + "</a>\",");
 
 		Matcher idUuidMatcher = JSON_ID_UUID_AND_VERSION_PATTERN.matcher(content);
 		content = idUuidMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(resource, result.group(1));
-			return resourceName.map(rN -> "\"id\": \"<a href=\"" + rN + "/" + result.group(1) + "\">" + result.group(1)
-					+ "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3) + "\"versionId\": \""
-					+ "<a href=\"" + rN + "/" + result.group(1) + "/_history/" + result.group(4) + "\">"
-					+ result.group(4) + "</a>" + "\",").orElse(result.group(0));
+			return resourceName
+					.map(rN -> "\"id\": \"<a href=\"" + rN + "/" + result.group(1) + "?_format=html\">"
+							+ result.group(1) + "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3)
+							+ "\"versionId\": \"" + "<a href=\"" + rN + "/" + result.group(1) + "/_history/"
+							+ result.group(4) + "?_format=html\">" + result.group(4) + "</a>" + "\",")
+					.orElse(result.group(0));
 		});
 
 		return content;

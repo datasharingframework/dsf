@@ -317,8 +317,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.db.url", "jdbc:postgresql://" + fhirLiquibaseRule.getHost() + ":"
 				+ fhirLiquibaseRule.getMappedPort(5432) + "/" + fhirLiquibaseRule.getDatabaseName());
+		initParameters.put("dev.dsf.fhir.db.user.group", FHIR_DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.username", FHIR_DATABASE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.password", FHIR_DATABASE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", FHIR_DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", FHIR_DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", FHIR_DATABASE_DELETE_USER_PASSWORD);
 
@@ -396,7 +398,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.bpe.db.url", "jdbc:postgresql://" + bpeLiquibaseRule.getHost() + ":"
 				+ bpeLiquibaseRule.getMappedPort(5432) + "/" + bpeLiquibaseRule.getDatabaseName());
-
+		initParameters.put("dev.dsf.bpe.db.user.group", BPE_DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.bpe.db.user.username", BPE_DATABASE_USER);
 		initParameters.put("dev.dsf.bpe.db.user.password", BPE_DATABASE_USER_PASSWORD);
 		initParameters.put("dev.dsf.bpe.db.user.camunda.username", BPE_DATABASE_CAMUNDA_USER);

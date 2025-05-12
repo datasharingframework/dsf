@@ -1,5 +1,7 @@
 package dev.dsf.bpe.integration;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,6 +9,7 @@ import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+import org.hl7.fhir.r4.model.Binary;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -16,6 +19,8 @@ import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest.CertificationReque
 import de.hsheilbronn.mi.utils.crypto.io.KeyStoreWriter;
 import de.hsheilbronn.mi.utils.crypto.io.PemWriter;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import jakarta.ws.rs.core.MediaType;
 
 public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 {
@@ -203,5 +208,18 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public void startEnvironmentVariableTest() throws Exception
 	{
 		executePluginTest(createTestTask("EnvironmentVariableTest"));
+	}
+
+	@Test
+	public void startDsfClientTest() throws Exception
+	{
+		Binary binary = new Binary();
+		new ReadAccessHelperImpl().addLocal(binary);
+		binary.setData(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+		binary.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		Binary created = getWebserviceClient().create(binary);
+		assertNotNull(created);
+
+		executePluginTest(createTestTask("DsfClientTest"));
 	}
 }

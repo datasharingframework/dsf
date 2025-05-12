@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 
@@ -157,7 +158,8 @@ public class OrganizationAffiliationDaoTest
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
 
-		return organizationDao.createWithTransactionAndId(connection, memberOrg, UUID.randomUUID());
+		return organizationDao.createWithTransactionAndId(LargeObjectManager.NO_OP, connection, memberOrg,
+				UUID.randomUUID());
 	}
 
 	private OrganizationAffiliation createAndStoreOrganizationAffiliationInDb(Organization parent, Organization member,
@@ -169,13 +171,15 @@ public class OrganizationAffiliationDaoTest
 				.setReference("Organization/" + member.getIdElement().getIdPart());
 		organizationAffiliation.getOrganization().setReference("Organization/" + parent.getIdElement().getIdPart());
 
-		return getDao().createWithTransactionAndId(connection, organizationAffiliation, UUID.randomUUID());
+		return getDao().createWithTransactionAndId(LargeObjectManager.NO_OP, connection, organizationAffiliation,
+				UUID.randomUUID());
 	}
 
 	@Test
 	public void testUpdateWithExistingBinary() throws Exception
 	{
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization memberOrg = new Organization();
@@ -214,7 +218,8 @@ public class OrganizationAffiliationDaoTest
 	@Test
 	public void testUpdateWithExistingBinaryUpdateMemberOrg() throws Exception
 	{
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization memberOrg = new Organization();
@@ -253,7 +258,8 @@ public class OrganizationAffiliationDaoTest
 	@Test
 	public void testUpdateWithExistingBinaryUpdateParentOrg() throws Exception
 	{
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization memberOrg = new Organization();
