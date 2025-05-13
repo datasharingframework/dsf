@@ -96,9 +96,8 @@ public class DocumentationGenerator extends AbstractMojo
 				.getFieldsAnnotatedWith(dev.dsf.bpe.v1.documentation.ProcessDocumentation.class);
 		if (!processFieldsV1.isEmpty())
 		{
-
-			List<String> pluginProcessNames = getPluginProcessNames(reflections,
-					dev.dsf.bpe.v1.ProcessPluginDefinition.class, classLoader, workingPackage, this::getV1ProcessNames);
+			List<String> pluginProcessNames = getPluginProcessNames(dev.dsf.bpe.v1.ProcessPluginDefinition.class,
+					classLoader, workingPackage, this::getV1ProcessNames);
 			writeFields(processFieldsV1, processDocumentationGenerator(pluginProcessNames, ProcessDocumentation::v1),
 					file, workingPackage);
 		}
@@ -108,9 +107,8 @@ public class DocumentationGenerator extends AbstractMojo
 				.getFieldsAnnotatedWith(dev.dsf.bpe.v2.documentation.ProcessDocumentation.class);
 		if (!processFieldsV2.isEmpty())
 		{
-
-			List<String> pluginProcessNames = getPluginProcessNames(reflections,
-					dev.dsf.bpe.v2.ProcessPluginDefinition.class, classLoader, workingPackage, this::getV2ProcessNames);
+			List<String> pluginProcessNames = getPluginProcessNames(dev.dsf.bpe.v2.ProcessPluginDefinition.class,
+					classLoader, workingPackage, this::getV2ProcessNames);
 			writeFields(processFieldsV2, processDocumentationGenerator(pluginProcessNames, ProcessDocumentation::v2),
 					file, workingPackage);
 		}
@@ -145,9 +143,8 @@ public class DocumentationGenerator extends AbstractMojo
 		}
 	}
 
-	private <D> List<String> getPluginProcessNames(Reflections reflections, Class<D> processPluginDefinitionType,
-			ClassLoader classLoader, String workingPackage,
-			BiFunction<D, ClassLoader, List<String>> definitionToProcessNames)
+	private <D> List<String> getPluginProcessNames(Class<D> processPluginDefinitionType, ClassLoader classLoader,
+			String workingPackage, BiFunction<D, ClassLoader, List<String>> definitionToProcessNames)
 	{
 		List<Provider<?>> definitions = ServiceLoader.load(processPluginDefinitionType, classLoader).stream()
 				.collect(Collectors.toList());
