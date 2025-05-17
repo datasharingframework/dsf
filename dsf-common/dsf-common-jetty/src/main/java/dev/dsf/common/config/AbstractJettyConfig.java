@@ -115,7 +115,7 @@ public abstract class AbstractJettyConfig
 	@Value("${dev.dsf.server.certificate.key.password:#{null}}")
 	private char[] serverCertificateKeyFilePassword;
 
-	@Documentation(description = "Set to `true` to enable OIDC authorization code flow", recommendation = "Requires *DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL*, *DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID* and *DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET* to be specified")
+	@Documentation(description = "Set to `true` to enable OIDC authorization code flow", recommendation = "Requires *DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL*, *DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID* and *DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET* or *DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE* to be specified")
 	@Value("${dev.dsf.server.auth.oidc.authorization.code.flow:false}")
 	private boolean oidcAuthorizationCodeFlowEnabled;
 

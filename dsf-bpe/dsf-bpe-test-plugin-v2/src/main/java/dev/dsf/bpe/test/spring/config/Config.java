@@ -34,15 +34,18 @@ import dev.dsf.bpe.test.service.MimetypeServiceTest;
 import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
+import dev.dsf.bpe.v2.documentation.ProcessDocumentation;
 import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
 import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
 
 @Configuration
 public class Config implements InitializingBean
 {
+	@ProcessDocumentation(description = "Mandatory property", example = "foo", required = true)
 	@Value("${dev.dsf.bpe.test.env.mandatory:#{null}}")
 	private String envVariableMandatory;
 
+	@ProcessDocumentation(description = "Property with default value", recommendation = "Override default value if necessary")
 	@Value("${dev.dsf.bpe.test.env.optional:default-value}")
 	private String envVariableOptional;
 
