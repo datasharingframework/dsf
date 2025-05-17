@@ -8,6 +8,10 @@
 		<artifactId>dsf-tools-pom</artifactId>
 		<version>1.7.2-SNAPSHOT</version>
 	</parent>
+	
+	<properties>
+		<skipShadePlugin>false</skipShadePlugin>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -75,6 +79,7 @@
 								</transformer>
 							</transformers>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<skip>${skipShadePlugin}</skip>
 						</configuration>
 					</execution>
 				</executions>
