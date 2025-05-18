@@ -17,7 +17,6 @@
 		<module>dsf-tools-default-ca-files-generator</module>
 		<module>dsf-tools-docker-secrets-reader</module>
 		<module>dsf-tools-documentation-generator</module>
-		<module>dsf-tools-proxy-test</module>
 		<module>dsf-tools-test-data-generator</module>
 	</modules>
 
@@ -29,63 +28,12 @@
 		<dependencies>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-build-info-reader</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-bundle-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-db-migration</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-documentation-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-proxy-test</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-test-data-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-api-v1</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-api-v2</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-rest-adapter</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

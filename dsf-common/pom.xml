@@ -42,43 +42,43 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-auth</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-config</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-db</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-status</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>

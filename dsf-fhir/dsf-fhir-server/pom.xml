@@ -12,7 +12,15 @@
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-auth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-rest-adapter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-validation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -25,14 +33,6 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-tools-docker-secrets-reader</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-validation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-auth</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
