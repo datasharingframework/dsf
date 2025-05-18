@@ -1,10 +1,10 @@
-name: "CodeQL"
+name: DSF 1.x CodeQL
 
 on:
   push:
-    branches: [ "main", "develop", "hotfix/*", "release/*" ]
+    branches: [ "main", "develop", "hotfix/1*", "release/1*" ]
   pull_request:
-    branches: [ "main", "develop", "hotfix/*", "release/*" ]
+    branches: [ "main", "develop", "hotfix/1*", "release/1*" ]
   schedule:
     - cron: '21 15 * * 0' # Sundays, 15:21
 
