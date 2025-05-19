@@ -609,6 +609,11 @@
 					<artifactId>maven-pmd-plugin</artifactId>
 					<version>3.26.0</version>
 				</plugin>
+				<plugin>
+					<groupId>org.sonatype.central</groupId>
+					<artifactId>central-publishing-maven-plugin</artifactId>
+					<version>0.7.0</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -733,19 +738,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<executions>
 					<execution>
@@ -773,11 +765,6 @@
 	</build>
 
 	<distributionManagement>
-		<repository>
-			<id>sonatype</id>
-			<name>Sonatype Nexus release repository</name>
-			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
 		<!-- for deployment to GitHub Packages the id must be 'github', if not the deployment fails with a 401 error -->
 		<snapshotRepository>
 			<id>github</id>
@@ -886,6 +873,68 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>publish-to-maven-central</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+							<deploymentName>DSF 2.x</deploymentName>
+							<excludeArtifacts>
+								<excludeArtifact>dsf-bpe-process-api</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v1-impl</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v2-impl</excludeArtifact>
+								<excludeArtifact>dsf-bpe-server</excludeArtifact>
+								<excludeArtifact>dsf-bpe-server-jetty</excludeArtifact>
+								<excludeArtifact>dsf-bpe-test-plugin</excludeArtifact>
+								<excludeArtifact>dsf-bpe-test-plugin-v1</excludeArtifact>
+								<excludeArtifact>dsf-bpe-test-plugin-v2</excludeArtifact>
+								<excludeArtifact>dsf-common-pom</excludeArtifact>
+								<excludeArtifact>dsf-common-auth</excludeArtifact>
+								<excludeArtifact>dsf-common-config</excludeArtifact>
+								<excludeArtifact>dsf-common-db</excludeArtifact>
+								<excludeArtifact>dsf-common-documentation</excludeArtifact>
+								<excludeArtifact>dsf-common-jetty</excludeArtifact>
+								<excludeArtifact>dsf-common-status</excludeArtifact>
+								<excludeArtifact>dsf-common-ui</excludeArtifact>
+								<excludeArtifact>dsf-fhir-pom</excludeArtifact>
+								<excludeArtifact>dsf-fhir-auth</excludeArtifact>
+								<excludeArtifact>dsf-fhir-rest-adapter</excludeArtifact>
+								<excludeArtifact>dsf-fhir-server</excludeArtifact>
+								<excludeArtifact>dsf-fhir-server-jetty</excludeArtifact>
+								<excludeArtifact>dsf-fhir-validation</excludeArtifact>
+								<excludeArtifact>dsf-fhir-webservice-client</excludeArtifact>
+								<excludeArtifact>dsf-fhir-websocket-client</excludeArtifact>
+								<excludeArtifact>dsf-tools-build-info-reader</excludeArtifact>
+								<excludeArtifact>dsf-tools-bundle-generator</excludeArtifact>
+								<excludeArtifact>dsf-tools-db-migration</excludeArtifact>
+								<excludeArtifact>dsf-tools-default-ca-files-generator</excludeArtifact>
+								<excludeArtifact>dsf-tools-docker-secrets-reader</excludeArtifact>
+								<excludeArtifact>dsf-tools-test-data-generator</excludeArtifact>
+							</excludeArtifacts>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
