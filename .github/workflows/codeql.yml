@@ -1,10 +1,10 @@
-name: "CodeQL"
+name: DSF 1.x CodeQL
 
 on:
   push:
-    branches: [ "main", "develop", "hotfix/*", "release/*" ]
+    branches: [ "main", "develop", "hotfix/1*", "release/1*" ]
   pull_request:
-    branches: [ "main", "develop", "hotfix/*", "release/*" ]
+    branches: [ "main", "develop", "hotfix/1*", "release/1*" ]
   schedule:
     - cron: '21 15 * * 0' # Sundays, 15:21
 
@@ -41,7 +41,7 @@ jobs:
 
     - name: Compile with Maven
       if: ${{ matrix.language == 'java-kotlin' }}
-      run: mvn --batch-mode --fail-at-end --threads 1C -Dmaven.javadoc.skip=true -Dimpsort.skip=true -Dformatter.skip=true -Dgpg.skip -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests clean package
+      run: mvn --batch-mode --fail-at-end --threads 1C -Dimpsort.skip=true -Dformatter.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests -DskipShadePlugin=true -P!generate-source-and-javadoc-jars clean package
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

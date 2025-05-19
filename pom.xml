@@ -3,7 +3,7 @@
 
 	<groupId>dev.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>1.7.1-SNAPSHOT</version>
+	<version>1.7.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -161,7 +161,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.5</version>
+				<version>42.7.3</version>
 			</dependency>
 
 			<!-- hhn rwh -->
@@ -624,6 +624,11 @@
 					<artifactId>maven-pmd-plugin</artifactId>
 					<version>3.26.0</version>
 				</plugin>
+				<plugin>
+					<groupId>org.sonatype.central</groupId>
+					<artifactId>central-publishing-maven-plugin</artifactId>
+					<version>0.7.0</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -748,19 +753,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<executions>
 					<execution>
@@ -788,11 +780,6 @@
 	</build>
 
 	<distributionManagement>
-		<repository>
-			<id>sonatype</id>
-			<name>Sonatype Nexus release repository</name>
-			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
 		<!-- for deployment to GitHub Packages the id must be 'github', if not the deployment fails with a 401 error -->
 		<snapshotRepository>
 			<id>github</id>
@@ -901,6 +888,36 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>publish-to-maven-central</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+							<deploymentName>DSF 1.x</deploymentName>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
