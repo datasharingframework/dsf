@@ -12,6 +12,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-db</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-documentation</artifactId>
 		</dependency>
 		<dependency>
@@ -21,10 +25,6 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-db-migration</artifactId>
 		</dependency>
 
 		<dependency>

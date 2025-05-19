@@ -16,7 +16,7 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-db-migration</artifactId>
+			<artifactId>dsf-common-db</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>

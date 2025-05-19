@@ -11,11 +11,8 @@
 	</parent>
 
 	<modules>
-		<module>dsf-tools-build-info-reader</module>
 		<module>dsf-tools-bundle-generator</module>
-		<module>dsf-tools-db-migration</module>
 		<module>dsf-tools-default-ca-files-generator</module>
-		<module>dsf-tools-docker-secrets-reader</module>
 		<module>dsf-tools-documentation-generator</module>
 		<module>dsf-tools-test-data-generator</module>
 	</modules>

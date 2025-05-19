@@ -9,9 +9,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import dev.dsf.common.db.migration.DbMigrator;
+import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.common.documentation.Documentation;
-import dev.dsf.tools.db.DbMigrator;
-import dev.dsf.tools.db.DbMigratorConfig;
 import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration

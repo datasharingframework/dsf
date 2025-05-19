@@ -26,7 +26,7 @@ import org.springframework.context.event.EventListener;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.mail.LoggingMailService;
 import dev.dsf.bpe.mail.SmtpMailService;
-import dev.dsf.tools.build.BuildInfoReader;
+import dev.dsf.common.build.BuildInfoReader;
 
 @Configuration
 public class MailConfig implements InitializingBean

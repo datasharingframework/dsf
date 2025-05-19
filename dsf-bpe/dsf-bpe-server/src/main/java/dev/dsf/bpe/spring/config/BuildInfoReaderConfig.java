@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import dev.dsf.tools.build.BuildInfoReader;
-import dev.dsf.tools.build.BuildInfoReaderImpl;
+import dev.dsf.common.build.BuildInfoReader;
+import dev.dsf.common.build.BuildInfoReaderImpl;
 
 @Configuration
 public class BuildInfoReaderConfig
