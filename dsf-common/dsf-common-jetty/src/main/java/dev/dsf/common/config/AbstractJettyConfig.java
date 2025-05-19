@@ -59,10 +59,10 @@ import dev.dsf.common.auth.DsfOpenIdConfiguration;
 import dev.dsf.common.auth.DsfOpenIdLoginService;
 import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
+import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.jetty.HttpClientWithGetRetry;
 import dev.dsf.common.jetty.JettyServer;
-import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 import jakarta.servlet.ServletContainerInitializer;
 
 @Configuration

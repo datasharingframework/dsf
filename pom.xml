@@ -913,8 +913,10 @@
 								<excludeArtifact>dsf-bpe-test-plugin-v2</excludeArtifact>
 								<excludeArtifact>dsf-common-pom</excludeArtifact>
 								<excludeArtifact>dsf-common-auth</excludeArtifact>
+								<excludeArtifact>dsf-common-build-info-reader</excludeArtifact>
 								<excludeArtifact>dsf-common-config</excludeArtifact>
 								<excludeArtifact>dsf-common-db</excludeArtifact>
+								<excludeArtifact>dsf-common-docker-secrets-reader</excludeArtifact>
 								<excludeArtifact>dsf-common-documentation</excludeArtifact>
 								<excludeArtifact>dsf-common-jetty</excludeArtifact>
 								<excludeArtifact>dsf-common-status</excludeArtifact>
@@ -927,11 +929,8 @@
 								<excludeArtifact>dsf-fhir-validation</excludeArtifact>
 								<excludeArtifact>dsf-fhir-webservice-client</excludeArtifact>
 								<excludeArtifact>dsf-fhir-websocket-client</excludeArtifact>
-								<excludeArtifact>dsf-tools-build-info-reader</excludeArtifact>
 								<excludeArtifact>dsf-tools-bundle-generator</excludeArtifact>
-								<excludeArtifact>dsf-tools-db-migration</excludeArtifact>
 								<excludeArtifact>dsf-tools-default-ca-files-generator</excludeArtifact>
-								<excludeArtifact>dsf-tools-docker-secrets-reader</excludeArtifact>
 								<excludeArtifact>dsf-tools-test-data-generator</excludeArtifact>
 							</excludeArtifacts>
 						</configuration>

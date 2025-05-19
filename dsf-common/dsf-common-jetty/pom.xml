@@ -20,11 +20,11 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-documentation</artifactId>			
+			<artifactId>dsf-common-docker-secrets-reader</artifactId>			
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-docker-secrets-reader</artifactId>			
+			<artifactId>dsf-common-documentation</artifactId>			
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
