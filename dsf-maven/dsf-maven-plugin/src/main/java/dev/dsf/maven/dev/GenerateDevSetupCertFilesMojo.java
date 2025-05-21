@@ -59,6 +59,9 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 		getLog().debug("caChain: " + caChain);
 		getLog().debug("templates: " + templates);
 
+		if (privateKeyPassword == null)
+			throw new MojoExecutionException("privateKeyPassword null");
+
 		try
 		{
 			Files.createDirectories(certDir.toPath());
