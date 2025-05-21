@@ -13,7 +13,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import dev.dsf.maven.exception.RuntimeIOException;
 
-@Mojo(name = "clean-dev-setup-cert-files", defaultPhase = LifecyclePhase.CLEAN, requiresDependencyResolution = ResolutionScope.COMPILE, threadSafe = true, aggregator = true)
+@Mojo(name = "clean-dev-setup-cert-files", defaultPhase = LifecyclePhase.CLEAN, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true, aggregator = true)
 public class CleanDevSetupCertFilesMojo extends AbstractMojo
 {
 	@Parameter(defaultValue = "${project.basedir}", readonly = true, required = true)
