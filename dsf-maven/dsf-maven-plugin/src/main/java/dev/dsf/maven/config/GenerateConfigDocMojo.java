@@ -1,5 +1,6 @@
 package dev.dsf.maven.config;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -14,7 +15,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 public class GenerateConfigDocMojo extends AbstractMojo
 {
 	@Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
-	private String projectBuildDirectory;
+	private File projectBuildDirectory;
 
 	@Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
 	private List<String> compileClasspathElements;
@@ -29,7 +30,7 @@ public class GenerateConfigDocMojo extends AbstractMojo
 		getLog().debug("compileClasspathElements: " + compileClasspathElements);
 		getLog().debug("configDocPackages: " + configDocPackages);
 
-		new ConfigDocGenerator(projectBuildDirectory, compileClasspathElements)
+		new ConfigDocGenerator(projectBuildDirectory.toPath(), compileClasspathElements)
 				.generateDocumentation(configDocPackages);
 	}
 }

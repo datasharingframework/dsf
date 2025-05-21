@@ -10,7 +10,6 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -55,10 +54,10 @@ public class ConfigDocGenerator
 	{
 	}
 
-	private final String projectBuildDirectory;
+	private final Path projectBuildDirectory;
 	private final List<String> compileClasspathElements = new ArrayList<>();
 
-	public ConfigDocGenerator(String projectBuildDirectory, List<String> compileClasspathElements)
+	public ConfigDocGenerator(Path projectBuildDirectory, List<String> compileClasspathElements)
 	{
 		Objects.requireNonNull(projectBuildDirectory, "projectBuildDirectory");
 
@@ -75,7 +74,7 @@ public class ConfigDocGenerator
 
 	private void generateDocumentation(String configDocPackage)
 	{
-		Path file = Paths.get(projectBuildDirectory, "ConfigDoc_" + configDocPackage + ".md");
+		Path file = projectBuildDirectory.resolve("ConfigDoc_" + configDocPackage + ".md");
 		logger.info("Generating documentation for package {} in file {}", configDocPackage, file);
 
 		moveExistingToBackup(file);
