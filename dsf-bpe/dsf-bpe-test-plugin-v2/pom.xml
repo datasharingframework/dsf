@@ -33,7 +33,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<packages>dev.dsf.bpe.test.spring.config</packages>
+					<configDocPackages>dev.dsf.bpe.test.spring.config</configDocPackages>
 				</configuration>
 			</plugin>
 		</plugins>

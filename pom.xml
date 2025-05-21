@@ -772,6 +772,7 @@
 									</template>
 								</templates>
 							</configuration>
+							<inherited>false</inherited>
 						</execution>
 					</executions>
 					<configuration>
