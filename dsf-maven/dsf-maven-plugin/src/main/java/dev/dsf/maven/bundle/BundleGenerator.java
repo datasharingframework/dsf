@@ -72,16 +72,15 @@ public class BundleGenerator
 
 	private final Path projectBaseDir;
 	private final Path baseFolder;
+	private final Path projectBuildDirectory;
 
-	public BundleGenerator(Path projectBaseDir, Path baseFolder) throws MojoExecutionException
+	public BundleGenerator(Path projectBaseDir, Path baseFolder, Path projectBuildDirectory)
+			throws MojoExecutionException
 	{
-		this.projectBaseDir = projectBaseDir;
-		this.baseFolder = baseFolder;
+		this.projectBaseDir = Objects.requireNonNull(projectBaseDir, "projectBaseDir");
+		this.baseFolder = Objects.requireNonNull(baseFolder, "baseFolder");
+		this.projectBuildDirectory = Objects.requireNonNull(projectBuildDirectory, "projectBuildDirectory");
 
-		if (projectBaseDir == null)
-			throw new MojoExecutionException("projectBaseDir not defined");
-		if (baseFolder == null)
-			throw new MojoExecutionException("baseFolder not defined");
 		if (!Files.isReadable(baseFolder))
 			throw new MojoExecutionException("baseFolder '" + baseFolder.toString() + "' not readable");
 	}
@@ -93,15 +92,17 @@ public class BundleGenerator
 
 	public void generateAndSaveBundle() throws MojoFailureException
 	{
+		final Path bundleFilename = getBundleFilename();
+
 		Bundle bundle;
 		try
 		{
-			logger.info("Generating bundle at {} ...", relativeToProjectDir(getBundleFilename()));
+			logger.info("Generating bundle at {} ...", relativeToProjectDir(bundleFilename));
 			bundle = generateBundle();
 		}
 		catch (IOException e)
 		{
-			logger.error("Error while generating bundle", e);
+			logger.error("Unable to generate bundle", e);
 			throw new MojoFailureException(e);
 		}
 
@@ -115,12 +116,16 @@ public class BundleGenerator
 
 		try
 		{
-			saveBundle(bundle);
-			logger.info("Bundle saved at {}", relativeToProjectDir(getBundleFilename()));
+			saveBundle(bundle, bundleFilename);
+			logger.info("Bundle saved at {}", relativeToProjectDir(bundleFilename));
+
+			Path target = projectBuildDirectory.resolve("classes/fhir/" + BUNDLE_FILENAME);
+			Files.copy(bundleFilename, target);
+			logger.info("Bundle copied to {}", relativeToProjectDir(target));
 		}
 		catch (IOException | TransformerException e)
 		{
-			logger.error("Error while generating bundle", e);
+			logger.error("Unable to save bundle", e);
 			throw new MojoFailureException(e);
 		}
 	}
@@ -334,11 +339,11 @@ public class BundleGenerator
 		};
 	}
 
-	private void saveBundle(Bundle bundle) throws IOException, TransformerException
+	private void saveBundle(Bundle bundle, Path bundleFilename) throws IOException, TransformerException
 	{
 		String xml = newXmlParser().encodeResourceToString(bundle);
 
-		try (OutputStream out = Files.newOutputStream(getBundleFilename());
+		try (OutputStream out = Files.newOutputStream(bundleFilename);
 				OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8))
 		{
 			// minimized output: empty-element tags, no indentation, no line-breaks

@@ -19,12 +19,16 @@ public class GenerateFhirBundleMojo extends AbstractMojo
 	@Parameter(defaultValue = "dsf.baseFolder", required = true)
 	private File baseFolder;
 
+	@Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
+	private File projectBuildDirectory;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
 		getLog().debug("projectBaseDir: " + projectBaseDir);
 		getLog().debug("baseFolder: " + baseFolder);
 
-		new BundleGenerator(projectBaseDir.toPath(), baseFolder.toPath()).generateAndSaveBundle();
+		new BundleGenerator(projectBaseDir.toPath(), baseFolder.toPath(), projectBuildDirectory.toPath())
+				.generateAndSaveBundle();
 	}
 }
