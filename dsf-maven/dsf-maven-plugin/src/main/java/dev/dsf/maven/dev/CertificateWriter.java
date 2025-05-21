@@ -52,7 +52,7 @@ public class CertificateWriter extends AbstractIo
 			else if (target.getFileName().toString().endsWith(".p12"))
 				toRuntimeException(() -> writePkcs12(cert.getCn(), capk, target));
 			else
-				logger.warn("Cert (cn: {}) target filetype not supported", cert.getCn(), target.getFileName());
+				logger.warn("Cert (cn: {}) target filetype not supported: {}", cert.getCn(), target.getFileName());
 		}));
 	}
 
@@ -68,7 +68,7 @@ public class CertificateWriter extends AbstractIo
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> writeRootCaJks(target));
 			else
-				logger.warn("RootCa target filetype not supported", target.getFileName());
+				logger.warn("RootCa target filetype not supported: {}", target.getFileName());
 		});
 	}
 
@@ -84,7 +84,7 @@ public class CertificateWriter extends AbstractIo
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> writeIssuingCaJks(target));
 			else
-				logger.warn("IssuingCa target filetype not supported", target.getFileName());
+				logger.warn("IssuingCa target filetype not supported: {}", target.getFileName());
 		});
 	}
 
@@ -100,7 +100,7 @@ public class CertificateWriter extends AbstractIo
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> writeCaChainJks(target));
 			else
-				logger.warn("CaChain target filetype not supported", target.getFileName());
+				logger.warn("CaChain target filetype not supported: {}", target.getFileName());
 		});
 	}
 
