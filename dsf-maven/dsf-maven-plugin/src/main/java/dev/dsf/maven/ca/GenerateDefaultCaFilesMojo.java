@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-@Mojo(name = "generate-default-ca-files", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true)
+@Mojo(name = "generate-default-ca-files", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true)
 public class GenerateDefaultCaFilesMojo extends AbstractMojo
 {
 	@Parameter(defaultValue = "${project.basedir}", readonly = true, required = true)

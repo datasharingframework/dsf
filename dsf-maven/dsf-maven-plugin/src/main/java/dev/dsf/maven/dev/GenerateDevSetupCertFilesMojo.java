@@ -15,7 +15,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import dev.dsf.maven.exception.RuntimeIOException;
 
-@Mojo(name = "generate-dev-setup-cert-files", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true, aggregator = true)
+@Mojo(name = "generate-dev-setup-cert-files", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true, aggregator = true)
 public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 {
 	@Parameter(defaultValue = "${project.basedir}", readonly = true, required = true)
