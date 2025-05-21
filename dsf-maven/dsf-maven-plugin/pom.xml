@@ -123,9 +123,8 @@
 				<artifactId>maven-plugin-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>descriptor-helpmojo</id>
+						<id>helpmojo</id>
 						<goals>
-							<goal>descriptor</goal>
 							<goal>helpmojo</goal>
 						</goals>
 					</execution>
