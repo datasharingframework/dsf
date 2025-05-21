@@ -25,6 +25,10 @@ public class GenerateConfigDocMojo extends AbstractMojo
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
+		getLog().debug("projectBuildDirectory: " + projectBuildDirectory);
+		getLog().debug("compileClasspathElements: " + compileClasspathElements);
+		getLog().debug("configDocPackages: " + configDocPackages);
+
 		new ConfigDocGenerator(projectBuildDirectory, compileClasspathElements)
 				.generateDocumentation(configDocPackages);
 	}

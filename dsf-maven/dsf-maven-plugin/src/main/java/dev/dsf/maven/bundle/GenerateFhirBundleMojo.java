@@ -22,6 +22,9 @@ public class GenerateFhirBundleMojo extends AbstractMojo
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
+		getLog().debug("projectBaseDir: " + projectBaseDir);
+		getLog().debug("baseFolder: " + baseFolder);
+
 		new BundleGenerator(projectBaseDir.toPath(), baseFolder.toPath()).generateAndSaveBundle();
 	}
 }

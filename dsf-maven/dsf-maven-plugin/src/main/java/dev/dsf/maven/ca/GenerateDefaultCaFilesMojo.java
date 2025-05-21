@@ -36,6 +36,13 @@ public class GenerateDefaultCaFilesMojo extends AbstractMojo
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
+		getLog().debug("projectBasedir: " + projectBasedir);
+		getLog().debug("certFolder: " + certFolder);
+		getLog().debug("clientOnlyCaCommonNames: " + clientOnlyCaCommonNames);
+		getLog().debug("clientCertIssuingCaFiles: " + clientCertIssuingCaFiles);
+		getLog().debug("clientCertCaChainFiles: " + clientCertCaChainFiles);
+		getLog().debug("serverCertRootCaFiles: " + serverCertRootCaFiles);
+
 		try
 		{
 			new DefaultCaFilesGenerator(projectBasedir.toPath(), certFolder.toPath(), clientOnlyCaCommonNames)

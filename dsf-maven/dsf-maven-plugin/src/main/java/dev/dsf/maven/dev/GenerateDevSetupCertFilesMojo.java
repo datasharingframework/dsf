@@ -48,7 +48,11 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
+		getLog().debug("projectBasedir: " + projectBasedir);
+		getLog().debug("encoding: " + encoding);
 		getLog().debug("certDir: " + certDir);
+		getLog().debug("privateKeyPassword: "
+				+ (privateKeyPassword == null ? null : !privateKeyPassword.isEmpty() ? "***" : ""));
 		getLog().debug("certs: " + certs);
 		getLog().debug("rootCa: " + rootCa);
 		getLog().debug("issuingCa: " + issuingCa);

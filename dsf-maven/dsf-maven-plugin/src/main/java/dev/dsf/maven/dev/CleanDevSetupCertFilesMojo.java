@@ -19,9 +19,6 @@ public class CleanDevSetupCertFilesMojo extends AbstractMojo
 	@Parameter(defaultValue = "${project.basedir}", readonly = true, required = true)
 	private File projectBasedir;
 
-	@Parameter(defaultValue = "${project.build.sourceEncoding}", readonly = true, required = true)
-	private String encoding;
-
 	@Parameter(required = true, property = "dsf.certDir", defaultValue = "cert")
 	private File certDir;
 
@@ -46,6 +43,7 @@ public class CleanDevSetupCertFilesMojo extends AbstractMojo
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
+		getLog().debug("projectBasedir: " + projectBasedir);
 		getLog().debug("certDir: " + certDir);
 		getLog().debug("certs: " + certs);
 		getLog().debug("rootCa: " + rootCa);
