@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -120,7 +121,7 @@ public class BundleGenerator
 			logger.info("Bundle saved at {}", relativeToProjectDir(bundleFilename));
 
 			Path target = projectBuildDirectory.resolve("classes/fhir/" + BUNDLE_FILENAME);
-			Files.copy(bundleFilename, target);
+			Files.copy(bundleFilename, target, StandardCopyOption.REPLACE_EXISTING);
 			logger.info("Bundle copied to {}", relativeToProjectDir(target));
 		}
 		catch (IOException | TransformerException e)
