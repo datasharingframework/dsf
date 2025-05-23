@@ -29,18 +29,16 @@
 		<plugins>
 			<plugin>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<artifactId>dsf-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<goals>
-							<goal>generate</goal>
+							<goal>generate-config-doc</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<workingPackages>
-						<workingPackage>dev.dsf.bpe.test.spring.config</workingPackage>
-					</workingPackages>
+					<configDocPackages>dev.dsf.bpe.test.spring.config</configDocPackages>
 				</configuration>
 			</plugin>
 		</plugins>

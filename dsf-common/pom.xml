@@ -12,8 +12,10 @@
 	
 	<modules>
 		<module>dsf-common-auth</module>
+		<module>dsf-common-build-info-reader</module>
 		<module>dsf-common-config</module>
 		<module>dsf-common-db</module>
+		<module>dsf-common-docker-secrets-reader</module>
 		<module>dsf-common-documentation</module>
 		<module>dsf-common-jetty</module>
 		<module>dsf-common-status</module>
@@ -58,6 +60,11 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-docker-secrets-reader</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -74,12 +81,6 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-ui</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

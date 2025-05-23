@@ -12,6 +12,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-db</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-documentation</artifactId>
 		</dependency>
 		<dependency>
@@ -21,10 +25,6 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-db-migration</artifactId>
 		</dependency>
 
 		<dependency>
@@ -134,24 +134,51 @@
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+						<fileset>
+							<directory>docker/ca</directory>
+							<includes>
+								<include>*.pem</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker/fhir_proxy/ca</directory>
+							<includes>
+								<include>*.pem</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
 					</filesets>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<artifactId>dsf-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>config-doc</id>
 						<goals>
-							<goal>generate</goal>
+							<goal>generate-config-doc</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-ca-files</id>
+						<goals>
+							<goal>generate-default-ca-files</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<workingPackages>
-						<workingPackage>dev.dsf.common</workingPackage>
-						<workingPackage>dev.dsf.fhir</workingPackage>
-					</workingPackages>
+					<configDocPackages>dev.dsf.common,dev.dsf.fhir</configDocPackages>
+					<clientCertIssuingCaFiles>
+						../../dsf-docker/fhir_proxy/ca/client_cert_issuing_cas.pem
+					</clientCertIssuingCaFiles>
+					<clientCertCaChainFiles>
+						../../dsf-docker/fhir_proxy/ca/client_cert_ca_chains.pem,docker/ca/client_cert_ca_chains.pem
+					</clientCertCaChainFiles>
+					<serverCertRootCaFiles>
+						docker/ca/server_cert_root_cas.pem
+					</serverCertRootCaFiles>
 				</configuration>
 			</plugin>
 		</plugins>
