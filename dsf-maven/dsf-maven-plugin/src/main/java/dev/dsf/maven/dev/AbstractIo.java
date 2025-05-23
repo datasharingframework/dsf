@@ -22,5 +22,4 @@ public abstract class AbstractIo
 			throw new RuntimeIOException(e);
 		}
 	}
-
 }
