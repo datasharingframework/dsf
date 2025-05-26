@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.After;
 import org.junit.Before;
@@ -71,6 +72,9 @@ public class IdentityProviderTest
 	private static final Organization REMOTE_ORGANIZATION = new Organization();
 	private static final X509Certificate REMOTE_ORGANIZATION_CERTIFICATE;
 
+	private static final Endpoint LOCAL_ENDPOINT = new Endpoint();
+	private static final Endpoint REMOTE_ENDPOINT = new Endpoint();
+
 	private static final X509Certificate LOCAL_PRACTITIONER_CERTIFICATE;
 	private static final String LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT;
 
@@ -111,8 +115,8 @@ public class IdentityProviderTest
 				.setValue(REMOTE_ORGANIZATION_IDENTIFIER_VALUE);
 	}
 
-
 	private OrganizationProvider organizationProvider;
+	private EndpointProvider endpointProvider;
 	private RoleConfig roleConfig;
 	private DsfOpenIdCredentials credentials;
 
@@ -120,7 +124,7 @@ public class IdentityProviderTest
 	{
 		when(roleConfig.getEntries()).thenReturn(mappings);
 
-		IdentityProvider provider = new IdentityProviderImpl(roleConfig, organizationProvider,
+		IdentityProvider provider = new IdentityProviderImpl(roleConfig, organizationProvider, endpointProvider,
 				LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
 
 		verify(roleConfig).getEntries();
@@ -142,6 +146,7 @@ public class IdentityProviderTest
 	public void before() throws Exception
 	{
 		organizationProvider = mock(OrganizationProvider.class);
+		endpointProvider = mock(EndpointProvider.class);
 		roleConfig = mock(RoleConfig.class);
 		credentials = mock(DsfOpenIdCredentials.class);
 	}
@@ -150,6 +155,7 @@ public class IdentityProviderTest
 	public void after() throws Exception
 	{
 		verifyNoMoreInteractions(organizationProvider);
+		verifyNoMoreInteractions(endpointProvider);
 	}
 
 	@Test
@@ -177,6 +183,7 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE))
 				.thenReturn(Optional.of(LOCAL_ORGANIZATION));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { LOCAL_ORGANIZATION_CERTIFICATE });
 		assertNotNull(i);
@@ -194,6 +201,7 @@ public class IdentityProviderTest
 
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
+		verify(endpointProvider).getLocalEndpoint();
 
 		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, cArg1.getValue());
 	}
@@ -205,6 +213,8 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(REMOTE_ORGANIZATION_CERTIFICATE))
 				.thenReturn(Optional.of(REMOTE_ORGANIZATION));
+		when(endpointProvider.getEndpoint(REMOTE_ORGANIZATION, REMOTE_ORGANIZATION_CERTIFICATE))
+				.thenReturn(Optional.of(REMOTE_ENDPOINT));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { REMOTE_ORGANIZATION_CERTIFICATE });
 		assertNotNull(i);
@@ -220,10 +230,17 @@ public class IdentityProviderTest
 		assertEquals(REMOTE_ORGANIZATION, orgI.getOrganization());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
-		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
-		verify(organizationProvider).getOrganization(cArg1.capture());
+		ArgumentCaptor<X509Certificate> getOrgArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		verify(organizationProvider).getOrganization(getOrgArg1.capture());
 
-		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, cArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getOrgArg1.getValue());
+
+		ArgumentCaptor<Organization> getEndpArg1 = ArgumentCaptor.forClass(Organization.class);
+		ArgumentCaptor<X509Certificate> getEndpArg2 = ArgumentCaptor.forClass(X509Certificate.class);
+		verify(endpointProvider).getEndpoint(getEndpArg1.capture(), getEndpArg2.capture());
+
+		assertEquals(REMOTE_ORGANIZATION, getEndpArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getEndpArg2.getValue());
 	}
 
 	@Test
@@ -252,6 +269,7 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE)).thenReturn(Optional.empty());
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(FhirServerRole.CREATE));
 		when(roleConfig.getDsfRolesForThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT))
 				.thenReturn(List.of(FhirServerRole.DELETE));
@@ -281,6 +299,7 @@ public class IdentityProviderTest
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 
 		ArgumentCaptor<String> mArg1 = ArgumentCaptor.forClass(String.class);
 		verify(roleConfig).getDsfRolesForEmail(mArg1.capture());
@@ -332,6 +351,7 @@ public class IdentityProviderTest
 		IdentityProvider provider = createIdentityProvider(List.of(createMappingWithEmail(LOCAL_PRACTITIONER_MAIL)));
 
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		when(credentials.getStringClaimOrDefault("family_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_FAMILY);
 		when(credentials.getStringClaimOrDefault("given_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_GIVEN);
@@ -385,6 +405,7 @@ public class IdentityProviderTest
 		assertNotNull(practitionerI.getPractitioner());
 
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 
 		verify(credentials).getIdToken();
 		verify(credentials).getAccessToken();
@@ -428,6 +449,7 @@ public class IdentityProviderTest
 						"groups", new String[] { TOKEN_GROUP }));
 		when(credentials.getUserId()).thenReturn("user-id");
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(credentials);
 		assertNull(i);
@@ -442,6 +464,7 @@ public class IdentityProviderTest
 		verify(credentials).getUserId();
 
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 	}
 
 	@Test
@@ -458,10 +481,12 @@ public class IdentityProviderTest
 				Map.of("resource_access", Map.of(TOKEN_ROLE2_CLIENT, Map.of("roles", new String[] { TOKEN_ROLE2 })),
 						"groups", new String[] { TOKEN_GROUP }));
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.empty());
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.empty());
 
 		Identity i = provider.getIdentity(credentials);
 		assertNull(i);
 
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 	}
 }

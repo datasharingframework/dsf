@@ -4,6 +4,7 @@ import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 
 import dev.dsf.common.auth.conf.DsfRole;
@@ -77,6 +78,17 @@ public class TestOrganizationIdentity implements OrganizationIdentity
 	public Optional<X509Certificate> getCertificate()
 	{
 		throw new UnsupportedOperationException();
+	}
 
+	@Override
+	public Optional<Endpoint> getEndpoint()
+	{
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<String> getEndpointIdentifierValue()
+	{
+		return Optional.empty();
 	}
 }

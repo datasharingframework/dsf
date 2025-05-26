@@ -29,6 +29,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
@@ -71,8 +72,9 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 
 		Optional<Practitioner> practitioner = toPractitioner(credentials);
 		Optional<Organization> localOrganization = getLocalOrganization();
+		Optional<Endpoint> localEndpoint = getLocalEndpoint();
 
-		if (practitioner.isPresent() && localOrganization.isPresent())
+		if (practitioner.isPresent() && localOrganization.isPresent() && localEndpoint.isPresent())
 		{
 			Map<String, Object> parsedIdToken = credentials.getIdToken();
 			Map<String, Object> parsedAccessToken = credentials.getAccessToken();
@@ -91,19 +93,21 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 				return null;
 			}
 
-			return new PractitionerIdentityImpl(localOrganization.get(), dsfRoles, null, practitioner.get(),
-					practitionerRoles, credentials);
+			return new PractitionerIdentityImpl(localOrganization.get(), localEndpoint.get(), dsfRoles, null,
+					practitioner.get(), practitionerRoles, credentials);
 		}
 		else
 		{
 			logger.warn(
-					"User from OpenID Connect token '{}' not configured as local user or local organization unknown",
+					"User from OpenID Connect token '{}' not configured as local user or local organization or local endpoint unknown",
 					credentials.getUserId());
 			return null;
 		}
 	}
 
 	protected abstract Optional<Organization> getLocalOrganization();
+
+	protected abstract Optional<Endpoint> getLocalEndpoint();
 
 	protected final String getThumbprint(X509Certificate certificate)
 	{

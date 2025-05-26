@@ -163,13 +163,19 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 						&& BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
 				.count() == 1;
 
+		Function<StructureDefinition, Optional<String>> getStructureDefinitionBaseDefinition = s -> s
+				.hasBaseDefinitionElement() && s.getBaseDefinitionElement().hasValue()
+						? Optional.of(s.getBaseDefinitionElement().getValue())
+						: Optional.empty();
+
 		return new ProcessPluginFhirConfig<>(ActivityDefinition.class, CodeSystem.class, Library.class, Measure.class,
 				NamingSystem.class, Questionnaire.class, StructureDefinition.class, Task.class, ValueSet.class,
 				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), BpmnMessage.URL,
 				BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName, hasMetadataResourceUrl,
 				hasMetadataResourceVersion, getMetadataResourceVersion, getActivityDefinitionUrl, NamingSystem::hasName,
 				getTaskInstantiatesCanonical, getTaskIdentifierValue, isTaskStatusDraft, getRequester, getRecipient,
-				Task::hasInput, hasTaskInputMessageName, Task::hasOutput);
+				Task::hasInput, hasTaskInputMessageName, Task::hasOutput, getStructureDefinitionBaseDefinition,
+				StructureDefinition::setBaseDefinition);
 	}
 
 	private IParser newXmlParser()

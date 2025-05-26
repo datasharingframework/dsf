@@ -24,5 +24,4 @@ public interface OrganizationProvider
 	Optional<Identity> getLocalOrganizationAsIdentity();
 
 	String getLocalOrganizationIdentifierValue();
-
 }
