@@ -31,7 +31,7 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-task-base-1.0.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
+			List.of("dsf-task-base-2.0.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
 			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"),
 			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"));
 

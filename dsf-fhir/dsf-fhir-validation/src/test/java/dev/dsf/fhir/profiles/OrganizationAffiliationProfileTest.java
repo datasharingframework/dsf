@@ -23,8 +23,8 @@ public class OrganizationAffiliationProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-organization-affiliation-1.0.0.xml", "dsf-organization-1.0.0.xml",
-					"dsf-organization-parent-1.0.0.xml"),
+			List.of("dsf-organization-affiliation-2.0.0.xml", "dsf-organization-2.0.0.xml",
+					"dsf-organization-parent-2.0.0.xml"),
 			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"),
 			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml"));
 
