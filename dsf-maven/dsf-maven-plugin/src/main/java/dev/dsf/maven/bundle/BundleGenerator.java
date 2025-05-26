@@ -283,9 +283,17 @@ public class BundleGenerator
 		return entry ->
 		{
 			Set<String> dependencies = resourcesAndDirectDependencies.get(entry.getKey());
-			return !dependencies.isEmpty() && dependencies.stream()
-					.flatMap(d -> resourcesAndDirectDependencies.get(new EntryAndLabel(null, d)).stream())
-					.allMatch(d -> d.equals(entry.getKey().label));
+			return !dependencies.isEmpty() && dependencies.stream().flatMap(d ->
+			{
+				Set<String> set = resourcesAndDirectDependencies.get(new EntryAndLabel(null, d));
+				if (set == null)
+				{
+					logger.error("Dependency of {} not found: {}", entry.getKey().label, d);
+					throw new RuntimeException("Dependency of " + entry.getKey().label + " not found: " + d);
+				}
+				return set.stream();
+
+			}).allMatch(d -> d.equals(entry.getKey().label));
 		};
 	}
 

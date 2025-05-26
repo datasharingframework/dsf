@@ -638,7 +638,7 @@
 										</sans>
 										<type>SERVER</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.crt</target>
+											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.chain.crt</target>
 											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.key.plain</target>
 										</targets>
 									</cert>
@@ -649,7 +649,7 @@
 										</sans>
 										<type>SERVER</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.crt</target>
+											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.chain.crt</target>
 											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.key.plain</target>
 										</targets>
 									</cert>

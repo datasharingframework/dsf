@@ -6,7 +6,7 @@ services:
     ports:
       - 127.0.0.1:443:443
     secrets:
-      - localhost.crt
+      - localhost.chain.crt
       - localhost.key.plain
       - issuing_ca.crt
       - ca_chain.crt
@@ -88,7 +88,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     secrets:
-      - keycloak.crt
+      - keycloak.chain.crt
       - keycloak.key.plain
       - keycloak_trust_store.jks
     volumes:
@@ -101,7 +101,7 @@ services:
       start
       --hostname keycloak
       --import-realm
-      --https-certificate-file=/run/secrets/keycloak.crt
+      --https-certificate-file=/run/secrets/keycloak.chain.crt
       --https-certificate-key-file=/run/secrets/keycloak.key.plain
       --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
       --spi-truststore-file-password=password
@@ -846,13 +846,13 @@ services:
       internet:
 
 secrets:
-  localhost.crt:
-    file: ./secrets/localhost.crt
+  localhost.chain.crt:
+    file: ./secrets/localhost.chain.crt
   localhost.key.plain:
     file: ./secrets/localhost.key.plain
 
-  keycloak.crt:
-    file: ./secrets/keycloak.crt
+  keycloak.chain.crt:
+    file: ./secrets/keycloak.chain.crt
   keycloak.key.plain:
     file: ./secrets/keycloak.key.plain
   keycloak_trust_store.jks:
