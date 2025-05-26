@@ -66,6 +66,7 @@
 		<element id="OrganizationAffiliation.endpoint">
 			<path value="OrganizationAffiliation.endpoint" />
 			<min value="1" />
+			<max value="1" />
 			<type>
 				<code value="Reference" />
 				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/endpoint|2.0.0" />
