@@ -72,9 +72,8 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 
 		Optional<Practitioner> practitioner = toPractitioner(credentials);
 		Optional<Organization> localOrganization = getLocalOrganization();
-		Optional<Endpoint> localEndpoint = getLocalEndpoint();
 
-		if (practitioner.isPresent() && localOrganization.isPresent() && localEndpoint.isPresent())
+		if (practitioner.isPresent() && localOrganization.isPresent())
 		{
 			Map<String, Object> parsedIdToken = credentials.getIdToken();
 			Map<String, Object> parsedAccessToken = credentials.getAccessToken();
@@ -93,13 +92,15 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 				return null;
 			}
 
-			return new PractitionerIdentityImpl(localOrganization.get(), localEndpoint.get(), dsfRoles, null,
+			Optional<Endpoint> localEndpoint = getLocalEndpoint();
+
+			return new PractitionerIdentityImpl(localOrganization.get(), localEndpoint.orElse(null), dsfRoles, null,
 					practitioner.get(), practitionerRoles, credentials);
 		}
 		else
 		{
 			logger.warn(
-					"User from OpenID Connect token '{}' not configured as local user or local organization or local endpoint unknown",
+					"User from OpenID Connect token '{}' not configured as local user or local organization unknown",
 					credentials.getUserId());
 			return null;
 		}
