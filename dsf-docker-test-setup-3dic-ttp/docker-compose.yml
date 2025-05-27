@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: nginx:1.27
+    image: nginx:1.28
     restart: "no"
     ports:
       - 127.0.0.1:443:443
@@ -79,7 +79,7 @@ services:
         read_only: true
 
   keycloak:
-    image: quay.io/keycloak/keycloak:25.0
+    image: quay.io/keycloak/keycloak:26.2
     restart: "no"
     ports:
       - 127.0.0.1:8443:8443
@@ -99,13 +99,13 @@ services:
       - internet
     command: >-
       start
+      --db dev-file
       --hostname keycloak
       --import-realm
       --https-certificate-file=/run/secrets/keycloak.chain.crt
       --https-certificate-key-file=/run/secrets/keycloak.key.plain
       --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
       --spi-truststore-file-password=password
-      --spi-truststore-file-hostname-verification-policy=DEFAULT
 
   forward-proxy:
     build: ./forward-proxy
