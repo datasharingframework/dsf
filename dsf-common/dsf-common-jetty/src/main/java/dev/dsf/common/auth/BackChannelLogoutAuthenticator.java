@@ -133,6 +133,8 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 			if (sessionBySid != null)
 				sessionBySid.invalidate();
 
+			response.setStatus(HttpStatus.OK_200);
+			response.write(true, null, callback);
 			return AuthenticationState.SEND_SUCCESS;
 		}
 		catch (JWTVerificationException e)
