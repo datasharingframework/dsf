@@ -12,7 +12,7 @@ public class TestOrganizationIdentity extends OrganizationIdentityImpl
 {
 	private TestOrganizationIdentity(boolean localIdentity, Organization organization, Set<? extends DsfRole> roles)
 	{
-		super(localIdentity, organization, null, roles, null); // TODO not null endpoint?
+		super(localIdentity, organization, null, roles, null);
 	}
 
 	public static TestOrganizationIdentity local(Organization organization)
