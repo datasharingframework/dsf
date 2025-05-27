@@ -222,7 +222,10 @@ public class BundleGenerator
 
 		resources.stream().map(EntryAndLabel::label).forEach(l -> logger.debug(l));
 
-		bundle.setEntry(resources.stream().map(EntryAndLabel::entry).toList());
+		List<BundleEntryComponent> finalEntries = new ArrayList<>(
+				bundle.getEntry().stream().filter(Predicate.not(BundleEntryComponent::hasResource)).toList());
+		finalEntries.addAll(resources.stream().map(EntryAndLabel::entry).toList());
+		bundle.setEntry(finalEntries);
 	}
 
 	private static record EntryAndLabel(BundleEntryComponent entry, String label)
