@@ -449,7 +449,6 @@ public class IdentityProviderTest
 						"groups", new String[] { TOKEN_GROUP }));
 		when(credentials.getUserId()).thenReturn("user-id");
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
-		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(credentials);
 		assertNull(i);
@@ -464,7 +463,6 @@ public class IdentityProviderTest
 		verify(credentials).getUserId();
 
 		verify(organizationProvider).getLocalOrganization();
-		verify(endpointProvider).getLocalEndpoint();
 	}
 
 	@Test
@@ -481,12 +479,10 @@ public class IdentityProviderTest
 				Map.of("resource_access", Map.of(TOKEN_ROLE2_CLIENT, Map.of("roles", new String[] { TOKEN_ROLE2 })),
 						"groups", new String[] { TOKEN_GROUP }));
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.empty());
-		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.empty());
 
 		Identity i = provider.getIdentity(credentials);
 		assertNull(i);
 
 		verify(organizationProvider).getLocalOrganization();
-		verify(endpointProvider).getLocalEndpoint();
 	}
 }
