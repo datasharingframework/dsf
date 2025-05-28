@@ -43,7 +43,9 @@ public class CertificateWriter extends AbstractIo
 				.getCertificateAndPrivateKey(cert.getCn());
 		certificateAndPrivateKey.ifPresent(capk -> cert.getTargets().stream().map(File::toPath).forEach(target ->
 		{
-			if (target.getFileName().toString().endsWith(".crt"))
+			if (target.getFileName().toString().endsWith(".chain.crt"))
+				toRuntimeException(() -> writeCertificateChain(cert.getCn(), capk, target));
+			else if (target.getFileName().toString().endsWith(".crt"))
 				toRuntimeException(() -> writeCertificate(cert.getCn(), capk, target));
 			else if (target.getFileName().toString().endsWith(".key"))
 				toRuntimeException(() -> writePrivateKey(cert.getCn(), capk, target));
@@ -109,6 +111,13 @@ public class CertificateWriter extends AbstractIo
 		logger.info("Writing certificate (cn: {}) to {}", cn, projectBasedir.relativize(target));
 
 		PemWriter.writeCertificate(capk.certificate(), target);
+	}
+
+	private void writeCertificateChain(String cn, CertificateAndPrivateKey capk, Path target) throws IOException
+	{
+		logger.info("Writing certificate (cn: {}) and issuingCa to {}", cn, projectBasedir.relativize(target));
+
+		PemWriter.writeCertificates(List.of(capk.certificate(), generator.getIssuingCaCertificate()), true, target);
 	}
 
 	private void writePrivateKey(String cn, CertificateAndPrivateKey capk, Path target) throws IOException
