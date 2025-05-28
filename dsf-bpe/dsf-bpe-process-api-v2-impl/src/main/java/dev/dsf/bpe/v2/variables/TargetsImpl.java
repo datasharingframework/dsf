@@ -67,6 +67,12 @@ public class TargetsImpl implements Targets
 	}
 
 	@Override
+	public int size()
+	{
+		return entries.size();
+	}
+
+	@Override
 	public String toString()
 	{
 		return "TargetsImpl [entries=" + entries + "]";

@@ -18,6 +18,7 @@ import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
+import dev.dsf.bpe.v2.service.TargetProvider;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 
@@ -39,6 +40,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
 	private final CryptoService cryptoService;
+	private final TargetProvider targetProvider;
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
@@ -46,7 +48,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
-			TaskHelper taskHelper, CryptoService cryptoService)
+			TaskHelper taskHelper, CryptoService cryptoService, TargetProvider targetProvider)
 	{
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
@@ -63,6 +65,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.readAccessHelper = readAccessHelper;
 		this.taskHelper = taskHelper;
 		this.cryptoService = cryptoService;
+		this.targetProvider = targetProvider;
 	}
 
 	@Override
@@ -82,6 +85,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 		Objects.requireNonNull(taskHelper, "taskHelper");
 		Objects.requireNonNull(cryptoService, "cryptoService");
+		Objects.requireNonNull(targetProvider, "targetProvider");
 	}
 
 	@Override
@@ -172,5 +176,11 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public CryptoService getCryptoService()
 	{
 		return cryptoService;
+	}
+
+	@Override
+	public TargetProvider getTargetProvider()
+	{
+		return targetProvider;
 	}
 }

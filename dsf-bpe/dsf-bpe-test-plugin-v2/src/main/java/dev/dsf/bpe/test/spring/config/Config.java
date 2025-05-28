@@ -33,6 +33,7 @@ import dev.dsf.bpe.test.service.JsonVariableTestSet;
 import dev.dsf.bpe.test.service.MimetypeServiceTest;
 import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
+import dev.dsf.bpe.test.service.TargetProviderTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
 import dev.dsf.bpe.v2.documentation.ProcessDocumentation;
 import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
@@ -68,7 +69,7 @@ public class Config implements InitializingBean
 				ExceptionTest.class, ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
 				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
 				MimetypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class,
-				DsfClientTest.class);
+				DsfClientTest.class, TargetProviderTest.class);
 	}
 
 	@Bean

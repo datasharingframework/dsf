@@ -49,4 +49,9 @@ public interface Targets
 	 * @return <code>true</code> if the entries list is empty
 	 */
 	boolean isEmpty();
+
+	/**
+	 * @return number of target entries
+	 */
+	int size();
 }
