@@ -2,6 +2,7 @@ package dev.dsf.bpe.v2.variables;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
 
@@ -54,4 +55,10 @@ public interface Targets
 	 * @return number of target entries
 	 */
 	int size();
+
+	/**
+	 * @return {@link Optional} with the first element of the target entries, or {@link Optional#empty()} if
+	 *         {@link Targets#isEmpty()}
+	 */
+	Optional<Target> getFirst();
 }
