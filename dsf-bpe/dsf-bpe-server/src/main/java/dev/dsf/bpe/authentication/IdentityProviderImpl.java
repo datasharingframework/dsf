@@ -4,6 +4,7 @@ import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class IdentityProviderImpl extends AbstractIdentityProvider implements Id
 			Practitioner p = practitioner.get();
 			Organization o = localOrganization.get();
 
-			return new PractitionerIdentityImpl(o, getDsfRolesFor(p, thumbprint, null, null), certificates[0], p,
+			return new PractitionerIdentityImpl(o, null, getDsfRolesFor(p, thumbprint, null, null), certificates[0], p,
 					getPractitionerRolesFor(p, thumbprint, null, null), null);
 		}
 		else
@@ -69,5 +70,11 @@ public class IdentityProviderImpl extends AbstractIdentityProvider implements Id
 					thumbprint, getDn(certificates[0]));
 			return null;
 		}
+	}
+
+	@Override
+	protected Optional<Endpoint> getLocalEndpoint()
+	{
+		return Optional.empty();
 	}
 }

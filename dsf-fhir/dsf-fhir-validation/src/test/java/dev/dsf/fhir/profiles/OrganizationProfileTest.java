@@ -26,8 +26,8 @@ public class OrganizationProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-organization-1.0.0.xml", "dsf-organization-parent-1.0.0.xml",
-					"dsf-extension-certificate-thumbprint-1.0.0.xml", "dsf-endpoint-1.0.0.xml",
+			List.of("dsf-organization-2.0.0.xml", "dsf-organization-parent-2.0.0.xml",
+					"dsf-extension-certificate-thumbprint-2.0.0.xml", "dsf-endpoint-2.0.0.xml",
 					"dsf-extension-read-access-parent-organization-role-1.0.0.xml",
 					"dsf-extension-read-access-organization-1.0.0.xml"),
 			List.of("dsf-read-access-tag-1.0.0.xml"), List.of("dsf-read-access-tag-1.0.0.xml"));
@@ -74,6 +74,34 @@ public class OrganizationProfileTest
 				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	@Test
+	public void testOrganizationProfileHexNotValid() throws Exception
+	{
+		Organization org = new Organization();
+		org.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization");
+		Coding tag = org.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag")
+				.setCode("ORGANIZATION");
+		tag.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization",
+				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("organization.com"));
+		org.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("test.org");
+		org.setActive(true);
+		org.addEndpoint().setReference("Endpoint/" + UUID.randomUUID().toString());
+		org.addEndpoint().setReference("Endpoint/" + UUID.randomUUID().toString());
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(
+						"6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a_Wrong_Characters"));
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(
+						"6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a82a117824a4c430ebTooLong"));
+
+		ValidationResult result = resourceValidator.validate(org);
+		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+
+		assertEquals(2, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 

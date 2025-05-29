@@ -35,7 +35,7 @@ public final class PluginTestExecutor
 	{
 		Arrays.stream(testClass.getClass().getDeclaredMethods())
 				.filter(m -> m.getAnnotationsByType(PluginTest.class).length == 1)
-				.filter(m -> m.getParameterCount() <= testMethodArgs.length).forEach(m ->
+				.filter(m -> m.getParameterCount() <= testMethodArgs.length + 2).forEach(m ->
 				{
 					try
 					{

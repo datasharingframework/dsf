@@ -8,7 +8,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import dev.dsf.common.db.DataSourceWithLogger;
+import dev.dsf.common.db.logging.DataSourceWithLogger;
 
 public abstract class AbstractDbTest
 {

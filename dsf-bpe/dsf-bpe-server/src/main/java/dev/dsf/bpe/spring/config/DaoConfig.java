@@ -14,7 +14,7 @@ import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
 import dev.dsf.bpe.dao.ProcessPluginResourcesDaoJdbc;
 import dev.dsf.bpe.dao.ProcessStateDao;
 import dev.dsf.bpe.dao.ProcessStateDaoJdbc;
-import dev.dsf.common.db.DataSourceWithLogger;
+import dev.dsf.common.db.logging.DataSourceWithLogger;
 
 @Configuration
 public class DaoConfig

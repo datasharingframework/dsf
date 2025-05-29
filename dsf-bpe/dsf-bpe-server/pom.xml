@@ -16,15 +16,7 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-websocket-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-build-info-reader</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-docker-secrets-reader</artifactId>
+			<artifactId>dsf-common-build-info-reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -36,11 +28,15 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-documentation</artifactId>
+			<artifactId>dsf-common-db</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-db</artifactId>
+			<artifactId>dsf-common-docker-secrets-reader</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-documentation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -49,6 +45,10 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-ui</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-websocket-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>

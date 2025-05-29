@@ -3,11 +3,11 @@ package dev.dsf.fhir;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import dev.dsf.common.db.migration.DbMigrator;
 import dev.dsf.common.jetty.JettyServer;
 import dev.dsf.common.jetty.Log4jInitializer;
 import dev.dsf.fhir.config.FhirDbMigratorConfig;
 import dev.dsf.fhir.config.FhirHttpJettyConfig;
-import dev.dsf.tools.db.DbMigrator;
 
 public final class FhirJettyServer
 {

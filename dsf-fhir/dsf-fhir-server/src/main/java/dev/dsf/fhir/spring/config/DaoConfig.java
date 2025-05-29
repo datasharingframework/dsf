@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import dev.dsf.common.db.DataSourceWithLogger;
+import dev.dsf.common.db.logging.DataSourceWithLogger;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.BundleDao;
@@ -124,7 +124,8 @@ public class DaoConfig
 	@Bean
 	public BinaryDao binaryDao()
 	{
-		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				propertiesConfig.getDbUsersGroup());
 	}
 
 	@Bean

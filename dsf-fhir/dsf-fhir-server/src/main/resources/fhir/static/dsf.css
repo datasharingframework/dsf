@@ -1147,6 +1147,19 @@ div.row-text {
 	font-size: 1em;
 }
 
+a#download {
+	background-color: #326F95;
+	color: #fff;
+	padding: 12px 60px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	float: left;
+    border: 1px outset buttonborder;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
 @media print {
 	body {
 		margin: 0;

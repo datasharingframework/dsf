@@ -1,14 +1,10 @@
 package dev.dsf.fhir.authentication;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -17,32 +13,27 @@ import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 
-public class OrganizationProviderImpl implements OrganizationProvider, InitializingBean
+public class OrganizationProviderImpl extends AbstractProvider implements OrganizationProvider, InitializingBean
 {
 	private final OrganizationDao dao;
-	private final ExceptionHandler exceptionHandler;
 	private final String localOrganizationIdentifierValue;
 
-	public OrganizationProviderImpl(OrganizationDao dao, ExceptionHandler exceptionHandler,
+	public OrganizationProviderImpl(ExceptionHandler exceptionHandler, OrganizationDao dao,
 			String localOrganizationIdentifierValue)
 	{
+		super(exceptionHandler);
+
 		this.dao = dao;
-		this.exceptionHandler = exceptionHandler;
 		this.localOrganizationIdentifierValue = localOrganizationIdentifierValue;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(dao, "dao");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(localOrganizationIdentifierValue, "localOrganizationIdentifierValue");
-	}
+		super.afterPropertiesSet();
 
-	private Optional<Organization> getOrganization(String thumbprint)
-	{
-		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
-				() -> dao.readActiveNotDeletedByThumbprint(thumbprint), Optional::empty);
+		Objects.requireNonNull(dao, "dao");
+		Objects.requireNonNull(localOrganizationIdentifierValue, "localOrganizationIdentifierValue");
 	}
 
 	@Override
@@ -52,20 +43,9 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 			return Optional.empty();
 
 		String thumbprint = getThumbprint(certificate);
-		return getOrganization(thumbprint);
-	}
 
-	protected String getThumbprint(X509Certificate certificate)
-	{
-		try
-		{
-			byte[] digest = MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded());
-			return Hex.encodeHexString(digest);
-		}
-		catch (CertificateEncodingException | NoSuchAlgorithmException e)
-		{
-			throw new RuntimeException(e);
-		}
+		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
+				() -> dao.readActiveNotDeletedByThumbprint(thumbprint), Optional::empty);
 	}
 
 	@Override
@@ -84,6 +64,6 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public Optional<Identity> getLocalOrganizationAsIdentity()
 	{
-		return getLocalOrganization().map(o -> new OrganizationIdentityImpl(true, o, List.of(), null));
+		return getLocalOrganization().map(o -> new OrganizationIdentityImpl(true, o, null, List.of(), null));
 	}
 }

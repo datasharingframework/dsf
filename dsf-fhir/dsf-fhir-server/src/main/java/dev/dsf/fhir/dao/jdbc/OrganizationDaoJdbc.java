@@ -68,7 +68,6 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT organization FROM current_organizations WHERE organization->'extension' @> ?::jsonb AND organization->>'active' = 'true'"))
 		{
-
 			String search = "[{\"url\": \"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
 					+ thumbprintHex + "\"}]";
 			statement.setString(1, search);
@@ -110,7 +109,6 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT organization FROM current_organizations WHERE organization->'identifier' @> ?::jsonb AND organization->>'active' = 'true'"))
 		{
-
 			String search = "[{\"system\": \"http://dsf.dev/sid/organization-identifier\", \"value\": \""
 					+ identifierValue + "\"}]";
 			statement.setString(1, search);

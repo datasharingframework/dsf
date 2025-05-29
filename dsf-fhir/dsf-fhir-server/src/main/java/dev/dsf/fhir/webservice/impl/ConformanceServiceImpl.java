@@ -70,6 +70,7 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.common.build.BuildInfoReader;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.SummaryMode;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -182,7 +183,6 @@ import dev.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevIncl
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.ConformanceService;
 import dev.dsf.fhir.websocket.ServerEndpoint;
-import dev.dsf.tools.build.BuildInfoReader;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;

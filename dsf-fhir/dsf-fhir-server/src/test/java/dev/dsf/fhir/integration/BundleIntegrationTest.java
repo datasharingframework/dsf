@@ -5,6 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +23,6 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -356,18 +358,52 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void createBundleInBundle() throws Exception
+	public void createBundleInBundle1() throws Exception
 	{
-		Bundle b = new Bundle().setType(BundleType.BATCHRESPONSE);
-		b.addEntry()
-				.setResource(new Bundle().setType(BundleType.SEARCHSET)
-						.addLink(new BundleLinkComponent().setRelation("self").setUrl("Medication")).setTotal(0))
-				.setResponse(new BundleEntryResponseComponent().setStatus("200"));
-		getReadAccessHelper().addAll(b);
+		StructureDefinition sd = readTestBundleProfile("test-bundle-profile1.xml");
+		getWebserviceClient().create(sd);
 
+		Bundle b = new Bundle().setType(BundleType.BATCH);
+		b.getMeta().addProfile(sd.getUrl() + "|" + sd.getVersion());
+
+		b.addEntry().setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.GET).setUrl("Conset"));
+		b.addEntry().setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.GET).setUrl("Condition"));
+
+		getReadAccessHelper().addAll(b);
 		Bundle created = getWebserviceClient().create(b);
+
 		assertNotNull(created);
 		assertNotNull(created.getIdElement());
 		assertNotNull(created.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void createBundleInBundle2() throws Exception
+	{
+		StructureDefinition sd = readTestBundleProfile("test-bundle-profile2.xml");
+		getWebserviceClient().create(sd);
+
+		Bundle b = new Bundle().setType(BundleType.BATCHRESPONSE);
+		b.getMeta().addProfile(sd.getUrl() + "|" + sd.getVersion());
+
+		BundleEntryComponent e = b.addEntry();
+		e.setResource(new Bundle().setType(BundleType.SEARCHSET).setTotal(0)
+				.addLink(new BundleLinkComponent().setRelation("self").setUrl("Medication")));
+		e.getResponse().setStatus("200");
+
+		getReadAccessHelper().addAll(b);
+		Bundle created = getWebserviceClient().create(b);
+
+		assertNotNull(created);
+		assertNotNull(created.getIdElement());
+		assertNotNull(created.getIdElement().getIdPart());
+	}
+
+	private StructureDefinition readTestBundleProfile(String bundleFile) throws IOException
+	{
+		try (InputStream in = Files.newInputStream(Paths.get("src/test/resources/integration/bundle", bundleFile)))
+		{
+			return fhirContext.newXmlParser().parseResource(StructureDefinition.class, in);
+		}
 	}
 }

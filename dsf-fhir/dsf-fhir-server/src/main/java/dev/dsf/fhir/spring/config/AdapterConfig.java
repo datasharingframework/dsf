@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.adapter.ResourceActivityDefinition;
+import dev.dsf.fhir.adapter.ResourceBinary;
 import dev.dsf.fhir.adapter.ResourceCodeSystem;
 import dev.dsf.fhir.adapter.ResourceEndpoint;
 import dev.dsf.fhir.adapter.ResourceLibrary;
@@ -31,6 +32,7 @@ import dev.dsf.fhir.adapter.ResourceSubscription;
 import dev.dsf.fhir.adapter.ResourceTask;
 import dev.dsf.fhir.adapter.ResourceValueSet;
 import dev.dsf.fhir.adapter.SearchSetActivityDefinition;
+import dev.dsf.fhir.adapter.SearchSetBinary;
 import dev.dsf.fhir.adapter.SearchSetEndpoint;
 import dev.dsf.fhir.adapter.SearchSetMeasureReport;
 import dev.dsf.fhir.adapter.SearchSetMetadataResource;
@@ -66,13 +68,15 @@ public class AdapterConfig
 	@Bean
 	public ThymeleafTemplateService thymeleafTemplateService()
 	{
-		List<ThymeleafContext> thymeleafContexts = List.of(new ResourceActivityDefinition(), new ResourceCodeSystem(),
+		List<ThymeleafContext> thymeleafContexts = List.of(new ResourceActivityDefinition(),
+				new ResourceBinary(propertiesConfig.getDsfServerBaseUrl()), new ResourceCodeSystem(),
 				new ResourceEndpoint(), new ResourceLibrary(), new ResourceMeasure(),
 				new ResourceMeasureReport(propertiesConfig.getDsfServerBaseUrl()), new ResourceNamingSystem(),
 				new ResourceOrganizationAffiliation(), new ResourceOrganization(), new ResourceQuestionnaire(),
 				new ResourceQuestionnaireResponse(), new ResourceStructureDefinition(), new ResourceSubscription(),
 				new ResourceTask(), new ResourceValueSet(),
 				new SearchSetActivityDefinition(propertiesConfig.getDefaultPageCount()),
+				new SearchSetBinary(propertiesConfig.getDefaultPageCount()),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), CodeSystem.class),
 				new SearchSetEndpoint(propertiesConfig.getDefaultPageCount()),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), Library.class),

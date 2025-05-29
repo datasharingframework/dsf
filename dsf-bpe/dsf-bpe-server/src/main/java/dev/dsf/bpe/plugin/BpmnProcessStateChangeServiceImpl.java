@@ -81,10 +81,10 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 		logger.debug("Deploying process models ...");
 		models.forEach(this::deploy);
 
-		Set<ProcessIdAndVersion> loadedProcesses = models.stream().map(BpmnFileAndModel::getProcessIdAndVersion)
+		Set<ProcessIdAndVersion> loadedProcesses = models.stream().map(BpmnFileAndModel::toProcessIdAndVersion)
 				.collect(Collectors.toSet());
-		Set<ProcessIdAndVersion> draft = models.stream().filter(BpmnFileAndModel::isDraft)
-				.map(BpmnFileAndModel::getProcessIdAndVersion).collect(Collectors.toSet());
+		Set<ProcessIdAndVersion> draft = models.stream().filter(BpmnFileAndModel::draft)
+				.map(BpmnFileAndModel::toProcessIdAndVersion).collect(Collectors.toSet());
 
 		List<ProcessDefinition> definitions = repositoryService.createProcessDefinitionQuery().list();
 		for (ProcessDefinition definition : definitions)
@@ -197,18 +197,18 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 
 	private void deploy(BpmnFileAndModel fileAndModel)
 	{
-		ProcessIdAndVersion processKeyAndVersion = fileAndModel.getProcessIdAndVersion();
+		ProcessIdAndVersion processKeyAndVersion = fileAndModel.toProcessIdAndVersion();
 
 		DeploymentBuilder builder = repositoryService.createDeployment().name(processKeyAndVersion.toString())
-				.source(fileAndModel.getFile()).addModelInstance(fileAndModel.getFile(), fileAndModel.getModel())
-				.enableDuplicateFiltering(true).tenantId(String.valueOf(fileAndModel.getProcessPluginApiVersion()));
+				.source(fileAndModel.file()).addModelInstance(fileAndModel.file(), fileAndModel.model())
+				.enableDuplicateFiltering(true).tenantId(String.valueOf(fileAndModel.processPluginApiVersion()));
 
 		Deployment deployment = builder.deploy();
 
 		logger.debug("Process {} from {}://{} deployed with id {}", processKeyAndVersion.toString(),
-				fileAndModel.getJar().toString(), fileAndModel.getFile(), deployment.getId());
+				fileAndModel.jar().toString(), fileAndModel.file(), deployment.getId());
 
-		if (fileAndModel.isDraft())
+		if (fileAndModel.draft())
 		{
 			List<ProcessDefinition> activeDraftDefinitions = repositoryService.createProcessDefinitionQuery()
 					.processDefinitionKey(processKeyAndVersion.getId()).versionTag(processKeyAndVersion.getVersion())

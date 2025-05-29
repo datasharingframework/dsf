@@ -49,10 +49,30 @@ public final class ElementId
 	public static <R extends Resource> ElementId from(R resource, Predicate<R> hasReference,
 			Function<R, Reference> getReference)
 	{
+		return from(resource, hasReference, getReference, false);
+	}
+
+	/**
+	 * @param <R>
+	 *            FHIR resource type
+	 * @param resource
+	 *            may be <code>null</code>
+	 * @param hasReference
+	 *            not <code>null</code>
+	 * @param getReference
+	 *            not <code>null</code>
+	 * @param fullId
+	 *            <code>true</code> to display id with resource-type and version
+	 * @return <code>null</code> if the given <b>resource</b> is <code>null</code>, <b>hasReference</b> returns
+	 *         <code>false</code> or the {@link Reference} provided by <b>getReference</b> has not reference-element
+	 */
+	public static <R extends Resource> ElementId from(R resource, Predicate<R> hasReference,
+			Function<R, Reference> getReference, boolean fullId)
+	{
 		Reference ref = resource != null && hasReference.test(resource) ? getReference.apply(resource) : null;
 		IIdType id = ref != null && ref.hasReferenceElement() ? ref.getReferenceElement() : null;
 
-		return id != null ? ElementId.from(id) : null;
+		return id != null ? ElementId.from(id, fullId) : null;
 	}
 
 	/**
@@ -74,11 +94,25 @@ public final class ElementId
 	 */
 	public static ElementId from(IIdType id)
 	{
+		return from(id, false);
+	}
+
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param fullId
+	 *            <code>true</code> to display id with resource-type and version
+	 * @return
+	 * @throws NullPointerException
+	 *             if the given <b>id</b> is <code>null</code>
+	 */
+	private static ElementId from(IIdType id, boolean fullId)
+	{
 		Objects.requireNonNull(id, "id");
 
-		String href = id.toVersionless().getValue();
+		String href = fullId ? id.toUnqualified().getValue() : id.toVersionless().getValue();
 		String resourceType = id.getResourceType();
-		String value = id.getIdPart();
+		String value = fullId ? id.toUnqualified().getValue() : id.getIdPart();
 
 		return new ElementId(href, resourceType, value);
 	}

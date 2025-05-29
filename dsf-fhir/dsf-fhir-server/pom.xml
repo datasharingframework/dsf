@@ -12,19 +12,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-auth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-fhir-rest-adapter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-webservice-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-build-info-reader</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -32,11 +24,15 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-auth</artifactId>
+			<artifactId>dsf-fhir-webservice-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-auth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-build-info-reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -49,6 +45,10 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-documentation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-docker-secrets-reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>

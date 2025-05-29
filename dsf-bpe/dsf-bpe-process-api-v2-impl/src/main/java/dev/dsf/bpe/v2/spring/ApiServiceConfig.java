@@ -1,8 +1,10 @@
 package dev.dsf.bpe.v2.spring;
 
 import java.util.Locale;
+import java.util.function.Function;
 
 import org.apache.tika.detect.Detector;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +34,7 @@ import dev.dsf.bpe.v2.config.ProxyConfig;
 import dev.dsf.bpe.v2.config.ProxyConfigDelegate;
 import dev.dsf.bpe.v2.listener.ContinueListener;
 import dev.dsf.bpe.v2.listener.EndListener;
+import dev.dsf.bpe.v2.listener.ListenerVariables;
 import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
 import dev.dsf.bpe.v2.service.CryptoService;
@@ -63,7 +66,7 @@ import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelperImpl;
 import dev.dsf.bpe.v2.variables.FhirResourceSerializer;
 import dev.dsf.bpe.v2.variables.FhirResourcesListSerializer;
-import dev.dsf.bpe.v2.variables.JsonVariableSerializer;
+import dev.dsf.bpe.v2.variables.JsonHolderSerializer;
 import dev.dsf.bpe.v2.variables.ObjectMapperFactory;
 import dev.dsf.bpe.v2.variables.TargetSerializer;
 import dev.dsf.bpe.v2.variables.TargetsSerializer;
@@ -89,7 +92,6 @@ public class ApiServiceConfig
 
 	@Autowired
 	private BpeOidcClientProvider bpeOidcClientProvider;
-
 
 	@Bean
 	public ProcessPluginApi processPluginApiV2()
@@ -241,28 +243,34 @@ public class ApiServiceConfig
 	}
 
 	@Bean
-	public JsonVariableSerializer jsonVariableSerializer()
+	public JsonHolderSerializer jsonVariableSerializer()
 	{
-		return new JsonVariableSerializer(objectMapper());
+		return new JsonHolderSerializer();
+	}
+
+	@Bean
+	public Function<DelegateExecution, ListenerVariables> listenerVariablesFactory()
+	{
+		return execution -> new VariablesImpl(execution, objectMapper());
 	}
 
 	@Bean
 	public ExecutionListener startListener()
 	{
-		return new StartListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
+		return new StartListener(dsfClientConfig.getLocalConfig().getBaseUrl(), listenerVariablesFactory());
 	}
 
 	@Bean
 	public ExecutionListener endListener()
 	{
-		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new,
+		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), listenerVariablesFactory(),
 				dsfClientProvider().getLocalDsfClient());
 	}
 
 	@Bean
 	public ExecutionListener continueListener()
 	{
-		return new ContinueListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
+		return new ContinueListener(dsfClientConfig.getLocalConfig().getBaseUrl(), listenerVariablesFactory());
 	}
 
 	@Bean

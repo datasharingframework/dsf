@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
@@ -91,60 +90,57 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 	public AuthenticationState validateRequest(Request request, Response response, Callback callback)
 			throws ServerAuthException
 	{
+
+		Fields formFields = FormFields.getFields(request);
+		Field logoutTokenField = formFields.get("logout_token");
+
+		if (logoutTokenField == null || logoutTokenField.getValues().size() != 1)
+		{
+			Response.writeError(request, response, callback, HttpStatus.FORBIDDEN_403);
+			return AuthenticationState.SEND_FAILURE;
+		}
+
+		Algorithm algorithm = Algorithm.RSA256(openIdConfiguration.getRsaKeyProvider());
+		JWTVerifier verifier = JWT.require(algorithm).withIssuer(openIdConfiguration.getIssuer())
+				.withAudience(openIdConfiguration.getClientId()).acceptLeeway(1)
+				.withClaim("events",
+						(claim, jwt) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
+				.build();
+
 		try
 		{
-			Fields formFields = FormFields.from(request).get();
-			Field logoutTokenField = formFields.get("logout_token");
-
-			if (logoutTokenField == null || logoutTokenField.getValues().size() != 1)
+			DecodedJWT jwt = verifier.verify(logoutTokenField.getValue());
+			if (!jwt.getClaims().containsKey("sub") && !jwt.getClaims().containsKey("sid"))
 			{
-				Response.writeError(request, response, callback, HttpStatus.FORBIDDEN_403);
-				return AuthenticationState.SEND_FAILURE;
-			}
-
-			Algorithm algorithm = Algorithm.RSA256(openIdConfiguration.getRsaKeyProvider());
-			JWTVerifier verifier = JWT.require(algorithm).withIssuer(openIdConfiguration.getIssuer())
-					.withAudience(openIdConfiguration.getClientId()).acceptLeeway(1).withClaim("events", (claim,
-							jwt) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
-					.build();
-
-			try
-			{
-				DecodedJWT jwt = verifier.verify(logoutTokenField.getValue());
-				if (!jwt.getClaims().containsKey("sub") && !jwt.getClaims().containsKey("sid"))
-				{
-					logger.warn("Logout Token has no sub and no sid claim");
-					Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
-					return AuthenticationState.SEND_FAILURE;
-				}
-
-				logger.debug("logout token claims: {}", jwt.getClaims());
-
-				String sub = jwt.getClaim("sub").asString();
-				String sid = jwt.getClaim("sid").asString();
-
-				logger.debug("Invalidating session for sub/sid {}/{}", sub, sid);
-
-				HttpSession sessionBySub = sessionsBySub.get(sub);
-				if (sessionBySub != null)
-					sessionBySub.invalidate();
-
-				// session will have been removed if found by sub and invalidated
-				HttpSession sessionBySid = sessionsBySid.get(sid);
-				if (sessionBySid != null)
-					sessionBySid.invalidate();
-
-				return AuthenticationState.SEND_SUCCESS;
-			}
-			catch (JWTVerificationException e)
-			{
+				logger.warn("Logout Token has no sub and no sid claim");
 				Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
 				return AuthenticationState.SEND_FAILURE;
 			}
+
+			logger.debug("logout token claims: {}", jwt.getClaims());
+
+			String sub = jwt.getClaim("sub").asString();
+			String sid = jwt.getClaim("sid").asString();
+
+			logger.debug("Invalidating session for sub/sid {}/{}", sub, sid);
+
+			HttpSession sessionBySub = sessionsBySub.get(sub);
+			if (sessionBySub != null)
+				sessionBySub.invalidate();
+
+			// session will have been removed if found by sub and invalidated
+			HttpSession sessionBySid = sessionsBySid.get(sid);
+			if (sessionBySid != null)
+				sessionBySid.invalidate();
+
+			response.setStatus(HttpStatus.OK_200);
+			response.write(true, null, callback);
+			return AuthenticationState.SEND_SUCCESS;
 		}
-		catch (InterruptedException | ExecutionException e)
+		catch (JWTVerificationException e)
 		{
-			throw new ServerAuthException(e);
+			Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
+			return AuthenticationState.SEND_FAILURE;
 		}
 	}
 

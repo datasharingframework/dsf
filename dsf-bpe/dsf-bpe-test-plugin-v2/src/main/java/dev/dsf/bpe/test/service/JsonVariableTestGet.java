@@ -25,8 +25,8 @@ public class JsonVariableTestGet extends AbstractTest implements ServiceTask
 		JsonPojo variable = variables.getVariable(JsonVariableTestSet.JSON_VARIABLE);
 
 		expectNotNull(variable);
-		expectSame(JsonVariableTestSet.TEST_VALUE_1, variable.getValue1());
-		expectSame(JsonVariableTestSet.TEST_VALUE_2, variable.getValue2());
+		expectSame(JsonVariableTestSet.TEST_VALUE_1, variable.value1());
+		expectSame(JsonVariableTestSet.TEST_VALUE_2, variable.value2());
 	}
 
 	@PluginTest

@@ -11,13 +11,13 @@
 	</parent>
 
 	<modules>
+		<module>dsf-fhir-auth</module>
 		<module>dsf-fhir-rest-adapter</module>
 		<module>dsf-fhir-server</module>
 		<module>dsf-fhir-server-jetty</module>
+		<module>dsf-fhir-validation</module>
 		<module>dsf-fhir-webservice-client</module>
 		<module>dsf-fhir-websocket-client</module>
-		<module>dsf-fhir-validation</module>
-		<module>dsf-fhir-auth</module>
 	</modules>
 	
 	<properties>
@@ -43,69 +43,12 @@
 		<dependencies>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-auth</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-rest-adapter</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-server-jetty</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-validation</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-webservice-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-websocket-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-db-migration</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-bundle-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-build-info-reader</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-documentation-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			
-			<dependency>
-				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-build-info-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -116,6 +59,11 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-db</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-docker-secrets-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -136,6 +84,43 @@
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-rest-adapter</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-validation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-webservice-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-websocket-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-tools-bundle-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

@@ -89,11 +89,6 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-server-jetty</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-test-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -107,42 +102,15 @@
 				<artifactId>dsf-bpe-test-plugin-v2</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-websocket-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-db-migration</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-build-info-reader</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-documentation-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
+			
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-build-info-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -152,12 +120,17 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-common-documentation</artifactId>
+				<artifactId>dsf-common-db</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-common-db</artifactId>
+				<artifactId>dsf-common-docker-secrets-reader</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -178,10 +151,13 @@
 
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-process-base</artifactId>
+				<artifactId>dsf-fhir-server</artifactId>
 				<version>${project.version}</version>
-				<scope>test</scope>
-				<type>test-jar</type>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-websocket-client</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

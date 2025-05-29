@@ -44,4 +44,20 @@ public class BinaryServiceSecure extends AbstractResourceServiceSecure<BinaryDao
 	{
 		throw new UnsupportedOperationException("Implemented and delegated by jaxrs layer");
 	}
+
+	@Override
+	public Response readHead(String id, UriInfo uri, HttpHeaders headers)
+	{
+		Response read = delegate.readHead(id, uri, headers);
+
+		return checkRead(read);
+	}
+
+	@Override
+	public Response vreadHead(String id, long version, UriInfo uri, HttpHeaders headers)
+	{
+		Response read = delegate.vreadHead(id, version, uri, headers);
+
+		return checkRead(read);
+	}
 }
