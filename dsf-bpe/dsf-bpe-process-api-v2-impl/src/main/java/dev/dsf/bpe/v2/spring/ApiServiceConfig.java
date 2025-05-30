@@ -58,6 +58,8 @@ import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelperImpl;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelperImpl;
+import dev.dsf.bpe.v2.service.TargetProvider;
+import dev.dsf.bpe.v2.service.TargetProviderImpl;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.TaskHelperImpl;
 import dev.dsf.bpe.v2.service.detector.CombinedDetectors;
@@ -99,7 +101,7 @@ public class ApiServiceConfig
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
 				fhirClientProvider(), oidcClientProvider(), mailService(), mimetypeService(), objectMapper(),
 				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
-				taskHelper(), cryptoService());
+				taskHelper(), cryptoService(), targetProvider());
 	}
 
 	@Bean
@@ -284,5 +286,11 @@ public class ApiServiceConfig
 	public CryptoService cryptoService()
 	{
 		return new CryptoServiceImpl();
+	}
+
+	@Bean
+	public TargetProvider targetProvider()
+	{
+		return new TargetProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
 	}
 }

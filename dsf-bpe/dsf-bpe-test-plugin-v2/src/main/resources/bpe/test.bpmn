@@ -38,6 +38,7 @@
       <bpmn:outgoing>Flow_151zxir</bpmn:outgoing>
       <bpmn:outgoing>Flow_1bo772x</bpmn:outgoing>
       <bpmn:outgoing>Flow_1gipugc</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1wjdaz2</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
     <bpmn:sequenceFlow id="Flow_14rzc0j" sourceRef="Gateway_0eszi2t" targetRef="ProxyTest">
@@ -64,6 +65,7 @@
       <bpmn:incoming>Flow_1ic3b4h</bpmn:incoming>
       <bpmn:incoming>Flow_01nnroq</bpmn:incoming>
       <bpmn:incoming>Flow_04z1f6i</bpmn:incoming>
+      <bpmn:incoming>Flow_0w963xd</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_08zzudo" sourceRef="ProxyTest" targetRef="Gateway_056f6tw" />
@@ -290,6 +292,14 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'DsfClientTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_04z1f6i" sourceRef="DsfClientTest" targetRef="Gateway_056f6tw" />
+    <bpmn:serviceTask id="TargetProviderTest" name="TargetProviderTest" camunda:class="dev.dsf.bpe.test.service.TargetProviderTest">
+      <bpmn:incoming>Flow_1wjdaz2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0w963xd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0w963xd" sourceRef="TargetProviderTest" targetRef="Gateway_056f6tw" />
+    <bpmn:sequenceFlow id="Flow_1wjdaz2" sourceRef="Gateway_0eszi2t" targetRef="TargetProviderTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'TargetProviderTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />
   <bpmn:message id="Message_2iq6v5e" name="proxyTest" />
@@ -411,6 +421,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0og1ky5" bpmnElement="DsfClientTest">
         <dc:Bounds x="480" y="1830" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1jxi9cb" bpmnElement="TargetProviderTest">
+        <dc:Bounds x="480" y="1940" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1w9i7ga_di" bpmnElement="Event_1dnlmzp">
@@ -633,6 +647,16 @@
         <di:waypoint x="580" y="1870" />
         <di:waypoint x="1180" y="1870" />
         <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0w963xd_di" bpmnElement="Flow_0w963xd">
+        <di:waypoint x="580" y="1980" />
+        <di:waypoint x="1180" y="1980" />
+        <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wjdaz2_di" bpmnElement="Flow_1wjdaz2">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="1980" />
+        <di:waypoint x="480" y="1980" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

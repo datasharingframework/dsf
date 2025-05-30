@@ -222,4 +222,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 
 		executePluginTest(createTestTask("DsfClientTest"));
 	}
+
+	@Test
+	public void startTargetProviderTest() throws Exception
+	{
+		executePluginTest(createTestTask("TargetProviderTest"));
+	}
 }
