@@ -1,0 +1,1 @@
+Empty `cert` directory, will contain test certificates after executing `mvn dsf:generate-dev-setup-cert-files`
