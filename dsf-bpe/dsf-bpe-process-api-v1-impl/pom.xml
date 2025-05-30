@@ -138,10 +138,10 @@
 									<artifactId>xpp3_xpath</artifactId>
 									<version>1.1.4c</version>
 								</artifactItem>-->
-								<artifactItem>
+								<!--<artifactItem>
 									<groupId>org.apache.commons</groupId>
 									<artifactId>commons-compress</artifactId>
-								</artifactItem>
+								</artifactItem>-->
 								<artifactItem>
 									<groupId>org.fhir</groupId>
 									<artifactId>ucum</artifactId>

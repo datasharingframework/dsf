@@ -427,7 +427,7 @@ public class PropertiesConfig implements InitializingBean
 		try
 		{
 			X509Certificate clientCertiticate = PemReader.readCertificate(Paths.get(getDsfClientCertificateFile()));
-			CertificateValidator.vaildateClientCertificate(getDsfClientTrustedClientCas(), clientCertiticate);
+			CertificateValidator.validateClientCertificate(getDsfClientTrustedClientCas(), clientCertiticate);
 		}
 		catch (CertificateException e)
 		{

@@ -223,7 +223,7 @@ public class PropertiesConfig implements InitializingBean
 			List<X509Certificate> certificates = PemReader
 					.readCertificates(Paths.get(getDsfClientTrustedClientCasFile()));
 			KeyStore dsfClientTrustedClientCas = KeyStoreCreator.jksForTrustedCertificates(certificates);
-			CertificateValidator.vaildateClientCertificate(dsfClientTrustedClientCas, clientCertiticate);
+			CertificateValidator.validateClientCertificate(dsfClientTrustedClientCas, clientCertiticate);
 		}
 		catch (CertificateException e)
 		{

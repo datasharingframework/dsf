@@ -54,9 +54,9 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 		LargeObject largeObject = getLargeObjectManager(connection).open(oid);
 		try (inputStream; OutputStream outputStream = largeObject.getOutputStream())
 		{
-			logger.info("Writing to large object '{}' ...", oid);
+			logger.debug("Writing to large object '{}' ...", oid);
 			long size = copy(inputStream, outputStream);
-			logger.info("Writing to large object '{}' [Done, {} bytes]", oid, size);
+			logger.debug("Writing to large object '{}' [Done, {} bytes]", oid, size);
 
 			return new OidAndSize(oid, size);
 		}

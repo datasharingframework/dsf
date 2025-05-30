@@ -157,7 +157,7 @@ public class CryptoServiceImpl implements CryptoService
 		Objects.requireNonNull(trustStore, "trustStore");
 		Objects.requireNonNull(certificateChain, "certificateChain");
 
-		CertificateValidator.vaildateClientCertificate(trustStore, certificateChain);
+		CertificateValidator.validateClientCertificate(trustStore, certificateChain);
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class CryptoServiceImpl implements CryptoService
 		Objects.requireNonNull(trustStore, "trustStore");
 		Objects.requireNonNull(certificateChain, "certificateChain");
 
-		CertificateValidator.vaildateServerCertificate(trustStore, certificateChain);
+		CertificateValidator.validateServerCertificate(trustStore, certificateChain);
 	}
 
 	@Override
