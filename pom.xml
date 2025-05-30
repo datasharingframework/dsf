@@ -31,7 +31,7 @@
 		<camunda.version>7.23.0</camunda.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.2.0</hapi.fhir.version.v2>
-		<hapi.fhir.org.hl7.version.v2>6.4.0</hapi.fhir.org.hl7.version.v2>
+		<hapi.fhir.org.hl7.version.v2>6.5.18</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>8.2.0</hapi.fhir.version>
 		<bouncycastle.version>1.80</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
