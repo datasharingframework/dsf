@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Questionnaire;
