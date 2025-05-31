@@ -452,6 +452,18 @@ pre.lang-html {
 	border-left-color: var(--color-row-border-grey);
 }
 
+.bundle>#list>table tr[resource-type="DocumentReference"] td[status="current"] {
+	border-left-color: var(--color-row-border-green);
+}
+
+.bundle>#list>table tr[resource-type="DocumentReference"] td[status="superseded"] {
+	border-left-color: var(--color-row-border-grey);
+}
+
+.bundle>#list>table tr[resource-type="DocumentReference"] td[status="entered-in-error"] {
+	border-left-color: var(--color-row-border-red);
+}
+
 .bundle>#list>table tr[resource-type="Endpoint"] td[status="active"] {
 	border-left-color: var(--color-row-border-green);
 }
@@ -639,6 +651,21 @@ pre.lang-html {
 	color: var(--color-info-grey);
 }
 
+#resource[resource-type="DocumentReference"][status="current"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="DocumentReference"][status="superseded"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="DocumentReference"][status="entered-in-error"] #base-data {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
 #resource[resource-type="Endpoint"][status="active"] #base-data {
 	background-color: var(--color-info-background-green);
 	color: var(--color-info-green);
@@ -798,6 +825,18 @@ pre.lang-html {
 #resource[resource-type="StructureDefinition"][status="retired"] #base-data path,
 #resource[resource-type="ValueSet"][status="retired"] #base-data path {
 	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="DocumentReference"][status="current"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="DocumentReference"][status="superseded"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="DocumentReference"][status="entered-in-error"] #base-data path {
+	fill: var(--color-info-red);
 }
 
 #resource[resource-type="Endpoint"][status="active"] #base-data path {
