@@ -20,6 +20,8 @@
 		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
 
+	<name>DSF Maven Parent POM</name>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

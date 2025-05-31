@@ -40,7 +40,7 @@
 		<apache.tika.version>3.2.0</apache.tika.version>
 	</properties>
 
-	<name>DSF</name>
+	<name>DSF Parent POM</name>
 	<description>Data Sharing Framework (DSF)</description>
 	<url>https://dsf.dev</url>
 
