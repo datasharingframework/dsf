@@ -9,6 +9,8 @@
 		<version>1.8.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF Tools Docker Secrets Reader</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>

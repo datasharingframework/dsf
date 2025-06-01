@@ -9,6 +9,8 @@
 		<version>1.8.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF Tools Test Data Generator</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
@@ -32,7 +34,7 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>

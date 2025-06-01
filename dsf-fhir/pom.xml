@@ -19,10 +19,12 @@
 		<module>dsf-fhir-validation</module>
 		<module>dsf-fhir-auth</module>
 	</modules>
-	
+
 	<properties>
 		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
+
+	<name>DSF FHIR Parent POM</name>
 
 	<dependencies>
 		<!-- Logging -->
@@ -107,7 +109,7 @@
 				<artifactId>dsf-tools-documentation-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-auth</artifactId>

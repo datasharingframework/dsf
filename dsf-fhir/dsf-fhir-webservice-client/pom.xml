@@ -9,6 +9,8 @@
 		<version>1.8.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF FHIR Webservice Client</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>

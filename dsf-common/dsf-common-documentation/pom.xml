@@ -8,4 +8,6 @@
 		<artifactId>dsf-common-pom</artifactId>
 		<version>1.8.0-SNAPSHOT</version>
 	</parent>
+
+	<name>DSF Common Documentation</name>
 </project>

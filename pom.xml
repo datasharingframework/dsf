@@ -33,7 +33,7 @@
 		<bouncycastle.version>1.80</bouncycastle.version>
 	</properties>
 
-	<name>DSF</name>
+	<name>DSF Parent POM</name>
 	<description>Data Sharing Framework (DSF)</description>
 	<url>https://dsf.dev</url>
 
