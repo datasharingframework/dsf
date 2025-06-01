@@ -6,8 +6,10 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-common-pom</artifactId>
-		<version>1.7.1</version>
+		<version>1.8.0</version>
 	</parent>
+
+	<name>DSF Common DB</name>
 
 	<dependencies>
 		<dependency>

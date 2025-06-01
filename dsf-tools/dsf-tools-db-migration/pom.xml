@@ -6,8 +6,10 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-tools-pom</artifactId>
-		<version>1.7.1</version>
+		<version>1.8.0</version>
 	</parent>
+
+	<name>DSF Tools DB Migration</name>
 
 	<dependencies>
 		<dependency>

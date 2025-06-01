@@ -1,4 +1,4 @@
-name: Java CI Publish with Maven
+name: DSF 1.x Java CI Publish with Maven
 
 on:
   pull_request:
@@ -25,4 +25,4 @@ jobs:
       - name: Publish with Maven
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn --batch-mode --fail-at-end --threads 1C -DforkCount=2 -Dgpg.skip clean deploy
+        run: mvn --batch-mode --fail-at-end --threads 1C -DforkCount=2 clean deploy
