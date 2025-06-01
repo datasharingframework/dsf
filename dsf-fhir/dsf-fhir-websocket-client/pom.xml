@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>1.8.0-SNAPSHOT</version>
+		<version>1.8.0</version>
 	</parent>
 
 	<name>DSF FHIR Websocket Client</name>
