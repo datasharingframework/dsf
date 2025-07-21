@@ -316,7 +316,7 @@ public class ProcessPluginImplTest
 		List<BpmnFileAndModel> models = plugin.getProcessModels();
 		assertEquals(1, models.size());
 		BpmnFileAndModel bpmnFileAndModel = models.get(0);
-		BpmnModelInstance model = bpmnFileAndModel.getModel();
+		BpmnModelInstance model = bpmnFileAndModel.model();
 		assertNotNull(model);
 
 		Collection<Process> processes = model.getModelElementsByType(Process.class);

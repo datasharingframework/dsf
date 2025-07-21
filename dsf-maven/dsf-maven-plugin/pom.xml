@@ -12,6 +12,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF Maven Plugin</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>

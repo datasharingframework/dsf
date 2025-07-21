@@ -23,24 +23,24 @@
 
 		<slf4j.version>2.0.17</slf4j.version>
 		<log4j.version>2.24.3</log4j.version>
-		<jetty.version>12.0.18</jetty.version>
+		<jetty.version>12.0.21</jetty.version>
 		<jersey.version>3.1.10</jersey.version>
 		<tyrus.version>2.2.0</tyrus.version>
-		<spring.version>6.2.5</spring.version>
-		<jackson.version>2.18.3</jackson.version>
-		<camunda.version>7.22.0</camunda.version>
+		<spring.version>6.2.7</spring.version>
+		<jackson.version>2.19.0</jackson.version>
+		<camunda.version>7.23.0</camunda.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
-		<hapi.fhir.version.v2>8.0.0</hapi.fhir.version.v2>
-		<hapi.fhir.org.hl7.version.v2>6.4.0</hapi.fhir.org.hl7.version.v2>
-		<hapi.fhir.version>8.0.0</hapi.fhir.version>
+		<hapi.fhir.version.v2>8.2.0</hapi.fhir.version.v2>
+		<hapi.fhir.org.hl7.version.v2>6.5.18</hapi.fhir.org.hl7.version.v2>
+		<hapi.fhir.version>8.2.0</hapi.fhir.version>
 		<bouncycastle.version>1.80</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
-		<crypto-utils.version.v2>5.0.0</crypto-utils.version.v2>
-		<crypto-utils.version>5.0.0</crypto-utils.version>
-		<apache.tika.version>3.1.0</apache.tika.version>
+		<crypto-utils.version.v2>5.1.0</crypto-utils.version.v2>
+		<crypto-utils.version>5.1.0</crypto-utils.version>
+		<apache.tika.version>3.2.0</apache.tika.version>
 	</properties>
 
-	<name>DSF</name>
+	<name>DSF Parent POM</name>
 	<description>Data Sharing Framework (DSF)</description>
 	<url>https://dsf.dev</url>
 
@@ -141,7 +141,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>5.16.1</version>
+				<version>5.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -163,13 +163,12 @@
 			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
-				<version>4.31.1</version>
+				<version>4.32.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<!-- 42.7.4 https://github.com/pgjdbc/pgjdbc/issues/3365 -->
-				<version>42.7.3</version>
+				<version>42.7.6</version>
 			</dependency>
 
 			<!-- hhn rwh -->
@@ -387,7 +386,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.13.0</version>
+				<version>1.13.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -407,12 +406,12 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>33.4.6-jre</version>
+				<version>33.4.8-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.12.1</version>
+				<version>2.13.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
@@ -423,7 +422,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.18.0</version>
+				<version>2.19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -516,12 +515,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.5.2</version>
+					<version>3.5.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.5.2</version>
+					<version>3.5.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -542,12 +541,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
 					<version>3.2.7</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<!-- 3.3.0 not working, https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -638,7 +631,7 @@
 										</sans>
 										<type>SERVER</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.crt</target>
+											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.chain.crt</target>
 											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.key.plain</target>
 										</targets>
 									</cert>
@@ -649,7 +642,7 @@
 										</sans>
 										<type>SERVER</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.crt</target>
+											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.chain.crt</target>
 											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.key.plain</target>
 										</targets>
 									</cert>
@@ -1111,6 +1104,30 @@
 
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>

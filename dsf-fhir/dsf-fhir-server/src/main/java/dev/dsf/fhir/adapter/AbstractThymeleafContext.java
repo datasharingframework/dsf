@@ -18,8 +18,10 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
@@ -134,6 +136,12 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 		return formatDateTime(getValue(resource, hasDateTime, getDateTime));
 	}
 
+	protected final <E extends Base> String getInstant(E resource, Predicate<E> hasInstant,
+			Function<E, InstantType> getInstant)
+	{
+		return formatDateTime(getValue(resource, hasInstant, getInstant));
+	}
+
 	protected final <E extends Base> Boolean getBoolean(E resource, Predicate<E> hasBoolean,
 			Function<E, BooleanType> getBoolean)
 	{
@@ -175,6 +183,19 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 		return e != null && e.hasCode() ? e.getCode() : null;
 	}
 
+	protected final <E extends Base> ElementSystemValue getIdentifier(E resource, Predicate<E> hasIdentifier,
+			Function<E, Identifier> getIdentifier)
+	{
+		Objects.requireNonNull(hasIdentifier, "hasIdentifier");
+		Objects.requireNonNull(getIdentifier, "getIdentifier");
+
+		if (resource == null || !hasIdentifier.test(resource))
+			return null;
+
+		Identifier identifier = getIdentifier.apply(resource);
+		return identifier != null ? ElementSystemValue.from(identifier) : null;
+	}
+
 	protected final <E extends Base> List<ElementSystemValue> getIdentifiers(E resource, Predicate<E> hasIdentifier,
 			Function<E, List<Identifier>> getIdentifier)
 	{
@@ -186,5 +207,21 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 
 		List<Identifier> identifier = getIdentifier.apply(resource);
 		return identifier != null ? identifier.stream().map(ElementSystemValue::from).toList() : null;
+	}
+
+	protected final <E extends Base> List<ElementSystemValue> getReferenceIdentifiers(E resource,
+			Predicate<E> hasReference, Function<E, List<Reference>> getReference)
+	{
+		Objects.requireNonNull(hasReference, "hasReference");
+		Objects.requireNonNull(getReference, "getReference");
+
+		if (resource == null || !hasReference.test(resource))
+			return null;
+
+		List<Reference> references = getReference.apply(resource);
+		return references != null
+				? references.stream().filter(Reference::hasIdentifier).map(Reference::getIdentifier)
+						.map(ElementSystemValue::from).toList()
+				: null;
 	}
 }

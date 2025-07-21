@@ -75,6 +75,21 @@
 				</li>
 			</ul>
 		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="attachments">
+			<label>Attachments</label>
+			<ul th:if="${attachments}" th:each="a : ${attachments}">
+				<li class="attachments">
+					<th:block th:if="${a.url != null and a.contentType != null}">
+						<a href="#" title="Open" th:href="${a.url}" th:title="'Open ' + ${a.url}" th:text="${a.url} + ' (' + ${a.contentType} + ')'">url</a>
+					</th:block>
+					<th:block th:if="${a.url != null and a.contentType == null}">
+						<a href="#" title="Open" th:href="${a.url}" th:title="'Open ' + ${a.url}" th:text="${a.url}">url</a>
+					</th:block>
+				</li>
+			</ul>
+		</div>
+
 		<i th:fragment="additionalValuesComment">See json or xml for additional values.</i>
 	</div>
 </body>

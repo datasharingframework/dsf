@@ -8,7 +8,9 @@
 		<artifactId>dsf-bpe-pom</artifactId>
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
-	
+
+	<name>DSF BPE Test Plugin v2</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -19,7 +21,7 @@
 			<artifactId>dsf-bpe-process-api-v2</artifactId>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>

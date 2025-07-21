@@ -127,7 +127,9 @@ function getInitialBookmarks() {
 	return {
 		'$_misc': ['metadata'],
 		'$ActivityDefinition': ['ActivityDefinition', "ActivityDefinition?_sort=status,url,version"],
+		'$Binary': ['Binary'],
 		'$CodeSystem': ['CodeSystem'],
+		'$DocumentReference': ['DocumentReference'],
 		'$Endpoint': ['Endpoint'],
 		'$NamingSystem': ['NamingSystem'],
 		'$Library': ['Library'],

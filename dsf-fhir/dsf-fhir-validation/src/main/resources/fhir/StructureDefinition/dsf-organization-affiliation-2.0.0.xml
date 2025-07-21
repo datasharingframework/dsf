@@ -1,0 +1,80 @@
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/organization-affiliation" />
+	<version value="2.0.0" />
+	<name value="OrganizationAffiliation" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-05-26" />
+	<fhirVersion value="4.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="OrganizationAffiliation" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="OrganizationAffiliation.active">
+			<path value="OrganizationAffiliation.active" />
+			<min value="1" />
+		</element>
+		<element id="OrganizationAffiliation.organization">
+			<path value="OrganizationAffiliation.organization" />
+			<min value="1" />
+			<type>
+				<code value="Reference" />
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization-parent|2.0.0" />
+			</type>
+		</element>
+		<element id="OrganizationAffiliation.organization.reference">
+			<path value="OrganizationAffiliation.organization.reference" />
+			<min value="1" />
+		</element>
+		<element id="OrganizationAffiliation.participatingOrganization">
+			<path value="OrganizationAffiliation.participatingOrganization" />
+			<min value="1" />
+			<type>
+				<code value="Reference" />
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization|2.0.0" />
+			</type>
+		</element>
+		<element id="OrganizationAffiliation.participatingOrganization.reference">
+			<path value="OrganizationAffiliation.participatingOrganization.reference" />
+			<min value="1" />
+		</element>
+		<element id="OrganizationAffiliation.code">
+			<path value="OrganizationAffiliation.code" />
+			<min value="1" />
+		</element>
+		<element id="OrganizationAffiliation.code.coding">
+			<path value="OrganizationAffiliation.code.coding" />
+			<min value="1" />
+		</element>
+		<element id="OrganizationAffiliation.code.coding.system">
+			<path value="OrganizationAffiliation.code.coding.system" />
+			<min value="1" />
+		</element>
+		<element id="OrganizationAffiliation.code.coding.code">
+			<path value="OrganizationAffiliation.code.coding.code" />
+			<min value="1" />
+		</element>
+		<element id="OrganizationAffiliation.endpoint">
+			<path value="OrganizationAffiliation.endpoint" />
+			<min value="1" />
+			<max value="1" />
+			<type>
+				<code value="Reference" />
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/endpoint|2.0.0" />
+			</type>
+		</element>
+		<element id="OrganizationAffiliation.endpoint.reference">
+			<path value="OrganizationAffiliation.endpoint.reference" />
+			<min value="1" />
+		</element>
+	</differential>
+</StructureDefinition>
