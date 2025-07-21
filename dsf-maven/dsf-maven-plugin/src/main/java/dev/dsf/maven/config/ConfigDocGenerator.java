@@ -3,7 +3,9 @@ package dev.dsf.maven.config;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -12,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -38,8 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import dev.dsf.common.documentation.Documentation;
-
 public class ConfigDocGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigDocGenerator.class);
@@ -55,16 +54,55 @@ public class ConfigDocGenerator
 	}
 
 	private final Path projectBuildDirectory;
-	private final List<String> compileClasspathElements = new ArrayList<>();
+	private final URLClassLoader classLoader;
+	private final Class<? extends Annotation> coreDocumentationAnnotationClass;
 
 	public ConfigDocGenerator(Path projectBuildDirectory, List<String> compileClasspathElements)
 	{
 		Objects.requireNonNull(projectBuildDirectory, "projectBuildDirectory");
 
 		this.projectBuildDirectory = projectBuildDirectory;
+		classLoader = classLoader(compileClasspathElements);
+		coreDocumentationAnnotationClass = loadCoreDocumentationAnnotation(classLoader);
+	}
 
-		if (compileClasspathElements != null)
-			this.compileClasspathElements.addAll(compileClasspathElements);
+	private static URLClassLoader classLoader(List<String> compileClasspathElements)
+	{
+		URL[] classpathElements = compileClasspathElements.stream().map(ConfigDocGenerator::toUrl)
+				.filter(Objects::nonNull).toArray(URL[]::new);
+
+		return new URLClassLoader(classpathElements, Thread.currentThread().getContextClassLoader());
+	}
+
+	private static URL toUrl(String path)
+	{
+		try
+		{
+			return new File(path).toURI().toURL();
+		}
+		catch (MalformedURLException exception)
+		{
+			logger.warn("Could not transform path '{}' to url, returning null - {}", path, exception.getMessage());
+			return null;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Annotation> loadCoreDocumentationAnnotation(URLClassLoader classLoader)
+	{
+		try
+		{
+			Class<?> clazz = classLoader.loadClass("dev.dsf.common.documentation.Documentation");
+			if (clazz.isAnnotation())
+				return (Class<? extends Annotation>) clazz;
+		}
+		catch (ClassNotFoundException e)
+		{
+			logger.info(
+					"DSF core documentation annotation not found on classpath, for process plugins this is not an error");
+		}
+
+		return null;
 	}
 
 	public void generateDocumentation(List<String> configDocPackages)
@@ -79,12 +117,14 @@ public class ConfigDocGenerator
 
 		moveExistingToBackup(file);
 
-		URLClassLoader classLoader = classLoader();
 		Reflections reflections = createReflections(classLoader, configDocPackage);
 
-		Set<Field> dsfFields = reflections.getFieldsAnnotatedWith(Documentation.class);
-		if (!dsfFields.isEmpty())
-			writeFields(dsfFields, dsfDocumentationGenerator(), file, configDocPackage);
+		if (coreDocumentationAnnotationClass != null)
+		{
+			Set<Field> dsfFields = reflections.getFieldsAnnotatedWith(coreDocumentationAnnotationClass);
+			if (!dsfFields.isEmpty())
+				writeFields(dsfFields, dsfDocumentationGenerator(), file, configDocPackage);
+		}
 
 		// v1
 		Set<Field> processFieldsV1 = reflections
@@ -115,27 +155,6 @@ public class ConfigDocGenerator
 				.setUrls(ClasspathHelper.forPackage(workingPackage, classLoader)).addClassLoaders(classLoader)
 				.setScanners(Scanners.FieldsAnnotated, Scanners.SubTypes);
 		return new Reflections(configurationBuilder);
-	}
-
-	private URLClassLoader classLoader()
-	{
-		URL[] classpathElements = compileClasspathElements.stream().map(this::toUrl).filter(Objects::nonNull)
-				.toArray(URL[]::new);
-
-		return new URLClassLoader(classpathElements, Thread.currentThread().getContextClassLoader());
-	}
-
-	private URL toUrl(String path)
-	{
-		try
-		{
-			return new File(path).toURI().toURL();
-		}
-		catch (MalformedURLException exception)
-		{
-			logger.warn("Could not transform path '{}' to url, returning null - {}", path, exception.getMessage());
-			return null;
-		}
 	}
 
 	private <D> List<String> getPluginProcessNames(Class<D> processPluginDefinitionType, ClassLoader classLoader,
@@ -338,7 +357,7 @@ public class ConfigDocGenerator
 	{
 		return field ->
 		{
-			Documentation documentation = field.getAnnotation(Documentation.class);
+			Object documentation = field.getAnnotation(coreDocumentationAnnotationClass);
 			Value value = field.getAnnotation(Value.class);
 
 			PropertyNameAndDefaultValue propertyNameAndDefaultValue = getPropertyNameAndDefaultValue(value);
@@ -352,11 +371,12 @@ public class ConfigDocGenerator
 					? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
 					: initialEnvironment;
 
-			String required = getDocumentationString("Required", documentation.required() ? "Yes" : "No");
+			String required = getDocumentationString("Required", getBoolean(documentation, "required") ? "Yes" : "No");
 
-			String description = getDocumentationString("Description", documentation.description());
-			String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
-			String example = getDocumentationStringMonospace("Example", documentation.example());
+			String description = getDocumentationString("Description", getString(documentation, "description"));
+			String recommendation = getDocumentationString("Recommendation",
+					getString(documentation, "recommendation"));
+			String example = getDocumentationStringMonospace("Example", getString(documentation, "example"));
 
 			String defaultValueString = devalueValue != null && devalueValue.length() > 1
 					&& !"#{null}".equals(devalueValue) ? getDocumentationStringMonospace("Default", devalueValue) : "";
@@ -367,6 +387,32 @@ public class ConfigDocGenerator
 							.replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
 							.replace(PROPERTY_NAME_PLACEHOLDER, propertyName));
 		};
+	}
+
+	private boolean getBoolean(Object coreDocumentationAnnotation, String methodName)
+	{
+		try
+		{
+			return Boolean.TRUE.equals(
+					coreDocumentationAnnotationClass.getDeclaredMethod(methodName).invoke(coreDocumentationAnnotation));
+		}
+		catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException e)
+		{
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private String getString(Object coreDocumentationAnnotation, String methodName)
+	{
+		try
+		{
+			return (String) coreDocumentationAnnotationClass.getDeclaredMethod(methodName)
+					.invoke(coreDocumentationAnnotation);
+		}
+		catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException e)
+		{
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	private String getDocumentationStringMonospace(String title, String value)
