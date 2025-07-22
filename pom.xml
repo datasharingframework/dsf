@@ -1172,7 +1172,6 @@
 								<excludeArtifact>dsf-fhir-rest-adapter</excludeArtifact>
 								<excludeArtifact>dsf-fhir-server</excludeArtifact>
 								<excludeArtifact>dsf-fhir-server-jetty</excludeArtifact>
-								<excludeArtifact>dsf-fhir-validation</excludeArtifact>
 								<excludeArtifact>dsf-fhir-webservice-client</excludeArtifact>
 								<excludeArtifact>dsf-fhir-websocket-client</excludeArtifact>
 							</excludeArtifacts>
