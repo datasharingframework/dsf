@@ -33,16 +33,6 @@
 
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-documentation</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-process-api-v1</artifactId>
 			<exclusions>
 				<exclusion>
