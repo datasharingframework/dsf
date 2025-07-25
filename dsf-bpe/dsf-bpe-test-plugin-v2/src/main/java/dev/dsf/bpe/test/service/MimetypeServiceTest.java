@@ -90,7 +90,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 			InputStream data = getDataStream(resource);
 			String expected = getMimetype(resource);
 
-			mimetypeService.validate(data, expected);
+			mimetypeService.validateWithException(data, expected);
 		}
 	}
 
