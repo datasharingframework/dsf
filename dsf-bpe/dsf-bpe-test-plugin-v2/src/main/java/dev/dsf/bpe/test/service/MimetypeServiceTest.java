@@ -88,9 +88,28 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 		for (Resource resource : resources)
 		{
 			InputStream data = getDataStream(resource);
-			String expected = getMimetype(resource);
+			String mimeType = getMimetype(resource);
 
-			mimetypeService.validateWithException(data, expected);
+			MimetypeService.ValidationResult validationResult = mimetypeService.validateWithResult(data, mimeType);
+			if (!validationResult.mimetypesMatch())
+				throw new RuntimeException(
+						"Detected mimetype does not match expected mimetype (#validateWithResult())");
+
+			boolean mimetypesMatch = mimetypeService.validateWithBoolean(data, mimeType);
+			if (!mimetypesMatch)
+				throw new RuntimeException(
+						"Detected mimetype does not match expected mimetype (#validateWithBoolean())");
+
+			try
+			{
+				mimetypeService.validateWithException(data, mimeType);
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(
+						"Detected mimetype does not match expected mimetype (#validateWithException()) - "
+								+ e.getMessage());
+			}
 		}
 	}
 
