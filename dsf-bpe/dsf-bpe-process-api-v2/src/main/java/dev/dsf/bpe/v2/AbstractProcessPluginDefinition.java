@@ -76,7 +76,7 @@ public abstract class AbstractProcessPluginDefinition implements ProcessPluginDe
 		InputStream in = AbstractProcessPluginDefinition.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
 		if (in == null)
 		{
-			logger.warn("{} file not found in root folder");
+			logger.warn("{} file not found in root folder", PROPERTIES_FILE);
 			throw new RuntimeException(PROPERTIES_FILE + " file not found");
 		}
 
