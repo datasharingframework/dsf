@@ -1212,11 +1212,6 @@ a#download {
 	transition: max-height 0.3s ease;
 }
 
-.collapse-button {
-	margin-top: -0.5em;
-	margin-right: -0.25em;
-}
-
 .collapsed {
 	overflow: hidden;
 	max-height: 15em;
@@ -1262,6 +1257,8 @@ a#download {
 	stroke-width: 2;
 	stroke-linecap: round;
 	stroke-linejoin: round;
+	margin-top: -0.5em;
+    margin-right: -0.25em;
 }
 
 .collapse-button-rotated {
