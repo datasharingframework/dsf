@@ -90,6 +90,17 @@
 			</ul>
 		</div>
 
+		<div th:class="${class} ? ${class} : 'element element-100 collapsable collapsed'" th:fragment="contents" th:each="c : ${contents}">
+			<div class="content-header">
+				<label th:text="'Content ' + ${c.contentType}">contentType</label>
+				<svg width="24" height="24" viewBox="0 0 24 24" class="collapse-button">
+					<path d="M6 9l6 6 6-6"></path>
+				</svg>
+			</div>
+
+			<pre class="content-pre" th:text="${c.data}">data</pre>
+		</div>
+
 		<i th:fragment="additionalValuesComment">See json or xml for additional values.</i>
 	</div>
 </body>
