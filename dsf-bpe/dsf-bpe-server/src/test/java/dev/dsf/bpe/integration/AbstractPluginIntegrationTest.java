@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -31,6 +32,9 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.plugin.ProcessPluginManager;
 import dev.dsf.fhir.client.WebsocketClient;
 
 public abstract class AbstractPluginIntegrationTest extends AbstractIntegrationTest
@@ -201,5 +205,11 @@ public abstract class AbstractPluginIntegrationTest extends AbstractIntegrationT
 	{
 		return t.getOutput().stream().filter(isTestMethodFailed()).map(TaskOutputComponent::getValue)
 				.map(v -> ((StringType) v).getValue()).toList();
+	}
+
+	protected static Optional<ProcessPlugin> getProcessPluginForTestProcess(String version)
+	{
+		ProcessPluginManager pluginManager = getBpeSpringWebApplicationContext().getBean(ProcessPluginManager.class);
+		return pluginManager.getProcessPlugin(new ProcessIdAndVersion("dsfdev_test", version));
 	}
 }

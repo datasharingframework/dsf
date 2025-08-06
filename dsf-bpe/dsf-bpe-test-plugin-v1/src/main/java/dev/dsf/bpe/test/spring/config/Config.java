@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import dev.dsf.bpe.test.deployment.ProcessPluginDeploymentStateListenerTestImpl;
 import dev.dsf.bpe.test.service.ApiTest;
 import dev.dsf.bpe.test.service.EndpointProviderTest;
 import dev.dsf.bpe.test.service.EnvironmentVariableTest;
@@ -17,6 +18,7 @@ import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
 import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.ProcessPluginDeploymentStateListener;
 import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 
 @Configuration
@@ -82,5 +84,11 @@ public class Config implements InitializingBean
 	public EnvironmentVariableTest environmentVariableTest()
 	{
 		return new EnvironmentVariableTest(api, envVariableMandatory, envVariableOptional, envVariableProxyUrl);
+	}
+
+	@Bean
+	public ProcessPluginDeploymentStateListener processPluginDeploymentStateListener()
+	{
+		return new ProcessPluginDeploymentStateListenerTestImpl();
 	}
 }
