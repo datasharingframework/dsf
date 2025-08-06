@@ -3,7 +3,7 @@
 
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n"/>
+			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%notEmpty{ %X}%n"/>
 		</Console>
 	</Appenders>
 

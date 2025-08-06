@@ -80,7 +80,8 @@ public class PluginConfig
 	public ProcessPluginManager processPluginManager()
 	{
 		return new ProcessPluginManagerImpl(
-				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory()),
+				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory(),
+						camundaConfig.defaultBpmnParseListener()),
 				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler(),
 				propertiesConfig.getDsfServerBaseUrl(), dsfClientConfig.clientProvider().getWebserviceClient(),
 				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());

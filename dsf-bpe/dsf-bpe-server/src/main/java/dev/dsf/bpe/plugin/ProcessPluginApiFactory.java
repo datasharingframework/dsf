@@ -36,11 +36,12 @@ public class ProcessPluginApiFactory implements InitializingBean
 	private final BpeMailService bpeMailService;
 	private final BpeOidcClientProvider bpeOidcClientProvider;
 	private final ProcessPluginApiClassLoaderFactory classLoaderFactory;
+	private final String serverBaseUrl;
 
 	public ProcessPluginApiFactory(ConfigurableEnvironment environment, DsfClientConfig dsfClientConfig,
 			FhirClientConfigs fhirClientConfigs, BpeProxyConfig bpeProxyConfig, BuildInfoProvider buildInfoProvider,
 			BpeMailService bpeMailService, BpeOidcClientProvider bpeOidcClientProvider,
-			ProcessPluginApiClassLoaderFactory classLoaderFactory)
+			ProcessPluginApiClassLoaderFactory classLoaderFactory, String serverBaseUrl)
 	{
 		this.environment = environment;
 		this.dsfClientConfig = dsfClientConfig;
@@ -50,6 +51,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 		this.bpeMailService = bpeMailService;
 		this.bpeOidcClientProvider = bpeOidcClientProvider;
 		this.classLoaderFactory = classLoaderFactory;
+		this.serverBaseUrl = serverBaseUrl;
 	}
 
 	@Override
@@ -63,6 +65,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 		Objects.requireNonNull(bpeMailService, "bpeMailService");
 		Objects.requireNonNull(bpeOidcClientProvider, "bpeOidcClientProvider");
 		Objects.requireNonNull(classLoaderFactory, "classLoaderFactory");
+		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 	}
 
 	public List<ProcessPluginFactory> initialize()
@@ -77,7 +80,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 		ApplicationContext apiApplicationContext = createApiApplicationContext(apiVersion, apiClassLoader,
 				apiBuilder.getSpringServiceConfigClass());
 
-		return apiBuilder.build(apiClassLoader, apiApplicationContext, environment);
+		return apiBuilder.build(apiClassLoader, apiApplicationContext, environment, serverBaseUrl);
 	}
 
 	private ProcessPluginApiBuilder loadProcessPluginApiBuilder(ClassLoader apiClassLoader)

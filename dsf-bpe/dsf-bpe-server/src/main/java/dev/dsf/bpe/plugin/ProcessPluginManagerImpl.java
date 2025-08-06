@@ -37,7 +37,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 
 	public static final String ORGANIZATION_IDENTIFIER_SID = "http://dsf.dev/sid/organization-identifier";
 
-	private record ProcessIdAndVersionAndProcessPlugin(ProcessIdAndVersion idAndVersion, ProcessPlugin plugin)
+	private static record ProcessByIdAndVersion(ProcessIdAndVersion idAndVersion, ProcessPlugin plugin)
 	{
 	}
 
@@ -94,13 +94,17 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		if (localOrganizationIdentifierValue.isEmpty())
 			logger.warn("Local organization identifier unknown, check DSF FHIR server allow list");
 
-		List<ProcessPlugin> plugins = removeDuplicates(processPluginLoader.loadPlugins().stream()
-				.filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null))));
+		List<ProcessPlugin> plugins = removeDuplicates(
+				processPluginLoader.loadPlugins().stream().filter(p -> p.getPluginMdc().executeWithPluginMdc(
+						() -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null)))));
 
 		if (plugins.isEmpty())
 			logger.warn("No process plugins deployed");
 
-		processPluginConsumers.forEach(c -> c.setProcessPlugins(plugins));
+		pluginsByProcessIdAndVersion = plugins.stream()
+				.flatMap(p -> p.getProcessKeysAndVersions().stream().map(iAV -> new ProcessByIdAndVersion(iAV, p)))
+				.collect(Collectors.toMap(ProcessByIdAndVersion::idAndVersion, ProcessByIdAndVersion::plugin));
+		processPluginConsumers.forEach(c -> c.setProcessPlugins(plugins, pluginsByProcessIdAndVersion));
 
 		// deploy BPMN models
 		List<BpmnFileAndModel> models = plugins.stream().flatMap(p -> p.getProcessModels().stream()).toList();
@@ -113,11 +117,6 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		fhirResourceHandler.applyStateChangesAndStoreNewResourcesInDb(resources, outcomes);
 
 		onProcessesDeployed(outcomes, plugins);
-
-		this.pluginsByProcessIdAndVersion = plugins.stream().flatMap(
-				p -> p.getProcessKeysAndVersions().stream().map(iAV -> new ProcessIdAndVersionAndProcessPlugin(iAV, p)))
-				.collect(Collectors.toMap(ProcessIdAndVersionAndProcessPlugin::idAndVersion,
-						ProcessIdAndVersionAndProcessPlugin::plugin));
 	}
 
 	private BasicWebserviceClient retryClient()
@@ -202,8 +201,8 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.filter(c -> EnumSet.of(ProcessState.ACTIVE, ProcessState.DRAFT).contains(c.getNewProcessState()))
 				.map(ProcessStateChangeOutcome::getProcessKeyAndVersion).collect(Collectors.toSet());
 
-		plugins.stream()
-				.forEach(plugin -> plugin.getProcessPluginDeploymentListener().onProcessesDeployed(activeProcesses));
+		plugins.stream().forEach(p -> p.getPluginMdc().executeWithPluginMdc(
+				() -> p.getProcessPluginDeploymentListener().onProcessesDeployed(activeProcesses)));
 	}
 
 	@Override
