@@ -50,6 +50,10 @@
 			<artifactId>log4j-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-layout-template-json</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>crypto-utils</artifactId>
 			<version>${crypto-utils.version}</version>
