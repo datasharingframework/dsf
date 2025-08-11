@@ -15,9 +15,6 @@
 	</Appenders>
 	<Loggers>
 		<Logger name="dev.dsf" level="DEBUG" />
-		<Logger name="de.netzwerk_universitaetsmedizin" level="DEBUG" />
-		<Logger name="de.medizininformatik_initiative" level="DEBUG" />
-		<Logger name="de.dkfz.nct" level="DEBUG" />
 		<Logger name="org.eclipse.jetty" level="INFO" />
 		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR" />
 

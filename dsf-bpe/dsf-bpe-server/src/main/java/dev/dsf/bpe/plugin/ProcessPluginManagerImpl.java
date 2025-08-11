@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
@@ -94,8 +96,14 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		if (localOrganizationIdentifierValue.isEmpty())
 			logger.warn("Local organization identifier unknown, check DSF FHIR server allow list");
 
+		List<ProcessPlugin> loadedPlugins = processPluginLoader.loadPlugins();
+
+		// set log level to debug for logger with plugin definition package name
+		loadedPlugins.stream().map(ProcessPlugin::getPluginDefinitionPackageName)
+				.forEach(name -> Configurator.setLevel(name, Level.DEBUG));
+
 		List<ProcessPlugin> plugins = removeDuplicates(
-				processPluginLoader.loadPlugins().stream().filter(p -> p.getPluginMdc().executeWithPluginMdc(
+				loadedPlugins.stream().filter(p -> p.getPluginMdc().executeWithPluginMdc(
 						() -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null)))));
 
 		if (plugins.isEmpty())

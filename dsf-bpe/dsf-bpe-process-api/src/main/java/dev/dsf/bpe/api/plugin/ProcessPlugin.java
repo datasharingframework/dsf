@@ -43,6 +43,8 @@ public interface ProcessPlugin
 
 	List<BpmnFileAndModel> getProcessModels();
 
+	String getPluginDefinitionPackageName();
+
 	ProcessPluginDeploymentListener getProcessPluginDeploymentListener();
 
 	Class<?> getDefaultUserTaskListenerClass();

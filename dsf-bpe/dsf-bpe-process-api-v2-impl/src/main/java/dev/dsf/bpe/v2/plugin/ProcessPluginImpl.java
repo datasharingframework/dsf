@@ -320,6 +320,12 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 	}
 
 	@Override
+	public String getPluginDefinitionPackageName()
+	{
+		return processPluginDefinition.getClass().getPackageName();
+	}
+
+	@Override
 	public PrimitiveValue<?> createFhirTaskVariable(String taskJson)
 	{
 		Task task = newJsonParser().parseResource(Task.class, taskJson);
