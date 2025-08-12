@@ -70,8 +70,14 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 			List<Provider<?>> definitions = ServiceLoader.load(processPluginDefinitionType, pluginClassLoader).stream()
 					.collect(Collectors.toList());
 
-			if (definitions.size() != 1)
+			if (definitions.size() < 1)
 				return null;
+			else if (definitions.size() > 1)
+			{
+				logger.warn("Ignoring {}: {} process plugin definition classes for API version {} found",
+						pluginPath.toString(), definitions.size(), apiVersion);
+				return null;
+			}
 
 			String filename = pluginPath.getFileName().toString();
 			boolean isSnapshot = filename.endsWith(SNAPSHOT_FILE_SUFFIX);
