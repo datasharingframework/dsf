@@ -245,4 +245,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("TargetProviderTest"));
 	}
+
+	@Test
+	public void startSensitiveDataLoggerTest() throws Exception
+	{
+		executePluginTest(createTestTask("DataLoggerTest"));
+	}
 }

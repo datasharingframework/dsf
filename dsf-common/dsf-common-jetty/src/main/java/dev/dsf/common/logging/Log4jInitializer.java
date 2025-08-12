@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Properties;
 
 import org.apache.logging.log4j.Level;
@@ -19,7 +18,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import dev.dsf.common.logging.Log4jConfiguration.Log4jJsonLayout.TemplateUri;
 import dev.dsf.common.logging.Log4jConfiguration.Log4jLayout;
 
-public class Log4jInitializer
+public abstract class Log4jInitializer
 {
 	public static final String LOG_CONFIG = "dev.dsf.log.config";
 	public static final String LOG_CONFIG_DEFAULT = "conf/log4j2.xml";
@@ -43,8 +42,6 @@ public class Log4jInitializer
 	public static final String LOG_CONSOLE_STYLE = "dev.dsf.log.console.style";
 	public static final String LOG_CONSOLE_LEVEL = "dev.dsf.log.console.level";
 
-	protected final String fileNamePart;
-
 	protected final Properties properties;
 
 	protected final Log4jLayout consoleLayout;
@@ -54,10 +51,8 @@ public class Log4jInitializer
 
 	private final Path configPath;
 
-	public Log4jInitializer(String fileNamePart)
+	public Log4jInitializer()
 	{
-		this.fileNamePart = Objects.requireNonNull(fileNamePart, "fileNamePart");
-
 		properties = readJettyProperties();
 
 		consoleLayout = getLayout(LOG_CONSOLE_STYLE, STYLE_TEXT);
@@ -145,10 +140,7 @@ public class Log4jInitializer
 		return value;
 	}
 
-	protected Log4jConfigurationFactory createLog4jConfigurationFactory()
-	{
-		return new Log4jConfigurationFactory(fileNamePart, consoleLayout, consoleLevel, fileLayout, fileLevel);
-	}
+	protected abstract Log4jConfigurationFactory createLog4jConfigurationFactory();
 
 	public void initializeLog4j()
 	{

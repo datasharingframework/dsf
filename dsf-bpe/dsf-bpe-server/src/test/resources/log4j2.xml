@@ -5,9 +5,16 @@
 		<Console name="CONSOLE" target="SYSTEM_OUT">
 			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%notEmpty{ %X}%n"/>
 		</Console>
+		<Console name="DATA" target="SYSTEM_ERR">
+			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n"/>
+		</Console>
 	</Appenders>
 
 	<Loggers>
+		<Logger name="dsf-data-logger" level="DEBUG" additivity="false">
+			<AppenderRef ref="DATA"/>
+		</Logger>
+
 		<Logger name="de.rwh" level="INFO"/>
 		<Logger name="dev.dsf" level="TRACE"/>
 		<Logger name="org.eclipse.jetty" level="INFO"/>

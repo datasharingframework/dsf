@@ -17,16 +17,14 @@ public class FhirLog4jInitializer extends Log4jInitializer
 
 	public FhirLog4jInitializer()
 	{
-		super("fhir");
-
 		audit = getAudit(LOG_AUDIT, AUDIT_FILE);
 	}
 
 	@Override
 	protected Log4jConfigurationFactory createLog4jConfigurationFactory()
 	{
-		return new FhirLog4jConfigurationFactory(fileNamePart, consoleLayout, consoleLevel, fileLayout, fileLevel,
-				audit);
+		return new Log4jConfigurationFactory((loggerContext, name) -> new FhirLog4jConfiguration(loggerContext, name,
+				"fhir", consoleLayout, consoleLevel, fileLayout, fileLevel, audit));
 	}
 
 	private Audit getAudit(String parameter, String defaultValue)

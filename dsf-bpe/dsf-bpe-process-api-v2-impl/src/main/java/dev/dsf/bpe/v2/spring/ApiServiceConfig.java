@@ -39,6 +39,8 @@ import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.CryptoServiceImpl;
+import dev.dsf.bpe.v2.service.DataLogger;
+import dev.dsf.bpe.v2.service.DataLoggerImpl;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
@@ -101,7 +103,7 @@ public class ApiServiceConfig
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
 				fhirClientProvider(), oidcClientProvider(), mailService(), mimetypeService(), objectMapper(),
 				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
-				taskHelper(), cryptoService(), targetProvider());
+				taskHelper(), cryptoService(), targetProvider(), dataLogger());
 	}
 
 	@Bean
@@ -292,5 +294,11 @@ public class ApiServiceConfig
 	public TargetProvider targetProvider()
 	{
 		return new TargetProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
+	}
+
+	@Bean
+	public DataLogger dataLogger()
+	{
+		return new DataLoggerImpl(fhirContext());
 	}
 }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
 import dev.dsf.bpe.v2.service.CryptoService;
+import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
@@ -31,7 +32,6 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final FhirClientProvider fhirClientProvider;
 	private final OidcClientProvider oidcClientProvider;
 	private final MailService mailService;
-
 	private final MimetypeService mimetypeService;
 	private final ObjectMapper objectMapper;
 	private final OrganizationProvider organizationProvider;
@@ -41,6 +41,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final TaskHelper taskHelper;
 	private final CryptoService cryptoService;
 	private final TargetProvider targetProvider;
+	private final DataLogger dataLogger;
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
@@ -48,7 +49,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
-			TaskHelper taskHelper, CryptoService cryptoService, TargetProvider targetProvider)
+			TaskHelper taskHelper, CryptoService cryptoService, TargetProvider targetProvider, DataLogger dataLogger)
 	{
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
@@ -66,6 +67,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.taskHelper = taskHelper;
 		this.cryptoService = cryptoService;
 		this.targetProvider = targetProvider;
+		this.dataLogger = dataLogger;
 	}
 
 	@Override
@@ -86,6 +88,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(taskHelper, "taskHelper");
 		Objects.requireNonNull(cryptoService, "cryptoService");
 		Objects.requireNonNull(targetProvider, "targetProvider");
+		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
 	@Override
@@ -182,5 +185,11 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public TargetProvider getTargetProvider()
 	{
 		return targetProvider;
+	}
+
+	@Override
+	public DataLogger getDataLogger()
+	{
+		return dataLogger;
 	}
 }

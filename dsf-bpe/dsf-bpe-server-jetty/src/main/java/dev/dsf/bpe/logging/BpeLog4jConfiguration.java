@@ -1,4 +1,4 @@
-package dev.dsf.fhir.logging;
+package dev.dsf.bpe.logging;
 
 import java.util.EnumSet;
 
@@ -15,18 +15,18 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import dev.dsf.common.logging.Log4jConfiguration;
 
-public class FhirLog4jConfiguration extends Log4jConfiguration
+public class BpeLog4jConfiguration extends Log4jConfiguration
 {
-	private static final PatternLayout AUDIT_LAYOUT = PatternLayout.newBuilder().withPattern("%d%notEmpty{ %X} %m%n")
+	private static final PatternLayout DATA_LAYOUT = PatternLayout.newBuilder().withPattern("%d%notEmpty{ %X} %m%n")
 			.build();
 
-	public static enum Audit
+	public static enum Data
 	{
 		OUT(Target.SYSTEM_OUT), ERROR(Target.SYSTEM_ERR), FILE(null), OFF(null);
 
 		private final Target target;
 
-		private Audit(Target target)
+		private Data(Target target)
 		{
 			this.target = target;
 		}
@@ -37,36 +37,35 @@ public class FhirLog4jConfiguration extends Log4jConfiguration
 		}
 	}
 
-	public FhirLog4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart,
-			Log4jLayout consoleLayout, Level consoleLevel, Log4jLayout fileLayout, Level fileLevel, Audit audit)
+	public BpeLog4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart,
+			Log4jLayout consoleLayout, Level consoleLevel, Log4jLayout fileLayout, Level fileLevel, Data data)
 	{
 		super(loggerContext, name, fileNamePart, consoleLayout, consoleLevel, fileLayout, fileLevel);
 
-		if (EnumSet.of(Audit.OUT, Audit.ERROR, Audit.FILE).contains(audit))
+		if (EnumSet.of(Data.OUT, Data.ERROR, Data.FILE).contains(data))
 		{
-			Appender auditAppender = Audit.FILE.equals(audit) ? createFileAppender(fileNamePart)
-					: createConsoleAppender(audit);
+			Appender dataAppender = Data.FILE.equals(data) ? createFileAppender(fileNamePart)
+					: createConsoleAppender(data);
 
-			addAppender(auditAppender);
-			addLogger("dsf-audit-logger", Level.INFO, auditAppender, false);
+			addAppender(dataAppender);
+			addLogger("dsf-data-logger", Level.DEBUG, dataAppender, false);
 		}
 		else
-			addLogger("dsf-audit-logger", Level.OFF);
+			addLogger("dsf-data-logger", Level.OFF);
 	}
 
 	private Appender createFileAppender(String fileNamePart)
 	{
-		return RollingFileAppender.newBuilder().setName("AUDIT").withFileName("log/" + fileNamePart + "-audit.log")
-				.withFilePattern("log/" + fileNamePart + "-audit_%d{yyyy-MM-dd}_%i.log.gz").setIgnoreExceptions(false)
-				.setLayout(AUDIT_LAYOUT)
+		return RollingFileAppender.newBuilder().setName("DATA").withFileName("log/" + fileNamePart + "-data.log")
+				.withFilePattern("log/" + fileNamePart + "-data_%d{yyyy-MM-dd}_%i.log.gz").setIgnoreExceptions(false)
+				.setLayout(DATA_LAYOUT)
 				.withPolicy(CompositeTriggeringPolicy.createPolicy(OnStartupTriggeringPolicy.createPolicy(1),
 						TimeBasedTriggeringPolicy.newBuilder().build()))
 				.build();
 	}
 
-	private Appender createConsoleAppender(Audit audit)
+	private Appender createConsoleAppender(Data data)
 	{
-		return ConsoleAppender.newBuilder().setName("AUDIT").setTarget(audit.getTarget()).setLayout(AUDIT_LAYOUT)
-				.build();
+		return ConsoleAppender.newBuilder().setName("DATA").setTarget(data.getTarget()).setLayout(DATA_LAYOUT).build();
 	}
 }

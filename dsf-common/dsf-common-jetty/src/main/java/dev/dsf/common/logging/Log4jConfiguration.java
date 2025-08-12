@@ -146,13 +146,14 @@ public class Log4jConfiguration extends AbstractConfiguration
 
 	protected void addLogger(String loggerName, Level level)
 	{
-		addLogger(loggerName, level, null);
+		addLogger(loggerName, level, null, true);
 	}
 
-	protected void addLogger(String loggerName, Level level, Appender appender)
+	protected void addLogger(String loggerName, Level level, Appender appender, boolean additive)
 	{
 		LoggerConfig c = new LoggerConfig();
 		c.setLevel(level);
+		c.setAdditive(additive);
 
 		if (appender != null)
 			c.addAppender(appender, null, null);
