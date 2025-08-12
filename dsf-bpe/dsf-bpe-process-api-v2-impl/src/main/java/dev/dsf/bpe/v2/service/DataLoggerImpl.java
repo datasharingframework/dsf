@@ -17,6 +17,7 @@ public class DataLoggerImpl implements DataLogger
 		this.fhirContext = fhirContext;
 	}
 
+	@Override
 	public void log(String message, Resource resource)
 	{
 		if (message != null)
