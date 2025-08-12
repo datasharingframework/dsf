@@ -1,5 +1,10 @@
 package dev.dsf.common.logging;
 
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -102,27 +107,36 @@ public class Log4jConfiguration extends AbstractConfiguration
 		}
 	}
 
-	public Log4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart, Log4jLayout consoleLayout,
-			Level consoleLevel, Log4jLayout fileLayout, Level fileLevel)
+	public Log4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart,
+			Log4jLayout consoleOutLayout, Level consoleOutLevel, Log4jLayout consoleErrLayout, Level consoleErrLevel,
+			Log4jLayout fileLayout, Level fileLevel)
 	{
 		super(loggerContext, ConfigurationSource.NULL_SOURCE);
 
 		if (name != null)
 			setName(name);
 
-		addLogger("dev.dsf", min(consoleLevel, fileLevel));
+		addLogger("dev.dsf", min(consoleOutLevel, consoleErrLevel, fileLevel));
 		addLogger("org.eclipse.jetty", Level.INFO);
 		addLogger("ca.uhn.fhir.parser.LenientErrorHandler", Level.ERROR);
 
 		LoggerConfig root = getRootLogger();
 		root.setLevel(Level.WARN);
 
-		if (!Level.OFF.equals(consoleLevel))
+		if (!Level.OFF.equals(consoleOutLevel))
 		{
-			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE").setTarget(Target.SYSTEM_OUT)
-					.setLayout(consoleLayout.consoleLayout(this)).build();
+			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.OUT").setTarget(Target.SYSTEM_OUT)
+					.setLayout(consoleOutLayout.consoleLayout(this)).build();
 			addAppender(console);
-			root.addAppender(console, consoleLevel, null);
+			root.addAppender(console, consoleOutLevel, null);
+		}
+
+		if (!Level.OFF.equals(consoleErrLevel))
+		{
+			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.ERR").setTarget(Target.SYSTEM_ERR)
+					.setLayout(consoleErrLayout.consoleLayout(this)).build();
+			addAppender(console);
+			root.addAppender(console, consoleErrLevel, null);
 		}
 
 		if (!Level.OFF.equals(fileLevel))
@@ -139,26 +153,80 @@ public class Log4jConfiguration extends AbstractConfiguration
 		}
 	}
 
-	private Level min(Level a, Level b)
+	private Level min(Level... levels)
 	{
-		return a.isLessSpecificThan(b) ? a : b;
+		return Stream.of(levels).sorted(Comparator.comparing(Level::intLevel).reversed()).findFirst().get();
 	}
 
 	protected void addLogger(String loggerName, Level level)
 	{
-		addLogger(loggerName, level, null, true);
+		LoggerConfig config = new LoggerConfig();
+		config.setLevel(level);
+
+		addLogger(loggerName, config);
 	}
 
-	protected void addLogger(String loggerName, Level level, Appender appender, boolean additive)
+	protected void addSpecialLogger(String name, String fileNamePart, Function<Configuration, StringLayout> fileLayout,
+			Function<Configuration, StringLayout> outLayout, Function<Configuration, StringLayout> errLayout,
+			Level level)
 	{
-		LoggerConfig c = new LoggerConfig();
-		c.setLevel(level);
-		c.setAdditive(additive);
+		String loggerName = "dsf-" + name + "-logger";
+		String appenderName = name.toUpperCase(Locale.ENGLISH);
+		fileNamePart = fileNamePart + "-" + name;
 
-		if (appender != null)
-			c.addAppender(appender, null, null);
+		Appender file = createFileAppender(appenderName, fileNamePart, fileLayout.apply(this));
+		Appender out = createConsoleAppender(appenderName, Target.SYSTEM_OUT, outLayout.apply(this));
+		Appender err = createConsoleAppender(appenderName, Target.SYSTEM_ERR, errLayout.apply(this));
 
-		addLogger(loggerName, c);
+		LoggerConfig config = new LoggerConfig();
+		config.setLevel(file == null && out == null && err == null ? Level.OFF : level);
+		config.setAdditive(false);
+
+		if (file != null)
+		{
+			addAppender(file);
+			config.addAppender(file, null, null);
+		}
+		if (out != null)
+		{
+			addAppender(out);
+			config.addAppender(out, null, null);
+		}
+		if (err != null)
+		{
+			addAppender(err);
+			config.addAppender(err, null, null);
+		}
+
+		addLogger(loggerName, config);
+	}
+
+	private Appender createFileAppender(String appenderName, String fileNamePart, StringLayout layout)
+	{
+		if (layout == null)
+			return null;
+
+		return RollingFileAppender.newBuilder().setName(appenderName + ".FILE")
+				.withFileName("log/" + fileNamePart + ".log")
+				.withFilePattern("log/" + fileNamePart + "_%d{yyyy-MM-dd}_%i.log.gz").setIgnoreExceptions(false)
+				.setLayout(layout)
+				.withPolicy(CompositeTriggeringPolicy.createPolicy(OnStartupTriggeringPolicy.createPolicy(1),
+						TimeBasedTriggeringPolicy.newBuilder().build()))
+				.build();
+	}
+
+	private Appender createConsoleAppender(String appenderName, Target target, StringLayout layout)
+	{
+		if (layout == null)
+			return null;
+
+		String name = appenderName + "." + switch (target)
+		{
+			case SYSTEM_OUT -> "OUT";
+			case SYSTEM_ERR -> "ERR";
+		};
+
+		return ConsoleAppender.newBuilder().setName(name).setTarget(target).setLayout(layout).build();
 	}
 
 	@Override
