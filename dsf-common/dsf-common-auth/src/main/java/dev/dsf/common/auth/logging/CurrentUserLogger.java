@@ -1,8 +1,8 @@
 package dev.dsf.common.auth.logging;
 
+import java.security.Principal;
 import java.util.stream.Collectors;
 
-import org.eclipse.jetty.security.UserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +29,8 @@ public class CurrentUserLogger extends AbstractUserLogger
 	}
 
 	@Override
-	protected void before(UserPrincipal userPrincipal)
+	protected void before(Principal principal)
 	{
-		logger.debug("Current identity '{}'", userPrincipal.getName());
+		logger.debug("Current identity '{}'", principal.getName());
 	}
 }
