@@ -17,10 +17,10 @@ import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
-import dev.dsf.bpe.v2.service.MimetypeService;
+import dev.dsf.bpe.v2.service.MimeTypeService;
 import dev.dsf.bpe.v2.variables.Variables;
 
-public class MimetypeServiceTest extends AbstractTest implements ServiceTask
+public class MimeTypeServiceTest extends AbstractTest implements ServiceTask
 {
 	@Override
 	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
@@ -29,7 +29,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void testAttachmentBundle(MimetypeService mimetypeService)
+	public void testAttachmentBundle(MimeTypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-Bundle.xml");
@@ -37,7 +37,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void testAttachmentCsv(MimetypeService mimetypeService)
+	public void testAttachmentCsv(MimeTypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-CSV.xml");
@@ -45,7 +45,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void testAttachmentMeasureReport(MimetypeService mimetypeService)
+	public void testAttachmentMeasureReport(MimeTypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-MeasureReport.xml");
@@ -53,7 +53,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void testAttachmentNdJson(MimetypeService mimetypeService)
+	public void testAttachmentNdJson(MimeTypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-NdJson.xml");
@@ -61,7 +61,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void testAttachmentZip(MimetypeService mimetypeService)
+	public void testAttachmentZip(MimeTypeService mimetypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-ZIP.xml");
@@ -70,7 +70,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 
 	private List<Resource> getResourcesNotDocumentReferenceFromPath(String pathToBundle)
 	{
-		try (InputStream input = MimetypeServiceTest.class.getClassLoader().getResourceAsStream(pathToBundle))
+		try (InputStream input = MimeTypeServiceTest.class.getClassLoader().getResourceAsStream(pathToBundle))
 		{
 			Bundle bundle = FhirContext.forR4().newXmlParser().parseResource(Bundle.class, input);
 			return bundle.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)
@@ -83,14 +83,14 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 		}
 	}
 
-	private void testResourcesStream(List<Resource> resources, MimetypeService mimetypeService)
+	private void testResourcesStream(List<Resource> resources, MimeTypeService mimetypeService)
 	{
 		for (Resource resource : resources)
 		{
 			InputStream data = getDataStream(resource);
 			String mimeType = getMimetype(resource);
 
-			MimetypeService.ValidationResult validationResult = mimetypeService.validateWithResult(data, mimeType);
+			MimeTypeService.ValidationResult validationResult = mimetypeService.validateWithResult(data, mimeType);
 			if (!validationResult.mimetypesMatch())
 				throw new RuntimeException(
 						"Detected mimetype does not match expected mimetype (#validateWithResult())");

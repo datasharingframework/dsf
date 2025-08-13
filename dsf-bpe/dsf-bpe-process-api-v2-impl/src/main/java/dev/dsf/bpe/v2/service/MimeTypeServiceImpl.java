@@ -10,11 +10,11 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.springframework.beans.factory.InitializingBean;
 
-public class MimetypeServiceImpl implements MimetypeService, InitializingBean
+public class MimeTypeServiceImpl implements MimeTypeService, InitializingBean
 {
 	private final Detector detector;
 
-	public MimetypeServiceImpl(Detector detector)
+	public MimeTypeServiceImpl(Detector detector)
 	{
 		this.detector = detector;
 	}

@@ -67,7 +67,7 @@ public class CombinedDetectors implements Detector
 			}
 			catch (IOException exception)
 			{
-				throw new RuntimeException("Error while detecting mimetype", exception);
+				throw new RuntimeException("Error while detecting MIME type", exception);
 			}
 		};
 	}

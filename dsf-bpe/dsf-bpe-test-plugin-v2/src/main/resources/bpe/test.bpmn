@@ -237,7 +237,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'JsonVariableTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0x6aoim" sourceRef="JsonVariableTestGet" targetRef="Gateway_056f6tw" />
-    <bpmn:serviceTask id="MimetypeServiceTest" name="MimetypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimetypeServiceTest">
+    <bpmn:serviceTask id="MimetypeServiceTest" name="MimetypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimeTypeServiceTest">
       <bpmn:incoming>Flow_1gkrz8f</bpmn:incoming>
       <bpmn:outgoing>Flow_1le3eld</bpmn:outgoing>
     </bpmn:serviceTask>
