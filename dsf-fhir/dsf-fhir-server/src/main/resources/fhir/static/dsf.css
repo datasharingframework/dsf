@@ -1199,6 +1199,72 @@ a#download {
     text-decoration: none;
 }
 
+.content-header {
+	display: flex;
+	justify-content: space-between;
+}
+
+.content-pre {
+	margin-bottom: 0;
+}
+
+.collapsible {
+	transition: max-height 0.3s ease;
+}
+
+.collapsed {
+	overflow: hidden;
+	max-height: 15em;
+	position: relative;
+}
+
+.collapsed::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	height: 10em;
+	width: 100%;
+	background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--color-row-background));
+	pointer-events: none;
+}
+
+.collapsable.overflow::after {
+	opacity: 1;
+}
+
+.collapsable.overflow .collapse-button {
+	opacity: 1;
+	cursor: pointer;
+}
+
+.collapsable.no-overflow::after {
+	opacity: 0;
+}
+
+.collapsable.no-overflow .collapse-button {
+	opacity: 0;
+	cursor: default;
+}
+
+.expanded {
+	max-height: none;
+}
+
+.collapse-button {
+	fill: none;
+	stroke: #aaa;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	margin-top: -0.5em;
+	margin-right: -0.25em;
+}
+
+.collapse-button-rotated {
+	transform: rotate(180deg);
+}
+
 @media print {
 	body {
 		margin: 0;
