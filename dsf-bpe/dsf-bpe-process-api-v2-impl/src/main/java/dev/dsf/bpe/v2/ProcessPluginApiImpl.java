@@ -30,7 +30,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final OidcClientProvider oidcClientProvider;
 	private final MailService mailService;
 
-	private final MimeTypeService mimetypeService;
+	private final MimeTypeService mimeTypeService;
 	private final ObjectMapper objectMapper;
 	private final OrganizationProvider organizationProvider;
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
@@ -40,7 +40,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
-			OidcClientProvider oidcClientProvider, MailService mailService, MimeTypeService mimetypeService,
+			OidcClientProvider oidcClientProvider, MailService mailService, MimeTypeService mimeTypeService,
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
@@ -53,7 +53,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.fhirClientProvider = fhirClientProvider;
 		this.oidcClientProvider = oidcClientProvider;
 		this.mailService = mailService;
-		this.mimetypeService = mimetypeService;
+		this.mimeTypeService = mimeTypeService;
 		this.objectMapper = objectMapper;
 		this.organizationProvider = organizationProvider;
 		this.processAuthorizationHelper = processAuthorizationHelper;
@@ -123,9 +123,9 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	}
 
 	@Override
-	public MimeTypeService getMimetypeService()
+	public MimeTypeService getMimeTypeService()
 	{
-		return mimetypeService;
+		return mimeTypeService;
 	}
 
 	@Override

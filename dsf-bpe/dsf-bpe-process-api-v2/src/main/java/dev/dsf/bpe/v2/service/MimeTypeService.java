@@ -23,7 +23,7 @@ public interface MimeTypeService
 			return detectedBaseType + "/" + detectedSubType;
 		}
 
-		public boolean mimetypesMatch()
+		public boolean mimeTypesMatch()
 		{
 			return declared().equals(detected());
 		}
@@ -70,7 +70,7 @@ public interface MimeTypeService
 	 */
 	default boolean validateWithBoolean(InputStream stream, String declared)
 	{
-		return validateWithResult(stream, declared).mimetypesMatch();
+		return validateWithResult(stream, declared).mimeTypesMatch();
 	}
 
 	/**
@@ -85,7 +85,7 @@ public interface MimeTypeService
 	 */
 	default boolean validateWithBoolean(byte[] data, String declared)
 	{
-		return validateWithResult(new ByteArrayInputStream(data), declared).mimetypesMatch();
+		return validateWithResult(new ByteArrayInputStream(data), declared).mimeTypesMatch();
 	}
 
 	/**
@@ -104,7 +104,7 @@ public interface MimeTypeService
 	{
 		ValidationResult result = validateWithResult(stream, declared);
 
-		if (!result.mimetypesMatch())
+		if (!result.mimeTypesMatch())
 			logger.warn("Declared full MIME type {} does not match detected full MIME type {}", result.declared(),
 					result.detected());
 

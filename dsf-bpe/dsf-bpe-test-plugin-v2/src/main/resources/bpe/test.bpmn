@@ -237,12 +237,12 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'JsonVariableTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0x6aoim" sourceRef="JsonVariableTestGet" targetRef="Gateway_056f6tw" />
-    <bpmn:serviceTask id="MimetypeServiceTest" name="MimetypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimeTypeServiceTest">
+    <bpmn:serviceTask id="MimeTypeServiceTest" name="MimeTypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimeTypeServiceTest">
       <bpmn:incoming>Flow_1gkrz8f</bpmn:incoming>
       <bpmn:outgoing>Flow_1le3eld</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimetypeServiceTest" targetRef="Gateway_056f6tw" />
-    <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimetypeServiceTest">
+    <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimeTypeServiceTest" targetRef="Gateway_056f6tw" />
+    <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimeTypeServiceTest">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimetypeServiceTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
@@ -345,7 +345,7 @@
         <dc:Bounds x="650" y="1300" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimetypeServiceTest">
+      <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimeTypeServiceTest">
         <dc:Bounds x="480" y="1430" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>

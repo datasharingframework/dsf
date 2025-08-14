@@ -42,7 +42,7 @@ public interface ProcessPluginApi
 
 	MailService getMailService();
 
-	MimeTypeService getMimetypeService();
+	MimeTypeService getMimeTypeService();
 
 	ObjectMapper getObjectMapper();
 

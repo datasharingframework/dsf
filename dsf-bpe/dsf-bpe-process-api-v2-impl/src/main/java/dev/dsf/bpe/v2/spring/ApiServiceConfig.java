@@ -93,7 +93,7 @@ public class ApiServiceConfig
 	public ProcessPluginApi processPluginApiV2()
 	{
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
-				fhirClientProvider(), oidcClientProvider(), mailService(), mimetypeService(), objectMapper(),
+				fhirClientProvider(), oidcClientProvider(), mailService(), mimeTypeService(), objectMapper(),
 				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
 				taskHelper());
 	}
@@ -154,7 +154,7 @@ public class ApiServiceConfig
 	}
 
 	@Bean
-	public MimeTypeService mimetypeService()
+	public MimeTypeService mimeTypeService()
 	{
 		Detector detector = CombinedDetectors.withDefaultAndNdJson(NdJsonDetector.DEFAULT_LINES_TO_CHECK);
 		return new MimeTypeServiceImpl(detector);

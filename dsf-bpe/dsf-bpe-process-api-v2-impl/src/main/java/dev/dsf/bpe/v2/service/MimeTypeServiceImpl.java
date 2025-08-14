@@ -46,7 +46,7 @@ public class MimeTypeServiceImpl implements MimeTypeService, InitializingBean
 		}
 		catch (IOException exception)
 		{
-			throw new RuntimeException("Error while detecting mimetype", exception);
+			throw new RuntimeException("Error while detecting MIME type", exception);
 		}
 	}
 }
