@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1yb5vw3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.15.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1yb5vw3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0">
   <bpmn:process id="dsfdev_test" isExecutable="true" camunda:versionTag="#{version}">
     <bpmn:startEvent id="StartEvent">
       <bpmn:outgoing>Flow_112zq99</bpmn:outgoing>
@@ -33,7 +33,12 @@
       <bpmn:outgoing>Flow_0jv5jil</bpmn:outgoing>
       <bpmn:outgoing>Flow_0xzipbl</bpmn:outgoing>
       <bpmn:outgoing>Flow_0kt0v58</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1g6h0ul</bpmn:outgoing>
       <bpmn:outgoing>Flow_1gkrz8f</bpmn:outgoing>
+      <bpmn:outgoing>Flow_151zxir</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1bo772x</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1gipugc</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1wjdaz2</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
     <bpmn:sequenceFlow id="Flow_14rzc0j" sourceRef="Gateway_0eszi2t" targetRef="ProxyTest">
@@ -55,7 +60,12 @@
       <bpmn:incoming>Flow_1p9dw3m</bpmn:incoming>
       <bpmn:incoming>Flow_1n773yf</bpmn:incoming>
       <bpmn:incoming>Flow_0x6aoim</bpmn:incoming>
+      <bpmn:incoming>Flow_0b2eolg</bpmn:incoming>
       <bpmn:incoming>Flow_1le3eld</bpmn:incoming>
+      <bpmn:incoming>Flow_1ic3b4h</bpmn:incoming>
+      <bpmn:incoming>Flow_01nnroq</bpmn:incoming>
+      <bpmn:incoming>Flow_04z1f6i</bpmn:incoming>
+      <bpmn:incoming>Flow_0w963xd</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_08zzudo" sourceRef="ProxyTest" targetRef="Gateway_056f6tw" />
@@ -237,6 +247,14 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'JsonVariableTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0x6aoim" sourceRef="JsonVariableTestGet" targetRef="Gateway_056f6tw" />
+    <bpmn:serviceTask id="CryptoServiceTest" name="CryptoServiceTest" camunda:class="dev.dsf.bpe.test.service.CryptoServiceTest">
+      <bpmn:incoming>Flow_1g6h0ul</bpmn:incoming>
+      <bpmn:outgoing>Flow_0b2eolg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1g6h0ul" sourceRef="Gateway_0eszi2t" targetRef="CryptoServiceTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'CryptoServiceTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0b2eolg" sourceRef="CryptoServiceTest" targetRef="Gateway_056f6tw" />
     <bpmn:serviceTask id="MimeTypeServiceTest" name="MimeTypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimeTypeServiceTest">
       <bpmn:incoming>Flow_1gkrz8f</bpmn:incoming>
       <bpmn:outgoing>Flow_1le3eld</bpmn:outgoing>
@@ -244,6 +262,43 @@
     <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimeTypeServiceTest" targetRef="Gateway_056f6tw" />
     <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimeTypeServiceTest">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimeTypeServiceTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="FhirBinaryVariableTestSet" name="FhirBinaryVariableTestSet" camunda:asyncAfter="true" camunda:exclusive="false" camunda:class="dev.dsf.bpe.test.service.FhirBinaryVariableTestSet">
+      <bpmn:incoming>Flow_151zxir</bpmn:incoming>
+      <bpmn:outgoing>Flow_00fte7v</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="FhirBinaryVariableTestGet" name="FhirBinaryVariableTestGet" camunda:asyncBefore="true" camunda:exclusive="false" camunda:class="dev.dsf.bpe.test.service.FhirBinaryVariableTestGet">
+      <bpmn:incoming>Flow_00fte7v</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ic3b4h</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_00fte7v" sourceRef="FhirBinaryVariableTestSet" targetRef="FhirBinaryVariableTestGet" />
+    <bpmn:sequenceFlow id="Flow_1ic3b4h" sourceRef="FhirBinaryVariableTestGet" targetRef="Gateway_056f6tw" />
+    <bpmn:sequenceFlow id="Flow_151zxir" sourceRef="Gateway_0eszi2t" targetRef="FhirBinaryVariableTestSet">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'FhirBinaryVariableTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="EnvironmentVariableTest" name="EnvironmentVariableTest" camunda:class="dev.dsf.bpe.test.service.EnvironmentVariableTest">
+      <bpmn:incoming>Flow_1bo772x</bpmn:incoming>
+      <bpmn:outgoing>Flow_01nnroq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1bo772x" sourceRef="Gateway_0eszi2t" targetRef="EnvironmentVariableTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'EnvironmentVariableTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_01nnroq" sourceRef="EnvironmentVariableTest" targetRef="Gateway_056f6tw" />
+    <bpmn:serviceTask id="DsfClientTest" name="DsfClientTest" camunda:class="dev.dsf.bpe.test.service.DsfClientTest">
+      <bpmn:incoming>Flow_1gipugc</bpmn:incoming>
+      <bpmn:outgoing>Flow_04z1f6i</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1gipugc" sourceRef="Gateway_0eszi2t" targetRef="DsfClientTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'DsfClientTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_04z1f6i" sourceRef="DsfClientTest" targetRef="Gateway_056f6tw" />
+    <bpmn:serviceTask id="TargetProviderTest" name="TargetProviderTest" camunda:class="dev.dsf.bpe.test.service.TargetProviderTest">
+      <bpmn:incoming>Flow_1wjdaz2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0w963xd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0w963xd" sourceRef="TargetProviderTest" targetRef="Gateway_056f6tw" />
+    <bpmn:sequenceFlow id="Flow_1wjdaz2" sourceRef="Gateway_0eszi2t" targetRef="TargetProviderTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'TargetProviderTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />
@@ -338,15 +393,38 @@
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0hn6fft_di" bpmnElement="JsonVariableTestSet">
-        <dc:Bounds x="480" y="1300" width="100" height="80" />
+        <dc:Bounds x="480" y="1280" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_12jwxzn_di" bpmnElement="JsonVariableTestGet">
-        <dc:Bounds x="650" y="1300" width="100" height="80" />
+        <dc:Bounds x="650" y="1280" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1eg5ihs_di" bpmnElement="CryptoServiceTest">
+        <dc:Bounds x="480" y="1390" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimeTypeServiceTest">
-        <dc:Bounds x="480" y="1430" width="100" height="80" />
+        <dc:Bounds x="480" y="1500" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_00363t7" bpmnElement="FhirBinaryVariableTestSet">
+        <dc:Bounds x="480" y="1610" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0jphw92" bpmnElement="FhirBinaryVariableTestGet">
+        <dc:Bounds x="650" y="1610" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_14a3a5f_di" bpmnElement="EnvironmentVariableTest">
+        <dc:Bounds x="480" y="1720" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0og1ky5" bpmnElement="DsfClientTest">
+        <dc:Bounds x="480" y="1830" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1jxi9cb" bpmnElement="TargetProviderTest">
+        <dc:Bounds x="480" y="1940" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1w9i7ga_di" bpmnElement="Event_1dnlmzp">
@@ -503,28 +581,82 @@
         <di:waypoint x="1180" y="145" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0x6ibql_di" bpmnElement="Flow_0x6ibql">
-        <di:waypoint x="580" y="1340" />
-        <di:waypoint x="650" y="1340" />
+        <di:waypoint x="580" y="1320" />
+        <di:waypoint x="650" y="1320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0kt0v58_di" bpmnElement="Flow_0kt0v58">
         <di:waypoint x="410" y="145" />
-        <di:waypoint x="410" y="1340" />
-        <di:waypoint x="480" y="1340" />
+        <di:waypoint x="410" y="1320" />
+        <di:waypoint x="480" y="1320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0x6aoim_di" bpmnElement="Flow_0x6aoim">
-        <di:waypoint x="750" y="1340" />
-        <di:waypoint x="1180" y="1340" />
+        <di:waypoint x="750" y="1320" />
+        <di:waypoint x="1180" y="1320" />
+        <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g6h0ul_di" bpmnElement="Flow_1g6h0ul">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="1430" />
+        <di:waypoint x="480" y="1430" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0b2eolg_di" bpmnElement="Flow_0b2eolg">
+        <di:waypoint x="580" y="1430" />
+        <di:waypoint x="1180" y="1430" />
         <di:waypoint x="1180" y="145" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1le3eld_di" bpmnElement="Flow_1le3eld">
-        <di:waypoint x="580" y="1470" />
-        <di:waypoint x="1180" y="1470" />
+        <di:waypoint x="580" y="1540" />
+        <di:waypoint x="1180" y="1540" />
         <di:waypoint x="1180" y="145" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1gkrz8f_di" bpmnElement="Flow_1gkrz8f">
         <di:waypoint x="410" y="145" />
-        <di:waypoint x="410" y="1470" />
-        <di:waypoint x="480" y="1470" />
+        <di:waypoint x="410" y="1540" />
+        <di:waypoint x="480" y="1540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0owoo32" bpmnElement="Flow_00fte7v">
+        <di:waypoint x="580" y="1650" />
+        <di:waypoint x="650" y="1650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ic3b4h_di" bpmnElement="Flow_1ic3b4h">
+        <di:waypoint x="750" y="1650" />
+        <di:waypoint x="1180" y="1650" />
+        <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_151zxir_di" bpmnElement="Flow_151zxir">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="1650" />
+        <di:waypoint x="480" y="1650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bo772x_di" bpmnElement="Flow_1bo772x">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="1760" />
+        <di:waypoint x="480" y="1760" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01nnroq_di" bpmnElement="Flow_01nnroq">
+        <di:waypoint x="580" y="1760" />
+        <di:waypoint x="1180" y="1760" />
+        <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1gipugc_di" bpmnElement="Flow_1gipugc">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="1870" />
+        <di:waypoint x="480" y="1870" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04z1f6i_di" bpmnElement="Flow_04z1f6i">
+        <di:waypoint x="580" y="1870" />
+        <di:waypoint x="1180" y="1870" />
+        <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0w963xd_di" bpmnElement="Flow_0w963xd">
+        <di:waypoint x="580" y="1980" />
+        <di:waypoint x="1180" y="1980" />
+        <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wjdaz2_di" bpmnElement="Flow_1wjdaz2">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="1980" />
+        <di:waypoint x="480" y="1980" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

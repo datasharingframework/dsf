@@ -309,7 +309,8 @@ public class AuthorizationConfig
 	{
 		return new TaskAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getDsfServerBaseUrl(),
 				referenceConfig.referenceResolver(), authenticationConfig.organizationProvider(), readAccessHelper(),
-				helperConfig.parameterConverter(), processAuthorizationHelper(), fhirConfig.fhirContext());
+				helperConfig.parameterConverter(), processAuthorizationHelper(), fhirConfig.fhirContext(),
+				authenticationConfig.endpointProvider());
 	}
 
 	@Bean

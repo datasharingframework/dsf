@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>dsf-maven-pom</artifactId>
+	<packaging>pom</packaging>
+
+	<parent>
+		<groupId>dev.dsf</groupId>
+		<artifactId>dsf-pom</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
+
+	<modules>
+		<module>dsf-maven-plugin</module>
+	</modules>
+
+	<properties>
+		<main.basedir>${project.basedir}/../..</main.basedir>
+	</properties>
+
+	<name>DSF Maven Parent POM</name>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-documentation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api-v1</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api-v2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>

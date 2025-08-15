@@ -5,11 +5,13 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.fhir.help.ExceptionHandler;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -21,26 +23,38 @@ abstract class AbstractCommandList
 	private static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 
 	protected final DataSource dataSource;
+	protected final DataSource permanentDeleteDataSource;
+	protected final String dbUsersGroup;
 	protected final ExceptionHandler exceptionHandler;
 
 	protected final List<Command> commands = new ArrayList<>();
 	protected final boolean hasModifyingCommands;
+	protected final boolean hasBinaryModifyingCommands;
 
-	protected AbstractCommandList(DataSource dataSource, ExceptionHandler exceptionHandler,
-			List<? extends Command> commands)
+	protected AbstractCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
+			ExceptionHandler exceptionHandler, List<? extends Command> commands)
 	{
 		this.dataSource = dataSource;
+		this.permanentDeleteDataSource = permanentDeleteDataSource;
+		this.dbUsersGroup = dbUsersGroup;
 		this.exceptionHandler = exceptionHandler;
 
 		if (commands != null)
 			this.commands.addAll(commands);
 
 		hasModifyingCommands = hasModifyingCommands(commands);
+		hasBinaryModifyingCommands = hasModifyingCommands && hasBinaryModifyingCommands(commands);
 	}
 
 	private static boolean hasModifyingCommands(List<? extends Command> commands)
 	{
 		return commands != null && commands.stream().anyMatch(c -> c instanceof ModifyingCommand);
+	}
+
+	private static boolean hasBinaryModifyingCommands(List<? extends Command> commands)
+	{
+		return commands != null && commands.stream().anyMatch(c -> c instanceof ModifyingCommand m
+				&& Binary.class.getAnnotation(ResourceDef.class).name().equals(m.getResourceTypeName()));
 	}
 
 	protected void auditLogResult(Command command, BundleEntryComponent result)

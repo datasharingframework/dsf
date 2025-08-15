@@ -66,7 +66,7 @@ public class HistoryDaoTest extends AbstractDbTest
 	private final OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
 			fhirContext);
 	private final HistoryDao dao = new HistroyDaoJdbc(defaultDataSource, fhirContext,
-			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext));
+			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext, DATABASE_USERS_GROUP));
 	private final HistoryIdentityFilterFactory filterFactory = new HistoryIdentityFilterFactoryImpl();
 
 	@Test

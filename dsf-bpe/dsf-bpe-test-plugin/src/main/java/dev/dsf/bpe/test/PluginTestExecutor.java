@@ -23,13 +23,19 @@ public final class PluginTestExecutor
 		}
 	}
 
+	@FunctionalInterface
+	public interface RunnableWithException
+	{
+		void run() throws Exception;
+	}
+
 	public static final void execute(Object testClass, Consumer<String> addTestSucceededToStartTask,
 			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask, Object testMethodArg0,
 			Object testMethodArg1, Object... testMethodArgs)
 	{
 		Arrays.stream(testClass.getClass().getDeclaredMethods())
 				.filter(m -> m.getAnnotationsByType(PluginTest.class).length == 1)
-				.filter(m -> m.getParameterCount() <= testMethodArgs.length).forEach(m ->
+				.filter(m -> m.getParameterCount() <= testMethodArgs.length + 2).forEach(m ->
 				{
 					try
 					{
@@ -188,7 +194,7 @@ public final class PluginTestExecutor
 				"Tested " + type + " is not same as expected [expected: " + expected + ", actual: " + actual + "]");
 	}
 
-	public static void expectException(Class<?> expectedException, Runnable run)
+	public static void expectException(Class<?> expectedException, RunnableWithException run)
 	{
 		Objects.requireNonNull(expectedException, "expectedException");
 		Objects.requireNonNull(run, "run");

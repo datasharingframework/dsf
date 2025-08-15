@@ -21,12 +21,15 @@ import dev.dsf.bpe.v2.activity.MessageSendTask;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.activity.UserTaskListener;
 import dev.dsf.bpe.v2.documentation.ProcessDocumentation;
+import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
 import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
 
 /**
  * A provider configuration file named "dev.dsf.ProcessPluginDefinition" containing the canonical name of the class
  * implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details on the
  * content of the provider configuration file, see {@link ServiceLoader}.
+ *
+ * @see AbstractProcessPluginDefinition
  */
 public interface ProcessPluginDefinition
 {
@@ -142,8 +145,9 @@ public interface ProcessPluginDefinition
 	 * @see ServiceTask
 	 * @see UserTaskListener
 	 * @see ActivityPrototypeBeanCreator
+	 * @see ProcessPluginDeploymentListener
+	 * @see FhirResourceModifier
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
-	// TODO javadoc
 	List<Class<?>> getSpringConfigurations();
 }

@@ -179,8 +179,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.db.url", "jdbc:postgresql://" + liquibaseRule.getHost() + ":"
 				+ liquibaseRule.getMappedPort(5432) + "/" + liquibaseRule.getDatabaseName());
+		initParameters.put("dev.dsf.fhir.db.user.group", DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.username", DATABASE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.password", DATABASE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", DATABASE_DELETE_USER_PASSWORD);
 

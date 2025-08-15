@@ -28,9 +28,9 @@ import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
+import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.ui.theme.Theme;
-import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
@@ -45,6 +45,10 @@ public class PropertiesConfig implements InitializingBean
 	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
+
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
+	@Value("${dev.dsf.fhir.db.user.group:fhir_users}")
+	private String dbUsersGroup;
 
 	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.password}")
@@ -219,7 +223,7 @@ public class PropertiesConfig implements InitializingBean
 			List<X509Certificate> certificates = PemReader
 					.readCertificates(Paths.get(getDsfClientTrustedClientCasFile()));
 			KeyStore dsfClientTrustedClientCas = KeyStoreCreator.jksForTrustedCertificates(certificates);
-			CertificateValidator.vaildateClientCertificate(dsfClientTrustedClientCas, clientCertiticate);
+			CertificateValidator.validateClientCertificate(dsfClientTrustedClientCas, clientCertiticate);
 		}
 		catch (CertificateException e)
 		{
@@ -236,6 +240,11 @@ public class PropertiesConfig implements InitializingBean
 	public String getDbUsername()
 	{
 		return dbUsername;
+	}
+
+	public String getDbUsersGroup()
+	{
+		return dbUsersGroup;
 	}
 
 	public char[] getDbPassword()

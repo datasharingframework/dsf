@@ -3,22 +3,25 @@ package dev.dsf.bpe.v2.activity;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.values.SendTaskValues;
 import dev.dsf.bpe.v2.error.MessageEndEventErrorHandler;
-import dev.dsf.bpe.v2.variables.VariablesImpl;
+import dev.dsf.bpe.v2.variables.Variables;
 
 public class MessageEndEventDelegate extends AbstractMessageDelegate<MessageEndEvent> implements JavaDelegate
 {
-	public MessageEndEventDelegate(ProcessPluginApi api, MessageEndEvent delegate, SendTaskValues sendTask)
+	public MessageEndEventDelegate(ProcessPluginApi api, ObjectMapper objectMapper, MessageEndEvent delegate,
+			SendTaskValues sendTask)
 	{
-		super(api, delegate, sendTask);
+		super(api, objectMapper, delegate, sendTask);
 	}
 
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		final VariablesImpl variables = new VariablesImpl(execution);
+		Variables variables = createVariables(execution);
 
 		try
 		{

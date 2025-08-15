@@ -500,4 +500,52 @@ public final class CodeSystems
 			return isSame(SYSTEM, Codes.DSF_ADMIN, coding);
 		}
 	}
+
+	public static final class ReadAccessTag
+	{
+		private ReadAccessTag()
+		{
+		}
+
+		public static final String SYSTEM = "http://dsf.dev/fhir/CodeSystem/read-access-tag";
+
+		public static Coding withCode(String code)
+		{
+			return new Coding().setSystem(SYSTEM).setCode(code);
+		}
+
+		public static final class Codes
+		{
+			private Codes()
+			{
+			}
+
+			public static final String LOCAL = "LOCAL";
+			public static final String ORGANIZATION = "ORGANIZATION";
+			public static final String ROLE = "ROLE";
+			public static final String ALL = "ALL";
+		}
+
+		public static final Coding local()
+		{
+			return new Coding(SYSTEM, Codes.LOCAL, "Read access for local users");
+		}
+
+		public static final Coding organization()
+		{
+			return new Coding(SYSTEM, Codes.ORGANIZATION,
+					"Read access for organization specified via extension http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization");
+		}
+
+		public static final Coding role()
+		{
+			return new Coding(SYSTEM, Codes.ROLE,
+					"Read access for member organizations with role in consortium (parent organization) specified via extension http://dsf.dev/fhir/StructureDefinition/extension-read-access-consortium-role");
+		}
+
+		public static final Coding all()
+		{
+			return new Coding(SYSTEM, Codes.ALL, "Read access for remote and local users");
+		}
+	}
 }

@@ -29,6 +29,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
@@ -91,8 +92,10 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 				return null;
 			}
 
-			return new PractitionerIdentityImpl(localOrganization.get(), dsfRoles, null, practitioner.get(),
-					practitionerRoles, credentials);
+			Optional<Endpoint> localEndpoint = getLocalEndpoint();
+
+			return new PractitionerIdentityImpl(localOrganization.get(), localEndpoint.orElse(null), dsfRoles, null,
+					practitioner.get(), practitionerRoles, credentials);
 		}
 		else
 		{
@@ -104,6 +107,8 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 	}
 
 	protected abstract Optional<Organization> getLocalOrganization();
+
+	protected abstract Optional<Endpoint> getLocalEndpoint();
 
 	protected final String getThumbprint(X509Certificate certificate)
 	{

@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 
@@ -25,6 +26,8 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	/**
 	 * @param organization
 	 *            not <code>null</code>
+	 * @param endpoint
+	 *            may be <code>null</code>
 	 * @param dsfRoles
 	 *            may be <code>null</code>
 	 * @param certificate
@@ -36,11 +39,11 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	 * @param credentials
 	 *            may be <code>null</code>
 	 */
-	public PractitionerIdentityImpl(Organization organization, Collection<? extends DsfRole> dsfRoles,
-			X509Certificate certificate, Practitioner practitioner, Collection<? extends Coding> practitionerRoles,
-			DsfOpenIdCredentials credentials)
+	public PractitionerIdentityImpl(Organization organization, Endpoint endpoint,
+			Collection<? extends DsfRole> dsfRoles, X509Certificate certificate, Practitioner practitioner,
+			Collection<? extends Coding> practitionerRoles, DsfOpenIdCredentials credentials)
 	{
-		super(true, organization, dsfRoles, certificate);
+		super(true, organization, endpoint, dsfRoles, certificate);
 
 		this.practitioner = Objects.requireNonNull(practitioner, "practitioner");
 

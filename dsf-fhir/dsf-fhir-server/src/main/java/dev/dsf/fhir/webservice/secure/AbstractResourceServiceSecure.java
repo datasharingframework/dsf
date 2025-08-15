@@ -217,6 +217,19 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		Response read = delegate.read(id, uri, headers);
 
+		return checkRead(read);
+	}
+
+	@Override
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
+	{
+		Response read = delegate.vread(id, version, uri, headers);
+
+		return checkRead(read);
+	}
+
+	protected final Response checkRead(Response read)
+	{
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
 		{
 			final R entity = resourceType.cast(read.getEntity());
@@ -241,6 +254,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
 						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
 								.build();
+					else if (Status.PRECONDITION_FAILED.getStatusCode() == read.getStatus())
+						return Response.status(Status.PRECONDITION_FAILED).build();
 					else
 						return read;
 				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
@@ -257,74 +272,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-			return read;
-		}
-		else if (read.hasEntity())
-		{
-			audit.info("Read of {} denied for identity '{}', not a {}", resourceTypeName,
-					getCurrentIdentity().getName(), resourceTypeName);
-			return forbidden("read");
-		}
-		else
-		{
-			audit.info("Read of {} for identity '{}' returned without entity, status {} {}", resourceTypeName,
-					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-
-			logger.info("Returning with status {} {}, but no entity", read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-			return read;
-		}
-	}
-
-	@Override
-	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
-	{
-		Response read = delegate.vread(id, version, uri, headers);
-
-		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
-		{
-			final R entity = resourceType.cast(read.getEntity());
-			final String entityId = entity.getIdElement().getIdPart();
-			final long entityVersion = entity.getIdElement().getVersionIdPartAsLong();
-			final Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentIdentity(),
-					entity);
-
-			if (reasonReadAllowed.isEmpty())
-			{
-				audit.info("Read of {}/{}/_history/{} denied for identity '{}'", resourceTypeName, entityId,
-						entityVersion, getCurrentIdentity().getName());
-				return forbidden("read");
-			}
-			else
-			{
-				audit.info("Read of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
-						entityId, entityVersion, getCurrentIdentity().getName(), reasonReadAllowed.get());
-				return logResultStatus(() ->
-				{
-					// if not modified remove entity
-					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
-						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
-								.build();
-					else
-						return read;
-				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
-						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
-								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
-			}
-		}
-		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)
-		{
-			audit.info("Read of {} for identity '{}' returned with OperationOutcome, status: {} {}", resourceTypeName,
-					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-
-			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
+			logger.info("Returning with OperationOutcome, status: {} {}", read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
@@ -543,9 +491,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
-					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					"Query contains parameter not applicable in this conditional update context: standard parameters {} will be ignored",
 					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
 			queryParameters = queryParameters.entrySet().stream()

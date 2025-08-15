@@ -47,46 +47,55 @@ public class JwksImpl implements Jwks
 			this.y = y;
 		}
 
+		@Override
 		public String getKid()
 		{
 			return kid;
 		}
 
+		@Override
 		public String getKty()
 		{
 			return kty;
 		}
 
+		@Override
 		public String getAlg()
 		{
 			return alg;
 		}
 
+		@Override
 		public String getCrv()
 		{
 			return crv;
 		}
 
+		@Override
 		public String getUse()
 		{
 			return use;
 		}
 
+		@Override
 		public String getN()
 		{
 			return n;
 		}
 
+		@Override
 		public String getE()
 		{
 			return e;
 		}
 
+		@Override
 		public String getX()
 		{
 			return x;
 		}
 
+		@Override
 		public String getY()
 		{
 			return y;
@@ -102,11 +111,13 @@ public class JwksImpl implements Jwks
 			keysByKid.putAll(keys.stream().collect(Collectors.toMap(JwksKey::getKid, Function.identity())));
 	}
 
+	@Override
 	public Set<JwksKey> getKeys()
 	{
 		return Set.copyOf(keysByKid.values());
 	}
 
+	@Override
 	public Optional<JwksKey> getKey(String kid)
 	{
 		return Optional.ofNullable(keysByKid.get(kid));

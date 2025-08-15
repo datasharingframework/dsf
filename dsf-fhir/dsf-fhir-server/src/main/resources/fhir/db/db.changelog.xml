@@ -43,4 +43,5 @@
 	<include file="fhir/db/db.constraint_trigger.changelog-1.6.1.xml" />
 	<include file="fhir/db/db.delete_duplicate_resources.changelog-1.6.1.xml" />
 
+	<include file="fhir/db/db.binaries.changelog-2.0.0.xml" />
 </databaseChangeLog>

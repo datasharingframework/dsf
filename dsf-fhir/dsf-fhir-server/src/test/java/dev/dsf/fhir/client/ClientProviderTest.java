@@ -17,12 +17,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.common.build.BuildInfoReader;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.service.ReferenceCleaner;
-import dev.dsf.tools.build.BuildInfoReader;
 
 public class ClientProviderTest
 {

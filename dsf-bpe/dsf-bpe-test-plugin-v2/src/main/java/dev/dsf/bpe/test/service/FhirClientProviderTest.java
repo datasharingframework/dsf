@@ -47,7 +47,7 @@ public class FhirClientProviderTest extends AbstractTest implements ServiceTask
 			expectNotNull(c.getCertificateAuthentication().getKeyStore());
 			expectNotNull(c.getCertificateAuthentication().getKeyStorePassword());
 			expectNotNull(c.getConnectTimeout());
-			expectTrue(c.isDebugLoggingEnabled());
+			expectFalse(c.isDebugLoggingEnabled());
 			expectSame("dsf-fhir-server", c.getFhirServerId());
 			expectNull(c.getOidcAuthentication());
 			expectNull(c.getProxy());

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -64,6 +65,18 @@ public class TargetsImpl implements Targets
 	public boolean isEmpty()
 	{
 		return entries.isEmpty();
+	}
+
+	@Override
+	public int size()
+	{
+		return entries.size();
+	}
+
+	@Override
+	public Optional<Target> getFirst()
+	{
+		return entries.isEmpty() ? Optional.empty() : Optional.of(entries.get(0));
 	}
 
 	@Override

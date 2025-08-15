@@ -9,16 +9,31 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF Common DB</name>
+
 	<dependencies>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
 		</dependency>
 	</dependencies>
 </project>

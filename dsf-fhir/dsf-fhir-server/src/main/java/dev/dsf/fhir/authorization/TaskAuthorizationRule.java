@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.fhir.authentication.EndpointProvider;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
@@ -60,17 +62,19 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
 	private final FhirContext fhirContext;
+	private final EndpointProvider endpointProvider;
 
 	public TaskAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
 			ParameterConverter parameterConverter, ProcessAuthorizationHelper processAuthorizationHelper,
-			FhirContext fhirContext)
+			FhirContext fhirContext, EndpointProvider endpointProvider)
 	{
 		super(Task.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
 				parameterConverter);
 
 		this.processAuthorizationHelper = processAuthorizationHelper;
 		this.fhirContext = fhirContext;
+		this.endpointProvider = endpointProvider;
 	}
 
 	@Override
@@ -80,6 +84,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 		Objects.requireNonNull(processAuthorizationHelper, "processAuthorizationHelper");
 		Objects.requireNonNull(fhirContext, "fhirContext");
+		Objects.requireNonNull(endpointProvider, "endpointProvider");
 	}
 
 	@Override
@@ -506,13 +511,16 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 					boolean okForRecipient = processAuthorizationHelper
 							.getRecipients(activityDefinition, processUrl, processVersion, messageName, taskProfiles)
-							.anyMatch(r -> r.isRecipientAuthorized(recipient, getAffiliations(connection,
-									organizationProvider.getLocalOrganizationIdentifierValue())));
+							.anyMatch(r -> r.isRecipientAuthorized(recipient,
+									getAffiliations(connection,
+											organizationProvider.getLocalOrganizationIdentifierValue(),
+											endpointProvider.getLocalEndpointIdentifierValue().orElse(null))));
 
 					boolean okForRequester = processAuthorizationHelper
 							.getRequesters(activityDefinition, processUrl, processVersion, messageName, taskProfiles)
-							.anyMatch(r -> r.isRequesterAuthorized(requester, getAffiliations(connection,
-									requester.getOrganizationIdentifierValue().orElse(null))));
+							.anyMatch(r -> r.isRequesterAuthorized(requester,
+									getAffiliations(connection, requester.getOrganizationIdentifierValue().orElse(null),
+											requester.getEndpointIdentifierValue().orElse(null))));
 
 					if (!okForRecipient && !okForRequester)
 						logger.warn("Task not allowed for requester and recipient");
@@ -581,8 +589,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 					boolean okForRecipient = processAuthorizationHelper
 							.getRecipients(activityDefinition, processUrl, processVersion, messageName, taskProfiles)
-							.anyMatch(r -> r.isRecipientAuthorized(recipient, getAffiliations(connection,
-									organizationProvider.getLocalOrganizationIdentifierValue())));
+							.anyMatch(r -> r.isRecipientAuthorized(recipient,
+									getAffiliations(connection,
+											organizationProvider.getLocalOrganizationIdentifierValue(),
+											endpointProvider.getLocalEndpointIdentifierValue().orElse(null))));
 
 					if (!okForRecipient)
 						logger.warn("Task not allowed for recipient");
@@ -603,6 +613,28 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			logger.warn("Task.instantiatesCanonical not matching {} pattern", INSTANTIATES_CANONICAL_PATTERN_STRING);
 
 			return false;
+		}
+	}
+
+	private List<OrganizationAffiliation> getAffiliations(Connection connection, String organizationIdentifierValue,
+			String endpointIdentifierValue)
+	{
+		if (organizationIdentifierValue == null)
+			return List.of();
+		// endpointIdentifierValue may be null
+
+		try
+		{
+			return daoProvider.getOrganizationAffiliationDao()
+					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
+							connection, organizationIdentifierValue, endpointIdentifierValue);
+		}
+		catch (SQLException e)
+		{
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
+			throw new RuntimeException(e);
 		}
 	}
 

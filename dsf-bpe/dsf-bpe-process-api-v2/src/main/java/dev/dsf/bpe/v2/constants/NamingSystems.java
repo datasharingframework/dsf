@@ -13,8 +13,6 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 
-import dev.dsf.bpe.v2.constants.NamingSystems;
-
 /**
  * Constants defining standard DSF NamingSystems
  */
@@ -32,7 +30,24 @@ public final class NamingSystems
 
 		List<Identifier> identifiers = identifierSupplier.get();
 		return identifiers == null ? Optional.empty()
-				: identifiers.stream().filter(i -> identifierSystem.equals(i.getSystem())).findFirst();
+				: identifiers.stream()
+						.filter(i -> i.hasSystemElement() && i.getSystemElement().hasValue() && i.hasValueElement()
+								&& i.getValueElement().hasValue()
+								&& identifierSystem.equals(i.getSystemElement().getValue()))
+						.findFirst();
+	}
+
+	private static boolean hasIdentifier(Supplier<List<Identifier>> identifierSupplier, String identifierSystem)
+	{
+		Objects.requireNonNull(identifierSupplier, "identifierSupplier");
+		Objects.requireNonNull(identifierSystem, "identifierSystem");
+
+		List<Identifier> identifiers = identifierSupplier.get();
+		return identifiers == null ? false
+				: identifiers.stream()
+						.anyMatch(i -> i.hasSystemElement() && i.getSystemElement().hasValue() && i.hasValueElement()
+								&& i.getValueElement().hasValue()
+								&& identifierSystem.equals(i.getSystemElement().getValue()));
 	}
 
 	private static <R extends Resource> Optional<Identifier> findFirst(Optional<R> resource,
@@ -75,6 +90,11 @@ public final class NamingSystems
 			Objects.requireNonNull(organization, "organization");
 			return NamingSystems.findFirst(organization, Organization::getIdentifier, SID);
 		}
+
+		public static boolean hasIdentifier(Organization organization)
+		{
+			return organization == null ? false : NamingSystems.hasIdentifier(organization::getIdentifier, SID);
+		}
 	}
 
 	public static final class EndpointIdentifier
@@ -99,6 +119,11 @@ public final class NamingSystems
 		{
 			Objects.requireNonNull(endpoint, "endpoint");
 			return NamingSystems.findFirst(endpoint, Endpoint::getIdentifier, SID);
+		}
+
+		public static boolean hasIdentifier(Endpoint endpoint)
+		{
+			return endpoint == null ? false : NamingSystems.hasIdentifier(endpoint::getIdentifier, SID);
 		}
 	}
 
@@ -125,6 +150,11 @@ public final class NamingSystems
 			Objects.requireNonNull(practitioner, "practitioner");
 			return NamingSystems.findFirst(practitioner, Practitioner::getIdentifier, SID);
 		}
+
+		public static boolean hasIdentifier(Practitioner practitioner)
+		{
+			return practitioner == null ? false : NamingSystems.hasIdentifier(practitioner::getIdentifier, SID);
+		}
 	}
 
 	public static final class TaskIdentifier
@@ -149,6 +179,11 @@ public final class NamingSystems
 		{
 			Objects.requireNonNull(task, "task");
 			return NamingSystems.findFirst(task, Task::getIdentifier, SID);
+		}
+
+		public static boolean hasIdentifier(Task task)
+		{
+			return task == null ? false : NamingSystems.hasIdentifier(task::getIdentifier, SID);
 		}
 	}
 }

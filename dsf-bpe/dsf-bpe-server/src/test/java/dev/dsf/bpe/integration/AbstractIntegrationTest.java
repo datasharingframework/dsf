@@ -160,6 +160,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				Paths.get("src/main/resources/bpe/api/v1/allowed-bpe-classes.list"));
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTest");
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTestExecutor");
+		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTestExecutor$RunnableWithException");
 		writeListFile(ALLOWED_BPE_CLASSES_LIST_FILE_V1, allowedBpeClassesV1);
 
 		// allowed bpe classes override to enable access to classes from dsf-bpe-test-plugin module for v2 test plugins
@@ -167,6 +168,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				Paths.get("src/main/resources/bpe/api/v2/allowed-bpe-classes.list"));
 		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTest");
 		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTestExecutor");
+		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTestExecutor$RunnableWithException");
 		writeListFile(ALLOWED_BPE_CLASSES_LIST_FILE_V2, allowedBpeClassesV2);
 
 		bpeDefaultDataSource = createBpeDefaultDataSource(bpeLiquibaseRule.getHost(),
@@ -315,8 +317,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.db.url", "jdbc:postgresql://" + fhirLiquibaseRule.getHost() + ":"
 				+ fhirLiquibaseRule.getMappedPort(5432) + "/" + fhirLiquibaseRule.getDatabaseName());
+		initParameters.put("dev.dsf.fhir.db.user.group", FHIR_DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.username", FHIR_DATABASE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.password", FHIR_DATABASE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", FHIR_DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", FHIR_DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", FHIR_DATABASE_DELETE_USER_PASSWORD);
 
@@ -394,7 +398,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.bpe.db.url", "jdbc:postgresql://" + bpeLiquibaseRule.getHost() + ":"
 				+ bpeLiquibaseRule.getMappedPort(5432) + "/" + bpeLiquibaseRule.getDatabaseName());
-
+		initParameters.put("dev.dsf.bpe.db.user.group", BPE_DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.bpe.db.user.username", BPE_DATABASE_USER);
 		initParameters.put("dev.dsf.bpe.db.user.password", BPE_DATABASE_USER_PASSWORD);
 		initParameters.put("dev.dsf.bpe.db.user.camunda.username", BPE_DATABASE_CAMUNDA_USER);
@@ -432,7 +436,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				dsf-fhir-server:
 				  base-url: '#[fhirBaseUrl]'
 				  test-connection-on-startup: yes
-				  enable-debug-logging: yes
+				  enable-debug-logging: no
 				  cert-auth:
 				    private-key-file: '#[client.key]'
 				    certificate-file: '#[client.crt]'
@@ -449,6 +453,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config", fhirConnectionsYaml);
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
+
+		initParameters.put("dev.dsf.bpe.test.env.mandatory", "test-value");
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());

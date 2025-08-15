@@ -17,6 +17,7 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
@@ -80,16 +81,16 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	}
 
 	@Override
-	protected StructureDefinition createWithTransactionAndId(Connection connection, StructureDefinition resource,
-			UUID uuid) throws SQLException
+	protected StructureDefinition createWithTransactionAndId(LargeObjectManager largeObjectManager,
+			Connection connection, StructureDefinition resource, UUID uuid) throws SQLException
 	{
-		StructureDefinition created = super.createWithTransactionAndId(connection, resource, uuid);
+		StructureDefinition created = super.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 
 		if (resourceWithSnapshot != null)
 		{
 			try
 			{
-				snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
+				snapshotDao.createWithTransactionAndId(largeObjectManager, connection, resourceWithSnapshot, uuid);
 			}
 			catch (SQLException e)
 			{
@@ -105,10 +106,12 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	}
 
 	@Override
-	protected StructureDefinition updateWithTransaction(Connection connection, StructureDefinition resource,
-			Long expectedVersion) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	protected StructureDefinition updateWithTransaction(LargeObjectManager largeObjectManager, Connection connection,
+			StructureDefinition resource, Long expectedVersion)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
-		StructureDefinition updated = super.updateWithTransaction(connection, resource, expectedVersion);
+		StructureDefinition updated = super.updateWithTransaction(largeObjectManager, connection, resource,
+				expectedVersion);
 
 		if (resourceWithSnapshot != null)
 		{
@@ -117,7 +120,8 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 
 			try
 			{
-				snapshotDao.updateWithTransaction(connection, resourceWithSnapshot, expectedVersion);
+				snapshotDao.updateWithTransaction(largeObjectManager, connection, resourceWithSnapshot,
+						expectedVersion);
 			}
 			catch (SQLException | ResourceNotFoundException | ResourceVersionNoMatchException e)
 			{

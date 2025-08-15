@@ -100,4 +100,10 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	{
 		expectNotNull(api.getTaskHelper());
 	}
+
+	@PluginTest
+	public void apiGetCryptoService(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getCryptoService());
+	}
 }

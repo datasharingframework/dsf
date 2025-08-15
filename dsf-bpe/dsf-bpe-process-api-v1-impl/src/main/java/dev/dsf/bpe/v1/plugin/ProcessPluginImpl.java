@@ -44,6 +44,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
+import dev.dsf.bpe.api.plugin.FhirResourceModifier;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.api.plugin.ProcessPluginDeploymentListener;
 import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig;
@@ -162,13 +163,19 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 						&& BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
 				.count() == 1;
 
+		Function<StructureDefinition, Optional<String>> getStructureDefinitionBaseDefinition = s -> s
+				.hasBaseDefinitionElement() && s.getBaseDefinitionElement().hasValue()
+						? Optional.of(s.getBaseDefinitionElement().getValue())
+						: Optional.empty();
+
 		return new ProcessPluginFhirConfig<>(ActivityDefinition.class, CodeSystem.class, Library.class, Measure.class,
 				NamingSystem.class, Questionnaire.class, StructureDefinition.class, Task.class, ValueSet.class,
 				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), BpmnMessage.URL,
 				BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName, hasMetadataResourceUrl,
 				hasMetadataResourceVersion, getMetadataResourceVersion, getActivityDefinitionUrl, NamingSystem::hasName,
 				getTaskInstantiatesCanonical, getTaskIdentifierValue, isTaskStatusDraft, getRequester, getRecipient,
-				Task::hasInput, hasTaskInputMessageName, Task::hasOutput);
+				Task::hasInput, hasTaskInputMessageName, Task::hasOutput, getStructureDefinitionBaseDefinition,
+				StructureDefinition::setBaseDefinition);
 	}
 
 	private IParser newXmlParser()
@@ -327,5 +334,11 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 			VariableScope variableScope)
 	{
 		return get(TaskListener.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public FhirResourceModifier getFhirResourceModifier()
+	{
+		return FhirResourceModifier.identity();
 	}
 }

@@ -5,9 +5,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import dev.dsf.bpe.config.BpeDbMigratorConfig;
 import dev.dsf.bpe.config.BpeHttpsJettyConfig;
+import dev.dsf.common.db.migration.DbMigrator;
 import dev.dsf.common.jetty.JettyServer;
 import dev.dsf.common.jetty.Log4jInitializer;
-import dev.dsf.tools.db.DbMigrator;
 
 public final class BpeJettyServerHttps
 {

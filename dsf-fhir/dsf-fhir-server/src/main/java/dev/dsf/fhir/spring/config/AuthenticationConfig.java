@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import dev.dsf.common.auth.conf.IdentityProvider;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.RoleConfigReader;
+import dev.dsf.fhir.authentication.EndpointProvider;
+import dev.dsf.fhir.authentication.EndpointProviderImpl;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.IdentityProviderImpl;
 import dev.dsf.fhir.authentication.OrganizationProvider;
@@ -32,14 +34,21 @@ public class AuthenticationConfig
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderImpl(daoConfig.organizationDao(), helperConfig.exceptionHandler(),
+		return new OrganizationProviderImpl(helperConfig.exceptionHandler(), daoConfig.organizationDao(),
 				propertiesConfig.getOrganizationIdentifierValue());
+	}
+
+	@Bean
+	public EndpointProvider endpointProvider()
+	{
+		return new EndpointProviderImpl(helperConfig.exceptionHandler(), daoConfig.endpointDao(),
+				propertiesConfig.getDsfServerBaseUrl());
 	}
 
 	@Bean
 	public IdentityProvider identityProvider()
 	{
-		return new IdentityProviderImpl(roleConfig(), organizationProvider(),
+		return new IdentityProviderImpl(roleConfig(), organizationProvider(), endpointProvider(),
 				propertiesConfig.getOrganizationIdentifierValue());
 	}
 

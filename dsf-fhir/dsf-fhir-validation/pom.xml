@@ -9,6 +9,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF FHIR Validation</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -51,61 +53,26 @@
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-			<!-- <scope>test</scope> -->
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j2-impl</artifactId>
-			<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-			<!-- <scope>test</scope> -->
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-		<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-bundle-generator</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<goals>
-							<goal>java</goal>
+							<goal>generate-fhir-bundle</goal>
 						</goals>
-						<phase>generate-resources</phase>
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>dev.dsf.tools.generator.BundleGenerator</mainClass>
-					<arguments>
-						<argument>${project.basedir}/src/main/resources/fhir</argument>
-					</arguments>
-					<workingDirectory>${project.basedir}</workingDirectory>
-					<cleanupDaemonThreads>false</cleanupDaemonThreads>
-					<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-					<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-					<!-- <includePluginDependencies>true</includePluginDependencies> <includeProjectDependencies>false</includeProjectDependencies> -->
-					<!-- <executableDependency> <groupId>dev.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> </executableDependency> -->
+					<baseFolder>src/main/resources/fhir</baseFolder>
 				</configuration>
-				<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-				<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-				<!-- <dependencies> <dependency> <groupId>dev.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>2.0.0-SNAPSHOT</version> </dependency>
-					</dependencies> -->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -123,34 +90,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>exec-maven-plugin</artifactId>
-										<versionRange>[1.6.0,)</versionRange>
-										<goals>
-											<goal>java</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

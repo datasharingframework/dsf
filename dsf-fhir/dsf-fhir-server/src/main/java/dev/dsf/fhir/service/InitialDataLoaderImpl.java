@@ -28,7 +28,7 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 		Organization org = new Organization().setName("Initial Data Loader");
 		org.addIdentifier().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("initial.data.loader");
 
-		INITIAL_DATA_LOADER = new OrganizationIdentityImpl(true, org,
+		INITIAL_DATA_LOADER = new OrganizationIdentityImpl(true, org, null,
 				EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE, FhirServerRole.UPDATE), null);
 	}
 

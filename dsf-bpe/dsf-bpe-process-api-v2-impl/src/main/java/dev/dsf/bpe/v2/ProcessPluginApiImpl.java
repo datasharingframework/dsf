@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
@@ -17,6 +18,7 @@ import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
+import dev.dsf.bpe.v2.service.TargetProvider;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 
@@ -37,6 +39,8 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
+	private final CryptoService cryptoService;
+	private final TargetProvider targetProvider;
 
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
@@ -44,7 +48,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
-			TaskHelper taskHelper)
+			TaskHelper taskHelper, CryptoService cryptoService, TargetProvider targetProvider)
 	{
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
@@ -60,6 +64,8 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
 		this.readAccessHelper = readAccessHelper;
 		this.taskHelper = taskHelper;
+		this.cryptoService = cryptoService;
+		this.targetProvider = targetProvider;
 	}
 
 	@Override
@@ -78,6 +84,8 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(cryptoService, "cryptoService");
+		Objects.requireNonNull(targetProvider, "targetProvider");
 	}
 
 	@Override
@@ -162,5 +170,17 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public TaskHelper getTaskHelper()
 	{
 		return taskHelper;
+	}
+
+	@Override
+	public CryptoService getCryptoService()
+	{
+		return cryptoService;
+	}
+
+	@Override
+	public TargetProvider getTargetProvider()
+	{
+		return targetProvider;
 	}
 }

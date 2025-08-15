@@ -21,7 +21,8 @@ interface PreparedStatementFactory<R extends Resource>
 
 	String getCreateSql();
 
-	void configureCreateStatement(PreparedStatement statement, R resource, UUID uuid) throws SQLException;
+	void configureCreateStatement(LargeObjectManager largeObjectManager, PreparedStatement statement, R resource,
+			UUID uuid) throws SQLException;
 
 	String getReadByIdSql();
 
@@ -43,13 +44,8 @@ interface PreparedStatementFactory<R extends Resource>
 
 	R getReadByIdAndVersionResource(ResultSet result) throws SQLException;
 
-	String getUpdateNewRowSql();
+	String getUpdateSql();
 
-	void configureUpdateNewRowSqlStatement(PreparedStatement statement, UUID uuid, long version, R resource)
-			throws SQLException;
-
-	String getUpdateSameRowSql();
-
-	void configureUpdateSameRowSqlStatement(PreparedStatement statement, UUID uuid, long version, R resource)
-			throws SQLException;
+	void configureUpdateSqlStatement(LargeObjectManager largeObjectManager, PreparedStatement statement, UUID uuid,
+			long version, R resource) throws SQLException;
 }

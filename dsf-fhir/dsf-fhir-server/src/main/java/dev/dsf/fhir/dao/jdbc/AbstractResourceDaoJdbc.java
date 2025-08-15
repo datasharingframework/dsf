@@ -215,6 +215,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return dataSource;
 	}
 
+	protected DataSource getPermanentDeleteDataSource()
+	{
+		return permanentDeleteDataSource;
+	}
+
 	protected String getResourceTable()
 	{
 		return resourceTable;
@@ -259,6 +264,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
+	public LargeObjectManager createLargeObjectManager(Connection connection)
+	{
+		return LargeObjectManager.NO_OP;
+	}
+
+	@Override
 	public final R create(R resource) throws SQLException
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -272,29 +283,58 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(uuid, "uuid");
 
-		try (Connection connection = dataSource.getConnection())
+		try (Connection connection = newReadWriteTransaction())
 		{
-			connection.setReadOnly(false);
-			return createWithTransactionAndId(connection, resource, uuid);
+			LargeObjectManager largeObjectManager = createLargeObjectManager(connection);
+
+			try
+			{
+				R createdResource = createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
+				connection.commit();
+
+				return createdResource;
+			}
+			catch (Exception e)
+			{
+				connection.rollback();
+
+				try
+				{
+					largeObjectManager.rollback();
+				}
+				catch (SQLException suppressed)
+				{
+					e.addSuppressed(suppressed);
+				}
+
+				throw e;
+			}
 		}
 	}
 
 	@Override
-	public R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	public R createWithTransactionAndId(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			UUID uuid) throws SQLException
 	{
+		Objects.requireNonNull(largeObjectManager, "largeObjectManager");
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(uuid, "uuid");
 		if (connection.isReadOnly())
 			throw new IllegalArgumentException("Connection is read-only");
+		if (connection.getTransactionIsolation() != Connection.TRANSACTION_READ_COMMITTED)
+			throw new IllegalArgumentException("Connection transaction isolation not READ_COMMITTED");
+		if (connection.getAutoCommit())
+			throw new IllegalArgumentException("Connection transaction is in auto commit mode");
 
-		R inserted = create(connection, resource, uuid);
+		R inserted = create(largeObjectManager, connection, resource, uuid);
 
 		logger.debug("{} with ID {} created", resourceTypeName, inserted.getId());
 		return inserted;
 	}
 
-	private R create(Connection connection, R resource, UUID uuid) throws SQLException
+	private R create(LargeObjectManager largeObjectManager, Connection connection, R resource, UUID uuid)
+			throws SQLException
 	{
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
 		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), FIRST_VERSION_STRING));
@@ -303,7 +343,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getCreateSql()))
 		{
-			preparedStatementFactory.configureCreateStatement(statement, resource, uuid);
+			preparedStatementFactory.configureCreateStatement(largeObjectManager, statement, resource, uuid);
 
 			statement.execute();
 		}
@@ -369,7 +409,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		}
 	}
 
-	private ResourceDeletedException newResourceDeletedException(UUID uuid, LocalDateTime deleted, long version)
+	protected final ResourceDeletedException newResourceDeletedException(UUID uuid, LocalDateTime deleted, long version)
 	{
 		return new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString(), String.valueOf(version + 1)),
 				deleted);
@@ -567,9 +607,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		try (Connection connection = newReadWriteTransaction())
 		{
+			LargeObjectManager largeObjectManager = createLargeObjectManager(connection);
+
 			try
 			{
-				R updatedResource = updateWithTransaction(connection, resource, expectedVersion);
+				R updatedResource = updateWithTransaction(largeObjectManager, connection, resource, expectedVersion);
 
 				connection.commit();
 
@@ -578,15 +620,26 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			catch (Exception e)
 			{
 				connection.rollback();
+
+				try
+				{
+					largeObjectManager.rollback();
+				}
+				catch (SQLException suppressed)
+				{
+					e.addSuppressed(suppressed);
+				}
+
 				throw e;
 			}
 		}
 	}
 
 	@Override
-	public R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
-			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	public R updateWithTransaction(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			Long expectedVersion) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
+		Objects.requireNonNull(largeObjectManager, "largeObjectManager");
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resource, "resource");
 		// expectedVersion may be null
@@ -611,7 +664,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		// latestVersion gives stored latest version +1 if resource is deleted
 		long newVersion = latestVersion.version + 1;
 
-		R updated = update(connection, resource, newVersion);
+		R updated = update(largeObjectManager, connection, resource, newVersion);
 
 		logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName, updated.getIdElement().getIdPart(),
 				newVersion);
@@ -650,7 +703,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		}
 	}
 
-	private R update(Connection connection, R resource, long version) throws SQLException
+	private R update(LargeObjectManager largeObjectManager, Connection connection, R resource, long version)
+			throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
@@ -662,9 +716,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		resource.getMeta().setVersionId(versionAsString);
 		resource.getMeta().setLastUpdated(new Date());
 
-		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getUpdateNewRowSql()))
+		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getUpdateSql()))
 		{
-			preparedStatementFactory.configureUpdateNewRowSqlStatement(statement, uuid, version, resource);
+			preparedStatementFactory.configureUpdateSqlStatement(largeObjectManager, statement, uuid, version,
+					resource);
 
 			statement.execute();
 		}
@@ -786,9 +841,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	{
 		Objects.requireNonNull(query, "query");
 
-		try (Connection connection = dataSource.getConnection())
+		try (Connection connection = newReadWriteTransaction())
 		{
-			return searchWithTransaction(connection, query);
+			PartialResult<R> result = searchWithTransaction(connection, query);
+			connection.commit();
+			return result;
 		}
 	}
 
@@ -876,7 +933,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				includeResources.add(r);
 			}
 			else
-				logger.warn("parsed resouce of type {} not instance of {}, ignoring include resource",
+				logger.warn("parsed resource of type {} not instance of {}, ignoring include resource",
 						resource.getClass().getName(), Resource.class.getName());
 		}
 	}
@@ -912,11 +969,13 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	public void deletePermanently(UUID uuid)
 			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
 	{
-		try (Connection connection = permanentDeleteDataSource.getConnection())
+		try (Connection connection = getPermanentDeleteDataSource().getConnection())
 		{
 			connection.setReadOnly(false);
+			connection.setAutoCommit(false);
 
 			deletePermanentlyWithTransaction(connection, uuid);
+			connection.commit();
 		}
 	}
 
