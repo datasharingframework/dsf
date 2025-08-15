@@ -12,7 +12,7 @@ import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
-import dev.dsf.bpe.v2.service.MimetypeService;
+import dev.dsf.bpe.v2.service.MimeTypeService;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
@@ -44,7 +44,7 @@ public interface ProcessPluginApi
 
 	MailService getMailService();
 
-	MimetypeService getMimetypeService();
+	MimeTypeService getMimeTypeService();
 
 	ObjectMapper getObjectMapper();
 
