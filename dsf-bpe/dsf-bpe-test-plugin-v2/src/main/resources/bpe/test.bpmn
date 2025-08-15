@@ -243,7 +243,7 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimeTypeServiceTest" targetRef="Gateway_056f6tw" />
     <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimeTypeServiceTest">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimetypeServiceTest'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimeTypeServiceTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />

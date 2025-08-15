@@ -85,8 +85,8 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
-	public void startMimetypeServiceTest() throws Exception
+	public void startMimeTypeServiceTest() throws Exception
 	{
-		executePluginTest(createTestTask("MimetypeServiceTest"));
+		executePluginTest(createTestTask("MimeTypeServiceTest"));
 	}
 }

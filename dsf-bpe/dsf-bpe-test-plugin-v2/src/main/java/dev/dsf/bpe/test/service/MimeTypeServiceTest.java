@@ -88,7 +88,7 @@ public class MimeTypeServiceTest extends AbstractTest implements ServiceTask
 		for (Resource resource : resources)
 		{
 			InputStream data = getDataStream(resource);
-			String mimeType = getMimetype(resource);
+			String mimeType = getMimeType(resource);
 
 			MimeTypeService.ValidationResult validationResult = mimeTypeService.validateWithResult(data, mimeType);
 			if (!validationResult.mimeTypesMatch())
@@ -122,7 +122,7 @@ public class MimeTypeServiceTest extends AbstractTest implements ServiceTask
 					.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private String getMimetype(Resource resource)
+	private String getMimeType(Resource resource)
 	{
 		if (resource instanceof Binary binary)
 			return binary.getContentType();
