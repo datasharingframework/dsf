@@ -17,60 +17,60 @@ import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
-import dev.dsf.bpe.v2.service.MimetypeService;
+import dev.dsf.bpe.v2.service.MimeTypeService;
 import dev.dsf.bpe.v2.variables.Variables;
 
-public class MimetypeServiceTest extends AbstractTest implements ServiceTask
+public class MimeTypeServiceTest extends AbstractTest implements ServiceTask
 {
 	@Override
 	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		executeTests(api, variables, api.getMimetypeService());
+		executeTests(api, variables, api.getMimeTypeService());
 	}
 
 	@PluginTest
-	public void testAttachmentBundle(MimetypeService mimetypeService)
+	public void testAttachmentBundle(MimeTypeService mimeTypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-Bundle.xml");
-		testResourcesStream(resources, mimetypeService);
+		testResourcesStream(resources, mimeTypeService);
 	}
 
 	@PluginTest
-	public void testAttachmentCsv(MimetypeService mimetypeService)
+	public void testAttachmentCsv(MimeTypeService mimeTypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-CSV.xml");
-		testResourcesStream(resources, mimetypeService);
+		testResourcesStream(resources, mimeTypeService);
 	}
 
 	@PluginTest
-	public void testAttachmentMeasureReport(MimetypeService mimetypeService)
+	public void testAttachmentMeasureReport(MimeTypeService mimeTypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-MeasureReport.xml");
-		testResourcesStream(resources, mimetypeService);
+		testResourcesStream(resources, mimeTypeService);
 	}
 
 	@PluginTest
-	public void testAttachmentNdJson(MimetypeService mimetypeService)
+	public void testAttachmentNdJson(MimeTypeService mimeTypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-NdJson.xml");
-		testResourcesStream(resources, mimetypeService);
+		testResourcesStream(resources, mimeTypeService);
 	}
 
 	@PluginTest
-	public void testAttachmentZip(MimetypeService mimetypeService)
+	public void testAttachmentZip(MimeTypeService mimeTypeService)
 	{
 		List<Resource> resources = getResourcesNotDocumentReferenceFromPath(
 				"fhir/Bundle/DocumentReference-with-Attachment-ZIP.xml");
-		testResourcesStream(resources, mimetypeService);
+		testResourcesStream(resources, mimeTypeService);
 	}
 
 	private List<Resource> getResourcesNotDocumentReferenceFromPath(String pathToBundle)
 	{
-		try (InputStream input = MimetypeServiceTest.class.getClassLoader().getResourceAsStream(pathToBundle))
+		try (InputStream input = MimeTypeServiceTest.class.getClassLoader().getResourceAsStream(pathToBundle))
 		{
 			Bundle bundle = FhirContext.forR4().newXmlParser().parseResource(Bundle.class, input);
 			return bundle.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)
@@ -83,14 +83,33 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 		}
 	}
 
-	private void testResourcesStream(List<Resource> resources, MimetypeService mimetypeService)
+	private void testResourcesStream(List<Resource> resources, MimeTypeService mimeTypeService)
 	{
 		for (Resource resource : resources)
 		{
 			InputStream data = getDataStream(resource);
-			String expected = getMimetype(resource);
+			String mimeType = getMimeType(resource);
 
-			mimetypeService.validate(data, expected);
+			MimeTypeService.ValidationResult validationResult = mimeTypeService.validateWithResult(data, mimeType);
+			if (!validationResult.mimeTypesMatch())
+				throw new RuntimeException(
+						"Detected MIME type does not match expected MIME type (#validateWithResult())");
+
+			boolean mimeTypesMatch = mimeTypeService.validateWithBoolean(data, mimeType);
+			if (!mimeTypesMatch)
+				throw new RuntimeException(
+						"Detected MIME type does not match expected MIME type (#validateWithBoolean())");
+
+			try
+			{
+				mimeTypeService.validateWithException(data, mimeType);
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(
+						"Detected MIME type does not match expected MIME type (#validateWithException()) - "
+								+ e.getMessage());
+			}
 		}
 	}
 
@@ -103,7 +122,7 @@ public class MimetypeServiceTest extends AbstractTest implements ServiceTask
 					.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private String getMimetype(Resource resource)
+	private String getMimeType(Resource resource)
 	{
 		if (resource instanceof Binary binary)
 			return binary.getContentType();

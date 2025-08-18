@@ -257,13 +257,13 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'CryptoServiceTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0b2eolg" sourceRef="CryptoServiceTest" targetRef="Gateway_056f6tw" />
-    <bpmn:serviceTask id="MimetypeServiceTest" name="MimetypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimetypeServiceTest">
+    <bpmn:serviceTask id="MimeTypeServiceTest" name="MimeTypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimeTypeServiceTest">
       <bpmn:incoming>Flow_1gkrz8f</bpmn:incoming>
       <bpmn:outgoing>Flow_1le3eld</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimetypeServiceTest" targetRef="Gateway_056f6tw" />
-    <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimetypeServiceTest">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimetypeServiceTest'}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimeTypeServiceTest" targetRef="Gateway_056f6tw" />
+    <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimeTypeServiceTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimeTypeServiceTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="FhirBinaryVariableTestSet" name="FhirBinaryVariableTestSet" camunda:asyncAfter="true" camunda:exclusive="false" camunda:class="dev.dsf.bpe.test.service.FhirBinaryVariableTestSet">
       <bpmn:incoming>Flow_151zxir</bpmn:incoming>
@@ -413,7 +413,7 @@
       <bpmndi:BPMNShape id="Activity_1eg5ihs_di" bpmnElement="CryptoServiceTest">
         <dc:Bounds x="480" y="1390" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimetypeServiceTest">
+      <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimeTypeServiceTest">
         <dc:Bounds x="480" y="1500" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
