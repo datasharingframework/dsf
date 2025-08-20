@@ -39,6 +39,7 @@
       <bpmn:outgoing>Flow_1bo772x</bpmn:outgoing>
       <bpmn:outgoing>Flow_1gipugc</bpmn:outgoing>
       <bpmn:outgoing>Flow_1wjdaz2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0jlkf4u</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
     <bpmn:sequenceFlow id="Flow_14rzc0j" sourceRef="Gateway_0eszi2t" targetRef="ProxyTest">
@@ -66,6 +67,7 @@
       <bpmn:incoming>Flow_01nnroq</bpmn:incoming>
       <bpmn:incoming>Flow_04z1f6i</bpmn:incoming>
       <bpmn:incoming>Flow_0w963xd</bpmn:incoming>
+      <bpmn:incoming>Flow_17to6o7</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_08zzudo" sourceRef="ProxyTest" targetRef="Gateway_056f6tw" />
@@ -255,13 +257,13 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'CryptoServiceTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0b2eolg" sourceRef="CryptoServiceTest" targetRef="Gateway_056f6tw" />
-    <bpmn:serviceTask id="MimetypeServiceTest" name="MimetypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimetypeServiceTest">
+    <bpmn:serviceTask id="MimeTypeServiceTest" name="MimeTypeServiceTest" camunda:class="dev.dsf.bpe.test.service.MimeTypeServiceTest">
       <bpmn:incoming>Flow_1gkrz8f</bpmn:incoming>
       <bpmn:outgoing>Flow_1le3eld</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimetypeServiceTest" targetRef="Gateway_056f6tw" />
-    <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimetypeServiceTest">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimetypeServiceTest'}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_1le3eld" sourceRef="MimeTypeServiceTest" targetRef="Gateway_056f6tw" />
+    <bpmn:sequenceFlow id="Flow_1gkrz8f" sourceRef="Gateway_0eszi2t" targetRef="MimeTypeServiceTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'MimeTypeServiceTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="FhirBinaryVariableTestSet" name="FhirBinaryVariableTestSet" camunda:asyncAfter="true" camunda:exclusive="false" camunda:class="dev.dsf.bpe.test.service.FhirBinaryVariableTestSet">
       <bpmn:incoming>Flow_151zxir</bpmn:incoming>
@@ -300,6 +302,14 @@
     <bpmn:sequenceFlow id="Flow_1wjdaz2" sourceRef="Gateway_0eszi2t" targetRef="TargetProviderTest">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'TargetProviderTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="DataLoggerTest" name="DataLoggerTest" camunda:class="dev.dsf.bpe.test.service.DataLoggerTest">
+      <bpmn:incoming>Flow_0jlkf4u</bpmn:incoming>
+      <bpmn:outgoing>Flow_17to6o7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0jlkf4u" sourceRef="Gateway_0eszi2t" targetRef="DataLoggerTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'DataLoggerTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_17to6o7" sourceRef="DataLoggerTest" targetRef="Gateway_056f6tw" />
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />
   <bpmn:message id="Message_2iq6v5e" name="proxyTest" />
@@ -403,7 +413,7 @@
       <bpmndi:BPMNShape id="Activity_1eg5ihs_di" bpmnElement="CryptoServiceTest">
         <dc:Bounds x="480" y="1390" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimetypeServiceTest">
+      <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimeTypeServiceTest">
         <dc:Bounds x="480" y="1500" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -425,6 +435,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1jxi9cb" bpmnElement="TargetProviderTest">
         <dc:Bounds x="480" y="1940" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0xi9pbi" bpmnElement="DataLoggerTest">
+        <dc:Bounds x="480" y="2050" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1w9i7ga_di" bpmnElement="Event_1dnlmzp">
@@ -657,6 +671,16 @@
         <di:waypoint x="410" y="145" />
         <di:waypoint x="410" y="1980" />
         <di:waypoint x="480" y="1980" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jlkf4u_di" bpmnElement="Flow_0jlkf4u">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="2090" />
+        <di:waypoint x="480" y="2090" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17to6o7_di" bpmnElement="Flow_17to6o7">
+        <di:waypoint x="580" y="2090" />
+        <di:waypoint x="1180" y="2090" />
+        <di:waypoint x="1180" y="145" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

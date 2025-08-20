@@ -39,6 +39,8 @@ import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.CryptoServiceImpl;
+import dev.dsf.bpe.v2.service.DataLogger;
+import dev.dsf.bpe.v2.service.DataLoggerImpl;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
@@ -48,8 +50,8 @@ import dev.dsf.bpe.v2.service.FhirClientProviderImpl;
 import dev.dsf.bpe.v2.service.FhirClientProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MailServiceDelegate;
-import dev.dsf.bpe.v2.service.MimetypeService;
-import dev.dsf.bpe.v2.service.MimetypeServiceImpl;
+import dev.dsf.bpe.v2.service.MimeTypeService;
+import dev.dsf.bpe.v2.service.MimeTypeServiceImpl;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OidcClientProviderDelegate;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
@@ -99,9 +101,9 @@ public class ApiServiceConfig
 	public ProcessPluginApi processPluginApiV2()
 	{
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
-				fhirClientProvider(), oidcClientProvider(), mailService(), mimetypeService(), objectMapper(),
+				fhirClientProvider(), oidcClientProvider(), mailService(), mimeTypeService(), objectMapper(),
 				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
-				taskHelper(), cryptoService(), targetProvider());
+				taskHelper(), cryptoService(), targetProvider(), dataLogger());
 	}
 
 	@Bean
@@ -160,10 +162,10 @@ public class ApiServiceConfig
 	}
 
 	@Bean
-	public MimetypeService mimetypeService()
+	public MimeTypeService mimeTypeService()
 	{
 		Detector detector = CombinedDetectors.withDefaultAndNdJson(NdJsonDetector.DEFAULT_LINES_TO_CHECK);
-		return new MimetypeServiceImpl(detector);
+		return new MimeTypeServiceImpl(detector);
 	}
 
 	@Bean
@@ -292,5 +294,11 @@ public class ApiServiceConfig
 	public TargetProvider targetProvider()
 	{
 		return new TargetProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
+	}
+
+	@Bean
+	public DataLogger dataLogger()
+	{
+		return new DataLoggerImpl(fhirContext());
 	}
 }

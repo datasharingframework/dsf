@@ -15,6 +15,7 @@ import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 
 public class FallbackSerializerFactoryImpl implements FallbackSerializerFactory
@@ -80,7 +81,8 @@ public class FallbackSerializerFactoryImpl implements FallbackSerializerFactory
 	private final Map<String, TypedValueSerializerWrapper> serializersByName = new HashMap<>();
 
 	@Override
-	public void setProcessPlugins(List<ProcessPlugin> plugins)
+	public void setProcessPlugins(List<ProcessPlugin> plugins,
+			Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion)
 	{
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		List<TypedValueSerializerWrapper> serializers = plugins.stream()

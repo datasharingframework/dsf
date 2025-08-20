@@ -14,6 +14,8 @@ import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.camunda.bpm.engine.variable.value.PrimitiveValue;
 import org.springframework.context.ApplicationContext;
 
+import dev.dsf.bpe.api.logging.PluginMdc;
+
 public interface ProcessPlugin
 {
 	String MODEL_ATTRIBUTE_PROCESS_API_VERSION = "dsf.process.api.version";
@@ -30,6 +32,8 @@ public interface ProcessPlugin
 
 	ApplicationContext getApplicationContext();
 
+	PluginMdc getPluginMdc();
+
 	@SuppressWarnings("rawtypes")
 	Stream<TypedValueSerializer> getTypedValueSerializers();
 
@@ -38,6 +42,8 @@ public interface ProcessPlugin
 	Map<ProcessIdAndVersion, List<byte[]>> getFhirResources();
 
 	List<BpmnFileAndModel> getProcessModels();
+
+	String getPluginDefinitionPackageName();
 
 	ProcessPluginDeploymentListener getProcessPluginDeploymentListener();
 

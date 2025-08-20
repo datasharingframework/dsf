@@ -112,4 +112,10 @@ public class TestPractitionerIdentity implements PractitionerIdentity
 	{
 		return Optional.empty();
 	}
+
+	@Override
+	public Optional<String> getPractitionerIdentifierValue()
+	{
+		return Optional.empty();
+	}
 }

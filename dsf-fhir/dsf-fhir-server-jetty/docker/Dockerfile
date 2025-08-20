@@ -4,7 +4,7 @@ WORKDIR /opt/fhir
 COPY --chown=root:java ./ ./
 RUN chown root:java ./ && \
     chmod 750 ./ ./ca ./conf ./lib ./ui ./dsf_fhir_start.sh ./healthcheck.sh && \
-	chmod 440 ./ca/client_cert_ca_chains.pem ./ca/server_cert_root_cas.pem ./conf/log4j2.xml ./conf/bundle.xml ./dsf_fhir.jar ./lib/*.jar && \
+	chmod 440 ./ca/client_cert_ca_chains.pem ./ca/server_cert_root_cas.pem ./conf/bundle.xml ./dsf_fhir.jar ./lib/*.jar && \
 	chmod 1775 ./log
 
 

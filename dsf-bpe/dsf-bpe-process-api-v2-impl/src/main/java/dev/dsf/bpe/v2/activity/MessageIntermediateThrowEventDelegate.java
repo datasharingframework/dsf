@@ -1,9 +1,9 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.util.function.Function;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.values.SendTaskValues;
@@ -13,10 +13,11 @@ import dev.dsf.bpe.v2.variables.Variables;
 public class MessageIntermediateThrowEventDelegate extends AbstractMessageDelegate<MessageIntermediateThrowEvent>
 		implements JavaDelegate
 {
-	public MessageIntermediateThrowEventDelegate(ProcessPluginApi api, ObjectMapper objectMapper,
-			MessageIntermediateThrowEvent delegate, SendTaskValues sendTask)
+	public MessageIntermediateThrowEventDelegate(ProcessPluginApi api,
+			Function<DelegateExecution, Variables> variablesFactory, MessageIntermediateThrowEvent delegate,
+			SendTaskValues sendTask)
 	{
-		super(api, objectMapper, delegate, sendTask);
+		super(api, variablesFactory, delegate, sendTask);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package dev.dsf.bpe.listener;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -10,6 +11,7 @@ import java.util.stream.Stream;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.impl.bpmn.parser.AbstractBpmnParseListener;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
+import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.camunda.bpm.engine.impl.pvm.process.ProcessDefinitionImpl;
 import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
@@ -19,18 +21,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.bpe.api.listener.ListenerFactory;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.camunda.ProcessPluginConsumer;
 
-public class DefaultBpmnParseListener extends AbstractBpmnParseListener
+public class DefaultBpmnParseListener extends AbstractBpmnParseListener implements ProcessPluginConsumer
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultBpmnParseListener.class);
 
 	private final Map<String, ListenerFactory> listenerFactoriesByApiVersion = new HashMap<>();
+	private final Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion = new HashMap<>();
 
 	public DefaultBpmnParseListener(Stream<? extends ListenerFactory> listenerFactories)
 	{
 		if (listenerFactories != null)
 			this.listenerFactoriesByApiVersion.putAll(listenerFactories
 					.collect(Collectors.toMap(f -> String.valueOf(f.getApiVersion()), Function.identity())));
+	}
+
+	@Override
+	public void setProcessPlugins(List<ProcessPlugin> plugins,
+			Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion)
+	{
+		this.processPluginsByProcessIdAndVersion.putAll(processPluginsByProcessIdAndVersion);
+	}
+
+	private ProcessPlugin getPlugin(ProcessIdAndVersion processIdAndVersion)
+	{
+		return processPluginsByProcessIdAndVersion.get(processIdAndVersion);
 	}
 
 	private Optional<ListenerFactory> getListenerFactory(ActivityImpl element)
@@ -57,7 +75,8 @@ public class DefaultBpmnParseListener extends AbstractBpmnParseListener
 		{
 			Element messageEventDefinition = startEventElement.element(BpmnParse.MESSAGE_EVENT_DEFINITION);
 			if (messageEventDefinition != null)
-				startEventActivity.addListener(ExecutionListener.EVENTNAME_START, listenerFactory.getStartListener());
+				startEventActivity.addListener(ExecutionListener.EVENTNAME_START,
+						withMdc(listenerFactory.getStartListener()));
 			else
 				logger.debug("Not adding Listener to StartEvent {}", startEventActivity.getId());
 		});
@@ -73,7 +92,7 @@ public class DefaultBpmnParseListener extends AbstractBpmnParseListener
 			 * resource has been updated. Listeners added to the end phase of the EndEvent via BPMN are execute after
 			 * this listener
 			 */
-			endEventActivity.addListener(ExecutionListener.EVENTNAME_END, listenerFactory.getEndListener(), 0);
+			endEventActivity.addListener(ExecutionListener.EVENTNAME_END, withMdc(listenerFactory.getEndListener()), 0);
 		});
 	}
 
@@ -85,10 +104,11 @@ public class DefaultBpmnParseListener extends AbstractBpmnParseListener
 		{
 			/*
 			 * Adding at index 0 to the end phase of the IntermediateMessageCatchEvent, so processes can execute
-			 * listeners after variables has been updated. Listeners added to the end phase of the
+			 * listeners after variables have been updated. Listeners added to the end phase of the
 			 * IntermediateMessageCatchEvent via BPMN are execute after this listener
 			 */
-			nestedActivity.addListener(ExecutionListener.EVENTNAME_END, listenerFactory.getContinueListener(), 0);
+			nestedActivity.addListener(ExecutionListener.EVENTNAME_END, withMdc(listenerFactory.getContinueListener()),
+					0);
 		});
 	}
 
@@ -99,10 +119,22 @@ public class DefaultBpmnParseListener extends AbstractBpmnParseListener
 		{
 			/*
 			 * Adding at index 0 to the end phase of the IntermediateMessageCatchEvent, so processes can execute
-			 * listeners after variables has been updated. Listeners added to the end phase of the
+			 * listeners after variables have been updated. Listeners added to the end phase of the
 			 * IntermediateMessageCatchEvent via BPMN are execute after this listener
 			 */
-			activity.addListener(ExecutionListener.EVENTNAME_END, listenerFactory.getContinueListener(), 0);
+			activity.addListener(ExecutionListener.EVENTNAME_END, withMdc(listenerFactory.getContinueListener()), 0);
 		});
+	}
+
+	public ExecutionListener withMdc(ExecutionListener delegate)
+	{
+		return execution ->
+		{
+			ExecutionEntity e = (ExecutionEntity) execution;
+			ProcessIdAndVersion processKeyAndVersion = new ProcessIdAndVersion(e.getProcessDefinition().getKey(),
+					e.getProcessDefinition().getVersionTag());
+
+			getPlugin(processKeyAndVersion).getPluginMdc().executeWithProcessMdc(execution, delegate::notify);
+		};
 	}
 }

@@ -50,7 +50,7 @@ public class NdJsonDetector implements Detector
 		// Using own metadata as provided metadata should not be changed (see method definition in interface)
 		Metadata internalMetadata = new Metadata();
 
-		// Gives only a hint to the possible mimetype, this is needed because application/json
+		// Gives only a hint to the possible MIME type, this is needed because application/json
 		// cannot be detected without any hint and would resolve to text/plain.
 		// As we are checking line by line for JSON to detect if the content is application/x-ndjson, we have to reset
 		// the hint to application/json.

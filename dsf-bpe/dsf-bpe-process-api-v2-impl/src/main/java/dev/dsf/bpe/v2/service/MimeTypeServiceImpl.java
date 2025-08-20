@@ -8,17 +8,13 @@ import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class MimetypeServiceImpl implements MimetypeService, InitializingBean
+public class MimeTypeServiceImpl implements MimeTypeService, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(MimetypeServiceImpl.class);
-
 	private final Detector detector;
 
-	public MimetypeServiceImpl(Detector detector)
+	public MimeTypeServiceImpl(Detector detector)
 	{
 		this.detector = detector;
 	}
@@ -30,10 +26,9 @@ public class MimetypeServiceImpl implements MimetypeService, InitializingBean
 	}
 
 	@Override
-	public void validate(InputStream stream, String declared)
+	public ValidationResult validateWithResult(InputStream stream, String declared)
 	{
 		MediaType declaredMimeType = MediaType.parse(declared);
-		MediaType detectedMimeType;
 
 		try
 		{
@@ -44,21 +39,14 @@ public class MimetypeServiceImpl implements MimetypeService, InitializingBean
 			Metadata metadata = new Metadata();
 			metadata.add(Metadata.CONTENT_TYPE, declaredMimeType.toString());
 
-			detectedMimeType = detector.detect(input, metadata);
+			MediaType detectedMimeType = detector.detect(input, metadata);
+
+			return new ValidationResult(declaredMimeType.getType(), declaredMimeType.getSubtype(),
+					detectedMimeType.getType(), detectedMimeType.getSubtype());
 		}
 		catch (IOException exception)
 		{
-			throw new RuntimeException("Error while detecting mimetype", exception);
-		}
-
-		if (!declaredMimeType.equals(detectedMimeType))
-			logger.warn("Declared full mimetype {} does not match detected full mimetype {}",
-					declaredMimeType.toString(), detectedMimeType.toString());
-
-		if (!declaredMimeType.getType().equals(detectedMimeType.getType()))
-		{
-			throw new RuntimeException("Declared base mimetype of '" + declaredMimeType.toString()
-					+ "' does not match detected base mimetype of '" + detectedMimeType.toString() + "'");
+			throw new RuntimeException("Error while detecting MIME type", exception);
 		}
 	}
 }

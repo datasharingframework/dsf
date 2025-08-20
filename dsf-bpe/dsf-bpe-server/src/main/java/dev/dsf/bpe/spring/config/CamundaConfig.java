@@ -90,6 +90,16 @@ public class CamundaConfig
 	{
 		var c = new MultiVersionSpringProcessEngineConfiguration(delegateProvider());
 		c.setProcessEngineName("dsf");
+		c.setLoggingContextActivityId("dsf.process.activityId");
+		c.setLoggingContextActivityName("dsf.process.activityName");
+		c.setLoggingContextApplicationName(null);
+		c.setLoggingContextBusinessKey("dsf.process.businessKey");
+		c.setLoggingContextEngineName(null);
+		c.setLoggingContextProcessDefinitionId("dsf.process.definitionId");
+		c.setLoggingContextProcessDefinitionKey("dsf.process.definitionKey");
+		c.setLoggingContextProcessInstanceId("dsf.process.instanceId");
+		c.setLoggingContextTenantId(null);
+
 		c.setDataSource(transactionAwareDataSource());
 		c.setTransactionManager(transactionManager());
 		c.setDatabaseSchemaUpdate("false");

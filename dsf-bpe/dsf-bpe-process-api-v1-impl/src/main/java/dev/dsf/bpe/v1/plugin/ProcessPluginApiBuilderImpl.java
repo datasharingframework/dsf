@@ -11,9 +11,9 @@ public class ProcessPluginApiBuilderImpl implements ProcessPluginApiBuilder
 {
 	@Override
 	public ProcessPluginFactory build(ClassLoader apiClassLoader, ApplicationContext apiApplicationContext,
-			ConfigurableEnvironment environment)
+			ConfigurableEnvironment environment, String serverBaseUrl)
 	{
-		return new ProcessPluginFactoryImpl(apiClassLoader, apiApplicationContext, environment);
+		return new ProcessPluginFactoryImpl(apiClassLoader, apiApplicationContext, environment, serverBaseUrl);
 	}
 
 	@Override

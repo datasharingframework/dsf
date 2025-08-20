@@ -54,6 +54,8 @@ import org.junit.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.SpringServletContainerInitializer;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -579,5 +581,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		{
 			logger.error("Error while deleting directory {}, error: {}", directory.toString(), e.toString());
 		}
+	}
+
+	protected static AnnotationConfigWebApplicationContext getBpeSpringWebApplicationContext()
+	{
+		return (AnnotationConfigWebApplicationContext) WebApplicationContextUtils
+				.getWebApplicationContext(bpeServer.getServletContext());
 	}
 }

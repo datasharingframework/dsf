@@ -33,8 +33,7 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 		if (processPluginFactories != null)
 		{
 			this.processPluginFactories.addAll(processPluginFactories);
-			this.processPluginFactories.sort(
-					Comparator.<ProcessPluginFactory> comparingInt(ProcessPluginFactory::getApiVersion).reversed());
+			this.processPluginFactories.sort(Comparator.comparingInt(ProcessPluginFactory::getApiVersion).reversed());
 		}
 
 		this.pluginDirectory = pluginDirectory;

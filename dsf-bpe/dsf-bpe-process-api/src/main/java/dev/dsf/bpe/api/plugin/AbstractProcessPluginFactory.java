@@ -28,16 +28,18 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 	private final ClassLoader apiClassLoader;
 	protected final ApplicationContext apiApplicationContext;
 	protected final ConfigurableEnvironment environment;
+	protected final String serverBaseUrl;
 	private final Class<?> processPluginDefinitionType;
 
 	public AbstractProcessPluginFactory(int apiVersion, ClassLoader apiClassLoader,
-			ApplicationContext apiApplicationContext, ConfigurableEnvironment environment,
+			ApplicationContext apiApplicationContext, ConfigurableEnvironment environment, String serverBaseUrl,
 			Class<?> processPluginDefinitionType)
 	{
 		this.apiVersion = apiVersion;
 		this.apiClassLoader = apiClassLoader;
 		this.apiApplicationContext = apiApplicationContext;
 		this.environment = environment;
+		this.serverBaseUrl = serverBaseUrl;
 		this.processPluginDefinitionType = processPluginDefinitionType;
 	}
 
@@ -47,6 +49,7 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 		Objects.requireNonNull(apiClassLoader, "apiClassLoader");
 		Objects.requireNonNull(apiApplicationContext, "apiApplicationContext");
 		Objects.requireNonNull(environment, "environment");
+		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 		Objects.requireNonNull(processPluginDefinitionType, "processPluginDefinitionType");
 	}
 
@@ -67,8 +70,14 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 			List<Provider<?>> definitions = ServiceLoader.load(processPluginDefinitionType, pluginClassLoader).stream()
 					.collect(Collectors.toList());
 
-			if (definitions.size() != 1)
+			if (definitions.size() < 1)
 				return null;
+			else if (definitions.size() > 1)
+			{
+				logger.warn("Ignoring {}: {} process plugin definition classes for API version {} found",
+						pluginPath.toString(), definitions.size(), apiVersion);
+				return null;
+			}
 
 			String filename = pluginPath.getFileName().toString();
 			boolean isSnapshot = filename.endsWith(SNAPSHOT_FILE_SUFFIX);
