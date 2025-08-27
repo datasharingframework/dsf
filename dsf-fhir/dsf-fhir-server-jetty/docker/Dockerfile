@@ -3,8 +3,8 @@ RUN adduser --system --no-create-home --group --uid 2101 java
 WORKDIR /opt/fhir
 COPY --chown=root:java ./ ./
 RUN chown root:java ./ && \
-    chmod 750 ./ ./ca ./conf ./lib ./ui ./dsf_fhir_start.sh ./healthcheck.sh && \
-	chmod 440 ./ca/client_cert_ca_chains.pem ./ca/server_cert_root_cas.pem ./conf/bundle.xml ./dsf_fhir.jar ./lib/*.jar && \
+    chmod 750 ./ ./ca ./ca/client_ca_chains ./ca/server_root_cas ./conf ./lib ./ui ./dsf_fhir_start.sh ./healthcheck.sh && \
+	chmod 440 ./ca/client_ca_chains/*.crt ./ca/server_root_cas/*.crt ./conf/bundle.xml ./dsf_fhir.jar ./lib/*.jar && \
 	chmod 1775 ./log
 
 

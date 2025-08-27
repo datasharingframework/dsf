@@ -36,9 +36,9 @@ public class DefaultCaFilesGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCaFilesGenerator.class);
 
-	private static final String LOG_MESSAGE_SERVER_ROOT_C_AS = "server root CAs";
+	private static final String LOG_MESSAGE_SERVER_ROOT_CAS = "server root CAs";
 	private static final String LOG_MESSAGE_CLIENT_CA_CHAINS = "client CA chains";
-	private static final String LOG_MESSAGE_CLIENT_ISSUING_C_AS = "client issuing CAs";
+	private static final String LOG_MESSAGE_CLIENT_ISSUING_CAS = "client issuing CAs";
 
 	private static final class X509CertificateHolder
 	{
@@ -154,19 +154,19 @@ public class DefaultCaFilesGenerator
 			throw new MojoExecutionException("clientOnlyCaCommonNames not defined or empty");
 	}
 
-	public void createFiles(Stream<Path> clientCertIssuingCaFiles, Stream<Path> clientCertCaChainFiles,
-			Stream<Path> serverCertRootCaFiles) throws IOException, MojoExecutionException
+	public void createFiles(Stream<Path> clientIssuingCas, Stream<Path> clientCaChains, Stream<Path> serverRootCas)
+			throws IOException, MojoExecutionException
 	{
-		if (clientCertIssuingCaFiles == null)
-			throw new MojoExecutionException("clientCertIssuingCaFiles not defined");
-		if (clientCertCaChainFiles == null)
-			throw new MojoExecutionException("clientCertCaChainFiles not defined");
-		if (serverCertRootCaFiles == null)
-			throw new MojoExecutionException("serverCertRootCaFiles not defined");
+		if (clientIssuingCas == null)
+			throw new MojoExecutionException("clientIssuingCas not defined");
+		if (clientCaChains == null)
+			throw new MojoExecutionException("clientCaChains not defined");
+		if (serverRootCas == null)
+			throw new MojoExecutionException("serverRootCas not defined");
 
-		List<Path> iToWrite = clientCertIssuingCaFiles.filter(ifNotExists(LOG_MESSAGE_CLIENT_ISSUING_C_AS)).toList();
-		List<Path> cToWrite = clientCertCaChainFiles.filter(ifNotExists(LOG_MESSAGE_CLIENT_CA_CHAINS)).toList();
-		List<Path> sWrite = serverCertRootCaFiles.filter(ifNotExists(LOG_MESSAGE_SERVER_ROOT_C_AS)).toList();
+		List<Path> iToWrite = clientIssuingCas.filter(isDirectory(LOG_MESSAGE_CLIENT_ISSUING_CAS)).toList();
+		List<Path> cToWrite = clientCaChains.filter(isDirectory(LOG_MESSAGE_CLIENT_CA_CHAINS)).toList();
+		List<Path> sWrite = serverRootCas.filter(isDirectory(LOG_MESSAGE_SERVER_ROOT_CAS)).toList();
 
 		if (iToWrite.isEmpty() && cToWrite.isEmpty() && sWrite.isEmpty())
 			return;
@@ -175,11 +175,11 @@ public class DefaultCaFilesGenerator
 
 		try
 		{
-			iToWrite.forEach(writeClientIssuingCas(certificates, LOG_MESSAGE_CLIENT_ISSUING_C_AS));
+			iToWrite.forEach(writeClientIssuingCas(certificates, LOG_MESSAGE_CLIENT_ISSUING_CAS));
 
 			cToWrite.forEach(writeClientCaChains(certificates, LOG_MESSAGE_CLIENT_CA_CHAINS));
 
-			sWrite.forEach(writeServerRootCas(certificates, LOG_MESSAGE_SERVER_ROOT_C_AS));
+			sWrite.forEach(writeServerRootCas(certificates, LOG_MESSAGE_SERVER_ROOT_CAS));
 		}
 		catch (RuntimeIOException e)
 		{
@@ -187,17 +187,16 @@ public class DefaultCaFilesGenerator
 		}
 	}
 
-	private Predicate<Path> ifNotExists(String logMessage)
+	private Predicate<Path> isDirectory(String logMessage)
 	{
-		return file ->
+		return folder ->
 		{
+			boolean isDirectory = Files.isDirectory(folder);
 
-			boolean exists = Files.isReadable(file);
+			if (!isDirectory)
+				logger.info("Default {} folder at {} does not exist", logMessage, projectBasedir.relativize(folder));
 
-			if (exists)
-				logger.info("Default {} file exists at {}", logMessage, projectBasedir.relativize(file));
-
-			return !exists;
+			return isDirectory;
 		};
 	}
 
@@ -259,26 +258,18 @@ public class DefaultCaFilesGenerator
 
 	private Consumer<Path> writeClientIssuingCas(List<X509CertificateHolder> certificates, String logMessage)
 	{
-		return file ->
-		{
-			List<X509Certificate> certs = certificates.stream().filter(X509CertificateHolder::isIssuingCa)
-					.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName))
-					.map(X509CertificateHolder::getCertificate).toList();
+		List<X509CertificateHolder> issuingCas = certificates.stream().filter(X509CertificateHolder::isIssuingCa)
+				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).toList();
 
-			writeCas(certs, file, logMessage);
-		};
+		return folder -> issuingCas.forEach(writeCert(folder, logMessage));
 	}
 
 	private Consumer<Path> writeClientCaChains(List<X509CertificateHolder> certificates, String logMessage)
 	{
-		return file ->
-		{
-			List<X509Certificate> certs = certificates.stream().filter(X509CertificateHolder::isRoot)
-					.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).flatMap(childern())
-					.map(X509CertificateHolder::getCertificate).toList();
+		List<X509CertificateHolder> caChains = certificates.stream().filter(X509CertificateHolder::isRoot)
+				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).flatMap(childern()).toList();
 
-			writeCas(certs, file, logMessage);
-		};
+		return folder -> caChains.forEach(writeCert(folder, logMessage));
 	}
 
 	private Function<X509CertificateHolder, Stream<X509CertificateHolder>> childern()
@@ -289,27 +280,33 @@ public class DefaultCaFilesGenerator
 
 	private Consumer<Path> writeServerRootCas(List<X509CertificateHolder> certificates, String logMessage)
 	{
-		return file ->
-		{
-			List<X509Certificate> certs = certificates.stream().filter(X509CertificateHolder::isRoot)
-					.filter(Predicate.not(X509CertificateHolder::isClientOnly))
-					.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName))
-					.map(X509CertificateHolder::getCertificate).toList();
+		List<X509CertificateHolder> rootCas = certificates.stream().filter(X509CertificateHolder::isRoot)
+				.filter(Predicate.not(X509CertificateHolder::isClientOnly)).toList();
 
-			writeCas(certs, file, logMessage);
-		};
+		return folder -> rootCas.forEach(writeCert(folder, logMessage));
 	}
 
-	private void writeCas(List<X509Certificate> certs, Path file, String logMessage) throws RuntimeIOException
+	private Consumer<X509CertificateHolder> writeCert(Path folder, String logMessage)
 	{
-		try
+		return holder ->
 		{
-			logger.info("Writing default {} file to {}", logMessage, projectBasedir.relativize(file));
-			PemWriter.writeCertificates(certs, file);
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeIOException(e);
-		}
+			try
+			{
+				Path target = folder.resolve(holder.getSubjectCommonName().replaceAll("[/\\- ]+", "_") + ".crt");
+
+				if (Files.isReadable(target))
+					logger.info("Not writing default {} file to {}, file exists", logMessage,
+							projectBasedir.relativize(target));
+				else
+				{
+					logger.info("Writing default {} file to {}", logMessage, projectBasedir.relativize(target));
+					PemWriter.writeCertificate(holder.getCertificate(), true, target);
+				}
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		};
 	}
 }

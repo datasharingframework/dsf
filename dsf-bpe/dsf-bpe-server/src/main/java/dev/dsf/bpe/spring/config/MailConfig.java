@@ -70,8 +70,8 @@ public class MailConfig implements InitializingBean
 
 		KeyStore trustStore = propertiesConfig.getMailServerTrustStore();
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore keyStore = propertiesConfig.getMailServerKeyStore(keyStorePassword).orElse(null);
-		KeyStore signStore = propertiesConfig.getMailSmimeSigingKeyStore().orElse(null);
+		KeyStore keyStore = propertiesConfig.getMailClientKeyStore(keyStorePassword);
+		KeyStore signStore = propertiesConfig.getMailSmimeSigingKeyStore();
 
 		return new SmtpMailService(fromAddress, toAddresses, toAddressesCc, replyToAddresses, useSmtps,
 				mailServerHostname, mailServerPort, mailServerUsername, mailServerPassword, trustStore, keyStore,
@@ -97,10 +97,10 @@ public class MailConfig implements InitializingBean
 					propertiesConfig.getMailUseSmtps(), propertiesConfig.getMailServerHostname(),
 					propertiesConfig.getMailServerPort(), propertiesConfig.getMailServerUsername(),
 					propertiesConfig.getMailServerPassword() != null ? "***" : "null",
-					propertiesConfig.getMailServerTrustStoreFile(),
-					propertiesConfig.getMailServerClientCertificateFile(),
-					propertiesConfig.getMailServerClientCertificatePrivateKeyFile(),
-					propertiesConfig.getMailServerClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+					propertiesConfig.getMailServerTrustStoreFileOrFolder(),
+					propertiesConfig.getMailClientCertificateFile(),
+					propertiesConfig.getMailClientCertificatePrivateKeyFile(),
+					propertiesConfig.getMailClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 					propertiesConfig.getMailSmimeSigingKeyStoreFile(),
 					propertiesConfig.getMailSmimeSigingKeyStorePassword() != null ? "***" : "null",
 					propertiesConfig.getSendTestMailOnStartup(), propertiesConfig.getSendMailOnErrorLogEvent(),

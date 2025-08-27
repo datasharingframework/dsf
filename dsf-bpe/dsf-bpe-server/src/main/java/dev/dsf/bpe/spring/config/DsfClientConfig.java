@@ -33,7 +33,8 @@ public class DsfClientConfig implements InitializingBean
 		logger.info(
 				"Local webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " url: {}, proxy: {}}",
-				propertiesConfig.getDsfClientTrustedServerCasFile(), propertiesConfig.getDsfClientCertificateFile(),
+				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
+				propertiesConfig.getDsfClientCertificateFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 				propertiesConfig.getDsfServerBaseUrl(),
@@ -42,7 +43,8 @@ public class DsfClientConfig implements InitializingBean
 		logger.info(
 				"Local websocket client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " url: {}, proxy: {}}",
-				propertiesConfig.getDsfClientTrustedServerCasFile(), propertiesConfig.getDsfClientCertificateFile(),
+				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
+				propertiesConfig.getDsfClientCertificateFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 				getWebsocketUrl(),
@@ -51,7 +53,8 @@ public class DsfClientConfig implements InitializingBean
 		logger.info(
 				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " proxy: {}}",
-				propertiesConfig.getDsfClientTrustedServerCasFile(), propertiesConfig.getDsfClientCertificateFile(),
+				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
+				propertiesConfig.getDsfClientCertificateFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 				propertiesConfig.proxyConfig().isEnabled()
@@ -63,7 +66,7 @@ public class DsfClientConfig implements InitializingBean
 	public ClientProvider clientProvider()
 	{
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore keyStore = propertiesConfig.getDsfClientCertificate(keyStorePassword);
+		KeyStore keyStore = propertiesConfig.getDsfClientKeyStore(keyStorePassword);
 		KeyStore trustStore = propertiesConfig.getDsfClientTrustedServerCas();
 
 		return new ClientProviderImpl(fhirConfig.fhirContext(), propertiesConfig.getDsfServerBaseUrl(),

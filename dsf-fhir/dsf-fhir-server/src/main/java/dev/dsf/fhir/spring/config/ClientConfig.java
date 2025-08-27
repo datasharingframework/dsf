@@ -61,7 +61,7 @@ public class ClientConfig implements InitializingBean
 			KeyStore keyStore = createKeyStore(propertiesConfig.getDsfClientCertificateFile(),
 					propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 					propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword(), keyStorePassword);
-			KeyStore trustStore = createTrustStore(propertiesConfig.getDsfClientTrustedServerCasFile());
+			KeyStore trustStore = propertiesConfig.getDsfClientTrustedServerCas();
 
 			return new ClientProviderImpl(trustStore, keyStore, keyStorePassword,
 					propertiesConfig.getDsfClientReadTimeout(), propertiesConfig.getDsfClientConnectTimeout(),
@@ -73,18 +73,6 @@ public class ClientConfig implements InitializingBean
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	private KeyStore createTrustStore(String trustStoreFile)
-			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
-	{
-		Path trustStorePath = Paths.get(trustStoreFile);
-
-		if (!Files.isReadable(trustStorePath))
-			throw new IOException(
-					"Trust store '" + trustStorePath.normalize().toAbsolutePath().toString() + "' not readable");
-
-		return KeyStoreCreator.jksForTrustedCertificates(PemReader.readCertificates(trustStorePath));
 	}
 
 	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
@@ -124,7 +112,8 @@ public class ClientConfig implements InitializingBean
 		logger.info(
 				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " proxy: {}, no_proxy: {}}",
-				propertiesConfig.getDsfClientTrustedServerCasFile(), propertiesConfig.getDsfClientCertificateFile(),
+				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
+				propertiesConfig.getDsfClientCertificateFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 				propertiesConfig.proxyConfig().isEnabled() ? "enabled" : "disabled",

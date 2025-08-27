@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -82,7 +83,8 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 	private X509TrustManager createX509TrustManager(KeyStore clientTrustStore)
 	{
 		logger.info("Using {} to validate client certificates",
-				KeyStoreFormatter.toSubjectsFromCertificates(clientTrustStore, X500PrincipalFormat.RFC1779).values());
+				KeyStoreFormatter.toSubjectsFromCertificates(clientTrustStore, X500PrincipalFormat.RFC1779).values()
+						.stream().collect(Collectors.joining("; ", "[", "]")));
 
 		try
 		{

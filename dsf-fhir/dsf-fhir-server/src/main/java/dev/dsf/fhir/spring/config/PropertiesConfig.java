@@ -25,7 +25,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
-import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import dev.dsf.common.config.AbstractCertificateConfig;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
@@ -34,7 +34,7 @@ import dev.dsf.common.ui.theme.Theme;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class PropertiesConfig implements InitializingBean
+public class PropertiesConfig extends AbstractCertificateConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
@@ -86,9 +86,9 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.server.init.bundle:conf/bundle.xml}")
 	private String initBundleFile;
 
-	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
-	private String dsfClientTrustedServerCasFile;
+	@Documentation(description = "Folder with PEM encoded files (*.crt, *.pem) or a single PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Add file to default folder via bind mount or use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/server_root_cas}")
+	private String dsfClientTrustedServerCasFileOrFolder;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
 	@Value("${dev.dsf.fhir.client.certificate}")
@@ -159,8 +159,8 @@ public class PropertiesConfig implements InitializingBean
 	private boolean oidcBearerTokenEnabled;
 
 	// documentation in dev.dsf.common.config.AbstractJettyConfig
-	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_cert_ca_chains.pem}")
-	private String dsfClientTrustedClientCasFile;
+	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_ca_chains}")
+	private String dsfClientTrustedClientCasFileOrFolder;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
@@ -220,10 +220,7 @@ public class PropertiesConfig implements InitializingBean
 		try
 		{
 			X509Certificate clientCertiticate = PemReader.readCertificate(Paths.get(getDsfClientCertificateFile()));
-			List<X509Certificate> certificates = PemReader
-					.readCertificates(Paths.get(getDsfClientTrustedClientCasFile()));
-			KeyStore dsfClientTrustedClientCas = KeyStoreCreator.jksForTrustedCertificates(certificates);
-			CertificateValidator.validateClientCertificate(dsfClientTrustedClientCas, clientCertiticate);
+			CertificateValidator.validateClientCertificate(getDsfClientTrustedClientCas(), clientCertiticate);
 		}
 		catch (CertificateException e)
 		{
@@ -292,9 +289,15 @@ public class PropertiesConfig implements InitializingBean
 		return initBundleFile;
 	}
 
-	public String getDsfClientTrustedServerCasFile()
+	public String getDsfClientTrustedServerCasFileOrFolder()
 	{
-		return dsfClientTrustedServerCasFile;
+		return dsfClientTrustedServerCasFileOrFolder;
+	}
+
+	public KeyStore getDsfClientTrustedServerCas()
+	{
+		return createTrustStore(getDsfClientTrustedServerCasFileOrFolder(),
+				"dev.dsf.fhir.client.trust.server.certificate.cas");
 	}
 
 	public String getDsfClientCertificateFile()
@@ -327,9 +330,11 @@ public class PropertiesConfig implements InitializingBean
 		return dsfClientVerbose;
 	}
 
-	public String getDsfClientTrustedClientCasFile()
+	@Bean
+	public KeyStore getDsfClientTrustedClientCas()
 	{
-		return dsfClientTrustedClientCasFile;
+		return createTrustStore(dsfClientTrustedClientCasFileOrFolder,
+				"dev.dsf.server.auth.trust.client.certificate.cas");
 	}
 
 	public boolean getStaticResourceCacheEnabled()

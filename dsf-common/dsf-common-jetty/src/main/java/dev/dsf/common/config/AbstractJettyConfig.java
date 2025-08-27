@@ -5,9 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -15,7 +13,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -67,7 +64,7 @@ import jakarta.servlet.ServletContainerInitializer;
 
 @Configuration
 @PropertySource(value = "file:conf/jetty.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public abstract class AbstractJettyConfig
+public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractJettyConfig.class);
 
@@ -95,9 +92,9 @@ public abstract class AbstractJettyConfig
 	@Value("${dev.dsf.server.auth.client.certificate.header:X-ClientCert}")
 	private String clientCertificateHeaderName;
 
-	@Documentation(description = "PEM encoded file with one or more trusted full CA chains to validate client certificates for https connections from local and remote clients", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_cert_ca_chains.pem}")
-	private String clientCertificateTrustStoreFile;
+	@Documentation(description = "Folder with PEM encoded files (*.crt, *.pem) or a single PEM encoded file with one or more trusted full CA chains to validate client certificates for https connections from local and remote clients", recommendation = "Add file to default folder via bind mount or use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_ca_chains}")
+	private String clientCertificateTrustStoreFileOrFolder;
 
 	@Documentation(description = "Server certificate file for testing", recommendation = "Only specify For testing when terminating TLS in jetty server")
 	@Value("${dev.dsf.server.certificate:#{null}}")
@@ -135,9 +132,9 @@ public abstract class AbstractJettyConfig
 	@Value("${dev.dsf.server.auth.oidc.provider.client.idleTimeout:30000}")
 	private long oidcProviderClientIdleTimeout;
 
-	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to the OIDC provider", recommendation = "Use docker secret file to configure", example = "/run/secrets/oidc_provider_trust_certificates.pem")
-	@Value("${dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
-	private String oidcProviderClientTrustCertificatesFile;
+	@Documentation(description = "Folder with PEM encoded files (*.crt, *.pem) or a single PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to the OIDC provider", recommendation = "Add file to default folder via bind mount or use docker secret file to configure", example = "/run/secrets/oidc_provider_trust_certificates.pem")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas:ca/server_root_cas}")
+	private String oidcProviderClientTrustCertificatesFileOrFolder;
 
 	@Documentation(description = "PEM encoded file with client certificate for https connections to the OIDC provider", recommendation = "Use docker secret file to configure", example = "/run/secrets/oidc_provider_client_certificate.pem")
 	@Value("${dev.dsf.server.auth.oidc.provider.client.certificate:#{null}}")
@@ -197,9 +194,43 @@ public abstract class AbstractJettyConfig
 	protected final Function<Server, ServerConnector> httpsApiConnector()
 	{
 		final char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		return JettyServer.httpsConnector(apiHost, apiPort, clientCertificateTrustStore(),
-				serverCertificateKeyStore(keyStorePassword), keyStorePassword,
-				!oidcAuthorizationCodeFlowEnabled && !oidcBearerTokenEnabled);
+
+		KeyStore serverCertificateKeyStore = serverCertificateKeyStore(keyStorePassword);
+
+		return JettyServer.httpsConnector(apiHost, apiPort, clientCertificateTrustStore(), serverCertificateKeyStore,
+				keyStorePassword, !oidcAuthorizationCodeFlowEnabled && !oidcBearerTokenEnabled);
+	}
+
+	private KeyStore serverCertificateKeyStore(char[] keyStorePassword)
+	{
+		try
+		{
+			Path certificatePath = checkFile(serverCertificateFile, "dev.dsf.server.certificate");
+			Path certificateChainPath = checkOptionalFile(serverCertificateChainFile,
+					"dev.dsf.server.certificate.chain");
+			Path keyPath = checkFile(serverCertificateKeyFile, "dev.dsf.server.certificate.key");
+
+			PrivateKey privateKey = PemReader.readPrivateKey(keyPath, serverCertificateKeyFilePassword);
+
+			List<X509Certificate> certificates = new ArrayList<>();
+			certificates.add(PemReader.readCertificate(certificatePath));
+			certificates.addAll(PemReader.readCertificates(certificateChainPath));
+
+			if (!CertificateValidator.isServerCertificate(certificates.get(0)))
+				throw new IOException(errorMessage("dev.dsf.server.certificate", "Certificate from '"
+						+ certificatePath.normalize().toAbsolutePath().toString() + "' not a server certificate"));
+			else if (!KeyPairValidator.matches(privateKey, certificates.get(0).getPublicKey()))
+				throw new IOException(errorMessage("dev.dsf.server.certificate", "dev.dsf.server.certificate.key",
+						"Private-key at '" + keyPath.normalize().toAbsolutePath().toString()
+								+ "' not matching Public-key from certificate at '"
+								+ certificatePath.normalize().toAbsolutePath().toString() + "'"));
+
+			return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, keyStorePassword, certificates);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected final Function<Server, ServerConnector> statusConnector()
@@ -228,86 +259,11 @@ public abstract class AbstractJettyConfig
 				servletContainerInitializers(), initParameters, this::configureSecurityHandler);
 	}
 
-	private KeyStore serverCertificateKeyStore(char[] keyStorePassword)
-	{
-		try
-		{
-			Path serverCertificatePath = checkFile(serverCertificateFile, "Server certificate file");
-			Path serverCertificateChainPath = checkOptionalFile(serverCertificateChainFile,
-					"Server certificate chain file");
-			Path serverCertificateKeyPath = checkFile(serverCertificateKeyFile, "Server certificate key file");
-
-			return readKeyStore(serverCertificatePath, serverCertificateChainPath, serverCertificateKeyPath,
-					serverCertificateKeyFilePassword, keyStorePassword);
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	private KeyStore readKeyStore(Path certificatePath, Path certificateChainPath, Path keyPath, char[] keyPassword,
-			char[] keyStorePassword) throws IOException
-	{
-		PrivateKey privateKey = PemReader.readPrivateKey(keyPath, keyPassword);
-
-		List<X509Certificate> certificates = new ArrayList<>();
-		certificates.add(PemReader.readCertificate(certificatePath));
-		certificates.addAll(PemReader.readCertificates(certificateChainPath));
-
-		if (!CertificateValidator.isServerCertificate(certificates.get(0)))
-			throw new IOException("Certificate from '" + certificatePath.normalize().toAbsolutePath().toString()
-					+ "' not a server certificate");
-		else if (!KeyPairValidator.matches(privateKey, certificates.get(0).getPublicKey()))
-			throw new IOException("Private-key at '" + keyPath.normalize().toAbsolutePath().toString()
-					+ "' not matching Public-key from certificate at '"
-					+ certificatePath.normalize().toAbsolutePath().toString() + "'");
-
-		return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, keyStorePassword, certificates);
-	}
-
+	@Bean
 	private KeyStore clientCertificateTrustStore()
 	{
-		try
-		{
-			Path clientCertificateTrustStorePath = checkFile(clientCertificateTrustStoreFile,
-					"Client certificate trust store file");
-
-			return KeyStoreCreator
-					.jksForTrustedCertificates(PemReader.readCertificates(clientCertificateTrustStorePath));
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	private Path checkFile(String file, String fileDescription) throws IOException
-	{
-		if (file == null || file.isBlank())
-			throw new RuntimeException(fileDescription + " not defined");
-
-		Path path = Paths.get(file);
-
-		if (!Files.isReadable(path))
-			throw new IOException(fileDescription + " '" + path.toAbsolutePath().toString() + "' not readable");
-
-		return path;
-	}
-
-	private Path checkOptionalFile(String file, String fileDescription) throws IOException
-	{
-		if (file == null || file.isBlank())
-			return null;
-		else
-		{
-			Path path = Paths.get(file);
-
-			if (!Files.isReadable(path))
-				throw new IOException(fileDescription + " '" + path.toAbsolutePath().toString() + "' not readable");
-
-			return path;
-		}
+		return createTrustStore(clientCertificateTrustStoreFileOrFolder,
+				"dev.dsf.server.auth.trust.client.certificate.cas");
 	}
 
 	private void configureSecurityHandler(WebAppContext webAppContext, Supplier<Integer> statusPortSupplier)
@@ -329,11 +285,11 @@ public abstract class AbstractJettyConfig
 			if (oidcAuthorizationCodeFlowEnabled)
 			{
 				if (oidcProviderRealmBaseUrl == null)
-					throw propertyNotDefined("dev.dsf.server.auth.oidc.provider.realm.base.url").get();
+					throw propertyNotDefined("dev.dsf.server.auth.oidc.provider.realm.base.url");
 				else if (oidcClientId == null)
-					throw propertyNotDefined("dev.dsf.server.auth.oidc.client.id").get();
+					throw propertyNotDefined("dev.dsf.server.auth.oidc.client.id");
 				else if (oidcClientSecret == null)
-					throw propertyNotDefined("dev.dsf.server.auth.oidc.client.secret").get();
+					throw propertyNotDefined("dev.dsf.server.auth.oidc.client.secret");
 				else
 				{
 					openIdAuthenticator = new OpenIdAuthenticator(openIdConfiguration);
@@ -344,7 +300,7 @@ public abstract class AbstractJettyConfig
 			if (oidcBearerTokenEnabled)
 			{
 				if (oidcProviderRealmBaseUrl == null)
-					throw propertyNotDefined("dev.dsf.server.auth.oidc.provider.realm.base.url").get();
+					throw propertyNotDefined("dev.dsf.server.auth.oidc.provider.realm.base.url");
 				else
 				{
 					bearerTokenAuthenticator = new BearerTokenAuthenticator(openIdConfiguration);
@@ -355,11 +311,11 @@ public abstract class AbstractJettyConfig
 			if (oidcBackChannelLogoutEnabled)
 			{
 				if (!oidcAuthorizationCodeFlowEnabled)
-					throw propertyNotDefinedTrue("dev.dsf.server.auth.oidc.authorization.code.flow").get();
+					throw propertyNotDefined("dev.dsf.server.auth.oidc.authorization.code.flow");
 				else if (oidcClientId == null)
-					throw propertyNotDefined("dev.dsf.server.auth.oidc.client.id").get();
+					throw propertyNotDefined("dev.dsf.server.auth.oidc.client.id");
 				else if (oidcBackChannelPath == null)
-					throw propertyNotDefined("dev.dsf.server.auth.oidc.back.channel.logout.path").get();
+					throw propertyNotDefined("dev.dsf.server.auth.oidc.back.channel.logout.path");
 				else
 				{
 					backChannelLogoutAuthenticator = new BackChannelLogoutAuthenticator(openIdConfiguration,
@@ -385,23 +341,6 @@ public abstract class AbstractJettyConfig
 		webAppContext.setSecurityHandler(securityHandler);
 
 		sessionHandler.addEventListener(backChannelLogoutAuthenticator);
-	}
-
-	private Supplier<RuntimeException> propertyNotDefined(String propertyName)
-	{
-		return () -> new RuntimeException("Property " + propertyName + " not defined (environment variable "
-				+ propertyToEnvironmentVariableName(propertyName) + ")");
-	}
-
-	private Supplier<RuntimeException> propertyNotDefinedTrue(String propertyName)
-	{
-		return () -> new RuntimeException("Property " + propertyName + " not defined as 'true' (environment variable "
-				+ propertyToEnvironmentVariableName(propertyName) + ")");
-	}
-
-	private String propertyToEnvironmentVariableName(String propertyName)
-	{
-		return propertyName.toUpperCase(Locale.ENGLISH).replace('.', '_');
 	}
 
 	private Duration oidcClientIdleTimeout()
@@ -441,11 +380,18 @@ public abstract class AbstractJettyConfig
 	private HttpClient createOidcClient()
 	{
 		char[] oidcClientKeyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore oidcProviderClientKeyStore = oidcProviderClientKeyStore(oidcClientKeyStorePassword);
+
+		KeyStore oidcProviderClientTrustStore = createOptionalTrustStore(
+				oidcProviderClientTrustCertificatesFileOrFolder,
+				"dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas");
+		KeyStore oidcProviderClientKeyStore = createOptionalClientKeyStore(oidcProviderClientCertificateFile,
+				oidcProviderClientCertificatePrivateKeyFile, oidcProviderClientCertificatePrivateKeyPassword,
+				oidcClientKeyStorePassword, "dev.dsf.server.auth.oidc.provider.client.certificate",
+				"dev.dsf.server.auth.oidc.provider.client.certificate.private.key");
 
 		SslContextFactory.Client sslContextFactory = new SslContextFactory.Client(false);
-		if (oidcProviderClientTrustStore() != null)
-			sslContextFactory.setTrustStore(oidcProviderClientTrustStore());
+		if (oidcProviderClientTrustStore != null)
+			sslContextFactory.setTrustStore(oidcProviderClientTrustStore);
 		if (oidcProviderClientKeyStore != null)
 		{
 			sslContextFactory.setKeyStore(oidcProviderClientKeyStore);
@@ -464,64 +410,5 @@ public abstract class AbstractJettyConfig
 			httpClient.getProxyConfiguration().addProxy(oidcClientProxy());
 
 		return httpClient;
-	}
-
-	private KeyStore oidcProviderClientTrustStore()
-	{
-		try
-		{
-			Path clientCertificateTrustStorePath = checkOptionalFile(oidcProviderClientTrustCertificatesFile,
-					"OIDC provider client certificate trust store file");
-
-			return clientCertificateTrustStorePath == null ? null
-					: KeyStoreCreator
-							.jksForTrustedCertificates(PemReader.readCertificates(clientCertificateTrustStorePath));
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	private KeyStore oidcProviderClientKeyStore(char[] keyStorePassword)
-	{
-		try
-		{
-			Path certificatePath = checkOptionalFile(oidcProviderClientCertificateFile,
-					"OIDC provider client certificate file");
-			Path privateKeyPath = checkOptionalFile(oidcProviderClientCertificatePrivateKeyFile,
-					"OIDC provider client certificate key file");
-
-			if (certificatePath == null && privateKeyPath != null)
-				throw new IOException(
-						"OIDC provider client certificate key file defined but OIDC provider client certificate file not defined");
-			else if (certificatePath != null && privateKeyPath == null)
-				throw new IOException(
-						"OIDC provider client certificate file defined but OIDC provider client certificate key file not defined");
-			else if (certificatePath != null && privateKeyPath != null)
-			{
-				List<X509Certificate> certificates = PemReader.readCertificates(certificatePath);
-				PrivateKey privateKey = PemReader.readPrivateKey(privateKeyPath, keyStorePassword);
-
-				if (certificates.isEmpty())
-					throw new IOException(
-							"No certificates in '" + certificatePath.normalize().toAbsolutePath().toString() + "'");
-				else if (!CertificateValidator.isClientCertificate(certificates.get(0)))
-					throw new IOException("First certificate from '"
-							+ certificatePath.normalize().toAbsolutePath().toString() + "' not a client certificate");
-				else if (!KeyPairValidator.matches(privateKey, certificates.get(0).getPublicKey()))
-					throw new IOException("Private-key at '" + privateKeyPath.normalize().toAbsolutePath().toString()
-							+ "' not matching Public-key from " + (certificates.size() > 1 ? "first " : "")
-							+ "certificate at '" + certificatePath.normalize().toAbsolutePath().toString() + "'");
-
-				return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, keyStorePassword, certificates);
-			}
-			else
-				return null;
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
 	}
 }
