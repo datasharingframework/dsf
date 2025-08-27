@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.stream.Collectors;
@@ -88,7 +89,7 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 
 			return createProcessPlugin(definitions.get(0).get(), draft, pluginPath, pluginClassLoader);
 		}
-		catch (Exception e)
+		catch (ServiceConfigurationError | Exception e)
 		{
 			logger.debug("Ignoring {}: Unable to load process plugin", pluginPath.toString(), e);
 			logger.warn("Ignoring {}: Unable to load process plugin: {} - {}", pluginPath.toString(),
