@@ -2,6 +2,7 @@ package dev.dsf.bpe.spring.config;
 
 import java.security.KeyStore;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.bpe.client.dsf.ClientProvider;
 import dev.dsf.bpe.client.dsf.ClientProviderImpl;
 
@@ -31,7 +34,7 @@ public class DsfClientConfig implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		logger.info(
-				"Local webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+				"Local DSF webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " url: {}, proxy: {}}",
 				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
 				propertiesConfig.getDsfClientCertificateFile(),
@@ -41,7 +44,7 @@ public class DsfClientConfig implements InitializingBean
 				propertiesConfig.proxyConfig().isEnabled(propertiesConfig.getDsfServerBaseUrl()) ? "enabled"
 						: "disabled");
 		logger.info(
-				"Local websocket client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+				"Local DSF websocket client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " url: {}, proxy: {}}",
 				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
 				propertiesConfig.getDsfClientCertificateFile(),
@@ -51,7 +54,7 @@ public class DsfClientConfig implements InitializingBean
 				propertiesConfig.proxyConfig().isEnabled(getWebsocketUrl()) ? "enabled" : "disabled");
 
 		logger.info(
-				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+				"Remote DSF webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " proxy: {}}",
 				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
 				propertiesConfig.getDsfClientCertificateFile(),
@@ -60,6 +63,12 @@ public class DsfClientConfig implements InitializingBean
 				propertiesConfig.proxyConfig().isEnabled()
 						? "enabled if remote server not in " + propertiesConfig.proxyConfig().getNoProxyUrls()
 						: "disabled");
+
+		logger.info("Using trust-store with {} to validate local and remote DSF server certificates",
+				KeyStoreFormatter
+						.toSubjectsFromCertificates(propertiesConfig.getDsfClientTrustedServerCas(),
+								X500PrincipalFormat.RFC1779)
+						.values().stream().collect(Collectors.joining("; ", "[", "]")));
 	}
 
 	@Bean

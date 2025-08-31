@@ -6,6 +6,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.time.Duration;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.bpe.api.client.oidc.OidcClient;
 import dev.dsf.bpe.api.client.oidc.OidcClientException;
 import dev.dsf.bpe.api.config.FhirClientConfig;
@@ -57,6 +60,13 @@ public class FhirClientConnectionsConfig implements InitializingBean
 		Duration defaultReadTimeout = propertiesConfig.getFhirClientConnectionsConfigDefaultReadTimeout();
 		KeyStore defaultTrustStore = propertiesConfig.getFhirClientConnectionsConfigDefaultTrustStore();
 		String defaultOidcDiscoveryPath = propertiesConfig.getFhirClientConnectionsConfigDefaultOidcDiscoveryPath();
+
+		logger.info(
+				"Using trust-store with {} as default to validate server certificates for v2 process plugin client connections",
+				KeyStoreFormatter
+						.toSubjectsFromCertificates(propertiesConfig.getDsfClientTrustedServerCas(),
+								X500PrincipalFormat.RFC1779)
+						.values().stream().collect(Collectors.joining("; ", "[", "]")));
 
 		return new FhirClientConfigYamlReaderImpl(defaultTestConnectionOnStartup, defaultEnableDebugLogging,
 				defaultConnectTimeout, defaultReadTimeout, defaultTrustStore, defaultOidcDiscoveryPath);

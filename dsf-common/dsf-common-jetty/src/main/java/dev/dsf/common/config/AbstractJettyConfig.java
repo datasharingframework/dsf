@@ -43,10 +43,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.common.auth.BackChannelLogoutAuthenticator;
 import dev.dsf.common.auth.BearerTokenAuthenticator;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
@@ -391,7 +393,13 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 
 		SslContextFactory.Client sslContextFactory = new SslContextFactory.Client(false);
 		if (oidcProviderClientTrustStore != null)
+		{
 			sslContextFactory.setTrustStore(oidcProviderClientTrustStore);
+			logger.info("Using trust-store with {} to validate OIDC provider server certificate",
+					KeyStoreFormatter
+							.toSubjectsFromCertificates(oidcProviderClientTrustStore, X500PrincipalFormat.RFC1779)
+							.values().stream().collect(Collectors.joining("; ", "[", "]")));
+		}
 		if (oidcProviderClientKeyStore != null)
 		{
 			sslContextFactory.setKeyStore(oidcProviderClientKeyStore);

@@ -82,7 +82,7 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 
 	private X509TrustManager createX509TrustManager(KeyStore clientTrustStore)
 	{
-		logger.info("Using {} to validate client certificates",
+		logger.info("Using trust-store with {} to validate client certificates",
 				KeyStoreFormatter.toSubjectsFromCertificates(clientTrustStore, X500PrincipalFormat.RFC1779).values()
 						.stream().collect(Collectors.joining("; ", "[", "]")));
 

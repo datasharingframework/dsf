@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +24,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.mail.LoggingMailService;
 import dev.dsf.bpe.mail.SmtpMailService;
@@ -106,6 +109,15 @@ public class MailConfig implements InitializingBean
 					propertiesConfig.getSendTestMailOnStartup(), propertiesConfig.getSendMailOnErrorLogEvent(),
 					propertiesConfig.getMailOnErrorLogEventBufferSize(),
 					propertiesConfig.getMailOnErrorLogEventDebugLogLocation());
+
+			if (propertiesConfig.getMailUseSmtps())
+			{
+				logger.info("Using trust-store with {} to validate mail server certificate",
+						KeyStoreFormatter
+								.toSubjectsFromCertificates(propertiesConfig.getDsfClientTrustedServerCas(),
+										X500PrincipalFormat.RFC1779)
+								.values().stream().collect(Collectors.joining("; ", "[", "]")));
+			}
 		}
 		else
 		{
