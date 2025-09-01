@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,6 +62,7 @@ import dev.dsf.bpe.api.plugin.FhirResourceModifiers;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig;
 import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.ProcessPluginApiFactory;
 import dev.dsf.bpe.v2.ProcessPluginDefinition;
 import dev.dsf.bpe.v2.ProcessPluginDeploymentListener;
 import dev.dsf.bpe.v2.activity.Activity;
@@ -92,11 +94,12 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginImpl.class);
 
 	private final ProcessPluginDefinition processPluginDefinition;
-	private final ProcessPluginApi processPluginApi;
 
 	private final Function<DelegateExecution, Variables> variablesFactory;
 	private final PluginMdc pluginMdc;
 
+	private final AtomicReference<ProcessPluginApi> processPluginApi = new AtomicReference<>();
+	private final AtomicReference<FhirContext> fhirContext = new AtomicReference<>();
 	private final AtomicReference<ObjectMapper> objectMapper = new AtomicReference<>();
 
 	public ProcessPluginImpl(ProcessPluginDefinition processPluginDefinition, int processPluginApiVersion,
@@ -109,11 +112,59 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 				MessageEndEvent.class, DefaultUserTaskListener.class);
 
 		this.processPluginDefinition = processPluginDefinition;
-		processPluginApi = apiApplicationContext.getBean(ProcessPluginApi.class);
 
 		variablesFactory = delegateExecution -> new VariablesImpl(delegateExecution, getObjectMapper());
 		pluginMdc = new PluginMdcImpl(processPluginApiVersion, processPluginDefinition.getName(),
 				processPluginDefinition.getVersion(), jarFile.toString(), serverBaseUrl, variablesFactory);
+	}
+
+	@Override
+	protected void customizeApplicationContext(AnnotationConfigApplicationContext context,
+			ApplicationContext parentContext)
+	{
+		context.registerBean("processPluginDefinition", ProcessPluginDefinition.class, () -> processPluginDefinition);
+		context.registerBean("api", ProcessPluginApi.class,
+				new ProcessPluginApiFactory(processPluginDefinition, parentContext));
+	}
+
+	private ProcessPluginApi getProcessPluginApi()
+	{
+		ProcessPluginApi entry = processPluginApi.get();
+		if (entry == null)
+		{
+			ProcessPluginApi o = doGetProcessPluginApi();
+			if (processPluginApi.compareAndSet(entry, o))
+				return o;
+			else
+				return processPluginApi.get();
+		}
+		else
+			return entry;
+	}
+
+	private ProcessPluginApi doGetProcessPluginApi()
+	{
+		return getApplicationContext().getBean(ProcessPluginApi.class);
+	}
+
+	private FhirContext getFhirContext()
+	{
+		FhirContext entry = fhirContext.get();
+		if (entry == null)
+		{
+			FhirContext o = doGetFhirContext();
+			if (fhirContext.compareAndSet(entry, o))
+				return o;
+			else
+				return fhirContext.get();
+		}
+		else
+			return entry;
+	}
+
+	private FhirContext doGetFhirContext()
+	{
+		return getApplicationContext().getBean(FhirContext.class);
 	}
 
 	private ObjectMapper getObjectMapper()
@@ -264,7 +315,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 
 	private IParser newParser(Function<FhirContext, IParser> parserFactor)
 	{
-		IParser p = parserFactor.apply(processPluginApi.getFhirContext());
+		IParser p = parserFactor.apply(getFhirContext());
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 
@@ -383,7 +434,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		SendTaskValues sendTaskValues = getSendTaskValues(fieldDeclarations, variableScope)
 				.orElseThrow(noOrIncompleteFhirTaskFields("MessageSendTask", className));
 
-		return new MessageSendTaskDelegate(processPluginApi, variablesFactory, target, sendTaskValues);
+		return new MessageSendTaskDelegate(getProcessPluginApi(), variablesFactory, target, sendTaskValues);
 	}
 
 	@Override
@@ -393,7 +444,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		ServiceTask target = get(ServiceTask.class, className);
 		injectFields(target, fieldDeclarations, variableScope);
 
-		return new ServiceTaskDelegate(processPluginApi, variablesFactory, target);
+		return new ServiceTaskDelegate(getProcessPluginApi(), variablesFactory, target);
 	}
 
 	@Override
@@ -406,7 +457,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		SendTaskValues sendTaskValues = getSendTaskValues(fieldDeclarations, variableScope)
 				.orElseThrow(noOrIncompleteFhirTaskFields("MessageEndEvent", className));
 
-		return new MessageEndEventDelegate(processPluginApi, variablesFactory, target, sendTaskValues);
+		return new MessageEndEventDelegate(getProcessPluginApi(), variablesFactory, target, sendTaskValues);
 	}
 
 	@Override
@@ -419,7 +470,8 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		SendTaskValues sendTaskValues = getSendTaskValues(fieldDeclarations, variableScope)
 				.orElseThrow(noOrIncompleteFhirTaskFields("MessageIntermediateThrowEvent", className));
 
-		return new MessageIntermediateThrowEventDelegate(processPluginApi, variablesFactory, target, sendTaskValues);
+		return new MessageIntermediateThrowEventDelegate(getProcessPluginApi(), variablesFactory, target,
+				sendTaskValues);
 	}
 
 	@Override
@@ -429,7 +481,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		ExecutionListener target = get(ExecutionListener.class, className);
 		injectFields(target, fieldDeclarations, variableScope);
 
-		return new ExecutionListenerDelegate(processPluginApi, variablesFactory, target);
+		return new ExecutionListenerDelegate(getProcessPluginApi(), variablesFactory, target);
 	}
 
 	@Override
@@ -439,7 +491,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		UserTaskListener target = get(UserTaskListener.class, className);
 		ClassDelegateUtil.applyFieldDeclaration(fieldDeclarations, target);
 
-		return new UserTaskListenerDelegate(processPluginApi, variablesFactory, target);
+		return new UserTaskListenerDelegate(getProcessPluginApi(), variablesFactory, target);
 	}
 
 	private List<FieldDeclaration> filterFhirTaskValues(List<FieldDeclaration> fieldDeclarations)

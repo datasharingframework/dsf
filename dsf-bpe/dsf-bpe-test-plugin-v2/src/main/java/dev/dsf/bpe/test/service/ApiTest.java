@@ -1,9 +1,11 @@
 package dev.dsf.bpe.test.service;
 
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
+import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
 
 import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
+import dev.dsf.bpe.test.TestProcessPluginDefinition;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
@@ -21,6 +23,19 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	public void apiNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api);
+	}
+
+	@PluginTest
+	public void apiGetProcessPluginDefinition(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getProcessPluginDefinition());
+
+		expectSame(TestProcessPluginDefinition.NAME, api.getProcessPluginDefinition().getName());
+		expectSame(TestProcessPluginDefinition.RELEASE_DATE, api.getProcessPluginDefinition().getReleaseDate());
+		expectSame(TestProcessPluginDefinition.RELEASE_DATE, api.getProcessPluginDefinition().getResourceReleaseDate());
+		expectSame(TestProcessPluginDefinition.VERSION, api.getProcessPluginDefinition().getVersion());
+		expectSame(TestProcessPluginDefinition.VERSION.substring(0, 3),
+				api.getProcessPluginDefinition().getResourceVersion());
 	}
 
 	@PluginTest

@@ -552,6 +552,9 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 					.concat(Stream.of(apiServicesSpringConfiguration), getDefinitionSpringConfigurations().stream())
 					.toArray(Class<?>[]::new));
 			context.setEnvironment(environment);
+
+			customizeApplicationContext(context, apiApplicationContext);
+
 			context.refresh();
 
 			return context;
@@ -574,6 +577,11 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 			return null;
 		}
+	}
+
+	protected void customizeApplicationContext(AnnotationConfigApplicationContext context,
+			ApplicationContext parentContext)
+	{
 	}
 
 	private Stream<BpmnFileAndModel> loadBpmnModels(String localOrganizationIdentifierValue)

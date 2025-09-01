@@ -25,6 +25,7 @@ import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 
 public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 {
+	private final ProcessPluginDefinition processPluginDefinition;
 	private final ProxyConfig proxyConfig;
 	private final EndpointProvider endpointProvider;
 	private final FhirContext fhirContext;
@@ -43,14 +44,15 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final TargetProvider targetProvider;
 	private final DataLogger dataLogger;
 
-	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
-			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
-			OidcClientProvider oidcClientProvider, MailService mailService, MimeTypeService mimeTypeService,
-			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
+	public ProcessPluginApiImpl(ProcessPluginDefinition processPluginDefinition, ProxyConfig proxyConfig,
+			EndpointProvider endpointProvider, FhirContext fhirContext, DsfClientProvider dsfClientProvider,
+			FhirClientProvider fhirClientProvider, OidcClientProvider oidcClientProvider, MailService mailService,
+			MimeTypeService mimeTypeService, ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
 			TaskHelper taskHelper, CryptoService cryptoService, TargetProvider targetProvider, DataLogger dataLogger)
 	{
+		this.processPluginDefinition = processPluginDefinition;
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
 		this.fhirContext = fhirContext;
@@ -73,6 +75,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(processPluginDefinition, "processPluginDefinition");
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
 		Objects.requireNonNull(endpointProvider, "endpointProvider");
 		Objects.requireNonNull(fhirContext, "fhirContext");
@@ -90,6 +93,12 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(cryptoService, "cryptoService");
 		Objects.requireNonNull(targetProvider, "targetProvider");
 		Objects.requireNonNull(dataLogger, "dataLogger");
+	}
+
+	@Override
+	public ProcessPluginDefinition getProcessPluginDefinition()
+	{
+		return processPluginDefinition;
 	}
 
 	@Override
