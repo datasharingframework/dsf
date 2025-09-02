@@ -28,6 +28,7 @@ import dev.dsf.bpe.test.service.ErrorBoundaryEventTestVerify;
 import dev.dsf.bpe.test.service.ExceptionTest;
 import dev.dsf.bpe.test.service.FhirBinaryVariableTestGet;
 import dev.dsf.bpe.test.service.FhirBinaryVariableTestSet;
+import dev.dsf.bpe.test.service.FhirClientConfigProviderTest;
 import dev.dsf.bpe.test.service.FhirClientProviderTest;
 import dev.dsf.bpe.test.service.FieldInjectionTest;
 import dev.dsf.bpe.test.service.JsonVariableTestGet;
@@ -67,12 +68,13 @@ public class Config implements InitializingBean
 	{
 		return new ActivityPrototypeBeanCreator(TestActivitySelector.class, ProxyTest.class, ApiTest.class,
 				OrganizationProviderTest.class, EndpointProviderTest.class, FhirClientProviderTest.class,
-				StartSendTaskTestListener.class, SendTaskTest.class, StartFieldInjectionTestListener.class,
-				FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class, ErrorBoundaryEventTestVerify.class,
-				ExceptionTest.class, ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
-				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
-				MimeTypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class,
-				DsfClientTest.class, TargetProviderTest.class, DataLoggerTest.class);
+				FhirClientConfigProviderTest.class, StartSendTaskTestListener.class, SendTaskTest.class,
+				StartFieldInjectionTestListener.class, FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class,
+				ErrorBoundaryEventTestVerify.class, ExceptionTest.class, ContinueSendTest.class,
+				ContinueSendTestSend.class, ContinueSendTestEvaluate.class, JsonVariableTestSet.class,
+				JsonVariableTestGet.class, CryptoServiceTest.class, MimeTypeServiceTest.class,
+				FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class, DsfClientTest.class,
+				TargetProviderTest.class, DataLoggerTest.class);
 	}
 
 	@Bean

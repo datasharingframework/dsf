@@ -63,10 +63,8 @@ public class FhirClientConnectionsConfig implements InitializingBean
 
 		logger.info(
 				"Using trust-store with {} as default to validate server certificates for v2 process plugin client connections",
-				KeyStoreFormatter
-						.toSubjectsFromCertificates(propertiesConfig.getDsfClientTrustedServerCas(),
-								X500PrincipalFormat.RFC1779)
-						.values().stream().collect(Collectors.joining("; ", "[", "]")));
+				KeyStoreFormatter.toSubjectsFromCertificates(defaultTrustStore, X500PrincipalFormat.RFC1779).values()
+						.stream().collect(Collectors.joining("; ", "[", "]")));
 
 		return new FhirClientConfigYamlReaderImpl(defaultTestConnectionOnStartup, defaultEnableDebugLogging,
 				defaultConnectTimeout, defaultReadTimeout, defaultTrustStore, defaultOidcDiscoveryPath);
@@ -92,7 +90,7 @@ public class FhirClientConnectionsConfig implements InitializingBean
 		{
 			logger.error("FHIR server connections configuration YAML not valid: {}", e.getValidationErrors());
 
-			return FhirClientConfigsImpl.empty();
+			return FhirClientConfigsImpl.empty(propertiesConfig.getFhirClientConnectionsConfigDefaultTrustStore());
 		}
 		catch (IOException e)
 		{
@@ -100,7 +98,7 @@ public class FhirClientConnectionsConfig implements InitializingBean
 			logger.warn("Unable to parse FHIR server connections configuration: {} - {}", e.getClass().getName(),
 					e.getMessage());
 
-			return FhirClientConfigsImpl.empty();
+			return FhirClientConfigsImpl.empty(propertiesConfig.getFhirClientConnectionsConfigDefaultTrustStore());
 		}
 	}
 

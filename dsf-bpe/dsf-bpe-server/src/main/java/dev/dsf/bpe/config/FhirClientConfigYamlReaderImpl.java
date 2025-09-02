@@ -95,7 +95,7 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 		Objects.requireNonNull(yaml, "yaml");
 
 		if (yaml.isBlank())
-			return FhirClientConfigsImpl.empty();
+			return FhirClientConfigsImpl.empty(defaultTrustStore);
 
 		try (Reader reader = new StringReader(yaml))
 		{
@@ -126,7 +126,7 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 			Map<String, FhirClientConfig> configs = yConfigs.entrySet().stream().map(this::toConfig)
 					.collect(Collectors.toMap(FhirClientConfig::fhirServerId, Function.identity()));
 
-			return new FhirClientConfigsImpl(configs);
+			return new FhirClientConfigsImpl(configs, defaultTrustStore);
 		}
 		catch (RuntimeIOException e)
 		{
