@@ -53,7 +53,7 @@ public interface OidcClientProvider
 	 * @param config
 	 *            not <code>null</code>
 	 * @return never <code>null</code>
-	 * @see FhirClientProvider#getClientConfig(String)
+	 * @see FhirClientConfigProvider#getClientConfig(String)
 	 */
 	OidcClient getOidcClient(OidcAuthentication config);
 }
