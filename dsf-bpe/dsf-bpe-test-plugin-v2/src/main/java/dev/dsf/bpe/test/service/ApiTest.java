@@ -24,6 +24,12 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
+	public void apiGetProxyConfigNotNull(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getProxyConfig());
+	}
+
+	@PluginTest
 	public void apiGetEndpointProviderNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getEndpointProvider());
@@ -84,13 +90,13 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void apiGetProxyConfigNotNull(ProcessPluginApi api) throws Exception
+	public void apiGetQuestionnaireResponseHelper(ProcessPluginApi api) throws Exception
 	{
-		expectNotNull(api.getProxyConfig());
+		expectNotNull(api.getQuestionnaireResponseHelper());
 	}
 
 	@PluginTest
-	public void apiGetReadAccessHelperNotNull(ProcessPluginApi api) throws Exception
+	public void apiGetReadAccessHelper(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getReadAccessHelper());
 	}
@@ -102,8 +108,26 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
+	public void apiGetCompressionService(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getCompressionService());
+	}
+
+	@PluginTest
 	public void apiGetCryptoService(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getCryptoService());
+	}
+
+	@PluginTest
+	public void apiGetTargetProvider(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getTargetProvider());
+	}
+
+	@PluginTest
+	public void apiGetDataLogger(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getDataLogger());
 	}
 }

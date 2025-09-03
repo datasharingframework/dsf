@@ -37,6 +37,8 @@ import dev.dsf.bpe.v2.listener.EndListener;
 import dev.dsf.bpe.v2.listener.ListenerVariables;
 import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
+import dev.dsf.bpe.v2.service.CompressionService;
+import dev.dsf.bpe.v2.service.CompressionServiceImpl;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.CryptoServiceImpl;
 import dev.dsf.bpe.v2.service.DataLogger;
@@ -103,7 +105,7 @@ public class ApiServiceConfig
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
 				fhirClientProvider(), oidcClientProvider(), mailService(), mimeTypeService(), objectMapper(),
 				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
-				taskHelper(), cryptoService(), targetProvider(), dataLogger());
+				taskHelper(), compressionService(), cryptoService(), targetProvider(), dataLogger());
 	}
 
 	@Bean
@@ -282,6 +284,12 @@ public class ApiServiceConfig
 	{
 		return new ListenerFactoryImpl(ProcessPluginFactoryImpl.API_VERSION, startListener(), endListener(),
 				continueListener());
+	}
+
+	@Bean
+	public CompressionService compressionService()
+	{
+		return new CompressionServiceImpl();
 	}
 
 	@Bean

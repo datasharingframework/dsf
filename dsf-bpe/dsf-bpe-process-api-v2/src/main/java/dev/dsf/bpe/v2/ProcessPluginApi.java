@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
@@ -58,6 +59,8 @@ public interface ProcessPluginApi
 	ReadAccessHelper getReadAccessHelper();
 
 	TaskHelper getTaskHelper();
+
+	CompressionService getCompressionService();
 
 	CryptoService getCryptoService();
 
