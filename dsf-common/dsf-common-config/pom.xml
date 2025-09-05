@@ -17,6 +17,10 @@
 			<artifactId>spring-beans</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>crypto-utils</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<scope>test</scope>
@@ -27,4 +31,16 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<testCompilerArgument>-proc:none</testCompilerArgument>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

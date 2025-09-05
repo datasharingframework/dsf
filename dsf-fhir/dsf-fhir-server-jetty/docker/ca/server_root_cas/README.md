@@ -1,0 +1,1 @@
+Empty `server_root_cas` directory for maven/docker build, will contain default certificate authority pem files after maven build

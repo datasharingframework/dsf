@@ -61,6 +61,13 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<testCompilerArgument>-proc:none</testCompilerArgument>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-maven-plugin</artifactId>
 				<executions>

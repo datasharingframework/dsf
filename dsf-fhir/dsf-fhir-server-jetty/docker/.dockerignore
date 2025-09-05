@@ -1,4 +1,5 @@
-ca/README.md
+ca/client_ca_chains/README.md
+ca/server_root_cas/README.md
 lib/README.md
 log/README.md
 ui/README.md

@@ -45,9 +45,11 @@ import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.EndpointProviderImpl;
+import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
+import dev.dsf.bpe.v2.service.FhirClientConfigProviderImpl;
+import dev.dsf.bpe.v2.service.FhirClientConfigProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.FhirClientProviderImpl;
-import dev.dsf.bpe.v2.service.FhirClientProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MailServiceDelegate;
 import dev.dsf.bpe.v2.service.MimeTypeService;
@@ -101,9 +103,10 @@ public class ApiServiceConfig
 	public ProcessPluginApi processPluginApiV2()
 	{
 		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
-				fhirClientProvider(), oidcClientProvider(), mailService(), mimeTypeService(), objectMapper(),
-				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
-				taskHelper(), cryptoService(), targetProvider(), dataLogger());
+				fhirClientProvider(), fhirClientConfigProvider(), oidcClientProvider(), mailService(),
+				mimeTypeService(), objectMapper(), organizationProvider(), processAuthorizationHelper(),
+				questionnaireResponseHelper(), readAccessHelper(), taskHelper(), cryptoService(), targetProvider(),
+				dataLogger());
 	}
 
 	@Bean
@@ -144,9 +147,15 @@ public class ApiServiceConfig
 	@Bean
 	public FhirClientProvider fhirClientProvider()
 	{
-		return new FhirClientProviderWithEndpointSupport(endpointProvider(),
-				new FhirClientProviderImpl(fhirContext(), proxyConfigDelegate(), oidcClientProvider(),
-						buildInfoProvider.getUserAgentValue(), clientConfigsDelegate()));
+		return new FhirClientProviderImpl(fhirContext(), proxyConfigDelegate(), oidcClientProvider(),
+				buildInfoProvider.getUserAgentValue(), fhirClientConfigProvider());
+	}
+
+	@Bean
+	public FhirClientConfigProvider fhirClientConfigProvider()
+	{
+		return new FhirClientConfigProviderWithEndpointSupport(endpointProvider(),
+				new FhirClientConfigProviderImpl(fhirClientConfigs.defaultTrustStore(), clientConfigsDelegate()));
 	}
 
 	@Bean

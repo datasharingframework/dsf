@@ -6,6 +6,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.time.Duration;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.bpe.api.client.oidc.OidcClient;
 import dev.dsf.bpe.api.client.oidc.OidcClientException;
 import dev.dsf.bpe.api.config.FhirClientConfig;
@@ -58,6 +61,11 @@ public class FhirClientConnectionsConfig implements InitializingBean
 		KeyStore defaultTrustStore = propertiesConfig.getFhirClientConnectionsConfigDefaultTrustStore();
 		String defaultOidcDiscoveryPath = propertiesConfig.getFhirClientConnectionsConfigDefaultOidcDiscoveryPath();
 
+		logger.info(
+				"Using trust-store with {} as default to validate server certificates for v2 process plugin client connections",
+				KeyStoreFormatter.toSubjectsFromCertificates(defaultTrustStore, X500PrincipalFormat.RFC1779).values()
+						.stream().collect(Collectors.joining("; ", "[", "]")));
+
 		return new FhirClientConfigYamlReaderImpl(defaultTestConnectionOnStartup, defaultEnableDebugLogging,
 				defaultConnectTimeout, defaultReadTimeout, defaultTrustStore, defaultOidcDiscoveryPath);
 	}
@@ -82,7 +90,7 @@ public class FhirClientConnectionsConfig implements InitializingBean
 		{
 			logger.error("FHIR server connections configuration YAML not valid: {}", e.getValidationErrors());
 
-			return FhirClientConfigsImpl.empty();
+			return FhirClientConfigsImpl.empty(propertiesConfig.getFhirClientConnectionsConfigDefaultTrustStore());
 		}
 		catch (IOException e)
 		{
@@ -90,7 +98,7 @@ public class FhirClientConnectionsConfig implements InitializingBean
 			logger.warn("Unable to parse FHIR server connections configuration: {} - {}", e.getClass().getName(),
 					e.getMessage());
 
-			return FhirClientConfigsImpl.empty();
+			return FhirClientConfigsImpl.empty(propertiesConfig.getFhirClientConnectionsConfigDefaultTrustStore());
 		}
 	}
 

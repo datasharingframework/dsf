@@ -85,6 +85,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
+	public void startFhirClientConfigProviderTest() throws Exception
+	{
+		executePluginTest(createTestTask("FhirClientConfigProvider"));
+	}
+
+	@Test
 	public void startSendTaskTest() throws Exception
 	{
 		executePluginTest(createTestTask("SendTaskTest"));
