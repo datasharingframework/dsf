@@ -85,6 +85,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
+	public void startFhirClientConfigProviderTest() throws Exception
+	{
+		executePluginTest(createTestTask("FhirClientConfigProvider"));
+	}
+
+	@Test
 	public void startSendTaskTest() throws Exception
 	{
 		executePluginTest(createTestTask("SendTaskTest"));
@@ -256,5 +262,11 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public void startSensitiveDataLoggerTest() throws Exception
 	{
 		executePluginTest(createTestTask("DataLoggerTest"));
+	}
+
+	@Test
+	public void startAutowireTest() throws Exception
+	{
+		executePluginTest(createTestTask("AutowireTest"));
 	}
 }

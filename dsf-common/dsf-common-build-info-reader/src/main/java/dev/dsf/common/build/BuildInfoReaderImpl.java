@@ -2,6 +2,9 @@ package dev.dsf.common.build;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -34,10 +37,11 @@ public class BuildInfoReaderImpl implements BuildInfoReader
 	{
 		if (versionProperties == null)
 		{
-			try (InputStream in = BuildInfoReaderImpl.class.getResourceAsStream(VERSION_PROPERTIES_FILE))
+			try (InputStream in = BuildInfoReaderImpl.class.getResourceAsStream(VERSION_PROPERTIES_FILE);
+					Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8))
 			{
 				versionProperties = new Properties();
-				versionProperties.load(in);
+				versionProperties.load(reader);
 			}
 			catch (IOException e)
 			{

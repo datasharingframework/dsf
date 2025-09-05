@@ -24,14 +24,14 @@ public class GenerateDefaultCaFilesMojo extends AbstractMojo
 	@Parameter(property = "dsf.clientOnlyCaCommonNames", required = true)
 	private List<String> clientOnlyCaCommonNames;
 
-	@Parameter(property = "dsf.clientCertIssuingCaFiles", required = true)
-	private List<File> clientCertIssuingCaFiles;
+	@Parameter(property = "dsf.clientIssuingCas", required = true)
+	private List<File> clientIssuingCas;
 
-	@Parameter(property = "dsf.clientCertCaChainFiles", required = true)
-	private List<File> clientCertCaChainFiles;
+	@Parameter(property = "dsf.clientCaChains", required = true)
+	private List<File> clientCaChains;
 
-	@Parameter(property = "dsf.serverCertRootCaFiles", required = true)
-	private List<File> serverCertRootCaFiles;
+	@Parameter(property = "dsf.serverRootCas", required = true)
+	private List<File> serverRootCas;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
@@ -39,16 +39,15 @@ public class GenerateDefaultCaFilesMojo extends AbstractMojo
 		getLog().debug("projectBasedir: " + projectBasedir);
 		getLog().debug("certFolder: " + certFolder);
 		getLog().debug("clientOnlyCaCommonNames: " + clientOnlyCaCommonNames);
-		getLog().debug("clientCertIssuingCaFiles: " + clientCertIssuingCaFiles);
-		getLog().debug("clientCertCaChainFiles: " + clientCertCaChainFiles);
-		getLog().debug("serverCertRootCaFiles: " + serverCertRootCaFiles);
+		getLog().debug("clientIssuingCas: " + clientIssuingCas);
+		getLog().debug("clientCaChains: " + clientCaChains);
+		getLog().debug("serverRootCas: " + serverRootCas);
 
 		try
 		{
 			new DefaultCaFilesGenerator(projectBasedir.toPath(), certFolder.toPath(), clientOnlyCaCommonNames)
-					.createFiles(clientCertIssuingCaFiles.stream().map(File::toPath),
-							clientCertCaChainFiles.stream().map(File::toPath),
-							serverCertRootCaFiles.stream().map(File::toPath));
+					.createFiles(clientIssuingCas.stream().map(File::toPath), clientCaChains.stream().map(File::toPath),
+							serverRootCas.stream().map(File::toPath));
 		}
 		catch (IOException e)
 		{

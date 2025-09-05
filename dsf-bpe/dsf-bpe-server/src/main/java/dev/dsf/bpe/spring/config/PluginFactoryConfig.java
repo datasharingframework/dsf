@@ -118,7 +118,7 @@ public class PluginFactoryConfig
 			@Override
 			public KeyStore getKeyStore()
 			{
-				return propertiesConfig.getDsfClientCertificate(keyStorePassword);
+				return propertiesConfig.getDsfClientKeyStore(keyStorePassword);
 			}
 
 			@Override

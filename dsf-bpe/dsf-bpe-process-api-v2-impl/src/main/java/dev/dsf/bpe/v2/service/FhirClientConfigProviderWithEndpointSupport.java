@@ -2,43 +2,36 @@ package dev.dsf.bpe.v2.service;
 
 import java.security.KeyStore;
 import java.time.Duration;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.springframework.beans.factory.InitializingBean;
+import javax.net.ssl.SSLContext;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import dev.dsf.bpe.api.config.FhirClientConfig;
 import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 
-public class FhirClientProviderWithEndpointSupport implements FhirClientProvider, InitializingBean
+public class FhirClientConfigProviderWithEndpointSupport implements FhirClientConfigProvider
 {
 	private final EndpointProvider endpointProvider;
-	private final FhirClientProviderImpl delegate;
+	private final FhirClientConfigProvider delegate;
 
-	public FhirClientProviderWithEndpointSupport(EndpointProvider endpointProvider, FhirClientProviderImpl delegate)
+	public FhirClientConfigProviderWithEndpointSupport(EndpointProvider endpointProvider,
+			FhirClientConfigProvider delegate)
 	{
 		this.endpointProvider = endpointProvider;
 		this.delegate = delegate;
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
+	public SSLContext createDefaultSslContext()
 	{
-		Objects.requireNonNull(endpointProvider, "endpointProvider");
-		Objects.requireNonNull(delegate, "delegate");
+		return delegate.createDefaultSslContext();
 	}
 
 	@Override
-	public Optional<IGenericClient> getClient(String fhirServerId)
+	public KeyStore createDefaultTrustStore()
 	{
-		if (fhirServerId == null || fhirServerId.isBlank())
-			return Optional.empty();
-		else if (fhirServerId.startsWith("#"))
-			return getClientConfig(fhirServerId).flatMap(delegate::getClient);
-		else
-			return delegate.getClient(fhirServerId);
+		return delegate.createDefaultTrustStore();
 	}
 
 	@Override
