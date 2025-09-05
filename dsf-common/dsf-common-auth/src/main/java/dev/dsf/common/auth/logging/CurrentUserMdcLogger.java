@@ -41,8 +41,7 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 	{
 		before((Identity) organization);
 
-		organization.getCertificate().map(this::getThumbprint)
-				.ifPresent(t -> MDC.pushByKey(DSF_ORGANIZATION_THUMBPRINT, t));
+		organization.getCertificate().map(this::getThumbprint).ifPresent(t -> MDC.put(DSF_ORGANIZATION_THUMBPRINT, t));
 		organization.getCertificate().map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName)
 				.ifPresent(d -> MDC.put(DSF_ORGANIZATION_DN, d));
 
@@ -55,8 +54,7 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 	{
 		before((Identity) practitioner);
 
-		practitioner.getCertificate().map(this::getThumbprint)
-				.ifPresent(t -> MDC.pushByKey(DSF_PRACTITIONER_THUMBPRINT, t));
+		practitioner.getCertificate().map(this::getThumbprint).ifPresent(t -> MDC.put(DSF_PRACTITIONER_THUMBPRINT, t));
 		practitioner.getCertificate().map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName)
 				.ifPresent(d -> MDC.put(DSF_PRACTITIONER_DN, d));
 		practitioner.getCredentials().map(DsfOpenIdCredentials::getUserId)

@@ -40,6 +40,7 @@
       <bpmn:outgoing>Flow_1gipugc</bpmn:outgoing>
       <bpmn:outgoing>Flow_1wjdaz2</bpmn:outgoing>
       <bpmn:outgoing>Flow_0jlkf4u</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1x18y7y</bpmn:outgoing>
       <bpmn:outgoing>Flow_0312al1</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
@@ -69,6 +70,7 @@
       <bpmn:incoming>Flow_04z1f6i</bpmn:incoming>
       <bpmn:incoming>Flow_0w963xd</bpmn:incoming>
       <bpmn:incoming>Flow_17to6o7</bpmn:incoming>
+      <bpmn:incoming>Flow_0scl0xx</bpmn:incoming>
       <bpmn:incoming>Flow_0vj0i7z</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
@@ -312,6 +314,14 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'DataLoggerTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_17to6o7" sourceRef="DataLoggerTest" targetRef="Gateway_056f6tw" />
+    <bpmn:serviceTask id="AutowireTest" name="AutowireTest" camunda:class="dev.dsf.bpe.test.service.AutowireTest">
+      <bpmn:incoming>Flow_1x18y7y</bpmn:incoming>
+      <bpmn:outgoing>Flow_0scl0xx</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1x18y7y" sourceRef="Gateway_0eszi2t" targetRef="AutowireTest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'AutowireTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0scl0xx" sourceRef="AutowireTest" targetRef="Gateway_056f6tw" />
     <bpmn:serviceTask id="FhirClientConfigProviderTest" name="FhirClientConfigProviderTest" camunda:class="dev.dsf.bpe.test.service.FhirClientConfigProviderTest">
       <bpmn:incoming>Flow_0312al1</bpmn:incoming>
       <bpmn:outgoing>Flow_0vj0i7z</bpmn:outgoing>
@@ -453,6 +463,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0wafhn1" bpmnElement="FhirClientConfigProviderTest">
         <dc:Bounds x="480" y="630" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0a3e66p" bpmnElement="AutowireTest">
+        <dc:Bounds x="480" y="2270" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1w9i7ga_di" bpmnElement="Event_1dnlmzp">
@@ -694,6 +708,16 @@
       <bpmndi:BPMNEdge id="Flow_17to6o7_di" bpmnElement="Flow_17to6o7">
         <di:waypoint x="580" y="2200" />
         <di:waypoint x="1180" y="2200" />
+        <di:waypoint x="1180" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x18y7y_di" bpmnElement="Flow_1x18y7y">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="2310" />
+        <di:waypoint x="480" y="2310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0scl0xx_di" bpmnElement="Flow_0scl0xx">
+        <di:waypoint x="580" y="2310" />
+        <di:waypoint x="1180" y="2310" />
         <di:waypoint x="1180" y="145" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0vj0i7z_di" bpmnElement="Flow_0vj0i7z">

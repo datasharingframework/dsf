@@ -32,6 +32,8 @@ import dev.dsf.bpe.v2.variables.Variables;
  */
 public interface ProcessPluginApi
 {
+	ProcessPluginDefinition getProcessPluginDefinition();
+
 	ProxyConfig getProxyConfig();
 
 	EndpointProvider getEndpointProvider();

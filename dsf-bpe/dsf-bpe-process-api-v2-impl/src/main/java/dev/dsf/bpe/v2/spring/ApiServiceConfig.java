@@ -22,8 +22,6 @@ import dev.dsf.bpe.api.listener.ListenerFactoryImpl;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.api.service.BpeOidcClientProvider;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
-import dev.dsf.bpe.v2.ProcessPluginApi;
-import dev.dsf.bpe.v2.ProcessPluginApiImpl;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleaner;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleanerImpl;
 import dev.dsf.bpe.v2.client.dsf.ReferenceExtractor;
@@ -98,16 +96,6 @@ public class ApiServiceConfig
 
 	@Autowired
 	private BpeOidcClientProvider bpeOidcClientProvider;
-
-	@Bean
-	public ProcessPluginApi processPluginApiV2()
-	{
-		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
-				fhirClientProvider(), fhirClientConfigProvider(), oidcClientProvider(), mailService(),
-				mimeTypeService(), objectMapper(), organizationProvider(), processAuthorizationHelper(),
-				questionnaireResponseHelper(), readAccessHelper(), taskHelper(), cryptoService(), targetProvider(),
-				dataLogger());
-	}
 
 	@Bean
 	public ProxyConfig proxyConfigDelegate()
