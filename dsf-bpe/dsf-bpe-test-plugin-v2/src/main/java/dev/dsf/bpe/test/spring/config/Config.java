@@ -18,6 +18,7 @@ import dev.dsf.bpe.test.message.ContinueSendTestSend;
 import dev.dsf.bpe.test.message.SendTaskTest;
 import dev.dsf.bpe.test.service.ApiTest;
 import dev.dsf.bpe.test.service.AutowireTest;
+import dev.dsf.bpe.test.service.CompressionServiceTest;
 import dev.dsf.bpe.test.service.ContinueSendTest;
 import dev.dsf.bpe.test.service.ContinueSendTestEvaluate;
 import dev.dsf.bpe.test.service.CryptoServiceTest;
@@ -72,11 +73,11 @@ public class Config implements InitializingBean
 				OrganizationProviderTest.class, EndpointProviderTest.class, FhirClientProviderTest.class,
 				FhirClientConfigProviderTest.class, StartSendTaskTestListener.class, SendTaskTest.class,
 				StartFieldInjectionTestListener.class, FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class,
-				ErrorBoundaryEventTestVerify.class, ExceptionTest.class, ContinueSendTest.class,
-				ContinueSendTestSend.class, ContinueSendTestEvaluate.class, JsonVariableTestSet.class,
-				JsonVariableTestGet.class, CryptoServiceTest.class, MimeTypeServiceTest.class,
-				FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class, DsfClientTest.class,
-				TargetProviderTest.class, DataLoggerTest.class, AutowireTest.class);
+				ErrorBoundaryEventTestVerify.class, ExceptionTest.class, CompressionServiceTest.class,
+				ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
+				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
+				MimeTypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class,
+				DsfClientTest.class, TargetProviderTest.class, DataLoggerTest.class, AutowireTest.class);
 	}
 
 	@Bean

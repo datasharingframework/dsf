@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
@@ -42,6 +43,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
+	private final CompressionService compressionService;
 	private final CryptoService cryptoService;
 	private final TargetProvider targetProvider;
 	private final DataLogger dataLogger;
@@ -53,7 +55,8 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
-			TaskHelper taskHelper, CryptoService cryptoService, TargetProvider targetProvider, DataLogger dataLogger)
+			TaskHelper taskHelper, CompressionService compressionService, CryptoService cryptoService,
+			TargetProvider targetProvider, DataLogger dataLogger)
 	{
 		this.processPluginDefinition = processPluginDefinition;
 		this.proxyConfig = proxyConfig;
@@ -71,6 +74,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
 		this.readAccessHelper = readAccessHelper;
 		this.taskHelper = taskHelper;
+		this.compressionService = compressionService;
 		this.cryptoService = cryptoService;
 		this.targetProvider = targetProvider;
 		this.dataLogger = dataLogger;
@@ -95,6 +99,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(compressionService, "compressionService");
 		Objects.requireNonNull(cryptoService, "cryptoService");
 		Objects.requireNonNull(targetProvider, "targetProvider");
 		Objects.requireNonNull(dataLogger, "dataLogger");
@@ -194,6 +199,12 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public TaskHelper getTaskHelper()
 	{
 		return taskHelper;
+	}
+
+	@Override
+	public CompressionService getCompressionService()
+	{
+		return compressionService;
 	}
 
 	@Override

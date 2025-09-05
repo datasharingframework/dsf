@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
@@ -50,7 +51,7 @@ public class ProcessPluginApiFactory implements Supplier<ProcessPluginApi>
 				fromParent(OidcClientProvider.class), fromParent(MailService.class), fromParent(MimeTypeService.class),
 				fromParent(ObjectMapper.class), fromParent(OrganizationProvider.class),
 				fromParent(ProcessAuthorizationHelper.class), fromParent(QuestionnaireResponseHelper.class),
-				fromParent(ReadAccessHelper.class), fromParent(TaskHelper.class), fromParent(CryptoService.class),
-				fromParent(TargetProvider.class), fromParent(DataLogger.class));
+				fromParent(ReadAccessHelper.class), fromParent(TaskHelper.class), fromParent(CompressionService.class),
+				fromParent(CryptoService.class), fromParent(TargetProvider.class), fromParent(DataLogger.class));
 	}
 }

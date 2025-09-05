@@ -26,7 +26,7 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void apiGetProcessPluginDefinition(ProcessPluginApi api) throws Exception
+	public void apiGetProcessPluginDefinitionNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getProcessPluginDefinition());
 
@@ -36,6 +36,12 @@ public class ApiTest extends AbstractTest implements ServiceTask
 		expectSame(TestProcessPluginDefinition.VERSION, api.getProcessPluginDefinition().getVersion());
 		expectSame(TestProcessPluginDefinition.VERSION.substring(0, 3),
 				api.getProcessPluginDefinition().getResourceVersion());
+	}
+
+	@PluginTest
+	public void apiGetProxyConfigNotNull(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getProxyConfig());
 	}
 
 	@PluginTest
@@ -60,6 +66,12 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	public void apiGetFhirClientProviderNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getFhirClientProvider());
+	}
+
+	@PluginTest
+	public void apiGetFhirClientConfigProviderNotNull(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getFhirClientConfigProvider());
 	}
 
 	@PluginTest
@@ -99,9 +111,9 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void apiGetProxyConfigNotNull(ProcessPluginApi api) throws Exception
+	public void apiGetQuestionnaireResponseHelperNotNull(ProcessPluginApi api) throws Exception
 	{
-		expectNotNull(api.getProxyConfig());
+		expectNotNull(api.getQuestionnaireResponseHelper());
 	}
 
 	@PluginTest
@@ -117,8 +129,26 @@ public class ApiTest extends AbstractTest implements ServiceTask
 	}
 
 	@PluginTest
-	public void apiGetCryptoService(ProcessPluginApi api) throws Exception
+	public void apiGetCompressionServiceNotNull(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getCompressionService());
+	}
+
+	@PluginTest
+	public void apiGetCryptoServiceNotNull(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getCryptoService());
+	}
+
+	@PluginTest
+	public void apiGetTargetProviderNotNull(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getTargetProvider());
+	}
+
+	@PluginTest
+	public void apiGetDataLoggerNotNull(ProcessPluginApi api) throws Exception
+	{
+		expectNotNull(api.getDataLogger());
 	}
 }

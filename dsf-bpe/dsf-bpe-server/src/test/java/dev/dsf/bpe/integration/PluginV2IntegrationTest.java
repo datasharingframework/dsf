@@ -127,6 +127,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
+	public void startCompressionServiceTest() throws Exception
+	{
+		executePluginTest(createTestTask("CompressionServiceTest"));
+	}
+
+	@Test
 	public void startCryptoServiceTest() throws Exception
 	{
 		List<Path> filesToDelete = null;
