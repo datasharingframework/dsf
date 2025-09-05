@@ -312,12 +312,12 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'DataLoggerTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_17to6o7" sourceRef="DataLoggerTest" targetRef="Gateway_056f6tw" />
-    <bpmn:serviceTask id="FhirClientConfigProviderTes" name="FhirClientConfigProviderTest" camunda:class="dev.dsf.bpe.test.service.FhirClientConfigProviderTest">
+    <bpmn:serviceTask id="FhirClientConfigProviderTest" name="FhirClientConfigProviderTest" camunda:class="dev.dsf.bpe.test.service.FhirClientConfigProviderTest">
       <bpmn:incoming>Flow_0312al1</bpmn:incoming>
       <bpmn:outgoing>Flow_0vj0i7z</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_0vj0i7z" sourceRef="FhirClientConfigProviderTes" targetRef="Gateway_056f6tw" />
-    <bpmn:sequenceFlow id="Flow_0312al1" sourceRef="Gateway_0eszi2t" targetRef="FhirClientConfigProviderTes">
+    <bpmn:sequenceFlow id="Flow_0vj0i7z" sourceRef="FhirClientConfigProviderTest" targetRef="Gateway_056f6tw" />
+    <bpmn:sequenceFlow id="Flow_0312al1" sourceRef="Gateway_0eszi2t" targetRef="FhirClientConfigProviderTest">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'FhirClientConfigProvider'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
@@ -451,7 +451,7 @@
         <dc:Bounds x="480" y="2160" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0wafhn1" bpmnElement="FhirClientConfigProviderTes">
+      <bpmndi:BPMNShape id="BPMNShape_0wafhn1" bpmnElement="FhirClientConfigProviderTest">
         <dc:Bounds x="480" y="630" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
