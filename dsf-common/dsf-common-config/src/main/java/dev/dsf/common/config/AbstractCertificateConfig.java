@@ -212,8 +212,8 @@ public abstract class AbstractCertificateConfig
 			List<X509Certificate> certificates = PemReader.readCertificates(certificatePath);
 			PrivateKey privateKey = PemReader.readPrivateKey(privateKeyPath, privateKeyPassword);
 
-			return createKeyStore(keyStorePassword, certificatePropertyName, privateKeyPropertyName, certificatePath,
-					privateKeyPath, certificates, privateKey);
+			return createClientKeyStore(keyStorePassword, certificatePropertyName, privateKeyPropertyName,
+					certificatePath, privateKeyPath, certificates, privateKey);
 		}
 		catch (IOException e)
 		{
@@ -240,8 +240,8 @@ public abstract class AbstractCertificateConfig
 			List<X509Certificate> certificates = PemReader.readCertificates(certificatePath);
 			PrivateKey privateKey = PemReader.readPrivateKey(privateKeyPath, privateKeyPassword);
 
-			return createKeyStore(keyStorePassword, certificatePropertyName, privateKeyPropertyName, certificatePath,
-					privateKeyPath, certificates, privateKey);
+			return createClientKeyStore(keyStorePassword, certificatePropertyName, privateKeyPropertyName,
+					certificatePath, privateKeyPath, certificates, privateKey);
 		}
 		catch (IOException e)
 		{
@@ -249,7 +249,7 @@ public abstract class AbstractCertificateConfig
 		}
 	}
 
-	private KeyStore createKeyStore(char[] keyStorePassword, String certificatePropertyName,
+	private KeyStore createClientKeyStore(char[] keyStorePassword, String certificatePropertyName,
 			String privateKeyPropertyName, Path certificatePath, Path privateKeyPath,
 			List<X509Certificate> certificates, PrivateKey privateKey) throws IOException
 	{
