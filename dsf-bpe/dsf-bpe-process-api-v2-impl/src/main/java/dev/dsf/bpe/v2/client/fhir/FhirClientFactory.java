@@ -222,6 +222,7 @@ public class FhirClientFactory extends RestfulClientFactory
 	}
 
 	@Override
+	@Deprecated
 	public ServerValidationModeEnum getServerValidationModeEnum()
 	{
 		return getServerValidationMode();
@@ -294,6 +295,7 @@ public class FhirClientFactory extends RestfulClientFactory
 	}
 
 	@Override
+	@Deprecated
 	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode)
 	{
 		throw notSupported();

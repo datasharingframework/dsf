@@ -90,8 +90,7 @@ public class ValidationSupportWithFetchFromDbWithTransaction implements IValidat
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<StructureDefinition> fetchAllStructureDefinitions()
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions()
 	{
 		Map<String, StructureDefinition> byUrl = new HashMap<>();
 		throwRuntimeException(() -> structureDefinitionSnapshotDao.readAllWithTransaction(connection))
@@ -99,7 +98,10 @@ public class ValidationSupportWithFetchFromDbWithTransaction implements IValidat
 		throwRuntimeException(() -> structureDefinitionDao.readAllWithTransaction(connection))
 				.forEach(s -> byUrl.putIfAbsent(s.getUrl(), s));
 
-		return new ArrayList<>(byUrl.values());
+		@SuppressWarnings("unchecked")
+		List<T> definitions = (List<T>) new ArrayList<>(byUrl.values());
+
+		return definitions;
 	}
 
 	@Override

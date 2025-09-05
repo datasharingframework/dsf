@@ -13,6 +13,7 @@ import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
+import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MimeTypeService;
@@ -45,11 +46,11 @@ public class ProcessPluginApiFactory implements Supplier<ProcessPluginApi>
 	{
 		return new ProcessPluginApiImpl(processPluginDefinition, fromParent(ProxyConfig.class),
 				fromParent(EndpointProvider.class), fromParent(FhirContext.class), fromParent(DsfClientProvider.class),
-				fromParent(FhirClientProvider.class), fromParent(OidcClientProvider.class),
-				fromParent(MailService.class), fromParent(MimeTypeService.class), fromParent(ObjectMapper.class),
-				fromParent(OrganizationProvider.class), fromParent(ProcessAuthorizationHelper.class),
-				fromParent(QuestionnaireResponseHelper.class), fromParent(ReadAccessHelper.class),
-				fromParent(TaskHelper.class), fromParent(CryptoService.class), fromParent(TargetProvider.class),
-				fromParent(DataLogger.class));
+				fromParent(FhirClientProvider.class), fromParent(FhirClientConfigProvider.class),
+				fromParent(OidcClientProvider.class), fromParent(MailService.class), fromParent(MimeTypeService.class),
+				fromParent(ObjectMapper.class), fromParent(OrganizationProvider.class),
+				fromParent(ProcessAuthorizationHelper.class), fromParent(QuestionnaireResponseHelper.class),
+				fromParent(ReadAccessHelper.class), fromParent(TaskHelper.class), fromParent(CryptoService.class),
+				fromParent(TargetProvider.class), fromParent(DataLogger.class));
 	}
 }

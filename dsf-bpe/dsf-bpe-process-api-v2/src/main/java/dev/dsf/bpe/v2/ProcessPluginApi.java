@@ -11,6 +11,7 @@ import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
+import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MimeTypeService;
@@ -42,6 +43,8 @@ public interface ProcessPluginApi
 	DsfClientProvider getDsfClientProvider();
 
 	FhirClientProvider getFhirClientProvider();
+
+	FhirClientConfigProvider getFhirClientConfigProvider();
 
 	OidcClientProvider getOidcClientProvider();
 
