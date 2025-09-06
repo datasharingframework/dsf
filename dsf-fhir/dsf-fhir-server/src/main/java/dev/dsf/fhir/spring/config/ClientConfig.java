@@ -12,6 +12,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
@@ -21,10 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.fhir.client.ClientProvider;
 import dev.dsf.fhir.client.ClientProviderImpl;
 
@@ -61,7 +64,7 @@ public class ClientConfig implements InitializingBean
 			KeyStore keyStore = createKeyStore(propertiesConfig.getDsfClientCertificateFile(),
 					propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 					propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword(), keyStorePassword);
-			KeyStore trustStore = createTrustStore(propertiesConfig.getDsfClientTrustedServerCasFile());
+			KeyStore trustStore = propertiesConfig.getDsfClientTrustedServerCas();
 
 			return new ClientProviderImpl(trustStore, keyStore, keyStorePassword,
 					propertiesConfig.getDsfClientReadTimeout(), propertiesConfig.getDsfClientConnectTimeout(),
@@ -73,18 +76,6 @@ public class ClientConfig implements InitializingBean
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	private KeyStore createTrustStore(String trustStoreFile)
-			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
-	{
-		Path trustStorePath = Paths.get(trustStoreFile);
-
-		if (!Files.isReadable(trustStorePath))
-			throw new IOException(
-					"Trust store '" + trustStorePath.normalize().toAbsolutePath().toString() + "' not readable");
-
-		return KeyStoreCreator.jksForTrustedCertificates(PemReader.readCertificates(trustStorePath));
 	}
 
 	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
@@ -122,12 +113,18 @@ public class ClientConfig implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		logger.info(
-				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+				"Remote DSF webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " proxy: {}, no_proxy: {}}",
-				propertiesConfig.getDsfClientTrustedServerCasFile(), propertiesConfig.getDsfClientCertificateFile(),
+				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
+				propertiesConfig.getDsfClientCertificateFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 				propertiesConfig.proxyConfig().isEnabled() ? "enabled" : "disabled",
 				propertiesConfig.proxyConfig().getNoProxyUrls());
+		logger.info("Using trust-store with {} to validate remote DSF server certificates",
+				KeyStoreFormatter
+						.toSubjectsFromCertificates(propertiesConfig.getDsfClientTrustedServerCas(),
+								X500PrincipalFormat.RFC1779)
+						.values().stream().collect(Collectors.joining("; ", "[", "]")));
 	}
 }

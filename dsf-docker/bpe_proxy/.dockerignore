@@ -1,3 +1,4 @@
-ca/README.md
+ca/client_ca_chains/README.md
+ca/client_issuing_cas/README.md
 .dockerignore
 Dockerfile

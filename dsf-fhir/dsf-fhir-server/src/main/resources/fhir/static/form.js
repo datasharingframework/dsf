@@ -177,7 +177,7 @@ function newTaskInputBoolean(type, id, checkedTrue, checkedFalse, optional) {
 		addError(errorListElement, "Input mandatory")
 	}
 
-	if (value) {
+	if (value !== null) {
 		return {
 			input: {
 				type: type,

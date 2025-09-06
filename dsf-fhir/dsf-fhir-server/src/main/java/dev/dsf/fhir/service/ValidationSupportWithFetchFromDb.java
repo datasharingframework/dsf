@@ -84,14 +84,16 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<StructureDefinition> fetchAllStructureDefinitions()
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions()
 	{
 		Map<String, StructureDefinition> byUrl = new HashMap<>();
 		throwRuntimeException(() -> structureDefinitionSnapshotDao.readAll()).forEach(s -> byUrl.put(s.getUrl(), s));
 		throwRuntimeException(() -> structureDefinitionDao.readAll()).forEach(s -> byUrl.putIfAbsent(s.getUrl(), s));
 
-		return new ArrayList<>(byUrl.values());
+		@SuppressWarnings("unchecked")
+		List<T> definitions = (List<T>) new ArrayList<>(byUrl.values());
+
+		return definitions;
 	}
 
 	@Override

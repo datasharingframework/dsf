@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
@@ -17,12 +16,8 @@ import org.springframework.context.ApplicationContext;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 
-public class DelegateProviderImpl implements DelegateProvider, ProcessPluginConsumer, InitializingBean
+public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 {
-	private static record ProcessByIdAndVersion(ProcessIdAndVersion processIdAndVersion, ProcessPlugin plugin)
-	{
-	}
-
 	private final ClassLoader defaultClassLoader;
 	private final ApplicationContext defaultApplicationContext;
 
@@ -42,12 +37,10 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	}
 
 	@Override
-	public void setProcessPlugins(List<ProcessPlugin> plugins)
+	public void setProcessPlugins(List<ProcessPlugin> plugins,
+			Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion)
 	{
-		processPluginsByProcessIdAndVersion.putAll(plugins.stream()
-				.flatMap(plugin -> plugin.getProcessKeysAndVersions().stream()
-						.map(idAndVersion -> new ProcessByIdAndVersion(idAndVersion, plugin)))
-				.collect(Collectors.toMap(ProcessByIdAndVersion::processIdAndVersion, ProcessByIdAndVersion::plugin)));
+		this.processPluginsByProcessIdAndVersion.putAll(processPluginsByProcessIdAndVersion);
 	}
 
 	private ProcessPlugin getPlugin(ProcessIdAndVersion processIdAndVersion)
@@ -71,42 +64,60 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	public JavaDelegate getMessageSendTask(ProcessIdAndVersion processIdAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
 	{
-		return getPlugin(processIdAndVersion).getMessageSendTask(className, fieldDeclarations, variableScope);
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageSendTask(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
 	}
 
 	@Override
 	public JavaDelegate getServiceTask(ProcessIdAndVersion processIdAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
 	{
-		return getPlugin(processIdAndVersion).getServiceTask(className, fieldDeclarations, variableScope);
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getServiceTask(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
 	}
 
 	@Override
 	public JavaDelegate getMessageEndEvent(ProcessIdAndVersion processIdAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
 	{
-		return getPlugin(processIdAndVersion).getMessageEndEvent(className, fieldDeclarations, variableScope);
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageEndEvent(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
 	}
 
 	@Override
 	public JavaDelegate getMessageIntermediateThrowEvent(ProcessIdAndVersion processIdAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
 	{
-		return getPlugin(processIdAndVersion).getMessageIntermediateThrowEvent(className, fieldDeclarations,
-				variableScope);
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageIntermediateThrowEvent(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
 	}
 
 	@Override
 	public ExecutionListener getExecutionListener(ProcessIdAndVersion processIdAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
 	{
-		return getPlugin(processIdAndVersion).getExecutionListener(className, fieldDeclarations, variableScope);
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		ExecutionListener executionListener = plugin.getExecutionListener(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution,
+				executionListener::notify);
 	}
 
 	@Override
 	public TaskListener getTaskListener(ProcessIdAndVersion processIdAndVersion, String className,
 			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
 	{
-		return getPlugin(processIdAndVersion).getTaskListener(className, fieldDeclarations, variableScope);
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		TaskListener taskListener = plugin.getTaskListener(className, fieldDeclarations, variableScope);
+
+		return delegateTask -> plugin.getPluginMdc().executeWithProcessMdc(delegateTask, taskListener::notify);
 	}
 }

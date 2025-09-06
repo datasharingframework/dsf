@@ -1,6 +1,8 @@
 package dev.dsf.bpe.integration;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.junit.BeforeClass;
@@ -19,6 +22,7 @@ import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest.CertificationReque
 import de.hsheilbronn.mi.utils.crypto.io.KeyStoreWriter;
 import de.hsheilbronn.mi.utils.crypto.io.PemWriter;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import jakarta.ws.rs.core.MediaType;
 
@@ -35,6 +39,19 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public static void verifyProcessPluginResourcesExist() throws Exception
 	{
 		verifyProcessPluginResourcesExistForVersion(PROCESS_VERSION);
+
+		Optional<ProcessPlugin> processPlugin = getProcessPluginForTestProcess(PROCESS_VERSION);
+		assertTrue(processPlugin.isPresent());
+
+		// not statically typed since listener class is loaded by plugin class loader
+		Object listener = processPlugin.get().getApplicationContext().getBean("processPluginDeploymentListener");
+		assertNotNull(listener);
+
+		@SuppressWarnings("unchecked")
+		List<Boolean> ok = (List<Boolean>) listener.getClass().getMethod("getOk").invoke(listener);
+		assertNotNull(ok);
+		assertEquals(1, ok.size());
+		assertTrue(ok.get(0));
 	}
 
 	@Test
@@ -65,6 +82,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public void startFhirClientProviderTest() throws Exception
 	{
 		executePluginTest(createTestTask("FhirClientProvider"));
+	}
+
+	@Test
+	public void startFhirClientConfigProviderTest() throws Exception
+	{
+		executePluginTest(createTestTask("FhirClientConfigProvider"));
 	}
 
 	@Test
@@ -101,6 +124,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public void startJsonVariableTest() throws Exception
 	{
 		executePluginTest(createTestTask("JsonVariableTest"));
+	}
+
+	@Test
+	public void startCompressionServiceTest() throws Exception
+	{
+		executePluginTest(createTestTask("CompressionServiceTest"));
 	}
 
 	@Test
@@ -193,9 +222,9 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
-	public void startMimetypeServiceTest() throws Exception
+	public void startMimeTypeServiceTest() throws Exception
 	{
-		executePluginTest(createTestTask("MimetypeServiceTest"));
+		executePluginTest(createTestTask("MimeTypeServiceTest"));
 	}
 
 	@Test
@@ -221,5 +250,23 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 		assertNotNull(created);
 
 		executePluginTest(createTestTask("DsfClientTest"));
+	}
+
+	@Test
+	public void startTargetProviderTest() throws Exception
+	{
+		executePluginTest(createTestTask("TargetProviderTest"));
+	}
+
+	@Test
+	public void startSensitiveDataLoggerTest() throws Exception
+	{
+		executePluginTest(createTestTask("DataLoggerTest"));
+	}
+
+	@Test
+	public void startAutowireTest() throws Exception
+	{
+		executePluginTest(createTestTask("AutowireTest"));
 	}
 }

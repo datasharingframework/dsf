@@ -1,10 +1,10 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.util.function.Function;
+
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
@@ -13,9 +13,10 @@ import dev.dsf.bpe.v2.variables.Variables;
 
 public class ServiceTaskDelegate extends AbstractProcessPluginDelegate<ServiceTask> implements JavaDelegate
 {
-	public ServiceTaskDelegate(ProcessPluginApi api, ObjectMapper objectMapper, ServiceTask delegate)
+	public ServiceTaskDelegate(ProcessPluginApi api, Function<DelegateExecution, Variables> variablesFactory,
+			ServiceTask delegate)
 	{
-		super(api, objectMapper, delegate);
+		super(api, variablesFactory, delegate);
 	}
 
 	@Override

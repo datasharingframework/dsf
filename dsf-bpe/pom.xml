@@ -22,10 +22,12 @@
 		<module>dsf-bpe-test-plugin-v1</module>
 		<module>dsf-bpe-test-plugin-v2</module>
 	</modules>
-	
+
 	<properties>
 		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
+
+	<name>DSF BPE Parent POM</name>
 
 	<repositories>
 		<repository>

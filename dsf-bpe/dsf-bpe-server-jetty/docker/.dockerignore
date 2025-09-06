@@ -1,6 +1,8 @@
 api/v1/README.md
 api/v2/README.md
-ca/README.md
+ca/client_ca_chains/README.md
+ca/server_root_cas/README.md
+conf/README.md
 lib/README.md
 lib_external/README.md
 log/README.md

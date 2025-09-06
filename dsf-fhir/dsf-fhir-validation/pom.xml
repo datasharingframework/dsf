@@ -9,6 +9,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF FHIR Validation</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -48,7 +50,7 @@
 			<artifactId>junit</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j2-impl</artifactId>
@@ -58,6 +60,13 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<testCompilerArgument>-proc:none</testCompilerArgument>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-maven-plugin</artifactId>

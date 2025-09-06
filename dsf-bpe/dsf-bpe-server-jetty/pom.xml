@@ -9,6 +9,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF BPE Server Jetty</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -61,6 +63,15 @@
 		</resources>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<compilerArgs>
+						<arg>-proc:none</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -123,16 +134,30 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>docker/ca</directory>
+							<directory>docker/ca/client_ca_chains</directory>
 							<includes>
-								<include>*.pem</include>
+								<include>*.crt</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../../dsf-docker/bpe_proxy/ca</directory>
+							<directory>docker/ca/server_root_cas</directory>
 							<includes>
-								<include>*.pem</include>
+								<include>*.crt</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker/bpe_proxy/ca/client_ca_chains</directory>
+							<includes>
+								<include>*.crt</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker/bpe_proxy/ca/client_issuing_cas</directory>
+							<includes>
+								<include>*.crt</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
@@ -158,15 +183,15 @@
 				</executions>
 				<configuration>
 					<configDocPackages>dev.dsf.common,dev.dsf.bpe</configDocPackages>
-					<clientCertIssuingCaFiles>
-						../../dsf-docker/bpe_proxy/ca/client_cert_issuing_cas.pem
-					</clientCertIssuingCaFiles>
-					<clientCertCaChainFiles>
-						../../dsf-docker/bpe_proxy/ca/client_cert_ca_chains.pem,docker/ca/client_cert_ca_chains.pem
-					</clientCertCaChainFiles>
-					<serverCertRootCaFiles>
-						docker/ca/server_cert_root_cas.pem
-					</serverCertRootCaFiles>
+					<clientIssuingCas>
+						../../dsf-docker/bpe_proxy/ca/client_issuing_cas
+					</clientIssuingCas>
+					<clientCaChains>
+						../../dsf-docker/bpe_proxy/ca/client_ca_chains,docker/ca/client_ca_chains
+					</clientCaChains>
+					<serverRootCas>
+						docker/ca/server_root_cas
+					</serverRootCas>
 				</configuration>
 			</plugin>
 		</plugins>

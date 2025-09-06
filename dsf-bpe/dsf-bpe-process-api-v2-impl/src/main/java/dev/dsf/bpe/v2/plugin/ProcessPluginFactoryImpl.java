@@ -19,9 +19,10 @@ public class ProcessPluginFactoryImpl extends AbstractProcessPluginFactory imple
 	public static final int API_VERSION = 2;
 
 	public ProcessPluginFactoryImpl(ClassLoader apiClassLoader, ApplicationContext apiApplicationContext,
-			ConfigurableEnvironment environment)
+			ConfigurableEnvironment environment, String serverBaseUrl)
 	{
-		super(API_VERSION, apiClassLoader, apiApplicationContext, environment, ProcessPluginDefinition.class);
+		super(API_VERSION, apiClassLoader, apiApplicationContext, environment, serverBaseUrl,
+				ProcessPluginDefinition.class);
 	}
 
 	@Override
@@ -29,7 +30,7 @@ public class ProcessPluginFactoryImpl extends AbstractProcessPluginFactory imple
 			URLClassLoader classLoader)
 	{
 		return new ProcessPluginImpl((ProcessPluginDefinition) processPluginDefinition, API_VERSION, draft, jarFile,
-				classLoader, environment, apiApplicationContext);
+				classLoader, environment, apiApplicationContext, serverBaseUrl);
 	}
 
 	@Override

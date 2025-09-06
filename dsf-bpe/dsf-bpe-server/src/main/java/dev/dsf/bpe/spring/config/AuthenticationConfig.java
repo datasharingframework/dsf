@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.bpe.authentication.BpeServerRole;
 import dev.dsf.bpe.authentication.IdentityProviderImpl;
-import dev.dsf.bpe.service.LocalOrganizationProvider;
-import dev.dsf.bpe.service.LocalOrganizationProviderImpl;
+import dev.dsf.bpe.service.LocalOrganizationAndEndpointProvider;
+import dev.dsf.bpe.service.LocalOrganizationAndEndpointProviderImpl;
 import dev.dsf.common.auth.conf.IdentityProvider;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.RoleConfigReader;
@@ -28,9 +28,9 @@ public class AuthenticationConfig
 	private PropertiesConfig propertiesConfig;
 
 	@Bean
-	public LocalOrganizationProvider localOrganizationProvider()
+	public LocalOrganizationAndEndpointProvider localOrganizationProvider()
 	{
-		return new LocalOrganizationProviderImpl(Duration.ofSeconds(30), dsfClientConfig.clientProvider(),
+		return new LocalOrganizationAndEndpointProviderImpl(Duration.ofSeconds(30), dsfClientConfig.clientProvider(),
 				propertiesConfig.getDsfServerBaseUrl());
 	}
 

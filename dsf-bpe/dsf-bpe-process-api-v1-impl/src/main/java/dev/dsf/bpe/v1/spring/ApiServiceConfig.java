@@ -101,8 +101,9 @@ public class ApiServiceConfig
 				dsfClientConfig.getLocalConfig().getConnectTimeout(),
 				dsfClientConfig.getLocalConfig().isDebugLoggingEnabled(), dsfClientConfig.getTrustStore(),
 				dsfClientConfig.getKeyStore(), dsfClientConfig.getKeyStorePassword(),
-				dsfClientConfig.getLocalConfig().getReadTimeout(), dsfClientConfig.getLocalConfig().getConnectTimeout(),
-				dsfClientConfig.getLocalConfig().isDebugLoggingEnabled(), proxyConfig, buildInfoProvider);
+				dsfClientConfig.getRemoteConfig().getReadTimeout(),
+				dsfClientConfig.getRemoteConfig().getConnectTimeout(),
+				dsfClientConfig.getRemoteConfig().isDebugLoggingEnabled(), proxyConfig, buildInfoProvider);
 	}
 
 	@Bean

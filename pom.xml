@@ -40,7 +40,7 @@
 		<apache.tika.version>3.2.0</apache.tika.version>
 	</properties>
 
-	<name>DSF</name>
+	<name>DSF Parent POM</name>
 	<description>Data Sharing Framework (DSF)</description>
 	<url>https://dsf.dev</url>
 
@@ -112,6 +112,11 @@
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-layout-template-json</artifactId>
 				<version>${log4j.version}</version>
 			</dependency>
 			<!-- async logging -->
@@ -212,6 +217,11 @@
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-openid</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-security</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 
@@ -377,12 +387,18 @@
 				<version>0.10.2</version>
 			</dependency>
 
-			<!-- managing out-dated dependencies from hapi fhir -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>1.27.1</version>
+				<version>1.28.0</version>
 			</dependency>
+			<dependency>
+				<groupId>org.tukaani</groupId>
+				<artifactId>xz</artifactId>
+				<version>1.10</version>
+			</dependency>
+
+			<!-- managing out-dated dependencies from hapi fhir -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
@@ -840,6 +856,13 @@
 
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<propertiesEncoding>UTF-8</propertiesEncoding>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
 				<executions>
@@ -1054,6 +1077,25 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<tags>
+								<tag>
+									<name>apiNote</name>
+									<placement>a</placement>
+									<head>API Note:</head>
+								</tag>
+								<tag>
+									<name>implSpec</name>
+									<placement>a</placement>
+									<head>Implementation Requirements:</head>
+								</tag>
+								<tag>
+									<name>implNote</name>
+									<placement>a</placement>
+									<head>Implementation Note:</head>
+								</tag>
+							</tags>
+						</configuration>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>
@@ -1106,6 +1148,30 @@
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
 						<executions>
 							<execution>
@@ -1148,7 +1214,6 @@
 								<excludeArtifact>dsf-fhir-rest-adapter</excludeArtifact>
 								<excludeArtifact>dsf-fhir-server</excludeArtifact>
 								<excludeArtifact>dsf-fhir-server-jetty</excludeArtifact>
-								<excludeArtifact>dsf-fhir-validation</excludeArtifact>
 								<excludeArtifact>dsf-fhir-webservice-client</excludeArtifact>
 								<excludeArtifact>dsf-fhir-websocket-client</excludeArtifact>
 							</excludeArtifacts>

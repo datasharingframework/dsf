@@ -5,9 +5,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import dev.dsf.bpe.config.BpeDbMigratorConfig;
 import dev.dsf.bpe.config.BpeHttpJettyConfig;
+import dev.dsf.bpe.logging.BpeLog4jInitializer;
 import dev.dsf.common.db.migration.DbMigrator;
 import dev.dsf.common.jetty.JettyServer;
-import dev.dsf.common.jetty.Log4jInitializer;
 
 public final class BpeJettyServer
 {
@@ -16,7 +16,7 @@ public final class BpeJettyServer
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
 
-		Log4jInitializer.initializeLog4j();
+		new BpeLog4jInitializer().initializeLog4j();
 	}
 
 	private BpeJettyServer()

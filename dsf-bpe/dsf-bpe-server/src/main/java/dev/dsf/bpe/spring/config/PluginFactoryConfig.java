@@ -118,7 +118,7 @@ public class PluginFactoryConfig
 			@Override
 			public KeyStore getKeyStore()
 			{
-				return propertiesConfig.getDsfClientCertificate(keyStorePassword);
+				return propertiesConfig.getDsfClientKeyStore(keyStorePassword);
 			}
 
 			@Override
@@ -210,7 +210,8 @@ public class PluginFactoryConfig
 
 		return new ProcessPluginApiFactory((ConfigurableEnvironment) environment, clientConfig,
 				fhirClientConnectionsConfig.fhirClientConfigs(), proxyConfig, buildInfoProvider, bpeMailService,
-				oidcClientProviderConfig.bpeOidcClientProvider(), pluginApiClassLoaderFactory());
+				oidcClientProviderConfig.bpeOidcClientProvider(), pluginApiClassLoaderFactory(),
+				propertiesConfig.getDsfServerBaseUrl());
 	}
 
 	@Bean

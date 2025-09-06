@@ -22,8 +22,6 @@ import dev.dsf.bpe.api.listener.ListenerFactoryImpl;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.api.service.BpeOidcClientProvider;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
-import dev.dsf.bpe.v2.ProcessPluginApi;
-import dev.dsf.bpe.v2.ProcessPluginApiImpl;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleaner;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleanerImpl;
 import dev.dsf.bpe.v2.client.dsf.ReferenceExtractor;
@@ -37,19 +35,25 @@ import dev.dsf.bpe.v2.listener.EndListener;
 import dev.dsf.bpe.v2.listener.ListenerVariables;
 import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
+import dev.dsf.bpe.v2.service.CompressionService;
+import dev.dsf.bpe.v2.service.CompressionServiceImpl;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.CryptoServiceImpl;
+import dev.dsf.bpe.v2.service.DataLogger;
+import dev.dsf.bpe.v2.service.DataLoggerImpl;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.EndpointProviderImpl;
+import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
+import dev.dsf.bpe.v2.service.FhirClientConfigProviderImpl;
+import dev.dsf.bpe.v2.service.FhirClientConfigProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.FhirClientProviderImpl;
-import dev.dsf.bpe.v2.service.FhirClientProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MailServiceDelegate;
-import dev.dsf.bpe.v2.service.MimetypeService;
-import dev.dsf.bpe.v2.service.MimetypeServiceImpl;
+import dev.dsf.bpe.v2.service.MimeTypeService;
+import dev.dsf.bpe.v2.service.MimeTypeServiceImpl;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OidcClientProviderDelegate;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
@@ -58,6 +62,8 @@ import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelperImpl;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelperImpl;
+import dev.dsf.bpe.v2.service.TargetProvider;
+import dev.dsf.bpe.v2.service.TargetProviderImpl;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.TaskHelperImpl;
 import dev.dsf.bpe.v2.service.detector.CombinedDetectors;
@@ -92,15 +98,6 @@ public class ApiServiceConfig
 
 	@Autowired
 	private BpeOidcClientProvider bpeOidcClientProvider;
-
-	@Bean
-	public ProcessPluginApi processPluginApiV2()
-	{
-		return new ProcessPluginApiImpl(proxyConfigDelegate(), endpointProvider(), fhirContext(), dsfClientProvider(),
-				fhirClientProvider(), oidcClientProvider(), mailService(), mimetypeService(), objectMapper(),
-				organizationProvider(), processAuthorizationHelper(), questionnaireResponseHelper(), readAccessHelper(),
-				taskHelper(), cryptoService());
-	}
 
 	@Bean
 	public ProxyConfig proxyConfigDelegate()
@@ -140,9 +137,15 @@ public class ApiServiceConfig
 	@Bean
 	public FhirClientProvider fhirClientProvider()
 	{
-		return new FhirClientProviderWithEndpointSupport(endpointProvider(),
-				new FhirClientProviderImpl(fhirContext(), proxyConfigDelegate(), oidcClientProvider(),
-						buildInfoProvider.getUserAgentValue(), clientConfigsDelegate()));
+		return new FhirClientProviderImpl(fhirContext(), proxyConfigDelegate(), oidcClientProvider(),
+				buildInfoProvider.getUserAgentValue(), fhirClientConfigProvider());
+	}
+
+	@Bean
+	public FhirClientConfigProvider fhirClientConfigProvider()
+	{
+		return new FhirClientConfigProviderWithEndpointSupport(endpointProvider(),
+				new FhirClientConfigProviderImpl(fhirClientConfigs.defaultTrustStore(), clientConfigsDelegate()));
 	}
 
 	@Bean
@@ -158,10 +161,10 @@ public class ApiServiceConfig
 	}
 
 	@Bean
-	public MimetypeService mimetypeService()
+	public MimeTypeService mimeTypeService()
 	{
 		Detector detector = CombinedDetectors.withDefaultAndNdJson(NdJsonDetector.DEFAULT_LINES_TO_CHECK);
-		return new MimetypeServiceImpl(detector);
+		return new MimeTypeServiceImpl(detector);
 	}
 
 	@Bean
@@ -281,8 +284,26 @@ public class ApiServiceConfig
 	}
 
 	@Bean
+	public CompressionService compressionService()
+	{
+		return new CompressionServiceImpl();
+	}
+
+	@Bean
 	public CryptoService cryptoService()
 	{
 		return new CryptoServiceImpl();
+	}
+
+	@Bean
+	public TargetProvider targetProvider()
+	{
+		return new TargetProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
+	}
+
+	@Bean
+	public DataLogger dataLogger()
+	{
+		return new DataLoggerImpl(fhirContext());
 	}
 }

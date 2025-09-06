@@ -9,6 +9,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF Common Build Info Reader</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>

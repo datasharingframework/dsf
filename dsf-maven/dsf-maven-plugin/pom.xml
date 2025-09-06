@@ -12,6 +12,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF Maven Plugin</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -29,16 +31,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-documentation</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-process-api-v1</artifactId>

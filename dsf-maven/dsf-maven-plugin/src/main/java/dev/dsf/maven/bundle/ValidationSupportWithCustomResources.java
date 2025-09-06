@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -60,11 +61,13 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 		return context;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions()
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions()
 	{
-		return new ArrayList<>(structureDefinitionsByUrl.values());
+		@SuppressWarnings("unchecked")
+		List<T> definitions = (List<T>) new ArrayList<>(structureDefinitionsByUrl.values());
+
+		return definitions;
 	}
 
 	@Override

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="resource-data" th:fragment="resource-data">
+			<th:block th:insert="~{resourceElements::systemAndValue}" th:with="label='Master Identifier',systemAndValue=${documentReference.masterIdentifier}" th:if="${documentReference.masterIdentifier}"></th:block>
+			<th:block th:insert="~{resourceElements::identifier}" th:with="identifier=${documentReference.identifier}" th:if="${documentReference.identifier}"></th:block>
+			<th:block th:insert="~{resourceElements::status}" th:if="${resource.status}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Document Status',string=${documentReference.docStatus}" th:if="${documentReference.docStatus}"></th:block>
+			<th:block th:insert="~{resourceElements::systemsAndValues}" th:with="label='Author',systemsAndValues=${documentReference.author}" th:if="${documentReference.author}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Date',string=${documentReference.date}" th:if="${documentReference.date}"></th:block>
+			<th:block th:insert="~{resourceElements::attachments}" th:with="attachments=${documentReference.attachment}" th:if="${documentReference.attachment}"></th:block>
+			<th:block th:insert="~{resourceElements::additionalValuesComment}"></th:block>
+		</div>
+	</div>
+</body>
+</html>

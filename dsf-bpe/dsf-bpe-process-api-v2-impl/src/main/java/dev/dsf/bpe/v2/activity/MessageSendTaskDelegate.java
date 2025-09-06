@@ -1,10 +1,10 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.util.function.Function;
+
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.values.SendTaskValues;
@@ -14,10 +14,10 @@ import dev.dsf.bpe.v2.variables.Variables;
 
 public class MessageSendTaskDelegate extends AbstractMessageDelegate<MessageSendTask> implements JavaDelegate
 {
-	public MessageSendTaskDelegate(ProcessPluginApi api, ObjectMapper objectMapper, MessageSendTask delegate,
-			SendTaskValues sendTask)
+	public MessageSendTaskDelegate(ProcessPluginApi api, Function<DelegateExecution, Variables> variablesFactory,
+			MessageSendTask delegate, SendTaskValues sendTask)
 	{
-		super(api, objectMapper, delegate, sendTask);
+		super(api, variablesFactory, delegate, sendTask);
 	}
 
 	@Override

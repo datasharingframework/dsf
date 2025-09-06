@@ -7,16 +7,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
+import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
+import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
-import dev.dsf.bpe.v2.service.MimetypeService;
+import dev.dsf.bpe.v2.service.MimeTypeService;
 import dev.dsf.bpe.v2.service.OidcClientProvider;
 import dev.dsf.bpe.v2.service.OrganizationProvider;
 import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
+import dev.dsf.bpe.v2.service.TargetProvider;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 import dev.dsf.bpe.v2.variables.Variables;
@@ -29,6 +33,8 @@ import dev.dsf.bpe.v2.variables.Variables;
  */
 public interface ProcessPluginApi
 {
+	ProcessPluginDefinition getProcessPluginDefinition();
+
 	ProxyConfig getProxyConfig();
 
 	EndpointProvider getEndpointProvider();
@@ -39,11 +45,13 @@ public interface ProcessPluginApi
 
 	FhirClientProvider getFhirClientProvider();
 
+	FhirClientConfigProvider getFhirClientConfigProvider();
+
 	OidcClientProvider getOidcClientProvider();
 
 	MailService getMailService();
 
-	MimetypeService getMimetypeService();
+	MimeTypeService getMimeTypeService();
 
 	ObjectMapper getObjectMapper();
 
@@ -57,5 +65,11 @@ public interface ProcessPluginApi
 
 	TaskHelper getTaskHelper();
 
+	CompressionService getCompressionService();
+
 	CryptoService getCryptoService();
+
+	TargetProvider getTargetProvider();
+
+	DataLogger getDataLogger();
 }
