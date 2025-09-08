@@ -32,6 +32,7 @@ import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.ResourceUpdatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -414,17 +415,21 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
 		// retrieving the latest resource from db to include updated references
-		Resource updatedResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection, updatedResource);
+		R updatedResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection, updatedResource);
+
+		referenceCleaner.cleanLiteralReferences(updatedResourceWithResolvedReferences);
+
 		try
 		{
-			referenceCleaner.cleanLiteralReferences(updatedResourceWithResolvedReferences);
-			eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResourceWithResolvedReferences));
+			eventHandler.handleEvent(createEvent(updatedResourceWithResolvedReferences));
 		}
 		catch (Exception e)
 		{
 			logger.debug("Error while handling resource updated event", e);
 			logger.warn("Error while handling resource updated event: {} - {}", e.getClass().getName(), e.getMessage());
 		}
+
+		modifyResponseResource(updatedResourceWithResolvedReferences);
 
 		IdType location = updatedResourceWithResolvedReferences.getIdElement().withServerBase(serverBase,
 				updatedResourceWithResolvedReferences.getResourceType().name());
@@ -450,6 +455,15 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		response.setLastModified(updatedResourceWithResolvedReferences.getMeta().getLastUpdated());
 
 		return Optional.of(resultEntry);
+	}
+
+	protected ResourceUpdatedEvent createEvent(Resource eventResource)
+	{
+		return eventGenerator.newResourceUpdatedEvent(eventResource);
+	}
+
+	protected void modifyResponseResource(R responseResource)
+	{
 	}
 
 	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource)

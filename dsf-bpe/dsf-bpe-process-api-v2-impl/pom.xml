@@ -162,7 +162,7 @@
 								<artifactItem>
 									<groupId>org.xerial</groupId>
 									<artifactId>sqlite-jdbc</artifactId>
-									<version>3.45.1.0</version>
+									<version>3.49.1.0</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
