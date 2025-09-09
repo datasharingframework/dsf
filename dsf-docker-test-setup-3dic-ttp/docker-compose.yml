@@ -826,7 +826,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-bpe
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: /run/secrets/oidc_client_ttp_bpe.secret
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_bpe.secret
     networks:
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.59
