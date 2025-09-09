@@ -502,7 +502,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws IOException
+	public void onContextRefreshedEvent()
 	{
 		buildInfoReader().logSystemDefaultTimezone();
 		buildInfoReader().logBuildInfo();
