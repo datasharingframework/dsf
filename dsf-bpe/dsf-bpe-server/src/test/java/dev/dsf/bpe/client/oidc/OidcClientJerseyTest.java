@@ -27,7 +27,7 @@ public class OidcClientJerseyTest
 				trustStore, null, null, null, null, null, "Test Client", Duration.ofSeconds(10), Duration.ofSeconds(5),
 				true, Duration.ofSeconds(10));
 
-		char[] accessToken = client.getAccessToken();
+		char[] accessToken = client.asOidcClientWithDecodedJwt().getAccessToken();
 		assertNotNull(accessToken);
 	}
 }

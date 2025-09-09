@@ -14,23 +14,22 @@ import org.eclipse.jetty.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.JWTVerifier;
+
+import dev.dsf.common.oidc.JwtVerifier;
+import dev.dsf.common.oidc.OidcClientException;
 
 public class BearerTokenAuthenticator extends LoginAuthenticator
 {
 	private static final Logger logger = LoggerFactory.getLogger(BearerTokenAuthenticator.class);
 
-	private final DsfOpenIdConfiguration openIdConfiguration;
+	private final JwtVerifier jwtVerifier;
 
-	public BearerTokenAuthenticator(DsfOpenIdConfiguration openIdConfiguration)
+	public BearerTokenAuthenticator(JwtVerifier jwtVerifier)
 	{
-		Objects.requireNonNull(openIdConfiguration, "openIdConfiguration");
-		this.openIdConfiguration = openIdConfiguration;
+		this.jwtVerifier = Objects.requireNonNull(jwtVerifier, "jwtVerifier");
 	}
 
 	@Override
@@ -54,15 +53,11 @@ public class BearerTokenAuthenticator extends LoginAuthenticator
 			return AuthenticationState.SEND_FAILURE;
 		}
 
-		Algorithm algorithm = Algorithm.RSA256(openIdConfiguration.getRsaKeyProvider());
-		JWTVerifier verifier = JWT.require(algorithm).withIssuer(openIdConfiguration.getIssuer()).acceptLeeway(1)
-				.build();
-
-		String accessToken = authorizationHeader.substring(7, authorizationHeader.length());
-
 		try
 		{
-			DecodedJWT jwt = verifier.verify(accessToken);
+			String token = authorizationHeader.substring(7, authorizationHeader.length());
+			DecodedJWT jwt = jwtVerifier.verifyBearerToken(token);
+
 			if (!jwt.getClaims().containsKey("sub") && !jwt.getClaims().containsKey("sid"))
 			{
 				logger.warn("Access token has no sub and no sid claim");
@@ -71,7 +66,7 @@ public class BearerTokenAuthenticator extends LoginAuthenticator
 			}
 
 			logger.debug("Access token claims: {}", jwt.getClaims());
-			UserIdentity user = login(null, accessToken, request, response);
+			UserIdentity user = login(null, token, request, response);
 			if (user == null)
 			{
 				Response.writeError(request, response, callback, HttpStatus.FORBIDDEN_403);
@@ -82,13 +77,20 @@ public class BearerTokenAuthenticator extends LoginAuthenticator
 		}
 		catch (TokenExpiredException e)
 		{
+			logger.debug("Bearer token expired, sending 401", e);
+			logger.info("Bearer token expired, sending 401");
+
 			response.getHeaders().put(HttpHeader.WWW_AUTHENTICATE.asString(),
 					"Bearer error=\"invalid_token\", error_description=\"The access token expired\"");
 			Response.writeError(request, response, callback, HttpStatus.UNAUTHORIZED_401);
 			return AuthenticationState.SEND_FAILURE;
 		}
-		catch (JWTVerificationException e)
+		catch (JWTVerificationException | OidcClientException e)
 		{
+			logger.debug("Bearer token authorization failed, sending 400", e);
+			logger.warn("Bearer token authorization failed, sending 400: {} - {}", e.getClass().getName(),
+					e.getMessage());
+
 			Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
 			return AuthenticationState.SEND_FAILURE;
 		}

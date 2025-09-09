@@ -10,7 +10,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,18 +27,26 @@ import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
 import org.eclipse.jetty.ee10.webapp.WebAppContext;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.openid.OpenIdAuthenticator;
+import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
@@ -54,14 +61,20 @@ import dev.dsf.common.auth.BearerTokenAuthenticator;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
 import dev.dsf.common.auth.DsfLoginService;
-import dev.dsf.common.auth.DsfOpenIdConfiguration;
 import dev.dsf.common.auth.DsfOpenIdLoginService;
 import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
+import dev.dsf.common.build.BuildInfoReader;
+import dev.dsf.common.build.BuildInfoReaderImpl;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.jetty.HttpClientWithGetRetry;
 import dev.dsf.common.jetty.JettyServer;
+import dev.dsf.common.oidc.BaseOidcClient;
+import dev.dsf.common.oidc.BaseOidcClientJersey;
+import dev.dsf.common.oidc.BaseOidcClientWithCache;
+import dev.dsf.common.oidc.JwtVerifier;
+import dev.dsf.common.oidc.JwtVerifierImpl;
 import jakarta.servlet.ServletContainerInitializer;
 
 @Configuration
@@ -122,17 +135,25 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.server.auth.oidc.bearer.token:false}")
 	private boolean oidcBearerTokenEnabled;
 
+	@Documentation(description = "Audience (aud) value to verify before accepting OIDC bearer tokens, uses value from `DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID` by default, set blank string e.g. `''` to disable", recommendation = "Requires *DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL* to be specified and *DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN* set tor `true`")
+	@Value("${dev.dsf.server.auth.oidc.bearer.token.audience:#{null}}")
+	private String oidcBearerTokenAudience;
+
 	@Documentation(description = "OIDC provider realm base url", example = "https://keycloak.test.com:8443/realms/example-realm-name")
 	@Value("${dev.dsf.server.auth.oidc.provider.realm.base.url:#{null}}")
 	private String oidcProviderRealmBaseUrl;
 
-	@Documentation(description = "OIDC provider client connect timeout in milliseconds")
-	@Value("${dev.dsf.server.auth.oidc.provider.client.connectTimeout:5000}")
-	private long oidcProviderClientConnectTimeout;
+	@Documentation(description = "OIDC provider dicovery path")
+	@Value("${dev.dsf.server.auth.oidc.provider.discovery.path:/.well-known/openid-configuration}")
+	private String oidcProviderDiscoveryPath;
 
-	@Documentation(description = "OIDC provider client idle timeout in milliseconds")
-	@Value("${dev.dsf.server.auth.oidc.provider.client.idleTimeout:30000}")
-	private long oidcProviderClientIdleTimeout;
+	@Documentation(description = "OIDC provider client connect timeout")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.timeout.connect:PT5S}")
+	private String oidcProviderClientTimeoutConnect;
+
+	@Documentation(description = "OIDC provider client read timeout")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.timeout.read:PT30S}")
+	private String oidcProviderClientTimeoutRead;
 
 	@Documentation(description = "Folder with PEM encoded files (*.crt, *.pem) or a single PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to the OIDC provider", recommendation = "Add file to default folder via bind mount or use docker secret file to configure", example = "/run/secrets/oidc_provider_trust_certificates.pem")
 	@Value("${dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas:ca/server_root_cas}")
@@ -273,7 +294,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		SessionHandler sessionHandler = webAppContext.getSessionHandler();
 		DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
 
-		DsfOpenIdConfiguration openIdConfiguration = null;
+		OpenIdConfiguration openIdConfiguration = null;
 		OpenIdAuthenticator openIdAuthenticator = null;
 		DsfOpenIdLoginService openIdLoginService = null;
 		BearerTokenAuthenticator bearerTokenAuthenticator = null;
@@ -281,8 +302,8 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 
 		if (oidcAuthorizationCodeFlowEnabled || oidcBearerTokenEnabled || oidcBackChannelLogoutEnabled)
 		{
-			openIdConfiguration = new DsfOpenIdConfiguration(oidcProviderRealmBaseUrl, oidcClientId, oidcClientSecret,
-					createOidcClient(), oidcBackChannelLogoutEnabled, oidcBearerTokenEnabled);
+			openIdConfiguration = new OpenIdConfiguration.Builder(oidcProviderRealmBaseUrl, oidcClientId,
+					oidcClientSecret).httpClient(createOidcClient()).build();
 
 			if (oidcAuthorizationCodeFlowEnabled)
 			{
@@ -305,7 +326,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 					throw propertyNotDefined("dev.dsf.server.auth.oidc.provider.realm.base.url");
 				else
 				{
-					bearerTokenAuthenticator = new BearerTokenAuthenticator(openIdConfiguration);
+					bearerTokenAuthenticator = new BearerTokenAuthenticator(jwtVerifier());
 					logger.info("OIDC bearer token enabled");
 				}
 			}
@@ -320,7 +341,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 					throw propertyNotDefined("dev.dsf.server.auth.oidc.back.channel.logout.path");
 				else
 				{
-					backChannelLogoutAuthenticator = new BackChannelLogoutAuthenticator(openIdConfiguration,
+					backChannelLogoutAuthenticator = new BackChannelLogoutAuthenticator(jwtVerifier(),
 							oidcBackChannelPath);
 					logger.info("OIDC back-channel logout enabled");
 				}
@@ -345,22 +366,56 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		sessionHandler.addEventListener(backChannelLogoutAuthenticator);
 	}
 
-	private Duration oidcClientIdleTimeout()
+	@Bean
+	@Lazy
+	public JwtVerifier jwtVerifier()
 	{
-		return oidcProviderClientIdleTimeout >= 0 ? Duration.of(oidcProviderClientIdleTimeout, ChronoUnit.MILLIS)
-				: null;
+		return new JwtVerifierImpl(oidcProviderRealmBaseUrl, oidcClientId, oidcBearerTokenAudience, baseOidcClient());
 	}
 
-	private Duration oidcClientConnectTimeout()
+	@Bean
+	@Lazy
+	public BaseOidcClient baseOidcClient()
 	{
-		return oidcProviderClientConnectTimeout >= 0 ? Duration.of(oidcProviderClientConnectTimeout, ChronoUnit.MILLIS)
-				: null;
+		String proxyUrl = null, proxyUsername = null;
+		char[] proxyPassword = null;
+
+		ProxyConfig proxy = proxyConfig();
+		if (proxy.isEnabled(oidcProviderRealmBaseUrl))
+		{
+			proxyUrl = proxy.getUrl();
+			proxyUsername = proxy.getUsername();
+			proxyPassword = proxy.getPassword();
+		}
+
+		KeyStore trustStore = oidcProviderClientTrustStore();
+		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+		KeyStore keyStore = oidcProviderClientKeyStore(keyStorePassword);
+
+		return new BaseOidcClientWithCache(new BaseOidcClientJersey(oidcProviderRealmBaseUrl, oidcProviderDiscoveryPath,
+				trustStore, keyStore, keyStore == null ? null : keyStorePassword, proxyUrl, proxyUsername,
+				proxyPassword, buildInfoReader().getUserAgentValue(), oidcProviderClientTimeoutConnect(),
+				oidcProviderClientTimeoutRead(), false));
+	}
+
+	@Bean
+	@Lazy
+	public Duration oidcProviderClientTimeoutRead()
+	{
+		return Duration.parse(oidcProviderClientTimeoutRead);
+	}
+
+	@Bean
+	@Lazy
+	public Duration oidcProviderClientTimeoutConnect()
+	{
+		return Duration.parse(oidcProviderClientTimeoutConnect);
 	}
 
 	private Proxy oidcClientProxy()
 	{
-		ProxyConfig config = new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
-		if (config.getUrl() != null && !config.isNoProxyUrl(oidcProviderRealmBaseUrl))
+		ProxyConfig config = proxyConfig();
+		if (config.isEnabled(oidcProviderRealmBaseUrl))
 		{
 			try
 			{
@@ -379,17 +434,37 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 			return null;
 	}
 
+	@Bean
+	@Lazy
+	public ProxyConfig proxyConfig()
+	{
+		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
+	}
+
+	@Bean
+	@Lazy
+	public KeyStore oidcProviderClientTrustStore()
+	{
+		return createOptionalTrustStore(oidcProviderClientTrustCertificatesFileOrFolder,
+				"dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas");
+	}
+
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public KeyStore oidcProviderClientKeyStore(char[] oidcClientKeyStorePassword)
+	{
+		return createOptionalClientKeyStore(oidcProviderClientCertificateFile,
+				oidcProviderClientCertificatePrivateKeyFile, oidcProviderClientCertificatePrivateKeyPassword,
+				oidcClientKeyStorePassword, "dev.dsf.server.auth.oidc.provider.client.certificate",
+				"dev.dsf.server.auth.oidc.provider.client.certificate.private.key");
+	}
+
 	private HttpClient createOidcClient()
 	{
 		char[] oidcClientKeyStorePassword = UUID.randomUUID().toString().toCharArray();
 
-		KeyStore oidcProviderClientTrustStore = createOptionalTrustStore(
-				oidcProviderClientTrustCertificatesFileOrFolder,
-				"dev.dsf.server.auth.oidc.provider.client.trust.server.certificate.cas");
-		KeyStore oidcProviderClientKeyStore = createOptionalClientKeyStore(oidcProviderClientCertificateFile,
-				oidcProviderClientCertificatePrivateKeyFile, oidcProviderClientCertificatePrivateKeyPassword,
-				oidcClientKeyStorePassword, "dev.dsf.server.auth.oidc.provider.client.certificate",
-				"dev.dsf.server.auth.oidc.provider.client.certificate.private.key");
+		KeyStore oidcProviderClientTrustStore = oidcProviderClientTrustStore();
+		KeyStore oidcProviderClientKeyStore = oidcProviderClientKeyStore(oidcClientKeyStorePassword);
 
 		SslContextFactory.Client sslContextFactory = new SslContextFactory.Client(false);
 		if (oidcProviderClientTrustStore != null)
@@ -408,15 +483,28 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 
 		ClientConnector connector = new ClientConnector();
 		connector.setSslContextFactory(sslContextFactory);
-		if (oidcClientIdleTimeout() != null)
-			connector.setIdleTimeout(oidcClientIdleTimeout());
-		if (oidcClientConnectTimeout() != null)
-			connector.setConnectTimeout(oidcClientConnectTimeout());
+		connector.setIdleTimeout(oidcProviderClientTimeoutRead());
+		connector.setConnectTimeout(oidcProviderClientTimeoutConnect());
 
 		HttpClient httpClient = new HttpClientWithGetRetry(new HttpClientTransportOverHTTP(connector), 5);
 		if (oidcClientProxy() != null)
 			httpClient.getProxyConfiguration().addProxy(oidcClientProxy());
 
+		httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, buildInfoReader().getUserAgentValue()));
+
 		return httpClient;
+	}
+
+	@Bean
+	public BuildInfoReader buildInfoReader()
+	{
+		return new BuildInfoReaderImpl();
+	}
+
+	@EventListener({ ContextRefreshedEvent.class })
+	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws IOException
+	{
+		buildInfoReader().logSystemDefaultTimezone();
+		buildInfoReader().logBuildInfo();
 	}
 }

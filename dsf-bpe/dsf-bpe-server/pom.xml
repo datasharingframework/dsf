@@ -42,6 +42,10 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-oidc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-status</artifactId>
 		</dependency>
 		<dependency>

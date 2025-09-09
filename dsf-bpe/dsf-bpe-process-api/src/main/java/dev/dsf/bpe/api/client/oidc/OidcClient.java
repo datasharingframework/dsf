@@ -15,11 +15,17 @@ public interface OidcClient
 	 * @throws OidcClientException
 	 *             if response status not 200 OK
 	 */
-	Jwks getJwks() throws OidcClientException;
+	default Jwks getJwks() throws OidcClientException
+	{
+		return getJwks(getConfiguration());
+	}
 
 	/**
+	 * <i>Implementation may ignore the configuration parameter and use value from {@link #getConfiguration()}
+	 * instead.</i>
+	 *
 	 * @param configuration
-	 *            not <code>null</code>
+	 *            may be <code>null</code>, uses value from {@link #getConfiguration()} if <code>null</code>
 	 * @return {@link Jwks} resource
 	 * @throws OidcClientException
 	 *             if response status not 200 OK

@@ -21,15 +21,6 @@ public interface OidcClient
 	Jwks getJwks() throws OidcClientException;
 
 	/**
-	 * @param configuration
-	 *            not <code>null</code>
-	 * @return {@link Jwks} resource
-	 * @throws OidcClientException
-	 *             if response status not 200 OK
-	 */
-	Jwks getJwks(Configuration configuration) throws OidcClientException;
-
-	/**
 	 * @return access token
 	 */
 	char[] getAccessToken() throws OidcClientException;

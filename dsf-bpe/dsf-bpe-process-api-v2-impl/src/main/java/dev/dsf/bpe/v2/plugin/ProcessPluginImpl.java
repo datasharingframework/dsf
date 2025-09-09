@@ -127,75 +127,40 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 				new ProcessPluginApiFactory(processPluginDefinition, parentContext));
 	}
 
-	private ProcessPluginApi getProcessPluginApi()
+	private <T> T getOrSet(AtomicReference<T> cache, Supplier<T> supplier)
 	{
-		ProcessPluginApi entry = processPluginApi.get();
-		if (entry == null)
+		T cached = cache.get();
+		if (cached == null)
 		{
-			ProcessPluginApi o = doGetProcessPluginApi();
-			if (processPluginApi.compareAndSet(entry, o))
-				return o;
+			T value = supplier.get();
+			if (cache.compareAndSet(cached, value))
+				return value;
 			else
-				return processPluginApi.get();
+				return cache.get();
 		}
 		else
-			return entry;
+			return cached;
 	}
 
-	private ProcessPluginApi doGetProcessPluginApi()
+	private ProcessPluginApi getProcessPluginApi()
 	{
-		return getApplicationContext().getBean(ProcessPluginApi.class);
+		return getOrSet(processPluginApi, () -> getApplicationContext().getBean(ProcessPluginApi.class));
 	}
 
 	private FhirContext getFhirContext()
 	{
-		FhirContext entry = fhirContext.get();
-		if (entry == null)
-		{
-			FhirContext o = doGetFhirContext();
-			if (fhirContext.compareAndSet(entry, o))
-				return o;
-			else
-				return fhirContext.get();
-		}
-		else
-			return entry;
-	}
-
-	private FhirContext doGetFhirContext()
-	{
-		return getApplicationContext().getBean(FhirContext.class);
+		return getOrSet(fhirContext, () -> getApplicationContext().getBean(FhirContext.class));
 	}
 
 	private ObjectMapper getObjectMapper()
 	{
-		ObjectMapper entry = objectMapper.get();
-		if (entry == null)
-		{
-			ObjectMapper o = doGetObjectMapper();
-			if (objectMapper.compareAndSet(entry, o))
-				return o;
-			else
-				return objectMapper.get();
-		}
-		else
-			return entry;
-	}
-
-	private ObjectMapper doGetObjectMapper()
-	{
-		try
+		return getOrSet(objectMapper, () ->
 		{
 			ObjectMapper objectMapper = getApplicationContext().getBean(ObjectMapper.class).copy();
 			objectMapper.setTypeFactory(TypeFactory.defaultInstance().withClassLoader(getProcessPluginClassLoader()));
 
 			return objectMapper;
-
-		}
-		catch (BeansException e)
-		{
-			throw new RuntimeException(e);
-		}
+		});
 	}
 
 	@Override
