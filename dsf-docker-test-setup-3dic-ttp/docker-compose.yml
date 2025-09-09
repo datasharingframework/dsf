@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: nginx:1.28
+    image: nginx:1.29
     restart: "no"
     ports:
       - 127.0.0.1:443:443
@@ -79,7 +79,7 @@ services:
         read_only: true
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2
+    image: quay.io/keycloak/keycloak:26.3
     restart: "no"
     ports:
       - 127.0.0.1:8443:8443
