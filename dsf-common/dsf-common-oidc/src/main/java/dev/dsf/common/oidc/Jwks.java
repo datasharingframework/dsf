@@ -98,7 +98,7 @@ public class Jwks
 					};
 				}
 
-				default -> throw new JwksException("JWKS kty property '" + kty + "' not supported");
+				default -> throw new JwksException("JWKS kty property value '" + kty + "' not one of 'RSA' or 'EC'");
 			};
 		}
 
@@ -186,7 +186,7 @@ public class Jwks
 				case "P-521" -> new ECGenParameterSpec("secp521r1");
 
 				default -> throw new JwksException(
-						"JWKS crv property value '" + crv + "' not one of 'P-256', 'P-384' or 'P-512'");
+						"JWKS crv property value '" + crv + "' not one of 'P-256', 'P-384' or 'P-521'");
 			};
 
 			try

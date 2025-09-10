@@ -131,7 +131,7 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 		catch (JWTVerificationException | OidcClientException e)
 		{
 			logger.debug("Backchannel logout failed, sending 400", e);
-			logger.warn("Backchannel logout, sending 400: {} - {}", e.getClass().getName(), e.getMessage());
+			logger.warn("Backchannel logout failed, sending 400: {} - {}", e.getClass().getName(), e.getMessage());
 
 			Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
 			return AuthenticationState.SEND_FAILURE;

@@ -69,7 +69,7 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 		if (base == null)
 			logger.warn("Base definition with url {} not found", differential.getBaseDefinition());
 		else if (!base.hasSnapshot())
-			logger.warn("Base definition with url {} has not snapshot", differential.getBaseDefinition());
+			logger.warn("Base definition with url {} has no snapshot", differential.getBaseDefinition());
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();
