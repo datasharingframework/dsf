@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   proxy:
-    image: nginx:1.28
+    image: nginx:1.29
     restart: "no"
     ports:
       - 127.0.0.1:443:443
@@ -79,7 +79,7 @@ services:
         read_only: true
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2
+    image: quay.io/keycloak/keycloak:26.3
     restart: "no"
     ports:
       - 127.0.0.1:8443:8443
@@ -190,6 +190,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN_AUDIENCE: 'account'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic1
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-fhir
@@ -825,7 +826,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-bpe
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: /run/secrets/oidc_client_ttp_bpe.secret
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_bpe.secret
     networks:
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.59

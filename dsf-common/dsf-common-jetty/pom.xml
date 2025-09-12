@@ -18,6 +18,10 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-build-info-reader</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-config</artifactId>
 		</dependency>
 		<dependency>
@@ -27,6 +31,10 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-documentation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-oidc</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

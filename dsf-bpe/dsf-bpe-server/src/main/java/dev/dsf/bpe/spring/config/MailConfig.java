@@ -1,6 +1,5 @@
 package dev.dsf.bpe.spring.config;
 
-import java.io.IOException;
 import java.security.KeyStore;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -140,7 +139,7 @@ public class MailConfig implements InitializingBean
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws IOException
+	public void onContextRefreshedEvent()
 	{
 		if (propertiesConfig.getSendTestMailOnStartup())
 		{

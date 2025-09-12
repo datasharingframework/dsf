@@ -1,10 +1,17 @@
-package dev.dsf.common.auth.jwk;
+package dev.dsf.common.oidc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Optional;
+
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.dsf.common.oidc.Jwks.JwksKey;
 
 public class JwksTest
 {
@@ -43,30 +50,32 @@ public class JwksTest
 	@Test
 	public void testDecodeJwks() throws Exception
 	{
-		Jwks jwks = Jwks.from(jwksString);
+		ObjectMapper objectMapper = new ObjectMapper();
+		Jwks jwks = objectMapper.readValue(jwksString, Jwks.class);
 
 		assertNotNull(jwks);
-		assertNotNull(jwks.getAllKeys());
-		assertEquals(2, jwks.getAllKeys().size());
+		assertNotNull(jwks.getKeys());
+		assertEquals(2, jwks.getKeys().size());
 
-		Jwk jwk0 = jwks.getAllKeys().get(0);
-		Jwk jwk1 = jwks.getAllKeys().get(1);
+		Optional<JwksKey> jwk0o = jwks.getKey("kncc6492FTtclCO8qJvhS2PvYap_VabfAPOLhK3mkfA");
+		Optional<JwksKey> jwk1o = jwks.getKey("Zp7ockRwsxqM6FrZlDJUOVwAxPICO2jBW0Rbk25oYGk");
 
-		assertNotNull(jwk0);
-		assertNotNull(jwk1);
+		assertTrue(jwk0o.isPresent());
+		assertTrue(jwk1o.isPresent());
+		assertTrue(jwks.getKey(null).isEmpty());
+		assertTrue(jwks.getKey("not existing").isEmpty());
 
-		assertNotNull(jwk0.getId());
-		assertEquals("kncc6492FTtclCO8qJvhS2PvYap_VabfAPOLhK3mkfA", jwk0.getId());
-		assertNotNull(jwk1.getId());
-		assertEquals("Zp7ockRwsxqM6FrZlDJUOVwAxPICO2jBW0Rbk25oYGk", jwk1.getId());
+		JwksKey jwk0 = jwk0o.get();
+		JwksKey jwk1 = jwk1o.get();
 
-		assertEquals(jwk0, jwks.getKey(jwk0.getId()));
-		assertEquals(jwk1, jwks.getKey(jwk1.getId()));
+		assertNotNull(jwk0.kid());
+		assertEquals("kncc6492FTtclCO8qJvhS2PvYap_VabfAPOLhK3mkfA", jwk0.kid());
+		assertNotNull(jwk1.kid());
+		assertEquals("Zp7ockRwsxqM6FrZlDJUOVwAxPICO2jBW0Rbk25oYGk", jwk1.kid());
 
-		assertTrue(jwk0.getPublicKey().isPresent());
-		assertTrue(jwk1.getPublicKey().isPresent());
+		assertNotNull(jwk0.toAlgorithm());
+		assertEquals("RS256", jwk0.toAlgorithm().getName());
 
-		assertEquals("RSA", jwk0.getPublicKey().get().getAlgorithm());
-		assertEquals("RSA", jwk1.getPublicKey().get().getAlgorithm());
+		assertThrows(JwksException.class, jwk1::toAlgorithm);
 	}
 }

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidatorExtension;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Resource;
@@ -124,8 +124,8 @@ public class ResourceValidatorImpl implements ResourceValidator
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(validationSupport.getFhirContext());
 		ValidationSupportContext validationSupportContext = new ValidationSupportContext(validationSupport);
-		VersionSpecificWorkerContextWrapper workerContext = new VersionSpecificWorkerContextWrapper(
-				validationSupportContext, versionCanonicalizer)
+		WorkerContextValidationSupportAdapter workerContext = new WorkerContextValidationSupportAdapter(
+				validationSupport)
 		{
 			@Override
 			public CodeSystem fetchCodeSystem(String system)

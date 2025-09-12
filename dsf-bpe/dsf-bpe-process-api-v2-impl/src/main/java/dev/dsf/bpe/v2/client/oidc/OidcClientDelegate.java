@@ -270,13 +270,6 @@ public class OidcClientDelegate implements OidcClient
 	}
 
 	@Override
-	public Jwks getJwks(Configuration configuration) throws OidcClientException
-	{
-		var jwks = delegate.getJwks(configuration == null ? null : new ConfigurationV2Delegate(configuration));
-		return jwks == null ? null : new JwksApiDelegate(jwks);
-	}
-
-	@Override
 	public char[] getAccessToken() throws OidcClientException
 	{
 		return delegate.getAccessToken();

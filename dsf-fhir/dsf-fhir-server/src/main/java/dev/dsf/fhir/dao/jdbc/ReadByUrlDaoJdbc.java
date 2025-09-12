@@ -105,9 +105,9 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 		if (url == null || url.isBlank())
 			return Optional.empty();
 
-		String versionSql = version != null && !version.isBlank() ? "AND " + resourceColumn + "->>'version' = ? " : "";
+		String versionSql = version != null && !version.isBlank() ? " AND " + resourceColumn + "->>'version' = ?" : "";
 		String sql = "SELECT " + resourceColumn + " FROM current_" + resourceTable + " WHERE " + resourceColumn
-				+ "->>'url' = ? " + versionSql;
+				+ "->>'url' = ?" + versionSql;
 
 		try (PreparedStatement statement = connection.prepareStatement(sql))
 		{

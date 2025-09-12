@@ -1,6 +1,5 @@
 package dev.dsf.fhir.validation;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -29,25 +28,6 @@ public class ValidatorTest
 	public void validateBundleInBundle() throws Exception
 	{
 		ResourceValidator validator = createValidator();
-
-		Bundle b = createBundleInBundle();
-
-		ValidationResult result = validator.validate(b);
-
-		logger.debug("validation messages: {}", result.getMessages());
-
-		assertNotNull(result);
-		assertNotNull(result.getMessages());
-		assertEquals("If this assert fails, maybe remove ResourceInResourceValidator workaround", 2,
-				result.getMessages().size());
-	}
-
-	// XXX Tests workaround for HAPI bug, unable to validate Bundles containing Bundles
-	// Bug may be related to https://github.com/hapifhir/org.hl7.fhir.core/issues/1889
-	@Test
-	public void validateBundleInBundleWorkaround() throws Exception
-	{
-		ResourceValidator validator = new ResourceInResourceValidator(fhirContext, createValidator());
 
 		Bundle b = createBundleInBundle();
 

@@ -3,6 +3,7 @@ com.fasterxml.jackson.core
 com.fasterxml.jackson.databind
 com.fasterxml.jackson.datatype
 com.google.common
+com.ctc.wstx.stax.WstxInputFactory
 dev.dsf.bpe.api
 jakarta.annotation.Nonnull
 jakarta.annotation.Nullable

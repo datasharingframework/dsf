@@ -37,7 +37,7 @@ public class InitialDataMigratorConfig
 
 	@Order(HIGHEST_PRECEDENCE + 1)
 	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws Exception
+	public void onContextRefreshedEvent()
 	{
 		initialDataMigrator().execute();
 	}
