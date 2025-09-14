@@ -1191,6 +1191,7 @@
 								<excludeArtifact>dsf-common-docker-secrets-reader</excludeArtifact>
 								<excludeArtifact>dsf-common-documentation</excludeArtifact>
 								<excludeArtifact>dsf-common-jetty</excludeArtifact>
+								<excludeArtifact>dsf-common-oidc</excludeArtifact>
 								<excludeArtifact>dsf-common-status</excludeArtifact>
 								<excludeArtifact>dsf-common-ui</excludeArtifact>
 								<excludeArtifact>dsf-fhir-pom</excludeArtifact>
