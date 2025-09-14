@@ -19,15 +19,17 @@ import dev.dsf.bpe.v2.constants.NamingSystems;
 public interface FhirClientConfigProvider
 {
 	/**
+	 * <i>Every call to this method creates a new {@link SSLContext} object.</i>
+	 *
 	 * @return new {@link SSLContext} configured with {@link #createDefaultTrustStore()}
-	 * @implNote Every call to this method creates a new {@link SSLContext} object
 	 */
 	SSLContext createDefaultSslContext();
 
 	/**
+	 * <i>Every call to this method creates a new {@link KeyStore} object.</i>
+	 *
 	 * @return copy of default certificate trust store configured via the DSF BPE config property
 	 *         `dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas`
-	 * @implNote Every call to this method creates a new {@link KeyStore} object
 	 */
 	KeyStore createDefaultTrustStore();
 
