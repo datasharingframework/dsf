@@ -82,10 +82,10 @@ public class ProcessPluginClassLoader extends URLClassLoader
 						@Override
 						public void visitLdcInsn(Object value)
 						{
-							if (value instanceof Type)
-								value = Type.getType(replace(((Type) value).getDescriptor()));
-							else if (value instanceof String && ((String) value).contains(FROM_PACKAGE))
-								value = ((String) value).replace(FROM_PACKAGE, TO_PACKAGE);
+							if (value instanceof Type t)
+								value = Type.getType(replace(t.getDescriptor()));
+							else if (value instanceof String s)
+								value = replace(s);
 
 							super.visitLdcInsn(value);
 						}
