@@ -22,25 +22,25 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.EndEvent;
-import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
-import org.camunda.bpm.model.bpmn.instance.FlowNode;
-import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
-import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.SendTask;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.camunda.bpm.model.bpmn.instance.SubProcess;
-import org.camunda.bpm.model.bpmn.instance.UserTask;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaField;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
+import org.operaton.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.instance.EndEvent;
+import org.operaton.bpm.model.bpmn.instance.ExtensionElements;
+import org.operaton.bpm.model.bpmn.instance.FlowNode;
+import org.operaton.bpm.model.bpmn.instance.IntermediateThrowEvent;
+import org.operaton.bpm.model.bpmn.instance.MessageEventDefinition;
+import org.operaton.bpm.model.bpmn.instance.Process;
+import org.operaton.bpm.model.bpmn.instance.SendTask;
+import org.operaton.bpm.model.bpmn.instance.ServiceTask;
+import org.operaton.bpm.model.bpmn.instance.SubProcess;
+import org.operaton.bpm.model.bpmn.instance.UserTask;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonExecutionListener;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonField;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonProperties;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonProperty;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonTaskListener;
+import org.operaton.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -647,28 +647,28 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 				{
 					ExtensionElements ext = getOrCreateExtensionElements(process);
 
-					CamundaProperties properties = ext.getChildElementsByType(CamundaProperties.class).stream()
+					OperatonProperties properties = ext.getChildElementsByType(OperatonProperties.class).stream()
 							.findFirst().orElseGet(() ->
 							{
-								CamundaProperties p = ext.getModelInstance().newInstance(CamundaProperties.class);
+								OperatonProperties p = ext.getModelInstance().newInstance(OperatonProperties.class);
 								ext.addChildElement(p);
 								return p;
 							});
 
-					CamundaProperty property = properties.getCamundaProperties().stream()
-							.filter(p -> MODEL_ATTRIBUTE_PROCESS_API_VERSION.equals(p.getCamundaName())).findFirst()
+					OperatonProperty property = properties.getOperatonProperties().stream()
+							.filter(p -> MODEL_ATTRIBUTE_PROCESS_API_VERSION.equals(p.getOperatonName())).findFirst()
 							.orElseGet(() ->
 							{
-								CamundaProperty p = properties.getModelInstance().newInstance(CamundaProperty.class);
+								OperatonProperty p = properties.getModelInstance().newInstance(OperatonProperty.class);
 								properties.addChildElement(p);
 								return p;
 							});
 
-					property.setCamundaName(MODEL_ATTRIBUTE_PROCESS_API_VERSION);
-					property.setCamundaValue(String.valueOf(processPluginApiVersion));
+					property.setOperatonName(MODEL_ATTRIBUTE_PROCESS_API_VERSION);
+					property.setOperatonValue(String.valueOf(processPluginApiVersion));
 
-					if (process.getCamundaHistoryTimeToLiveString() == null
-							|| process.getCamundaHistoryTimeToLiveString().isBlank())
+					if (process.getOperatonHistoryTimeToLiveString() == null
+							|| process.getOperatonHistoryTimeToLiveString().isBlank())
 					{
 						if (draft)
 							logger.info("Setting process history time to live for process {} from {} to {}",
@@ -676,7 +676,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 						else
 							logger.debug("Setting process history time to live for process {} from {} to {}",
 									process.getId(), getJarFile().toString(), DEFAULT_PROCESS_HISTORY_TIME_TO_LIVE);
-						process.setCamundaHistoryTimeToLiveString(DEFAULT_PROCESS_HISTORY_TIME_TO_LIVE);
+						process.setOperatonHistoryTimeToLiveString(DEFAULT_PROCESS_HISTORY_TIME_TO_LIVE);
 					}
 				});
 
@@ -735,7 +735,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		if (!getDefinitionResourceVersion().equals(processKeyAndVersion.getVersion()))
 		{
 			logger.warn(
-					"Camunda version tag of process in '{}' does not match process plugin version (tag: {} vs. plugin: {})",
+					"Operaton version tag of process in '{}' does not match process plugin version (tag: {} vs. plugin: {})",
 					fileAndModel.file(), processKeyAndVersion.getVersion(), getDefinitionVersion());
 			return false;
 		}
@@ -748,7 +748,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		return true;
 	}
 
-	// TODO filter BPMN Models that use UserTasks but either do not declare a camunda formKey or do not contain the
+	// TODO filter BPMN Models that use UserTasks but either do not declare a operaton formKey or do not contain the
 	// matching questionnaire resource
 	private Stream<BpmnFileAndModel> filterBpmnModelsWithNotAvailableBeans(List<BpmnFileAndModel> models,
 			ApplicationContext applicationContext)
@@ -774,12 +774,12 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	{
 		// service tasks
 		boolean serviceTasksOk = parent.getChildElementsByType(ServiceTask.class).stream().filter(Objects::nonNull)
-				.allMatch(t -> beanAvailable(process, t.getId(), t.getCamundaClass(), serviceTaskInterface,
+				.allMatch(t -> beanAvailable(process, t.getId(), t.getOperatonClass(), serviceTaskInterface,
 						applicationContext));
 
 		// message send tasks
 		boolean sendTasksOk = parent.getChildElementsByType(SendTask.class).stream().filter(Objects::nonNull)
-				.allMatch(t -> beanAvailable(process, t.getId(), t.getCamundaClass(), messageSendTaskInterface,
+				.allMatch(t -> beanAvailable(process, t.getId(), t.getOperatonClass(), messageSendTaskInterface,
 						applicationContext)
 						&& taskFieldsAvailable(process, "SendTask", t.getId(), t.getExtensionElements()));
 
@@ -787,16 +787,16 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		boolean userTasksTaskListenersOk = parent.getChildElementsByType(UserTask.class).stream()
 				.filter(Objects::nonNull)
 				.allMatch(t -> t.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
-						.flatMap(e -> e.getChildElementsByType(CamundaTaskListener.class).stream())
-						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, t.getId(), l.getCamundaClass(),
+						.flatMap(e -> e.getChildElementsByType(OperatonTaskListener.class).stream())
+						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, t.getId(), l.getOperatonClass(),
 								userTaskListenerInterface, applicationContext)));
 
 		// all elements: execution listeners
 		boolean allElementsExecutionListenersOk = parent.getChildElementsByType(FlowNode.class).stream()
 				.filter(Objects::nonNull)
 				.allMatch(n -> n.getChildElementsByType(ExtensionElements.class).stream().filter(Objects::nonNull)
-						.flatMap(e -> e.getChildElementsByType(CamundaExecutionListener.class).stream())
-						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, n.getId(), l.getCamundaClass(),
+						.flatMap(e -> e.getChildElementsByType(OperatonExecutionListener.class).stream())
+						.filter(Objects::nonNull).allMatch(l -> beanAvailable(process, n.getId(), l.getOperatonClass(),
 								executionListenerInterface, applicationContext)));
 
 		// message intermediate throw events
@@ -806,7 +806,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 						e -> e.getEventDefinitions().stream().filter(Objects::nonNull)
 								.filter(def -> def instanceof MessageEventDefinition))
 				.map(def -> (MessageEventDefinition) def)
-				.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(),
+				.allMatch(def -> beanAvailable(process, def.getId(), def.getOperatonClass(),
 						messageIntermediateThrowEventInterface, applicationContext)
 						&& taskFieldsAvailable(process, "IntermediateThrowEvent", def.getId(),
 								def.getExtensionElements()));
@@ -815,7 +815,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		boolean endEventsOk = parent.getChildElementsByType(EndEvent.class).stream().filter(Objects::nonNull)
 				.allMatch(e -> e.getEventDefinitions().stream().filter(Objects::nonNull)
 						.filter(def -> def instanceof MessageEventDefinition).map(def -> (MessageEventDefinition) def)
-						.allMatch(def -> beanAvailable(process, def.getId(), def.getCamundaClass(),
+						.allMatch(def -> beanAvailable(process, def.getId(), def.getOperatonClass(),
 								messageEndEventInterface, applicationContext)
 								&& taskFieldsAvailable(process, "MessageEndEvent", e.getId(),
 										def.getExtensionElements())));
@@ -831,20 +831,20 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	public boolean taskFieldsAvailable(Process process, String elementType, String elementId,
 			ExtensionElements extensionElements)
 	{
-		Collection<CamundaField> fields = extensionElements == null ? List.of()
-				: extensionElements.getChildElementsByType(CamundaField.class);
+		Collection<OperatonField> fields = extensionElements == null ? List.of()
+				: extensionElements.getChildElementsByType(OperatonField.class);
 
 		String instantiatesCanonical = null;
 		String messageName = null;
 		String profile = null;
 
-		for (CamundaField field : fields)
+		for (OperatonField field : fields)
 		{
-			if ("profile".equals(field.getCamundaName()))
+			if ("profile".equals(field.getOperatonName()))
 				profile = field.getTextContent();
-			else if ("messageName".equals(field.getCamundaName()))
+			else if ("messageName".equals(field.getOperatonName()))
 				messageName = field.getTextContent();
-			else if ("instantiatesCanonical".equals(field.getCamundaName()))
+			else if ("instantiatesCanonical".equals(field.getOperatonName()))
 				instantiatesCanonical = field.getTextContent();
 		}
 
@@ -861,7 +861,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 					.collect(Collectors.joining(", "));
 
 			logger.warn("Mandatory fields in {} with id {} of process {}|{} not defined: {} missing", elementType,
-					elementId, process.getId(), process.getCamundaVersionTag(), message);
+					elementId, process.getId(), process.getOperatonVersionTag(), message);
 		}
 
 		return instantiatesCanonical != null && !instantiatesCanonical.isBlank() && messageName != null
@@ -875,7 +875,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			return true;
 
 		ProcessIdAndVersion processKeyAndVersion = new ProcessIdAndVersion(process.getId(),
-				process.getCamundaVersionTag());
+				process.getOperatonVersionTag());
 
 		Class<?> serviceClass = loadClass(processKeyAndVersion, elementId, expectedInterface, className);
 		if (serviceClass == null)

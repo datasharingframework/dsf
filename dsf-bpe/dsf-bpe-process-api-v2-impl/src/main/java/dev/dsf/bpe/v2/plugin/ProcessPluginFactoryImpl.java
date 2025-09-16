@@ -1,10 +1,9 @@
 package dev.dsf.bpe.v2.plugin;
 
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.operaton.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
@@ -27,10 +26,10 @@ public class ProcessPluginFactoryImpl extends AbstractProcessPluginFactory imple
 
 	@Override
 	protected ProcessPlugin createProcessPlugin(Object processPluginDefinition, boolean draft, Path jarFile,
-			URLClassLoader classLoader)
+			ClassLoader pluginClassLoader)
 	{
 		return new ProcessPluginImpl((ProcessPluginDefinition) processPluginDefinition, API_VERSION, draft, jarFile,
-				classLoader, environment, apiApplicationContext, serverBaseUrl);
+				pluginClassLoader, environment, apiApplicationContext, serverBaseUrl);
 	}
 
 	@Override

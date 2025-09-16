@@ -3,7 +3,7 @@ package dev.dsf.bpe.spring.config;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.camunda.bpm.engine.ProcessEngine;
+import org.operaton.bpm.engine.ProcessEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

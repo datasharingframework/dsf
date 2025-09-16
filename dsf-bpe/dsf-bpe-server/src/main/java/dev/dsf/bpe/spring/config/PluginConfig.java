@@ -35,7 +35,7 @@ public class PluginConfig
 	private DaoConfig daoConfig;
 
 	@Autowired
-	private CamundaConfig camundaConfig;
+	private OperatonConfig operatonConfig;
 
 	@Autowired
 	private List<ProcessPluginFactory> processPluginFactories;
@@ -63,7 +63,7 @@ public class PluginConfig
 	@Bean
 	public BpmnProcessStateChangeService bpmnProcessStateChangeService()
 	{
-		return new BpmnProcessStateChangeServiceImpl(camundaConfig.processEngine().getRepositoryService(),
+		return new BpmnProcessStateChangeServiceImpl(operatonConfig.processEngine().getRepositoryService(),
 				daoConfig.processStateDao(), ProcessIdAndVersion.fromStrings(propertiesConfig.getProcessExcluded()),
 				ProcessIdAndVersion.fromStrings(propertiesConfig.getProcessRetired()));
 	}
@@ -80,8 +80,8 @@ public class PluginConfig
 	public ProcessPluginManager processPluginManager()
 	{
 		return new ProcessPluginManagerImpl(
-				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory(),
-						camundaConfig.defaultBpmnParseListener()),
+				List.of(operatonConfig.delegateProvider(), operatonConfig.fallbackSerializerFactory(),
+						operatonConfig.defaultBpmnParseListener()),
 				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler(),
 				propertiesConfig.getDsfServerBaseUrl(), dsfClientConfig.clientProvider().getWebserviceClient(),
 				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());

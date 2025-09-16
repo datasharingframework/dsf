@@ -1,6 +1,6 @@
 package dev.dsf.bpe.v1;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 

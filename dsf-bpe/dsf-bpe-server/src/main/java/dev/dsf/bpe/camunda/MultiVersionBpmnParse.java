@@ -3,16 +3,16 @@ package dev.dsf.bpe.camunda;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.delegate.TaskListener;
-import org.camunda.bpm.engine.impl.bpmn.behavior.ClassDelegateActivityBehavior;
-import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
-import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParser;
-import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
-import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
-import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
-import org.camunda.bpm.engine.impl.task.TaskDefinition;
-import org.camunda.bpm.engine.impl.util.xml.Element;
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.operaton.bpm.engine.delegate.TaskListener;
+import org.operaton.bpm.engine.impl.bpmn.behavior.ClassDelegateActivityBehavior;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParse;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParser;
+import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
+import org.operaton.bpm.engine.impl.pvm.process.ActivityImpl;
+import org.operaton.bpm.engine.impl.pvm.process.ScopeImpl;
+import org.operaton.bpm.engine.impl.task.TaskDefinition;
+import org.operaton.bpm.engine.impl.util.xml.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class MultiVersionBpmnParse extends BpmnParse
 
 		if (activity.getActivityBehavior() instanceof ClassDelegateActivityBehavior)
 		{
-			String className = serviceTaskElement.attributeNS(CAMUNDA_BPMN_EXTENSIONS_NS, PROPERTYNAME_CLASS);
+			String className = serviceTaskElement.attributeNS(OPERATON_BPMN_EXTENSIONS_NS, PROPERTYNAME_CLASS);
 			List<FieldDeclaration> fieldDeclarations = parseFieldDeclarations(serviceTaskElement);
 
 			logger.debug("Modifying {} for {} in BPMN element with id '{}'",

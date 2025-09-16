@@ -28,9 +28,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.Process;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.instance.BaseElement;
+import org.operaton.bpm.model.bpmn.instance.Process;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;

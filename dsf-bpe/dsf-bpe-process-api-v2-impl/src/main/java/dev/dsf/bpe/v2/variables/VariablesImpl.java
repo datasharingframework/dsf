@@ -10,11 +10,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.variable.value.TypedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -363,61 +363,61 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void setInteger(String variableName, Integer value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.integerValue(value));
 	}
 
 	@Override
 	public void setString(String variableName, String value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.stringValue(value));
 	}
 
 	@Override
 	public void setByteArray(String variableName, byte[] value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.byteArrayValue(value));
 	}
 
 	@Override
 	public void setDate(String variableName, Date value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.dateValue(value));
 	}
 
 	@Override
 	public void setLong(String variableName, Long value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.longValue(value));
 	}
 
 	@Override
 	public void setShort(String variableName, Short value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.shortValue(value));
 	}
 
 	@Override
 	public void setDouble(String variableName, Double value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.doubleValue(value));
 	}
 
 	@Override
 	public void setNumber(String variableName, Number value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.numberValue(value));
 	}
 
 	@Override
 	public void setFile(String variableName, File value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.fileValue(value));
 	}
 
 	@Override
 	public void setBoolean(String variableName, Boolean value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.booleanValue(value));
 	}
 
 	@Override
@@ -452,61 +452,61 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public void setIntegerLocal(String variableName, Integer value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.integerValue(value));
 	}
 
 	@Override
 	public void setStringLocal(String variableName, String value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.stringValue(value));
 	}
 
 	@Override
 	public void setByteArrayLocal(String variableName, byte[] value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.byteArrayValue(value));
 	}
 
 	@Override
 	public void setDateLocal(String variableName, Date value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.dateValue(value));
 	}
 
 	@Override
 	public void setLongLocal(String variableName, Long value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.longValue(value));
 	}
 
 	@Override
 	public void setShortLocal(String variableName, Short value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.shortValue(value));
 	}
 
 	@Override
 	public void setDoubleLocal(String variableName, Double value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.doubleValue(value));
 	}
 
 	@Override
 	public void setNumberLocal(String variableName, Number value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.numberValue(value));
 	}
 
 	@Override
 	public void setFileLocal(String variableName, File value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.fileValue(value));
 	}
 
 	@Override
 	public void setBooleanLocal(String variableName, Boolean value)
 	{
-		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
+		setVariableLocal(variableName, org.operaton.bpm.engine.variable.Variables.booleanValue(value));
 	}
 
 	private void setVariableLocal(String variableName, TypedValue value)
