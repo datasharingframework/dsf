@@ -1,5 +1,7 @@
 package dev.dsf.bpe.v1.plugin;
 
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
@@ -22,6 +24,12 @@ public class ProcessPluginFactoryImpl extends AbstractProcessPluginFactory imple
 	{
 		super(API_VERSION, apiClassLoader, apiApplicationContext, environment, serverBaseUrl,
 				ProcessPluginDefinition.class);
+	}
+
+	@Override
+	protected URLClassLoader createPluginClassLoader(String name, URL[] urls, ClassLoader parent)
+	{
+		return new ProcessPluginClassLoader(name, urls, parent);
 	}
 
 	@Override
