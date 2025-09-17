@@ -96,7 +96,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 
 			currentOrOldProcessResources.forEach(res ->
 			{
-				resources.computeIfPresent(res.getResourceInfo(), (processInfo, processResource) ->
+				resources.computeIfPresent(res.getResourceInfo(), (_, processResource) ->
 				{
 					processResource.addAll(res.getProcesses());
 

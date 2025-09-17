@@ -96,7 +96,7 @@ public class StructureDefinitionAuthorizationRule
 		{
 			return getDao()
 					.readByUrlAndVersionWithTransaction(connection, newResource.getUrl(), newResource.getVersion())
-					.map(s -> true).orElse(false);
+					.isPresent();
 		}
 		catch (SQLException e)
 		{

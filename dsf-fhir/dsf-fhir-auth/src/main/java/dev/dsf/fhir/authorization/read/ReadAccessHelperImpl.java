@@ -284,7 +284,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	@Override
 	public boolean isValid(Resource resource)
 	{
-		return isValid(resource, organizationIdentifier -> true, role -> true);
+		return isValid(resource, _ -> true, _ -> true);
 	}
 
 	@Override

@@ -180,11 +180,11 @@ public abstract class Log4jInitializer
 			return configuration -> JsonTemplateLayout.newBuilder().setConfiguration(configuration)
 					.setEventTemplateUri(TemplateUri.LOGSTASH.getUri()).build();
 		else if (SPECIAL_TEXT.equalsIgnoreCase(value))
-			return configuration -> PatternLayout.newBuilder().withPattern("%d %m%n").build();
+			return _ -> PatternLayout.newBuilder().withPattern("%d %m%n").build();
 		else if (SPECIAL_TEXT_MDC.equalsIgnoreCase(value))
-			return configuration -> PatternLayout.newBuilder().withPattern("%d%notEmpty{ %X} %m%n").build();
+			return _ -> PatternLayout.newBuilder().withPattern("%d%notEmpty{ %X} %m%n").build();
 		else if (SPECIAL_OFF.equalsIgnoreCase(value))
-			return configuration -> null;
+			return _ -> null;
 		else
 			throw new IllegalArgumentException("Value '" + value + "' for " + parameter + " not supported");
 	}

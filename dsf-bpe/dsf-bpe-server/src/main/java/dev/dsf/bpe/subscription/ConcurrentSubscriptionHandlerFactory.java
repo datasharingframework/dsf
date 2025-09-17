@@ -35,7 +35,7 @@ public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 			throw new IllegalArgumentException("corePoolSize <= 0");
 
 		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES, queue,
-				(r, executor) -> logger.error("Unable to handle Task - execution rejected"));
+				(_, _) -> logger.error("Unable to handle Task - execution rejected"));
 		executor.allowCoreThreadTimeOut(true);
 
 		this.delegate = delegate;

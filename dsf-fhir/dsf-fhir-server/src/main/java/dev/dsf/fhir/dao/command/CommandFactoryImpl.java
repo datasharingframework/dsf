@@ -279,7 +279,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 				.getDao(resource.getClass());
 
-		if (referenceExtractor.getReferences(resource).anyMatch(r -> true)) // at least one entry
+		if (referenceExtractor.getReferences(resource).anyMatch(_ -> true)) // at least one entry
 		{
 			return dao.map(d -> Stream.of(cmd,
 					new CheckReferencesCommand<R, ResourceDao<R>>(index, identity, returnType, bundle, entry,

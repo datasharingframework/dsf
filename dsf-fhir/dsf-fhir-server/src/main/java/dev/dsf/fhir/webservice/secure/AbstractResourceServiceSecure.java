@@ -260,10 +260,10 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 						return read;
 				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
 						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
 								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
+								status.getStatusCode(), status.getReasonPhrase()));
 			}
 		}
 		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)

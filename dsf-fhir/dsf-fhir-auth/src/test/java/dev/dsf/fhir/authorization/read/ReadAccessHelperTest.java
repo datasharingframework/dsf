@@ -52,7 +52,7 @@ public class ReadAccessHelperTest
 			var r = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, in);
 
 			assertTrue(helper.isValid(r));
-			assertTrue(helper.isValid(r, org -> false, role -> false));
+			assertTrue(helper.isValid(r, _ -> false, _ -> false));
 
 			assertTrue(helper.hasLocal(r));
 			assertFalse(helper.hasAll(r));
@@ -102,7 +102,7 @@ public class ReadAccessHelperTest
 			var r = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, in);
 
 			assertTrue(helper.isValid(r));
-			assertTrue(helper.isValid(r, org -> organizationIdentifier.equals(org.getValue()), role -> false));
+			assertTrue(helper.isValid(r, org -> organizationIdentifier.equals(org.getValue()), _ -> false));
 
 			assertTrue(helper.hasLocal(r));
 			assertTrue(helper.hasOrganization(r, organizationIdentifier));
@@ -202,7 +202,7 @@ public class ReadAccessHelperTest
 			var r = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, in);
 
 			assertTrue(helper.isValid(r));
-			assertTrue(helper.isValid(r, org -> false, role -> false));
+			assertTrue(helper.isValid(r, _ -> false, _ -> false));
 			assertTrue(helper.hasAll(r));
 		}
 	}
@@ -235,7 +235,7 @@ public class ReadAccessHelperTest
 		helper.addLocal(r);
 		helper.addOrganization(r, organizationIdentifier);
 
-		assertTrue(helper.isValid(r, org -> organizationIdentifier.equals(org.getValue()), role -> true));
+		assertTrue(helper.isValid(r, org -> organizationIdentifier.equals(org.getValue()), _ -> true));
 	}
 
 	@Test
