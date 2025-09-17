@@ -40,6 +40,9 @@ jobs:
         languages: ${{ matrix.language }}
         queries: security-extended, security-and-quality
 
+    - name: Display Maven Version
+      run: mvn --version
+
     - name: Compile with Maven
       if: ${{ matrix.language == 'java-kotlin' }}
       run: mvn --batch-mode --fail-at-end --threads 1C -Dimpsort.skip=true -Dformatter.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests -DskipShadePlugin=true -P!generate-source-and-javadoc-jars clean package
