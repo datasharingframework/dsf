@@ -25,12 +25,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up JDK 21
+    - name: Set up JDK 25
       if: ${{ matrix.language == 'java-kotlin' }}
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: 21
+        java-version: 25
         cache: 'maven'
 
     - name: Initialize CodeQL
