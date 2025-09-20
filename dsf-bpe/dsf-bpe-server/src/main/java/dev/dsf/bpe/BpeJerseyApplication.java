@@ -14,6 +14,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import dev.dsf.bpe.spring.config.PropertiesConfig;
 import dev.dsf.common.auth.filter.AuthenticationFilter;
 import dev.dsf.common.auth.logging.CurrentUserLogger;
+import dev.dsf.common.auth.logging.CurrentUserMdcLogger;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.ApplicationPath;
@@ -50,6 +51,8 @@ public final class BpeJerseyApplication extends ResourceConfig
 
 		if (context.getBean(PropertiesConfig.class).getDebugLogMessageCurrentUser())
 			register(CurrentUserLogger.class);
+
+		register(CurrentUserMdcLogger.class);
 
 		if (context.getBean(PropertiesConfig.class).getDebugLogMessageWebserviceRequest())
 		{

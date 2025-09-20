@@ -43,6 +43,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import dev.dsf.bpe.api.logging.PluginMdc;
 import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
 import dev.dsf.bpe.api.plugin.FhirResourceModifier;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
@@ -55,7 +56,9 @@ import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
+import dev.dsf.bpe.v1.logging.PluginMdcImpl;
 import dev.dsf.bpe.v1.variables.FhirResourceValues;
+import dev.dsf.bpe.v1.variables.VariablesImpl;
 
 public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> implements ProcessPlugin
 {
@@ -64,9 +67,11 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 	private final ProcessPluginDefinition processPluginDefinition;
 	private final ProcessPluginApi processPluginApi;
 
+	private final PluginMdcImpl pluginMdc;
+
 	public ProcessPluginImpl(ProcessPluginDefinition processPluginDefinition, int processPluginApiVersion,
 			boolean draft, Path jarFile, ClassLoader classLoader, ConfigurableEnvironment environment,
-			ApplicationContext apiApplicationContext)
+			ApplicationContext apiApplicationContext, String serverBaseUrl)
 	{
 		super(ProcessPluginDefinition.class, processPluginApiVersion, draft, jarFile, classLoader, environment,
 				apiApplicationContext, ApiServicesSpringConfiguration.class, JavaDelegate.class, JavaDelegate.class,
@@ -75,6 +80,15 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 
 		this.processPluginDefinition = processPluginDefinition;
 		processPluginApi = apiApplicationContext.getBean(ProcessPluginApi.class);
+
+		pluginMdc = new PluginMdcImpl(processPluginApiVersion, processPluginDefinition.getName(),
+				processPluginDefinition.getVersion(), jarFile.toString(), serverBaseUrl, VariablesImpl::new);
+	}
+
+	@Override
+	public PluginMdc getPluginMdc()
+	{
+		return pluginMdc;
 	}
 
 	@Override
@@ -163,13 +177,19 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 						&& BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
 				.count() == 1;
 
+		Function<StructureDefinition, Optional<String>> getStructureDefinitionBaseDefinition = s -> s
+				.hasBaseDefinitionElement() && s.getBaseDefinitionElement().hasValue()
+						? Optional.of(s.getBaseDefinitionElement().getValue())
+						: Optional.empty();
+
 		return new ProcessPluginFhirConfig<>(ActivityDefinition.class, CodeSystem.class, Library.class, Measure.class,
 				NamingSystem.class, Questionnaire.class, StructureDefinition.class, Task.class, ValueSet.class,
 				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), BpmnMessage.URL,
 				BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName, hasMetadataResourceUrl,
 				hasMetadataResourceVersion, getMetadataResourceVersion, getActivityDefinitionUrl, NamingSystem::hasName,
 				getTaskInstantiatesCanonical, getTaskIdentifierValue, isTaskStatusDraft, getRequester, getRecipient,
-				Task::hasInput, hasTaskInputMessageName, Task::hasOutput);
+				Task::hasInput, hasTaskInputMessageName, Task::hasOutput, getStructureDefinitionBaseDefinition,
+				StructureDefinition::setBaseDefinition);
 	}
 
 	private IParser newXmlParser()
@@ -237,6 +257,12 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 	protected List<String> getDefinitionProcessModels()
 	{
 		return processPluginDefinition.getProcessModels();
+	}
+
+	@Override
+	public String getPluginDefinitionPackageName()
+	{
+		return processPluginDefinition.getClass().getPackageName();
 	}
 
 	@Override

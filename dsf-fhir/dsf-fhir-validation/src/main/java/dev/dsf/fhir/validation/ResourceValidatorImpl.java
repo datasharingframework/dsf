@@ -2,17 +2,19 @@ package dev.dsf.fhir.validation;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidatorExtension;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -51,7 +53,7 @@ public class ResourceValidatorImpl implements ResourceValidator
 
 		@Override
 		public boolean resolveURL(IResourceValidator validator, Object appContext, String path, String url, String type,
-				boolean canonical) throws IOException, FHIRException
+				boolean canonical, List<CanonicalType> targets) throws IOException, FHIRException
 		{
 			if (("urn:ietf:bcp:13".equals(url) || "urn:ietf:bcp:13|4.0.1".equals(url)
 					|| "urn:ietf:rfc:3986".equals(url)) && "uri".equals(type) && !canonical)
@@ -122,8 +124,8 @@ public class ResourceValidatorImpl implements ResourceValidator
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(validationSupport.getFhirContext());
 		ValidationSupportContext validationSupportContext = new ValidationSupportContext(validationSupport);
-		VersionSpecificWorkerContextWrapper workerContext = new VersionSpecificWorkerContextWrapper(
-				validationSupportContext, versionCanonicalizer)
+		WorkerContextValidationSupportAdapter workerContext = new WorkerContextValidationSupportAdapter(
+				validationSupport)
 		{
 			@Override
 			public CodeSystem fetchCodeSystem(String system)

@@ -8,7 +8,9 @@
 		<artifactId>dsf-bpe-pom</artifactId>
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
-	
+
+	<name>DSF BPE Test Plugin v1</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -24,4 +26,23 @@
 			<version>${crypto-utils.version.v1}</version>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate-config-doc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<configDocPackages>dev.dsf.bpe.test.spring.config</configDocPackages>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

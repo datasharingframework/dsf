@@ -28,6 +28,8 @@ import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
  * A provider configuration file named "dev.dsf.ProcessPluginDefinition" containing the canonical name of the class
  * implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details on the
  * content of the provider configuration file, see {@link ServiceLoader}.
+ *
+ * @see AbstractProcessPluginDefinition
  */
 public interface ProcessPluginDefinition
 {

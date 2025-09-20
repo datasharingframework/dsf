@@ -1,10 +1,10 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.util.function.Function;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.TaskListener;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.values.CreateQuestionnaireResponseValues;
@@ -13,9 +13,10 @@ import dev.dsf.bpe.v2.variables.Variables;
 
 public class UserTaskListenerDelegate extends AbstractProcessPluginDelegate<UserTaskListener> implements TaskListener
 {
-	public UserTaskListenerDelegate(ProcessPluginApi api, ObjectMapper objectMapper, UserTaskListener delegate)
+	public UserTaskListenerDelegate(ProcessPluginApi api, Function<DelegateExecution, Variables> variablesFactory,
+			UserTaskListener delegate)
 	{
-		super(api, objectMapper, delegate);
+		super(api, variablesFactory, delegate);
 	}
 
 	@Override

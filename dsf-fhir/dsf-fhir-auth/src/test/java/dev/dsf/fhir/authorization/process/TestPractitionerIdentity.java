@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 
@@ -98,5 +99,23 @@ public class TestPractitionerIdentity implements PractitionerIdentity
 	public Optional<DsfOpenIdCredentials> getCredentials()
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Optional<Endpoint> getEndpoint()
+	{
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<String> getEndpointIdentifierValue()
+	{
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<String> getPractitionerIdentifierValue()
+	{
+		return Optional.empty();
 	}
 }

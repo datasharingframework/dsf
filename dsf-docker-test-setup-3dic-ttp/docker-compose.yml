@@ -1,12 +1,12 @@
 version: '3.8'
 services:
   proxy:
-    image: nginx:1.27
+    image: nginx:1.29
     restart: "no"
     ports:
       - 127.0.0.1:443:443
     secrets:
-      - localhost.crt
+      - localhost.chain.crt
       - localhost.key.plain
       - issuing_ca.crt
       - ca_chain.crt
@@ -79,7 +79,7 @@ services:
         read_only: true
 
   keycloak:
-    image: quay.io/keycloak/keycloak:25.0
+    image: quay.io/keycloak/keycloak:26.3
     restart: "no"
     ports:
       - 127.0.0.1:8443:8443
@@ -88,7 +88,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     secrets:
-      - keycloak.crt
+      - keycloak.chain.crt
       - keycloak.key.plain
       - keycloak_trust_store.jks
     volumes:
@@ -99,13 +99,13 @@ services:
       - internet
     command: >-
       start
+      --db dev-file
       --hostname keycloak
       --import-realm
-      --https-certificate-file=/run/secrets/keycloak.crt
+      --https-certificate-file=/run/secrets/keycloak.chain.crt
       --https-certificate-key-file=/run/secrets/keycloak.key.plain
       --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
       --spi-truststore-file-password=password
-      --spi-truststore-file-hostname-verification-policy=DEFAULT
 
   forward-proxy:
     build: ./forward-proxy
@@ -190,6 +190,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN_AUDIENCE: 'account'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic1
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-fhir
@@ -825,7 +826,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-bpe
-      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET: /run/secrets/oidc_client_ttp_bpe.secret
+      DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_bpe.secret
     networks:
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.59
@@ -846,13 +847,13 @@ services:
       internet:
 
 secrets:
-  localhost.crt:
-    file: ./secrets/localhost.crt
+  localhost.chain.crt:
+    file: ./secrets/localhost.chain.crt
   localhost.key.plain:
     file: ./secrets/localhost.key.plain
 
-  keycloak.crt:
-    file: ./secrets/keycloak.crt
+  keycloak.chain.crt:
+    file: ./secrets/keycloak.chain.crt
   keycloak.key.plain:
     file: ./secrets/keycloak.key.plain
   keycloak_trust_store.jks:

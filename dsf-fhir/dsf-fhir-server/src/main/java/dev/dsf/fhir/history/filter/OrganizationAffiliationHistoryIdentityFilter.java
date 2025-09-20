@@ -4,9 +4,9 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.fhir.search.filter.OrganizationIdentityFilter;
+import dev.dsf.fhir.search.filter.OrganizationAffiliationIdentityFilter;
 
-public class OrganizationAffiliationHistoryIdentityFilter extends OrganizationIdentityFilter
+public class OrganizationAffiliationHistoryIdentityFilter extends OrganizationAffiliationIdentityFilter
 		implements HistoryIdentityFilter
 {
 	private static final String RESOURCE_TYPE = OrganizationAffiliation.class.getAnnotation(ResourceDef.class).name();

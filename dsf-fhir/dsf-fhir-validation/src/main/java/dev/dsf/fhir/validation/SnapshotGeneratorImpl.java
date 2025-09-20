@@ -3,6 +3,7 @@ package dev.dsf.fhir.validation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -23,18 +24,21 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(SnapshotGeneratorImpl.class);
 
-	private final IWorkerContext worker;
+	private Supplier<IWorkerContext> workerFactory;
 
 	public SnapshotGeneratorImpl(FhirContext fhirContext, IValidationSupport validationSupport)
 	{
-		worker = createWorker(fhirContext, validationSupport);
+		workerFactory = createWorker(fhirContext, validationSupport);
 	}
 
-	protected IWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
+	private Supplier<IWorkerContext> createWorker(FhirContext context, IValidationSupport validationSupport)
 	{
-		HapiWorkerContext workerContext = new HapiWorkerContext(context, validationSupport);
-		workerContext.setLocale(context.getLocalizer().getLocale());
-		return workerContext;
+		return () ->
+		{
+			HapiWorkerContext workerContext = new HapiWorkerContext(context, validationSupport);
+			workerContext.setLocale(context.getLocalizer().getLocale());
+			return workerContext;
+		};
 	}
 
 	@Override
@@ -58,10 +62,14 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 				differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion(),
 				differential.getBaseDefinition());
 
+		// can't reuse worker, worker contains cache
+		IWorkerContext worker = workerFactory.get();
 		StructureDefinition base = worker.fetchResource(StructureDefinition.class, differential.getBaseDefinition());
 
 		if (base == null)
 			logger.warn("Base definition with url {} not found", differential.getBaseDefinition());
+		else if (!base.hasSnapshot())
+			logger.warn("Base definition with url {} has no snapshot", differential.getBaseDefinition());
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();

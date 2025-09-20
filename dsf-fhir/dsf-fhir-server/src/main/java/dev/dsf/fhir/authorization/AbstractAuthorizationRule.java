@@ -2,20 +2,17 @@ package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -129,26 +126,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 	}
 
-	protected List<OrganizationAffiliation> getAffiliations(Connection connection, String organizationIdentifierValue)
-	{
-		if (organizationIdentifierValue == null)
-			return List.of();
-
-		try
-		{
-			return daoProvider.getOrganizationAffiliationDao()
-					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-							connection, organizationIdentifierValue);
-		}
-		catch (SQLException e)
-		{
-			logger.debug("Error while accessing database", e);
-			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
-
-			throw new RuntimeException(e);
-		}
-	}
-
 	@Override
 	public final Optional<String> reasonUpdateAllowed(Identity identity, R oldResource, R newResource)
 	{
@@ -251,20 +228,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	{
 		return codeSystem.getConcept().stream().filter(ConceptDefinitionComponent::hasCode)
 				.map(ConceptDefinitionComponent::getCode).anyMatch(c -> c.equals(cCode));
-	}
-
-	protected final boolean isCurrentIdentityPartOfReferencedOrganizations(Connection connection, Identity identity,
-			String referenceLocation, Collection<? extends Reference> references)
-	{
-		return isCurrentIdentityPartOfReferencedOrganizations(connection, identity, referenceLocation,
-				references.stream());
-	}
-
-	protected final boolean isCurrentIdentityPartOfReferencedOrganizations(Connection connection, Identity identity,
-			String referenceLocation, Stream<? extends Reference> references)
-	{
-		return references.anyMatch(
-				r -> isCurrentIdentityPartOfReferencedOrganization(connection, identity, referenceLocation, r));
 	}
 
 	protected final boolean isCurrentIdentityPartOfReferencedOrganization(Connection connection, Identity identity,

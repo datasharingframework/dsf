@@ -22,7 +22,7 @@ public class PostStartupConfig
 	private CamundaConfig camundaConfig;
 
 	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event)
+	public void onContextRefreshedEvent()
 	{
 		logger.info("Deploying process plugins ...");
 		pluginConfig.processPluginManager().loadAndDeployPlugins();

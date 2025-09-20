@@ -45,7 +45,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.common.db.PreparedStatementWithLogger;
+import dev.dsf.common.db.logging.PreparedStatementWithLogger;
 import dev.dsf.fhir.adapter.DeferredBase64BinaryType;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;

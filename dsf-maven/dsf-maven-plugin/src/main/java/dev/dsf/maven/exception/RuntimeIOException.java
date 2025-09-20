@@ -1,0 +1,19 @@
+package dev.dsf.maven.exception;
+
+import java.io.IOException;
+
+public class RuntimeIOException extends RuntimeException
+{
+	private static final long serialVersionUID = 1L;
+
+	public RuntimeIOException(IOException cause)
+	{
+		super(cause);
+	}
+
+	@Override
+	public synchronized IOException getCause()
+	{
+		return (IOException) super.getCause();
+	}
+}

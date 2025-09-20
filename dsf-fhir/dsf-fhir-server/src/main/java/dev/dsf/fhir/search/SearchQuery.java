@@ -85,13 +85,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			return this;
 		}
 
-		public SearchQueryBuilder<R> with(
-				@SuppressWarnings("unchecked") SearchQueryParameterFactory<R>... searchParameters)
-		{
-			return with(List.of(searchParameters));
-		}
-
-		public SearchQueryBuilder<R> with(List<? extends SearchQueryParameterFactory<R>> searchParameters)
+		public SearchQueryBuilder<R> with(List<SearchQueryParameterFactory<R>> searchParameters)
 		{
 			this.searchParameters.addAll(searchParameters);
 			return this;

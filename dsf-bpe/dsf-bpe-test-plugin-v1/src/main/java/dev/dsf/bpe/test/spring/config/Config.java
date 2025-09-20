@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import dev.dsf.bpe.test.deployment.ProcessPluginDeploymentStateListenerTestImpl;
 import dev.dsf.bpe.test.service.ApiTest;
 import dev.dsf.bpe.test.service.EndpointProviderTest;
 import dev.dsf.bpe.test.service.EnvironmentVariableTest;
@@ -17,13 +18,17 @@ import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
 import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.ProcessPluginDeploymentStateListener;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 
 @Configuration
 public class Config implements InitializingBean
 {
+	@ProcessDocumentation(description = "Mandatory property", example = "foo", required = true)
 	@Value("${dev.dsf.bpe.test.env.mandatory:#{null}}")
 	private String envVariableMandatory;
 
+	@ProcessDocumentation(description = "Property with default value", recommendation = "Override default value if necessary")
 	@Value("${dev.dsf.bpe.test.env.optional:default-value}")
 	private String envVariableOptional;
 
@@ -79,5 +84,11 @@ public class Config implements InitializingBean
 	public EnvironmentVariableTest environmentVariableTest()
 	{
 		return new EnvironmentVariableTest(api, envVariableMandatory, envVariableOptional, envVariableProxyUrl);
+	}
+
+	@Bean
+	public ProcessPluginDeploymentStateListener processPluginDeploymentStateListener()
+	{
+		return new ProcessPluginDeploymentStateListenerTestImpl();
 	}
 }

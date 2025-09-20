@@ -1,8 +1,8 @@
 package dev.dsf.bpe.v2.activity;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
+import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.error.ExecutionListenerErrorHandler;
@@ -11,9 +11,10 @@ import dev.dsf.bpe.v2.variables.Variables;
 public class ExecutionListenerDelegate extends AbstractProcessPluginDelegate<ExecutionListener>
 		implements org.camunda.bpm.engine.delegate.ExecutionListener
 {
-	public ExecutionListenerDelegate(ProcessPluginApi api, ObjectMapper objectMapper, ExecutionListener delegate)
+	public ExecutionListenerDelegate(ProcessPluginApi api, Function<DelegateExecution, Variables> variablesFactory,
+			ExecutionListener delegate)
 	{
-		super(api, objectMapper, delegate);
+		super(api, variablesFactory, delegate);
 	}
 
 	@Override

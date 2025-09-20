@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.common.build.BuildInfoReader;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.service.ReferenceCleaner;
-import dev.dsf.tools.build.BuildInfoReader;
 
 public class ClientProviderImpl implements ClientProvider, InitializingBean
 {

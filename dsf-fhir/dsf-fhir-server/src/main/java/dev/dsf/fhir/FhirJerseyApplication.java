@@ -13,6 +13,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import dev.dsf.common.auth.filter.AuthenticationFilter;
 import dev.dsf.common.auth.logging.CurrentUserLogger;
+import dev.dsf.common.auth.logging.CurrentUserMdcLogger;
 import dev.dsf.fhir.spring.config.PropertiesConfig;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
@@ -50,6 +51,8 @@ public final class FhirJerseyApplication extends ResourceConfig
 
 		if (context.getBean(PropertiesConfig.class).getDebugLogMessageCurrentUser())
 			register(CurrentUserLogger.class);
+
+		register(CurrentUserMdcLogger.class);
 
 		if (context.getBean(PropertiesConfig.class).getDebugLogMessageWebserviceRequest())
 		{

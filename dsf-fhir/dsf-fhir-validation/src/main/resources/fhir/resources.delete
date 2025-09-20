@@ -1,1 +1,7 @@
 CodeSystem?url=urn:ietf:bcp:13&version=4.0.1&date=eq2021-07-28
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/endpoint&version=1.0.0
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint&version=1.0.0
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization&version=1.0.0
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization-affiliation&version=1.0.0
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization-parent&version=1.0.0
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/task-base&version=1.0.0

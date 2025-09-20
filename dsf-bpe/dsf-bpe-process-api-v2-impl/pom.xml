@@ -9,6 +9,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF BPE Process API v2 Implementation</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -45,6 +47,14 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.tukaani</groupId>
+			<artifactId>xz</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
@@ -152,7 +162,7 @@
 								<artifactItem>
 									<groupId>org.xerial</groupId>
 									<artifactId>sqlite-jdbc</artifactId>
-									<version>3.45.1.0</version>
+									<version>3.49.1.0</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
@@ -182,7 +192,7 @@
 								<artifactItem>
 									<groupId>net.sf.saxon</groupId>
 									<artifactId>Saxon-HE</artifactId>
-									<version>9.8.0-15</version>
+									<version>11.6</version>
 								</artifactItem>
 								<!--<artifactItem>
 									<groupId>org.ogce</groupId>
@@ -199,18 +209,22 @@
 									<artifactId>commons-compress</artifactId>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.fhir</groupId>
-									<artifactId>ucum</artifactId>
-									<version>1.0.8</version>
+									<groupId>org.tukaani</groupId>
+									<artifactId>xz</artifactId>
 								</artifactItem>
 								<artifactItem>
+									<groupId>org.fhir</groupId>
+									<artifactId>ucum</artifactId>
+									<version>1.0.9</version>
+								</artifactItem>
+								<!--<artifactItem>
 									<groupId>com.google.code.gson</groupId>
 									<artifactId>gson</artifactId>
-								</artifactItem>
+								</artifactItem>-->
 								<artifactItem>
 									<groupId>com.google.errorprone</groupId>
 									<artifactId>error_prone_annotations</artifactId>
-									<version>2.27.0</version>
+									<version>2.38.0</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
@@ -234,7 +248,7 @@
 								<artifactItem>
 									<groupId>org.checkerframework</groupId>
 									<artifactId>checker-qual</artifactId>
-									<version>3.43.0</version>
+									<version>3.49.3</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.google.j2objc</groupId>
@@ -244,17 +258,17 @@
 								<artifactItem>
 									<groupId>io.opentelemetry</groupId>
 									<artifactId>opentelemetry-api</artifactId>
-									<version>1.38.0</version>
+									<version>1.44.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.opentelemetry</groupId>
 									<artifactId>opentelemetry-context</artifactId>
-									<version>1.38.0</version>
+									<version>1.44.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.opentelemetry.instrumentation</groupId>
 									<artifactId>opentelemetry-instrumentation-annotations</artifactId>
-									<version>2.4.0</version>
+									<version>2.10.0</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.tika</groupId>
