@@ -233,8 +233,8 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		catch (SQLException e)
 		{
 			logger.debug("Unable to delete entries from binaries_lo_unlink_queue table", e);
-			logger.error("Unable to delete entries from binaries_lo_unlink_queue table: {} - {}", e.getClass().getName(),
-					e.getMessage());
+			logger.error("Unable to delete entries from binaries_lo_unlink_queue table: {} - {}",
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 
