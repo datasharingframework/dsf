@@ -9,6 +9,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
@@ -34,6 +37,8 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 
 	private final String selectUpdateUser;
 
+	private final ExecutorService loUnlinker;
+
 	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			String selectUpdateUser)
 	{
@@ -44,6 +49,16 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 				List.of());
 
 		this.selectUpdateUser = selectUpdateUser;
+
+		loUnlinker = Executors.newFixedThreadPool(1, r -> new Thread(r, "binaries-large-object-unlinker"));
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+
+		startLargeObjectUnlink();
 	}
 
 	@Override
@@ -198,5 +213,50 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		binary.ifPresent(b -> b.setUserData(RangeRequest.USER_DATA_VALUE_RANGE_REQUEST, rangeRequest));
 
 		return binary;
+	}
+
+	@Override
+	public void startLargeObjectUnlink()
+	{
+		loUnlinker.submit(this::doLargeObjectUnlink);
+	}
+
+	private void doLargeObjectUnlink()
+	{
+		logger.debug("Deleting entries from binaries_lo_unlink_queue");
+
+		try (Connection connection = getPermanentDeleteDataSource().getConnection();
+				PreparedStatement statement = connection.prepareStatement("DELETE FROM binaries_lo_unlink_queue"))
+		{
+			statement.execute();
+		}
+		catch (SQLException e)
+		{
+			logger.debug("Unable to delete entries from binaries_lo_unlink_queue table", e);
+			logger.error("Unable to delete entries from binaries_lo_unlink_queue table: {} - {}", e.getClass().getName(),
+					e.getMessage());
+		}
+	}
+
+	@Override
+	public void stopLargeObjectUnlinker()
+	{
+		startLargeObjectUnlink();
+
+		logger.debug("Shutting down binaries-large-object-unlinker executor ...");
+
+		loUnlinker.shutdown();
+
+		try
+		{
+			if (!loUnlinker.awaitTermination(60, TimeUnit.SECONDS))
+			{
+				loUnlinker.shutdownNow();
+			}
+		}
+		catch (InterruptedException ex)
+		{
+			loUnlinker.shutdownNow();
+		}
 	}
 }

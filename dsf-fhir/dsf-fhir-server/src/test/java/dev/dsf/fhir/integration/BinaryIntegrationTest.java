@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -2991,6 +2992,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		long t1pd = System.currentTimeMillis();
 
 		logger.info("Permanent delete call finished in {} ms", (t1pd - t0pd));
+		
+		// wait for binaries_lo_unlink_queue delete to finish
+		Thread.sleep(Duration.ofSeconds(2));
 	}
 
 	@Test
