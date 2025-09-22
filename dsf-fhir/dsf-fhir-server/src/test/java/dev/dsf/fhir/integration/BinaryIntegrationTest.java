@@ -72,6 +72,23 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testReadHeadAllowedLocalUser() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		assertTrue(getWebserviceClient().exists(Binary.class, created.getIdElement().getIdPart()));
+	}
+
+	@Test
 	public void testReadAllowedLocalUserViaSecurityContext() throws Exception
 	{
 		ResearchStudy rs = new ResearchStudy();
@@ -2915,7 +2932,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreate4GiB() throws Exception
+	public void testCreateReadDelete4GiB() throws Exception
 	{
 		long payloadSize = RandomInputStream.ONE_GIBIBYTE * 4;
 
@@ -2933,6 +2950,15 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 				MediaType.APPLICATION_OCTET_STREAM_TYPE, securityContext);
 		assertNotNull(created);
 
+		long t0h = System.currentTimeMillis();
+		assertTrue(getWebserviceClient().exists(Binary.class, created.getIdPart(), created.getVersionIdPart()));
+		long t1h = System.currentTimeMillis();
+
+		long headExecTime = t1h - t0h;
+		logger.info("HTTP HEAD call finished in {} ms", headExecTime);
+		assertTrue("HTTP HEAD call took longer then 200 ms, (" + headExecTime + ")", headExecTime < 200);
+
+		long t0g = System.currentTimeMillis();
 		InputStream in = getWebserviceClient().readBinary(created.getIdPart(), created.getVersionIdPart(),
 				MediaType.APPLICATION_OCTET_STREAM_TYPE);
 
@@ -2948,6 +2974,23 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 			assertEquals(payloadSize, readSize);
 		}
+		long t1g = System.currentTimeMillis();
+
+		logger.info("HTTP GET call finished in {} ms", (t1g - t0g));
+
+		long t0d = System.currentTimeMillis();
+		getWebserviceClient().delete(Binary.class, created.getIdPart());
+		long t1d = System.currentTimeMillis();
+
+		long deleteExecTime = t1d - t0d;
+		logger.info("HTTP DELETE call finished in {} ms", deleteExecTime);
+		assertTrue("HTTP DELETE call took longer then 200 ms, (" + deleteExecTime + ")", deleteExecTime < 200);
+
+		long t0pd = System.currentTimeMillis();
+		getWebserviceClient().deletePermanently(Binary.class, created.getIdPart());
+		long t1pd = System.currentTimeMillis();
+
+		logger.info("Permanent delete call finished in {} ms", (t1pd - t0pd));
 	}
 
 	@Test
