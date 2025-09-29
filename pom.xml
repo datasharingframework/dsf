@@ -3,7 +3,7 @@
 
 	<groupId>dev.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>1.8.0-SNAPSHOT</version>
+	<version>1.8.0</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -33,7 +33,7 @@
 		<bouncycastle.version>1.80</bouncycastle.version>
 	</properties>
 
-	<name>DSF</name>
+	<name>DSF Parent POM</name>
 	<description>Data Sharing Framework (DSF)</description>
 	<url>https://dsf.dev</url>
 
@@ -897,6 +897,30 @@
 
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
