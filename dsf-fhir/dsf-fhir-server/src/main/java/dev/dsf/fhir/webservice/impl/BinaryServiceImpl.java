@@ -178,7 +178,7 @@ public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Bi
 	{
 		Response response = super.deletePermanently(deletePath, id, uri, headers);
 
-		dao.startLargeObjectUnlink();
+		dao.executeLargeObjectUnlink();
 
 		return response;
 	}

@@ -16,7 +16,7 @@ public interface BinaryDao extends ResourceDao<Binary>
 	Optional<Binary> readVersion(UUID uuid, long version, RangeRequest rangeRequest)
 			throws SQLException, ResourceDeletedException;
 
-	void startLargeObjectUnlink();
+	void executeLargeObjectUnlink();
 
 	void stopLargeObjectUnlinker();
 }

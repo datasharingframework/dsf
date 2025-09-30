@@ -58,7 +58,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	{
 		super.afterPropertiesSet();
 
-		startLargeObjectUnlink();
+		executeLargeObjectUnlink();
 	}
 
 	@Override
@@ -216,12 +216,12 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	}
 
 	@Override
-	public void startLargeObjectUnlink()
+	public void executeLargeObjectUnlink()
 	{
-		loUnlinker.submit(this::doLargeObjectUnlink);
+		loUnlinker.submit(this::doExecuteLargeObjectUnlink);
 	}
 
-	private void doLargeObjectUnlink()
+	private void doExecuteLargeObjectUnlink()
 	{
 		logger.debug("Deleting entries from binaries_lo_unlink_queue");
 
@@ -241,7 +241,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	@Override
 	public void stopLargeObjectUnlinker()
 	{
-		startLargeObjectUnlink();
+		executeLargeObjectUnlink();
 
 		logger.debug("Shutting down binaries-large-object-unlinker executor ...");
 
