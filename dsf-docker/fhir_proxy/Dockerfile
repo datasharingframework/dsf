@@ -3,13 +3,18 @@ LABEL org.opencontainers.image.source=https://github.com/datasharingframework/ds
 LABEL org.opencontainers.image.description="DSF FHIR Reverse Proxy"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
 
+RUN --mount=type=cache,target=/etc/apk/cache \
+    apk update && apk upgrade && apk -q add libcap && \
+    setcap 'cap_net_bind_service=+ep' /usr/local/apache2/bin/httpd && \
+    addgroup -g 4101 apache && adduser -S -H -u 4101 -G apache apache
+
 WORKDIR /usr/local/apache2
 COPY ./ ./
-RUN chown daemon:daemon ./ca/ && \
-	chmod 750 ./ca/ ./start.sh && \
-	chmod 440 ./ca/client_cert_ca_chains.pem ./ca/client_cert_issuing_cas.pem && \
-    chmod 644 ./conf/httpd.conf ./conf/extra/host.conf ./conf/extra/host-ssl.conf ./conf/extra/httpd-ssl.conf && \
-    apk update && apk upgrade && rm -vrf /var/cache/apk/*
+
+RUN chmod 750 ./ca/ ./start.sh && \
+    chmod 440 ./ca/client_cert_ca_chains.pem ./ca/client_cert_issuing_cas.pem && \
+    chmod 640 ./conf/httpd.conf ./conf/extra/host.conf ./conf/extra/host-ssl.conf ./conf/extra/httpd-ssl.conf && \
+    chown -hR apache:apache /usr/local/apache2/
 
 # setting non existing default values, see host-ssl.conf IfFile tests
 ENV SSL_CERTIFICATE_CHAIN_FILE="/does/not/exist"
@@ -44,4 +49,6 @@ ENV PROXY_PASS_CONNECTION_TIMEOUT_WS=30
 # server context path: / character at start, no / character at end
 ENV SERVER_CONTEXT_PATH="/fhir"
 
+USER apache
 ENTRYPOINT [ "sh", "./start.sh" ]
+HEALTHCHECK --interval=10s --timeout=15s --start-period=10s --retries=5 CMD nc -zv localhost 80 && nc -zv localhost 443 || exit 1
