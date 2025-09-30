@@ -185,6 +185,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-jetty</artifactId>
 			<scope>test</scope>

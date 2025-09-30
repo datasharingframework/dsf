@@ -167,18 +167,19 @@ public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Bi
 		return parameterConverter.getMediaTypeIfSupported(uri, headers).orElseGet(() -> getMediaType(headers));
 	}
 
-	// @Override
-	// protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
-	// {
-	// if (uri.getQueryParameters().containsKey(Constants.PARAM_FORMAT))
-	// return super.getMediaTypeForRead(uri, headers);
-	// else
-	// return getMediaType(headers);
-	// }
-	//
 	private MediaType getMediaType(HttpHeaders headers)
 	{
 		List<MediaType> types = headers.getAcceptableMediaTypes();
 		return types == null ? null : types.get(0);
+	}
+
+	@Override
+	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
+	{
+		Response response = super.deletePermanently(deletePath, id, uri, headers);
+
+		dao.executeLargeObjectUnlink();
+
+		return response;
 	}
 }

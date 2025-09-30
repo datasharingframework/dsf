@@ -1,7 +1,6 @@
 package dev.dsf.bpe.subscription;
 
 import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -19,8 +18,6 @@ public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 	private static final Logger logger = LoggerFactory.getLogger(ConcurrentSubscriptionHandlerFactory.class);
 
 	private final SubscriptionHandlerFactory<R> delegate;
-
-	private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
 	private final ThreadPoolExecutor executor;
 
 	/**
@@ -34,11 +31,11 @@ public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 		if (corePoolSize <= 0)
 			throw new IllegalArgumentException("corePoolSize <= 0");
 
-		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES, queue,
+		this.delegate = delegate;
+
+		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
 				(_, _) -> logger.error("Unable to handle Task - execution rejected"));
 		executor.allowCoreThreadTimeOut(true);
-
-		this.delegate = delegate;
 	}
 
 	@Override
