@@ -158,6 +158,9 @@ public class WebserviceConfig
 	@Autowired
 	private HistoryConfig historyConfig;
 
+	@Autowired
+	private AdapterConfig adapterConfig;
+
 	@Bean
 	public BrowserPolicyHeaderResponseFilter browserPolicyHeaderResponseFilter()
 	{
@@ -202,7 +205,8 @@ public class WebserviceConfig
 	@Bean
 	public BinaryService binaryService()
 	{
-		return new BinaryServiceJaxrs(binaryServiceSecure(), helperConfig.parameterConverter());
+		return new BinaryServiceJaxrs(binaryServiceSecure(), helperConfig.parameterConverter(),
+				adapterConfig.fhirAdapter());
 	}
 
 	private BinaryServiceSecure binaryServiceSecure()
