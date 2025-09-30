@@ -3,30 +3,35 @@ LABEL org.opencontainers.image.source=https://github.com/datasharingframework/ds
 LABEL org.opencontainers.image.description="DSF BPE Reverse Proxy"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
 
+RUN --mount=type=cache,target=/etc/apk/cache \
+    apk update && apk upgrade && apk -q add libcap && \
+    setcap 'cap_net_bind_service=+ep' /usr/local/apache2/bin/httpd && \
+    addgroup -g 4202 apache && adduser -S -H -u 4202 -G apache apache
+
 WORKDIR /usr/local/apache2
 COPY ./ ./
-RUN chown daemon:daemon ./ca/ && \
-	chmod 750 ./ca/ ./ca/client_ca_chains ./ca/client_issuing_cas ./start.sh && \
-	chmod 440 ./ca/client_ca_chains/*.crt ./ca/client_issuing_cas/*.crt && \
+
+RUN chmod 750 ./ca/ ./ca/client_ca_chains ./ca/client_issuing_cas ./start.sh && \
+    chmod 440 ./ca/client_ca_chains/*.crt ./ca/client_issuing_cas/*.crt && \
     chmod 644 ./conf/httpd.conf ./conf/extra/host.conf ./conf/extra/host-ssl.conf ./conf/extra/httpd-ssl.conf && \
-    apk update && apk upgrade && rm -vrf /var/cache/apk/*
+    chown -hR apache:apache /usr/local/apache2/
 
 # setting non existing default values, see host-ssl.conf IfFile tests
 ENV SSL_CERTIFICATE_CHAIN_FILE="/does/not/exist"
 
 # file with trusted client certificate issuing CAs, modifies the "Acceptable client certificate CA names" send to the client, uses all from SSL_CA_CERTIFICATE_FILE or SSL_CA_CERTIFICATE_PATH if not set or empty, not used by default, overrides SSL_CA_DN_REQUEST_PATH if not empty
-ENV SSL_CA_DN_REQUEST_FILE=
+ENV SSL_CA_DN_REQUEST_FILE=""
 
 # file with trusted full CA chains for validating client certificates, not used by default, overrides SSL_CA_CERTIFICATE_PATH if not empty
-ENV SSL_CA_CERTIFICATE_FILE=
+ENV SSL_CA_CERTIFICATE_FILE=""
 
 # folder with trusted client certificate issuing CAs, modifies the "Acceptable client certificate CA names" send to the client, uses all from SSL_CA_CERTIFICATE_FILE or SSL_CA_CERTIFICATE_PATH if not set or empty
 ENV SSL_CA_DN_REQUEST_PATH="ca/client_issuing_cas"
 
-# folder with trusted full CA chains for validating client certificates 
+# folder with trusted full CA chains for validating client certificates
 ENV SSL_CA_CERTIFICATE_PATH="ca/client_ca_chains"
 
-# setting default value - client certificate required, use 'optional' when using OIDC 
+# setting default value - client certificate required, use 'optional' when using OIDC
 ENV SSL_VERIFY_CLIENT="require"
 
 # expected client certificate subject DN country (C) values
@@ -41,7 +46,7 @@ ENV PROXY_PASS_TIMEOUT_HTTP=60
 # timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a reply
 ENV PROXY_PASS_TIMEOUT_WS=60
 
-# connection timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a connection to be established 
+# connection timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a connection to be established
 ENV PROXY_PASS_CONNECTION_TIMEOUT_HTTP=30
 
 # connection timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a connection to be established
@@ -50,4 +55,6 @@ ENV PROXY_PASS_CONNECTION_TIMEOUT_WS=30
 # server context path: / character at start, no / character at end
 ENV SERVER_CONTEXT_PATH="/bpe"
 
+USER apache
 ENTRYPOINT [ "sh", "./start.sh" ]
+HEALTHCHECK --interval=10s --timeout=15s --start-period=10s --retries=5 CMD nc -zv localhost 80 && nc -zv localhost 443 || exit 1
