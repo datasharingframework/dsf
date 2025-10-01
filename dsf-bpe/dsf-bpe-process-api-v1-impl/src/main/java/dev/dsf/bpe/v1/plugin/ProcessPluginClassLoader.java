@@ -33,7 +33,14 @@ public class ProcessPluginClassLoader extends URLClassLoader
 				throw new ClassNotFoundException(name);
 
 			ClassReader reader = new ClassReader(is);
-			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES)
+			{
+				@Override
+				protected ClassLoader getClassLoader()
+				{
+					return ProcessPluginClassLoader.this;
+				}
+			};
 
 			ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9, writer)
 			{
