@@ -21,4 +21,6 @@
 	<include file="bpe/db/db.camunda_engine.changelog-1.6.0.xml" />
 
 	<include file="bpe/db/db.camunda_engine.changelog-1.8.0.xml" />
+	
+	<include file="bpe/db/db.camunda_engine.changelog-1.9.0.xml" />
 </databaseChangeLog>

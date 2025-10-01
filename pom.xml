@@ -33,7 +33,7 @@
 		<hapi.fhir.version.v2>8.4.0</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>8.4.0</hapi.fhir.version>
-		<bouncycastle.version>1.81</bouncycastle.version>
+		<bouncycastle.version>1.82</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.0</crypto-utils.version.v2>
 		<crypto-utils.version>5.2.0</crypto-utils.version>
