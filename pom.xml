@@ -818,6 +818,12 @@
 								GEANT S/MIME RSA 1
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
+								HARICA Client Authentication ECC
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								HARICA Client Authentication RSA
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
 								HARICA S/MIME ECC
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
