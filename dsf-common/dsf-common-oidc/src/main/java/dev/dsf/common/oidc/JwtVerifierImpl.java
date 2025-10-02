@@ -45,7 +45,7 @@ public class JwtVerifierImpl implements JwtVerifier
 		JWTVerifier verifier = oidcClient.getJwks().getKey(keyId).map(JwksKey::toAlgorithm).map(algorithm ->
 		{
 			return createVerification(algorithm).withAudience(clientId).withClaim("events",
-					(claim, jwt) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
+					(claim, _) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
 					.build();
 
 		}).orElseThrow(() -> new OidcClientException(

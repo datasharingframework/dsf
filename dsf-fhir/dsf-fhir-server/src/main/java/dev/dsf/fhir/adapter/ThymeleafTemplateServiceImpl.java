@@ -163,7 +163,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		{
 			Optional<String> lastSegment = uriInfo.getPathSegments().stream().filter(Objects::nonNull)
 					.map(PathSegment::getPath).filter(Objects::nonNull).filter(s -> !s.isBlank())
-					.reduce((first, second) -> second);
+					.reduce((_, second) -> second);
 
 			return lastSegment.map(g::isResourceSupported).orElse(false);
 		}).findFirst();

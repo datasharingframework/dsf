@@ -34,7 +34,7 @@ public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
 		this.delegate = delegate;
 
 		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-				(r, executor) -> logger.error("Unable to handle Task - execution rejected"));
+				(_, _) -> logger.error("Unable to handle Task - execution rejected"));
 		executor.allowCoreThreadTimeOut(true);
 	}
 

@@ -158,7 +158,7 @@ public class FhirAdapter implements MessageBodyReader<BaseResource>, MessageBody
 	{
 		Map<String, DeferredBase64BinaryType> dataByPlaceholder = getDeferredBase64BinaryTypes(bundle)
 				.collect(Collectors.toMap(DeferredBase64BinaryType::createPlaceHolderAndSetAsUserData,
-						Function.identity(), (a, b) -> a, LinkedHashMap::new));
+						Function.identity(), (a, _) -> a, LinkedHashMap::new));
 
 		String s = getParser(mediaType).encodeResourceToString(bundle);
 

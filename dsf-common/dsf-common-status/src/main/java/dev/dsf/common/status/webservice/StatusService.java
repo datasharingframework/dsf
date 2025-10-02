@@ -55,7 +55,7 @@ public class StatusService implements InitializingBean
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		try (Connection connection = dataSource.getConnection())
+		try (Connection _ = dataSource.getConnection())
 		{
 			return Response.ok().build();
 		}

@@ -348,7 +348,7 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 			// accept header is FHIR mime-type
 			return Arrays.stream(FHIR_MEDIA_TYPES).filter(f -> f.equals(accept.toString())).findFirst()
-					.map(s -> accept);
+					.map(_ -> accept);
 		}
 	}
 

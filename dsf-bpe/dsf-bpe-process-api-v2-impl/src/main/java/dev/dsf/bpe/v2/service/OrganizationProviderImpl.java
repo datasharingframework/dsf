@@ -142,7 +142,7 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 		Map<String, List<String>> searchParameters = Map.of("active", List.of("true"), "identifier:not",
 				List.of(toSearchParameter(localOrganizationIdentifier.get())), "_profile",
 				List.of("http://dsf.dev/fhir/StructureDefinition/organization"));
-		return search(Organization.class, searchParameters, SearchEntryMode.MATCH, Organization.class, o -> true);
+		return search(Organization.class, searchParameters, SearchEntryMode.MATCH, Organization.class, _ -> true);
 	}
 
 	@Override
@@ -150,6 +150,6 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 	{
 		Map<String, List<String>> searchParameters = Map.of("active", List.of("true"), "_profile",
 				List.of("http://dsf.dev/fhir/StructureDefinition/organization-parent"));
-		return search(Organization.class, searchParameters, SearchEntryMode.MATCH, Organization.class, o -> true);
+		return search(Organization.class, searchParameters, SearchEntryMode.MATCH, Organization.class, _ -> true);
 	}
 }

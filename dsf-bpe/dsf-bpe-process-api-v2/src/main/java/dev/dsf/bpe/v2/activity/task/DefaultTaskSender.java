@@ -44,7 +44,7 @@ public class DefaultTaskSender implements TaskSender
 	public DefaultTaskSender(ProcessPluginApi api, Variables variables, SendTaskValues sendTaskValues,
 			BusinessKeyStrategy businessKeyStrategy)
 	{
-		this(api, variables, sendTaskValues, businessKeyStrategy, t -> List.of());
+		this(api, variables, sendTaskValues, businessKeyStrategy, _ -> List.of());
 	}
 
 	public DefaultTaskSender(ProcessPluginApi api, Variables variables, SendTaskValues sendTaskValues,

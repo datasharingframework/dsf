@@ -21,6 +21,6 @@ public class ErrorBoundaryEventTestThrow implements ServiceTask
 	@Override
 	public ServiceTaskErrorHandler getErrorHandler()
 	{
-		return new ExceptionToErrorBoundaryEventTranslationErrorHandler(e -> TEST_ERROR_CODE);
+		return new ExceptionToErrorBoundaryEventTranslationErrorHandler(_ -> TEST_ERROR_CODE);
 	}
 }

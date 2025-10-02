@@ -231,7 +231,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		expectNotAcceptable(() ->
 		{
-			try (InputStream in = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+			try (InputStream _ = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
 					MediaType.APPLICATION_XML_TYPE))
 			{
 			}
