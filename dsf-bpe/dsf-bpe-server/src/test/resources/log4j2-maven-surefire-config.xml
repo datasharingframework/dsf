@@ -14,12 +14,12 @@
 			<AppenderRef ref="DATA"/>
 		</Logger>
 
-		<AsyncLogger name="dev.dsf" level="INFO"/>
-		<AsyncLogger name="org.eclipse.jetty" level="INFO"/>
+		<Logger name="dev.dsf" level="INFO"/>
+		<Logger name="org.eclipse.jetty" level="INFO"/>
 		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR"/>
 
-		<AsyncRoot level="WARN">
+		<Root level="WARN">
 			<AppenderRef ref="CONSOLE"/>
-		</AsyncRoot>
+		</Root>
 	</Loggers>
 </Configuration>

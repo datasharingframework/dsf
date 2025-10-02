@@ -44,7 +44,7 @@ public class AuthenticationConfig
 	public RoleConfig roleConfig()
 	{
 		RoleConfig config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
-				role -> BpeServerRole.isValid(role) ? BpeServerRole.valueOf(role) : null, s -> null);
+				role -> BpeServerRole.isValid(role) ? BpeServerRole.valueOf(role) : null, _ -> null);
 
 		logger.info("Role config: {}", config.toString());
 		return config;

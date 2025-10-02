@@ -40,14 +40,14 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 
 			JavaDelegate delegate = switch (e.getBpmnModelElementInstance())
 			{
-				case SendTask st ->
+				case SendTask _ ->
 					delegateProvider.getMessageSendTask(processKeyAndVersion, className, fieldDeclarations, execution);
-				case ServiceTask st ->
+				case ServiceTask _ ->
 					delegateProvider.getServiceTask(processKeyAndVersion, className, fieldDeclarations, execution);
-				case EndEvent ee ->
+				case EndEvent _ ->
 					delegateProvider.getMessageEndEvent(processKeyAndVersion, className, fieldDeclarations, execution);
-				case IntermediateThrowEvent ite -> delegateProvider.getMessageIntermediateThrowEvent(
-						processKeyAndVersion, className, fieldDeclarations, execution);
+				case IntermediateThrowEvent _ -> delegateProvider.getMessageIntermediateThrowEvent(processKeyAndVersion,
+						className, fieldDeclarations, execution);
 
 				default -> throw new IllegalArgumentException("Unexpected value: " + e.getBpmnModelElementInstance());
 			};

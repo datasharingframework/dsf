@@ -8,7 +8,7 @@ RUN chown root:java ./ && \
 	chmod 1775 ./log
 
 
-FROM azul/zulu-openjdk:21-jre-headless
+FROM azul/zulu-openjdk:25-jre-headless
 LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
 LABEL org.opencontainers.image.description="DSF FHIR Server"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"

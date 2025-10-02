@@ -66,39 +66,42 @@ public class Jwks
 		{
 			return switch (kty)
 			{
-				case "RSA" -> {
-
-					RSAPublicKey key = toRsaPublicKey(n, e);
-					RSAKeyProvider keyProvider = toRsaKeyProvider(key, kid);
-
-					yield switch (alg)
-					{
-						case "RS256" -> Algorithm.RSA256(keyProvider);
-						case "RS384" -> Algorithm.RSA384(keyProvider);
-						case "RS512" -> Algorithm.RSA512(keyProvider);
-
-						default -> throw new JwksException(
-								"JWKS alg property value '" + alg + "' not one of 'RSA256', 'RSA384' or 'RSA512'");
-					};
-				}
-
-				case "EC" -> {
-
-					ECPublicKey key = toEcPublicKey(x, y, crv);
-					ECDSAKeyProvider keyProvider = toEcKeyProvider(key, kid);
-
-					yield switch (alg)
-					{
-						case "ES256" -> Algorithm.ECDSA256(keyProvider);
-						case "ES384" -> Algorithm.ECDSA384(keyProvider);
-						case "ES512" -> Algorithm.ECDSA512(keyProvider);
-
-						default -> throw new JwksException(
-								"JWKS crv property value '" + alg + "' not one of 'ES256', 'ES384' or 'ES512'");
-					};
-				}
+				case "RSA" -> toRsaAlgorithm();
+				case "EC" -> toEcdsaAlgorithm();
 
 				default -> throw new JwksException("JWKS kty property value '" + kty + "' not one of 'RSA' or 'EC'");
+			};
+		}
+
+		private Algorithm toRsaAlgorithm()
+		{
+			RSAPublicKey key = toRsaPublicKey(n, e);
+			RSAKeyProvider keyProvider = toRsaKeyProvider(key, kid);
+
+			return switch (alg)
+			{
+				case "RS256" -> Algorithm.RSA256(keyProvider);
+				case "RS384" -> Algorithm.RSA384(keyProvider);
+				case "RS512" -> Algorithm.RSA512(keyProvider);
+
+				default -> throw new JwksException(
+						"JWKS alg property value '" + alg + "' not one of 'RSA256', 'RSA384' or 'RSA512'");
+			};
+		}
+
+		private Algorithm toEcdsaAlgorithm()
+		{
+			ECPublicKey key = toEcPublicKey(x, y, crv);
+			ECDSAKeyProvider keyProvider = toEcKeyProvider(key, kid);
+
+			return switch (alg)
+			{
+				case "ES256" -> Algorithm.ECDSA256(keyProvider);
+				case "ES384" -> Algorithm.ECDSA384(keyProvider);
+				case "ES512" -> Algorithm.ECDSA512(keyProvider);
+
+				default -> throw new JwksException(
+						"JWKS crv property value '" + alg + "' not one of 'ES256', 'ES384' or 'ES512'");
 			};
 		}
 
