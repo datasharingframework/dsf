@@ -27,7 +27,7 @@ ENV SSL_VERIFY_CLIENT="require"
 ENV SSL_EXPECTED_CLIENT_S_DN_C_VALUES="'DE'"
 
 # expected client certificate issuer DN common-name (CN) values
-ENV SSL_EXPECTED_CLIENT_I_DN_CN_VALUES="'GEANT TLS ECC 1', 'HARICA OV TLS ECC', 'GEANT TLS RSA 1', 'HARICA OV TLS RSA', 'GEANT S/MIME ECC 1', 'HARICA S/MIME ECC', 'GEANT S/MIME RSA 1', 'HARICA S/MIME RSA', 'DFN-Verein Global Issuing CA', 'Fraunhofer User CA - G02', 'D-TRUST SSL Class 3 CA 1 2009', 'Sectigo RSA Organization Validation Secure Server CA', 'GEANT OV RSA CA 4', 'GEANT Personal CA 4', 'GEANT eScience Personal CA 4', 'Sectigo ECC Organization Validation Secure Server CA', 'GEANT OV ECC CA 4', 'GEANT Personal ECC CA 4', 'GEANT eScience Personal ECC CA 4', 'D-TRUST Limited Basic CA 1-2 2019', 'D-TRUST Limited Basic CA 1-3 2019'"
+ENV SSL_EXPECTED_CLIENT_I_DN_CN_VALUES="'GEANT TLS ECC 1', 'HARICA OV TLS ECC', 'GEANT TLS RSA 1', 'HARICA OV TLS RSA', 'GEANT S/MIME ECC 1', 'HARICA Client Authentication ECC', 'HARICA S/MIME ECC', 'GEANT S/MIME RSA 1', 'HARICA Client Authentication RSA', 'HARICA S/MIME RSA', 'DFN-Verein Global Issuing CA', 'Fraunhofer User CA - G02', 'D-TRUST SSL Class 3 CA 1 2009', 'Sectigo RSA Organization Validation Secure Server CA', 'GEANT OV RSA CA 4', 'GEANT Personal CA 4', 'GEANT eScience Personal CA 4', 'Sectigo ECC Organization Validation Secure Server CA', 'GEANT OV ECC CA 4', 'GEANT Personal ECC CA 4', 'GEANT eScience Personal ECC CA 4', 'D-TRUST Limited Basic CA 1-2 2019', 'D-TRUST Limited Basic CA 1-3 2019'"
 
 # timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a reply
 ENV PROXY_PASS_TIMEOUT_HTTP=60
