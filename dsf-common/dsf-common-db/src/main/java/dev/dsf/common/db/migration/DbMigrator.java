@@ -220,7 +220,7 @@ public final class DbMigrator
 				logger.warn("PSQLException ({}): trying again in 5s", p.getServerErrorMessage().getMessage());
 				try
 				{
-					Thread.sleep(10_000);
+					Thread.sleep(5_000);
 				}
 				catch (InterruptedException e1)
 				{
