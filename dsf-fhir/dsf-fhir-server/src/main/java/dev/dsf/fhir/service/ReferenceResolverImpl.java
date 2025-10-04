@@ -22,7 +22,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.client.ClientProvider;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.dao.ResourceDao;
@@ -95,9 +94,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public Optional<Resource> resolveReference(Identity identity, ResourceReference reference, Connection connection)
+	public Optional<Resource> resolveReference(ResourceReference reference, Connection connection)
 	{
-		Objects.requireNonNull(identity, "identity");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
 
@@ -108,8 +106,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				resolveLiteralExternalReference(reference);
 			case CONDITIONAL, RELATED_ARTEFACT_CONDITIONAL_URL, ATTACHMENT_CONDITIONAL_URL ->
-				resolveConditionalReference(identity, reference, connection);
-			case LOGICAL -> resolveLogicalReference(identity, reference, connection);
+				resolveConditionalReference(reference, connection);
+			case LOGICAL -> resolveLogicalReference(reference, connection);
 
 			default -> throw new IllegalArgumentException("Reference of type " + type + " not supported");
 		};
@@ -215,8 +213,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		}
 	}
 
-	private Optional<Resource> resolveConditionalReference(Identity identity, ResourceReference reference,
-			Connection connection)
+	private Optional<Resource> resolveConditionalReference(ResourceReference reference, Connection connection)
 	{
 		Objects.requireNonNull(reference, "reference");
 
@@ -252,12 +249,11 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return Optional.empty();
 			}
 
-			return search(identity, connection, d, reference, condition.getQueryParams(), referenceType);
+			return search(connection, d, reference, condition.getQueryParams(), referenceType);
 		}
 	}
 
-	private Optional<Resource> resolveLogicalReference(Identity identity, ResourceReference reference,
-			Connection connection)
+	private Optional<Resource> resolveLogicalReference(ResourceReference reference, Connection connection)
 	{
 		Objects.requireNonNull(reference, "reference");
 		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LOGICAL);
@@ -283,13 +279,13 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 
 			Identifier targetIdentifier = reference.getReference().getIdentifier();
-			return search(identity, connection, d, reference,
+			return search(connection, d, reference,
 					Map.of("identifier", List.of(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())),
 					ReferenceType.LOGICAL);
 		}
 	}
 
-	private Optional<Resource> search(Identity identity, Connection connection, ResourceDao<?> referenceTargetDao,
+	private Optional<Resource> search(Connection connection, ResourceDao<?> referenceTargetDao,
 			ResourceReference resourceReference, Map<String, List<String>> queryParameters, ReferenceType referenceType)
 	{
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
@@ -305,7 +301,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, PageAndCount.single());
+		SearchQuery<?> query = referenceTargetDao.createSearchQueryWithoutUserFilter(PageAndCount.single());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
@@ -462,10 +458,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public Optional<OperationOutcome> checkConditionalReference(Identity identity, Resource resource,
-			ResourceReference reference, Connection connection, Integer bundleIndex) throws IllegalArgumentException
+	public Optional<OperationOutcome> checkConditionalReference(Resource resource, ResourceReference reference,
+			Connection connection, Integer bundleIndex) throws IllegalArgumentException
 	{
-		Objects.requireNonNull(identity, "identity");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
@@ -489,7 +484,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 						responseGenerator.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, reference));
 
 			// Resource target =
-			return search(identity, resource, bundleIndex, connection, d, reference, condition.getQueryParams(), true);
+			return search(resource, bundleIndex, connection, d, reference, condition.getQueryParams(), true);
 
 			// TODO add literal reference for conditional reference somewhere else
 			// reference.getReference().setIdentifier(null).setReferenceElement(
@@ -500,17 +495,16 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public Optional<OperationOutcome> checkLogicalReference(Identity identity, Resource resource,
-			ResourceReference resourceReference, Connection connection) throws IllegalArgumentException
+	public Optional<OperationOutcome> checkLogicalReference(Resource resource, ResourceReference resourceReference,
+			Connection connection) throws IllegalArgumentException
 	{
-		return checkLogicalReference(identity, resource, resourceReference, connection, null);
+		return checkLogicalReference(resource, resourceReference, connection, null);
 	}
 
 	@Override
-	public Optional<OperationOutcome> checkLogicalReference(Identity identity, Resource resource,
-			ResourceReference reference, Connection connection, Integer bundleIndex) throws IllegalArgumentException
+	public Optional<OperationOutcome> checkLogicalReference(Resource resource, ResourceReference reference,
+			Connection connection, Integer bundleIndex) throws IllegalArgumentException
 	{
-		Objects.requireNonNull(identity, "identity");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
@@ -532,7 +526,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 			Identifier targetIdentifier = reference.getReference().getIdentifier();
 			// Resource target =
-			return search(identity, resource, bundleIndex, connection, d, reference,
+			return search(resource, bundleIndex, connection, d, reference,
 					Map.of("identifier", List.of(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())),
 					true);
 
@@ -547,8 +541,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		// return Optional.empty();
 	}
 
-	private Optional<OperationOutcome> search(Identity identity, Resource resource, Integer bundleIndex,
-			Connection connection, ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
+	private Optional<OperationOutcome> search(Resource resource, Integer bundleIndex, Connection connection,
+			ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
 			Map<String, List<String>> queryParameters, boolean logicalNotConditional)
 	{
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
@@ -564,7 +558,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = referenceTargetDao.createSearchQuery(identity, PageAndCount.exists());
+		SearchQuery<?> query = referenceTargetDao.createSearchQueryWithoutUserFilter(PageAndCount.exists());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
@@ -604,17 +598,16 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public Optional<OperationOutcome> checkCanonicalReference(Identity identity, Resource resource,
-			ResourceReference reference, Connection connection) throws IllegalArgumentException
+	public Optional<OperationOutcome> checkCanonicalReference(Resource resource, ResourceReference reference,
+			Connection connection) throws IllegalArgumentException
 	{
-		return checkCanonicalReference(identity, resource, reference, connection, null);
+		return checkCanonicalReference(resource, reference, connection, null);
 	}
 
 	@Override
-	public Optional<OperationOutcome> checkCanonicalReference(Identity identity, Resource resource,
-			ResourceReference reference, Connection connection, Integer bundleIndex) throws IllegalArgumentException
+	public Optional<OperationOutcome> checkCanonicalReference(Resource resource, ResourceReference reference,
+			Connection connection, Integer bundleIndex) throws IllegalArgumentException
 	{
-		Objects.requireNonNull(identity, "identity");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
@@ -636,7 +629,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			return Optional.empty();
 		}
 
-		Optional<Resource> referencedResource = referenceDao.flatMap(dao -> search(identity, connection, dao, reference,
+		Optional<Resource> referencedResource = referenceDao.flatMap(dao -> search(connection, dao, reference,
 				Map.of("url", List.of(reference.getCanonical().getValue())), ReferenceType.CANONICAL));
 
 		if (referencedResource.isPresent())

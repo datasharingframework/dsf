@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.TaskDao;
-import dev.dsf.fhir.dao.TestOrganizationIdentity;
 import dev.dsf.fhir.dao.command.ReferencesHelperImpl;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceCleaner;
@@ -1459,15 +1458,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Task task = readTestTaskBinary("External_Test_Organization", "Test_Organization");
 		task.setStatus(createStatus);
 
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
-				.getBean(OrganizationProvider.class);
 		ReferenceExtractor referenceExtractor = getSpringWebApplicationContext().getBean(ReferenceExtractor.class);
 		ReferenceResolver referenceResolver = getSpringWebApplicationContext().getBean(ReferenceResolver.class);
 		ResponseGenerator responseGenerator = getSpringWebApplicationContext().getBean(ResponseGenerator.class);
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 
-		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0,
-				TestOrganizationIdentity.local(organizationProvider.getLocalOrganization().get()), task, getBaseUrl(),
+		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0, task, getBaseUrl(),
 				referenceExtractor, referenceResolver, responseGenerator);
 		try (Connection connection = dataSource.getConnection())
 		{

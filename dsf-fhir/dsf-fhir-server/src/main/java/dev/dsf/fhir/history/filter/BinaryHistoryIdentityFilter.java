@@ -1,18 +1,20 @@
 package dev.dsf.fhir.history.filter;
 
-import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.ResourceType;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.search.filter.BinaryIdentityFilter;
 
 public class BinaryHistoryIdentityFilter extends BinaryIdentityFilter implements HistoryIdentityFilter
 {
-	private static final String RESOURCE_TYPE = Binary.class.getAnnotation(ResourceDef.class).name();
+	private static final FhirServerRole HISTORY_ROLE = FhirServerRoleImpl.history(ResourceType.Binary);
+	private static final String RESOURCE_TYPE = ResourceType.Binary.name();
 
 	public BinaryHistoryIdentityFilter(Identity identity)
 	{
-		super(identity, HistoryIdentityFilter.RESOURCE_TABLE, HistoryIdentityFilter.RESOURCE_ID_COLUMN);
+		super(identity, HistoryIdentityFilter.RESOURCE_TABLE, HistoryIdentityFilter.RESOURCE_ID_COLUMN, HISTORY_ROLE);
 	}
 
 	@Override

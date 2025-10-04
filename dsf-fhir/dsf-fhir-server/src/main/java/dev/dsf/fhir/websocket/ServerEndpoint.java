@@ -17,8 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.CloseReason.CloseCodes;
@@ -56,11 +57,11 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	public void onOpen(Session session, EndpointConfig config)
 	{
 		Principal principal = session.getUserPrincipal();
-		if (principal == null || !(principal instanceof Identity)
-				|| !((Identity) principal).hasDsfRole(FhirServerRole.WEBSOCKET))
+		if (principal == null || !(principal instanceof Identity) || !((Identity) principal).getDsfRoles().stream()
+				.map(DsfRole::name).anyMatch(FhirServerRoleImpl.Operation.WEBSOCKET.name()::equals))
 		{
 			logger.warn("No user in session or user is missing role {}, closing websocket, session {}",
-					FhirServerRole.WEBSOCKET, session.getId());
+					FhirServerRoleImpl.Operation.WEBSOCKET, session.getId());
 			try
 			{
 				session.close(new CloseReason(CloseCodes.VIOLATED_POLICY, "Forbidden"));

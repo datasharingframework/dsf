@@ -18,13 +18,14 @@ import dev.dsf.common.auth.conf.IdentityProvider;
 import dev.dsf.common.auth.conf.PractitionerIdentityImpl;
 import dev.dsf.common.auth.conf.RoleConfig;
 
-public class IdentityProviderImpl extends AbstractIdentityProvider implements IdentityProvider, InitializingBean
+public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole>
+		implements IdentityProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(IdentityProviderImpl.class);
 
 	private final LocalOrganizationAndEndpointProvider organizationAndEndpointProvider;
 
-	public IdentityProviderImpl(RoleConfig roleConfig,
+	public IdentityProviderImpl(RoleConfig<BpeServerRole> roleConfig,
 			LocalOrganizationAndEndpointProvider organizationAndEndpointProvider)
 	{
 		super(roleConfig);

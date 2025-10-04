@@ -13,6 +13,7 @@ import dev.dsf.common.auth.conf.RoleConfigReader;
 import dev.dsf.fhir.authentication.EndpointProvider;
 import dev.dsf.fhir.authentication.EndpointProviderImpl;
 import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.authentication.IdentityProviderImpl;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authentication.OrganizationProviderImpl;
@@ -53,11 +54,10 @@ public class AuthenticationConfig
 	}
 
 	@Bean
-	public RoleConfig roleConfig()
+	public RoleConfig<FhirServerRole> roleConfig()
 	{
-		RoleConfig config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
-				role -> FhirServerRole.isValid(role) ? FhirServerRole.valueOf(role) : null,
-				this::practionerRoleFactory);
+		RoleConfig<FhirServerRole> config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
+				FhirServerRoleImpl::from, this::practionerRoleFactory);
 
 		logger.info("Role config: {}", config.toString());
 		return config;
