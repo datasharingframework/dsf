@@ -696,6 +696,31 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateTaskAllowedMinimalUser() throws Exception
+	{
+		ActivityDefinition ad5 = readActivityDefinition("dsf-test-activity-definition5-1.0.xml");
+
+		expectForbidden(() -> getMinimalWebserviceClient().create(ad5));
+
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad5);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+
+		expectForbidden(() -> getMinimalWebserviceClient().create(testTaskProfile));
+
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getMinimalWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
 	public void testCreateTaskAllowedLocalUserWithRole() throws Exception
 	{
 		ActivityDefinition ad1 = readActivityDefinition("dsf-test-activity-definition5-1.0.xml");

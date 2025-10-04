@@ -114,6 +114,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static FhirWebserviceClient webserviceClient;
 	private static FhirWebserviceClient externalWebserviceClient;
 	private static FhirWebserviceClient practitionerWebserviceClient;
+	private static FhirWebserviceClient minimalWebserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -146,6 +147,12 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				certificates.getPractitionerClientCertificate().trustStore(),
 				certificates.getPractitionerClientCertificate().keyStore(),
 				certificates.getPractitionerClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
+
+		logger.info("Creating minimal client ...");
+		minimalWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
+				certificates.getMinimalClientCertificate().trustStore(),
+				certificates.getMinimalClientCertificate().keyStore(),
+				certificates.getMinimalClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer(statusConnectorChannel, apiConnectorChannel, baseUrl);
@@ -212,7 +219,18 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				      - HISTORY
 				    practitioner-role:
 				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
-				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex()));
+				- minimal-test-user:
+				    thumbprint: %s
+				    dsf-role:
+				      - CREATE: [Task]
+				      - READ: &tqqr [Task, Questionnaire, QuestionnaireResponse]
+				      - UPDATE: [QuestionnaireResponse]
+				      - SEARCH: *tqqr
+				      - HISTORY: *tqqr
+				    practitioner-role:
+				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
+				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex(),
+				certificates.getMinimalClientCertificate().certificateSha512ThumbprintHex()));
 		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", "true");
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
@@ -380,6 +398,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static FhirWebserviceClient getPractitionerWebserviceClient()
 	{
 		return practitionerWebserviceClient;
+	}
+
+	protected static FhirWebserviceClient getMinimalWebserviceClient()
+	{
+		return minimalWebserviceClient;
 	}
 
 	protected static WebsocketClient getWebsocketClient()
