@@ -696,8 +696,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonReadAllowed(Connection connection, Identity identity, Task existingResource)
 	{
-		final String resourceId = parameterConverter
-				.toUuid(getResourceTypeName(), existingResource.getIdElement().getIdPart()).toString();
+		final String resourceId = existingResource.getIdElement().getIdPart();
 		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 
 		if (identity.hasDsfRole(readRole))
@@ -743,8 +742,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	public Optional<String> reasonUpdateAllowed(Connection connection, Identity identity, Task oldResource,
 			Task newResource)
 	{
-		final String oldResourceId = parameterConverter
-				.toUuid(getResourceTypeName(), oldResource.getIdElement().getIdPart()).toString();
+		final String oldResourceId = oldResource.getIdElement().getIdPart();
 		final long oldResourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
 		if (identity.hasDsfRole(updateRole))
@@ -1059,8 +1057,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonDeleteAllowed(Connection connection, Identity identity, Task oldResource)
 	{
-		final String oldResourceId = parameterConverter
-				.toUuid(getResourceTypeName(), oldResource.getIdElement().getIdPart()).toString();
+		final String oldResourceId = oldResource.getIdElement().getIdPart();
 		final long oldResourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
 		if (identity.hasDsfRole(deleteRole))

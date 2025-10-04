@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
@@ -356,14 +355,13 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 
 	private Optional<String> reasonWebsocketAllowed(Connection connection, Identity identity, R existingResource)
 	{
-		final UUID resourceId = parameterConverter.toUuid(getResourceTypeName(),
-				existingResource.getIdElement().getIdPart());
+		final String resourceId = existingResource.getIdElement().getIdPart();
 		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 
 		if (identity.isLocalIdentity() && identity.hasDsfRole(websocketRole))
 		{
 			logger.info("Websocket access to {}/{}/_history/{} authorized for local identity '{}'",
-					getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName());
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName());
 
 			return Optional.of("Identity has role " + websocketRole);
 		}
@@ -371,7 +369,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		{
 			logger.warn(
 					"Websocket access to {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(), websocketRole);
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), websocketRole);
 
 			return Optional.empty();
 		}

@@ -155,22 +155,22 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				if (modificationsOk(connection, oldResource, newResource))
 				{
 					logger.info("Update of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),
-							resourceId.toString(), resourceVersion, identity.getName());
+							resourceId, resourceVersion, identity.getName());
 
 					return Optional.of("Identity is local identity and has role " + updateRole);
 				}
 				else
 				{
 					logger.warn("Update of {}/{}/_history/{} unauthorized, modification not allowed",
-							getResourceTypeName(), resourceId.toString(), resourceVersion);
+							getResourceTypeName(), resourceId, resourceVersion);
 
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Update of {}/{}/_history/{} unauthorized, {}", getResourceTypeName(),
-						resourceId.toString(), resourceVersion, errors.get());
+				logger.warn("Update of {}/{}/_history/{} unauthorized, {}", getResourceTypeName(), resourceId,
+						resourceVersion, errors.get());
 
 				return Optional.empty();
 			}
@@ -179,7 +179,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		{
 			logger.warn(
 					"Update of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(), updateRole);
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), updateRole);
 
 			return Optional.empty();
 		}
