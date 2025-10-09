@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import de.hsheilbronn.mi.utils.crypto.ca.CertificateAuthority;
 import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest;
 import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest.CertificationRequestAndPrivateKey;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest.CertificationRequestBuilder;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import de.hsheilbronn.mi.utils.crypto.io.PemWriter;
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
@@ -60,26 +61,32 @@ public class CertificateGenerator
 
 	public static record CertificationRequestConfig(
 			BiFunction<CertificateAuthority, CertificationRequest, X509Certificate> signer, String commonName,
-			List<String> dnsNames)
+			String mail, List<String> dnsNames)
 	{
 		public CertificationRequestConfig(
 				BiFunction<CertificateAuthority, CertificationRequest, X509Certificate> signer, String commonName,
-				String... dnsNames)
+				String mail, String... dnsNames)
 		{
-			this(signer, commonName, List.of(dnsNames));
+			this(signer, commonName, mail, List.of(dnsNames));
 		}
 
 		public CertificationRequestConfig(
-				BiFunction<CertificateAuthority, CertificationRequest, X509Certificate> signer, String commonName)
+				BiFunction<CertificateAuthority, CertificationRequest, X509Certificate> signer, String commonName,
+				String mail)
 		{
-			this(signer, commonName, List.of());
+			this(signer, commonName, mail, List.of());
 		}
 
 		public CertificateAndPrivateKey sign(CertificateAuthority ca)
 		{
-			CertificationRequestAndPrivateKey req = CertificationRequest
+			CertificationRequestBuilder reqBuilder = CertificationRequest
 					.builder(ca, SUBJECT_C, null, null, SUBJECT_O, null, commonName).generateKeyPair()
-					.setDnsNames(dnsNames).build();
+					.setDnsNames(dnsNames);
+
+			if (mail != null && !mail.isBlank())
+				reqBuilder.setEmail(mail);
+
+			CertificationRequestAndPrivateKey req = reqBuilder.build();
 
 			X509Certificate crt = signer.apply(ca, req);
 
@@ -97,7 +104,7 @@ public class CertificateGenerator
 	public static final String SUBJECT_CN_ISSUING_CA = "DSF Dev Issuing CA";
 
 	private static final CertificationRequestConfig CERTIFICATION_REQUEST_ISSUING_CA = new CertificationRequestConfig(
-			CertificateAuthority::signClientServerIssuingCaCertificate, SUBJECT_CN_ISSUING_CA);
+			CertificateAuthority::signClientServerIssuingCaCertificate, SUBJECT_CN_ISSUING_CA, null);
 
 	private final Path certDir;
 	private final char[] privateKeyPassword;

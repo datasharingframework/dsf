@@ -630,6 +630,7 @@
 								<certs>
 									<cert>
 										<cn>Webbrowser Test User</cn>
+										<email>webbrowser.test.user@invalid</email>
 										<type>CLIENT</type>
 										<targets>
 											<target>cert/Webbrowser_Test_User.p12</target>
