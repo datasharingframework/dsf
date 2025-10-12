@@ -80,13 +80,11 @@ public interface Requester extends WithAuthorization
 
 	boolean requesterMatches(Extension requesterExtension);
 
-	boolean isRequesterAuthorized(Identity requesterUser, Stream<OrganizationAffiliation> requesterAffiliations);
+	boolean isRequesterAuthorized(Identity requester, Stream<OrganizationAffiliation> requesterAffiliations);
 
-	default boolean isRequesterAuthorized(Identity requesterUser,
-			Collection<OrganizationAffiliation> requesterAffiliations)
+	default boolean isRequesterAuthorized(Identity requester, Collection<OrganizationAffiliation> requesterAffiliations)
 	{
-		return isRequesterAuthorized(requesterUser,
-				requesterAffiliations == null ? null : requesterAffiliations.stream());
+		return isRequesterAuthorized(requester, requesterAffiliations == null ? null : requesterAffiliations.stream());
 	}
 
 	Extension toRequesterExtension();

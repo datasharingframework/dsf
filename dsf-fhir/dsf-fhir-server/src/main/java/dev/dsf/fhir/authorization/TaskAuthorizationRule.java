@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.fhir.authentication.EndpointProvider;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
@@ -61,6 +62,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			.compile(INSTANTIATES_CANONICAL_PATTERN_STRING);
 
 	private static final String NAMING_SYSTEM_TASK_IDENTIFIER = "http://dsf.dev/sid/task-identifier";
+	private static final String NAMING_SYSTEM_ORGANIZATION_IDENTIFIER = "http://dsf.dev/sid/organization-identifier";
+	private static final String NAMING_SYSTEM_PRACTITIONER_IDENTIFIER = "http://dsf.dev/sid/practitioner-identifier";
 
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
 	private final FhirContext fhirContext;
@@ -146,90 +149,99 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonCreateAllowed(Connection connection, Identity identity, Task newResource)
 	{
-		if (identity.hasDsfRole(createRole))
+		if (!identity.hasDsfRole(createRole))
 		{
-			if (TaskStatus.DRAFT.equals(newResource.getStatus()))
+			logger.warn("Create of Task unauthorized for identity '{}', no role {}", identity.getName(), createRole);
+			return Optional.empty();
+		}
+
+		if (TaskStatus.DRAFT.equals(newResource.getStatus()))
+			return reasonCreateDraftAllowed(connection, identity, newResource);
+		else if (TaskStatus.REQUESTED.equals(newResource.getStatus()))
+			return reasonCreateRequestedAllowed(connection, identity, newResource);
+		else
+		{
+			logger.warn("Create of Task unauthorized for identity '{}', Task.status not {} and not {}",
+					identity.getName(), TaskStatus.DRAFT.toCode(), TaskStatus.REQUESTED.toCode());
+
+			return Optional.empty();
+		}
+	}
+
+	private Optional<String> reasonCreateDraftAllowed(Connection connection, Identity identity, Task newResource)
+	{
+		if (identity.isLocalIdentity() && (identity instanceof OrganizationIdentity
+				|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN"))))
+		{
+			Optional<String> errors = draftTaskOk(connection, identity, newResource);
+			if (errors.isEmpty())
 			{
-				if (identity.isLocalIdentity() && identity instanceof OrganizationIdentity)
+				if (!draftTaskExists(connection, newResource))
 				{
-					Optional<String> errors = draftTaskOk(connection, identity, newResource);
-					if (errors.isEmpty())
-					{
-						if (!draftTaskExists(connection, newResource))
-						{
-							logger.info(
-									"Create of Task authorized for local organization identity '{}', Task.status draft",
-									identity.getName());
-
-							return Optional.of("Local identity, Task.status draft");
-						}
-						else
-						{
-							logger.warn("Create of Task unauthorized, unique resource already exists");
-
-							return Optional.empty();
-						}
-					}
-					else
-					{
-						logger.warn("Create of Task unauthorized for identity '{}', Task.status draft, {}",
-								identity.getName(), errors.get());
-
-						return Optional.empty();
-					}
-				}
-				else
-				{
-					logger.warn(
-							"Create of Task unauthorized for identity '{}', Task.status draft, not allowed for non local organization identity",
+					logger.info("Create of Task authorized for local organization identity '{}', Task.status draft",
 							identity.getName());
 
-					return Optional.empty();
-				}
-			}
-			else if (TaskStatus.REQUESTED.equals(newResource.getStatus()))
-			{
-				Optional<String> errors = requestedTaskOk(connection, identity, newResource);
-				if (errors.isEmpty())
-				{
-					if (taskAllowedForRequesterAndRecipient(connection, identity, newResource))
-					{
-						logger.info(
-								"Create of Task authorized for identity '{}', Task.status requested, process allowed for current identity",
-								identity.getName());
-
-						return Optional.of(
-								"Local or remote identity, Task.status requested, Task.requester current identity's organization, Task.restriction.recipient local organization, "
-										+ "process with instantiatesCanonical and message-name allowed for current identity, Task defines needed profile");
-					}
-					else
-					{
-						logger.warn(
-								"Create of Task unauthorized for identity '{}', Task.status requested, process with instantiatesCanonical, message-name, requester or recipient not allowed",
-								identity.getName());
-
-						return Optional.empty();
-					}
+					return Optional.of("Local identity, Task.status draft");
 				}
 				else
 				{
-					logger.warn("Create of Task unauthorized for identity '{}', Task.status requested, {}",
-							identity.getName(), errors.get());
+					logger.warn("Create of Task unauthorized, unique resource already exists");
 
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Create of Task unauthorized for identity '{}', Task.status not {} and not {}",
-						identity.getName(), TaskStatus.DRAFT.toCode(), TaskStatus.REQUESTED.toCode());
+				logger.warn("Create of Task unauthorized for identity '{}', Task.status draft, {}", identity.getName(),
+						errors.get());
 
 				return Optional.empty();
 			}
 		}
 		else
 		{
-			logger.warn("Create of Task unauthorized for identity '{}', no role {}", identity.getName(), createRole);
+			logger.warn(
+					"Create of Task unauthorized for identity '{}', Task.status draft, not allowed for remote organization identity or practitioner identity without DSF_ADMIN role",
+					identity.getName());
+
+			return Optional.empty();
+		}
+	}
+
+	private Optional<String> reasonCreateRequestedAllowed(Connection connection, Identity identity, Task newResource)
+	{
+		Optional<String> errors = requestedTaskOk(connection, identity, newResource);
+		if (!errors.isEmpty())
+		{
+			logger.warn("Create of Task unauthorized for identity '{}', Task.status requested, {}", identity.getName(),
+					errors.get());
+
+			return Optional.empty();
+		}
+
+		if (taskAllowedForRequesterAndRecipient(connection, identity, newResource))
+		{
+			logger.info(
+					"Create of Task authorized for identity '{}', Task.status requested, process allowed for current identity",
+					identity.getName());
+
+			String identityType = "";
+			if (identity instanceof OrganizationIdentity)
+				identityType = "organization ";
+			else if (identity instanceof PractitionerIdentity)
+				identityType = "practitioner ";
+			else
+				throw new RuntimeException(identity.getClass().getName() + " identity not supported");
+
+			return Optional.of("Local or remote identity, Task.status requested, Task.requester current " + identityType
+					+ "identity, Task.restriction.recipient local organization, "
+					+ "process with instantiatesCanonical and message-name allowed for current identity, Task defines needed profile");
+		}
+		else
+		{
+			logger.warn(
+					"Create of Task unauthorized for identity '{}', Task.status requested, process with instantiatesCanonical, message-name, requester or recipient not allowed",
+					identity.getName());
 
 			return Optional.empty();
 		}
@@ -254,22 +266,51 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		List<String> errors = new ArrayList<>();
 
 		if (newResource.getIdentifier().stream().anyMatch(i -> NAMING_SYSTEM_TASK_IDENTIFIER.equals(i.getSystem())))
-		{
 			errors.add("Task.identifier[" + NAMING_SYSTEM_TASK_IDENTIFIER + "] defined");
-		}
 
 		if (newResource.hasRequester())
 		{
-			if (!isCurrentIdentityPartOfReferencedOrganization(connection, identity, "Task.requester",
-					newResource.getRequester()))
+			Reference requester = newResource.getRequester();
+
+			if (requester.hasIdentifier())
 			{
-				errors.add("Task.requester current identity not part of referenced organization");
+				Identifier identifier = requester.getIdentifier();
+
+				if (identifier.hasSystem() && identifier.hasValue())
+				{
+					if (identity.isLocalIdentity() && identity instanceof PractitionerIdentity p)
+					{
+						if (!NAMING_SYSTEM_PRACTITIONER_IDENTIFIER.equals(identifier.getSystem()))
+							errors.add("Task.requester.identifier.system not " + NAMING_SYSTEM_PRACTITIONER_IDENTIFIER);
+
+						Optional<String> practitionerIdentifierValue = p.getPractitionerIdentifierValue();
+						if (practitionerIdentifierValue.isPresent())
+						{
+							if (!practitionerIdentifierValue.get().equals(identifier.getValue()))
+								errors.add("Task.requester not current practitioner identity");
+						}
+						else
+							throw new RuntimeException("Authenticated practitioner user has no identifier");
+					}
+
+					if (identity instanceof OrganizationIdentity)
+					{
+						if (!NAMING_SYSTEM_ORGANIZATION_IDENTIFIER.equals(identifier.getSystem()))
+							errors.add("Task.requester.identifier.system not " + NAMING_SYSTEM_ORGANIZATION_IDENTIFIER);
+
+						if (!isCurrentIdentityPartOfReferencedOrganization(connection, identity, "Task.requester",
+								newResource.getRequester()))
+							errors.add("Task.requester current identity not part of referenced organization");
+					}
+				}
+				else
+					errors.add("Task.requester.identifier.system or Task.requester.identifier.value missing");
 			}
+			else
+				errors.add("Task.requester.identifier missing");
 		}
 		else
-		{
 			errors.add("Task.requester missing");
-		}
 
 		if (newResource.hasRestriction())
 		{
@@ -286,24 +327,16 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 							errors.add("Task.restriction.recipient not local organization");
 					}
 					else
-					{
-						errors.add("Task.restriction.recipient not a organization");
-					}
+						errors.add("Task.restriction.recipient not an organization");
 				}
 				else
-				{
 					errors.add("Task.restriction.recipient could not be resolved");
-				}
 			}
 			else
-			{
 				errors.add("Task.restriction.recipient missing or more than one");
-			}
 		}
 		else
-		{
 			errors.add("Task.restriction not defined");
-		}
 
 		if (newResource.hasInstantiatesCanonical())
 		{
@@ -314,9 +347,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			}
 		}
 		else
-		{
 			errors.add("Task.instantiatesCanonical not defined");
-		}
 
 		if (newResource.hasInput())
 		{
@@ -328,14 +359,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			}
 		}
 		else
-		{
 			errors.add("Task.input empty");
-		}
 
 		if (newResource.hasOutput())
-		{
 			errors.add("Task.output not empty");
-		}
 
 		if (errors.isEmpty())
 			return Optional.empty();
@@ -531,7 +558,6 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		if (recipientOpt.isEmpty())
 		{
 			logger.warn("Local organization does not exist");
-
 			return false;
 		}
 
@@ -551,7 +577,6 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				{
 					logger.warn("No ActivityDefinition with process-url '{}' and process-version '{}'", processUrl,
 							processVersion);
-
 					return false;
 				}
 				else
@@ -591,14 +616,12 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			{
 				logger.debug("Error while reading ActivityDefinitions", e);
 				logger.warn("Error while reading ActivityDefinitions: {} - {}", e.getClass().getName(), e.getMessage());
-
 				return false;
 			}
 		}
 		else
 		{
 			logger.warn("Task.instantiatesCanonical not matching {} pattern", INSTANTIATES_CANONICAL_PATTERN_STRING);
-
 			return false;
 		}
 	}
@@ -701,29 +724,84 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 		if (identity.hasDsfRole(readRole))
 		{
-			if (identity.isLocalIdentity() && isCurrentIdentityPartOfReferencedOrganization(connection, identity,
-					"Task.restriction.recipient", existingResource.getRestriction().getRecipientFirstRep()))
+			if (identity instanceof OrganizationIdentity)
 			{
-				logger.info(
-						"Read of Task/{}/_history/{} authorized for identity '{}', Task.restriction.recipient reference could be resolved and current identity part of referenced organization",
-						resourceId, resourceVersion, identity.getName());
+				if (identity.isLocalIdentity() && isCurrentIdentityPartOfReferencedOrganization(connection, identity,
+						"Task.restriction.recipient", existingResource.getRestriction().getRecipientFirstRep()))
+				{
+					logger.info(
+							"Read of Task/{}/_history/{} authorized for identity '{}', identity is local organization and organization referenced as recipient",
+							resourceId, resourceVersion, identity.getName());
 
-				return Optional
-						.of("Task.restriction.recipient resolved and local identity part of referenced organization");
+					return Optional.of("Identity is local organization and organization referenced as recipient");
+				}
+				else if (isCurrentIdentityPartOfReferencedOrganization(connection, identity, "Task.requester",
+						existingResource.getRequester()))
+				{
+					logger.info(
+							"Read of Task/{}/_history/{} authorized for identity '{}', identity is remote organization and organization referenced as requester",
+							resourceId, resourceVersion, identity.getName());
+
+					return Optional.of("Identity is remote organization and organization referenced as requester");
+				}
+				else
+				{
+					logger.warn(
+							"Read of Task/{}/_history/{} unauthorized for identity '{}', organization not local and not referenced as requester",
+							resourceId, resourceVersion, identity.getName());
+
+					return Optional.empty();
+				}
 			}
-			else if (isCurrentIdentityPartOfReferencedOrganization(connection, identity, "Task.requester",
-					existingResource.getRequester()))
+			else if (identity instanceof PractitionerIdentity p)
 			{
-				logger.info(
-						"Read of Task/{}/_history/{} authorized for identity '{}', Task.requester reference could be resolved and current identity part of referenced organization",
-						resourceId, resourceVersion, identity.getName());
+				if (p.hasPractionerRole("DSF_ADMIN")
+						&& isCurrentIdentityPartOfReferencedOrganization(connection, identity,
+								"Task.restriction.recipient", existingResource.getRestriction().getRecipientFirstRep()))
+				{
+					logger.info(
+							"Read of Task/{}/_history/{} authorized for identity '{}', identity is local practitioner, has role DSF_ADMIN and organization referenced as recipient",
+							resourceId, resourceVersion, identity.getName());
 
-				return Optional.of("Task.requester resolved and identity part of referenced organization");
+					return Optional.of(
+							"Identity is local practitioner, has role DSF_ADMIN and organization referenced as recipient");
+				}
+				else if (p.getPractitionerIdentifierValue()
+						.map(v -> existingResource.getRequester().hasIdentifier()
+								&& NAMING_SYSTEM_PRACTITIONER_IDENTIFIER
+										.equals(existingResource.getRequester().getIdentifier().getSystem())
+								&& v.equals(existingResource.getRequester().getIdentifier().getValue()))
+						.orElse(false))
+				{
+					logger.info(
+							"Read of Task/{}/_history/{} authorized for identity '{}', identity is local practitioner and practitioner referenced as requester",
+							resourceId, resourceVersion, identity.getName());
+
+					return Optional.of("Identity is local practitioner and practitioner referenced as requester");
+				}
+				else if (TaskStatus.DRAFT.equals(existingResource.getStatus())
+						&& isCurrentIdentityPartOfReferencedOrganization(connection, identity,
+								"Task.restriction.recipient", existingResource.getRestriction().getRecipientFirstRep()))
+				{
+					logger.info(
+							"Read of Task/{}/_history/{} authorized for identity '{}', identity is local practitioner and Task.status is DRAFT",
+							resourceId, resourceVersion, identity.getName());
+
+					return Optional.of("Identity is local practitioner and Task.status is DRAFT");
+				}
+				else
+				{
+					logger.warn(
+							"Read of Task/{}/_history/{} unauthorized for identity '{}', practitioner has no DSF_ADMIN role and not referenced as requester",
+							resourceId, resourceVersion, identity.getName());
+
+					return Optional.empty();
+				}
 			}
 			else
 			{
 				logger.warn(
-						"Read of Task/{}/_history/{} unauthorized for identity '{}', Task.requester or Task.restriction.recipient references could not be resolved or current identity not part of referenced organizations",
+						"Read of Task/{}/_history/{} unauthorized for identity '{}', not a organization or practitioner identity",
 						resourceId, resourceVersion, identity.getName());
 
 				return Optional.empty();
@@ -747,7 +825,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 		if (identity.hasDsfRole(updateRole))
 		{
-			if (identity.isLocalIdentity() && identity instanceof OrganizationIdentity)
+			if (identity.isLocalIdentity() && (identity instanceof OrganizationIdentity
+					|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN"))))
 			{
 				// DRAFT -> DRAFT
 				if (TaskStatus.DRAFT.equals(oldResource.getStatus())

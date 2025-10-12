@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import org.hl7.fhir.r4.model.ResourceType;
 
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 
@@ -37,20 +39,53 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 	{
 		if (identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE))
 		{
-			// TODO modify for requester = Practitioner or PractitionerRole
-			return "(" + resourceColumn + "->'requester'->>'reference' = ? OR " + resourceColumn
-					+ "->'requester'->>'reference' = ? OR " + resourceColumn
-					+ "->'restriction'->'recipient' @> ?::jsonb OR " + resourceColumn
-					+ "->'restriction'->'recipient' @> ?::jsonb)";
+			if (identity instanceof OrganizationIdentity)
+			{
+				if (identity.isLocalIdentity())
+					return resourceColumn + "->'restriction'->'recipient' @> ?::jsonb";
+				else
+					return resourceColumn + "->'requester'->>'reference' = ?";
+			}
+			else if (identity instanceof PractitionerIdentity p)
+			{
+				if (p.hasPractionerRole("DSF_ADMIN"))
+					return resourceColumn + "->'restriction'->'recipient' @> ?::jsonb";
+				else if (p.getPractitionerIdentifierValue().isPresent())
+				{
+					return "((" + resourceColumn + "->'requester'->'identifier'->>'system' = '"
+							+ PractitionerIdentity.PRACTITIONER_IDENTIFIER_SYSTEM + "' AND " + resourceColumn
+							+ "->'requester'->'identifier'->>'value' = ?) OR (" + resourceColumn
+							+ "->>'status' = 'draft' AND " + resourceColumn + "->'restriction'->'recipient' @> ?::jsonb"
+							+ "))";
+				}
+				else
+					return "(" + resourceColumn + "->>'status' = 'draft' AND " + resourceColumn
+							+ "->'restriction'->'recipient' @> ?::jsonb" + ")";
+			}
 		}
-		else
-			return "FALSE";
+
+		return "FALSE";
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		return identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE) ? 4 : 0;
+		if (identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE))
+		{
+			if (identity instanceof OrganizationIdentity)
+				return 1;
+			else if (identity instanceof PractitionerIdentity p)
+			{
+				if (p.hasPractionerRole("DSF_ADMIN"))
+					return 1;
+				else if (p.getPractitionerIdentifierValue().isPresent())
+					return 2;
+				else
+					return 1;
+			}
+		}
+
+		return 0;
 	}
 
 	@Override
@@ -59,17 +94,43 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 	{
 		if (identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE))
 		{
-			if (subqueryParameterIndex == 1)
-				statement.setString(parameterIndex, identity.getOrganization().getIdElement().getValue());
-			else if (subqueryParameterIndex == 2)
-				statement.setString(parameterIndex,
-						identity.getOrganization().getIdElement().toVersionless().getValue());
-			else if (subqueryParameterIndex == 3)
-				statement.setString(parameterIndex,
-						"[{\"reference\": \"" + identity.getOrganization().getIdElement().getValue() + "\"}]");
-			else if (subqueryParameterIndex == 4)
-				statement.setString(parameterIndex, "[{\"reference\": \""
-						+ identity.getOrganization().getIdElement().toVersionless().getValue() + "\"}]");
+			if (identity instanceof OrganizationIdentity)
+			{
+				if (identity.isLocalIdentity())
+				{
+					statement.setString(parameterIndex, "[{\"reference\": \""
+							+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue() + "\"}]");
+				}
+				else
+				{
+					statement.setString(parameterIndex,
+							identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue());
+				}
+			}
+			else if (identity instanceof PractitionerIdentity p)
+			{
+				if (p.hasPractionerRole("DSF_ADMIN"))
+				{
+					statement.setString(parameterIndex, "[{\"reference\": \""
+							+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue() + "\"}]");
+				}
+				else if (p.getPractitionerIdentifierValue().isPresent())
+				{
+					if (subqueryParameterIndex == 1)
+						statement.setString(parameterIndex, p.getPractitionerIdentifierValue().get());
+					else if (subqueryParameterIndex == 2)
+					{
+						statement.setString(parameterIndex, "[{\"reference\": \""
+								+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue()
+								+ "\"}]");
+					}
+				}
+				else
+				{
+					statement.setString(parameterIndex, "[{\"reference\": \""
+							+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue() + "\"}]");
+				}
+			}
 		}
 	}
 }

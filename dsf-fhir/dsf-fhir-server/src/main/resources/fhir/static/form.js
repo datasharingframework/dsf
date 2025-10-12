@@ -38,10 +38,12 @@ function readTaskInputsFromForm() {
 	delete task.meta["lastUpdated"]
 	delete task["identifier"]
 
-	// TODO set requester as practitioner-identifier if OIDC or Personal Client-Certificate
-	//task.requester.type = "Practitioner"
-	//task.requester.identifier.value = ""
-	//task.requester.identifier.system = "http://dsf.dev/sid/practitioner-identifier"
+	const practitionerIdentifierValue = document.querySelector('#practitionerIdentifierValue')?.value
+	if (practitionerIdentifierValue !== undefined) {
+		task.requester.type = "Practitioner"
+		task.requester.identifier.system = "http://dsf.dev/sid/practitioner-identifier"
+		task.requester.identifier.value = practitionerIdentifierValue
+	}
 
 	task.status = "requested"
 	task.authoredOn = new Date().toISOString()

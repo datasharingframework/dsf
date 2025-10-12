@@ -55,6 +55,18 @@
 				<code value="Reference" />
 				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization|2.0.0" />
 			</type>
+			<constraint>
+				<key value="requester-identifier-type-organization" />
+				<severity value="error"/>
+				<human value="Task.requester.identifier.type must be 'Organization' if Task.requester.identifier.system is http://dsf.dev/sid/organization-identifier" />
+				<expression value="identifier.system = 'http://dsf.dev/sid/organization-identifier' implies type.empty() or type = 'Organization'"/>
+			</constraint>
+			<constraint>
+				<key value="requester-identifier-type-practitioner" />
+				<severity value="error"/>
+				<human value="Task.requester.identifier.type must be 'Practitioner' if Task.requester.identifier.system is http://dsf.dev/sid/practitioner-identifier" />
+				<expression value="identifier.system = 'http://dsf.dev/sid/practitioner-identifier' implies type.empty() or type = 'Practitioner'"/>
+			</constraint>
 		</element>
 		<element id="Task.requester.reference">
 			<path value="Task.requester.reference" />
@@ -67,7 +79,12 @@
 		<element id="Task.requester.identifier.system">
 			<path value="Task.requester.identifier.system" />
 			<min value="1" />
-			<fixedUri value="http://dsf.dev/sid/organization-identifier" />
+			<constraint>
+				<key value="requester-identifier-system" />
+				<severity value="error"/>
+				<human value="Task.requester.identifier.system must be 'http://dsf.dev/sid/organization-identifier' or 'http://dsf.dev/sid/practitioner-identifier'"/>
+				<expression value="$this = 'http://dsf.dev/sid/organization-identifier' or $this = 'http://dsf.dev/sid/practitioner-identifier'"/>
+			</constraint>
 		</element>
 		<element id="Task.requester.identifier.value">
 			<path value="Task.requester.identifier.value" />
@@ -104,9 +121,6 @@
 			<min value="1" />
 		</element>
 		<element id="Task.input">
-			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-				<valueString value="Parameter" />
-			</extension>
 			<path value="Task.input" />
 			<slicing>
 				<discriminator>
@@ -122,9 +136,6 @@
 			<min value="1" />
 		</element>
 		<element id="Task.input:message-name">
-			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-				<valueString value="Parameter" />
-			</extension>
 			<path value="Task.input" />
 			<sliceName value="message-name" />
 			<min value="1" />
@@ -133,9 +144,6 @@
 		<element id="Task.input:message-name.type">
 			<path value="Task.input.type" />
 			<binding>
-				<extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-					<valueString value="TaskInputParameterType" />
-				</extension>
 				<strength value="required" />
 				<valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message|1.0.0" />
 			</binding>
@@ -162,9 +170,6 @@
 			</type>
 		</element>
 		<element id="Task.input:business-key">
-			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-				<valueString value="Parameter" />
-			</extension>
 			<path value="Task.input" />
 			<sliceName value="business-key" />
 			<max value="1" />
@@ -172,9 +177,6 @@
 		<element id="Task.input:business-key.type">
 			<path value="Task.input.type" />
 			<binding>
-				<extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-					<valueString value="TaskInputParameterType" />
-				</extension>
 				<strength value="required" />
 				<valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message|1.0.0" />
 			</binding>
@@ -201,9 +203,6 @@
 			</type>
 		</element>
 		<element id="Task.input:correlation-key">
-			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-				<valueString value="Parameter" />
-			</extension>
 			<path value="Task.input" />
 			<sliceName value="correlation-key" />
 			<max value="1" />
@@ -211,9 +210,6 @@
 		<element id="Task.input:correlation-key.type">
 			<path value="Task.input.type" />
 			<binding>
-				<extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-					<valueString value="TaskInputParameterType" />
-				</extension>
 				<strength value="required" />
 				<valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message|1.0.0" />
 			</binding>
@@ -260,9 +256,6 @@
 		<element id="Task.output:error.type">
 			<path value="Task.output.type" />
 			<binding>
-				<extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-					<valueString value="TaskOutputParameterType" />
-				</extension>
 				<strength value="required" />
 				<valueSet value="http://dsf.dev/fhir/ValueSet/bpmn-message|1.0.0" />
 			</binding>
