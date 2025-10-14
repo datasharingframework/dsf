@@ -67,7 +67,7 @@ public class WebsocketConfig
 	{
 		return new QuestionnaireResponseHandler(camundaConfig.processEngine().getRepositoryService(),
 				pluginConfig.processPluginManager(), fhirConfig.fhirContext(),
-				camundaConfig.processEngine().getTaskService());
+				camundaConfig.processEngine().getTaskService(), dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
 	@Bean
