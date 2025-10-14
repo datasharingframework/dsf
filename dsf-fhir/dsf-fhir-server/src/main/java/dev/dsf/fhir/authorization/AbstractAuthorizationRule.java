@@ -21,6 +21,8 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.authentication.OrganizationProvider;
@@ -249,6 +251,51 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				.map(ConceptDefinitionComponent::getCode).anyMatch(c -> c.equals(cCode));
 	}
 
+	protected boolean isCurrentIdentityPartOfReferencedOrganization(Connection connection, Identity identity,
+			String referenceLocation, Reference reference)
+	{
+		if (reference == null)
+		{
+			logger.warn("Null reference while checking if user part of referenced organization");
+
+			return false;
+		}
+		else
+		{
+			ResourceReference resReference = new ResourceReference(referenceLocation, reference, Organization.class);
+
+			ReferenceType type = resReference.getType(serverBase);
+			if (!EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(type))
+			{
+				logger.warn("Reference of type {} not supported while checking if user part of referenced organization",
+						type);
+
+				return false;
+			}
+
+			Optional<Resource> resource = referenceResolver.resolveReference(resReference, connection);
+			if (resource.isPresent() && resource.get() instanceof Organization)
+			{
+				// ignoring updates (version changes) to the organization id
+				boolean sameOrganization = identity.getOrganization().getIdElement().getIdPart()
+						.equals(resource.get().getIdElement().getIdPart());
+				if (!sameOrganization)
+					logger.warn(
+							"Current user not part of organization {} while checking if user part of referenced organization",
+							resource.get().getIdElement().getValue());
+
+				return sameOrganization;
+			}
+			else
+			{
+				logger.warn(
+						"Reference to organization could not be resolved while checking if user part of referenced organization");
+
+				return false;
+			}
+		}
+	}
+
 	@SafeVarargs
 	protected final Optional<ResourceReference> createIfLiteralInternalOrLogicalReference(String referenceLocation,
 			Reference reference, Class<? extends Resource>... referenceTypes)
@@ -373,5 +420,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 
 			return Optional.empty();
 		}
+	}
+
+	protected final boolean isLocalOrganizationOrDsfAdmin(Identity identity)
+	{
+		return identity.isLocalIdentity() && (identity instanceof OrganizationIdentity
+				|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN")));
 	}
 }
