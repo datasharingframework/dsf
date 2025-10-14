@@ -21,3 +21,4 @@ StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization&ver
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization-affiliation&version=1.0.0
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization-parent&version=1.0.0
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/task-base&version=1.0.0
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/questionnaire-response&version=1.0.0
