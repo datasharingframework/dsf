@@ -165,6 +165,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 				securityContext.getUserPrincipal() instanceof PractitionerIdentity p
 						? p.getPractitionerIdentifierValue().orElse(null)
 						: null);
+
 		context.setVariable("openid", "OPENID".equals(securityContext.getAuthenticationScheme()));
 		context.setVariable("xml", toXml(mediaType, resource));
 		context.setVariable("json", toJson(mediaType, resource));

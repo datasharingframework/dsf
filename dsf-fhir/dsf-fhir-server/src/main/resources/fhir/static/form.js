@@ -44,6 +44,7 @@ function readTaskInputsFromForm() {
 		task.requester.identifier.system = "http://dsf.dev/sid/practitioner-identifier"
 		task.requester.identifier.value = practitionerIdentifierValue
 	}
+	// task.requester = local organization is default for draft Task
 
 	task.status = "requested"
 	task.authoredOn = new Date().toISOString()
@@ -224,8 +225,17 @@ function readQuestionnaireResponseAnswersFromForm() {
 			}
 		}
 	})
+	
+	const practitionerIdentifierValue = document.querySelector('#practitionerIdentifierValue')?.value
+	if (practitionerIdentifierValue !== undefined) {
+		questionnaireResponse.author.type = "Practitioner"
+		questionnaireResponse.author.identifier.system = "http://dsf.dev/sid/practitioner-identifier"
+		questionnaireResponse.author.identifier.value = practitionerIdentifierValue
+	}
+	// questionnaireResponse.author = local organization is default for in-progess QuestionnaireResponse
 
 	questionnaireResponse.status = "completed"
+	questionnaireResponse.authored = new Date().toISOString()
 	questionnaireResponse.item = newItems
 
 	return valid ? questionnaireResponse : null

@@ -508,7 +508,10 @@ pre.lang-html {
 	border-left-color: var(--color-row-border-orange);
 }
 
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"],
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"] {
+	border-left-color: var(--color-row-border-grey);
+}
+
 .bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="amended"] {
 	border-left-color: var(--color-row-border-green);
 }
@@ -740,7 +743,11 @@ pre.lang-html {
 	color: var(--color-info-orange);
 }
 
-#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data,
+#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
 #resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data {
 	background-color: var(--color-info-background-green);
 	color: var(--color-info-green);
@@ -899,7 +906,10 @@ pre.lang-html {
 	fill: var(--color-info-orange);
 }
 
-#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data path,
+#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
 #resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data path {
 	fill: var(--color-info-green);
 }
