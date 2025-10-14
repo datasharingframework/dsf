@@ -224,6 +224,7 @@ function readQuestionnaireResponseAnswersFromForm() {
 	})
 
 	questionnaireResponse.status = "completed"
+	questionnaireResponse.authored = new Date().toISOString()
 	questionnaireResponse.item = newItems
 
 	return valid ? questionnaireResponse : null
