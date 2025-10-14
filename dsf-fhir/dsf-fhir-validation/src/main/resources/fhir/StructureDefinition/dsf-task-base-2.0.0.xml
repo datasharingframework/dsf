@@ -57,15 +57,15 @@
 			</type>
 			<constraint>
 				<key value="requester-identifier-type-organization" />
-				<severity value="error"/>
+				<severity value="error" />
 				<human value="Task.requester.identifier.type must be 'Organization' if Task.requester.identifier.system is http://dsf.dev/sid/organization-identifier" />
-				<expression value="identifier.system = 'http://dsf.dev/sid/organization-identifier' implies type.empty() or type = 'Organization'"/>
+				<expression value="identifier.system = 'http://dsf.dev/sid/organization-identifier' implies type.empty() or type = 'Organization'" />
 			</constraint>
 			<constraint>
 				<key value="requester-identifier-type-practitioner" />
-				<severity value="error"/>
+				<severity value="error" />
 				<human value="Task.requester.identifier.type must be 'Practitioner' if Task.requester.identifier.system is http://dsf.dev/sid/practitioner-identifier" />
-				<expression value="identifier.system = 'http://dsf.dev/sid/practitioner-identifier' implies type.empty() or type = 'Practitioner'"/>
+				<expression value="identifier.system = 'http://dsf.dev/sid/practitioner-identifier' implies type.empty() or type = 'Practitioner'" />
 			</constraint>
 		</element>
 		<element id="Task.requester.reference">
@@ -81,9 +81,9 @@
 			<min value="1" />
 			<constraint>
 				<key value="requester-identifier-system" />
-				<severity value="error"/>
-				<human value="Task.requester.identifier.system must be 'http://dsf.dev/sid/organization-identifier' or 'http://dsf.dev/sid/practitioner-identifier'"/>
-				<expression value="$this = 'http://dsf.dev/sid/organization-identifier' or $this = 'http://dsf.dev/sid/practitioner-identifier'"/>
+				<severity value="error" />
+				<human value="Task.requester.identifier.system must be 'http://dsf.dev/sid/organization-identifier' or 'http://dsf.dev/sid/practitioner-identifier'" />
+				<expression value="$this = 'http://dsf.dev/sid/organization-identifier' or $this = 'http://dsf.dev/sid/practitioner-identifier'" />
 			</constraint>
 		</element>
 		<element id="Task.requester.identifier.value">
@@ -102,6 +102,12 @@
 				<code value="Reference" />
 				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization|2.0.0" />
 			</type>
+			<constraint>
+				<key value="restriction-recipient-identifier-type-organization" />
+				<severity value="error" />
+				<human value="Task.restriction.recipient.identifier.type must be 'Organization' if Task.restriction.recipient.identifier.system is http://dsf.dev/sid/organization-identifier" />
+				<expression value="identifier.system = 'http://dsf.dev/sid/organization-identifier' implies type.empty() or type = 'Organization'" />
+			</constraint>
 		</element>
 		<element id="Task.restriction.recipient.reference">
 			<path value="Task.restriction.recipient.reference" />
