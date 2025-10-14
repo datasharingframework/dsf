@@ -130,7 +130,7 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 			if (businessKey == null)
 			{
 				businessKey = UUID.randomUUID().toString();
-				logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getId());
+				logger.debug("Adding business-key {} to Task with id {}", businessKey, task.getIdElement().getIdPart());
 				task.addInput().setType(new CodeableConcept().addCoding(new Coding()
 						.setSystem(Constants.BPMN_MESSAGE_URL).setCode(Constants.BPMN_MESSAGE_BUSINESS_KEY)))
 						.setValue(new StringType(businessKey));
@@ -170,9 +170,10 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 			}
 			catch (Exception e)
 			{
-				logger.debug("Unable to handle Task with id {}", task.getId(), e);
-				logger.warn("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
-						e.getMessage());
+				logger.debug("Unable to update Task with id {} (status in-progress)", task.getIdElement().getIdPart(),
+						e);
+				logger.warn("Unable to update Task with id {} (status in-progress): {} - {}",
+						task.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 
 				updateTaskFailed(task, "Unable to update Task to status 'in-progress'");
 			}
@@ -186,25 +187,25 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 		}
 		catch (MismatchingMessageCorrelationException e)
 		{
-			logger.debug("Unable to handle Task with id {}", task.getId(), e);
-			logger.warn("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
-					e.getMessage());
+			logger.debug("Unable to handle Task with id {}", task.getIdElement().getIdPart(), e);
+			logger.warn("Unable to handle Task with id {}: {} - {}", task.getIdElement().getIdPart(),
+					e.getClass().getName(), e.getMessage());
 
 			updateTaskFailed(task, "Unable to correlate Task");
 		}
 		catch (ProcessNotFoundException e)
 		{
-			logger.debug("Unable to handle Task with id {}", task.getId(), e);
-			logger.warn("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
-					e.getMessage());
+			logger.debug("Unable to handle Task with id {}", task.getIdElement().getIdPart(), e);
+			logger.warn("Unable to handle Task with id {}: {} - {}", task.getIdElement().getIdPart(),
+					e.getClass().getName(), e.getMessage());
 
 			updateTaskFailed(task, e.getShortMessage());
 		}
 		catch (Exception e)
 		{
-			logger.debug("Unable to handle Task with id {}", task.getId(), e);
-			logger.error("Unable to handle Task with id {}: {} - {}", task.getId(), e.getClass().getName(),
-					e.getMessage());
+			logger.debug("Unable to handle Task with id {}", task.getIdElement().getIdPart(), e);
+			logger.error("Unable to handle Task with id {}: {} - {}", task.getIdElement().getIdPart(),
+					e.getClass().getName(), e.getMessage());
 
 			updateTaskFailed(task, e);
 		}
@@ -229,8 +230,8 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 		}
 		catch (Exception e)
 		{
-			logger.debug("Unable to update Task with id {} (status failed)", task.getId(), e);
-			logger.error("Unable to update Task with id {} (status failed): {} - {}", task.getId(),
+			logger.debug("Unable to update Task with id {} (status failed)", task.getIdElement().getIdPart(), e);
+			logger.error("Unable to update Task with id {} (status failed): {} - {}", task.getIdElement().getIdPart(),
 					e.getClass().getName(), e.getMessage());
 		}
 	}
