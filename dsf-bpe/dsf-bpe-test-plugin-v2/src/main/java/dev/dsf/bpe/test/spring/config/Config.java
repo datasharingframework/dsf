@@ -41,6 +41,7 @@ import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
 import dev.dsf.bpe.test.service.QuestionnaireTestAnswer;
 import dev.dsf.bpe.test.service.QuestionnaireTestAnswerCheck;
+import dev.dsf.bpe.test.service.QuestionnaireTestSetIdentifies;
 import dev.dsf.bpe.test.service.TargetProviderTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
 import dev.dsf.bpe.v2.ProcessPluginDeploymentListener;
@@ -80,7 +81,8 @@ public class Config implements InitializingBean
 				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
 				MimeTypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class,
 				DsfClientTest.class, TargetProviderTest.class, DataLoggerTest.class, AutowireTest.class,
-				QuestionnaireTestAnswer.class, QuestionnaireTestAnswerCheck.class);
+				QuestionnaireTestAnswer.class, QuestionnaireTestAnswerCheck.class,
+				QuestionnaireTestSetIdentifies.class);
 	}
 
 	@Bean

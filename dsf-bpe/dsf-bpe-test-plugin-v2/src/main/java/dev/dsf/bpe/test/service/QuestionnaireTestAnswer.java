@@ -90,12 +90,12 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 		expectSame(1, resultBundle.getTotal());
 		expectSame(1, resultBundle.getEntry().size());
 
-		BundleEntryComponent e = resultBundle.getEntryFirstRep();
-		expectNotNull(e);
-		expectTrue(e.hasResource());
-		expectTrue(e.getResource() instanceof QuestionnaireResponse);
+		BundleEntryComponent entry = resultBundle.getEntryFirstRep();
+		expectNotNull(entry);
+		expectTrue(entry.hasResource());
+		expectTrue(entry.getResource() instanceof QuestionnaireResponse);
 
-		QuestionnaireResponse qr = (QuestionnaireResponse) e.getResource();
+		QuestionnaireResponse qr = (QuestionnaireResponse) entry.getResource();
 
 		expectTrue(qr.hasAuthor());
 		expectTrue(qr.getAuthor().hasIdentifier());
@@ -138,6 +138,26 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 				Identifier id = (Identifier) idExt.getValue();
 				expectSame(NamingSystems.PractitionerIdentifier.SID, id.getSystem());
 				expectSame("dic-user@test.org", id.getValue());
+			}
+			else if ("identifiers".equals(type))
+			{
+				expectTrue(authExt.hasExtension("practitioner"));
+				List<Extension> idExts = authExt.getExtensionsByUrl("practitioner");
+				expectNotNull(idExts);
+				expectSame(3, idExts.size());
+
+				idExts.stream().filter(Extension::hasValue).filter(e -> e.getValue() instanceof Identifier)
+						.map(e -> (Identifier) e.getValue()).map(Identifier::getSystem)
+						.allMatch(NamingSystems.PractitionerIdentifier.SID::equals);
+
+				List<String> values = idExts.stream().filter(Extension::hasValue)
+						.filter(e -> e.getValue() instanceof Identifier).map(e -> (Identifier) e.getValue())
+						.map(Identifier::getValue).toList();
+				expectSame(3, values.size());
+
+				expectTrue(values.contains("dic-user@test.org"));
+				expectTrue(values.contains("foo@invalid"));
+				expectTrue(values.contains("bar@invalid"));
 			}
 		}
 		else

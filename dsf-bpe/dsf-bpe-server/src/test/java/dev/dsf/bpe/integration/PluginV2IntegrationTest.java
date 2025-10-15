@@ -287,4 +287,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("QuestionnaireTestIdentifier"));
 	}
+
+	@Test
+	public void startQuestionnaireTestIdentifierMulti() throws Exception
+	{
+		executePluginTest(createTestTask("QuestionnaireTestIdentifierMulti"));
+	}
 }
