@@ -3,6 +3,7 @@ package dev.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -31,7 +33,6 @@ import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.fhir.authentication.EndpointProvider;
-import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -44,6 +45,7 @@ import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
+import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 
 public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskDao>
 {
@@ -87,10 +89,64 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		Objects.requireNonNull(endpointProvider, "endpointProvider");
 	}
 
+	private boolean isCurrentIdentityPartOfReferencedOrganization(Connection connection, Identity identity,
+			String referenceLocation, Reference reference)
+	{
+		if (reference == null)
+		{
+			logger.warn("Null reference while checking if user part of referenced organization");
+
+			return false;
+		}
+		else
+		{
+			ResourceReference resReference = new ResourceReference(referenceLocation, reference, Organization.class);
+
+			ReferenceType type = resReference.getType(serverBase);
+			if (!EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(type))
+			{
+				logger.warn("Reference of type {} not supported while checking if user part of referenced organization",
+						type);
+
+				return false;
+			}
+
+			Optional<Resource> resource = referenceResolver.resolveReference(resReference, connection);
+			if (resource.isPresent() && resource.get() instanceof Organization)
+			{
+				// ignoring updates (version changes) to the organization id
+				boolean sameOrganization = identity.getOrganization().getIdElement().getIdPart()
+						.equals(resource.get().getIdElement().getIdPart());
+				if (!sameOrganization)
+					logger.warn(
+							"Current user not part of organization {} while checking if user part of referenced organization",
+							resource.get().getIdElement().getValue());
+
+				return sameOrganization;
+			}
+			else
+			{
+				logger.warn(
+						"Reference to organization could not be resolved while checking if user part of referenced organization");
+
+				return false;
+			}
+		}
+	}
+
+	private boolean isLocalOrganization(Organization organization)
+	{
+		if (organization == null || !organization.hasIdElement())
+			return false;
+
+		return organizationProvider.getLocalOrganization()
+				.map(localOrg -> localOrg.getIdElement().equals(organization.getIdElement())).orElse(false);
+	}
+
 	@Override
 	public Optional<String> reasonCreateAllowed(Connection connection, Identity identity, Task newResource)
 	{
-		if (identity.hasDsfRole(FhirServerRole.CREATE))
+		if (identity.hasDsfRole(createRole))
 		{
 			if (TaskStatus.DRAFT.equals(newResource.getStatus()))
 			{
@@ -173,8 +229,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		}
 		else
 		{
-			logger.warn("Create of Task unauthorized for identity '{}', no role {}", identity.getName(),
-					FhirServerRole.CREATE);
+			logger.warn("Create of Task unauthorized for identity '{}', no role {}", identity.getName(), createRole);
 
 			return Optional.empty();
 		}
@@ -222,7 +277,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			{
 				ResourceReference reference = new ResourceReference("Task.restriction.recipient",
 						newResource.getRestriction().getRecipientFirstRep(), Organization.class);
-				Optional<Resource> recipient = referenceResolver.resolveReference(identity, reference, connection);
+				Optional<Resource> recipient = referenceResolver.resolveReference(reference, connection);
 				if (recipient.isPresent())
 				{
 					if (recipient.get() instanceof Organization o)
@@ -321,7 +376,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		{
 			ResourceReference reference = new ResourceReference("Task.requester", newResource.getRequester(),
 					Organization.class);
-			Optional<Resource> requester = referenceResolver.resolveReference(identity, reference, connection);
+			Optional<Resource> requester = referenceResolver.resolveReference(reference, connection);
 			if (requester.isPresent())
 			{
 				if (requester.get() instanceof Organization o)
@@ -350,7 +405,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			{
 				ResourceReference reference = new ResourceReference("Task.restriction.recipient",
 						newResource.getRestriction().getRecipientFirstRep(), Organization.class);
-				Optional<Resource> recipient = referenceResolver.resolveReference(identity, reference, connection);
+				Optional<Resource> recipient = referenceResolver.resolveReference(reference, connection);
 				if (recipient.isPresent())
 				{
 					if (recipient.get() instanceof Organization o)
@@ -641,11 +696,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonReadAllowed(Connection connection, Identity identity, Task existingResource)
 	{
-		final String resourceId = parameterConverter
-				.toUuid(getResourceTypeName(), existingResource.getIdElement().getIdPart()).toString();
+		final String resourceId = existingResource.getIdElement().getIdPart();
 		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasDsfRole(FhirServerRole.READ))
+		if (identity.hasDsfRole(readRole))
 		{
 			if (identity.isLocalIdentity() && isCurrentIdentityPartOfReferencedOrganization(connection, identity,
 					"Task.restriction.recipient", existingResource.getRestriction().getRecipientFirstRep()))
@@ -678,7 +732,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		else
 		{
 			logger.warn("Read of Task/{}/_history/{} unauthorized for identity '{}', no role {}", resourceId,
-					resourceVersion, identity.getName(), FhirServerRole.READ);
+					resourceVersion, identity.getName(), readRole);
 
 			return Optional.empty();
 		}
@@ -688,11 +742,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	public Optional<String> reasonUpdateAllowed(Connection connection, Identity identity, Task oldResource,
 			Task newResource)
 	{
-		final String oldResourceId = parameterConverter
-				.toUuid(getResourceTypeName(), oldResource.getIdElement().getIdPart()).toString();
+		final String oldResourceId = oldResource.getIdElement().getIdPart();
 		final long oldResourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasDsfRole(FhirServerRole.UPDATE))
+		if (identity.hasDsfRole(updateRole))
 		{
 			if (identity.isLocalIdentity() && identity instanceof OrganizationIdentity)
 			{
@@ -920,7 +973,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		else
 		{
 			logger.warn("Update of Task/{}/_history/{} unauthorized for identity '{}', no role {}", oldResourceId,
-					oldResourceVersion, identity.getName(), FhirServerRole.UPDATE);
+					oldResourceVersion, identity.getName(), updateRole);
 
 			return Optional.empty();
 		}
@@ -1004,11 +1057,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonDeleteAllowed(Connection connection, Identity identity, Task oldResource)
 	{
-		final String oldResourceId = parameterConverter
-				.toUuid(getResourceTypeName(), oldResource.getIdElement().getIdPart()).toString();
+		final String oldResourceId = oldResource.getIdElement().getIdPart();
 		final long oldResourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasDsfRole(FhirServerRole.DELETE))
+		if (identity.hasDsfRole(deleteRole))
 		{
 			if (identity.isLocalIdentity() && identity instanceof OrganizationIdentity)
 			{
@@ -1039,7 +1091,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		else
 		{
 			logger.warn("Delete of Task/{}/_history/{} unauthorized for identity '{}', no role {}", oldResourceId,
-					oldResourceVersion, identity.getName(), FhirServerRole.DELETE);
+					oldResourceVersion, identity.getName(), deleteRole);
 
 			return Optional.empty();
 		}

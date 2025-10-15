@@ -41,10 +41,10 @@ public class AuthenticationConfig
 	}
 
 	@Bean
-	public RoleConfig roleConfig()
+	public RoleConfig<BpeServerRole> roleConfig()
 	{
-		RoleConfig config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
-				role -> BpeServerRole.isValid(role) ? BpeServerRole.valueOf(role) : null, _ -> null);
+		RoleConfig<BpeServerRole> config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
+				BpeServerRole::from, _ -> null);
 
 		logger.info("Role config: {}", config.toString());
 		return config;

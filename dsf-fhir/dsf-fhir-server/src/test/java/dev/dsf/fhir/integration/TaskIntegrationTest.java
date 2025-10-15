@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.TaskDao;
-import dev.dsf.fhir.dao.TestOrganizationIdentity;
 import dev.dsf.fhir.dao.command.ReferencesHelperImpl;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceCleaner;
@@ -692,6 +691,31 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task task = readTestTask("Test_Organization", "Test_Organization");
 		Task createdTask = getWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskAllowedMinimalUser() throws Exception
+	{
+		ActivityDefinition ad5 = readActivityDefinition("dsf-test-activity-definition5-1.0.xml");
+
+		expectForbidden(() -> getMinimalWebserviceClient().create(ad5));
+
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad5);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+
+		expectForbidden(() -> getMinimalWebserviceClient().create(testTaskProfile));
+
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		Task createdTask = getMinimalWebserviceClient().create(task);
 		assertNotNull(createdTask);
 		assertNotNull(createdTask.getIdElement().getIdPart());
 	}
@@ -1459,15 +1483,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Task task = readTestTaskBinary("External_Test_Organization", "Test_Organization");
 		task.setStatus(createStatus);
 
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
-				.getBean(OrganizationProvider.class);
 		ReferenceExtractor referenceExtractor = getSpringWebApplicationContext().getBean(ReferenceExtractor.class);
 		ReferenceResolver referenceResolver = getSpringWebApplicationContext().getBean(ReferenceResolver.class);
 		ResponseGenerator responseGenerator = getSpringWebApplicationContext().getBean(ResponseGenerator.class);
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 
-		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0,
-				TestOrganizationIdentity.local(organizationProvider.getLocalOrganization().get()), task, getBaseUrl(),
+		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0, task, getBaseUrl(),
 				referenceExtractor, referenceResolver, responseGenerator);
 		try (Connection connection = dataSource.getConnection())
 		{

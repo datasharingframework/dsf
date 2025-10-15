@@ -183,6 +183,7 @@ public class ResourceValidatorImpl implements ResourceValidator
 
 		// TODO: remove after HAPI validator is fixed: https://github.com/hapifhir/org.hl7.fhir.core/issues/193
 		adaptDefaultSliceValidationErrorToWarning(result);
+		adaptQuestionnaireTextNotSameValidationErrorToWarning(result);
 
 		return new ValidationResult(context,
 				result.getMessages().stream().filter(m -> !(ResultSeverityEnum.WARNING.equals(m.getSeverity())
@@ -194,6 +195,14 @@ public class ResourceValidatorImpl implements ResourceValidator
 		result.getMessages().stream()
 				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 						&& AT_DEFAULT_SLICE_PATTERN.matcher(m.getMessage()).matches())
+				.forEach(m -> m.setSeverity(ResultSeverityEnum.WARNING));
+	}
+
+	private void adaptQuestionnaireTextNotSameValidationErrorToWarning(ValidationResult result)
+	{
+		result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) && m.getMessage()
+						.startsWith("If text exists, it must match the questionnaire definition for linkId"))
 				.forEach(m -> m.setSeverity(ResultSeverityEnum.WARNING));
 	}
 }
