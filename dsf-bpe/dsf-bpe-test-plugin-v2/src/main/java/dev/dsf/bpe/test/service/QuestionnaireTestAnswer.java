@@ -1,5 +1,6 @@
 package dev.dsf.bpe.test.service;
 
+import static dev.dsf.bpe.test.PluginTestExecutor.expectFalse;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectTrue;
@@ -8,6 +9,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -23,36 +25,66 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UrlType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.constants.CodeSystems;
+import dev.dsf.bpe.v2.constants.NamingSystems;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
 import dev.dsf.bpe.v2.variables.Variables;
 
 public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 {
+	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireTestAnswer.class);
+
+	private String type;
+
+	/**
+	 * @param type
+	 * @deprecated only for BPMN field injection
+	 */
+	@Deprecated
+	public void setType(String type)
+	{
+		this.type = type;
+	}
+
 	@Override
 	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		// Sleep to wait for QuestionnaireResponse to have been created with status in-progress
-		Thread.sleep(Duration.ofMillis(500));
-
-		executeTests(api, variables);
+		executeTests(api, variables, TO_ERROR_BOUNDARY_EVENT);
 	}
 
 	@PluginTest
 	public void updateQuestionnaireResponse(ProcessPluginApi api) throws Exception
 	{
-		Bundle resultBundle = api.getDsfClientProvider().getLocalDsfClient().search(QuestionnaireResponse.class,
-				Map.of("status", List.of(QuestionnaireResponseStatus.INPROGRESS.toCode())));
+		Bundle resultBundle = null;
+		for (int i = 0; i < 5; i++)
+		{
+			// Sleep to wait for QuestionnaireResponse to have been created with status in-progress
+			logger.info("sleeping ...");
+			Thread.sleep(Duration.ofMillis(250));
+
+			logger.info("searching ...");
+			resultBundle = api.getDsfClientProvider().getLocalDsfClient().search(QuestionnaireResponse.class,
+					Map.of("status", List.of(QuestionnaireResponseStatus.INPROGRESS.toCode())));
+
+			if (resultBundle != null && resultBundle.getTotal() == 1)
+				break;
+		}
 
 		expectNotNull(resultBundle);
 		expectSame(1, resultBundle.getTotal());
@@ -70,22 +102,47 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 		expectSame("http://dsf.dev/sid/organization-identifier", qr.getAuthor().getIdentifier().getSystem());
 		expectSame("Test_Organization", qr.getAuthor().getIdentifier().getValue());
 
-		expectTrue(qr.hasExtension("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization"));
-		Extension authExt = qr
-				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		if (type != null)
+		{
+			expectTrue(
+					qr.hasExtension("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization"));
+			Extension authExt = qr
+					.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 
-		expectTrue(authExt.hasExtension("practitioner-role"));
-		List<Extension> roleExts = authExt.getExtensionsByUrl("practitioner-role");
-		expectNotNull(roleExts);
-		expectSame(1, roleExts.size());
+			if ("role".equals(type))
+			{
+				expectTrue(authExt.hasExtension("practitioner-role"));
+				List<Extension> roleExts = authExt.getExtensionsByUrl("practitioner-role");
+				expectNotNull(roleExts);
+				expectSame(1, roleExts.size());
 
-		Extension roleExt = roleExts.get(0);
-		expectTrue(roleExt.hasValue());
-		expectSame(Coding.class, roleExt.getValue().getClass());
+				Extension roleExt = roleExts.get(0);
+				expectTrue(roleExt.hasValue());
+				expectSame(Coding.class, roleExt.getValue().getClass());
 
-		Coding role = (Coding) roleExt.getValue();
-		expectSame(CodeSystems.PractitionerRole.SYSTEM, role.getSystem());
-		expectSame(CodeSystems.PractitionerRole.Codes.DIC_USER, role.getCode());
+				Coding role = (Coding) roleExt.getValue();
+				expectSame(CodeSystems.PractitionerRole.SYSTEM, role.getSystem());
+				expectSame(CodeSystems.PractitionerRole.Codes.DIC_USER, role.getCode());
+			}
+			else if ("identifier".equals(type))
+			{
+				expectTrue(authExt.hasExtension("practitioner"));
+				List<Extension> idExts = authExt.getExtensionsByUrl("practitioner");
+				expectNotNull(idExts);
+				expectSame(1, idExts.size());
+
+				Extension idExt = idExts.get(0);
+				expectTrue(idExt.hasValue());
+				expectSame(Identifier.class, idExt.getValue().getClass());
+
+				Identifier id = (Identifier) idExt.getValue();
+				expectSame(NamingSystems.PractitionerIdentifier.SID, id.getSystem());
+				expectSame("dic-user@test.org", id.getValue());
+			}
+		}
+		else
+			expectFalse(
+					qr.hasExtension("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization"));
 
 		qr.setAuthored(new Date());
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -117,11 +174,45 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 				case "boolean-example" -> set(item, new BooleanType(true));
 			}
 		});
-		api.getDsfClientProvider().getLocalDsfClient().update(qr);
+
+		if (type != null)
+		{
+			expectFalse(update(api, qr, "uac-user", "uac-user@test.org"));
+			expectTrue(update(api, qr, "dic-user", "dic-user@test.org"));
+		}
+		else
+			api.getDsfClientProvider().getLocalDsfClient().update(qr);
 	}
 
 	private void set(QuestionnaireResponseItemComponent item, Type value)
 	{
 		item.getAnswerFirstRep().setValue(value);
+	}
+
+	private boolean update(ProcessPluginApi api, QuestionnaireResponse qr, String clientId, String identifierValue)
+	{
+		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name())
+				.setIdentifier(NamingSystems.PractitionerIdentifier.withValue(identifierValue));
+
+		Optional<IGenericClient> oClient = api.getFhirClientProvider().getClient(clientId);
+
+		expectTrue(oClient.isPresent());
+
+		IGenericClient client = oClient.get();
+		try
+		{
+
+			MethodOutcome outcome = client.update().resource(qr).execute();
+			expectNotNull(outcome);
+
+			return outcome.getResponseStatusCode() == 200;
+		}
+		catch (BaseServerResponseException e)
+		{
+			logger.info("QuestionnaireResponse update, status {}, {} : {}", e.getStatusCode(), e.getClass().getName(),
+					e.getMessage());
+
+			return false;
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package dev.dsf.bpe.test.service;
 
+import static dev.dsf.bpe.test.PluginTestExecutor.expectFalse;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectTrue;
@@ -8,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -16,6 +18,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PrimitiveType;
@@ -27,17 +30,36 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
+import dev.dsf.bpe.v2.constants.NamingSystems;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
 import dev.dsf.bpe.v2.variables.Variables;
 
 public class QuestionnaireTestAnswerCheck extends AbstractTest implements ServiceTask
 {
+	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireTestAnswerCheck.class);
+
+	private String type;
+
+	/**
+	 * @param type
+	 * @deprecated only for BPMN field injection
+	 */
+	@Deprecated
+	public void setType(String type)
+	{
+		this.type = type;
+	}
+
 	@Override
 	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
@@ -64,8 +86,17 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 		expectTrue(qr.hasAuthored());
 		expectTrue(qr.hasAuthor());
 		expectTrue(qr.getAuthor().hasIdentifier());
-		expectSame("http://dsf.dev/sid/organization-identifier", qr.getAuthor().getIdentifier().getSystem());
-		expectSame("Test_Organization", qr.getAuthor().getIdentifier().getValue());
+
+		if (type != null)
+		{
+			expectSame(NamingSystems.PractitionerIdentifier.SID, qr.getAuthor().getIdentifier().getSystem());
+			expectSame("dic-user@test.org", qr.getAuthor().getIdentifier().getValue());
+		}
+		else
+		{
+			expectSame(NamingSystems.OrganizationIdentifier.SID, qr.getAuthor().getIdentifier().getSystem());
+			expectSame("Test_Organization", qr.getAuthor().getIdentifier().getValue());
+		}
 
 		qr.getItem().forEach(item ->
 		{
@@ -85,7 +116,7 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 
 				case "date-time-example" -> test(item, new DateTimeType(new Date(), TemporalPrecisionEnum.MONTH));
 
-				// TODO potential bug, completed not QuestionnaireResponse has UriType not UrlType
+				// TODO potential bug, QuestionnaireResponse has "url-example" item with UriType not UrlType answer
 				case "url-example" -> test(item, new UriType("http://test.com/foo"));
 
 				case "reference-example" -> test(item,
@@ -96,6 +127,12 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 				case "boolean-example" -> test(item, new BooleanType(true));
 			}
 		});
+
+		if (type != null)
+		{
+			expectFalse(read(api, qr.getIdElement(), "uac-user"));
+			expectTrue(read(api, qr.getIdElement(), "dic-user"));
+		}
 	}
 
 	private void test(QuestionnaireResponseItemComponent item, Type expected)
@@ -126,6 +163,28 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 
 			default ->
 				throw new IllegalArgumentException("Value of type " + value.getClass().getName() + " not supported");
+		}
+	}
+
+	private boolean read(ProcessPluginApi api, IdType id, String clientId)
+	{
+		Optional<IGenericClient> oClient = api.getFhirClientProvider().getClient(clientId);
+
+		expectTrue(oClient.isPresent());
+
+		IGenericClient client = oClient.get();
+
+		try
+		{
+			client.read().resource(QuestionnaireResponse.class).withId(id).execute();
+			return true;
+		}
+		catch (BaseServerResponseException e)
+		{
+			logger.info("QuestionnaireResponse read, status {}, {} : {}", e.getStatusCode(), e.getClass().getName(),
+					e.getMessage());
+
+			return false;
 		}
 	}
 }
