@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -53,9 +52,7 @@ public class DefaultUserTaskListener implements UserTaskListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTaskListener.class);
 
-	protected static final String EXTENSION_QUESTIONNAIRE_AUTHORIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization";
-	protected static final String EXTENSION_QUESTIONNAIRE_AUTHORIZATION_PRACTITIONER = "practitioner";
-	protected static final String EXTENSION_QUESTIONNAIRE_AUTHORIZATION_PRACTITIONER_ROLE = "practitioner-role";
+	protected static final String PROFILE_QUESTIONNAIRE_RESPONSE = "http://dsf.dev/fhir/StructureDefinition/questionnaire-response";
 
 	private static final record KeyAndValue(String key, String value)
 	{
@@ -199,6 +196,7 @@ public class DefaultUserTaskListener implements UserTaskListener
 			String questionnaireUrlWithVersion, String businessKey, String userTaskId)
 	{
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		questionnaireResponse.getMeta().addProfile(PROFILE_QUESTIONNAIRE_RESPONSE);
 		questionnaireResponse.setQuestionnaire(questionnaireUrlWithVersion);
 		questionnaireResponse.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
 
@@ -218,53 +216,10 @@ public class DefaultUserTaskListener implements UserTaskListener
 		Set<Coding> practitionerRoles = getPractitionerRoles();
 
 		if (!practitioners.isEmpty() || !practitionerRoles.isEmpty())
-			questionnaireResponse.addExtension(createQuestionnaireAuthorization(practitioners, practitionerRoles));
+			questionnaireResponse.addExtension(api.getQuestionnaireResponseHelper()
+					.createQuestionnaireAuthorizationExtension(practitioners, practitionerRoles));
 
 		return questionnaireResponse;
-	}
-
-	protected Extension createQuestionnaireAuthorization(Set<Identifier> practitioners, Set<Coding> practitionerRoles)
-	{
-		Extension e = new Extension(EXTENSION_QUESTIONNAIRE_AUTHORIZATION);
-
-		practitioners.stream().map(this::createQuestionnaireAuthorizationPractitionerExtension)
-				.forEach(e::addExtension);
-		practitionerRoles.stream().map(this::createQuestionnaireAuthorizationPractitionerRoleExtension)
-				.forEach(e::addExtension);
-
-		return e;
-	}
-
-	/**
-	 * @param practitioner
-	 *            not <code>null</code>, system and value set
-	 * @return practitioner extension
-	 */
-	protected Extension createQuestionnaireAuthorizationPractitionerExtension(Identifier practitioner)
-	{
-		Objects.requireNonNull(practitioner, "practitioner");
-		if (!practitioner.hasSystem())
-			throw new IllegalArgumentException("practitioner.system missing");
-		if (!practitioner.hasValue())
-			throw new IllegalArgumentException("practitioner.value missing");
-
-		return new Extension(EXTENSION_QUESTIONNAIRE_AUTHORIZATION_PRACTITIONER).setValue(practitioner);
-	}
-
-	/**
-	 * @param practitionerRole
-	 *            not <code>null</code>, system and code set
-	 * @return practitioner-role extension
-	 */
-	protected Extension createQuestionnaireAuthorizationPractitionerRoleExtension(Coding practitionerRole)
-	{
-		Objects.requireNonNull(practitionerRole, "practitionerRole");
-		if (!practitionerRole.hasSystem())
-			throw new IllegalArgumentException("practitionerRole.system missing");
-		if (!practitionerRole.hasCode())
-			throw new IllegalArgumentException("practitionerRole.code missing");
-
-		return new Extension(EXTENSION_QUESTIONNAIRE_AUTHORIZATION_PRACTITIONER_ROLE).setValue(practitionerRole);
 	}
 
 	private void transformQuestionnaireItemsToQuestionnaireResponseItems(ProcessPluginApi api,
@@ -348,7 +303,7 @@ public class DefaultUserTaskListener implements UserTaskListener
 	}
 
 	/**
-	 * <i>Override this method if you do not want to configure practitioner roles via field-injection in BPMN<i>
+	 * <i>Override this method if you do not want to configure practitioner roles via field-injection in BPMN</i>
 	 *
 	 * @return practitioner-role entries used in creating the questionnaire authorization extension
 	 */
@@ -358,7 +313,7 @@ public class DefaultUserTaskListener implements UserTaskListener
 	}
 
 	/**
-	 * <i>Override this method if you do not want to configure practitioner identifiers via field-injection in BPMN<i>
+	 * <i>Override this method if you do not want to configure practitioner identifiers via field-injection in BPMN</i>
 	 *
 	 * @return practitioner entries used in creating the questionnaire authorization extension
 	 */
