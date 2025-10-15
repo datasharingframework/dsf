@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.variable.Variables.SerializationDataFormats;
 import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
@@ -96,7 +97,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T fromJsonJolder(JsonHolder holder)
+	private <T> T fromJsonHolder(JsonHolder holder)
 	{
 		try
 		{
@@ -373,6 +374,13 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
+	public void setStringList(String variableName, List<String> value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.objectValue(value)
+				.serializationDataFormat(SerializationDataFormats.JAVA).create());
+	}
+
+	@Override
 	public void setByteArray(String variableName, byte[] value)
 	{
 		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
@@ -444,7 +452,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		Object variable = execution.getVariable(variableName);
 
 		if (variable instanceof JsonHolder jsonVariable)
-			return (T) fromJsonJolder(jsonVariable);
+			return (T) fromJsonHolder(jsonVariable);
 		else
 			return (T) variable;
 	}
@@ -459,6 +467,13 @@ public class VariablesImpl implements Variables, ListenerVariables
 	public void setStringLocal(String variableName, String value)
 	{
 		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+	}
+
+	@Override
+	public void setStringListLocal(String variableName, List<String> value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.objectValue(value)
+				.serializationDataFormat(SerializationDataFormats.JAVA).create());
 	}
 
 	@Override
@@ -533,7 +548,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		Object variable = execution.getVariable(variableName);
 
 		if (variable instanceof JsonHolder jsonHolder)
-			return (T) fromJsonJolder(jsonHolder);
+			return (T) fromJsonHolder(jsonHolder);
 		else
 			return (T) variable;
 	}
