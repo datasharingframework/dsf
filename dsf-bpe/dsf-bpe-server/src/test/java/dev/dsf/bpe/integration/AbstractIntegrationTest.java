@@ -341,18 +341,28 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				String.valueOf(X509Certificates.PASSWORD));
 
 		initParameters.put("dev.dsf.fhir.server.roleConfig", String.format("""
-				- practitioner-test-user:
+				- dic-user:
 				    thumbprint: %s
 				    dsf-role:
-				      - CREATE
-				      - READ
-				      - UPDATE
-				      - DELETE
-				      - SEARCH
-				      - HISTORY
+				      - CREATE: [Task]
+				      - READ: &tqqr [Task, Questionnaire, QuestionnaireResponse]
+				      - UPDATE: [QuestionnaireResponse]
+				      - SEARCH: *tqqr
+				      - HISTORY: *tqqr
 				    practitioner-role:
 				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
-				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex()));
+				- uac-user:
+				    thumbprint: %s
+				    dsf-role:
+				      - CREATE: [Task]
+				      - READ: &tqqr [Task, Questionnaire, QuestionnaireResponse]
+				      - UPDATE: [QuestionnaireResponse]
+				      - SEARCH: *tqqr
+				      - HISTORY: *tqqr
+				    practitioner-role:
+				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|UAC_USER
+				""", certificates.getDicUserClientCertificate().certificateSha512ThumbprintHex(),
+				certificates.getUacUserClientCertificate().certificateSha512ThumbprintHex()));
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());
@@ -445,11 +455,35 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				    password: '#[password]'
 				via-proxy:
 				  base-url: 'http://via.proxy/fhir'
+				dic-user:
+				  base-url: '#[fhirBaseUrl]'
+				  test-connection-on-startup: yes
+				  enable-debug-logging: no
+				  cert-auth:
+				    private-key-file: '#[dic.client.key]'
+				    certificate-file: '#[dic.client.crt]'
+				    password: '#[password]'
+				uac-user:
+				  base-url: '#[fhirBaseUrl]'
+				  test-connection-on-startup: yes
+				  enable-debug-logging: no
+				  cert-auth:
+				    private-key-file: '#[uac.client.key]'
+				    certificate-file: '#[uac.client.crt]'
+				    password: '#[password]'
 				""".replaceAll(Pattern.quote("#[fhirBaseUrl]"), Matcher.quoteReplacement(fhirBaseUrl))
 				.replaceAll(Pattern.quote("#[client.key]"),
 						Matcher.quoteReplacement(certificates.getClientCertificatePrivateKeyFile().toString()))
 				.replaceAll(Pattern.quote("#[client.crt]"),
 						Matcher.quoteReplacement(certificates.getClientCertificateFile().toString()))
+				.replaceAll(Pattern.quote("#[dic.client.key]"),
+						Matcher.quoteReplacement(certificates.getDicUserClientCertificatePrivateKeyFile().toString()))
+				.replaceAll(Pattern.quote("#[dic.client.crt]"),
+						Matcher.quoteReplacement(certificates.getDicUserClientCertificateFile().toString()))
+				.replaceAll(Pattern.quote("#[uac.client.key]"),
+						Matcher.quoteReplacement(certificates.getUacUserClientCertificatePrivateKeyFile().toString()))
+				.replaceAll(Pattern.quote("#[uac.client.crt]"),
+						Matcher.quoteReplacement(certificates.getUacUserClientCertificateFile().toString()))
 				.replaceAll(Pattern.quote("#[password]"),
 						Matcher.quoteReplacement(String.valueOf(X509Certificates.PASSWORD)));
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config", fhirConnectionsYaml);
