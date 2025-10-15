@@ -35,16 +35,8 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
 
-		referencesHelper = createReferencesHelper(index, identity, serverBase, resource, responseGenerator,
-				referenceExtractor, referenceResolver);
-	}
-
-	protected ReferencesHelper<R> createReferencesHelper(int index, Identity identity, String serverBase, R resource,
-			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
-	{
-		return new ReferencesHelperImpl<>(index, identity, resource, serverBase, referenceExtractor, referenceResolver,
-				responseGenerator);
+		referencesHelper = new ReferencesHelperImpl<>(index, resource, serverBase, referenceExtractor,
+				referenceResolver, responseGenerator);
 	}
 
 	@Override

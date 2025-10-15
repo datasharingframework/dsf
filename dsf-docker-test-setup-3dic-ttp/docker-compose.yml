@@ -171,13 +171,11 @@ services:
             thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
-              - CREATE
+              - CREATE: [Task]
               - READ
-              - UPDATE
-              - DELETE
+              - UPDATE: [QuestionnaireResponse]
               - SEARCH
               - HISTORY
-              - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
         - bpe-oidc-auth-client:
@@ -260,13 +258,13 @@ services:
             thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
-              - CREATE
+              - CREATE:
+                - Task
               - READ
-              - UPDATE
-              - DELETE
+              - UPDATE:
+                - QuestionnaireResponse
               - SEARCH
               - HISTORY
-              - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/ca_chain.crt
@@ -342,13 +340,11 @@ services:
             thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
-              - CREATE
+              - CREATE: [Task]
               - READ
-              - UPDATE
-              - DELETE
+              - UPDATE: [QuestionnaireResponse]
               - SEARCH
               - HISTORY
-              - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/ca_chain.crt
@@ -431,13 +427,11 @@ services:
             thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             token-role: admin
             dsf-role:
-              - CREATE
+              - CREATE: [Task]
               - READ
-              - UPDATE
-              - DELETE
+              - UPDATE: [QuestionnaireResponse]
               - SEARCH
               - HISTORY
-              - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/ca_chain.crt

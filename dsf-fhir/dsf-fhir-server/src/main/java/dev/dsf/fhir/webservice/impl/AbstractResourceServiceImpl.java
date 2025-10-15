@@ -252,8 +252,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private Optional<OperationOutcome> resolveLogicalReference(Resource resource, ResourceReference reference,
 			Connection connection)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(getCurrentIdentity(), reference,
-				connection);
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
@@ -292,11 +291,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				referenceResolver.checkLiteralExternalReference(resource, reference);
 
-			case LOGICAL ->
-				referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
+			case LOGICAL -> referenceResolver.checkLogicalReference(resource, reference, connection);
 
-			case CANONICAL ->
-				referenceResolver.checkCanonicalReference(getCurrentIdentity(), resource, reference, connection);
+			case CANONICAL -> referenceResolver.checkCanonicalReference(resource, reference, connection);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();

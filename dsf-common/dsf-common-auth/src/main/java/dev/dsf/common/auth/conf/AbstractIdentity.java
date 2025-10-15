@@ -87,7 +87,7 @@ public abstract class AbstractIdentity implements Identity
 	@Override
 	public boolean hasDsfRole(DsfRole dsfRole)
 	{
-		return dsfRoles.contains(dsfRole);
+		return dsfRoles.stream().anyMatch(r -> r.matches(dsfRole));
 	}
 
 	@Override

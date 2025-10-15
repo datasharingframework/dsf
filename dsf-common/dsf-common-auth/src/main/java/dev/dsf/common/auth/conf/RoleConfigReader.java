@@ -7,9 +7,11 @@ import java.util.function.Function;
 import org.hl7.fhir.r4.model.Coding;
 import org.yaml.snakeyaml.Yaml;
 
+import dev.dsf.common.auth.conf.RoleConfig.DsfRoleFactory;
+
 public class RoleConfigReader
 {
-	public RoleConfig read(String config, Function<String, DsfRole> dsfRoleFactory,
+	public <R extends DsfRole> RoleConfig<R> read(String config, DsfRoleFactory<R> dsfRoleFactory,
 			Function<String, Coding> practitionerRoleFactory)
 	{
 		Objects.requireNonNull(config, "config");
@@ -17,10 +19,10 @@ public class RoleConfigReader
 		Objects.requireNonNull(practitionerRoleFactory, "practitionerRoleFactory");
 
 		Object o = yaml().load(config);
-		return new RoleConfig(o, dsfRoleFactory, practitionerRoleFactory);
+		return new RoleConfig<R>(o, dsfRoleFactory, practitionerRoleFactory);
 	}
 
-	public RoleConfig read(InputStream config, Function<String, DsfRole> dsfRoleFactory,
+	public <R extends DsfRole> RoleConfig<R> read(InputStream config, DsfRoleFactory<R> dsfRoleFactory,
 			Function<String, Coding> practitionerRoleFactory)
 	{
 		Objects.requireNonNull(config, "config");
@@ -28,7 +30,7 @@ public class RoleConfigReader
 		Objects.requireNonNull(practitionerRoleFactory, "practitionerRoleFactory");
 
 		Object o = yaml().load(config);
-		return new RoleConfig(o, dsfRoleFactory, practitionerRoleFactory);
+		return new RoleConfig<R>(o, dsfRoleFactory, practitionerRoleFactory);
 	}
 
 	protected Yaml yaml()

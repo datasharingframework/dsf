@@ -41,16 +41,16 @@ import org.springframework.beans.factory.InitializingBean;
 import dev.dsf.common.auth.DsfOpenIdCredentials;
 import dev.dsf.common.auth.conf.RoleConfig.Mapping;
 
-public abstract class AbstractIdentityProvider implements IdentityProvider, InitializingBean
+public abstract class AbstractIdentityProvider<R extends DsfRole> implements IdentityProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIdentityProvider.class);
 
 	private static final String PRACTITIONER_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/practitioner-identifier";
 
-	private final RoleConfig roleConfig;
+	private final RoleConfig<R> roleConfig;
 	private final Set<String> thumbprints;
 
-	public AbstractIdentityProvider(RoleConfig roleConfig)
+	public AbstractIdentityProvider(RoleConfig<R> roleConfig)
 	{
 		this.roleConfig = roleConfig;
 
@@ -81,7 +81,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 			List<String> rolesFromTokens = getRolesFromTokens(parsedIdToken, parsedAccessToken);
 			List<String> groupsFromTokens = getGroupsFromTokens(parsedIdToken, parsedAccessToken);
 
-			Set<DsfRole> dsfRoles = getDsfRolesFor(practitioner.get(), null, rolesFromTokens, groupsFromTokens);
+			Set<R> dsfRoles = getDsfRolesFor(practitioner.get(), null, rolesFromTokens, groupsFromTokens);
 			Set<Coding> practitionerRoles = getPractitionerRolesFor(practitioner.get(), null, rolesFromTokens,
 					groupsFromTokens);
 
@@ -187,19 +187,18 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 	}
 
 	// thumbprint from certificate, token roles and groups from jwt
-	protected final Set<DsfRole> getDsfRolesFor(Practitioner practitioner, String thumbprint, List<String> tokenRoles,
+	protected final Set<R> getDsfRolesFor(Practitioner practitioner, String thumbprint, List<String> tokenRoles,
 			List<String> tokenGroups)
 	{
 		List<String> emailAddresses = practitioner.getIdentifier().stream()
 				.filter(i -> PRACTITIONER_IDENTIFIER_SYSTEM.equals(i.getSystem()) && i.hasValue())
 				.map(Identifier::getValue).toList();
 
-		Stream<DsfRole> r1 = emailAddresses.stream().map(roleConfig::getDsfRolesForEmail).flatMap(List::stream);
-		Stream<DsfRole> r2 = thumbprint == null ? Stream.empty()
-				: roleConfig.getDsfRolesForThumbprint(thumbprint).stream();
-		Stream<DsfRole> r3 = tokenRoles == null ? Stream.empty()
+		Stream<R> r1 = emailAddresses.stream().map(roleConfig::getDsfRolesForEmail).flatMap(List::stream);
+		Stream<R> r2 = thumbprint == null ? Stream.empty() : roleConfig.getDsfRolesForThumbprint(thumbprint).stream();
+		Stream<R> r3 = tokenRoles == null ? Stream.empty()
 				: tokenRoles.stream().map(roleConfig::getDsfRolesForTokenRole).flatMap(List::stream);
-		Stream<DsfRole> r4 = tokenGroups == null ? Stream.empty()
+		Stream<R> r4 = tokenGroups == null ? Stream.empty()
 				: tokenGroups.stream().map(roleConfig::getDsfRolesForTokenGroup).flatMap(List::stream);
 
 		return Stream.of(r1, r2, r3, r4).flatMap(Function.identity()).distinct().collect(Collectors.toSet());

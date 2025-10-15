@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
@@ -46,7 +45,7 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonCreateAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse newResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.CREATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(createRole))
 		{
 			Optional<String> errors = newResourceOk(newResource, EnumSet.of(QuestionnaireResponseStatus.INPROGRESS));
 			if (errors.isEmpty())
@@ -63,7 +62,7 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 		else
 		{
-			logger.warn("Create of QuestionnaireResponse unauthorized, not a local user");
+			logger.warn("Create of QuestionnaireResponse unauthorized, not a local user or no create role");
 			return Optional.empty();
 		}
 	}
@@ -147,14 +146,14 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonReadAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse existingResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.READ))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(readRole))
 		{
 			logger.info("Read of QuestionnaireResponse authorized for local user '{}'", identity.getName());
 			return Optional.of("task.restriction.recipient resolved and local user part of referenced organization");
 		}
 		else
 		{
-			logger.warn("Read of QuestionnaireResponse unauthorized, not a local user");
+			logger.warn("Read of QuestionnaireResponse unauthorized, not a local user or no read role");
 			return Optional.empty();
 		}
 	}
@@ -163,7 +162,7 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonUpdateAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse oldResource, QuestionnaireResponse newResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.UPDATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(updateRole))
 		{
 			Optional<String> errors = newResourceOk(newResource,
 					EnumSet.of(QuestionnaireResponseStatus.COMPLETED, QuestionnaireResponseStatus.STOPPED));
@@ -189,7 +188,7 @@ public class QuestionnaireResponseAuthorizationRule
 		}
 		else
 		{
-			logger.warn("Update of QuestionnaireResponse unauthorized, not a local user");
+			logger.warn("Update of QuestionnaireResponse unauthorized, not a local user or no update role");
 			return Optional.empty();
 		}
 	}
@@ -247,14 +246,14 @@ public class QuestionnaireResponseAuthorizationRule
 	public Optional<String> reasonDeleteAllowed(Connection connection, Identity identity,
 			QuestionnaireResponse oldResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.DELETE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(deleteRole))
 		{
 			logger.info("Delete of QuestionnaireResponse authorized for local user '{}'", identity.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Delete of QuestionnaireResponse unauthorized, not a local user");
+			logger.warn("Delete of QuestionnaireResponse unauthorized, not a local user or no delete role");
 			return Optional.empty();
 		}
 	}
