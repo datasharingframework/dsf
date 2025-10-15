@@ -269,4 +269,10 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	{
 		executePluginTest(createTestTask("AutowireTest"));
 	}
+
+	@Test
+	public void startQuestionnaireTest() throws Exception
+	{
+		executePluginTest(createTestTask("QuestionnaireTest"));
+	}
 }

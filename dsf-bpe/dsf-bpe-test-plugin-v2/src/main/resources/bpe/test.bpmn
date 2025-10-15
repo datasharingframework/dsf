@@ -43,6 +43,7 @@
       <bpmn:outgoing>Flow_1x18y7y</bpmn:outgoing>
       <bpmn:outgoing>Flow_0312al1</bpmn:outgoing>
       <bpmn:outgoing>Flow_06ychsk</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0upusgm</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1bqddk1" sourceRef="TestActivitySelector" targetRef="Gateway_0eszi2t" />
     <bpmn:sequenceFlow id="Flow_14rzc0j" sourceRef="Gateway_0eszi2t" targetRef="ProxyTest">
@@ -74,6 +75,7 @@
       <bpmn:incoming>Flow_0scl0xx</bpmn:incoming>
       <bpmn:incoming>Flow_0vj0i7z</bpmn:incoming>
       <bpmn:incoming>Flow_04532de</bpmn:incoming>
+      <bpmn:incoming>Flow_1kiws3i</bpmn:incoming>
       <bpmn:outgoing>Flow_0a1kwg9</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_08zzudo" sourceRef="ProxyTest" targetRef="Gateway_056f6tw" />
@@ -340,6 +342,44 @@
     <bpmn:sequenceFlow id="Flow_06ychsk" sourceRef="Gateway_0eszi2t" targetRef="CompressionServiceTest">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'CompressionServiceTest'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:userTask id="QuestionnaireTest" name="QuestionnaireTest" camunda:formKey="http://dsf.dev/fhir/Questionnaire/test|#{version}">
+      <bpmn:extensionElements>
+        <camunda:taskListener class="dev.dsf.bpe.v2.activity.DefaultUserTaskListener" event="create" id="">
+          <camunda:field name="practitionerRole">
+            <camunda:string>DIC_USER</camunda:string>
+          </camunda:field>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_060oe1s</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ih55cr</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Gateway_0uflimn" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:incoming>Flow_0upusgm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ae3sja</bpmn:outgoing>
+      <bpmn:outgoing>Flow_060oe1s</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_0ae3sja" sourceRef="Gateway_0uflimn" targetRef="QuestionnaireTestAnswer" />
+    <bpmn:sequenceFlow id="Flow_060oe1s" sourceRef="Gateway_0uflimn" targetRef="QuestionnaireTest" />
+    <bpmn:sequenceFlow id="Flow_1ih55cr" sourceRef="QuestionnaireTest" targetRef="Gateway_060n9hs" />
+    <bpmn:parallelGateway id="Gateway_060n9hs">
+      <bpmn:incoming>Flow_1ih55cr</bpmn:incoming>
+      <bpmn:incoming>Flow_1dlruuj</bpmn:incoming>
+      <bpmn:outgoing>Flow_0i42902</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_1dlruuj" sourceRef="QuestionnaireTestAnswer" targetRef="Gateway_060n9hs" />
+    <bpmn:serviceTask id="QuestionnaireTestAnswer" name="QuestionnaireTestAnswer" camunda:class="dev.dsf.bpe.test.service.QuestionnaireTestAnswer">
+      <bpmn:incoming>Flow_0ae3sja</bpmn:incoming>
+      <bpmn:outgoing>Flow_1dlruuj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0i42902" sourceRef="Gateway_060n9hs" targetRef="QuestionnaireTestAnswerCheck" />
+    <bpmn:serviceTask id="QuestionnaireTestAnswerCheck" name="QuestionnaireTestAnswerCheck" camunda:class="dev.dsf.bpe.test.service.QuestionnaireTestAnswerCheck">
+      <bpmn:incoming>Flow_0i42902</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kiws3i</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0upusgm" sourceRef="Gateway_0eszi2t" targetRef="Gateway_0uflimn">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${testActivity == 'QuestionnaireTest'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1kiws3i" sourceRef="QuestionnaireTestAnswerCheck" targetRef="Gateway_056f6tw" />
   </bpmn:process>
   <bpmn:message id="Message_1nn2wdw" name="start" />
   <bpmn:message id="Message_2iq6v5e" name="proxyTest" />
@@ -443,10 +483,6 @@
       <bpmndi:BPMNShape id="Activity_1eg5ihs_di" bpmnElement="CryptoServiceTest">
         <dc:Bounds x="480" y="1500" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0wafhn1" bpmnElement="FhirClientConfigProviderTest">
-        <dc:Bounds x="480" y="630" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1uknvol_di" bpmnElement="MimeTypeServiceTest">
         <dc:Bounds x="480" y="1720" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -479,9 +515,30 @@
         <dc:Bounds x="480" y="2380" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0wafhn1" bpmnElement="FhirClientConfigProviderTest">
+        <dc:Bounds x="480" y="630" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0nyr385" bpmnElement="CompressionServiceTest">
         <dc:Bounds x="480" y="1610" width="100" height="80" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0n06wf2_di" bpmnElement="QuestionnaireTest">
+        <dc:Bounds x="610" y="2490" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_10cdp7a_di" bpmnElement="Gateway_0uflimn">
+        <dc:Bounds x="505" y="2505" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0iuf70m_di" bpmnElement="Gateway_060n9hs">
+        <dc:Bounds x="765" y="2505" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_03rsu0y_di" bpmnElement="QuestionnaireTestAnswer">
+        <dc:Bounds x="610" y="2600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0f2n390_di" bpmnElement="QuestionnaireTestAnswerCheck">
+        <dc:Bounds x="870" y="2490" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1w9i7ga_di" bpmnElement="Event_1dnlmzp">
         <dc:Bounds x="562" y="1022" width="36" height="36" />
@@ -753,6 +810,38 @@
         <di:waypoint x="410" y="145" />
         <di:waypoint x="410" y="1650" />
         <di:waypoint x="480" y="1650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ae3sja_di" bpmnElement="Flow_0ae3sja">
+        <di:waypoint x="530" y="2555" />
+        <di:waypoint x="530" y="2640" />
+        <di:waypoint x="610" y="2640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_060oe1s_di" bpmnElement="Flow_060oe1s">
+        <di:waypoint x="555" y="2530" />
+        <di:waypoint x="610" y="2530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ih55cr_di" bpmnElement="Flow_1ih55cr">
+        <di:waypoint x="710" y="2530" />
+        <di:waypoint x="765" y="2530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1dlruuj_di" bpmnElement="Flow_1dlruuj">
+        <di:waypoint x="710" y="2640" />
+        <di:waypoint x="790" y="2640" />
+        <di:waypoint x="790" y="2555" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i42902_di" bpmnElement="Flow_0i42902">
+        <di:waypoint x="815" y="2530" />
+        <di:waypoint x="870" y="2530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0upusgm_di" bpmnElement="Flow_0upusgm">
+        <di:waypoint x="410" y="145" />
+        <di:waypoint x="410" y="2530" />
+        <di:waypoint x="505" y="2530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kiws3i_di" bpmnElement="Flow_1kiws3i">
+        <di:waypoint x="970" y="2530" />
+        <di:waypoint x="1180" y="2530" />
+        <di:waypoint x="1180" y="145" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

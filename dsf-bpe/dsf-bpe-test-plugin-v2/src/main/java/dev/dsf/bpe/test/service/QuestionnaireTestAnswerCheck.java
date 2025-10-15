@@ -1,0 +1,131 @@
+package dev.dsf.bpe.test.service;
+
+import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
+import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
+import static dev.dsf.bpe.test.PluginTestExecutor.expectTrue;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TimeType;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import dev.dsf.bpe.test.AbstractTest;
+import dev.dsf.bpe.test.PluginTest;
+import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.activity.ServiceTask;
+import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
+import dev.dsf.bpe.v2.variables.Variables;
+
+public class QuestionnaireTestAnswerCheck extends AbstractTest implements ServiceTask
+{
+	@Override
+	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
+	{
+		executeTests(api, variables);
+	}
+
+	@PluginTest
+	public void checkQuestionnaireResponse(ProcessPluginApi api) throws Exception
+	{
+		Bundle resultBundle = api.getDsfClientProvider().getLocalDsfClient().search(QuestionnaireResponse.class,
+				Map.of("status", List.of(QuestionnaireResponseStatus.AMENDED.toCode())));
+
+		expectNotNull(resultBundle);
+		expectSame(1, resultBundle.getTotal());
+		expectSame(1, resultBundle.getEntry().size());
+
+		BundleEntryComponent e = resultBundle.getEntryFirstRep();
+		expectNotNull(e);
+		expectTrue(e.hasResource());
+		expectTrue(e.getResource() instanceof QuestionnaireResponse);
+
+		QuestionnaireResponse qr = (QuestionnaireResponse) e.getResource();
+
+		expectTrue(qr.hasAuthored());
+		expectTrue(qr.hasAuthor());
+		expectTrue(qr.getAuthor().hasIdentifier());
+		expectSame("http://dsf.dev/sid/organization-identifier", qr.getAuthor().getIdentifier().getSystem());
+		expectSame("Test_Organization", qr.getAuthor().getIdentifier().getValue());
+
+		qr.getItem().forEach(item ->
+		{
+			switch (item.getLinkId())
+			{
+				case "string-example" -> test(item, new StringType("string-example answer"));
+
+				case "text-example" -> test(item, new StringType("text-example answer"));
+
+				case "integer-example" -> test(item, new IntegerType(666));
+
+				case "decimal-example" -> test(item, new DecimalType(Math.PI));
+
+				case "date-example" -> test(item, new DateType(new Date()));
+
+				case "time-example" -> test(item, new TimeType("11:55:00"));
+
+				case "date-time-example" -> test(item, new DateTimeType(new Date(), TemporalPrecisionEnum.MONTH));
+
+				// TODO potential bug, completed not QuestionnaireResponse has UriType not UrlType
+				case "url-example" -> test(item, new UriType("http://test.com/foo"));
+
+				case "reference-example" -> test(item,
+						new Reference()
+								.setIdentifier(new Identifier().setSystem("http://dsf.dev/sid/organization-identifier")
+										.setValue("External_Test_Organization")));
+
+				case "boolean-example" -> test(item, new BooleanType(true));
+			}
+		});
+	}
+
+	private void test(QuestionnaireResponseItemComponent item, Type expected)
+	{
+		Type value = item.getAnswerFirstRep().getValue();
+
+		expectNotNull(value);
+		expectSame(expected.getClass(), value.getClass());
+
+		switch (value)
+		{
+			case DateType d -> expectSame(0, DateUtils.truncatedCompareTo(((DateType) expected).getValue(),
+					d.getValue(), Calendar.DAY_OF_MONTH));
+
+			case DateTimeType d -> expectSame(0,
+					DateUtils.truncatedCompareTo(((DateTimeType) expected).getValue(), d.getValue(), Calendar.MONTH));
+
+			case PrimitiveType<?> p -> expectSame(((PrimitiveType<?>) expected).getValue(), p.getValue());
+
+			case Reference r -> {
+				expectTrue(r.hasIdentifier());
+				expectNotNull(r.getIdentifier());
+				expectTrue(r.getIdentifier().hasSystem());
+				expectTrue(r.getIdentifier().hasValue());
+				expectSame(((Reference) expected).getIdentifier().getSystem(), r.getIdentifier().getSystem());
+				expectSame(((Reference) expected).getIdentifier().getValue(), r.getIdentifier().getValue());
+			}
+
+			default ->
+				throw new IllegalArgumentException("Value of type " + value.getClass().getName() + " not supported");
+		}
+	}
+}
