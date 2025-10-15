@@ -90,31 +90,31 @@ public class DefaultUserTaskListener implements UserTaskListener
 
 	/**
 	 * @param practitionerRole
-	 *            does nothing if <code>null</code>
+	 *            does nothing if <code>null</code> or blank
 	 * @deprecated only for field injection
 	 */
 	@Deprecated
 	public void setPractitionerRole(String practitionerRole)
 	{
-		if (practitionerRole != null)
+		if (practitionerRole != null && !practitionerRole.isBlank())
 			setPractitionerRoles(List.of(practitionerRole));
 	}
 
 	/**
 	 * @param practitioner
-	 *            does nothing if <code>null</code>
+	 *            does nothing if <code>null</code> or blank
 	 * @deprecated only for field injection
 	 */
 	@Deprecated
 	public void setPractitioner(String practitioner)
 	{
-		if (practitioner != null)
+		if (practitioner != null && !practitioner.isBlank())
 			setPractitioners(List.of(practitioner));
 	}
 
 	/**
 	 * @param practitionerRoles
-	 *            does nothing if <code>null</code>
+	 *            does nothing if <code>null</code>, ignores <code>null</code> and blank values
 	 * @deprecated only for field injection
 	 */
 	@Deprecated
@@ -122,14 +122,15 @@ public class DefaultUserTaskListener implements UserTaskListener
 	{
 		if (practitionerRoles != null)
 		{
-			practitionerRoles.stream().map(KeyAndValue.fromString(CodeSystems.PractitionerRole.SYSTEM))
+			practitionerRoles.stream().filter(Objects::nonNull).filter(p -> !p.isBlank())
+					.map(KeyAndValue.fromString(CodeSystems.PractitionerRole.SYSTEM))
 					.forEach(this.practitionerRoles::add);
 		}
 	}
 
 	/**
 	 * @param practitioners
-	 *            does nothing if <code>null</code>
+	 *            does nothing if <code>null</code>, ignores <code>null</code> and blank values
 	 * @deprecated only for field injection
 	 */
 	@Deprecated
@@ -137,7 +138,8 @@ public class DefaultUserTaskListener implements UserTaskListener
 	{
 		if (practitioners != null)
 		{
-			practitioners.stream().map(KeyAndValue.fromString(NamingSystems.PractitionerIdentifier.SID))
+			practitioners.stream().filter(Objects::nonNull).filter(p -> !p.isBlank())
+					.map(KeyAndValue.fromString(NamingSystems.PractitionerIdentifier.SID))
 					.forEach(this.practitioners::add);
 		}
 	}
