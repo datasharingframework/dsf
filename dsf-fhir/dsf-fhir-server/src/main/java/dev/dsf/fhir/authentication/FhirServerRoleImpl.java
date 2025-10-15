@@ -68,11 +68,12 @@ public record FhirServerRoleImpl(Operation operation, List<ResourceType> resourc
 
 	public static final Set<FhirServerRole> LOCAL_ORGANIZATION = EnumSet
 			.of(CREATE, READ, UPDATE, DELETE, SEARCH, HISTORY, PERMANENT_DELETE, WEBSOCKET).stream()
-			.map(Operation::toFhirServerRoleAllResources).collect(Collectors.toSet());
+			.map(Operation::toFhirServerRoleAllResources).collect(Collectors.toUnmodifiableSet());
 
-	public static final Set<FhirServerRole> REMOTE_ORGANIZATION = EnumSet
-			.of(CREATE, READ, UPDATE, DELETE, SEARCH, HISTORY).stream().map(Operation::toFhirServerRoleAllResources)
-			.collect(Collectors.toSet());
+	public static final Set<FhirServerRole> REMOTE_ORGANIZATION = Stream
+			.concat(Stream.of(create(Task.class)),
+					EnumSet.of(READ, SEARCH, HISTORY).stream().map(Operation::toFhirServerRoleAllResources))
+			.collect(Collectors.toUnmodifiableSet());
 
 	public static final Set<FhirServerRole> INITIAL_DATA_LOADER = EnumSet.of(CREATE, DELETE, UPDATE).stream()
 			.map(Operation::toFhirServerRoleAllResources).collect(Collectors.toSet());
