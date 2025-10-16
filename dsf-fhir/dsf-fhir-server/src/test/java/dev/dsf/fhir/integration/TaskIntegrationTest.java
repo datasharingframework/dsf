@@ -2246,4 +2246,36 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		expectForbidden(() -> getMinimalWebserviceClient().update(createdT));
 	}
+
+	@Test
+	public void testSerachTaskWithPractitionerUserByRequester() throws Exception
+	{
+		ActivityDefinition ad = readActivityDefinition("dsf-test-activity-definition5-1.0.xml");
+		ActivityDefinition createdAd = getWebserviceClient().create(ad);
+		assertNotNull(createdAd);
+		assertNotNull(createdAd.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask(null, X509Certificates.PRACTITIONER_CLIENT_MAIL, "Test_Organization");
+		Task createdTask = getPractitionerWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+
+
+		Bundle searchResult = getPractitionerWebserviceClient().search(Task.class, Map.of("requester:identifier",
+				List.of("http://dsf.dev/sid/practitioner-identifier|" + X509Certificates.PRACTITIONER_CLIENT_MAIL)));
+		assertNotNull(searchResult);
+		assertEquals(1, searchResult.getTotal());
+		assertNotNull(searchResult.getEntry());
+		assertEquals(1, searchResult.getEntry().size());
+		BundleEntryComponent entry = searchResult.getEntry().get(0);
+		assertNotNull(entry);
+		assertNotNull(entry.getResource());
+		assertEquals(Task.class, entry.getResource().getClass());
+		assertEquals(createdTask.getIdElement().getIdPart(), entry.getResource().getIdElement().getIdPart());
+	}
 }
