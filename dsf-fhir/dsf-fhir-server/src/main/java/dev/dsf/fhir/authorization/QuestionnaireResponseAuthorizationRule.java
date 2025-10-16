@@ -529,7 +529,7 @@ public class QuestionnaireResponseAuthorizationRule
 		newResource.setStatus(newResourceStatus);
 
 		if (!resourceNotModified)
-			logger.warn("Modification of QuestionnaireResponse not allowed", EXTENSION_QUESTIONNAIRE_AUTHORIZATION);
+			logger.warn("Modification of QuestionnaireResponse not allowed");
 
 		if (!authExtensionNotModified)
 			logger.warn("Modification of QuestionnaireResponse.extension[url={}] not allowed",
