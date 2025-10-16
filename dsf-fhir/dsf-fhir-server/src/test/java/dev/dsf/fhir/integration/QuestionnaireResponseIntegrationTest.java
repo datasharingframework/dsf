@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
@@ -1014,5 +1015,48 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		expectForbidden(() -> getMinimalWebserviceClient().update(created));
 		expectForbidden(() -> getPractitionerWebserviceClient().update(created));
 		expectForbidden(() -> getExternalWebserviceClient().update(created));
+	}
+
+	@Test
+	public void testSearchAllowedByMinimalUserWithRole() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner-role")
+				.setValue(new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getMinimalWebserviceClient().update(created);
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		Bundle searchResult = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("author:identifier",
+						List.of("http://dsf.dev/sid/practitioner-identifier|" + X509Certificates.MINIMAL_CLIENT_MAIL)));
+		assertNotNull(searchResult);
+		assertEquals(1, searchResult.getTotal());
+		assertNotNull(searchResult.getEntry());
+		assertEquals(1, searchResult.getEntry().size());
+		BundleEntryComponent entry = searchResult.getEntry().get(0);
+		assertNotNull(entry);
+		assertNotNull(entry.getResource());
+		assertEquals(QuestionnaireResponse.class, entry.getResource().getClass());
+		assertEquals(updated.getIdElement().getIdPart(), entry.getResource().getIdElement().getIdPart());
 	}
 }
