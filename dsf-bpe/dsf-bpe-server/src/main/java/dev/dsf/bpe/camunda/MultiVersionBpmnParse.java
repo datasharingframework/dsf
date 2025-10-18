@@ -10,7 +10,6 @@ import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParse;
 import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParser;
 import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
 import org.operaton.bpm.engine.impl.pvm.process.ActivityImpl;
-import org.operaton.bpm.engine.impl.pvm.process.ScopeImpl;
 import org.operaton.bpm.engine.impl.task.TaskDefinition;
 import org.operaton.bpm.engine.impl.util.xml.Element;
 import org.slf4j.Logger;
@@ -40,9 +39,9 @@ public class MultiVersionBpmnParse extends BpmnParse
 
 	@Override
 	public void parseServiceTaskLike(ActivityImpl activity, String elementName, Element serviceTaskElement,
-			Element camundaPropertiesElement, ScopeImpl scope)
+			Element operatonPropertiesElement)
 	{
-		super.parseServiceTaskLike(activity, elementName, serviceTaskElement, camundaPropertiesElement, scope);
+		super.parseServiceTaskLike(activity, elementName, serviceTaskElement, operatonPropertiesElement);
 
 		if (activity.getActivityBehavior() instanceof ClassDelegateActivityBehavior)
 		{
