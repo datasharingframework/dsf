@@ -4,7 +4,8 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 
 public class SearchSetQuestionnaireResponse extends AbstractSearchSet<QuestionnaireResponse>
 {
-	private record Row(ElementId id, String status, String questionnaire, String businessKey, String lastUpdated)
+	private record Row(ElementId id, String status, String questionnaire, String author, String businessKey,
+			String lastUpdated)
 	{
 	}
 
@@ -22,6 +23,10 @@ public class SearchSetQuestionnaireResponse extends AbstractSearchSet<Questionna
 				? resource.getQuestionnaireElement().getValue().replaceAll("\\|", " \\| ")
 				: "";
 
+		String author = resource.hasAuthor() && resource.getAuthor().hasIdentifier()
+				&& resource.getAuthor().getIdentifier().hasValue() ? resource.getAuthor().getIdentifier().getValue()
+						: "";
+
 		String businessKey = resource.getItem().stream()
 				.filter(i -> "business-key".equals(i.getLinkId()) && i.hasAnswer() && i.getAnswer().size() == 1
 						&& i.getAnswerFirstRep().hasValueStringType())
@@ -29,6 +34,6 @@ public class SearchSetQuestionnaireResponse extends AbstractSearchSet<Questionna
 
 		String lastUpdated = formatLastUpdated(resource);
 
-		return new Row(id, status, questionnaire, businessKey, lastUpdated);
+		return new Row(id, status, questionnaire, author, businessKey, lastUpdated);
 	}
 }

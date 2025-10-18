@@ -2,7 +2,6 @@ package dev.dsf.fhir.authorization.process;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,11 +29,6 @@ public class All implements Recipient, Requester
 		this.practitionerRoleCode = practitionerRoleCode;
 	}
 
-	private boolean needsPractitionerRole()
-	{
-		return practitionerRoleSystem != null && practitionerRoleCode != null;
-	}
-
 	@Override
 	public boolean isRequesterAuthorized(Identity requester, Stream<OrganizationAffiliation> requesterAffiliations)
 	{
@@ -47,26 +41,25 @@ public class All implements Recipient, Requester
 		return isAuthorized(recipient);
 	}
 
+	@Override
+	public String getPractitionerRoleSystem()
+	{
+		return practitionerRoleSystem;
+	}
+
+	@Override
+	public String getPractitionerRoleCode()
+	{
+		return practitionerRoleCode;
+	}
+
 	private boolean isAuthorized(Identity identity)
 	{
 		return identity != null && identity.getOrganization() != null && identity.getOrganization().getActive()
 				&& identity.isLocalIdentity() == localIdentity
-				&& ((needsPractitionerRole() && hasPractitionerRole(getPractitionerRoles(identity)))
-						|| (!needsPractitionerRole() && identity instanceof OrganizationIdentity));
-	}
-
-	private Set<Coding> getPractitionerRoles(Identity identity)
-	{
-		if (identity instanceof PractitionerIdentity p)
-			return p.getPractionerRoles();
-		else
-			return Set.of();
-	}
-
-	private boolean hasPractitionerRole(Set<Coding> practitionerRoles)
-	{
-		return practitionerRoles.stream().anyMatch(
-				c -> practitionerRoleSystem.equals(c.getSystem()) && practitionerRoleCode.equals(c.getCode()));
+				&& ((needsPractitionerRole() && hasPractitionerRole(identity))
+						|| (!needsPractitionerRole() && identity instanceof OrganizationIdentity)
+						|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN")));
 	}
 
 	@Override
@@ -143,12 +136,6 @@ public class All implements Recipient, Requester
 		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_PRACTITIONER.equals(extension.getUrl())
 				&& extension.hasValue() && extension.getValue() instanceof Coding value
 				&& practitionerRoleMatches(value);
-	}
-
-	private boolean practitionerRoleMatches(Coding coding)
-	{
-		return coding != null && coding.hasSystem() && coding.hasCode()
-				&& practitionerRoleSystem.equals(coding.getSystem()) && practitionerRoleCode.equals(coding.getCode());
 	}
 
 	@Override

@@ -41,7 +41,6 @@ import org.operaton.bpm.engine.delegate.JavaDelegate;
 import org.operaton.bpm.engine.delegate.TaskListener;
 import org.operaton.bpm.engine.delegate.VariableScope;
 import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
-import org.operaton.bpm.engine.impl.util.ClassDelegateUtil;
 import org.operaton.bpm.engine.variable.value.PrimitiveValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -454,7 +453,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 			VariableScope variableScope)
 	{
 		UserTaskListener target = get(UserTaskListener.class, className);
-		ClassDelegateUtil.applyFieldDeclaration(fieldDeclarations, target);
+		injectFields(target, fieldDeclarations, variableScope);
 
 		return new UserTaskListenerDelegate(getProcessPluginApi(), variablesFactory, target);
 	}

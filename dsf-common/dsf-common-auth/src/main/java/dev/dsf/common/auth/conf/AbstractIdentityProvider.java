@@ -50,12 +50,28 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 	private final RoleConfig<R> roleConfig;
 	private final Set<String> thumbprints;
 
+	/**
+	 * @param roleConfig
+	 *            not <code>null</code>
+	 */
 	public AbstractIdentityProvider(RoleConfig<R> roleConfig)
 	{
 		this.roleConfig = roleConfig;
 
 		thumbprints = roleConfig.getEntries().stream().map(Mapping::getThumbprints).flatMap(List::stream).distinct()
 				.collect(Collectors.toUnmodifiableSet());
+	}
+
+	private String getHost(String serverBaseUrl)
+	{
+		try
+		{
+			return new URI(serverBaseUrl).getHost();
+		}
+		catch (URISyntaxException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -231,23 +247,22 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		String iss = credentials.getStringClaimOrDefault("iss", "");
 		String sub = credentials.getStringClaimOrDefault("sub", "");
 
-		Set<String> emails = Stream.of(credentials.getStringClaimOrDefault("email", ""), toEmail(iss, sub))
-				.filter(m -> m != null).distinct().collect(Collectors.toSet());
+		String email = credentials.getStringClaimOrDefault("email", toEmail(iss, sub));
 
 		Stream<String> surname = Stream.of(credentials.getStringClaimOrDefault("family_name", ""));
 		Stream<String> givenNames = Stream.of(credentials.getStringClaimOrDefault("given_name", ""));
 
-		return toPractitioner(surname, givenNames, emails.stream());
+		return toPractitioner(surname, givenNames, email);
 	}
 
-	private Optional<Practitioner> toPractitioner(Stream<String> surname, Stream<String> givenNames,
-			Stream<String> emails)
+	private Optional<Practitioner> toPractitioner(Stream<String> surname, Stream<String> givenNames, String email)
 	{
 		Practitioner practitioner = new Practitioner();
 
-		emails.filter(e -> e != null).filter(e -> e.contains("@"))
-				.map(e -> new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(e))
-				.forEach(practitioner::addIdentifier);
+		if (email != null)
+			practitioner.addIdentifier(new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(email));
+		else
+			return Optional.empty();
 
 		HumanName name = new HumanName();
 		name.setFamily(surname.collect(Collectors.joining(" ")));
@@ -262,14 +277,7 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		if (iss == null || sub == null || iss.isBlank() || sub.isBlank())
 			return null;
 
-		try
-		{
-			return sub + "@" + new URI(iss).getHost();
-		}
-		catch (URISyntaxException e)
-		{
-			return null;
-		}
+		return sub + "." + getHost(iss) + "@oidc.invalid";
 	}
 
 	protected final Optional<Practitioner> toPractitioner(X509Certificate certificate)
@@ -281,7 +289,7 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		if (!thumbprints.contains(thumbprint))
 			return Optional.empty();
 
-		return toJcaX509CertificateHolder(certificate).flatMap(this::toPractitioner);
+		return toJcaX509CertificateHolder(certificate).flatMap(ch -> toPractitioner(ch, thumbprint));
 	}
 
 	private Optional<JcaX509CertificateHolder> toJcaX509CertificateHolder(X509Certificate certificate)
@@ -299,7 +307,7 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		}
 	}
 
-	private Optional<Practitioner> toPractitioner(JcaX509CertificateHolder certificate)
+	private Optional<Practitioner> toPractitioner(JcaX509CertificateHolder certificate, String thumbprint)
 	{
 		X500Name subject = certificate.getSubject();
 		List<String> givennames = getValues(subject, BCStyle.GIVENNAME);
@@ -314,10 +322,11 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 						.filter(n -> n.getTagNo() == GeneralName.rfc822Name).map(GeneralName::getName)
 						.map(IETFUtils::valueToString).toList();
 
-		Stream<String> emails = Stream.concat(Stream.concat(email1.stream(), email2.stream()), rfc822Names.stream());
+		String email = Stream.of(email1.stream(), email2.stream(), rfc822Names.stream()).flatMap(Function.identity())
+				.findFirst().orElse(thumbprint + "@certificate.invalid");
 
 		return toPractitioner(!surnames.isEmpty() ? surnames.stream() : commonName.stream(), givennames.stream(),
-				emails);
+				email);
 	}
 
 	private List<String> getValues(X500Name name, ASN1ObjectIdentifier attribute)

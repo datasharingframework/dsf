@@ -2,8 +2,11 @@ package dev.dsf.bpe.test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -30,12 +33,12 @@ public final class PluginTestExecutor
 	}
 
 	public static final void execute(Object testClass, Consumer<String> addTestSucceededToStartTask,
-			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask, Object testMethodArg0,
-			Object testMethodArg1, Object... testMethodArgs)
+			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask, Function<Exception, Exception> onError,
+			Object testMethodArg0, Object testMethodArg1, Object... testMethodArgs) throws Exception
 	{
-		Arrays.stream(testClass.getClass().getDeclaredMethods())
+		List<Exception> errorsToThrow = Arrays.stream(testClass.getClass().getDeclaredMethods())
 				.filter(m -> m.getAnnotationsByType(PluginTest.class).length == 1)
-				.filter(m -> m.getParameterCount() <= testMethodArgs.length + 2).forEach(m ->
+				.filter(m -> m.getParameterCount() <= testMethodArgs.length + 2).map(m ->
 				{
 					try
 					{
@@ -57,6 +60,8 @@ public final class PluginTestExecutor
 								m.getName());
 
 						addTestSucceededToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
+
+						return null;
 					}
 					catch (InvocationTargetException e)
 					{
@@ -73,6 +78,8 @@ public final class PluginTestExecutor
 									m.getName(), e.getClass().getName(), e.getMessage(), e);
 
 						addTestFailedToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
+
+						return onError.apply(e);
 					}
 					catch (Exception e)
 					{
@@ -80,10 +87,27 @@ public final class PluginTestExecutor
 								m.getName(), e.getClass().getName(), e.getMessage(), e);
 
 						addTestFailedToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
-					}
-				});
 
-		updateStartTask.run();
+						return onError.apply(e);
+					}
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+
+		try
+		{
+			updateStartTask.run();
+		}
+		finally
+		{
+			if (!errorsToThrow.isEmpty())
+			{
+				Exception error = errorsToThrow.get(0);
+
+				for (int i = 1; i < errorsToThrow.size(); i++)
+					error.addSuppressed(errorsToThrow.get(i));
+
+				throw error;
+			}
+		}
 	}
 
 	public static void expectNotNull(Object actual)

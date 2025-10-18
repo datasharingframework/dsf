@@ -71,7 +71,8 @@ public class X509Certificates extends ExternalResource
 	private CertificateAndPrivateKey bpeServerCertificate;
 	private CertificateAndPrivateKey fhirServerCertificate;
 	private CertificateAndPrivateKey clientCertificate;
-	private CertificateAndPrivateKey practitionerClientCertificate;
+	private CertificateAndPrivateKey dicUserClientCertificate;
+	private CertificateAndPrivateKey uacUserClientCertificate;
 	private CertificateAndPrivateKey externalClientCertificate;
 
 	private X509Certificate caCertificate;
@@ -80,8 +81,10 @@ public class X509Certificates extends ExternalResource
 	private Path clientCertificatePrivateKeyFile;
 	private Path externalClientCertificateFile;
 	private Path externalClientCertificatePrivateKeyFile;
-	private Path practitionerClientCertificateFile;
-	private Path practitionerClientCertificatePrivateKeyFile;
+	private Path dicUserClientCertificateFile;
+	private Path dicUserClientCertificatePrivateKeyFile;
+	private Path uacUserClientCertificateFile;
+	private Path uacUserClientCertificatePrivateKeyFile;
 
 	private List<Path> filesToDelete;
 
@@ -117,9 +120,14 @@ public class X509Certificates extends ExternalResource
 		return externalClientCertificate;
 	}
 
-	public CertificateAndPrivateKey getPractitionerClientCertificate()
+	public CertificateAndPrivateKey getDicUserClientCertificate()
 	{
-		return practitionerClientCertificate;
+		return dicUserClientCertificate;
+	}
+
+	public CertificateAndPrivateKey getUacUserClientCertificate()
+	{
+		return uacUserClientCertificate;
 	}
 
 	public X509Certificate getCaCertificate()
@@ -152,14 +160,24 @@ public class X509Certificates extends ExternalResource
 		return externalClientCertificatePrivateKeyFile;
 	}
 
-	public Path getPractitionerClientCertificateFile()
+	public Path getDicUserClientCertificateFile()
 	{
-		return practitionerClientCertificateFile;
+		return dicUserClientCertificateFile;
 	}
 
-	public Path getPractitionerClientCertificatePrivateKeyFile()
+	public Path getDicUserClientCertificatePrivateKeyFile()
 	{
-		return practitionerClientCertificatePrivateKeyFile;
+		return dicUserClientCertificatePrivateKeyFile;
+	}
+
+	public Path getUacUserClientCertificateFile()
+	{
+		return uacUserClientCertificateFile;
+	}
+
+	public Path getUacUserClientCertificatePrivateKeyFile()
+	{
+		return uacUserClientCertificatePrivateKeyFile;
 	}
 
 	private void createX509Certificates() throws InvalidKeyException, NoSuchAlgorithmException, KeyStoreException,
@@ -172,8 +190,10 @@ public class X509Certificates extends ExternalResource
 		Path clientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path externalClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path externalClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
-		Path practitionerClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
-		Path practitionerClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path dicUserClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path dicUserClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path uacUserClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path uacUserClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 
 		CertificateAuthority ca = CertificateAuthority
 				.builderSha384EcdsaSecp384r1("DE", null, null, null, null, "Junit Test CA")
@@ -213,15 +233,25 @@ public class X509Certificates extends ExternalResource
 				.toFile(externalClientCertificatePrivateKeyFile);
 		// external client --
 
-		// -- practitioner client
-		CertificationRequestAndPrivateKey practitionerClientRequest = CertificationRequest
-				.builder(ca, "DE", null, null, null, null, "practitioner-client").generateKeyPair()
-				.setEmail("practitioner@test.org").build();
-		X509Certificate practitionerClientCertificate = ca.signClientCertificate(practitionerClientRequest);
-		PemWriter.writeCertificate(practitionerClientCertificate, practitionerClientCertificateFile);
-		PemWriter.writePrivateKey(practitionerClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
-				.toFile(practitionerClientCertificatePrivateKeyFile);
-		// practitioner client --
+		// -- dic user client
+		CertificationRequestAndPrivateKey dicUserClientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "dic-user-client").generateKeyPair()
+				.setEmail("dic-user@test.org").build();
+		X509Certificate dicUserClientCertificate = ca.signClientCertificate(dicUserClientRequest);
+		PemWriter.writeCertificate(dicUserClientCertificate, dicUserClientCertificateFile);
+		PemWriter.writePrivateKey(dicUserClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(dicUserClientCertificatePrivateKeyFile);
+		// dic user client --
+
+		// -- uac user client
+		CertificationRequestAndPrivateKey uacUserClientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "uac-user-client").generateKeyPair()
+				.setEmail("uac-user@test.org").build();
+		X509Certificate uacUserClientCertificate = ca.signClientCertificate(uacUserClientRequest);
+		PemWriter.writeCertificate(uacUserClientCertificate, uacUserClientCertificateFile);
+		PemWriter.writePrivateKey(uacUserClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(uacUserClientCertificatePrivateKeyFile);
+		// uac user client --
 
 		this.caCertificate = caCertificate;
 		this.bpeServerCertificate = new CertificateAndPrivateKey(caCertificate, bpeServerCertificate,
@@ -232,20 +262,25 @@ public class X509Certificates extends ExternalResource
 				clientRequest.getPrivateKey());
 		this.externalClientCertificate = new CertificateAndPrivateKey(caCertificate, externalClientCertificate,
 				externalClientRequest.getPrivateKey());
-		this.practitionerClientCertificate = new CertificateAndPrivateKey(caCertificate, practitionerClientCertificate,
-				practitionerClientRequest.getPrivateKey());
+		this.dicUserClientCertificate = new CertificateAndPrivateKey(caCertificate, dicUserClientCertificate,
+				dicUserClientRequest.getPrivateKey());
+		this.uacUserClientCertificate = new CertificateAndPrivateKey(caCertificate, uacUserClientCertificate,
+				uacUserClientRequest.getPrivateKey());
 
 		this.caCertificateFile = caCertificateFile;
 		this.clientCertificateFile = clientCertificateFile;
 		this.clientCertificatePrivateKeyFile = clientCertificatePrivateKeyFile;
 		this.externalClientCertificateFile = externalClientCertificateFile;
 		this.externalClientCertificatePrivateKeyFile = externalClientCertificatePrivateKeyFile;
-		this.practitionerClientCertificateFile = practitionerClientCertificateFile;
-		this.practitionerClientCertificatePrivateKeyFile = practitionerClientCertificatePrivateKeyFile;
+		this.dicUserClientCertificateFile = dicUserClientCertificateFile;
+		this.dicUserClientCertificatePrivateKeyFile = dicUserClientCertificatePrivateKeyFile;
+		this.uacUserClientCertificateFile = uacUserClientCertificateFile;
+		this.uacUserClientCertificatePrivateKeyFile = uacUserClientCertificatePrivateKeyFile;
 
 		filesToDelete = List.of(caCertificateFile, clientCertificateFile, clientCertificatePrivateKeyFile,
-				externalClientCertificateFile, externalClientCertificatePrivateKeyFile,
-				practitionerClientCertificateFile, practitionerClientCertificatePrivateKeyFile);
+				externalClientCertificateFile, externalClientCertificatePrivateKeyFile, dicUserClientCertificateFile,
+				dicUserClientCertificatePrivateKeyFile, uacUserClientCertificateFile,
+				uacUserClientCertificatePrivateKeyFile);
 	}
 
 	private void deleteX509Certificates()

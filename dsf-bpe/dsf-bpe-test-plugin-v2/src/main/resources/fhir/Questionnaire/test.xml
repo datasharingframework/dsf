@@ -1,0 +1,94 @@
+<Questionnaire xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/questionnaire|1.5.0" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/Questionnaire/test" />
+	<!-- version managed by bpe -->
+	<version value="#{version}" />
+	<!-- date managed by bpe -->
+	<date value="#{date}" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<item>
+		<linkId value="business-key" />
+		<type value="string" />
+		<text value="The business-key of the process execution" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="user-task-id" />
+		<type value="string" />
+		<text value="The user-task-id of the process execution" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="display-example" />
+		<type value="display" />
+		<text
+			value="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet." />
+	</item>
+	<item>
+		<linkId value="string-example" />
+		<type value="string" />
+		<text value="Add a string to test the string type" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="text-example" />
+		<type value="text" />
+		<text value="Add a text to test the text type" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="integer-example" />
+		<type value="integer" />
+		<text value="Add an integer number to test the integer type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="decimal-example" />
+		<type value="decimal" />
+		<text value="Add a decimal number to test the decimal type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="date-example" />
+		<type value="date" />
+		<text value="Add a date to test the date type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="time-example" />
+		<type value="time" />
+		<text value="Add a time to test the time type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="date-time-example" />
+		<type value="dateTime" />
+		<text value="Add a date-time to test the dateTime type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="url-example" />
+		<type value="url" />
+		<text value="Add the location of the pdf contract" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="reference-example" />
+		<type value="reference" />
+		<text value="Add the location (url) of the data-set that should be approved" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="boolean-example" />
+		<type value="boolean" />
+		<text value="Do you approve the release of the data-set?" />
+		<required value="false" />
+	</item>
+</Questionnaire>

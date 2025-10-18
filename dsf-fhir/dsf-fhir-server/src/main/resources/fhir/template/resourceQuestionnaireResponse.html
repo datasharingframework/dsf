@@ -9,6 +9,8 @@
 					<li><b>Questionnaire:</b> [[${questionnaireResponse.questionnaire}]]</li>
 					<li><b>Business-Key:</b> [[${questionnaireResponse.businessKey}]]</li>
 					<li><b>User-Task-Id:</b> [[${questionnaireResponse.userTaskId}]]</li>
+					<li th:if="${questionnaireResponse.authored}"><b>Authored:</b> [[${questionnaireResponse.authored}]]</li>
+					<li th:if="${questionnaireResponse.author and resource.status != 'in-progress'}"><b>Author:</b> [[${questionnaireResponse.author.system}]] | [[${questionnaireResponse.author.value}]]</li>
 				</th:block>
 			</div>
 		</div>
@@ -68,6 +70,7 @@
 						<ul class="error-list" th:for="${i.id}" th:if="${resource.status == 'in-progress'}"></ul>
 					</div>
 					<div class="row-submit" th:if="${resource.status == 'in-progress'}">
+						<input type="hidden" id="practitionerIdentifierValue" th:value="${practitionerIdentifierValue}" th:if="${practitionerIdentifierValue}" />
 						<button id="complete-questionnaire-response" type="submit" name="submit" class="submit" formnovalidate>Submit</button>
 					</div>
 				</fieldset>

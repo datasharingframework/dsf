@@ -1,0 +1,55 @@
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-practitioner" />
+	<version value="2.0.0" />
+	<name value="ProcessAuthorizationPractitioner" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-10-15" />
+	<fhirVersion value="4.0.1" />
+	<kind value="complex-type" />
+	<abstract value="false" />
+	<context>
+		<type value="element" />
+		<expression value="Coding" />
+	</context>
+	<type value="Extension" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Extension">
+			<path value="Extension" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="Extension.url">
+			<path value="Extension.url" />
+			<fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-practitioner" />
+		</element>
+		<element id="Extension.value[x]">
+			<path value="Extension.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="Coding" />
+			</type>
+			<binding>
+				<strength value="preferred" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/practitioner-role" />
+			</binding>
+		</element>
+		<element id="Extension.value[x].system">
+			<path value="Extension.value[x].system" />
+			<min value="1" />
+		</element>
+		<element id="Extension.value[x].code">
+			<path value="Extension.value[x].code" />
+			<min value="1" />
+		</element>
+	</differential>
+</StructureDefinition>

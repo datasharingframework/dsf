@@ -67,7 +67,8 @@ public class WebsocketConfig
 	{
 		return new QuestionnaireResponseHandler(operatonConfig.processEngine().getRepositoryService(),
 				pluginConfig.processPluginManager(), fhirConfig.fhirContext(),
-				operatonConfig.processEngine().getTaskService());
+				operatonConfig.processEngine().getTaskService(),
+				dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
 	@Bean

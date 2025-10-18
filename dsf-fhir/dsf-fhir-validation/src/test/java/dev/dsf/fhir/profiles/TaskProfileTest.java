@@ -41,7 +41,14 @@ public class TaskProfileTest
 	@Test
 	public void testTaskValidRequestedWithoutBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.REQUESTED);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.REQUESTED);
+		testTaskValid(task);
+	}
+
+	@Test
+	public void testTaskValidRequestedWithoutBusinessKeyForPractitioner()
+	{
+		Task task = createTaskForPractitionerRequester(Task.TaskStatus.REQUESTED);
 		testTaskValid(task);
 	}
 
@@ -62,7 +69,7 @@ public class TaskProfileTest
 	@Test
 	public void testTaskInvalidInProgressMissingBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.INPROGRESS);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.INPROGRESS);
 		testTaskInvalidMissingBusinessKey(task);
 	}
 
@@ -76,7 +83,7 @@ public class TaskProfileTest
 	@Test
 	public void testTaskInvalidCompletedMissingBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.COMPLETED);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.COMPLETED);
 		testTaskInvalidMissingBusinessKey(task);
 	}
 
@@ -90,15 +97,33 @@ public class TaskProfileTest
 	@Test
 	public void testTaskInvalidFailedMissingBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.FAILED);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.FAILED);
 		testTaskInvalidMissingBusinessKey(task);
 	}
 
 	private Task createTaskWithBusinessKey(Task.TaskStatus status)
 	{
-		Task task = createTask(status);
+		Task task = createTaskForOrganizationRequester(status);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("business-key");
+
+		return task;
+	}
+
+	private Task createTaskForOrganizationRequester(Task.TaskStatus status)
+	{
+		Task task = createTask(status);
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC");
+
+		return task;
+	}
+
+	private Task createTaskForPractitionerRequester(Task.TaskStatus status)
+	{
+		Task task = createTask(status);
+		task.getRequester().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue("foo@org.com");
 
 		return task;
 	}
@@ -111,8 +136,6 @@ public class TaskProfileTest
 		task.setStatus(status);
 		task.setIntent(Task.TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
 				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC");
 
