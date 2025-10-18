@@ -7,7 +7,7 @@
     logicalFilePath="db/db.camunda_engine.changelog-1.9.0.xml">
 
 	<changeSet author="camunda.org" id="db.camunda_engine.changelog-1.9.0">
-		<sqlFile dbms="postgresql" encoding="utf8" path="db/camunda/postgres_engine_7.23_to_7.24.sql" />
+		<sqlFile dbms="postgresql" encoding="utf8" path="bpe/db/camunda/postgres_engine_7.23_to_7.24.sql" />
 	</changeSet>
 
 </databaseChangeLog>
