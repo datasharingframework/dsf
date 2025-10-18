@@ -34,6 +34,8 @@ public abstract class Log4jInitializer
 	public static final String STYLE_JSON_LOGSTASH = "JSON_LOGSTASH";
 	public static final String STYLE_TEXT_MDC = "TEXT_MDC";
 	public static final String STYLE_TEXT = "TEXT";
+	public static final String STYLE_TEXT_COLOR_MDC = "TEXT_COLOR_MDC";
+	public static final String STYLE_TEXT_COLOR = "TEXT_COLOR";
 
 	public static final String LEVEL_TRACE = "TRACE";
 	public static final String LEVEL_DEBUG = "DEBUG";
@@ -74,10 +76,10 @@ public abstract class Log4jInitializer
 	{
 		properties = readJettyProperties();
 
-		consoleOutLayout = getLayout(LOG_CONSOLE_OUT_STYLE, STYLE_TEXT);
+		consoleOutLayout = getLayout(LOG_CONSOLE_OUT_STYLE, STYLE_TEXT_COLOR);
 		consoleOutLevel = getLevel(LOG_CONSOLE_OUT_LEVEL, LEVEL_INFO);
 
-		consoleErrLayout = getLayout(LOG_CONSOLE_ERR_STYLE, STYLE_TEXT);
+		consoleErrLayout = getLayout(LOG_CONSOLE_ERR_STYLE, STYLE_TEXT_COLOR);
 		consoleErrLevel = getLevel(LOG_CONSOLE_ERR_LEVEL, LEVEL_OFF);
 
 		fileLayout = getLayout(LOG_FILE_STYLE, STYLE_TEXT_MDC);
@@ -111,9 +113,13 @@ public abstract class Log4jInitializer
 		String value = getValue(parameter, defaultValue);
 
 		if (STYLE_TEXT.equalsIgnoreCase(value))
-			return new Log4jConfiguration.Log4jTextLayout();
+			return new Log4jConfiguration.Log4jTextLayout(false);
 		else if (STYLE_TEXT_MDC.equalsIgnoreCase(value))
-			return new Log4jConfiguration.Log4jTextMdcLayout();
+			return new Log4jConfiguration.Log4jTextMdcLayout(false);
+		else if (STYLE_TEXT_COLOR.equalsIgnoreCase(value))
+			return new Log4jConfiguration.Log4jTextLayout(true);
+		else if (STYLE_TEXT_COLOR_MDC.equalsIgnoreCase(value))
+			return new Log4jConfiguration.Log4jTextMdcLayout(true);
 		else if (STYLE_JSON_ECS.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jJsonLayout(TemplateUri.ECS);
 		else if (STYLE_JSON_GCP.equalsIgnoreCase(value))

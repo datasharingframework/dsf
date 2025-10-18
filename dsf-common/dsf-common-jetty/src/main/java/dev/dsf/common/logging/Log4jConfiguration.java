@@ -33,12 +33,22 @@ public class Log4jConfiguration extends AbstractConfiguration
 
 	public static final class Log4jTextLayout implements Log4jLayout
 	{
+		private final boolean color;
+
+		public Log4jTextLayout(boolean color)
+		{
+			this.color = color;
+		}
+
 		@Override
 		public StringLayout consoleLayout(Configuration configuration)
 		{
-			return PatternLayout.newBuilder().withPattern(
-					"%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
-					.build();
+			if (color)
+				return PatternLayout.newBuilder().withPattern(
+						"%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
+						.build();
+			else
+				return PatternLayout.newBuilder().withPattern("%p %t - %C{1}.%M(%L) | %m%n").build();
 		}
 
 		@Override
@@ -50,12 +60,22 @@ public class Log4jConfiguration extends AbstractConfiguration
 
 	public static final class Log4jTextMdcLayout implements Log4jLayout
 	{
+		private final boolean color;
+
+		public Log4jTextMdcLayout(boolean color)
+		{
+			this.color = color;
+		}
+
 		@Override
 		public StringLayout consoleLayout(Configuration configuration)
 		{
-			return PatternLayout.newBuilder().withPattern(
-					"%highlight{%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
-					.build();
+			if (color)
+				return PatternLayout.newBuilder().withPattern(
+						"%highlight{%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
+						.build();
+			else
+				return PatternLayout.newBuilder().withPattern("%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m%n").build();
 		}
 
 		@Override
