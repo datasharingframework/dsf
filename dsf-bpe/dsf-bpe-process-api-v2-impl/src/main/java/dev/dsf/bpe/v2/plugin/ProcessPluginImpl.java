@@ -26,7 +26,6 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.delegate.VariableScope;
 import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
-import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 import org.camunda.bpm.engine.variable.value.PrimitiveValue;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -454,7 +453,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 			VariableScope variableScope)
 	{
 		UserTaskListener target = get(UserTaskListener.class, className);
-		ClassDelegateUtil.applyFieldDeclaration(fieldDeclarations, target);
+		injectFields(target, fieldDeclarations, variableScope);
 
 		return new UserTaskListenerDelegate(getProcessPluginApi(), variablesFactory, target);
 	}

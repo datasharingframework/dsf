@@ -17,6 +17,7 @@ public class Cert
 	}
 
 	private String cn;
+	private String email;
 	private List<String> sans;
 	private Type type;
 	private List<File> targets;
@@ -24,6 +25,11 @@ public class Cert
 	public String getCn()
 	{
 		return cn;
+	}
+
+	public String getEmail()
+	{
+		return email;
 	}
 
 	public List<String> getSans()
@@ -44,8 +50,9 @@ public class Cert
 	@Override
 	public String toString()
 	{
-		return "Cert [" + (cn != null ? "cn=" + cn + ", " : "") + (sans != null ? "sans=" + sans + ", " : "")
-				+ (type != null ? "type=" + type + ", " : "") + (targets != null ? "targets=" + targets : "") + "]";
+		return "Cert [" + (cn != null ? "cn=" + cn + ", " : "") + (email != null ? "email=" + email + ", " : "")
+				+ (sans != null ? "sans=" + sans + ", " : "") + (type != null ? "type=" + type + ", " : "")
+				+ (targets != null ? "targets=" + targets : "") + "]";
 	}
 
 	public CertificationRequestConfig toCertificationRequestConfig()
@@ -59,6 +66,6 @@ public class Cert
 			default -> throw new IllegalArgumentException("Unexpected value: " + type);
 		};
 
-		return new CertificationRequestConfig(signer, cn, sans == null ? List.of() : sans);
+		return new CertificationRequestConfig(signer, cn, email, sans == null ? List.of() : sans);
 	}
 }

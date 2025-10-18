@@ -1,10 +1,16 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
@@ -17,7 +23,9 @@ import org.springframework.context.annotation.Bean;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.values.CreateQuestionnaireResponseValues;
+import dev.dsf.bpe.v2.constants.CodeSystems;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnUserTask;
+import dev.dsf.bpe.v2.constants.NamingSystems;
 import dev.dsf.bpe.v2.variables.Variables;
 
 /**
@@ -30,10 +38,111 @@ import dev.dsf.bpe.v2.variables.Variables;
  * To modify the behavior of the listener, for example to set default values in the created 'in-progress'
  * {@link QuestionnaireResponse}, extend this class, register it as a prototype {@link Bean} and specify the class name
  * as a task listener with event type 'create' in the BPMN.
+ * <p>
+ * This listener will add a questionnaire authorization extension to the {@link QuestionnaireResponse} if practitioner
+ * roles or practitioner identifiers are set. A single role or identifier can be configured via a BPMN field injections
+ * using fields <code>practitionerRole</code> and <code>practitioner</code> with a String constant or expression. To
+ * configure multiple roles or identifiers use fields <code>practitionerRoles</code> and <code>practitioners</code> with
+ * an expression to access a process variable of type <code>List&lt;String&gt;</code>. Note: To use field injects the
+ * fully qualified name of this class needs to be set as the task listener JavaClass.
+ * <p>
+ * This class (as is) does not need to be registered as a prototype {@link Bean}.
  */
 public class DefaultUserTaskListener implements UserTaskListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTaskListener.class);
+
+	protected static final String PROFILE_QUESTIONNAIRE_RESPONSE = "http://dsf.dev/fhir/StructureDefinition/questionnaire-response";
+
+	private static final record KeyAndValue(String key, String value)
+	{
+		static Function<String, KeyAndValue> fromString(String defaultSystem)
+		{
+			return keyAndValue ->
+			{
+				Objects.requireNonNull(keyAndValue, "keyAndValue");
+
+				String[] split = keyAndValue.split("\\|");
+
+				if (split.length == 1)
+					return new KeyAndValue(defaultSystem, split[0]);
+				if (split.length == 2)
+					return new KeyAndValue(split[0], split[1]);
+				else
+					throw new IllegalArgumentException("Invalid format: must be a simple 'value' for default key "
+							+ defaultSystem + " or 'key|value'");
+			};
+		}
+
+		Identifier toIdentifier()
+		{
+			return new Identifier().setSystem(key).setValue(value);
+		}
+
+		Coding toCoding()
+		{
+			return new Coding().setSystem(key).setCode(value);
+		}
+	}
+
+	private final Set<KeyAndValue> practitionerRoles = new HashSet<>();
+	private final Set<KeyAndValue> practitioners = new HashSet<>();
+
+	/**
+	 * @param practitionerRole
+	 *            does nothing if <code>null</code> or blank
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setPractitionerRole(String practitionerRole)
+	{
+		if (practitionerRole != null && !practitionerRole.isBlank())
+			setPractitionerRoles(List.of(practitionerRole));
+	}
+
+	/**
+	 * @param practitioner
+	 *            does nothing if <code>null</code> or blank
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setPractitioner(String practitioner)
+	{
+		if (practitioner != null && !practitioner.isBlank())
+			setPractitioners(List.of(practitioner));
+	}
+
+	/**
+	 * @param practitionerRoles
+	 *            does nothing if <code>null</code>, ignores <code>null</code> and blank values
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setPractitionerRoles(List<String> practitionerRoles)
+	{
+		if (practitionerRoles != null)
+		{
+			practitionerRoles.stream().filter(Objects::nonNull).filter(p -> !p.isBlank())
+					.map(KeyAndValue.fromString(CodeSystems.PractitionerRole.SYSTEM))
+					.forEach(this.practitionerRoles::add);
+		}
+	}
+
+	/**
+	 * @param practitioners
+	 *            does nothing if <code>null</code>, ignores <code>null</code> and blank values
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setPractitioners(List<String> practitioners)
+	{
+		if (practitioners != null)
+		{
+			practitioners.stream().filter(Objects::nonNull).filter(p -> !p.isBlank())
+					.map(KeyAndValue.fromString(NamingSystems.PractitionerIdentifier.SID))
+					.forEach(this.practitioners::add);
+		}
+	}
 
 	@Override
 	public void notify(ProcessPluginApi api, Variables variables,
@@ -89,6 +198,7 @@ public class DefaultUserTaskListener implements UserTaskListener
 			String questionnaireUrlWithVersion, String businessKey, String userTaskId)
 	{
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		questionnaireResponse.getMeta().addProfile(PROFILE_QUESTIONNAIRE_RESPONSE);
 		questionnaireResponse.setQuestionnaire(questionnaireUrlWithVersion);
 		questionnaireResponse.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
 
@@ -103,6 +213,13 @@ public class DefaultUserTaskListener implements UserTaskListener
 		api.getQuestionnaireResponseHelper().addItemLeafWithAnswer(questionnaireResponse,
 				BpmnUserTask.Codes.USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
+
+		Set<Identifier> practitioners = getPractitioners();
+		Set<Coding> practitionerRoles = getPractitionerRoles();
+
+		if (!practitioners.isEmpty() || !practitionerRoles.isEmpty())
+			questionnaireResponse.addExtension(api.getQuestionnaireResponseHelper()
+					.createQuestionnaireAuthorizationExtension(practitioners, practitionerRoles));
 
 		return questionnaireResponse;
 	}
@@ -185,5 +302,25 @@ public class DefaultUserTaskListener implements UserTaskListener
 			CreateQuestionnaireResponseValues createQuestionnaireResponseValues, QuestionnaireResponse afterCreate)
 	{
 		// Nothing to do in default behavior
+	}
+
+	/**
+	 * <i>Override this method if you do not want to configure practitioner roles via field-injection in BPMN</i>
+	 *
+	 * @return practitioner-role entries used in creating the questionnaire authorization extension
+	 */
+	protected Set<Coding> getPractitionerRoles()
+	{
+		return practitionerRoles.stream().map(KeyAndValue::toCoding).collect(Collectors.toUnmodifiableSet());
+	}
+
+	/**
+	 * <i>Override this method if you do not want to configure practitioner identifiers via field-injection in BPMN</i>
+	 *
+	 * @return practitioner entries used in creating the questionnaire authorization extension
+	 */
+	protected Set<Identifier> getPractitioners()
+	{
+		return practitioners.stream().map(KeyAndValue::toIdentifier).collect(Collectors.toUnmodifiableSet());
 	}
 }

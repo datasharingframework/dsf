@@ -63,6 +63,9 @@ public class RoleTest
 	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE = TestPractitionerIdentity.practitioner(
 			createFhirOrganization(MEMBER_IDENTIFIER).setActive(true),
 			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN = TestPractitionerIdentity.practitioner(
+			createFhirOrganization(MEMBER_IDENTIFIER).setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DSF_ADMIN", null));
 	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1 = TestPractitionerIdentity.practitioner(
 			createFhirOrganization(MEMBER_IDENTIFIER).setActive(true),
 			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "UAC_USER", null));
@@ -244,12 +247,29 @@ public class RoleTest
 		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
 
+	@Test
+	public void testRemoteRoleRecipientNotOkPractitioner() throws Exception
+	{
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE, okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN, okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1, okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2, okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_NOT_ACTIVE, okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES, okAffiliation()));
+	}
+
 	// --- --- ---
 
 	@Test
 	public void testLocalRoleRequesterOk() throws Exception
 	{
 		assertTrue(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, okAffiliation()));
+	}
+
+	@Test
+	public void testLocalRoleRequesterOkPractitionerAdmin() throws Exception
+	{
+		assertTrue(local.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN, okAffiliation()));
 	}
 
 	@Test
@@ -396,6 +416,12 @@ public class RoleTest
 	public void testLocalRolePractitionerRequesterOk() throws Exception
 	{
 		assertTrue(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE, okAffiliation()));
+	}
+
+	@Test
+	public void testLocalRolePractitionerAdminRequesterOk() throws Exception
+	{
+		assertTrue(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN, okAffiliation()));
 	}
 
 	@Test

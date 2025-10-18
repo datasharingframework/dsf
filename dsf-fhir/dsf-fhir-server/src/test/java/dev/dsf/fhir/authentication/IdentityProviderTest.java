@@ -355,12 +355,14 @@ public class IdentityProviderTest
 	{
 		IdentityProvider provider = createIdentityProvider(List.of(createMappingWithEmail(LOCAL_PRACTITIONER_MAIL)));
 
-		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
-		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
-
+		when(credentials.getStringClaimOrDefault("iss", "")).thenReturn("https://iss");
+		when(credentials.getStringClaimOrDefault("sub", "")).thenReturn("sub");
+		when(credentials.getStringClaimOrDefault("email", "sub.iss@oidc.invalid")).thenReturn(LOCAL_PRACTITIONER_MAIL);
 		when(credentials.getStringClaimOrDefault("family_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_FAMILY);
 		when(credentials.getStringClaimOrDefault("given_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_GIVEN);
-		when(credentials.getStringClaimOrDefault("email", "")).thenReturn(LOCAL_PRACTITIONER_MAIL);
+
+		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
+
 		when(credentials.getIdToken())
 				.thenReturn(Map.of("realm_access", Map.of("roles", new String[] { TOKEN_ROLE1 })));
 		when(credentials.getAccessToken()).thenReturn(
@@ -381,6 +383,8 @@ public class IdentityProviderTest
 		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE2_CLIENT + "." + TOKEN_ROLE2))
 				.thenReturn(List.of(PRACTIONER_ROLE3));
 		when(roleConfig.getPractitionerRolesForTokenGroup(TOKEN_GROUP)).thenReturn(List.of(PRACTIONER_ROLE4));
+
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(credentials);
 		assertNotNull(i);
@@ -449,7 +453,7 @@ public class IdentityProviderTest
 
 		when(credentials.getStringClaimOrDefault("iss", "")).thenReturn("https://iss");
 		when(credentials.getStringClaimOrDefault("sub", "")).thenReturn("sub");
-		when(credentials.getStringClaimOrDefault("email", "")).thenReturn(LOCAL_PRACTITIONER_MAIL);
+		when(credentials.getStringClaimOrDefault("email", "sub.iss@oidc.invalid")).thenReturn(LOCAL_PRACTITIONER_MAIL);
 		when(credentials.getStringClaimOrDefault("family_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_FAMILY);
 		when(credentials.getStringClaimOrDefault("given_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_GIVEN);
 		when(credentials.getIdToken())
@@ -458,6 +462,7 @@ public class IdentityProviderTest
 				Map.of("resource_access", Map.of(TOKEN_ROLE2_CLIENT, Map.of("roles", new String[] { TOKEN_ROLE2 })),
 						"groups", new String[] { TOKEN_GROUP }));
 		when(credentials.getUserId()).thenReturn("user-id");
+
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
 
 		Identity i = provider.getIdentity(credentials);
@@ -465,7 +470,7 @@ public class IdentityProviderTest
 
 		verify(credentials).getStringClaimOrDefault("iss", "");
 		verify(credentials).getStringClaimOrDefault("sub", "");
-		verify(credentials).getStringClaimOrDefault("email", "");
+		verify(credentials).getStringClaimOrDefault("email", "sub.iss@oidc.invalid");
 		verify(credentials).getStringClaimOrDefault("family_name", "");
 		verify(credentials).getStringClaimOrDefault("given_name", "");
 		verify(credentials).getIdToken();

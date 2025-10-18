@@ -23,7 +23,7 @@ public abstract class AbstractTest extends AbstractServiceDelegate
 	{
 		PluginTestExecutor.execute(this, output(variables, "test-method-succeeded"),
 				output(variables, "test-method-failed"), () -> variables.updateTask(variables.getStartTask()),
-				execution, variables);
+				_ -> null, execution, variables);
 	}
 
 	private Consumer<String> output(Variables variables, String code)

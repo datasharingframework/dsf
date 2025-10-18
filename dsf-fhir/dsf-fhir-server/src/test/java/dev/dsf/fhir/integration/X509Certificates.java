@@ -32,6 +32,10 @@ import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 
 public class X509Certificates extends ExternalResource
 {
+	public static final String PRACTITIONER_CLIENT_MAIL = "practitioner@invalid";
+	public static final String MINIMAL_CLIENT_MAIL = "minimal@invalid";
+	public static final String ADMIN_CLIENT_MAIL = "admin@invalid";
+
 	public static record CertificateAndPrivateKey(X509Certificate caCertificate, X509Certificate certificate,
 			PrivateKey privateKey)
 	{
@@ -72,6 +76,7 @@ public class X509Certificates extends ExternalResource
 	private CertificateAndPrivateKey serverCertificate;
 	private CertificateAndPrivateKey clientCertificate;
 	private CertificateAndPrivateKey practitionerClientCertificate;
+	private CertificateAndPrivateKey adminClientCertificate;
 	private CertificateAndPrivateKey minimalClientCertificate;
 	private CertificateAndPrivateKey externalClientCertificate;
 
@@ -82,6 +87,8 @@ public class X509Certificates extends ExternalResource
 	private Path externalClientCertificatePrivateKeyFile;
 	private Path practitionerClientCertificateFile;
 	private Path practitionerClientCertificatePrivateKeyFile;
+	private Path adminClientCertificateFile;
+	private Path adminClientCertificatePrivateKeyFile;
 	private Path minimalClientCertificateFile;
 	private Path minimalClientCertificatePrivateKeyFile;
 
@@ -117,6 +124,11 @@ public class X509Certificates extends ExternalResource
 	public CertificateAndPrivateKey getPractitionerClientCertificate()
 	{
 		return practitionerClientCertificate;
+	}
+
+	public CertificateAndPrivateKey getAdminClientCertificate()
+	{
+		return adminClientCertificate;
 	}
 
 	public CertificateAndPrivateKey getMinimalClientCertificate()
@@ -164,6 +176,16 @@ public class X509Certificates extends ExternalResource
 		return practitionerClientCertificatePrivateKeyFile;
 	}
 
+	public Path getAdminClientCertificateFile()
+	{
+		return adminClientCertificateFile;
+	}
+
+	public Path getAdminClientCertificatePrivateKeyFile()
+	{
+		return adminClientCertificatePrivateKeyFile;
+	}
+
 	public Path getMinimalClientCertificateFile()
 	{
 		return minimalClientCertificateFile;
@@ -186,6 +208,8 @@ public class X509Certificates extends ExternalResource
 		Path externalClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path practitionerClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path practitionerClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path adminClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path adminClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path minimalClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path minimalClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 
@@ -223,16 +247,27 @@ public class X509Certificates extends ExternalResource
 		// -- practitioner client
 		CertificationRequestAndPrivateKey practitionerClientRequest = CertificationRequest
 				.builder(ca, "DE", null, null, null, null, "practitioner-client").generateKeyPair()
-				.setEmail("practitioner@test.org").build();
+				.setEmail(PRACTITIONER_CLIENT_MAIL).build();
 		X509Certificate practitionerClientCertificate = ca.signClientCertificate(practitionerClientRequest);
 		PemWriter.writeCertificate(practitionerClientCertificate, practitionerClientCertificateFile);
 		PemWriter.writePrivateKey(practitionerClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
 				.toFile(practitionerClientCertificatePrivateKeyFile);
 		// practitioner client --
 
+		// -- admin client
+		CertificationRequestAndPrivateKey adminClientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "admin-client").generateKeyPair().setEmail(ADMIN_CLIENT_MAIL)
+				.build();
+		X509Certificate adminClientCertificate = ca.signClientCertificate(adminClientRequest, Period.ofDays(1));
+		PemWriter.writeCertificate(adminClientCertificate, adminClientCertificateFile);
+		PemWriter.writePrivateKey(adminClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(adminClientCertificatePrivateKeyFile);
+		// admin client --
+
 		// -- minimal client
 		CertificationRequestAndPrivateKey minimalClientRequest = CertificationRequest
-				.builder(ca, "DE", null, null, null, null, "minimal-client").generateKeyPair().build();
+				.builder(ca, "DE", null, null, null, null, "minimal-client").generateKeyPair()
+				.setEmail(MINIMAL_CLIENT_MAIL).build();
 		X509Certificate minimalClientCertificate = ca.signClientCertificate(minimalClientRequest, Period.ofDays(1));
 		PemWriter.writeCertificate(minimalClientCertificate, minimalClientCertificateFile);
 		PemWriter.writePrivateKey(minimalClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
@@ -248,6 +283,8 @@ public class X509Certificates extends ExternalResource
 				externalClientRequest.getPrivateKey());
 		this.practitionerClientCertificate = new CertificateAndPrivateKey(caCertificate, practitionerClientCertificate,
 				practitionerClientRequest.getPrivateKey());
+		this.adminClientCertificate = new CertificateAndPrivateKey(caCertificate, adminClientCertificate,
+				adminClientRequest.getPrivateKey());
 		this.minimalClientCertificate = new CertificateAndPrivateKey(caCertificate, minimalClientCertificate,
 				minimalClientRequest.getPrivateKey());
 
@@ -258,13 +295,16 @@ public class X509Certificates extends ExternalResource
 		this.externalClientCertificatePrivateKeyFile = externalClientCertificatePrivateKeyFile;
 		this.practitionerClientCertificateFile = practitionerClientCertificateFile;
 		this.practitionerClientCertificatePrivateKeyFile = practitionerClientCertificatePrivateKeyFile;
+		this.adminClientCertificateFile = adminClientCertificateFile;
+		this.adminClientCertificatePrivateKeyFile = adminClientCertificatePrivateKeyFile;
 		this.minimalClientCertificateFile = minimalClientCertificateFile;
 		this.minimalClientCertificatePrivateKeyFile = minimalClientCertificatePrivateKeyFile;
 
 		filesToDelete = List.of(caCertificateFile, clientCertificateFile, clientCertificatePrivateKeyFile,
 				externalClientCertificateFile, externalClientCertificatePrivateKeyFile,
 				practitionerClientCertificateFile, practitionerClientCertificatePrivateKeyFile,
-				minimalClientCertificateFile, minimalClientCertificatePrivateKeyFile);
+				adminClientCertificateFile, adminClientCertificatePrivateKeyFile, minimalClientCertificateFile,
+				minimalClientCertificatePrivateKeyFile);
 	}
 
 	private void deleteX509Certificates()

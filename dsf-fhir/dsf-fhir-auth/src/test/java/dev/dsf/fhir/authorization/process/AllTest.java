@@ -1,7 +1,6 @@
 package dev.dsf.fhir.authorization.process;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.stream.Stream;
 
@@ -26,6 +25,9 @@ public class AllTest
 	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE = TestPractitionerIdentity.practitioner(
 			new Organization().setActive(true),
 			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN = TestPractitionerIdentity.practitioner(
+			new Organization().setActive(true),
+			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DSF_ADMIN", null));
 	private static final Identity LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1 = TestPractitionerIdentity.practitioner(
 			new Organization().setActive(true),
 			new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "UAC_USER", null));
@@ -105,9 +107,26 @@ public class AllTest
 	}
 
 	@Test
+	public void testRemoteAllRecipientNotOkPractitioner() throws Exception
+	{
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE, Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE1, Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_BAD_ROLE2, Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_NOT_ACTIVE, Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_NO_ROLES, Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN, Stream.empty()));
+	}
+
+	@Test
 	public void testLocalAllRequesterOk() throws Exception
 	{
 		assertTrue(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllRequesterOkPractitionerAdmin() throws Exception
+	{
+		assertTrue(local.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN, Stream.empty()));
 	}
 
 	@Test
@@ -168,6 +187,12 @@ public class AllTest
 	public void testLocalAllPractitionerRequesterOk() throws Exception
 	{
 		assertTrue(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE, Stream.empty()));
+	}
+
+	@Test
+	public void testLocalAllPractitionerRequesterOkPractitionerAdmin() throws Exception
+	{
+		assertTrue(localPractitioner.isRequesterAuthorized(LOCAL_PRACTITIONER_ORG_ACTIVE_DSF_ADMIN, Stream.empty()));
 	}
 
 	@Test

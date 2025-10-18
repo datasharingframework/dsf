@@ -15,7 +15,7 @@ public class QuestionnaireResponseHistoryIdentityFilter extends QuestionnaireRes
 
 	public QuestionnaireResponseHistoryIdentityFilter(Identity identity)
 	{
-		super(identity, HISTORY_ROLE);
+		super(identity, HistoryIdentityFilter.RESOURCE_COLUMN, HISTORY_ROLE);
 	}
 
 	@Override

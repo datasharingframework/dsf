@@ -3,6 +3,7 @@ package dev.dsf.fhir.integration;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -220,6 +221,9 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 		created.getItem().stream().filter(i -> "display-id".equals(i.getLinkId())).findFirst()
 				.ifPresent(i -> i.setText("Response Test Value"));
 		created.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.getAuthor().setType("Practitioner").getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
 
 		QuestionnaireResponse updated = getMinimalWebserviceClient().update(created);
 

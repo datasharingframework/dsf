@@ -41,6 +41,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.common.ui.theme.Theme;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
@@ -79,6 +80,8 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 			"&lt;id value=\"(" + UUID + ")\"/&gt;\\n([ ]*)&lt;meta&gt;\\n([ ]*)&lt;versionId value=\"([0-9]+)\"/&gt;");
 	private static final Pattern JSON_ID_UUID_AND_VERSION_PATTERN = Pattern
 			.compile("\"id\": \"(" + UUID + ")\",\\n([ ]*)\"meta\": \\{\\n([ ]*)\"versionId\": \"([0-9]+)\",");
+
+	private static final String CODE_SYSTEM_PRACTITIONER_ROLE = "http://dsf.dev/fhir/CodeSystem/practitioner-role";
 
 	private final String serverBaseUrl;
 	private final Theme theme;
@@ -142,6 +145,27 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		context.setVariable("heading", getHeading(resource, uriInfo));
 		context.setVariable("username",
 				securityContext.getUserPrincipal() instanceof Identity i ? i.getDisplayName() : null);
+
+		String usernameTitle = "";
+		if (securityContext.getUserPrincipal() instanceof PractitionerIdentity p)
+		{
+			if (p.getPractitionerIdentifierValue().isPresent())
+				usernameTitle += "Mail: " + p.getPractitionerIdentifierValue().get();
+			if (p.getPractitionerIdentifierValue().isPresent() && !p.getPractionerRoles().isEmpty())
+				usernameTitle += " - ";
+			if (!p.getPractionerRoles().isEmpty())
+				usernameTitle += p.getPractionerRoles().stream()
+						.map(c -> CODE_SYSTEM_PRACTITIONER_ROLE.equals(c.getSystem()) ? c.getCode()
+								: c.getSystem() + "|" + c.getCode())
+						.collect(Collectors.joining(", ", "Roles: ", ""));
+		}
+		context.setVariable("usernameTitle", usernameTitle);
+
+		context.setVariable("practitionerIdentifierValue",
+				securityContext.getUserPrincipal() instanceof PractitionerIdentity p
+						? p.getPractitionerIdentifierValue().orElse(null)
+						: null);
+
 		context.setVariable("openid", "OPENID".equals(securityContext.getAuthenticationScheme()));
 		context.setVariable("xml", toXml(mediaType, resource));
 		context.setVariable("json", toJson(mediaType, resource));

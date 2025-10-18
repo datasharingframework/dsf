@@ -27,13 +27,11 @@ public interface Recipient extends WithAuthorization
 
 	boolean recipientMatches(Extension recipientExtension);
 
-	boolean isRecipientAuthorized(Identity recipientUser, Stream<OrganizationAffiliation> recipientAffiliations);
+	boolean isRecipientAuthorized(Identity recipient, Stream<OrganizationAffiliation> recipientAffiliations);
 
-	default boolean isRecipientAuthorized(Identity recipientUser,
-			Collection<OrganizationAffiliation> recipientAffiliations)
+	default boolean isRecipientAuthorized(Identity recipient, Collection<OrganizationAffiliation> recipientAffiliations)
 	{
-		return isRecipientAuthorized(recipientUser,
-				recipientAffiliations == null ? null : recipientAffiliations.stream());
+		return isRecipientAuthorized(recipient, recipientAffiliations == null ? null : recipientAffiliations.stream());
 	}
 
 	Extension toRecipientExtension();
