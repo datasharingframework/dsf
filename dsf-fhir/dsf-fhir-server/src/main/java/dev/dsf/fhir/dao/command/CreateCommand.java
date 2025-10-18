@@ -30,6 +30,7 @@ import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.ResourceCreatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -247,12 +248,13 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (responseResult == null)
 		{
 			// retrieving the latest resource from db to include updated references
-			Resource createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
-					createdResource);
+			R createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection, createdResource);
+
+			referenceCleaner.cleanLiteralReferences(createdResourceWithResolvedReferences);
+
 			try
 			{
-				referenceCleaner.cleanLiteralReferences(createdResourceWithResolvedReferences);
-				eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResourceWithResolvedReferences));
+				eventHandler.handleEvent(createEvent(createdResourceWithResolvedReferences));
 			}
 			catch (Exception e)
 			{
@@ -260,6 +262,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				logger.warn("Error while handling resource created event: {} - {}", e.getClass().getName(),
 						e.getMessage());
 			}
+
+			modifyResponseResource(createdResourceWithResolvedReferences);
 
 			IdType location = createdResourceWithResolvedReferences.getIdElement().withServerBase(serverBase,
 					createdResourceWithResolvedReferences.getResourceType().name());
@@ -302,6 +306,15 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			return Optional.of(resultEntry);
 		}
+	}
+
+	protected ResourceCreatedEvent createEvent(R eventResource)
+	{
+		return eventGenerator.newResourceCreatedEvent(eventResource);
+	}
+
+	protected void modifyResponseResource(R responseResource)
+	{
 	}
 
 	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource)

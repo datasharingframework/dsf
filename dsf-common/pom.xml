@@ -18,6 +18,7 @@
 		<module>dsf-common-docker-secrets-reader</module>
 		<module>dsf-common-documentation</module>
 		<module>dsf-common-jetty</module>
+		<module>dsf-common-oidc</module>
 		<module>dsf-common-status</module>
 		<module>dsf-common-ui</module>
 	</modules>
@@ -52,6 +53,11 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-build-info-reader</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-config</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -77,6 +83,11 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-oidc</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-status</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -84,6 +95,12 @@
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-ui</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>de.hs-heilbronn.mi</groupId>
+				<artifactId>crypto-utils</artifactId>
+				<version>${crypto-utils.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

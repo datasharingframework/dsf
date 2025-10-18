@@ -42,6 +42,8 @@ import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.ResourceCreatedEvent;
+import dev.dsf.fhir.event.ResourceUpdatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -194,8 +196,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		referenceCleaner.cleanLiteralReferences(createdResource);
 
-		eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
-
 		if (afterCreate != null)
 			afterCreate.accept(createdResource);
 
@@ -252,8 +252,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private Optional<OperationOutcome> resolveLogicalReference(Resource resource, ResourceReference reference,
 			Connection connection)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(getCurrentIdentity(), reference,
-				connection);
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
@@ -292,11 +291,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				referenceResolver.checkLiteralExternalReference(resource, reference);
 
-			case LOGICAL ->
-				referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
+			case LOGICAL -> referenceResolver.checkLogicalReference(resource, reference, connection);
 
-			case CANONICAL ->
-				referenceResolver.checkCanonicalReference(getCurrentIdentity(), resource, reference, connection);
+			case CANONICAL -> referenceResolver.checkCanonicalReference(resource, reference, connection);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
@@ -309,8 +306,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
 	{
-		Optional<String> ifNoneExistHeader = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST,
-				Constants.HEADER_IF_NONE_EXIST_LC);
+		Optional<String> ifNoneExistHeader = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST);
 
 		if (ifNoneExistHeader.isEmpty())
 			return; // header not found, nothing to check against
@@ -377,7 +373,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	/**
 	 * Override to modify the given resource before db insert, throw {@link WebApplicationException} to interrupt the
-	 * normal flow
+	 * normal flow.
+	 * <p>
+	 * Default implementation calls the {@link #eventHandler} with a {@link ResourceCreatedEvent} for the created
+	 * resource.
 	 *
 	 * @param resource
 	 *            not <code>null</code>
@@ -389,7 +388,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	 */
 	protected Consumer<R> preCreate(R resource) throws WebApplicationException
 	{
-		return null;
+		return createdResource -> eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 	}
 
 	@Override
@@ -605,8 +604,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		referenceCleaner.cleanLiteralReferences(updatedResource);
 
-		eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
-
 		if (afterUpdate != null)
 			afterUpdate.accept(updatedResource);
 
@@ -620,7 +617,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	/**
 	 * Override to modify the given resource before db update, throw {@link WebApplicationException} to interrupt the
-	 * normal flow. Path id vs. resource.id.idPart is checked before this method is called
+	 * normal flow. Path id vs. resource.id.idPart is checked before this method is called.
+	 * <p>
+	 * Default implementation calls the {@link #eventHandler} with a {@link ResourceUpdatedEvent} for the updated
+	 * resource.
 	 *
 	 * @param resource
 	 *            not <code>null</code>
@@ -632,7 +632,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	 */
 	protected Consumer<R> preUpdate(R resource)
 	{
-		return null;
+		return updatedResource -> eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 	}
 
 	@Override

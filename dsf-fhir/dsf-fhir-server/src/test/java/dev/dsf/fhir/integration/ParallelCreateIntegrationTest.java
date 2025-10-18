@@ -516,7 +516,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				List.of("COS"));
 
 		return createBundle(bundleType, a1, a2,
-				(a, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
+				(_, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_PARENT
 						+ "&participating-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_MEMBER));
@@ -558,7 +558,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				List.of("DIC", "COS"));
 
 		return createBundle(bundleType, oA1, oA2,
-				(a, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
+				(_, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_PARENT
 						+ "&participating-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_MEMBER));
@@ -652,7 +652,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 		activityDefinitionDao.create(createActivityDefinition());
 
 		Bundle bundle = createBundle(BundleType.TRANSACTION, createTask(),
-				(t, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
+				(_, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
 				2);
 
 		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.TRANSACTIONRESPONSE);
@@ -666,7 +666,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 		activityDefinitionDao.create(createActivityDefinition());
 
 		Bundle bundle = createBundle(BundleType.BATCH, createTask(),
-				(t, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
+				(_, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
 				2);
 
 		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.BATCHRESPONSE);

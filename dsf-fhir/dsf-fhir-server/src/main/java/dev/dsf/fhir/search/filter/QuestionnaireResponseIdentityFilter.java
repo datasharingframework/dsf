@@ -2,40 +2,92 @@ package dev.dsf.fhir.search.filter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ResourceType;
 
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 
 public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 {
+	private static final FhirServerRole SEARCH_ROLE = FhirServerRoleImpl.search(ResourceType.QuestionnaireResponse);
+	private static final FhirServerRole READ_ROLE = FhirServerRoleImpl.read(ResourceType.QuestionnaireResponse);
+
+	private static final String RESOURCE_COLUMN = "questionnaire_response";
+
+	private final String resourceColumn;
+	private final FhirServerRole operationRole;
+
 	public QuestionnaireResponseIdentityFilter(Identity identity)
 	{
+		this(identity, RESOURCE_COLUMN, SEARCH_ROLE);
+	}
+
+	public QuestionnaireResponseIdentityFilter(Identity identity, String resourceColumn, FhirServerRole operationRole)
+	{
 		super(identity, null, null);
+
+		this.resourceColumn = resourceColumn;
+		this.operationRole = operationRole;
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		// read allowed for local users
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.READ))
-			return "";
+		if (identity.isLocalIdentity() && identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE))
+		{
+			if (identity instanceof OrganizationIdentity
+					|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN")))
+				return "";
+			else if (identity instanceof PractitionerIdentity p && p.getPractitionerIdentifierValue().isPresent())
+				return "EXISTS (SELECT 1 FROM jsonb_array_elements(" + resourceColumn + "->'extension') AS authExt "
+						+ "WHERE authExt->>'url' = 'http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization' "
+						+ "AND EXISTS (SELECT 1 FROM jsonb_array_elements(authExt->'extension') AS ext "
+						+ "WHERE ((ext->>'url' = 'practitioner' AND ext->'valueIdentifier'->>'value' = ?) "
+						+ "OR (ext->>'url' = 'practitioner-role' AND ("
+						+ "SELECT COUNT(*) FROM jsonb_array_elements(?::jsonb) AS allowed_roles "
+						+ "WHERE allowed_roles->>'system' = ext->'valueCoding'->>'system' AND allowed_roles->>'code' = ext->'valueCoding'->>'code'"
+						+ ") > 0))))";
+		}
 
-		// read not allowed for non local users
-		else
-			return "FALSE";
+		return "FALSE";
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		// no parameters
-		return 0;
+		if (identity.isLocalIdentity() && identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE)
+				&& identity instanceof PractitionerIdentity p && !p.hasPractionerRole("DSF_ADMIN")
+				&& p.getPractitionerIdentifierValue().isPresent())
+			return 2;
+		else
+			return 0;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException
 	{
-		// no parameters to modify
+		if (identity.isLocalIdentity() && identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE)
+				&& identity instanceof PractitionerIdentity p && !p.hasPractionerRole("DSF_ADMIN")
+				&& p.getPractitionerIdentifierValue().isPresent())
+		{
+			if (subqueryParameterIndex == 1)
+				statement.setString(parameterIndex, p.getPractitionerIdentifierValue().get());
+			else if (subqueryParameterIndex == 2)
+				statement.setString(parameterIndex, toJson(p.getPractionerRoles()));
+		}
+	}
+
+	private String toJson(Set<Coding> roles)
+	{
+		return roles.stream().map(c -> "{\"system\":\"%s\",\"code\":\"%s\"}".formatted(c.getSystem(), c.getCode()))
+				.collect(Collectors.joining(",", "[", "]"));
 	}
 }

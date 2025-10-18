@@ -8,9 +8,11 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,6 @@ public final class DbMigrator
 		}
 	}
 
-
 	private static final class LiquibaseConfigProvider extends AbstractMapConfigurationValueProvider
 	{
 		static final String LIQUIBASE_CHANGELOGLOCK_WAIT_TIME = "liquibase.changelogLockWaitTimeInMinutes";
@@ -74,6 +75,9 @@ public final class DbMigrator
 			return "DSF config";
 		}
 	}
+
+	private static final Set<String> POSTGRES_TRY_AGAIN_ERROR_MESSAGES = Set.of("the database system is starting up",
+			"the database system is not yet accepting connections");
 
 	private final DbMigratorConfig config;
 
@@ -204,6 +208,19 @@ public final class DbMigrator
 				try
 				{
 					Thread.sleep(10_000);
+				}
+				catch (InterruptedException e1)
+				{
+				}
+				retryOnConnectException(--times, run);
+			}
+			else if (cause instanceof PSQLException p
+					&& POSTGRES_TRY_AGAIN_ERROR_MESSAGES.contains(p.getServerErrorMessage().getMessage()) && times > 1)
+			{
+				logger.warn("PSQLException ({}): trying again in 5s", p.getServerErrorMessage().getMessage());
+				try
+				{
+					Thread.sleep(5_000);
 				}
 				catch (InterruptedException e1)
 				{

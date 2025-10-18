@@ -278,7 +278,7 @@ public class WebSocketSubscriptionManagerImpl
 
 		// defensive copy because list could be changed by other threads while we are reading
 		List<SessionIdAndRemoteAsync> remotes = new ArrayList<>(optRemotes.get());
-		remotes.stream().filter(r -> userHasReadAccess(r, event)).forEach(r -> send(r, text));
+		remotes.stream().filter(r -> userHasReadAndWebsocketAccess(r, event)).forEach(r -> send(r, text));
 	}
 
 	private IParser newXmlParser()
@@ -298,7 +298,7 @@ public class WebSocketSubscriptionManagerImpl
 		return p;
 	}
 
-	private boolean userHasReadAccess(SessionIdAndRemoteAsync sessionAndRemote, Event event)
+	private boolean userHasReadAndWebsocketAccess(SessionIdAndRemoteAsync sessionAndRemote, Event event)
 	{
 		Optional<AuthorizationRule<?>> optRule = authorizationRuleProvider
 				.getAuthorizationRule(event.getResourceType());
@@ -306,18 +306,23 @@ public class WebSocketSubscriptionManagerImpl
 		{
 			@SuppressWarnings("unchecked")
 			AuthorizationRule<Resource> rule = (AuthorizationRule<Resource>) optRule.get();
-			Optional<String> optReason = rule.reasonReadAllowed(sessionAndRemote.identity, event.getResource());
+			Optional<String> readAllowedReason = rule.reasonReadAllowed(sessionAndRemote.identity, event.getResource());
+			Optional<String> websocketAllowedReason = rule.reasonWebsocketAllowed(sessionAndRemote.identity,
+					event.getResource());
 
-			if (optReason.isPresent())
+			if (readAllowedReason.isPresent() && websocketAllowedReason.isPresent())
 			{
-				logger.info("Sending event {} to user {}, read of {} allowed {}", event.getClass().getSimpleName(),
-						sessionAndRemote.identity.getName(), event.getResourceType().getSimpleName(), optReason.get());
+				logger.info("Sending event {} to user {}, websocket access and read of {} allowed {}, {}",
+						event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
+						event.getResourceType().getSimpleName(), websocketAllowedReason.get(),
+						readAllowedReason.isPresent());
 				return true;
 			}
 			else
 			{
-				logger.warn("Skipping event {} for user {}, read of {} not allowed", event.getClass().getSimpleName(),
-						sessionAndRemote.identity.getName(), event.getResourceType().getSimpleName());
+				logger.warn("Skipping event {} for user {}, websocket access or read of {} not allowed",
+						event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
+						event.getResourceType().getSimpleName());
 				return false;
 			}
 		}

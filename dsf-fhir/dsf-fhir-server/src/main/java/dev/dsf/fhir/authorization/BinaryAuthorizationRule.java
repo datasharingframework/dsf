@@ -77,8 +77,7 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 		{
 			Optional<ResourceReference> ref = createIfLiteralInternalOrLogicalReference("Binary.securityContext",
 					newResource.getSecurityContext());
-			Optional<Resource> securityContextOpt = ref
-					.flatMap(r -> referenceResolver.resolveReference(identity, r, connection));
+			Optional<Resource> securityContextOpt = ref.flatMap(r -> referenceResolver.resolveReference(r, connection));
 
 			return securityContextOpt.isPresent() && rules.containsKey(securityContextOpt.get().getClass());
 		}

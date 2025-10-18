@@ -1,18 +1,20 @@
 package dev.dsf.fhir.history.filter;
 
-import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ResourceType;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.search.filter.TaskIdentityFilter;
 
 public class TaskHistoryIdentityFilter extends TaskIdentityFilter implements HistoryIdentityFilter
 {
-	private static final String RESOURCE_TYPE = Task.class.getAnnotation(ResourceDef.class).name();
+	private static final FhirServerRole HISTORY_ROLE = FhirServerRoleImpl.history(ResourceType.Task);
+	private static final String RESOURCE_TYPE = ResourceType.Task.name();
 
 	public TaskHistoryIdentityFilter(Identity identity)
 	{
-		super(identity, HistoryIdentityFilter.RESOURCE_COLUMN);
+		super(identity, HistoryIdentityFilter.RESOURCE_COLUMN, HISTORY_ROLE);
 	}
 
 	@Override

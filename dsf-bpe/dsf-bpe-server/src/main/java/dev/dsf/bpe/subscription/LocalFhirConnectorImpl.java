@@ -282,7 +282,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	}
 
 	@EventListener({ ContextClosedEvent.class })
-	public void onContextClosedEvent(ContextClosedEvent event)
+	public void onContextClosedEvent()
 	{
 		clientProvider.disconnectAll();
 	}

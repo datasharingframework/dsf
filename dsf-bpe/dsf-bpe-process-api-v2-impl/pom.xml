@@ -49,6 +49,14 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.tukaani</groupId>
+			<artifactId>xz</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
 			<version>${apache.tika.version}</version>
@@ -154,7 +162,7 @@
 								<artifactItem>
 									<groupId>org.xerial</groupId>
 									<artifactId>sqlite-jdbc</artifactId>
-									<version>3.45.1.0</version>
+									<version>3.49.1.0</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
@@ -196,10 +204,14 @@
 									<artifactId>jakarta-regexp</artifactId>
 									<version>1.4</version>
 								</artifactItem>
-								<!--<artifactItem>
+								<artifactItem>
 									<groupId>org.apache.commons</groupId>
 									<artifactId>commons-compress</artifactId>
-								</artifactItem>-->
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.tukaani</groupId>
+									<artifactId>xz</artifactId>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.fhir</groupId>
 									<artifactId>ucum</artifactId>

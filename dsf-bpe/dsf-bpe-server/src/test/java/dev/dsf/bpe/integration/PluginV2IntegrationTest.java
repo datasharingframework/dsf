@@ -85,6 +85,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
+	public void startFhirClientConfigProviderTest() throws Exception
+	{
+		executePluginTest(createTestTask("FhirClientConfigProvider"));
+	}
+
+	@Test
 	public void startSendTaskTest() throws Exception
 	{
 		executePluginTest(createTestTask("SendTaskTest"));
@@ -118,6 +124,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public void startJsonVariableTest() throws Exception
 	{
 		executePluginTest(createTestTask("JsonVariableTest"));
+	}
+
+	@Test
+	public void startCompressionServiceTest() throws Exception
+	{
+		executePluginTest(createTestTask("CompressionServiceTest"));
 	}
 
 	@Test
@@ -250,5 +262,35 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public void startSensitiveDataLoggerTest() throws Exception
 	{
 		executePluginTest(createTestTask("DataLoggerTest"));
+	}
+
+	@Test
+	public void startAutowireTest() throws Exception
+	{
+		executePluginTest(createTestTask("AutowireTest"));
+	}
+
+	@Test
+	public void startQuestionnaireTest() throws Exception
+	{
+		executePluginTest(createTestTask("QuestionnaireTest"));
+	}
+
+	@Test
+	public void startQuestionnaireTestRole() throws Exception
+	{
+		executePluginTest(createTestTask("QuestionnaireTestRole"));
+	}
+
+	@Test
+	public void startQuestionnaireTestIdentifier() throws Exception
+	{
+		executePluginTest(createTestTask("QuestionnaireTestIdentifier"));
+	}
+
+	@Test
+	public void startQuestionnaireTestIdentifierMulti() throws Exception
+	{
+		executePluginTest(createTestTask("QuestionnaireTestIdentifierMulti"));
 	}
 }

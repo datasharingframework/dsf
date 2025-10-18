@@ -7,7 +7,11 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
+import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.commons.io.output.NullOutputStream;
+import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
@@ -15,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.adapter.DeferredBase64BinaryType;
+import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
@@ -72,12 +77,14 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	}
 
 	private final ParameterConverter parameterConverter;
+	private final FhirAdapter fhirAdapter;
 
-	public BinaryServiceJaxrs(BinaryService delegate, ParameterConverter parameterConverter)
+	public BinaryServiceJaxrs(BinaryService delegate, ParameterConverter parameterConverter, FhirAdapter fhirAdapter)
 	{
 		super(delegate);
 
 		this.parameterConverter = parameterConverter;
+		this.fhirAdapter = fhirAdapter;
 	}
 
 	@Override
@@ -86,6 +93,7 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		Objects.requireNonNull(fhirAdapter, "fhirAdapter");
 	}
 
 	@POST
@@ -231,7 +239,9 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	private Response configureReadResponse(UriInfo uri, HttpHeaders headers, boolean head, Response read)
 	{
-		if (read.getEntity() instanceof Binary binary && !isValidFhirRequest(uri, headers))
+		Optional<MediaType> fhirMediaType = getValidFhirMediaType(uri, headers);
+
+		if (read.getEntity() instanceof Binary binary && fhirMediaType.isEmpty())
 		{
 			if (mediaTypeMatches(headers, binary))
 			{
@@ -276,17 +286,60 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 			else
 				return Response.status(Status.NOT_ACCEPTABLE).build();
 		}
+		else if (read.getEntity() instanceof Binary binary && fhirMediaType.isPresent() && head)
+		{
+			ResponseBuilder b = Response.status(Status.OK);
+			b.type(fhirMediaType.get());
+
+			if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
+					&& binary.getMeta().getVersionId() != null)
+			{
+				b.lastModified(binary.getMeta().getLastUpdated());
+				b.tag(new EntityTag(binary.getMeta().getVersionId(), true));
+			}
+
+			b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
+
+			b.header(HttpHeaders.CONTENT_LENGTH, calculateFhirResponseSize(binary, fhirMediaType.get()));
+
+			return b.build();
+		}
 		else
 			return read;
 	}
 
-	private boolean isValidFhirRequest(UriInfo uri, HttpHeaders headers)
+	private long calculateFhirResponseSize(Binary binary, MediaType mediaType)
+	{
+		long dataSize = (long) binary.getUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE);
+
+		// setting single byte to make sure data element is part of xml/json
+		binary.setDataElement(new Base64BinaryType(new byte[1]));
+
+		try (CountingOutputStream out = new CountingOutputStream(NullOutputStream.INSTANCE))
+		{
+			fhirAdapter.writeTo(binary, Binary.class, null, null, mediaType, null, out);
+
+			// minus 4 to account for single byte in data element
+			return out.getByteCount() - 4 + calculateBase64EncodedLength(dataSize);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private long calculateBase64EncodedLength(long dataSize)
+	{
+		return dataSize < 0 ? 0 : 4 * ((dataSize + 2) / 3);
+	}
+
+	private Optional<MediaType> getValidFhirMediaType(UriInfo uri, HttpHeaders headers)
 	{
 		// _format parameter override present and valid
 		if (uri.getQueryParameters().containsKey(Constants.PARAM_FORMAT))
 		{
-			parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
-			return true;
+			MediaType mediaType = parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
+			return Optional.of(mediaType);
 		}
 		else
 		{
@@ -294,7 +347,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 			MediaType accept = types == null ? null : types.get(0);
 
 			// accept header is FHIR mime-type
-			return Arrays.stream(FHIR_MEDIA_TYPES).anyMatch(f -> f.equals(accept.toString()));
+			return Arrays.stream(FHIR_MEDIA_TYPES).filter(f -> f.equals(accept.toString())).findFirst()
+					.map(_ -> accept);
 		}
 	}
 
@@ -308,13 +362,13 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	private ResponseBuilder toStreamResponse(Binary binary)
 	{
 		ResponseBuilder b = Response.status(Status.OK);
-		b = b.type(binary.getContentType() != null ? binary.getContentType() : MediaType.APPLICATION_OCTET_STREAM);
+		b.type(binary.getContentType() != null ? binary.getContentType() : MediaType.APPLICATION_OCTET_STREAM);
 
 		if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
 				&& binary.getMeta().getVersionId() != null)
 		{
-			b = b.lastModified(binary.getMeta().getLastUpdated());
-			b = b.tag(new EntityTag(binary.getMeta().getVersionId(), true));
+			b.lastModified(binary.getMeta().getLastUpdated());
+			b.tag(new EntityTag(binary.getMeta().getVersionId(), true));
 		}
 
 		if (binary.hasSecurityContext() && binary.getSecurityContext().hasReference())
@@ -323,9 +377,9 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 			b.header(Constants.HEADER_X_SECURITY_CONTEXT, binary.getSecurityContext().getReference());
 		}
 
-		b = b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
-		b = b.header(RangeRequest.ACCEPT_RANGES_HEADER, RangeRequest.ACCEPT_RANGES_HEADER_VALUE);
-		b = b.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + toFileName(binary));
+		b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
+		b.header(RangeRequest.ACCEPT_RANGES_HEADER, RangeRequest.ACCEPT_RANGES_HEADER_VALUE);
+		b.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + toFileName(binary));
 
 		return b;
 	}

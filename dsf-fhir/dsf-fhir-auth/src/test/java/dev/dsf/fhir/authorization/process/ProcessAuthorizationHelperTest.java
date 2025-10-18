@@ -69,7 +69,7 @@ public class ProcessAuthorizationHelperTest
 		pa2.addExtension("recipient",
 				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 
-		assertFalse(helper.isValid(ad, p -> true, c -> true, o -> true, c -> true));
+		assertFalse(helper.isValid(ad, _ -> true, _ -> true, _ -> true, _ -> true));
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			assertTrue(helper.isValid(ad, p -> true, c -> true, o -> true, c -> true));
+			assertTrue(helper.isValid(ad, _ -> true, _ -> true, _ -> true, _ -> true));
 		}
 	}
 
@@ -93,7 +93,7 @@ public class ProcessAuthorizationHelperTest
 		{
 			var ad = FhirContext.forR4().newXmlParser().parseResource(ActivityDefinition.class, in);
 
-			assertTrue(helper.isValid(ad, p -> true, c -> true, o -> true, c -> true));
+			assertTrue(helper.isValid(ad, _ -> true, _ -> true, _ -> true, _ -> true));
 		}
 	}
 

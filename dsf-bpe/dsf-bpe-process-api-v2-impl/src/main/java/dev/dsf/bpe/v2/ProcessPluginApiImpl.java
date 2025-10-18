@@ -8,10 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
+import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MimeTypeService;
@@ -25,11 +27,13 @@ import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 
 public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 {
+	private final ProcessPluginDefinition processPluginDefinition;
 	private final ProxyConfig proxyConfig;
 	private final EndpointProvider endpointProvider;
 	private final FhirContext fhirContext;
 	private final DsfClientProvider dsfClientProvider;
 	private final FhirClientProvider fhirClientProvider;
+	private final FhirClientConfigProvider fhirClientConfigProvider;
 	private final OidcClientProvider oidcClientProvider;
 	private final MailService mailService;
 	private final MimeTypeService mimeTypeService;
@@ -39,23 +43,28 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
+	private final CompressionService compressionService;
 	private final CryptoService cryptoService;
 	private final TargetProvider targetProvider;
 	private final DataLogger dataLogger;
 
-	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
-			DsfClientProvider dsfClientProvider, FhirClientProvider fhirClientProvider,
+	public ProcessPluginApiImpl(ProcessPluginDefinition processPluginDefinition, ProxyConfig proxyConfig,
+			EndpointProvider endpointProvider, FhirContext fhirContext, DsfClientProvider dsfClientProvider,
+			FhirClientProvider fhirClientProvider, FhirClientConfigProvider fhirClientConfigProvider,
 			OidcClientProvider oidcClientProvider, MailService mailService, MimeTypeService mimeTypeService,
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
-			TaskHelper taskHelper, CryptoService cryptoService, TargetProvider targetProvider, DataLogger dataLogger)
+			TaskHelper taskHelper, CompressionService compressionService, CryptoService cryptoService,
+			TargetProvider targetProvider, DataLogger dataLogger)
 	{
+		this.processPluginDefinition = processPluginDefinition;
 		this.proxyConfig = proxyConfig;
 		this.endpointProvider = endpointProvider;
 		this.fhirContext = fhirContext;
 		this.dsfClientProvider = dsfClientProvider;
 		this.fhirClientProvider = fhirClientProvider;
+		this.fhirClientConfigProvider = fhirClientConfigProvider;
 		this.oidcClientProvider = oidcClientProvider;
 		this.mailService = mailService;
 		this.mimeTypeService = mimeTypeService;
@@ -65,6 +74,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
 		this.readAccessHelper = readAccessHelper;
 		this.taskHelper = taskHelper;
+		this.compressionService = compressionService;
 		this.cryptoService = cryptoService;
 		this.targetProvider = targetProvider;
 		this.dataLogger = dataLogger;
@@ -73,11 +83,13 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(processPluginDefinition, "processPluginDefinition");
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
 		Objects.requireNonNull(endpointProvider, "endpointProvider");
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
 		Objects.requireNonNull(fhirClientProvider, "fhirClientProvider");
+		Objects.requireNonNull(fhirClientConfigProvider, "fhirClientConfigProvider");
 		Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
 		Objects.requireNonNull(mailService, "mailService");
 		Objects.requireNonNull(mimeTypeService, "mimeTypeService");
@@ -87,9 +99,16 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(compressionService, "compressionService");
 		Objects.requireNonNull(cryptoService, "cryptoService");
 		Objects.requireNonNull(targetProvider, "targetProvider");
 		Objects.requireNonNull(dataLogger, "dataLogger");
+	}
+
+	@Override
+	public ProcessPluginDefinition getProcessPluginDefinition()
+	{
+		return processPluginDefinition;
 	}
 
 	@Override
@@ -120,6 +139,12 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public FhirClientProvider getFhirClientProvider()
 	{
 		return fhirClientProvider;
+	}
+
+	@Override
+	public FhirClientConfigProvider getFhirClientConfigProvider()
+	{
+		return fhirClientConfigProvider;
 	}
 
 	@Override
@@ -174,6 +199,12 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public TaskHelper getTaskHelper()
 	{
 		return taskHelper;
+	}
+
+	@Override
+	public CompressionService getCompressionService()
+	{
+		return compressionService;
 	}
 
 	@Override

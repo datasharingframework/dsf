@@ -33,7 +33,8 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-	private record Element(String questionnaire, String businessKey, String userTaskId, List<Item> item)
+	private record Element(String questionnaire, String businessKey, String userTaskId, ElementSystemValue author,
+			String authored, List<Item> item)
 	{
 	}
 
@@ -63,9 +64,16 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 		String businessKey = getStringValue(resource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY);
 		String userTaskId = getStringValue(resource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID);
 
+		ElementSystemValue author = resource.hasAuthor() && resource.getAuthor().hasIdentifier()
+				? ElementSystemValue.from(resource.getAuthor().getIdentifier())
+				: null;
+		String authored = resource.hasAuthoredElement() && resource.getAuthoredElement().hasValue()
+				? formatDateTime(resource.getAuthoredElement().getValue())
+				: null;
+
 		List<Item> item = resource.hasItem() ? resource.getItem().stream().map(this::toItem).toList() : null;
 
-		return new Element(questionnaire, businessKey, userTaskId, item);
+		return new Element(questionnaire, businessKey, userTaskId, author, authored, item);
 	}
 
 	private String getStringValue(QuestionnaireResponse resource, String linkId)

@@ -19,7 +19,8 @@ import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.common.auth.conf.PractitionerIdentityImpl;
 import dev.dsf.common.auth.conf.RoleConfig;
 
-public class IdentityProviderImpl extends AbstractIdentityProvider implements IdentityProvider, InitializingBean
+public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRole>
+		implements IdentityProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(IdentityProviderImpl.class);
 
@@ -27,7 +28,7 @@ public class IdentityProviderImpl extends AbstractIdentityProvider implements Id
 	private final EndpointProvider endpointProvider;
 	private final String localOrganizationIdentifierValue;
 
-	public IdentityProviderImpl(RoleConfig roleConfig, OrganizationProvider organizationProvider,
+	public IdentityProviderImpl(RoleConfig<FhirServerRole> roleConfig, OrganizationProvider organizationProvider,
 			EndpointProvider endpointProvider, String localOrganizationIdentifierValue)
 	{
 		super(roleConfig);
@@ -73,7 +74,8 @@ public class IdentityProviderImpl extends AbstractIdentityProvider implements Id
 			boolean local = isLocalOrganization(o);
 
 			Optional<Endpoint> e = local ? getLocalEndpoint() : endpointProvider.getEndpoint(o, certificates[0]);
-			Set<FhirServerRole> r = local ? FhirServerRole.LOCAL_ORGANIZATION : FhirServerRole.REMOTE_ORGANIZATION;
+			Set<FhirServerRole> r = local ? FhirServerRoleImpl.LOCAL_ORGANIZATION
+					: FhirServerRoleImpl.REMOTE_ORGANIZATION;
 
 			return new OrganizationIdentityImpl(local, o, e.orElse(null), r, certificates[0]);
 		}

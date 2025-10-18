@@ -113,6 +113,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
+				<configuration>
+					<requiredJavaVersion>${maven.compiler.target}</requiredJavaVersion>
+				</configuration>
 				<executions>
 					<execution>
 						<id>helpmojo</id>
@@ -121,6 +124,14 @@
 						</goals>
 					</execution>
 				</executions>
+				<!-- TODO remove ASM dependency version override when maven-plugin-plugin supports Java 25 -->
+				<dependencies>
+					<dependency>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm</artifactId>
+						<version>9.8</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

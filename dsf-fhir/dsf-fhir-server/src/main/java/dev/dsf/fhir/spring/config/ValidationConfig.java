@@ -17,7 +17,6 @@ import dev.dsf.fhir.dao.command.ValidationHelperImpl;
 import dev.dsf.fhir.service.ValidationSupportWithCacheAndEventHandler;
 import dev.dsf.fhir.service.ValidationSupportWithFetchFromDb;
 import dev.dsf.fhir.service.ValidationSupportWithFetchFromDbWithTransaction;
-import dev.dsf.fhir.validation.ResourceInResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
 import dev.dsf.fhir.validation.SimpleValidationSupportChain;
@@ -61,8 +60,7 @@ public class ValidationConfig
 	@Bean
 	public ResourceValidator resourceValidator()
 	{
-		return new ResourceInResourceValidator(fhirConfig.fhirContext(),
-				new ResourceValidatorImpl(fhirConfig.fhirContext(), validationSupport()));
+		return new ResourceValidatorImpl(fhirConfig.fhirContext(), validationSupport());
 	}
 
 	@Bean

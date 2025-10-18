@@ -379,6 +379,33 @@ public interface Variables
 	}
 
 	/**
+	 * Sets execution variable with the given <b>variableName</b> to the given {@link List} of {@link String}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getStringList(String)
+	 */
+	void setStringList(String variableName, List<String> value);
+
+	/**
+	 * Retrieves {@link List} of {@link String} execution variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link List}
+	 * @see #setStringList(String, List)
+	 * @see #getVariable(String)
+	 */
+	default List<String> getStringList(String variableName)
+	{
+		return getVariable(variableName);
+	}
+
+	/**
 	 * Sets execution variable with the given <b>variableName</b> to the given {@link Boolean}
 	 *
 	 * @param variableName
@@ -644,6 +671,33 @@ public interface Variables
 	 * @see #getVariableLocal(String)
 	 */
 	default String getStringLocal(String variableName)
+	{
+		return getVariableLocal(variableName);
+	}
+
+	/**
+	 * Sets local variable with the given <b>variableName</b> to the given {@link List} of {@link String}
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @param value
+	 *            may be <code>null</code>
+	 * @see #getStringListLocal(String)
+	 */
+	void setStringListLocal(String variableName, List<String> value);
+
+	/**
+	 * Retrieves {@link List} of {@link String} local variable with the given <b>variableName</b>
+	 *
+	 * @param variableName
+	 *            not <code>null</code>
+	 * @return value from execution variables for the given <b>variableName</b>, may be <code>null</code>
+	 * @throws ClassCastException
+	 *             if the stored value is not a {@link List}
+	 * @see #setStringListLocal(String, List)
+	 * @see #getVariableLocal(String)
+	 */
+	default String getStringListLocal(String variableName)
 	{
 		return getVariableLocal(variableName);
 	}

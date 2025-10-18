@@ -247,7 +247,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		}
 
 		Map<String, Integer> processCounts = models.stream()
-				.collect(Collectors.toMap(m -> m.toProcessIdAndVersion().getId(), m -> 1, (c1, c2) -> c1 + c2));
+				.collect(Collectors.toMap(m -> m.toProcessIdAndVersion().getId(), _ -> 1, (c1, c2) -> c1 + c2));
 		if (processCounts.values().stream().anyMatch(c -> c > 1))
 		{
 			logger.warn("Ignoring process plugin {}-{} from {}: Processes with duplicate IDs found {}",
@@ -552,6 +552,9 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 					.concat(Stream.of(apiServicesSpringConfiguration), getDefinitionSpringConfigurations().stream())
 					.toArray(Class<?>[]::new));
 			context.setEnvironment(environment);
+
+			customizeApplicationContext(context, apiApplicationContext);
+
 			context.refresh();
 
 			return context;
@@ -574,6 +577,11 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 			return null;
 		}
+	}
+
+	protected void customizeApplicationContext(AnnotationConfigApplicationContext context,
+			ApplicationContext parentContext)
+	{
 	}
 
 	private Stream<BpmnFileAndModel> loadBpmnModels(String localOrganizationIdentifierValue)
@@ -1156,7 +1164,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	private Object modifyBaseDefinitionIfTaskProfile(Object resource, String file)
 	{
 		Optional<String> baseDefinition = fhirConfig.getStructureDefinitionBaseDefinition(resource);
-		baseDefinition.filter(d -> STRUCTURE_DEFINITION_BASE_TASK_URL_V1.equals(d)).ifPresent(d ->
+		baseDefinition.filter(d -> STRUCTURE_DEFINITION_BASE_TASK_URL_V1.equals(d)).ifPresent(_ ->
 		{
 			logger.info(
 					"Setting StructureDefinition.baseDefinition to {} for FHIR resource {} from process plugin {}-{}",

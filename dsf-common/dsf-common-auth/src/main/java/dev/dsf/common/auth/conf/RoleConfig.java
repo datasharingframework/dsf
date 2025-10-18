@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RoleConfig
+public class RoleConfig<R extends DsfRole>
 {
 	private static final Logger logger = LoggerFactory.getLogger(RoleConfig.class);
 
@@ -34,7 +34,7 @@ public class RoleConfig
 	private static final String EMAIL_PATTERN_STRING = "^[\\w!#$%&'*+/=?`{\\|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{\\|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
 	private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_PATTERN_STRING);
 
-	public static final class Mapping
+	public static final class Mapping<R extends DsfRole>
 	{
 		private final String name;
 
@@ -43,11 +43,11 @@ public class RoleConfig
 		private final List<String> tokenRoles = new ArrayList<>();
 		private final List<String> tokenGroups = new ArrayList<>();
 
-		private final List<DsfRole> dsfRoles = new ArrayList<>();
+		private final List<R> dsfRoles = new ArrayList<>();
 		private final List<Coding> practitionerRoles = new ArrayList<>();
 
 		public Mapping(String name, List<String> thumbprints, List<String> emails, List<String> tokenRoles,
-				List<String> tokenGroups, List<DsfRole> dsfRoles, List<Coding> practitionerRoles)
+				List<String> tokenGroups, List<R> dsfRoles, List<Coding> practitionerRoles)
 		{
 			this.name = name;
 
@@ -91,7 +91,7 @@ public class RoleConfig
 			return Collections.unmodifiableList(tokenGroups);
 		}
 
-		public List<DsfRole> getDsfRoles()
+		public List<R> getDsfRoles()
 		{
 			return Collections.unmodifiableList(dsfRoles);
 		}
@@ -112,21 +112,40 @@ public class RoleConfig
 		}
 	}
 
-	private final List<Mapping> entries = new ArrayList<>();
+	public static record RoleKeyAndValues(String key, List<String> values)
+	{
+		public RoleKeyAndValues(String key)
+		{
+			this(key, List.of());
+		}
+	}
+
+	public static interface DsfRoleFactory<R extends DsfRole>
+	{
+		/**
+		 * @param roleKeyAndValues
+		 *            not <code>null</code>
+		 * @return <code>null</code> if no role exists for the given key and values
+		 */
+		R create(RoleKeyAndValues roleKeyAndValues);
+	}
+
+	private final List<Mapping<R>> entries = new ArrayList<>();
 
 	/**
 	 * @param config
 	 *            parsed yaml
 	 * @param dsfRoleFactory
-	 *            factory should return <code>null</code> if the given string does not represent a valid role, the role
-	 *            needs to exists
+	 *            not <code>null</code>
 	 * @param practitionerRoleFactory
-	 *            factory should return <code>null</code> if the given string does not represent a valid code, the code
-	 *            or CodeSystem does not need to exist
+	 *            not <code>null</code>, factory should return <code>null</code> if the given string does not represent
+	 *            a valid code, the code or CodeSystem does not need to exist
 	 */
-	public RoleConfig(Object config, Function<String, DsfRole> dsfRoleFactory,
-			Function<String, Coding> practitionerRoleFactory)
+	public RoleConfig(Object config, DsfRoleFactory<R> dsfRoleFactory, Function<String, Coding> practitionerRoleFactory)
 	{
+		Objects.requireNonNull(dsfRoleFactory, "dsfRoleFactory");
+		Objects.requireNonNull(practitionerRoleFactory, "practitionerRoleFactory");
+
 		if (config != null && config instanceof List<?> l)
 		{
 			l.forEach(mapping ->
@@ -139,7 +158,7 @@ public class RoleConfig
 								&& mappingValues instanceof Map<?, ?> v)
 						{
 							List<String> thumbprints = null, emails = null, tokenRoles = null, tokenGroups = null;
-							List<DsfRole> dsfRoles = null;
+							List<R> dsfRoles = null;
 							List<Coding> practitionerRoles = null;
 
 							for (Entry<?, ?> property : v.entrySet())
@@ -153,7 +172,7 @@ public class RoleConfig
 											{
 												if (value == null || value.isBlank())
 												{
-													logger.warn("Ignoring empty of blank thumbprint in rule '{}'",
+													logger.warn("Ignoring empty or blank thumbprint in rule '{}'",
 															mappingKey);
 													return null;
 												}
@@ -166,7 +185,7 @@ public class RoleConfig
 												}
 												else
 													return value.trim();
-											}).filter(g -> g != null).toList();
+											}).filter(Objects::nonNull).toList();
 											break;
 
 										case PROPERTY_EMAIL:
@@ -174,7 +193,7 @@ public class RoleConfig
 											{
 												if (value == null || value.isBlank())
 												{
-													logger.warn("Ignoring empty of blank email in rule '{}'",
+													logger.warn("Ignoring empty or blank email in rule '{}'",
 															mappingKey);
 													return null;
 												}
@@ -187,7 +206,7 @@ public class RoleConfig
 												}
 												else
 													return value.trim();
-											}).filter(g -> g != null).toList();
+											}).filter(Objects::nonNull).toList();
 											break;
 
 										case PROPERTY_TOKEN_ROLE:
@@ -195,13 +214,13 @@ public class RoleConfig
 											{
 												if (value == null || value.isBlank())
 												{
-													logger.warn("Ignoring empty of blank token-role in rule '{}'",
+													logger.warn("Ignoring empty or blank token-role in rule '{}'",
 															mappingKey);
 													return null;
 												}
 												else
 													return value.trim();
-											}).filter(g -> g != null).toList();
+											}).filter(Objects::nonNull).toList();
 											break;
 
 										case PROPERTY_TOKEN_GROUP:
@@ -209,32 +228,33 @@ public class RoleConfig
 											{
 												if (value == null || value.isBlank())
 												{
-													logger.warn("Ignoring empty of blank token-group in rule '{}'",
+													logger.warn("Ignoring empty or blank token-group in rule '{}'",
 															mappingKey);
 													return null;
 												}
 												else
 													return value.trim();
-											}).filter(g -> g != null).toList();
+											}).filter(Objects::nonNull).toList();
 											break;
 
 										case PROPERTY_DSF_ROLE:
-											dsfRoles = getValues(property.getValue()).stream().map(value ->
+											dsfRoles = getRoleKeyAndValues(property.getValue()).stream().map(value ->
 											{
-												if (value == null || value.isBlank())
+												if (value == null || value.key().isBlank())
 												{
-													logger.warn("Ignoring empty of blank dsf-role in rule '{}'",
+													logger.warn("Ignoring empty or blank dsf-role in rule '{}'",
 															mappingKey);
 													return null;
 												}
 
-												DsfRole dsfRole = dsfRoleFactory.apply(value.trim());
+												R dsfRole = dsfRoleFactory.create(value);
 												if (dsfRole == null)
-													logger.warn("Unknown dsf-role '{}', ignoring value in rule '{}'",
-															value, mappingKey);
+													logger.warn(
+															"Unknown or malformed dsf-role '{}', ignoring value in rule '{}'",
+															value.key(), mappingKey);
 
 												return dsfRole;
-											}).filter(r -> r != null).toList();
+											}).filter(Objects::nonNull).toList();
 											break;
 
 										case PROPERTY_PRACTITIONER_ROLE:
@@ -255,7 +275,7 @@ public class RoleConfig
 															value, mappingKey);
 
 												return coding;
-											}).filter(r -> r != null).toList();
+											}).filter(Objects::nonNull).toList();
 											break;
 
 										default:
@@ -266,14 +286,12 @@ public class RoleConfig
 								}
 							}
 
-							entries.add(new Mapping((String) mappingKey, thumbprints, emails, tokenRoles, tokenGroups,
-									dsfRoles, practitionerRoles));
+							entries.add(new Mapping<R>((String) mappingKey, thumbprints, emails, tokenRoles,
+									tokenGroups, dsfRoles, practitionerRoles));
 						}
 						else if (mappingKey != null && mappingKey instanceof String
 								&& (mappingValues == null || !(mappingValues instanceof Map)))
-						{
 							logger.warn("Ignoring invalid rule '{}', no value specified or value not map", mappingKey);
-						}
 						else
 							logger.warn("Ignoring invalid rule '{}'", Objects.toString(mappingKey));
 					});
@@ -284,46 +302,74 @@ public class RoleConfig
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static List<String> getValues(Object o)
+	private List<String> getValues(Object o)
 	{
 		return switch (o)
 		{
 			case String s -> List.of(s);
-			case @SuppressWarnings("rawtypes") List l -> l;
+			case List<?> l -> l.stream().filter(v -> v instanceof String).map(v -> (String) v).toList();
 			default -> List.of();
 		};
 	}
 
-	public List<Mapping> getEntries()
+	private List<RoleKeyAndValues> getRoleKeyAndValues(Object o)
+	{
+		return switch (o)
+		{
+			case String s -> List.of(new RoleKeyAndValues(s));
+			case List<?> l -> getRoleKeyAndValuesFromList(l);
+			default -> List.of();
+		};
+	}
+
+	private List<RoleKeyAndValues> getRoleKeyAndValuesFromList(List<?> l)
+	{
+		return l.stream().map(v -> switch (v)
+		{
+			case String s -> new RoleKeyAndValues(s);
+			case Map<?, ?> m when m.size() == 1 -> getRoleKeyAndValuesFromMap(m);
+			default -> null;
+		}).filter(Objects::nonNull).toList();
+	}
+
+	private RoleKeyAndValues getRoleKeyAndValuesFromMap(Map<?, ?> m)
+	{
+		return m.entrySet().stream().findFirst().filter(e -> e.getKey() instanceof String)
+				.filter(e -> e.getValue() instanceof List<?> l && l.stream().allMatch(v -> v instanceof String))
+				.map(e -> new RoleKeyAndValues((String) e.getKey(), ((List<?>) e.getValue()).stream()
+						.filter(v -> v instanceof String).map(v -> (String) v).toList()))
+				.orElse(null);
+	}
+
+	public List<Mapping<R>> getEntries()
 	{
 		return Collections.unmodifiableList(entries);
 	}
 
-	public List<DsfRole> getDsfRolesForThumbprint(String thumbprint)
+	public List<R> getDsfRolesForThumbprint(String thumbprint)
 	{
 		return getDsfRoleFor(Mapping::getThumbprints, thumbprint);
 	}
 
-	public List<DsfRole> getDsfRolesForEmail(String email)
+	public List<R> getDsfRolesForEmail(String email)
 	{
 		return getDsfRoleFor(Mapping::getEmails, email);
 	}
 
-	public List<DsfRole> getDsfRolesForTokenRole(String tokenRole)
+	public List<R> getDsfRolesForTokenRole(String tokenRole)
 	{
 		return getDsfRoleFor(Mapping::getTokenRoles, tokenRole);
 	}
 
-	public List<DsfRole> getDsfRolesForTokenGroup(String tokenGroup)
+	public List<R> getDsfRolesForTokenGroup(String tokenGroup)
 	{
 		return getDsfRoleFor(Mapping::getTokenGroups, tokenGroup);
 	}
 
-	private List<DsfRole> getDsfRoleFor(Function<Mapping, List<String>> values, String value)
+	private List<R> getDsfRoleFor(Function<Mapping<R>, List<String>> values, String value)
 	{
-		return getEntries().stream().filter(m -> values.apply(m).contains(value)).flatMap(m -> m.getDsfRoles().stream())
-				.toList();
+		return getEntries().stream().filter(m -> values.apply(m).contains(value)).map(Mapping::getDsfRoles)
+				.flatMap(List::stream).toList();
 	}
 
 	public List<Coding> getPractitionerRolesForThumbprint(String thumbprint)
@@ -346,10 +392,10 @@ public class RoleConfig
 		return getPractitionerRoleFor(Mapping::getTokenGroups, tokenGroup);
 	}
 
-	private List<Coding> getPractitionerRoleFor(Function<Mapping, List<String>> values, String value)
+	private List<Coding> getPractitionerRoleFor(Function<Mapping<R>, List<String>> values, String value)
 	{
-		return getEntries().stream().filter(m -> values.apply(m).contains(value))
-				.flatMap(m -> m.getPractitionerRoles().stream()).toList();
+		return getEntries().stream().filter(m -> values.apply(m).contains(value)).map(Mapping::getPractitionerRoles)
+				.flatMap(List::stream).toList();
 	}
 
 	@Override

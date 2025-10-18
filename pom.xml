@@ -15,28 +15,28 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
-		<maven.compiler.release>21</maven.compiler.release>
+		<maven.compiler.source>25</maven.compiler.source>
+		<maven.compiler.target>25</maven.compiler.target>
+		<maven.compiler.release>25</maven.compiler.release>
 
 		<main.basedir>${project.basedir}</main.basedir>
 
 		<slf4j.version>2.0.17</slf4j.version>
-		<log4j.version>2.24.3</log4j.version>
-		<jetty.version>12.0.21</jetty.version>
-		<jersey.version>3.1.10</jersey.version>
+		<log4j.version>2.25.1</log4j.version>
+		<jetty.version>12.1.0</jetty.version>
+		<jersey.version>3.1.11</jersey.version>
 		<tyrus.version>2.2.0</tyrus.version>
-		<spring.version>6.2.7</spring.version>
-		<jackson.version>2.19.0</jackson.version>
+		<spring.version>6.2.10</spring.version>
+		<jackson.version>2.20.0</jackson.version>
 		<camunda.version>7.23.0</camunda.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
-		<hapi.fhir.version.v2>8.2.0</hapi.fhir.version.v2>
-		<hapi.fhir.org.hl7.version.v2>6.5.18</hapi.fhir.org.hl7.version.v2>
-		<hapi.fhir.version>8.2.0</hapi.fhir.version>
-		<bouncycastle.version>1.80</bouncycastle.version>
+		<hapi.fhir.version.v2>8.4.0</hapi.fhir.version.v2>
+		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
+		<hapi.fhir.version>8.4.0</hapi.fhir.version>
+		<bouncycastle.version>1.81</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
-		<crypto-utils.version.v2>5.1.0</crypto-utils.version.v2>
-		<crypto-utils.version>5.1.0</crypto-utils.version>
+		<crypto-utils.version.v2>5.2.0</crypto-utils.version.v2>
+		<crypto-utils.version>5.2.0</crypto-utils.version>
 		<apache.tika.version>3.2.0</apache.tika.version>
 	</properties>
 
@@ -119,17 +119,11 @@
 				<artifactId>log4j-layout-template-json</artifactId>
 				<version>${log4j.version}</version>
 			</dependency>
-			<!-- async logging -->
-			<dependency>
-				<groupId>com.lmax</groupId>
-				<artifactId>disruptor</artifactId>
-				<version>3.4.4</version>
-			</dependency>
 
 			<dependency>
 				<groupId>com.sun.mail</groupId>
 				<artifactId>jakarta.mail</artifactId>
-				<version>1.6.7</version>
+				<version>1.6.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -146,7 +140,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>5.18.0</version>
+				<version>5.19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -168,12 +162,12 @@
 			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
-				<version>4.32.0</version>
+				<version>4.33.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.6</version>
+				<version>42.7.7</version>
 			</dependency>
 
 			<!-- hhn rwh -->
@@ -274,7 +268,10 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
-				<version>${jackson.version}</version>
+				<!-- TODO change back to ${jackson.version} when
+				jackson-annotations hase same version as other jackson libs
+				again -->
+				<version>2.20</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -387,21 +384,27 @@
 				<version>0.10.2</version>
 			</dependency>
 
-			<!-- managing out-dated dependencies from hapi fhir -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>1.27.1</version>
+				<version>1.28.0</version>
 			</dependency>
+			<dependency>
+				<groupId>org.tukaani</groupId>
+				<artifactId>xz</artifactId>
+				<version>1.10</version>
+			</dependency>
+
+			<!-- managing out-dated dependencies from hapi fhir -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.13.1</version>
+				<version>1.14.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.17.0</version>
+				<version>3.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -432,12 +435,12 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.19.0</version>
+				<version>2.20.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.18.0</version>
+				<version>1.19.0</version>
 			</dependency>
 
 			<dependency>
@@ -459,7 +462,7 @@
 			<dependency>
 				<groupId>org.yaml</groupId>
 				<artifactId>snakeyaml</artifactId>
-				<version>2.4</version>
+				<version>2.5</version>
 			</dependency>
 
 			<dependency>
@@ -472,12 +475,12 @@
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-core</artifactId>
-				<version>3.9.9</version>
+				<version>3.9.11</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-plugin-api</artifactId>
-				<version>3.9.9</version>
+				<version>3.9.11</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
@@ -520,7 +523,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.11.2</version>
+					<version>3.12.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -550,17 +553,17 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
-					<version>3.2.7</version>
+					<version>3.2.8</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.4.1</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>net.revelc.code.formatter</groupId>
 					<artifactId>formatter-maven-plugin</artifactId>
-					<version>2.26.0</version>
+					<version>2.27.0</version>
 				</plugin>
 				<plugin>
 					<groupId>net.revelc.code</groupId>
@@ -581,11 +584,12 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
 					<version>3.15.1</version>
+					<!-- TODO remove ASM dependency version override in dsf-maven-plugin when maven-plugin-plugin supports Java 25 -->
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.5.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -595,7 +599,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.9.3.0</version>
+					<version>4.9.4.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -605,12 +609,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-pmd-plugin</artifactId>
-					<version>3.26.0</version>
+					<version>3.27.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonatype.central</groupId>
 					<artifactId>central-publishing-maven-plugin</artifactId>
-					<version>0.7.0</version>
+					<version>0.8.0</version>
 				</plugin>
 				<plugin>
 					<groupId>dev.dsf</groupId>
@@ -626,6 +630,7 @@
 								<certs>
 									<cert>
 										<cn>Webbrowser Test User</cn>
+										<email>webbrowser.test.user@invalid</email>
 										<type>CLIENT</type>
 										<targets>
 											<target>cert/Webbrowser_Test_User.p12</target>
@@ -809,6 +814,12 @@
 								GEANT S/MIME RSA 1
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
+								HARICA Client Authentication ECC
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								HARICA Client Authentication RSA
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
 								HARICA S/MIME ECC
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
@@ -849,6 +860,13 @@
 		</pluginManagement>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<propertiesEncoding>UTF-8</propertiesEncoding>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
@@ -965,6 +983,8 @@
 				<configuration>
 					<groups>java.,javax.,org.,com.</groups>
 					<staticGroups>java,*</staticGroups>
+					<!-- TODO remove config option when impsort-maven-plugin support Java 25 -->
+					<ignoreParseErrorsBelowImports>true</ignoreParseErrorsBelowImports>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -1175,9 +1195,9 @@
 								<excludeArtifact>dsf-common-docker-secrets-reader</excludeArtifact>
 								<excludeArtifact>dsf-common-documentation</excludeArtifact>
 								<excludeArtifact>dsf-common-jetty</excludeArtifact>
+								<excludeArtifact>dsf-common-oidc</excludeArtifact>
 								<excludeArtifact>dsf-common-status</excludeArtifact>
 								<excludeArtifact>dsf-common-ui</excludeArtifact>
-								<excludeArtifact>dsf-fhir-pom</excludeArtifact>
 								<excludeArtifact>dsf-fhir-auth</excludeArtifact>
 								<excludeArtifact>dsf-fhir-rest-adapter</excludeArtifact>
 								<excludeArtifact>dsf-fhir-server</excludeArtifact>

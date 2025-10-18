@@ -137,6 +137,11 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-oidc</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>

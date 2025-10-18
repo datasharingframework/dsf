@@ -7,10 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
+import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MimeTypeService;
@@ -31,6 +33,8 @@ import dev.dsf.bpe.v2.variables.Variables;
  */
 public interface ProcessPluginApi
 {
+	ProcessPluginDefinition getProcessPluginDefinition();
+
 	ProxyConfig getProxyConfig();
 
 	EndpointProvider getEndpointProvider();
@@ -40,6 +44,8 @@ public interface ProcessPluginApi
 	DsfClientProvider getDsfClientProvider();
 
 	FhirClientProvider getFhirClientProvider();
+
+	FhirClientConfigProvider getFhirClientConfigProvider();
 
 	OidcClientProvider getOidcClientProvider();
 
@@ -58,6 +64,8 @@ public interface ProcessPluginApi
 	ReadAccessHelper getReadAccessHelper();
 
 	TaskHelper getTaskHelper();
+
+	CompressionService getCompressionService();
 
 	CryptoService getCryptoService();
 

@@ -121,7 +121,7 @@ public class DaoConfig
 		return new ActivityDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(destroyMethod = "stopLargeObjectUnlinker")
 	public BinaryDao binaryDao()
 	{
 		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),

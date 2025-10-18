@@ -1,18 +1,20 @@
 package dev.dsf.fhir.history.filter;
 
-import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.ResourceType;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.search.filter.GroupIdentityFilter;
 
 public class GroupHistoryIdentityFilter extends GroupIdentityFilter implements HistoryIdentityFilter
 {
-	private static final String RESOURCE_TYPE = Group.class.getAnnotation(ResourceDef.class).name();
+	private static final FhirServerRole HISTORY_ROLE = FhirServerRoleImpl.history(ResourceType.Group);
+	private static final String RESOURCE_TYPE = ResourceType.Group.name();
 
 	public GroupHistoryIdentityFilter(Identity identity)
 	{
-		super(identity, HistoryIdentityFilter.RESOURCE_TABLE, HistoryIdentityFilter.RESOURCE_ID_COLUMN);
+		super(identity, HistoryIdentityFilter.RESOURCE_TABLE, HistoryIdentityFilter.RESOURCE_ID_COLUMN, HISTORY_ROLE);
 	}
 
 	@Override

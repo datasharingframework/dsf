@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.event.ResourceUpdatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -38,6 +40,7 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 
 	private final StructureDefinitionDao snapshotDao;
 
+	private boolean requestResourceHasSnapshot;
 	private StructureDefinition resourceWithSnapshot;
 
 	public UpdateStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
@@ -58,6 +61,7 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
+		requestResourceHasSnapshot = resource.hasSnapshot();
 		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy()
 				: generateSnapshot(snapshotGenerator, resource.copy());
 		resource.setSnapshot(null);
@@ -134,5 +138,24 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 		}
 
 		return updated;
+	}
+
+	@Override
+	protected ResourceUpdatedEvent createEvent(Resource eventResource)
+	{
+		if (resourceWithSnapshot != null)
+		{
+			resourceWithSnapshot.setIdElement(eventResource.getIdElement().copy());
+			return super.createEvent(resourceWithSnapshot);
+		}
+		else
+			return super.createEvent(eventResource);
+	}
+
+	@Override
+	protected void modifyResponseResource(StructureDefinition responseResource)
+	{
+		if (requestResourceHasSnapshot)
+			responseResource.setSnapshot(resourceWithSnapshot.getSnapshot());
 	}
 }

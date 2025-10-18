@@ -17,6 +17,7 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.event.ResourceCreatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -35,6 +36,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 
 	private final StructureDefinitionDao snapshotDao;
 
+	private boolean requestResourceHasSnapshot;
 	private StructureDefinition resourceWithSnapshot;
 
 	public CreateStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
@@ -55,6 +57,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
+		requestResourceHasSnapshot = resource.hasSnapshot();
 		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy()
 				: generateSnapshot(snapshotGenerator, resource.copy());
 		resource.setSnapshot(null);
@@ -100,5 +103,24 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 		}
 
 		return created;
+	}
+
+	@Override
+	protected ResourceCreatedEvent createEvent(StructureDefinition eventResource)
+	{
+		if (resourceWithSnapshot != null)
+		{
+			resourceWithSnapshot.setIdElement(eventResource.getIdElement().copy());
+			return super.createEvent(resourceWithSnapshot);
+		}
+		else
+			return super.createEvent(eventResource);
+	}
+
+	@Override
+	protected void modifyResponseResource(StructureDefinition responseResource)
+	{
+		if (requestResourceHasSnapshot)
+			responseResource.setSnapshot(resourceWithSnapshot.getSnapshot());
 	}
 }

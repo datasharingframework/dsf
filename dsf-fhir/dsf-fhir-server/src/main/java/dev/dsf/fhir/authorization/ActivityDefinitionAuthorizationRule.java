@@ -68,8 +68,7 @@ public class ActivityDefinitionAuthorizationRule
 		List<String> errors = new ArrayList<>();
 
 		// TODO check existence of profiles, codes and identifier against DB
-		if (!processAuthorizationHelper.isValid(newResource, taskProfile -> true, practitionerRole -> true,
-				organizationIdentifier -> true, organizationRole -> true))
+		if (!processAuthorizationHelper.isValid(newResource, _ -> true, _ -> true, _ -> true, _ -> true))
 		{
 			errors.add("ActivityDefinition.extension with url "
 					+ ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidatorExtension;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Resource;
@@ -124,8 +124,8 @@ public class ResourceValidatorImpl implements ResourceValidator
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(validationSupport.getFhirContext());
 		ValidationSupportContext validationSupportContext = new ValidationSupportContext(validationSupport);
-		VersionSpecificWorkerContextWrapper workerContext = new VersionSpecificWorkerContextWrapper(
-				validationSupportContext, versionCanonicalizer)
+		WorkerContextValidationSupportAdapter workerContext = new WorkerContextValidationSupportAdapter(
+				validationSupport)
 		{
 			@Override
 			public CodeSystem fetchCodeSystem(String system)
@@ -183,6 +183,7 @@ public class ResourceValidatorImpl implements ResourceValidator
 
 		// TODO: remove after HAPI validator is fixed: https://github.com/hapifhir/org.hl7.fhir.core/issues/193
 		adaptDefaultSliceValidationErrorToWarning(result);
+		adaptQuestionnaireTextNotSameValidationErrorToWarning(result);
 
 		return new ValidationResult(context,
 				result.getMessages().stream().filter(m -> !(ResultSeverityEnum.WARNING.equals(m.getSeverity())
@@ -194,6 +195,14 @@ public class ResourceValidatorImpl implements ResourceValidator
 		result.getMessages().stream()
 				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 						&& AT_DEFAULT_SLICE_PATTERN.matcher(m.getMessage()).matches())
+				.forEach(m -> m.setSeverity(ResultSeverityEnum.WARNING));
+	}
+
+	private void adaptQuestionnaireTextNotSameValidationErrorToWarning(ValidationResult result)
+	{
+		result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) && m.getMessage()
+						.startsWith("If text exists, it must match the questionnaire definition for linkId"))
 				.forEach(m -> m.setSeverity(ResultSeverityEnum.WARNING));
 	}
 }

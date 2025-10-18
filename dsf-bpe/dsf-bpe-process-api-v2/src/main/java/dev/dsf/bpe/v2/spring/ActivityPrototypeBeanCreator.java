@@ -17,7 +17,7 @@ import dev.dsf.bpe.v2.activity.Activity;
 
 /**
  * Helper class to register {@link Activity}s as prototype beans. Must be configured as a <code>static</code>
- * {@link Bean} inside a {@link Configuration} class.
+ * {@link Bean} inside a {@link Configuration} class. Autowiring via constructor arguments is enabled.
  * <p>
  * Usage:
  * <p>
@@ -73,6 +73,7 @@ public class ActivityPrototypeBeanCreator implements BeanDefinitionRegistryPostP
 		GenericBeanDefinition definition = new GenericBeanDefinition();
 		definition.setBeanClass(activity);
 		definition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		definition.setAutowireMode(GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		return definition;
 	}
 }

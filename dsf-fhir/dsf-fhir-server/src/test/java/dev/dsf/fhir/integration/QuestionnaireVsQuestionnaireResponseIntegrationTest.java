@@ -3,6 +3,7 @@ package dev.dsf.fhir.integration;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -198,5 +199,36 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(ResourceType.QuestionnaireResponse.name());
 
 		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testQuestionnaireResponseQuestionnaireDisplayItemChangedWithMinimalUser() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaireProfileVersion100("1.0.0");
+		questionnaire.addItem().setLinkId("display-id").setType(Questionnaire.QuestionnaireItemType.DISPLAY)
+				.setText("Default Text Value");
+
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.0.0");
+		questionnaireResponse.addItem().setLinkId("display-id").setText("Default Text Value");
+
+		expectForbidden(() -> getMinimalWebserviceClient().create(questionnaireResponse));
+
+		QuestionnaireResponse created = getWebserviceClient().create(questionnaireResponse);
+
+		created.getItem().stream().filter(i -> "display-id".equals(i.getLinkId())).findFirst()
+				.ifPresent(i -> i.setText("Response Test Value"));
+		created.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.getAuthor().setType("Practitioner").getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getMinimalWebserviceClient().update(created);
+
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
 	}
 }

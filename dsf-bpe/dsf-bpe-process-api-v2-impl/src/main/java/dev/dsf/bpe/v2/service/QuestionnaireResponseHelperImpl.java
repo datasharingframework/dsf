@@ -2,12 +2,17 @@ package dev.dsf.bpe.v2.service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -101,5 +106,45 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 	{
 		return questionnaireResponse.getIdElement().toVersionless()
 				.withServerBase(serverBaseUrl, ResourceType.QuestionnaireResponse.name()).getValue();
+	}
+
+	@Override
+	public Extension createQuestionnaireAuthorizationExtension(Set<Identifier> practitioners,
+			Set<Coding> practitionerRoles)
+	{
+		Extension e = new Extension(EXTENSION_QUESTIONNAIRE_AUTHORIZATION);
+
+		if (practitioners != null)
+			practitioners.stream().map(this::createQuestionnaireAuthorizationPractitionerSubExtension)
+					.forEach(e::addExtension);
+		if (practitionerRoles != null)
+			practitionerRoles.stream().map(this::createQuestionnaireAuthorizationPractitionerRoleSubExtension)
+					.forEach(e::addExtension);
+
+		return e;
+	}
+
+	@Override
+	public Extension createQuestionnaireAuthorizationPractitionerSubExtension(Identifier practitioner)
+	{
+		Objects.requireNonNull(practitioner, "practitioner");
+		if (!practitioner.hasSystem())
+			throw new IllegalArgumentException("practitioner.system missing");
+		if (!practitioner.hasValue())
+			throw new IllegalArgumentException("practitioner.value missing");
+
+		return new Extension(EXTENSION_QUESTIONNAIRE_AUTHORIZATION_PRACTITIONER).setValue(practitioner);
+	}
+
+	@Override
+	public Extension createQuestionnaireAuthorizationPractitionerRoleSubExtension(Coding practitionerRole)
+	{
+		Objects.requireNonNull(practitionerRole, "practitionerRole");
+		if (!practitionerRole.hasSystem())
+			throw new IllegalArgumentException("practitionerRole.system missing");
+		if (!practitionerRole.hasCode())
+			throw new IllegalArgumentException("practitionerRole.code missing");
+
+		return new Extension(EXTENSION_QUESTIONNAIRE_AUTHORIZATION_PRACTITIONER_ROLE).setValue(practitionerRole);
 	}
 }
