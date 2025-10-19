@@ -250,6 +250,10 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.sleep:PT5S}")
 	private String fhirServerRetryDelay;
 
+	@Documentation(description = "Set to true to enable FHIR validation feature for process plugins, not implemented for DSF version 2.0.x")
+	@Value("${dev.dsf.bpe.process.fhir.enable.validation:false}")
+	private boolean fhirValidationEnabled;
+
 	@Documentation(description = "Mail service sender address", example = "sender@localhost")
 	@Value("${dev.dsf.bpe.mail.fromAddress:}")
 	private String mailFromAddress;
@@ -920,5 +924,10 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	public ProxyConfig proxyConfig()
 	{
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
+	}
+
+	public boolean getFhirValidationEnabled()
+	{
+		return fhirValidationEnabled;
 	}
 }
