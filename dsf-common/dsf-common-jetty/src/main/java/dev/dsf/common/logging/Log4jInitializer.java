@@ -76,13 +76,13 @@ public abstract class Log4jInitializer
 	{
 		properties = readJettyProperties();
 
-		consoleOutLayout = getLayout(LOG_CONSOLE_OUT_STYLE, STYLE_TEXT_COLOR);
+		consoleOutLayout = getConsoleLayout(LOG_CONSOLE_OUT_STYLE, STYLE_TEXT_COLOR);
 		consoleOutLevel = getLevel(LOG_CONSOLE_OUT_LEVEL, LEVEL_INFO);
 
-		consoleErrLayout = getLayout(LOG_CONSOLE_ERR_STYLE, STYLE_TEXT_COLOR);
+		consoleErrLayout = getConsoleLayout(LOG_CONSOLE_ERR_STYLE, STYLE_TEXT_COLOR);
 		consoleErrLevel = getLevel(LOG_CONSOLE_ERR_LEVEL, LEVEL_OFF);
 
-		fileLayout = getLayout(LOG_FILE_STYLE, STYLE_TEXT_MDC);
+		fileLayout = getFileLayout(LOG_FILE_STYLE, STYLE_TEXT_MDC);
 		fileLevel = getLevel(LOG_FILE_LEVEL, LEVEL_DEBUG);
 
 		configPath = getConfigPath(LOG_CONFIG, LOG_CONFIG_DEFAULT);
@@ -108,18 +108,31 @@ public abstract class Log4jInitializer
 		return properties;
 	}
 
-	private Log4jLayout getLayout(String parameter, String defaultValue)
+	private Log4jLayout getConsoleLayout(String parameter, String defaultValue)
 	{
 		String value = getValue(parameter, defaultValue);
 
+		if (STYLE_TEXT_COLOR.equalsIgnoreCase(value))
+			return new Log4jConfiguration.Log4jTextLayout(true);
+		else if (STYLE_TEXT_COLOR_MDC.equalsIgnoreCase(value))
+			return new Log4jConfiguration.Log4jTextMdcLayout(true);
+		else
+			return getLayout(parameter, value);
+	}
+
+	private Log4jLayout getFileLayout(String parameter, String defaultValue)
+	{
+		String value = getValue(parameter, defaultValue);
+
+		return getLayout(parameter, value);
+	}
+
+	private Log4jLayout getLayout(String parameter, String value)
+	{
 		if (STYLE_TEXT.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jTextLayout(false);
 		else if (STYLE_TEXT_MDC.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jTextMdcLayout(false);
-		else if (STYLE_TEXT_COLOR.equalsIgnoreCase(value))
-			return new Log4jConfiguration.Log4jTextLayout(true);
-		else if (STYLE_TEXT_COLOR_MDC.equalsIgnoreCase(value))
-			return new Log4jConfiguration.Log4jTextMdcLayout(true);
 		else if (STYLE_JSON_ECS.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jJsonLayout(TemplateUri.ECS);
 		else if (STYLE_JSON_GCP.equalsIgnoreCase(value))
