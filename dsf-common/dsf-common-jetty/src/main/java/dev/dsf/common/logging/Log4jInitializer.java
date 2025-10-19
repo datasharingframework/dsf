@@ -36,13 +36,13 @@ public abstract class Log4jInitializer
 	public static final String STYLE_TEXT = "TEXT";
 	public static final String STYLE_TEXT_COLOR_MDC = "TEXT_COLOR_MDC";
 	public static final String STYLE_TEXT_COLOR = "TEXT_COLOR";
+	public static final String STYLE_OFF = "OFF";
 
 	public static final String LEVEL_TRACE = "TRACE";
 	public static final String LEVEL_DEBUG = "DEBUG";
 	public static final String LEVEL_INFO = "INFO";
 	public static final String LEVEL_WARN = "WARN";
 	public static final String LEVEL_ERROR = "ERROR";
-	public static final String LEVEL_OFF = "OFF";
 
 	public static final String SPECIAL_JSON_ECS = "JSON_ECS";
 	public static final String SPECIAL_JSON_GCP = "JSON_GCP";
@@ -79,8 +79,8 @@ public abstract class Log4jInitializer
 		consoleOutLayout = getConsoleLayout(LOG_CONSOLE_OUT_STYLE, STYLE_TEXT_COLOR);
 		consoleOutLevel = getLevel(LOG_CONSOLE_OUT_LEVEL, LEVEL_INFO);
 
-		consoleErrLayout = getConsoleLayout(LOG_CONSOLE_ERR_STYLE, STYLE_TEXT_COLOR);
-		consoleErrLevel = getLevel(LOG_CONSOLE_ERR_LEVEL, LEVEL_OFF);
+		consoleErrLayout = getConsoleLayout(LOG_CONSOLE_ERR_STYLE, STYLE_OFF);
+		consoleErrLevel = getLevel(LOG_CONSOLE_ERR_LEVEL, LEVEL_INFO);
 
 		fileLayout = getFileLayout(LOG_FILE_STYLE, STYLE_TEXT_MDC);
 		fileLevel = getLevel(LOG_FILE_LEVEL, LEVEL_DEBUG);
@@ -129,7 +129,9 @@ public abstract class Log4jInitializer
 
 	private Log4jLayout getLayout(String parameter, String value)
 	{
-		if (STYLE_TEXT.equalsIgnoreCase(value))
+		if (STYLE_OFF.equalsIgnoreCase(value))
+			return null;
+		else if (STYLE_TEXT.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jTextLayout(false);
 		else if (STYLE_TEXT_MDC.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jTextMdcLayout(false);
@@ -159,8 +161,6 @@ public abstract class Log4jInitializer
 			return Level.WARN;
 		else if (LEVEL_ERROR.equalsIgnoreCase(value))
 			return Level.ERROR;
-		else if (LEVEL_OFF.equalsIgnoreCase(value))
-			return Level.OFF;
 		else
 			throw new IllegalArgumentException("Value '" + value + "' for " + parameter + " not supported");
 	}

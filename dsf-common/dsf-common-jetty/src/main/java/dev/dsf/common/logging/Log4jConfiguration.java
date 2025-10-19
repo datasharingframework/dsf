@@ -143,7 +143,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 		LoggerConfig root = getRootLogger();
 		root.setLevel(Level.WARN);
 
-		if (!Level.OFF.equals(consoleOutLevel))
+		if (consoleOutLayout != null)
 		{
 			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.OUT").setTarget(Target.SYSTEM_OUT)
 					.setLayout(consoleOutLayout.consoleLayout(this)).build();
@@ -151,7 +151,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 			root.addAppender(console, consoleOutLevel, null);
 		}
 
-		if (!Level.OFF.equals(consoleErrLevel))
+		if (consoleErrLayout != null)
 		{
 			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.ERR").setTarget(Target.SYSTEM_ERR)
 					.setLayout(consoleErrLayout.consoleLayout(this)).build();
@@ -159,7 +159,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 			root.addAppender(console, consoleErrLevel, null);
 		}
 
-		if (!Level.OFF.equals(fileLevel))
+		if (fileLayout != null)
 		{
 			Appender file = RollingFileAppender.newBuilder().setName("FILE")
 					.withFileName("log/" + fileNamePart + ".log")
