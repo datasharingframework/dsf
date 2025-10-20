@@ -29,7 +29,7 @@ public interface ValidationService
 	ValidationResult validate(Resource resource, String profileUrl);
 
 	/**
-	 * Validated all bundle entries with a <code>entry.resource</code>. The validation result will be added as a
+	 * Validates all bundle entries with a <code>entry.resource</code>. Validation result is added as a
 	 * {@link OperationOutcome} resource to the corresponding <code>entry.response.outcome</code> property.
 	 *
 	 * @param bundle
