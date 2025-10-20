@@ -17,6 +17,7 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import dev.dsf.bpe.api.config.BpeProxyConfig;
 import dev.dsf.bpe.api.config.DsfClientConfig;
 import dev.dsf.bpe.api.config.FhirClientConfigs;
+import dev.dsf.bpe.api.config.FhirValidationConfig;
 import dev.dsf.bpe.api.listener.ListenerFactory;
 import dev.dsf.bpe.api.listener.ListenerFactoryImpl;
 import dev.dsf.bpe.api.service.BpeMailService;
@@ -66,6 +67,8 @@ import dev.dsf.bpe.v2.service.TargetProvider;
 import dev.dsf.bpe.v2.service.TargetProviderImpl;
 import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.TaskHelperImpl;
+import dev.dsf.bpe.v2.service.ValidationServiceProvider;
+import dev.dsf.bpe.v2.service.ValidationServiceProviderImpl;
 import dev.dsf.bpe.v2.service.detector.CombinedDetectors;
 import dev.dsf.bpe.v2.service.detector.NdJsonDetector;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
@@ -89,6 +92,9 @@ public class ApiServiceConfig
 
 	@Autowired
 	private BpeProxyConfig proxyConfig;
+
+	@Autowired
+	private FhirValidationConfig validationConfig;
 
 	@Autowired
 	private BuildInfoProvider buildInfoProvider;
@@ -305,5 +311,11 @@ public class ApiServiceConfig
 	public DataLogger dataLogger()
 	{
 		return new DataLoggerImpl(fhirContext());
+	}
+
+	@Bean
+	public ValidationServiceProvider validationServiceProvider()
+	{
+		return new ValidationServiceProviderImpl(validationConfig.isEnabled(), fhirContext());
 	}
 }
