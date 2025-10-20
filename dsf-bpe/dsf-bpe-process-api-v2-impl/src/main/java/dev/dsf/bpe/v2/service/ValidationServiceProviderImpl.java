@@ -48,9 +48,9 @@ public class ValidationServiceProviderImpl implements ValidationServiceProvider,
 			return Optional.of(new ValidationService()
 			{
 				@Override
-				public Bundle validate(Bundle bundle)
+				public Bundle validateEntries(Bundle bundle)
 				{
-					logger.warn("Bundle validation not implemented, retuning bundle as is");
+					logger.warn("Bundle validation not implemented, returning bundle as is");
 
 					return bundle;
 				}
@@ -65,7 +65,7 @@ public class ValidationServiceProviderImpl implements ValidationServiceProvider,
 				public ValidationResult validate(Resource resource)
 				{
 					logger.warn(
-							"Resource validation not implemented, retuning successfull validation result without messages");
+							"Resource validation not implemented, returning successful validation result without messages");
 
 					return new ValidationResult(fhirContext, List.of());
 				}
