@@ -12,12 +12,13 @@ import dev.dsf.common.logging.Log4jConfiguration;
 public class FhirLog4jConfiguration extends Log4jConfiguration
 {
 	public FhirLog4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart,
-			Log4jLayout consoleOutLayout, Level consoleOutLevel, Log4jLayout consoleErrLayout, Level consoleErrLevel,
-			Log4jLayout fileLayout, Level fileLevel, Function<Configuration, StringLayout> auditFile,
+			boolean consoleOutEnabled, Log4jLayout consoleOutLayout, Level consoleOutLevel, boolean consoleErrEnabled,
+			Log4jLayout consoleErrLayout, Level consoleErrLevel, boolean fileEnabled, Log4jLayout fileLayout,
+			Level fileLevel, Function<Configuration, StringLayout> auditFile,
 			Function<Configuration, StringLayout> auditOut, Function<Configuration, StringLayout> auditErr)
 	{
-		super(loggerContext, name, fileNamePart, consoleOutLayout, consoleOutLevel, consoleErrLayout, consoleErrLevel,
-				fileLayout, fileLevel);
+		super(loggerContext, name, fileNamePart, consoleOutEnabled, consoleOutLayout, consoleOutLevel,
+				consoleErrEnabled, consoleErrLayout, consoleErrLevel, fileEnabled, fileLayout, fileLevel);
 
 		addSpecialLogger("audit", fileNamePart, auditFile, auditOut, auditErr, Level.INFO);
 	}
