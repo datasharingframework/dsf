@@ -387,11 +387,16 @@ public interface TaskHelper
 	 *            may be <code>null</code>
 	 * @param code
 	 *            may be <code>null</code>
+	 * @param version
+	 *            may be <code>null</code>
 	 * @return not <code>null</code>
 	 * @see ParameterComponent#setType(org.hl7.fhir.r4.model.CodeableConcept)
 	 * @see ParameterComponent#setValue(Type)
 	 */
-	ParameterComponent createInput(Type value, String system, String code);
+	default ParameterComponent createInput(Type value, String system, String code, String version)
+	{
+		return createInput(value, new Coding(system, code, null).setVersion(version));
+	}
 
 
 	/**
@@ -416,9 +421,14 @@ public interface TaskHelper
 	 *            may be <code>null</code>
 	 * @param code
 	 *            may be <code>null</code>
+	 * @param version
+	 *            may be <code>null</code>
 	 * @return not <code>null</code>
 	 * @see TaskOutputComponent#setType(org.hl7.fhir.r4.model.CodeableConcept)
 	 * @see TaskOutputComponent#setValue(Type)
 	 */
-	TaskOutputComponent createOutput(Type value, String system, String code);
+	default TaskOutputComponent createOutput(Type value, String system, String code, String version)
+	{
+		return createOutput(value, new Coding(system, code, null).setVersion(version));
+	}
 }

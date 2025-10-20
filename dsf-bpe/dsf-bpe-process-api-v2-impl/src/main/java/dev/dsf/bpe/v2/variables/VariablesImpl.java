@@ -23,8 +23,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.api.Constants;
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v2.listener.ListenerVariables;
+import dev.dsf.bpe.v2.service.StartTaskUpdater;
+import dev.dsf.bpe.v2.service.StartTaskUpdaterImpl;
 import dev.dsf.bpe.v2.variables.FhirResourceValues.FhirResourceValue;
 import dev.dsf.bpe.v2.variables.FhirResourcesListValues.FhirResourcesListValue;
 import dev.dsf.bpe.v2.variables.TargetValues.TargetValue;
@@ -69,16 +72,22 @@ public class VariablesImpl implements Variables, ListenerVariables
 	private final DelegateExecution execution;
 	private final ObjectMapper objectMapper;
 
+	private final StartTaskUpdater startTaskUpdater;
+
 	/**
 	 * @param execution
 	 *            not <code>null</code>
 	 * @param objectMapper
 	 *            not <code>null</code>
+	 * @param client
+	 *            not <code>null</code>
 	 */
-	public VariablesImpl(DelegateExecution execution, ObjectMapper objectMapper)
+	public VariablesImpl(DelegateExecution execution, ObjectMapper objectMapper, DsfClient client)
 	{
 		this.execution = Objects.requireNonNull(execution, "execution");
 		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
+
+		startTaskUpdater = new StartTaskUpdaterImpl(client, this::getStartTask, this::updateTask);
 	}
 
 	private JsonHolder toJsonHolder(Object json)
@@ -288,6 +297,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 				execution.getParentActivityInstanceId(), execution.getParentId());
 
 		return getFhirResource(START_TASK);
+	}
+
+	@Override
+	public StartTaskUpdater getStartTaskUpdater()
+	{
+		return startTaskUpdater;
 	}
 
 	@Override

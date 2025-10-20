@@ -201,6 +201,15 @@ input[type=number] {
 	display: none;
 }
 
+.open {
+	align-self: center;
+	margin-left: 0.5em;
+}
+
+.open svg {
+	margin-top: 0.2em;
+}
+
 .copy {
 	align-self: center;
 	margin-left: 0.5em;
@@ -217,14 +226,6 @@ input[type=number] {
 input.identifier-coding-code {
 	margin-top: 6px;
 }
-
-/* .input-output-header {
-	font-family: monospace;
-	font-size: 1.75em;
-	color: #326F95;
-	padding-left: 5px;
-	margin-bottom: 12px;
-} */
 
 .invisible {
 	display: none;

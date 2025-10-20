@@ -32,7 +32,7 @@ public abstract class AbstractTest
 
 	private Consumer<String> output(ProcessPluginApi api, Variables variables, String code)
 	{
-		return t -> variables.getStartTask().addOutput(
-				api.getTaskHelper().createOutput(new StringType(t), "http://dsf.dev/fhir/CodeSystem/test", code));
+		return t -> variables.getStartTask().addOutput(api.getTaskHelper().createOutput(new StringType(t),
+				"http://dsf.dev/fhir/CodeSystem/test", code, api.getProcessPluginDefinition().getResourceVersion()));
 	}
 }

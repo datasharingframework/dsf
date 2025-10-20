@@ -108,20 +108,8 @@ public class TaskHelperImpl implements TaskHelper
 	}
 
 	@Override
-	public ParameterComponent createInput(Type value, String system, String code)
-	{
-		return createInput(value, new Coding(system, code, null));
-	}
-
-	@Override
 	public TaskOutputComponent createOutput(Type value, Coding coding)
 	{
 		return new TaskOutputComponent(new CodeableConcept(coding), value);
-	}
-
-	@Override
-	public TaskOutputComponent createOutput(Type value, String system, String code)
-	{
-		return createOutput(value, new Coding(system, code, null));
 	}
 }
