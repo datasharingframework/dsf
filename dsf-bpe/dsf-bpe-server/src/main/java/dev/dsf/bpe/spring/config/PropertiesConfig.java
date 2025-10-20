@@ -251,7 +251,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private String fhirServerRetryDelay;
 
 	@Documentation(description = "Set to true to enable FHIR validation feature for process plugins, not implemented for DSF version 2.0.x")
-	@Value("${dev.dsf.bpe.process.fhir.enable.validation:false}")
+	@Value("${dev.dsf.bpe.process.fhir.validation.enabled:false}")
 	private boolean fhirValidationEnabled;
 
 	@Documentation(description = "Mail service sender address", example = "sender@localhost")
