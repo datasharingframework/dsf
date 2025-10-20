@@ -10,9 +10,9 @@ import dev.dsf.common.logging.Log4jInitializer;
 
 public class FhirLog4jInitializer extends Log4jInitializer
 {
-	public static final String LOG_AUDIT_FILE = "dev.dsf.log.audit.file";
-	public static final String LOG_AUDIT_CONSOLE_OUT = "dev.dsf.log.audit.console.out";
-	public static final String LOG_AUDIT_CONSOLE_ERR = "dev.dsf.log.audit.console.err";
+	public static final String AUDIT_FILE = "audit.file";
+	public static final String AUDIT_CONSOLE_OUT = "audit.console.out";
+	public static final String AUDIT_CONSOLE_ERR = "audit.console.err";
 
 	private final Function<Configuration, StringLayout> specialFile;
 	private final Function<Configuration, StringLayout> specialConsoleOut;
@@ -20,16 +20,17 @@ public class FhirLog4jInitializer extends Log4jInitializer
 
 	public FhirLog4jInitializer()
 	{
-		specialFile = getSpecial(LOG_AUDIT_FILE, SPECIAL_TEXT_MDC);
-		specialConsoleOut = getSpecial(LOG_AUDIT_CONSOLE_OUT, SPECIAL_OFF);
-		specialConsoleErr = getSpecial(LOG_AUDIT_CONSOLE_ERR, SPECIAL_OFF);
+		specialFile = getSpecial(AUDIT_FILE, STYLE_TEXT_MDC, true);
+		specialConsoleOut = getSpecial(AUDIT_CONSOLE_OUT, STYLE_TEXT, false);
+		specialConsoleErr = getSpecial(AUDIT_CONSOLE_ERR, STYLE_TEXT, false);
 	}
 
 	@Override
 	protected Log4jConfigurationFactory createLog4jConfigurationFactory()
 	{
-		return new Log4jConfigurationFactory((loggerContext, name) -> new FhirLog4jConfiguration(loggerContext, name,
-				"fhir", consoleOutLayout, consoleOutLevel, consoleErrLayout, consoleErrLevel, fileLayout, fileLevel,
-				specialFile, specialConsoleOut, specialConsoleErr));
+		return new Log4jConfigurationFactory(
+				(loggerContext, name) -> new FhirLog4jConfiguration(loggerContext, name, "fhir", consoleOutEnabled,
+						consoleOutLayout, consoleOutLevel, consoleErrEnabled, consoleErrLayout, consoleErrLevel,
+						fileEnabled, fileLayout, fileLevel, specialFile, specialConsoleOut, specialConsoleErr));
 	}
 }
