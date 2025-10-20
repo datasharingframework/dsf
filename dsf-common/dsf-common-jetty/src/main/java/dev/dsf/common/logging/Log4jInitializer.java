@@ -36,7 +36,6 @@ public abstract class Log4jInitializer
 	public static final String STYLE_TEXT = "TEXT";
 	public static final String STYLE_TEXT_COLOR_MDC = "TEXT_COLOR_MDC";
 	public static final String STYLE_TEXT_COLOR = "TEXT_COLOR";
-	public static final String STYLE_OFF = "OFF";
 
 	public static final String LEVEL_TRACE = "TRACE";
 	public static final String LEVEL_DEBUG = "DEBUG";
@@ -44,29 +43,27 @@ public abstract class Log4jInitializer
 	public static final String LEVEL_WARN = "WARN";
 	public static final String LEVEL_ERROR = "ERROR";
 
-	public static final String SPECIAL_JSON_ECS = "JSON_ECS";
-	public static final String SPECIAL_JSON_GCP = "JSON_GCP";
-	public static final String SPECIAL_JSON_GELF = "JSON_GELF";
-	public static final String SPECIAL_JSON_LOGSTASH = "JSON_LOGSTASH";
-	public static final String SPECIAL_TEXT_MDC = "TEXT_MDC";
-	public static final String SPECIAL_TEXT = "TEXT";
-	public static final String SPECIAL_OFF = "OFF";
+	public static final String PREFIX = "dev.dsf.log.";
 
-	public static final String LOG_FILE_STYLE = "dev.dsf.log.file.style";
-	public static final String LOG_FILE_LEVEL = "dev.dsf.log.file.level";
-	public static final String LOG_CONSOLE_OUT_STYLE = "dev.dsf.log.console.out.style";
-	public static final String LOG_CONSOLE_OUT_LEVEL = "dev.dsf.log.console.out.level";
-	public static final String LOG_CONSOLE_ERR_STYLE = "dev.dsf.log.console.err.style";
-	public static final String LOG_CONSOLE_ERR_LEVEL = "dev.dsf.log.console.err.level";
+	public static final String FILE = "file";
+	public static final String CONSOLE_OUT = "console.out";
+	public static final String CONSOLE_ERR = "console.err";
+
+	public static final String POSTFIX_ENABLED = ".enabled";
+	public static final String POSTFIX_STYLE = ".style";
+	public static final String POSTFIX_LEVEL = ".level";
 
 	protected final Properties properties;
 
+	protected final boolean consoleOutEnabled;
 	protected final Log4jLayout consoleOutLayout;
 	protected final Level consoleOutLevel;
 
+	protected final boolean consoleErrEnabled;
 	protected final Log4jLayout consoleErrLayout;
 	protected final Level consoleErrLevel;
 
+	protected final boolean fileEnabled;
 	protected final Log4jLayout fileLayout;
 	protected final Level fileLevel;
 
@@ -76,14 +73,17 @@ public abstract class Log4jInitializer
 	{
 		properties = readJettyProperties();
 
-		consoleOutLayout = getConsoleLayout(LOG_CONSOLE_OUT_STYLE, STYLE_TEXT_COLOR);
-		consoleOutLevel = getLevel(LOG_CONSOLE_OUT_LEVEL, LEVEL_INFO);
+		consoleOutEnabled = getEnabled(CONSOLE_OUT, true);
+		consoleOutLayout = getConsoleLayout(CONSOLE_OUT, STYLE_TEXT_COLOR);
+		consoleOutLevel = getLevel(CONSOLE_OUT, LEVEL_INFO);
 
-		consoleErrLayout = getConsoleLayout(LOG_CONSOLE_ERR_STYLE, STYLE_OFF);
-		consoleErrLevel = getLevel(LOG_CONSOLE_ERR_LEVEL, LEVEL_INFO);
+		consoleErrEnabled = getEnabled(CONSOLE_ERR, false);
+		consoleErrLayout = getConsoleLayout(CONSOLE_ERR, STYLE_TEXT_COLOR);
+		consoleErrLevel = getLevel(CONSOLE_ERR, LEVEL_INFO);
 
-		fileLayout = getFileLayout(LOG_FILE_STYLE, STYLE_TEXT_MDC);
-		fileLevel = getLevel(LOG_FILE_LEVEL, LEVEL_DEBUG);
+		fileEnabled = getEnabled(FILE, true);
+		fileLayout = getFileLayout(FILE, STYLE_TEXT_MDC);
+		fileLevel = getLevel(FILE, LEVEL_DEBUG);
 
 		configPath = getConfigPath(LOG_CONFIG, LOG_CONFIG_DEFAULT);
 	}
@@ -108,9 +108,16 @@ public abstract class Log4jInitializer
 		return properties;
 	}
 
+	protected boolean getEnabled(String parameter, boolean defaultValue)
+	{
+		String value = getValue(PREFIX + parameter + POSTFIX_ENABLED, String.valueOf(defaultValue));
+
+		return Boolean.valueOf(value);
+	}
+
 	private Log4jLayout getConsoleLayout(String parameter, String defaultValue)
 	{
-		String value = getValue(parameter, defaultValue);
+		String value = getValue(PREFIX + parameter + POSTFIX_STYLE, defaultValue);
 
 		if (STYLE_TEXT_COLOR.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jTextLayout(true);
@@ -122,16 +129,14 @@ public abstract class Log4jInitializer
 
 	private Log4jLayout getFileLayout(String parameter, String defaultValue)
 	{
-		String value = getValue(parameter, defaultValue);
+		String value = getValue(PREFIX + parameter + POSTFIX_STYLE, defaultValue);
 
 		return getLayout(parameter, value);
 	}
 
 	private Log4jLayout getLayout(String parameter, String value)
 	{
-		if (STYLE_OFF.equalsIgnoreCase(value))
-			return null;
-		else if (STYLE_TEXT.equalsIgnoreCase(value))
+		if (STYLE_TEXT.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jTextLayout(false);
 		else if (STYLE_TEXT_MDC.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jTextMdcLayout(false);
@@ -144,12 +149,13 @@ public abstract class Log4jInitializer
 		else if (STYLE_JSON_LOGSTASH.equalsIgnoreCase(value))
 			return new Log4jConfiguration.Log4jJsonLayout(TemplateUri.LOGSTASH);
 		else
-			throw new IllegalArgumentException("Value '" + value + "' for " + parameter + " not supported");
+			throw new IllegalArgumentException(
+					"Value '" + value + "' for " + PREFIX + parameter + POSTFIX_STYLE + " not supported");
 	}
 
 	private Level getLevel(String parameter, String defaultValue)
 	{
-		String value = getValue(parameter, defaultValue);
+		String value = getValue(PREFIX + parameter + POSTFIX_LEVEL, defaultValue);
 
 		if (LEVEL_TRACE.equalsIgnoreCase(value))
 			return Level.TRACE;
@@ -162,7 +168,8 @@ public abstract class Log4jInitializer
 		else if (LEVEL_ERROR.equalsIgnoreCase(value))
 			return Level.ERROR;
 		else
-			throw new IllegalArgumentException("Value '" + value + "' for " + parameter + " not supported");
+			throw new IllegalArgumentException(
+					"Value '" + value + "' for " + PREFIX + parameter + POSTFIX_LEVEL + " not supported");
 	}
 
 	private Path getConfigPath(String parameter, String defaultValue)
@@ -182,30 +189,35 @@ public abstract class Log4jInitializer
 		return value;
 	}
 
-	protected Function<Configuration, StringLayout> getSpecial(String parameter, String defaultValue)
+	protected Function<Configuration, StringLayout> getSpecial(String parameter, String defaultStyle,
+			boolean defaultEnabled)
 	{
-		String value = getValue(parameter, defaultValue);
+		boolean enabled = getEnabled(parameter, defaultEnabled);
 
-		if (SPECIAL_JSON_ECS.equalsIgnoreCase(value))
+		if (!enabled)
+			return _ -> null;
+
+		String value = getValue(PREFIX + parameter + POSTFIX_STYLE, defaultStyle);
+
+		if (STYLE_JSON_ECS.equalsIgnoreCase(value))
 			return configuration -> JsonTemplateLayout.newBuilder().setConfiguration(configuration)
 					.setEventTemplateUri(TemplateUri.ECS.getUri()).build();
-		else if (SPECIAL_JSON_GCP.equalsIgnoreCase(value))
+		else if (STYLE_JSON_GCP.equalsIgnoreCase(value))
 			return configuration -> JsonTemplateLayout.newBuilder().setConfiguration(configuration)
 					.setEventTemplateUri(TemplateUri.GCP.getUri()).build();
-		else if (SPECIAL_JSON_GELF.equalsIgnoreCase(value))
+		else if (STYLE_JSON_GELF.equalsIgnoreCase(value))
 			return configuration -> JsonTemplateLayout.newBuilder().setConfiguration(configuration)
 					.setEventTemplateUri(TemplateUri.GELF.getUri()).build();
-		else if (SPECIAL_JSON_LOGSTASH.equalsIgnoreCase(value))
+		else if (STYLE_JSON_LOGSTASH.equalsIgnoreCase(value))
 			return configuration -> JsonTemplateLayout.newBuilder().setConfiguration(configuration)
 					.setEventTemplateUri(TemplateUri.LOGSTASH.getUri()).build();
-		else if (SPECIAL_TEXT.equalsIgnoreCase(value))
+		else if (STYLE_TEXT.equalsIgnoreCase(value))
 			return _ -> PatternLayout.newBuilder().withPattern("%d %m%n").build();
-		else if (SPECIAL_TEXT_MDC.equalsIgnoreCase(value))
+		else if (STYLE_TEXT_MDC.equalsIgnoreCase(value))
 			return _ -> PatternLayout.newBuilder().withPattern("%d%notEmpty{ %X} %m%n").build();
-		else if (SPECIAL_OFF.equalsIgnoreCase(value))
-			return _ -> null;
 		else
-			throw new IllegalArgumentException("Value '" + value + "' for " + parameter + " not supported");
+			throw new IllegalArgumentException(
+					"Value '" + value + "' for " + PREFIX + parameter + POSTFIX_STYLE + " not supported");
 	}
 
 	protected abstract Log4jConfigurationFactory createLog4jConfigurationFactory();

@@ -127,9 +127,10 @@ public class Log4jConfiguration extends AbstractConfiguration
 		}
 	}
 
-	public Log4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart,
-			Log4jLayout consoleOutLayout, Level consoleOutLevel, Log4jLayout consoleErrLayout, Level consoleErrLevel,
-			Log4jLayout fileLayout, Level fileLevel)
+	public Log4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart, boolean consoleOutEnabled,
+			Log4jLayout consoleOutLayout, Level consoleOutLevel, boolean consoleErrEnabled,
+			Log4jLayout consoleErrLayout, Level consoleErrLevel, boolean fileEnabled, Log4jLayout fileLayout,
+			Level fileLevel)
 	{
 		super(loggerContext, ConfigurationSource.NULL_SOURCE);
 
@@ -143,7 +144,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 		LoggerConfig root = getRootLogger();
 		root.setLevel(Level.WARN);
 
-		if (consoleOutLayout != null)
+		if (consoleOutEnabled)
 		{
 			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.OUT").setTarget(Target.SYSTEM_OUT)
 					.setLayout(consoleOutLayout.consoleLayout(this)).build();
@@ -151,7 +152,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 			root.addAppender(console, consoleOutLevel, null);
 		}
 
-		if (consoleErrLayout != null)
+		if (consoleErrEnabled)
 		{
 			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.ERR").setTarget(Target.SYSTEM_ERR)
 					.setLayout(consoleErrLayout.consoleLayout(this)).build();
@@ -159,7 +160,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 			root.addAppender(console, consoleErrLevel, null);
 		}
 
-		if (fileLayout != null)
+		if (fileEnabled)
 		{
 			Appender file = RollingFileAppender.newBuilder().setName("FILE")
 					.withFileName("log/" + fileNamePart + ".log")
