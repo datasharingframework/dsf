@@ -23,6 +23,7 @@ import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
 import dev.dsf.bpe.v2.service.TargetProvider;
 import dev.dsf.bpe.v2.service.TaskHelper;
+import dev.dsf.bpe.v2.service.ValidationServiceProvider;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 
 public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
@@ -47,6 +48,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final CryptoService cryptoService;
 	private final TargetProvider targetProvider;
 	private final DataLogger dataLogger;
+	private final ValidationServiceProvider validationServiceProvider;
 
 	public ProcessPluginApiImpl(ProcessPluginDefinition processPluginDefinition, ProxyConfig proxyConfig,
 			EndpointProvider endpointProvider, FhirContext fhirContext, DsfClientProvider dsfClientProvider,
@@ -56,7 +58,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 			ProcessAuthorizationHelper processAuthorizationHelper,
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
 			TaskHelper taskHelper, CompressionService compressionService, CryptoService cryptoService,
-			TargetProvider targetProvider, DataLogger dataLogger)
+			TargetProvider targetProvider, DataLogger dataLogger, ValidationServiceProvider validationServiceProvider)
 	{
 		this.processPluginDefinition = processPluginDefinition;
 		this.proxyConfig = proxyConfig;
@@ -78,6 +80,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		this.cryptoService = cryptoService;
 		this.targetProvider = targetProvider;
 		this.dataLogger = dataLogger;
+		this.validationServiceProvider = validationServiceProvider;
 	}
 
 	@Override
@@ -103,6 +106,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 		Objects.requireNonNull(cryptoService, "cryptoService");
 		Objects.requireNonNull(targetProvider, "targetProvider");
 		Objects.requireNonNull(dataLogger, "dataLogger");
+		Objects.requireNonNull(validationServiceProvider, "validationServiceProvider");
 	}
 
 	@Override
@@ -223,5 +227,11 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	public DataLogger getDataLogger()
 	{
 		return dataLogger;
+	}
+
+	@Override
+	public ValidationServiceProvider getValidationServiceProvider()
+	{
+		return validationServiceProvider;
 	}
 }

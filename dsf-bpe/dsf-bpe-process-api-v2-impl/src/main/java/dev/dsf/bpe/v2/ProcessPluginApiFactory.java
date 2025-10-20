@@ -24,6 +24,7 @@ import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
 import dev.dsf.bpe.v2.service.TargetProvider;
 import dev.dsf.bpe.v2.service.TaskHelper;
+import dev.dsf.bpe.v2.service.ValidationServiceProvider;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 
 public class ProcessPluginApiFactory implements Supplier<ProcessPluginApi>
@@ -52,6 +53,7 @@ public class ProcessPluginApiFactory implements Supplier<ProcessPluginApi>
 				fromParent(ObjectMapper.class), fromParent(OrganizationProvider.class),
 				fromParent(ProcessAuthorizationHelper.class), fromParent(QuestionnaireResponseHelper.class),
 				fromParent(ReadAccessHelper.class), fromParent(TaskHelper.class), fromParent(CompressionService.class),
-				fromParent(CryptoService.class), fromParent(TargetProvider.class), fromParent(DataLogger.class));
+				fromParent(CryptoService.class), fromParent(TargetProvider.class), fromParent(DataLogger.class),
+				fromParent(ValidationServiceProvider.class));
 	}
 }
