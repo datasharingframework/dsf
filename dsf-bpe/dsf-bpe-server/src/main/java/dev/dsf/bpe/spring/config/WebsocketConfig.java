@@ -26,7 +26,7 @@ public class WebsocketConfig
 	private DaoConfig daoConfig;
 
 	@Autowired
-	private CamundaConfig camundaConfig;
+	private OperatonConfig operatonConfig;
 
 	@Autowired
 	private FhirConfig fhirConfig;
@@ -40,9 +40,9 @@ public class WebsocketConfig
 	@Bean
 	public ResourceHandler<Task> taskHandler()
 	{
-		return new TaskHandler(camundaConfig.processEngine().getRepositoryService(),
+		return new TaskHandler(operatonConfig.processEngine().getRepositoryService(),
 				pluginConfig.processPluginManager(), fhirConfig.fhirContext(),
-				camundaConfig.processEngine().getRuntimeService(),
+				operatonConfig.processEngine().getRuntimeService(),
 				dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
@@ -65,9 +65,10 @@ public class WebsocketConfig
 	@Bean
 	public ResourceHandler<QuestionnaireResponse> questionnaireResponseHandler()
 	{
-		return new QuestionnaireResponseHandler(camundaConfig.processEngine().getRepositoryService(),
+		return new QuestionnaireResponseHandler(operatonConfig.processEngine().getRepositoryService(),
 				pluginConfig.processPluginManager(), fhirConfig.fhirContext(),
-				camundaConfig.processEngine().getTaskService(), dsfClientConfig.clientProvider().getWebserviceClient());
+				operatonConfig.processEngine().getTaskService(),
+				dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
 	@Bean

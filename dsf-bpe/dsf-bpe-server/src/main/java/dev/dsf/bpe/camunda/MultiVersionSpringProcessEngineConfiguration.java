@@ -1,7 +1,7 @@
 package dev.dsf.bpe.camunda;
 
-import org.camunda.bpm.engine.impl.telemetry.dto.TelemetryDataImpl;
-import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
+import org.operaton.bpm.engine.impl.telemetry.dto.TelemetryDataImpl;
+import org.operaton.bpm.engine.spring.SpringProcessEngineConfiguration;
 
 public class MultiVersionSpringProcessEngineConfiguration extends SpringProcessEngineConfiguration
 {

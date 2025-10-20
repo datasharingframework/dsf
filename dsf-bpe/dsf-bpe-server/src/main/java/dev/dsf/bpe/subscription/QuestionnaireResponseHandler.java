@@ -6,13 +6,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.TaskService;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.engine.variable.value.PrimitiveValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.StringType;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.TaskService;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.engine.variable.value.PrimitiveValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

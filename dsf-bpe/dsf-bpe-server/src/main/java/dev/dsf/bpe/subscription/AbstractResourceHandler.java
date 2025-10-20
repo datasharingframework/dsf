@@ -3,8 +3,8 @@ package dev.dsf.bpe.subscription;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;

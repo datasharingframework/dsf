@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.impl.variable.serializer.AbstractTypedValueSerializer;
-import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
-import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
-import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.camunda.bpm.engine.variable.value.PrimitiveValue;
-import org.camunda.bpm.engine.variable.value.TypedValue;
+import org.operaton.bpm.engine.impl.variable.serializer.AbstractTypedValueSerializer;
+import org.operaton.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.operaton.bpm.engine.impl.variable.serializer.ValueFields;
+import org.operaton.bpm.engine.variable.impl.value.UntypedValueImpl;
+import org.operaton.bpm.engine.variable.value.PrimitiveValue;
+import org.operaton.bpm.engine.variable.value.TypedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

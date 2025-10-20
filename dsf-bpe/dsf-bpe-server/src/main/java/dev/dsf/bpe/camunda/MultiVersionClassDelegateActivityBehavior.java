@@ -2,18 +2,18 @@ package dev.dsf.bpe.camunda;
 
 import java.util.List;
 
-import org.camunda.bpm.engine.ProcessEngineException;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.engine.impl.bpmn.behavior.ClassDelegateActivityBehavior;
-import org.camunda.bpm.engine.impl.bpmn.behavior.ServiceTaskJavaDelegateActivityBehavior;
-import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
-import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
-import org.camunda.bpm.engine.impl.pvm.delegate.ActivityBehavior;
-import org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution;
-import org.camunda.bpm.model.bpmn.instance.EndEvent;
-import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
-import org.camunda.bpm.model.bpmn.instance.SendTask;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.operaton.bpm.engine.ProcessEngineException;
+import org.operaton.bpm.engine.delegate.JavaDelegate;
+import org.operaton.bpm.engine.impl.bpmn.behavior.ClassDelegateActivityBehavior;
+import org.operaton.bpm.engine.impl.bpmn.behavior.ServiceTaskJavaDelegateActivityBehavior;
+import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
+import org.operaton.bpm.engine.impl.persistence.entity.ExecutionEntity;
+import org.operaton.bpm.engine.impl.pvm.delegate.ActivityBehavior;
+import org.operaton.bpm.engine.impl.pvm.delegate.ActivityExecution;
+import org.operaton.bpm.model.bpmn.instance.EndEvent;
+import org.operaton.bpm.model.bpmn.instance.IntermediateThrowEvent;
+import org.operaton.bpm.model.bpmn.instance.SendTask;
+import org.operaton.bpm.model.bpmn.instance.ServiceTask;
 
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 

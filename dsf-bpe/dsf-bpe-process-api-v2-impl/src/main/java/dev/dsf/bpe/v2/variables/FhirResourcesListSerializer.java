@@ -4,9 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 
-import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
-import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
-import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
+import org.operaton.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
+import org.operaton.bpm.engine.impl.variable.serializer.ValueFields;
+import org.operaton.bpm.engine.variable.impl.value.UntypedValueImpl;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.engine.delegate.TaskListener;
-import org.camunda.bpm.engine.delegate.VariableScope;
-import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
-import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
-import org.camunda.bpm.engine.variable.value.PrimitiveValue;
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.operaton.bpm.engine.delegate.JavaDelegate;
+import org.operaton.bpm.engine.delegate.TaskListener;
+import org.operaton.bpm.engine.delegate.VariableScope;
+import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
+import org.operaton.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.operaton.bpm.engine.variable.value.PrimitiveValue;
 import org.springframework.context.ApplicationContext;
 
 import dev.dsf.bpe.api.logging.PluginMdc;

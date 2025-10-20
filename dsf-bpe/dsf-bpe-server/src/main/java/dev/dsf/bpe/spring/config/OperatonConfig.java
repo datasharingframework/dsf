@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.camunda.bpm.engine.ProcessEngine;
-import org.camunda.bpm.engine.impl.jobexecutor.DefaultJobExecutor;
-import org.camunda.bpm.engine.impl.persistence.StrongUuidGenerator;
-import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
-import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
+import org.operaton.bpm.engine.ProcessEngine;
+import org.operaton.bpm.engine.impl.jobexecutor.DefaultJobExecutor;
+import org.operaton.bpm.engine.impl.persistence.StrongUuidGenerator;
+import org.operaton.bpm.engine.spring.ProcessEngineFactoryBean;
+import org.operaton.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -28,7 +28,7 @@ import dev.dsf.bpe.listener.DebugLoggingBpmnParseListener;
 import dev.dsf.bpe.listener.DefaultBpmnParseListener;
 
 @Configuration
-public class CamundaConfig
+public class OperatonConfig
 {
 	@Autowired
 	private PropertiesConfig propertiesConfig;

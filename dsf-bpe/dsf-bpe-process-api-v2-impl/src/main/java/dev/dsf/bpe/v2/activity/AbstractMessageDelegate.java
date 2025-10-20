@@ -2,7 +2,7 @@ package dev.dsf.bpe.v2.activity;
 
 import java.util.function.Function;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.values.SendTaskValues;

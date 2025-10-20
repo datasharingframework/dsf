@@ -3,7 +3,7 @@ package dev.dsf.bpe.api.plugin;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.operaton.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 
 import dev.dsf.bpe.api.listener.ListenerFactory;
 

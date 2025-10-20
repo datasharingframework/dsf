@@ -4,10 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
-import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
-import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
 import org.hl7.fhir.r4.model.Resource;
+import org.operaton.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
+import org.operaton.bpm.engine.impl.variable.serializer.ValueFields;
+import org.operaton.bpm.engine.variable.impl.value.UntypedValueImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

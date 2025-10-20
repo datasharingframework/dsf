@@ -1,8 +1,8 @@
 package dev.dsf.bpe.camunda;
 
-import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
-import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParser;
-import org.camunda.bpm.engine.impl.cfg.BpmnParseFactory;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParse;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParser;
+import org.operaton.bpm.engine.impl.cfg.BpmnParseFactory;
 
 public class MultiVersionBpmnParseFactory implements BpmnParseFactory
 {

@@ -153,12 +153,22 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.camunda.bpm</groupId>
-			<artifactId>camunda-engine</artifactId>
+			<groupId>org.operaton.bpm</groupId>
+			<artifactId>operaton-engine</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.camunda.bpm</groupId>
-			<artifactId>camunda-engine-spring</artifactId>
+			<groupId>org.operaton.bpm</groupId>
+			<artifactId>operaton-engine-spring</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-to-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

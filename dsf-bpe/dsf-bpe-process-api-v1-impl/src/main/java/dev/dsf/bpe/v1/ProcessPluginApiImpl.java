@@ -2,7 +2,7 @@ package dev.dsf.bpe.v1;
 
 import java.util.Objects;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

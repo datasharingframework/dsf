@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.engine.delegate.TaskListener;
-import org.camunda.bpm.engine.delegate.VariableScope;
-import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.operaton.bpm.engine.delegate.JavaDelegate;
+import org.operaton.bpm.engine.delegate.TaskListener;
+import org.operaton.bpm.engine.delegate.VariableScope;
+import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 

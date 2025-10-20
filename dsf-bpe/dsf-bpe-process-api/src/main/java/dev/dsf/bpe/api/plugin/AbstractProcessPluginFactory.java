@@ -65,7 +65,7 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 	{
 		try
 		{
-			URLClassLoader pluginClassLoader = new URLClassLoader(pluginPath.getFileName().toString(),
+			ClassLoader pluginClassLoader = createPluginClassLoader(pluginPath.getFileName().toString(),
 					new URL[] { toUrl(pluginPath) }, apiClassLoader);
 
 			List<Provider<?>> definitions = ServiceLoader.load(processPluginDefinitionType, pluginClassLoader).stream()
@@ -99,8 +99,13 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 		}
 	}
 
+	protected URLClassLoader createPluginClassLoader(String name, URL[] urls, ClassLoader parent)
+	{
+		return new URLClassLoader(name, urls, parent);
+	}
+
 	protected abstract ProcessPlugin createProcessPlugin(Object processPluginDefinition, boolean draft, Path jarFile,
-			URLClassLoader pluginClassLoader);
+			ClassLoader pluginClassLoader);
 
 	private URL toUrl(Path p)
 	{

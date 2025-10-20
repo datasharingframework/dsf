@@ -19,7 +19,7 @@ public class PostStartupConfig
 	private WebsocketConfig fhirConfig;
 
 	@Autowired
-	private CamundaConfig camundaConfig;
+	private OperatonConfig operatonConfig;
 
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent()
@@ -29,7 +29,7 @@ public class PostStartupConfig
 		logger.info("Deploying process plugins [Done]");
 
 		logger.info("Starting process engine ...");
-		camundaConfig.processEngineConfiguration().getJobExecutor().start();
+		operatonConfig.processEngineConfiguration().getJobExecutor().start();
 		logger.info("Starting process engine [Done]");
 
 		fhirConfig.fhirConnectorTask().connect();
