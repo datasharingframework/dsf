@@ -40,7 +40,8 @@ public class DefaultCaFilesGenerator
 	private static final List<String> CLIENT_ONLY_ISSUING_CA_COMMON_NAMES = List.of("D-TRUST Limited Basic CA 1-2 2019",
 			"D-TRUST Limited Basic CA 1-3 2019", "Fraunhofer User CA - G02", "GEANT eScience Personal CA 4",
 			"GEANT eScience Personal ECC CA 4", "GEANT Personal CA 4", "GEANT Personal ECC CA 4", "GEANT S/MIME ECC 1",
-			"GEANT S/MIME RSA 1", "HARICA S/MIME ECC", "HARICA S/MIME RSA");
+			"GEANT S/MIME RSA 1", "HARICA Client Authentication ECC", "HARICA Client Authentication RSA",
+			"HARICA S/MIME ECC", "HARICA S/MIME RSA");
 
 	private static final String CLIENT_CERT_ISSUING_CAS_PEM = "client_cert_issuing_cas.pem";
 	private static final String CLIENT_CERT_CA_CHAINS_PEM = "client_cert_ca_chains.pem";

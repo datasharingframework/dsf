@@ -1,11 +1,10 @@
-FROM debian:buster-slim AS builder
-RUN adduser --system --no-create-home --group --uid 2202 java
+FROM debian:trixie-slim AS builder
 WORKDIR /opt/bpe
-COPY --chown=root:java ./ ./
-RUN chown root:java ./ && \
+COPY --chown=root:2202 ./ ./
+RUN chown root:2202 ./ && \
     chmod 750 ./ ./ca ./conf ./lib ./lib_external ./process ./ui ./dsf_bpe_start.sh ./healthcheck.sh && \
-	chmod 440 ./ca/client_cert_ca_chains.pem ./ca/server_cert_root_cas.pem ./conf/log4j2.xml ./dsf_bpe.jar ./lib/*.jar && \
-	chmod 1775 ./log
+    chmod 440 ./ca/client_cert_ca_chains.pem ./ca/server_cert_root_cas.pem ./conf/log4j2.xml ./dsf_bpe.jar ./lib/*.jar && \
+    chmod 1775 ./log
 
 
 FROM azul/zulu-openjdk:17-jre-headless
@@ -15,8 +14,10 @@ LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
 
 EXPOSE 8080
 
-RUN adduser --system --no-create-home --group --uid 2202 java && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && apt dist-upgrade -y && apt install curl -y
+RUN adduser --system --no-create-home --group --uid 2202 java
 
 WORKDIR /opt/bpe
 COPY --from=builder /opt/bpe ./
