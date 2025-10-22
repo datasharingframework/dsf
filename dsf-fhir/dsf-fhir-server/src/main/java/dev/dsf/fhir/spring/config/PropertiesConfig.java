@@ -185,7 +185,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 			properties.put("dev.dsf.fhir.server.endpoint.address", baseUrl.toString());
 			properties.put("dev.dsf.fhir.server.endpoint.identifier.value", baseUrl.getHost());
 
-			environment.getPropertySources().addFirst(new PropertiesPropertySource("enpoint-properties", properties));
+			environment.getPropertySources().addFirst(new PropertiesPropertySource("endpoint-properties", properties));
 		}
 		catch (MalformedURLException | IllegalStateException | URISyntaxException e)
 		{
