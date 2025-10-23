@@ -217,9 +217,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 				Properties properties = new Properties();
 				properties.put("dev.dsf.fhir.server.organization.thumbprint", thumbprint);
 
-				environment.getPropertySources().addFirst(new PropertiesPropertySource("organization-thumbprint-properties", properties));
+				environment.getPropertySources()
+						.addFirst(new PropertiesPropertySource("organization-thumbprint-properties", properties));
 			}
-		} catch (IOException | NoSuchAlgorithmException | CertificateEncodingException e)
+		}
+		catch (IOException | NoSuchAlgorithmException | CertificateEncodingException e)
 		{
 			throw new RuntimeException(e);
 		}
