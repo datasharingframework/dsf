@@ -196,7 +196,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 		}
 		catch (MalformedURLException | IllegalStateException | URISyntaxException e)
 		{
-			throw new RuntimeException(e);
+			logger.warn("Exception while injecting endpoint properties", e);
 		}
 	}
 
@@ -223,7 +223,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 		}
 		catch (IOException | NoSuchAlgorithmException | CertificateEncodingException e)
 		{
-			throw new RuntimeException(e);
+			logger.warn("Exception while computing organization thumbprint property", e);
 		}
 	}
 
