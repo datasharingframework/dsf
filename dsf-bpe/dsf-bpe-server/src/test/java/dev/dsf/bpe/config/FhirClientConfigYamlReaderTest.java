@@ -115,6 +115,8 @@ public class FhirClientConfigYamlReaderTest
 			    trusted-root-certificates-file: '#[ca.crt]'
 			    client-id: some_client_id
 			    client-secret-file: '#[password.file]'
+			    required-audience: test_audience
+			    verify-authorized-party: no
 			oidc-auth-server2:
 			  base-url: https://oidcauth.server/fhir
 			  connect-timeout: PT2S
@@ -124,6 +126,7 @@ public class FhirClientConfigYamlReaderTest
 			    base-url: https://oidc2.server/foo/
 			    client-id: some_client_id
 			    client-secret: s3cr3t
+			    required-audience: [test_audience1, test_audience2]
 			empty-cert-auth:
 			  base-url: http://empty.cert.auth/fhir
 			  cert-auth:""";
@@ -229,6 +232,24 @@ public class FhirClientConfigYamlReaderTest
 			connection-timeout-too-large:
 			  base-url: http://min.server/fhir
 			  connect-timeout: P24DT20H31M23.648S
+			""", 1), ye("""
+			oidc-auth-empty-audience-inline:
+			  base-url: https://oidc.auth/empty/audience/inline
+			  oidc-auth:
+			    base-url: https://oidc.server
+			    client-id: some_client_id
+			    client-secret: s3cr3t
+			    required-audience: [test_audience, '']
+			""", 1), ye("""
+			oidc-auth-empty-audience-list:
+			  base-url: https://oidc.auth/empty/audience/list
+			  oidc-auth:
+			    base-url: https://oidc.server
+			    client-id: some_client_id
+			    client-secret: s3cr3t
+			    required-audience:
+			      - test_audience
+			      -
 			""", 1));
 
 	private static final char[] PASSWORD = "pa55w0rd".toCharArray();
@@ -246,6 +267,7 @@ public class FhirClientConfigYamlReaderTest
 	private static final Duration DEFAULT_CONNECTION_TIMEOUT = Duration.ofSeconds(1);
 	private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofSeconds(20);
 	private static final String DEFAULT_OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
+	private static final boolean DEFAULT_OIDC_VERIFY_AUTHORIZED_PARTY = true;
 
 	private static KeyStore DEFAULT_TRUST_STORE;
 	private static X509Certificate CLIENT_CERTIFICATE, SERVER_CERTIFICATE;
@@ -253,7 +275,8 @@ public class FhirClientConfigYamlReaderTest
 
 	private FhirClientConfigYamlReaderImpl reader = new FhirClientConfigYamlReaderImpl(
 			DEFAULT_TEST_CONNECTION_ON_STARTUP, DEFAULT_ENABLE_DEBUG_LOGGING, DEFAULT_CONNECTION_TIMEOUT,
-			DEFAULT_READ_TIMEOUT, DEFAULT_TRUST_STORE, DEFAULT_OIDC_DISCOVERY_PATH);
+			DEFAULT_READ_TIMEOUT, DEFAULT_TRUST_STORE, DEFAULT_OIDC_DISCOVERY_PATH,
+			DEFAULT_OIDC_VERIFY_AUTHORIZED_PARTY);
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -392,13 +415,15 @@ public class FhirClientConfigYamlReaderTest
 				DEFAULT_ENABLE_DEBUG_LOGGING, Duration.ofSeconds(2), Duration.ofMinutes(10), Assert::assertNull,
 				Assert::assertNull, Assert::assertNull,
 				testOidcAuth("https://oidc1.server/foo", "/test/.well-known/openid-configuration", false, true,
-						Duration.ofSeconds(5), Duration.ofMinutes(10), "some_client_id", PASSWORD));
+						Duration.ofSeconds(5), Duration.ofMinutes(10), "some_client_id", PASSWORD,
+						List.of("test_audience"), false));
 		testConfig(configs, "oidc-auth-server2", "https://oidcauth.server/fhir", DEFAULT_TEST_CONNECTION_ON_STARTUP,
 				DEFAULT_ENABLE_DEBUG_LOGGING, Duration.ofSeconds(2), Duration.ofMinutes(10), Assert::assertNull,
 				Assert::assertNull, Assert::assertNull,
 				testOidcAuth("https://oidc2.server/foo", DEFAULT_OIDC_DISCOVERY_PATH,
 						DEFAULT_TEST_CONNECTION_ON_STARTUP, DEFAULT_ENABLE_DEBUG_LOGGING, DEFAULT_CONNECTION_TIMEOUT,
-						DEFAULT_READ_TIMEOUT, "some_client_id", "s3cr3t".toCharArray()));
+						DEFAULT_READ_TIMEOUT, "some_client_id", "s3cr3t".toCharArray(),
+						List.of("test_audience1", "test_audience2"), DEFAULT_OIDC_VERIFY_AUTHORIZED_PARTY));
 		testConfig(configs, "empty-cert-auth", "http://empty.cert.auth/fhir", DEFAULT_TEST_CONNECTION_ON_STARTUP,
 				DEFAULT_ENABLE_DEBUG_LOGGING, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT, Assert::assertNull,
 				Assert::assertNull, Assert::assertNull, Assert::assertNull);
@@ -480,7 +505,8 @@ public class FhirClientConfigYamlReaderTest
 	private BiConsumerWithException<String, OidcAuthentication> testOidcAuth(String expectedBaseUrl,
 			String expectedDiscoveryPath, boolean expectedStartupConnectionTestEnabled,
 			boolean expectedDebugLoggingEnabled, Duration expectedConnectionTimeout, Duration expectedReadTimeout,
-			String expectedClientId, char[] expectedClientSecret)
+			String expectedClientId, char[] expectedClientSecret, List<String> expectedRequiredAudiences,
+			boolean expectedVerifyAuthorizedParty)
 	{
 		return (expectedFhirServerId, auth) ->
 		{
@@ -494,6 +520,8 @@ public class FhirClientConfigYamlReaderTest
 			testTrustStore(expectedFhirServerId, auth.trustStore());
 			assertEquals(expectedFhirServerId, expectedClientId, auth.clientId());
 			assertArrayEquals(expectedFhirServerId, expectedClientSecret, auth.clientSecret());
+			assertEquals(expectedRequiredAudiences, auth.requiredAudiences());
+			assertEquals(expectedVerifyAuthorizedParty, auth.verifyAuthorizedParty());
 		};
 	}
 

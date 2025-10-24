@@ -3,7 +3,9 @@ package dev.dsf.bpe.client.oidc;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -20,6 +22,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.Verification;
 
 import dev.dsf.bpe.api.client.oidc.Configuration;
 import dev.dsf.bpe.api.client.oidc.OidcClientException;
@@ -46,9 +49,11 @@ public class OidcClientJersey extends BaseOidcClientJersey
 		requestDebugLogger.setLevel(Level.INFO);
 	}
 
+	private final String clientId;
+	private final char[] clientSecret;
 	private final Duration notBeforeIssuedAtExpiresAtLeewaySeconds;
-
-	private final String basicAuthorizationValue;
+	private final List<String> requiredAudiences = new ArrayList<>();
+	private final boolean verifyAuthorizedParty;
 
 	/**
 	 * @param baseUrl
@@ -80,20 +85,26 @@ public class OidcClientJersey extends BaseOidcClientJersey
 	 * @param logRequestsAndResponses
 	 * @param notBeforeIssuedAtExpiresAtLeewaySeconds
 	 *            not <code>null</code>
+	 * @param requiredAudiences
+	 *            may be <code>null</code>
+	 * @param verifyAuthorizedParty
 	 */
 	public OidcClientJersey(String baseUrl, String discoveryPath, String clientId, char[] clientSecret,
 			KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String proxySchemeHostPort,
 			String proxyUserName, char[] proxyPassword, String userAgentValue, Duration connectTimeout,
-			Duration readTimeout, boolean logRequestsAndResponses, Duration notBeforeIssuedAtExpiresAtLeewaySeconds)
+			Duration readTimeout, boolean logRequestsAndResponses, Duration notBeforeIssuedAtExpiresAtLeewaySeconds,
+			List<String> requiredAudiences, boolean verifyAuthorizedParty)
 	{
 		super(baseUrl, discoveryPath, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName,
 				proxyPassword, userAgentValue, connectTimeout, readTimeout, logRequestsAndResponses);
 
+		this.clientId = clientId;
+		this.clientSecret = clientSecret;
 		this.notBeforeIssuedAtExpiresAtLeewaySeconds = Objects.requireNonNull(notBeforeIssuedAtExpiresAtLeewaySeconds,
 				"notBeforeIssuedAtExpiresAtLeewaySeconds");
-
-		basicAuthorizationValue = Base64.getEncoder().encodeToString(new StringBuilder().append(clientId).append(':')
-				.append(clientSecret).toString().getBytes(StandardCharsets.US_ASCII));
+		if (requiredAudiences != null)
+			this.requiredAudiences.addAll(requiredAudiences);
+		this.verifyAuthorizedParty = verifyAuthorizedParty;
 	}
 
 	private void logUnexpectedResponseAndClose(Response response)
@@ -102,7 +113,6 @@ public class OidcClientJersey extends BaseOidcClientJersey
 		logger.debug("Unexpected response, status: {} {}, message: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase(), message);
 	}
-
 
 	public DecodedJWT getAccessTokenDecoded() throws OidcClientException
 	{
@@ -120,7 +130,10 @@ public class OidcClientJersey extends BaseOidcClientJersey
 							+ configuration.grantTypesSupported());
 
 		Response response = client.target(configuration.tokenEndpoint()).request(MediaType.APPLICATION_JSON_TYPE)
-				.header(HttpHeaders.AUTHORIZATION, "Basic " + basicAuthorizationValue)
+				.header(HttpHeaders.AUTHORIZATION,
+						"Basic " + Base64.getEncoder()
+								.encodeToString(new StringBuilder().append(clientId).append(':').append(clientSecret)
+										.toString().getBytes(StandardCharsets.US_ASCII)))
 				.post(Entity.form(new Form().param("grant_type", "client_credentials")));
 
 		if (response.getStatus() == Status.OK.getStatusCode())
@@ -174,8 +187,18 @@ public class OidcClientJersey extends BaseOidcClientJersey
 
 			try
 			{
-				return JWT.require(algorithm.get()).acceptLeeway(notBeforeIssuedAtExpiresAtLeewaySeconds.getSeconds())
-						.build().verify(decoded);
+				Verification v = JWT.require(algorithm.get())
+						.acceptLeeway(notBeforeIssuedAtExpiresAtLeewaySeconds.getSeconds());
+
+				if (requiredAudiences.size() == 1)
+					v.withAudience(requiredAudiences.get(0));
+				else if (requiredAudiences.size() > 1)
+					v.withAudience(requiredAudiences.toArray(String[]::new));
+
+				if (verifyAuthorizedParty)
+					v.withClaim("azp", clientId);
+
+				return v.build().verify(decoded);
 			}
 			catch (AlgorithmMismatchException e)
 			{

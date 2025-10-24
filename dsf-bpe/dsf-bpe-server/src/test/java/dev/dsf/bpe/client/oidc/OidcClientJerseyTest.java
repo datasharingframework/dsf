@@ -25,7 +25,7 @@ public class OidcClientJerseyTest
 		OidcClientJersey client = new OidcClientJersey("https://keycloak:8443/realms/dic1",
 				"/.well-known/openid-configuration", "dic1-fhir", "mF0GEtjFoyWIM3in4VCwifGI3azb4DTn".toCharArray(),
 				trustStore, null, null, null, null, null, "Test Client", Duration.ofSeconds(10), Duration.ofSeconds(5),
-				true, Duration.ofSeconds(10));
+				true, Duration.ofSeconds(10), null, false);
 
 		char[] accessToken = client.asOidcClientWithDecodedJwt().getAccessToken();
 		assertNotNull(accessToken);

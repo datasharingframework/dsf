@@ -2,6 +2,7 @@ package dev.dsf.bpe.v2.client.fhir;
 
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.List;
 
 import dev.dsf.bpe.api.config.BpeProxyConfig;
 import dev.dsf.bpe.api.config.FhirClientConfig;
@@ -160,6 +161,18 @@ public class ClientConfigDelegate implements ClientConfig
 			public String getBaseUrl()
 			{
 				return delegate.oidcAuthentication().baseUrl();
+			}
+
+			@Override
+			public List<String> getRequiredAudiences()
+			{
+				return delegate.oidcAuthentication().requiredAudiences();
+			}
+
+			@Override
+			public boolean isVerifyAuthorizedParty()
+			{
+				return delegate.oidcAuthentication().verifyAuthorizedParty();
 			}
 
 			@Override

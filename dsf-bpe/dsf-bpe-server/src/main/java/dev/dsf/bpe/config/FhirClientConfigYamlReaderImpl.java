@@ -65,10 +65,11 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 	private final Duration defaultReadTimeout;
 	private final KeyStore defaultTrustStore;
 	private final String defaultOidcDiscoveryPath;
+	private final boolean defaultOidcVerifyAuthorizedParty;
 
 	public FhirClientConfigYamlReaderImpl(boolean defaultTestConnectionOnStartup, boolean defaultEnableDebugLogging,
 			Duration defaultConnectTimeout, Duration defaultReadTimeout, KeyStore defaultTrustStore,
-			String defaultOidcDiscoveryPath)
+			String defaultOidcDiscoveryPath, boolean defaultOidcVerifyAuthorizedParty)
 	{
 		this.defaultTestConnectionOnStartup = defaultTestConnectionOnStartup;
 		this.defaultEnableDebugLogging = defaultEnableDebugLogging;
@@ -78,6 +79,7 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 		this.defaultOidcDiscoveryPath = defaultOidcDiscoveryPath != null && !defaultOidcDiscoveryPath.startsWith("/")
 				? ("/" + defaultOidcDiscoveryPath)
 				: defaultOidcDiscoveryPath;
+		this.defaultOidcVerifyAuthorizedParty = defaultOidcVerifyAuthorizedParty;
 	}
 
 	@Override
@@ -198,6 +200,7 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 				valueOrDefault(oidcAuth::connectTimeout, defaultConnectTimeout),
 				valueOrDefault(oidcAuth::readTimeout, defaultReadTimeout),
 				valueOrDefault(oidcAuth::readTrustStore, defaultTrustStore), oidcAuth.clientId(),
-				oidcAuth.readClientSecret());
+				oidcAuth.readClientSecret(), valueOrDefault(oidcAuth::requiredAudiences, List.of()),
+				valueOrDefault(oidcAuth::verifyAuthorizedParty, defaultOidcVerifyAuthorizedParty));
 	}
 }

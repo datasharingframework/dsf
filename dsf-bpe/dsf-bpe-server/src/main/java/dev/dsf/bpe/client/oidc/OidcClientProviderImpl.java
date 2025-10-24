@@ -2,6 +2,7 @@ package dev.dsf.bpe.client.oidc;
 
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -25,12 +26,13 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 	private final Duration cacheTimeoutJwksResource;
 	private final Duration cacheTimeoutAccessTokenBeforeExpiration;
 	private final Duration notBeforeIssuedAtExpiresAtLeeway;
+	private final boolean defaultVerifyAuthorizedParty;
 
 	public OidcClientProviderImpl(ProxyConfig proxyConfig, String defaultDiscoveryPath, Duration defaultConnectTimeout,
 			Duration defaultReadTimeout, KeyStore defaultTrustedStore, boolean defaultEnableDebugLogging,
 			String userAgent, boolean cacheEnabled, Duration cacheTimeoutConfigurationResource,
 			Duration cacheTimeoutJwksResource, Duration cacheTimeoutAccessTokenBeforeExpiration,
-			Duration notBeforeIssuedAtExpiresAtLeeway)
+			Duration notBeforeIssuedAtExpiresAtLeeway, boolean defaultVerifyAuthorizedParty)
 	{
 		this.proxyConfig = proxyConfig;
 		this.defaultDiscoveryPath = defaultDiscoveryPath;
@@ -44,6 +46,7 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 		this.cacheTimeoutJwksResource = cacheTimeoutJwksResource;
 		this.cacheTimeoutAccessTokenBeforeExpiration = cacheTimeoutAccessTokenBeforeExpiration;
 		this.notBeforeIssuedAtExpiresAtLeeway = notBeforeIssuedAtExpiresAtLeeway;
+		this.defaultVerifyAuthorizedParty = defaultVerifyAuthorizedParty;
 	}
 
 	@Override
@@ -74,7 +77,8 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 
 	@Override
 	public OidcClient getOidcClient(String baseUrl, String clientId, char[] clientSecret, String discoveryPath,
-			Duration connectTimeout, Duration readTimeout, KeyStore trustStore, Boolean enableDebugLogging)
+			Duration connectTimeout, Duration readTimeout, KeyStore trustStore, Boolean enableDebugLogging,
+			List<String> requiredAudiences, Boolean verifyAuthorizedParty)
 	{
 		Objects.requireNonNull(baseUrl, "baseUrl");
 		Objects.requireNonNull(clientId, "clientId");
@@ -95,7 +99,9 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 				proxyPassword, userAgent, readTimeout != null ? readTimeout : defaultReadTimeout,
 				connectTimeout != null ? connectTimeout : defaultConnectTimeout,
 				enableDebugLogging != null ? enableDebugLogging : defaultEnableDebugLogging,
-				notBeforeIssuedAtExpiresAtLeeway).asOidcClientWithDecodedJwt();
+				notBeforeIssuedAtExpiresAtLeeway, requiredAudiences,
+				verifyAuthorizedParty != null ? verifyAuthorizedParty : defaultVerifyAuthorizedParty)
+				.asOidcClientWithDecodedJwt();
 
 		return cacheEnabled
 				? new OidcClientWithCache(cacheTimeoutConfigurationResource, cacheTimeoutJwksResource,
@@ -109,6 +115,7 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 		Objects.requireNonNull(config, "config");
 
 		return getOidcClient(config.baseUrl(), config.clientId(), config.clientSecret(), config.discoveryPath(),
-				config.connectTimeout(), config.readTimeout(), config.trustStore(), config.debugLoggingEnabled());
+				config.connectTimeout(), config.readTimeout(), config.trustStore(), config.debugLoggingEnabled(),
+				config.requiredAudiences(), config.verifyAuthorizedParty());
 	}
 }

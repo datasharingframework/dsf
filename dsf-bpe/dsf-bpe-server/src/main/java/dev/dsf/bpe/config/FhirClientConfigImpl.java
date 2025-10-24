@@ -190,8 +190,8 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 
 	public static record OidcAuthenticationImpl(String baseUrl, String discoveryPath,
 			boolean startupConnectionTestEnabled, boolean debugLoggingEnabled, Duration connectTimeout,
-			Duration readTimeout, KeyStore trustStore, String clientId, char[] clientSecret)
-			implements OidcAuthentication
+			Duration readTimeout, KeyStore trustStore, String clientId, char[] clientSecret,
+			List<String> requiredAudiences, boolean verifyAuthorizedParty) implements OidcAuthentication
 	{
 		/**
 		 * @param baseUrl
@@ -210,6 +210,9 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 		 *            not <code>null</code>
 		 * @param clientSecret
 		 *            not <code>null</code>
+		 * @param requiredAudiences
+		 *            not <code>null</code>
+		 * @param verifyAuthorizedParty
 		 */
 		public OidcAuthenticationImpl
 		{
@@ -220,6 +223,7 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 			Objects.requireNonNull(trustStore, "trustStore");
 			Objects.requireNonNull(clientId, "clientId");
 			Objects.requireNonNull(clientSecret, "clientSecret");
+			Objects.requireNonNull(requiredAudiences, "requiredAudiences");
 		}
 
 		@Override
@@ -229,7 +233,8 @@ public record FhirClientConfigImpl(String fhirServerId, String baseUrl, boolean 
 					+ startupConnectionTestEnabled + ", debugLoggingEnabled: " + debugLoggingEnabled
 					+ ", connectTimeout: " + connectTimeout + ", readTimeout: " + readTimeout + ", trustStore: "
 					+ trustStoreToString(trustStore) + ", clientId: " + clientId + ", clientSecret: "
-					+ secretToString(clientSecret) + "]";
+					+ secretToString(clientSecret) + ", requiredAudiences: " + requiredAudiences
+					+ ", verifyAuthorizedParty: " + verifyAuthorizedParty + "]";
 		}
 	}
 }

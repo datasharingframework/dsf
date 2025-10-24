@@ -60,6 +60,8 @@ public class FhirClientConnectionsConfig implements InitializingBean
 		Duration defaultReadTimeout = propertiesConfig.getFhirClientConnectionsConfigDefaultReadTimeout();
 		KeyStore defaultTrustStore = propertiesConfig.getFhirClientConnectionsConfigDefaultTrustStore();
 		String defaultOidcDiscoveryPath = propertiesConfig.getFhirClientConnectionsConfigDefaultOidcDiscoveryPath();
+		boolean defaultOidcVerifyAuthorizedParty = propertiesConfig
+				.getFhirClientConnectionsConfigDefaultOidcVerifyAuthorizedParty();
 
 		logger.info(
 				"Using trust-store with {} as default to validate server certificates for v2 process plugin client connections",
@@ -67,7 +69,8 @@ public class FhirClientConnectionsConfig implements InitializingBean
 						.stream().collect(Collectors.joining("; ", "[", "]")));
 
 		return new FhirClientConfigYamlReaderImpl(defaultTestConnectionOnStartup, defaultEnableDebugLogging,
-				defaultConnectTimeout, defaultReadTimeout, defaultTrustStore, defaultOidcDiscoveryPath);
+				defaultConnectTimeout, defaultReadTimeout, defaultTrustStore, defaultOidcDiscoveryPath,
+				defaultOidcVerifyAuthorizedParty);
 	}
 
 	@Bean

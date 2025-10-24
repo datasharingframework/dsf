@@ -2,6 +2,7 @@ package dev.dsf.bpe.v2.service;
 
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 
 import dev.dsf.bpe.api.service.BpeOidcClientProvider;
@@ -74,6 +75,18 @@ public class OidcClientProviderDelegate implements OidcClientProvider
 		{
 			return delegate.getClientSecret();
 		}
+
+		@Override
+		public List<String> requiredAudiences()
+		{
+			return delegate.getRequiredAudiences();
+		}
+
+		@Override
+		public boolean verifyAuthorizedParty()
+		{
+			return delegate.isVerifyAuthorizedParty();
+		}
 	}
 
 	private final BpeOidcClientProvider delegate;
@@ -85,14 +98,15 @@ public class OidcClientProviderDelegate implements OidcClientProvider
 
 	@Override
 	public OidcClient getOidcClient(String baseUrl, String clientId, char[] clientSecret, String discoveryPath,
-			Duration connectTimeout, Duration readTimeout, KeyStore trustStore, Boolean enableDebugLogging)
+			Duration connectTimeout, Duration readTimeout, KeyStore trustStore, Boolean enableDebugLogging,
+			List<String> requiredAudiences, Boolean verifyAuthorizedParty)
 	{
 		Objects.requireNonNull(baseUrl, "baseUrl");
 		Objects.requireNonNull(clientId, "clientId");
 		Objects.requireNonNull(clientSecret, "clientSecret");
 
 		return new OidcClientDelegate(delegate.getOidcClient(baseUrl, clientId, clientSecret, discoveryPath,
-				connectTimeout, readTimeout, trustStore, enableDebugLogging));
+				connectTimeout, readTimeout, trustStore, enableDebugLogging, requiredAudiences, verifyAuthorizedParty));
 	}
 
 	@Override
