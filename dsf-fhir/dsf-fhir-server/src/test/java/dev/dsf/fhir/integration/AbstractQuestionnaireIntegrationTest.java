@@ -13,10 +13,9 @@ import java.util.UUID;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -38,7 +37,6 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 	protected static final String QUESTIONNAIRE_ITEM_BUSINESS_KEY_LINK = "business-key";
 	protected static final String QUESTIONNAIRE_ITEM_BUSINESS_KEY_TEXT = "The business-key of the process execution";
 
-	protected static final QuestionnaireResponse.QuestionnaireResponseStatus QUESTIONNAIRE_RESPONSE_STATUS = QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS;
 	protected static final Date QUESTIONNAIRE_RESPONSE_DATE = Date
 			.from(LocalDateTime.parse("2022-01-02T00:00:00").toInstant(ZoneOffset.UTC));
 
@@ -97,26 +95,24 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 		required.ifPresent(item::setRequired);
 	}
 
-	protected QuestionnaireResponse createQuestionnaireResponse()
+	protected QuestionnaireResponse createInProgressQuestionnaireResponse()
 	{
 		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
 				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
-		questionnaireResponse.getMeta()
-				.addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire-response|1.0.0");
+		questionnaireResponse.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire-response");
 
 		questionnaireResponse.getIdentifier().setSystem(TEST_IDENTIFIER_SYSTEM).setValue(TEST_IDENTIFIER_VALUE);
 		questionnaireResponse.setQuestionnaire(QUESTIONNAIRE_URL_VERSION);
 
-		questionnaireResponse.setStatus(QUESTIONNAIRE_RESPONSE_STATUS);
+		questionnaireResponse.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		questionnaireResponse.setAuthored(QUESTIONNAIRE_RESPONSE_DATE);
 
-		Organization localOrganization = organizationProvider.getLocalOrganization().get();
-		questionnaireResponse.setSubject(new Reference("Organization/" + localOrganization.getIdElement().getIdPart()));
-		questionnaireResponse.setAuthor(new Reference().setType(ResourceType.Organization.name())
-				.setIdentifier(localOrganization.getIdentifierFirstRep()));
+		questionnaireResponse.getAuthor().setType(ResourceType.Organization.name())
+				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless())
+				.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization");
 
 		addItem(questionnaireResponse, QUESTIONNAIRE_ITEM_USER_TASK_ID_LINK, QUESTIONNAIRE_ITEM_USER_TASK_ID_TEXT,
 				new StringType(UUID.randomUUID().toString()));
@@ -128,7 +124,7 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 
 	protected QuestionnaireResponse createQuestionnaireResponse(String questionnaireVersion)
 	{
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
 		String urlVersion = questionnaireResponse.getQuestionnaire().replace(QUESTIONNAIRE_VERSION,
 				questionnaireVersion);
 		return questionnaireResponse.setQuestionnaire(urlVersion);

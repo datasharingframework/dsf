@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="hhund" id="db.binaries_lo_unlink_queue.changelog-2.0.0">
+		<createTable tableName="binaries_lo_unlink_queue">
+			<column name="binary_oid" type="oid">
+				<constraints nullable="false" />
+			</column>
+			<column name="queued_at" type="TIMESTAMP" defaultValue="now()" />
+		</createTable>
+
+		<addPrimaryKey tableName="binaries_lo_unlink_queue" columnNames="binary_oid" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE binaries_lo_unlink_queue OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE binaries_lo_unlink_queue TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, DELETE ON TABLE binaries_lo_unlink_queue TO ${db.server_permanent_delete_users_group};
+			CREATE INDEX binary_oid_index ON binaries_lo_unlink_queue USING btree (binary_oid);
+		</sql>
+	</changeSet>
+	
+	<changeSet author="hhund" id="db.binaries_lo_unlink_queue.changelog-2.0.0.on_binaries_lo_unlink_queue_delete_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_binaries_lo_unlink_queue_delete.sql" splitStatements="false" />
+	</changeSet>
+	
+	<changeSet author="hhund" id="db.binaries_lo_unlink_queue.changelog-2.0.0.on_delete_trigger">
+		<sql dbms="postgresql">
+			CREATE TRIGGER binaries_lo_unlink_queue_delete BEFORE DELETE ON binaries_lo_unlink_queue FOR EACH ROW EXECUTE PROCEDURE on_binaries_lo_unlink_queue_delete();
+		</sql>
+	</changeSet>
+</databaseChangeLog>

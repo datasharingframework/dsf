@@ -31,21 +31,25 @@ public class ConfigurationImpl implements Configuration
 			this.grantTypesSupported.addAll(grantTypesSupported);
 	}
 
+	@Override
 	public String getIssuer()
 	{
 		return issuer;
 	}
 
+	@Override
 	public String getTokenEndpoint()
 	{
 		return tokenEndpoint;
 	}
 
+	@Override
 	public String getJwksUri()
 	{
 		return jwksUri;
 	}
 
+	@Override
 	public Set<String> getGrantTypesSupported()
 	{
 		return Collections.unmodifiableSet(grantTypesSupported);

@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -49,7 +51,15 @@ public abstract class AbstractResourceProvider implements InitializingBean
 			Map<String, List<String>> searchParameters, SearchEntryMode targetMode, Class<R> targetType,
 			Predicate<R> filter)
 	{
-		List<R> organizations = new ArrayList<>();
+		return search(searchType, searchParameters).filter(e -> targetMode.equals(e.getSearch().getMode()))
+				.filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.filter(targetType::isInstance).map(targetType::cast).filter(filter).toList();
+	}
+
+	protected final Stream<BundleEntryComponent> search(Class<? extends Resource> searchType,
+			Map<String, List<String>> searchParameters)
+	{
+		List<Stream<BundleEntryComponent>> resources = new ArrayList<>();
 
 		boolean hasMore = true;
 		int page = 1;
@@ -57,15 +67,13 @@ public abstract class AbstractResourceProvider implements InitializingBean
 		{
 			Bundle resultBundle = search(searchType, searchParameters, page++);
 
-			organizations.addAll(resultBundle.getEntry().stream().filter(BundleEntryComponent::hasSearch)
-					.filter(e -> targetMode.equals(e.getSearch().getMode())).filter(BundleEntryComponent::hasResource)
-					.map(BundleEntryComponent::getResource).filter(targetType::isInstance).map(targetType::cast)
-					.filter(filter).toList());
+			resources.add(resultBundle.getEntry().stream().filter(BundleEntryComponent::hasSearch)
+					.filter(BundleEntryComponent::hasResource));
 
 			hasMore = resultBundle.getLink(LINK_NEXT) != null;
 		}
 
-		return organizations;
+		return resources.stream().flatMap(Function.identity());
 	}
 
 	private Bundle search(Class<? extends Resource> searchType, Map<String, List<String>> parameters, int page)

@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 
@@ -17,6 +18,7 @@ public abstract class AbstractIdentity implements Identity
 {
 	private final boolean localIdentity;
 	private final Organization organization;
+	private final Endpoint endpoint;
 	private final Set<DsfRole> dsfRoles = new HashSet<>();
 	private final X509Certificate certificate;
 
@@ -25,16 +27,19 @@ public abstract class AbstractIdentity implements Identity
 	 *            <code>true</code> if this is a local identity
 	 * @param organization
 	 *            not <code>null</code>
+	 * @param endpoint
+	 *            may be <code>null</code>
 	 * @param dsfRoles
 	 *            may be <code>null</code>
 	 * @param certificate
 	 *            may be <code>null</code>
 	 */
-	public AbstractIdentity(boolean localIdentity, Organization organization, Collection<? extends DsfRole> dsfRoles,
-			X509Certificate certificate)
+	public AbstractIdentity(boolean localIdentity, Organization organization, Endpoint endpoint,
+			Collection<? extends DsfRole> dsfRoles, X509Certificate certificate)
 	{
 		this.localIdentity = localIdentity;
 		this.organization = Objects.requireNonNull(organization, "organization");
+		this.endpoint = endpoint;
 
 		if (dsfRoles != null)
 			this.dsfRoles.addAll(dsfRoles);
@@ -82,7 +87,7 @@ public abstract class AbstractIdentity implements Identity
 	@Override
 	public boolean hasDsfRole(DsfRole dsfRole)
 	{
-		return dsfRoles.contains(dsfRole);
+		return dsfRoles.stream().anyMatch(r -> r.matches(dsfRole));
 	}
 
 	@Override
@@ -90,5 +95,17 @@ public abstract class AbstractIdentity implements Identity
 	{
 		// null if login via OIDC
 		return Optional.ofNullable(certificate);
+	}
+
+	@Override
+	public Optional<Endpoint> getEndpoint()
+	{
+		return Optional.ofNullable(endpoint);
+	}
+
+	@Override
+	public Optional<String> getEndpointIdentifierValue()
+	{
+		return getEndpoint().flatMap(e -> getIdentifierValue(e::getIdentifier, ENDPOINT_IDENTIFIER_SYSTEM));
 	}
 }

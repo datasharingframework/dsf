@@ -1,0 +1,1 @@
+Empty `client_ca_chains` directory for maven/docker build, will contain default certificate authority pem files after maven build

@@ -15,7 +15,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Period;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.After;
 import org.junit.Before;
@@ -39,6 +39,7 @@ import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.RoleConfig.Mapping;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl.Operation;
 
 public class IdentityProviderTest
 {
@@ -70,6 +71,9 @@ public class IdentityProviderTest
 	private static final X509Certificate LOCAL_ORGANIZATION_CERTIFICATE;
 	private static final Organization REMOTE_ORGANIZATION = new Organization();
 	private static final X509Certificate REMOTE_ORGANIZATION_CERTIFICATE;
+
+	private static final Endpoint LOCAL_ENDPOINT = new Endpoint();
+	private static final Endpoint REMOTE_ENDPOINT = new Endpoint();
 
 	private static final X509Certificate LOCAL_PRACTITIONER_CERTIFICATE;
 	private static final String LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT;
@@ -111,16 +115,16 @@ public class IdentityProviderTest
 				.setValue(REMOTE_ORGANIZATION_IDENTIFIER_VALUE);
 	}
 
-
 	private OrganizationProvider organizationProvider;
-	private RoleConfig roleConfig;
+	private EndpointProvider endpointProvider;
+	private RoleConfig<FhirServerRole> roleConfig;
 	private DsfOpenIdCredentials credentials;
 
-	private IdentityProvider createIdentityProvider(List<Mapping> mappings)
+	private IdentityProvider createIdentityProvider(List<Mapping<FhirServerRole>> mappings)
 	{
 		when(roleConfig.getEntries()).thenReturn(mappings);
 
-		IdentityProvider provider = new IdentityProviderImpl(roleConfig, organizationProvider,
+		IdentityProvider provider = new IdentityProviderImpl(roleConfig, organizationProvider, endpointProvider,
 				LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
 
 		verify(roleConfig).getEntries();
@@ -128,20 +132,24 @@ public class IdentityProviderTest
 		return provider;
 	}
 
-	private Mapping createMappingWithThumbprint(String thumbprint)
+	private Mapping<FhirServerRole> createMappingWithThumbprint(String thumbprint)
 	{
-		return new Mapping("test-mapping", List.of(thumbprint), List.of(), List.of(), List.of(), List.of(), List.of());
+		return new Mapping<FhirServerRole>("test-mapping", List.of(thumbprint), List.of(), List.of(), List.of(),
+				List.of(), List.of());
 	}
 
-	private Mapping createMappingWithEmail(String email)
+	private Mapping<FhirServerRole> createMappingWithEmail(String email)
 	{
-		return new Mapping("test-mapping", List.of(), List.of(email), List.of(), List.of(), List.of(), List.of());
+		return new Mapping<FhirServerRole>("test-mapping", List.of(), List.of(email), List.of(), List.of(), List.of(),
+				List.of());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void before() throws Exception
 	{
 		organizationProvider = mock(OrganizationProvider.class);
+		endpointProvider = mock(EndpointProvider.class);
 		roleConfig = mock(RoleConfig.class);
 		credentials = mock(DsfOpenIdCredentials.class);
 	}
@@ -150,6 +158,7 @@ public class IdentityProviderTest
 	public void after() throws Exception
 	{
 		verifyNoMoreInteractions(organizationProvider);
+		verifyNoMoreInteractions(endpointProvider);
 	}
 
 	@Test
@@ -177,6 +186,7 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE))
 				.thenReturn(Optional.of(LOCAL_ORGANIZATION));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { LOCAL_ORGANIZATION_CERTIFICATE });
 		assertNotNull(i);
@@ -187,13 +197,14 @@ public class IdentityProviderTest
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
-		assertEquals(FhirServerRole.LOCAL_ORGANIZATION, orgI.getDsfRoles());
+		assertEquals(FhirServerRoleImpl.LOCAL_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(LOCAL_ORGANIZATION, orgI.getOrganization());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
+		verify(endpointProvider).getLocalEndpoint();
 
 		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, cArg1.getValue());
 	}
@@ -205,6 +216,8 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(REMOTE_ORGANIZATION_CERTIFICATE))
 				.thenReturn(Optional.of(REMOTE_ORGANIZATION));
+		when(endpointProvider.getEndpoint(REMOTE_ORGANIZATION, REMOTE_ORGANIZATION_CERTIFICATE))
+				.thenReturn(Optional.of(REMOTE_ENDPOINT));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { REMOTE_ORGANIZATION_CERTIFICATE });
 		assertNotNull(i);
@@ -215,15 +228,22 @@ public class IdentityProviderTest
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
-		assertEquals(FhirServerRole.REMOTE_ORGANIZATION, orgI.getDsfRoles());
+		assertEquals(FhirServerRoleImpl.REMOTE_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(REMOTE_ORGANIZATION, orgI.getOrganization());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
-		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
-		verify(organizationProvider).getOrganization(cArg1.capture());
+		ArgumentCaptor<X509Certificate> getOrgArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		verify(organizationProvider).getOrganization(getOrgArg1.capture());
 
-		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, cArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getOrgArg1.getValue());
+
+		ArgumentCaptor<Organization> getEndpArg1 = ArgumentCaptor.forClass(Organization.class);
+		ArgumentCaptor<X509Certificate> getEndpArg2 = ArgumentCaptor.forClass(X509Certificate.class);
+		verify(endpointProvider).getEndpoint(getEndpArg1.capture(), getEndpArg2.capture());
+
+		assertEquals(REMOTE_ORGANIZATION, getEndpArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getEndpArg2.getValue());
 	}
 
 	@Test
@@ -252,9 +272,11 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE)).thenReturn(Optional.empty());
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
-		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(FhirServerRole.CREATE));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
+		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL))
+				.thenReturn(List.of(Operation.CREATE.toFhirServerRoleAllResources()));
 		when(roleConfig.getDsfRolesForThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT))
-				.thenReturn(List.of(FhirServerRole.DELETE));
+				.thenReturn(List.of(Operation.DELETE.toFhirServerRoleAllResources()));
 		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(PRACTIONER_ROLE1));
 		when(roleConfig.getPractitionerRolesForThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT))
 				.thenReturn(List.of(PRACTIONER_ROLE2));
@@ -271,7 +293,8 @@ public class IdentityProviderTest
 		assertTrue(practitionerI.getCredentials().isEmpty());
 		assertEquals(LOCAL_PRACTITIONER_NAME_GIVEN + " " + LOCAL_PRACTITIONER_NAME_FAMILY,
 				practitionerI.getDisplayName());
-		assertEquals(EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE), practitionerI.getDsfRoles());
+		assertEquals(Set.of(Operation.CREATE.toFhirServerRoleAllResources(),
+				Operation.DELETE.toFhirServerRoleAllResources()), practitionerI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE + "/" + LOCAL_PRACTITIONER_MAIL, practitionerI.getName());
 		assertEquals(LOCAL_ORGANIZATION, practitionerI.getOrganization());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue().get());
@@ -281,6 +304,7 @@ public class IdentityProviderTest
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 
 		ArgumentCaptor<String> mArg1 = ArgumentCaptor.forClass(String.class);
 		verify(roleConfig).getDsfRolesForEmail(mArg1.capture());
@@ -331,28 +355,36 @@ public class IdentityProviderTest
 	{
 		IdentityProvider provider = createIdentityProvider(List.of(createMappingWithEmail(LOCAL_PRACTITIONER_MAIL)));
 
-		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
-
+		when(credentials.getStringClaimOrDefault("iss", "")).thenReturn("https://iss");
+		when(credentials.getStringClaimOrDefault("sub", "")).thenReturn("sub");
+		when(credentials.getStringClaimOrDefault("email", "sub.iss@oidc.invalid")).thenReturn(LOCAL_PRACTITIONER_MAIL);
 		when(credentials.getStringClaimOrDefault("family_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_FAMILY);
 		when(credentials.getStringClaimOrDefault("given_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_GIVEN);
-		when(credentials.getStringClaimOrDefault("email", "")).thenReturn(LOCAL_PRACTITIONER_MAIL);
+
+		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
+
 		when(credentials.getIdToken())
 				.thenReturn(Map.of("realm_access", Map.of("roles", new String[] { TOKEN_ROLE1 })));
 		when(credentials.getAccessToken()).thenReturn(
 				Map.of("resource_access", Map.of(TOKEN_ROLE2_CLIENT, Map.of("roles", new String[] { TOKEN_ROLE2 })),
 						"groups", new String[] { TOKEN_GROUP }));
 
-		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(FhirServerRole.CREATE));
-		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE1)).thenReturn(List.of(FhirServerRole.DELETE));
+		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL))
+				.thenReturn(List.of(Operation.CREATE.toFhirServerRoleAllResources()));
+		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE1))
+				.thenReturn(List.of(Operation.DELETE.toFhirServerRoleAllResources()));
 		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE2_CLIENT + "." + TOKEN_ROLE2))
-				.thenReturn(List.of(FhirServerRole.HISTORY));
-		when(roleConfig.getDsfRolesForTokenGroup(TOKEN_GROUP)).thenReturn(List.of(FhirServerRole.PERMANENT_DELETE));
+				.thenReturn(List.of(Operation.HISTORY.toFhirServerRoleAllResources()));
+		when(roleConfig.getDsfRolesForTokenGroup(TOKEN_GROUP))
+				.thenReturn(List.of(Operation.PERMANENT_DELETE.toFhirServerRoleAllResources()));
 
 		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(PRACTIONER_ROLE1));
 		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE1)).thenReturn(List.of(PRACTIONER_ROLE2));
 		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE2_CLIENT + "." + TOKEN_ROLE2))
 				.thenReturn(List.of(PRACTIONER_ROLE3));
 		when(roleConfig.getPractitionerRolesForTokenGroup(TOKEN_GROUP)).thenReturn(List.of(PRACTIONER_ROLE4));
+
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(credentials);
 		assertNotNull(i);
@@ -366,8 +398,10 @@ public class IdentityProviderTest
 		assertEquals(credentials, practitionerI.getCredentials().get());
 		assertEquals(LOCAL_PRACTITIONER_NAME_GIVEN + " " + LOCAL_PRACTITIONER_NAME_FAMILY,
 				practitionerI.getDisplayName());
-		assertEquals(EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE, FhirServerRole.HISTORY,
-				FhirServerRole.PERMANENT_DELETE), practitionerI.getDsfRoles());
+		assertEquals(Set.of(new FhirServerRoleImpl(Operation.CREATE, List.of()),
+				new FhirServerRoleImpl(Operation.DELETE, List.of()),
+				new FhirServerRoleImpl(Operation.HISTORY, List.of()),
+				new FhirServerRoleImpl(Operation.PERMANENT_DELETE, List.of())), practitionerI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE + "/" + LOCAL_PRACTITIONER_MAIL, practitionerI.getName());
 		assertEquals(LOCAL_ORGANIZATION, practitionerI.getOrganization());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue().get());
@@ -385,6 +419,7 @@ public class IdentityProviderTest
 		assertNotNull(practitionerI.getPractitioner());
 
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 
 		verify(credentials).getIdToken();
 		verify(credentials).getAccessToken();
@@ -418,7 +453,7 @@ public class IdentityProviderTest
 
 		when(credentials.getStringClaimOrDefault("iss", "")).thenReturn("https://iss");
 		when(credentials.getStringClaimOrDefault("sub", "")).thenReturn("sub");
-		when(credentials.getStringClaimOrDefault("email", "")).thenReturn(LOCAL_PRACTITIONER_MAIL);
+		when(credentials.getStringClaimOrDefault("email", "sub.iss@oidc.invalid")).thenReturn(LOCAL_PRACTITIONER_MAIL);
 		when(credentials.getStringClaimOrDefault("family_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_FAMILY);
 		when(credentials.getStringClaimOrDefault("given_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_GIVEN);
 		when(credentials.getIdToken())
@@ -427,6 +462,7 @@ public class IdentityProviderTest
 				Map.of("resource_access", Map.of(TOKEN_ROLE2_CLIENT, Map.of("roles", new String[] { TOKEN_ROLE2 })),
 						"groups", new String[] { TOKEN_GROUP }));
 		when(credentials.getUserId()).thenReturn("user-id");
+
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
 
 		Identity i = provider.getIdentity(credentials);
@@ -434,7 +470,7 @@ public class IdentityProviderTest
 
 		verify(credentials).getStringClaimOrDefault("iss", "");
 		verify(credentials).getStringClaimOrDefault("sub", "");
-		verify(credentials).getStringClaimOrDefault("email", "");
+		verify(credentials).getStringClaimOrDefault("email", "sub.iss@oidc.invalid");
 		verify(credentials).getStringClaimOrDefault("family_name", "");
 		verify(credentials).getStringClaimOrDefault("given_name", "");
 		verify(credentials).getIdToken();

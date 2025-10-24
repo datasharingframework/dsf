@@ -1,0 +1,53 @@
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-organization" />
+	<version value="2.0.0" />
+	<name value="ProcessAuthorizationRemoteOrganization" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-10-15" />
+	<fhirVersion value="4.0.1" />
+	<kind value="complex-type" />
+	<abstract value="false" />
+	<type value="Coding" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Coding" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Coding.extension">
+			<path value="Coding.extension" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="url" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+		</element>
+		<element id="Coding.extension:organization">
+			<path value="Coding.extension" />
+			<sliceName value="organization" />
+			<min value="1" />
+			<max value="1" />
+			<type>
+				<code value="Extension" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization|2.0.0" />
+			</type>
+		</element>
+		<element id="Coding.system">
+			<path value="Coding.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+		</element>
+		<element id="Coding.code">
+			<path value="Coding.code" />
+			<min value="1" />
+			<fixedCode value="REMOTE_ORGANIZATION" />
+		</element>
+	</differential>
+</StructureDefinition>

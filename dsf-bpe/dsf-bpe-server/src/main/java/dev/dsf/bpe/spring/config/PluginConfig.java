@@ -73,16 +73,17 @@ public class PluginConfig
 	{
 		return new FhirResourceHandlerImpl(dsfClientConfig.clientProvider().getWebserviceClient(),
 				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
-				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());
 	}
 
 	@Bean
 	public ProcessPluginManager processPluginManager()
 	{
 		return new ProcessPluginManagerImpl(
-				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory()),
+				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory(),
+						camundaConfig.defaultBpmnParseListener()),
 				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler(),
 				propertiesConfig.getDsfServerBaseUrl(), dsfClientConfig.clientProvider().getWebserviceClient(),
-				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());
 	}
 }

@@ -18,6 +18,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import dev.dsf.bpe.api.config.BpeProxyConfig;
 import dev.dsf.bpe.api.config.DsfClientConfig;
 import dev.dsf.bpe.api.config.FhirClientConfigs;
+import dev.dsf.bpe.api.config.FhirValidationConfig;
 import dev.dsf.bpe.api.plugin.ProcessPluginApiBuilder;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.api.service.BpeMailService;
@@ -32,24 +33,29 @@ public class ProcessPluginApiFactory implements InitializingBean
 	private final DsfClientConfig dsfClientConfig;
 	private final FhirClientConfigs fhirClientConfigs;
 	private final BpeProxyConfig bpeProxyConfig;
+	private final FhirValidationConfig fhirValidationConfig;
 	private final BuildInfoProvider buildInfoProvider;
 	private final BpeMailService bpeMailService;
 	private final BpeOidcClientProvider bpeOidcClientProvider;
 	private final ProcessPluginApiClassLoaderFactory classLoaderFactory;
+	private final String serverBaseUrl;
 
 	public ProcessPluginApiFactory(ConfigurableEnvironment environment, DsfClientConfig dsfClientConfig,
-			FhirClientConfigs fhirClientConfigs, BpeProxyConfig bpeProxyConfig, BuildInfoProvider buildInfoProvider,
+			FhirClientConfigs fhirClientConfigs, BpeProxyConfig bpeProxyConfig,
+			FhirValidationConfig fhirValidationConfig, BuildInfoProvider buildInfoProvider,
 			BpeMailService bpeMailService, BpeOidcClientProvider bpeOidcClientProvider,
-			ProcessPluginApiClassLoaderFactory classLoaderFactory)
+			ProcessPluginApiClassLoaderFactory classLoaderFactory, String serverBaseUrl)
 	{
 		this.environment = environment;
 		this.dsfClientConfig = dsfClientConfig;
 		this.fhirClientConfigs = fhirClientConfigs;
 		this.bpeProxyConfig = bpeProxyConfig;
+		this.fhirValidationConfig = fhirValidationConfig;
 		this.buildInfoProvider = buildInfoProvider;
 		this.bpeMailService = bpeMailService;
 		this.bpeOidcClientProvider = bpeOidcClientProvider;
 		this.classLoaderFactory = classLoaderFactory;
+		this.serverBaseUrl = serverBaseUrl;
 	}
 
 	@Override
@@ -59,10 +65,12 @@ public class ProcessPluginApiFactory implements InitializingBean
 		Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
 		Objects.requireNonNull(fhirClientConfigs, "fhirClientConfigs");
 		Objects.requireNonNull(bpeProxyConfig, "bpeProxyConfig");
+		Objects.requireNonNull(fhirValidationConfig, "fhirValidationConfig");
 		Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
 		Objects.requireNonNull(bpeMailService, "bpeMailService");
 		Objects.requireNonNull(bpeOidcClientProvider, "bpeOidcClientProvider");
 		Objects.requireNonNull(classLoaderFactory, "classLoaderFactory");
+		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 	}
 
 	public List<ProcessPluginFactory> initialize()
@@ -77,7 +85,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 		ApplicationContext apiApplicationContext = createApiApplicationContext(apiVersion, apiClassLoader,
 				apiBuilder.getSpringServiceConfigClass());
 
-		return apiBuilder.build(apiClassLoader, apiApplicationContext, environment);
+		return apiBuilder.build(apiClassLoader, apiApplicationContext, environment, serverBaseUrl);
 	}
 
 	private ProcessPluginApiBuilder loadProcessPluginApiBuilder(ClassLoader apiClassLoader)
@@ -95,6 +103,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 			factory.registerSingleton("dsfClientConfig", dsfClientConfig);
 			factory.registerSingleton("fhirClientConfigs", fhirClientConfigs);
 			factory.registerSingleton("bpeProxyConfig", bpeProxyConfig);
+			factory.registerSingleton("fhirValidationConfig", fhirValidationConfig);
 			factory.registerSingleton("buildInfoReader", buildInfoProvider);
 			factory.registerSingleton("bpeMailService", bpeMailService);
 			factory.registerSingleton("bpeOidcClientProvider", bpeOidcClientProvider);

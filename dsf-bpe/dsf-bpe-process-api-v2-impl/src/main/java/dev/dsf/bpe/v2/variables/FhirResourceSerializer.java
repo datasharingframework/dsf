@@ -1,19 +1,21 @@
 package dev.dsf.bpe.v2.variables;
 
 import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.v2.variables.FhirResourceValues.FhirResourceValue;
 
@@ -40,16 +42,33 @@ public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourc
 	public void writeValue(FhirResourceValue value, ValueFields valueFields)
 	{
 		Resource resource = value.getValue();
-		try
+
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+				OutputStreamWriter writer = new OutputStreamWriter(out))
 		{
 			if (resource != null)
 			{
-				String s = newJsonParser().encodeResourceToString(resource);
+				if (resource instanceof Binary binary)
+				{
+					byte[] data = binary.getData();
+					if (data != null)
+					{
+						out.write(data);
+						valueFields.setLongValue((long) data.length);
+
+						binary.setData(null);
+						resource = binary.copy();
+						binary.setData(data);
+					}
+				}
+
+				newJsonParser().encodeResourceToWriter(resource, writer);
+
 				valueFields.setTextValue(resource.getClass().getName());
-				valueFields.setByteArrayValue(s.getBytes(StandardCharsets.UTF_8));
+				valueFields.setByteArrayValue(out.toByteArray());
 			}
 		}
-		catch (DataFormatException e)
+		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -82,7 +101,18 @@ public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourc
 			{
 				@SuppressWarnings("unchecked")
 				Class<Resource> clazz = (Class<Resource>) Class.forName(className);
-				resource = newJsonParser().parseResource(clazz, new ByteArrayInputStream(bytes));
+
+				ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+				if (Binary.class.equals(clazz))
+				{
+					byte[] data = in.readNBytes(valueFields.getLongValue().intValue());
+					Binary binary = newJsonParser().parseResource(Binary.class, in);
+					binary.setData(data);
+
+					resource = binary;
+				}
+				else
+					resource = newJsonParser().parseResource(clazz, in);
 			}
 			else
 			{
@@ -92,7 +122,7 @@ public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourc
 
 			return FhirResourceValues.create(resource);
 		}
-		catch (ClassNotFoundException e)
+		catch (ClassNotFoundException | IOException e)
 		{
 			throw new RuntimeException(e);
 		}

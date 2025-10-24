@@ -20,6 +20,7 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.Constants;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 
 public class QuestionnaireResponseHandler extends AbstractResourceHandler
@@ -28,13 +29,15 @@ public class QuestionnaireResponseHandler extends AbstractResourceHandler
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseHandler.class);
 
 	private final TaskService userTaskService;
+	private final WebserviceClient webserviceClient;
 
 	public QuestionnaireResponseHandler(RepositoryService repositoryService, ProcessPluginManager processPluginManager,
-			FhirContext fhirContext, TaskService userTaskService)
+			FhirContext fhirContext, TaskService userTaskService, WebserviceClient webserviceClient)
 	{
 		super(repositoryService, processPluginManager, fhirContext);
 
 		this.userTaskService = userTaskService;
+		this.webserviceClient = webserviceClient;
 	}
 
 	@Override
@@ -43,6 +46,7 @@ public class QuestionnaireResponseHandler extends AbstractResourceHandler
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(userTaskService, "userTaskService");
+		Objects.requireNonNull(webserviceClient, "webserviceClient");
 	}
 
 	@Override
@@ -81,6 +85,19 @@ public class QuestionnaireResponseHandler extends AbstractResourceHandler
 								newJsonParser().encodeResourceToString(questionnaireResponse));
 				Map<String, Object> variables = Map.of(Constants.QUESTIONNAIRE_RESPONSE_VARIABLE,
 						fhirQuestionnaireResponseVariable);
+
+				try
+				{
+					questionnaireResponse.setStatus(QuestionnaireResponseStatus.AMENDED);
+					webserviceClient.update(questionnaireResponse);
+				}
+				catch (Exception e)
+				{
+					logger.debug("Unable to update QuestionnaireResponse (status amended) with id {}",
+							questionnaireResponse.getId(), e);
+					logger.warn("Unable to update QuestionnaireResponse (status amended) with id {}: {} - {}",
+							questionnaireResponse.getId(), e.getClass().getName(), e.getMessage());
+				}
 
 				logger.info(
 						"QuestionnaireResponse '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",

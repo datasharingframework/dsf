@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Task;
@@ -84,9 +83,10 @@ public class ValidationSupportRule extends ExternalResource
 
 		var customValidationSupport = new ValidationSupportWithCustomResources(context);
 
-		validationSupport = new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(context),
-				customValidationSupport, new DefaultProfileValidationSupport(context),
-				new CommonCodeSystemsTerminologyService(context));
+		validationSupport = new ValidationSupportWithCache(context,
+				new SimpleValidationSupportChain(context, new InMemoryTerminologyServerValidationSupport(context),
+						customValidationSupport, new DefaultProfileValidationSupport(context),
+						new CommonCodeSystemsTerminologyService(context)));
 
 		readProfilesAndGenerateSnapshots(context, version, date, customValidationSupport,
 				new SnapshotGeneratorImpl(context, validationSupport), structureDefinitions.stream());

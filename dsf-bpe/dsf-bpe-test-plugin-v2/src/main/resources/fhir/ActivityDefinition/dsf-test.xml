@@ -1,42 +1,43 @@
 <ActivityDefinition xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
-			<code value="ALL" />
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
 		</tag>
 	</meta>
 	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="start" />
+			<valueString value="start"/>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://dsf.dev/fhir/StructureDefinition/task-test|#{version}" />
+			<valueCanonical value="http://dsf.dev/fhir/StructureDefinition/task-test|#{version}"/>
 		</extension>
 		<extension url="requester">
 			<valueCoding>
-				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
-				<code value="LOCAL_ALL" />
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization"/>
+				<code value="LOCAL_ALL"/>
 			</valueCoding>
 		</extension>
 		<extension url="recipient">
 			<valueCoding>
-				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
-				<code value="LOCAL_ALL" />
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization"/>
+				<code value="LOCAL_ALL"/>
 			</valueCoding>
 		</extension>
 	</extension>
-	<url value="http://dsf.dev/bpe/Process/test" />
+	<!-- Second process-authorization extension see dev.dsf.bpe.test.fhir.FhirResourceModifierImpl -->
+	<url value="http://dsf.dev/bpe/Process/test"/>
 	<!-- version managed by bpe -->
-	<version value="#{version}" />
-	<name value="Test" />
-	<title value="Test" />
-	<subtitle value="Test Process" />
+	<version value="#{version}"/>
+	<name value="Test"/>
+	<title value="Test"/>
+	<subtitle value="Test Process"/>
 	<!-- status managed by bpe -->
-	<status value="unknown" />
-	<experimental value="false" />
+	<status value="unknown"/>
+	<experimental value="false"/>
 	<!-- date managed by bpe -->
-	<date value="#{date}" />
-	<publisher value="DSF" />
-	<description value="Test process" />
-	<kind value="Task" />
+	<date value="#{date}"/>
+	<publisher value="DSF"/>
+	<description value="Test process"/>
+	<kind value="Task"/>
 </ActivityDefinition>

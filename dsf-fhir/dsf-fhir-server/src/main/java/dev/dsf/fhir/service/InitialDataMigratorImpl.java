@@ -21,7 +21,7 @@ public class InitialDataMigratorImpl implements InitialDataMigrator
 	}
 
 	@Override
-	public void execute() throws Exception
+	public void execute()
 	{
 		logger.info("Executing initial data migration jobs ...");
 

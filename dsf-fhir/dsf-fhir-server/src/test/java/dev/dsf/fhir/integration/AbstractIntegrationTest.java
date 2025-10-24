@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +114,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static FhirWebserviceClient webserviceClient;
 	private static FhirWebserviceClient externalWebserviceClient;
 	private static FhirWebserviceClient practitionerWebserviceClient;
+	private static FhirWebserviceClient adminWebserviceClient;
+	private static FhirWebserviceClient minimalWebserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -146,6 +149,18 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				certificates.getPractitionerClientCertificate().keyStore(),
 				certificates.getPractitionerClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
 
+		logger.info("Creating admin client ...");
+		adminWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
+				certificates.getAdminClientCertificate().trustStore(),
+				certificates.getAdminClientCertificate().keyStore(),
+				certificates.getAdminClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
+
+		logger.info("Creating minimal client ...");
+		minimalWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
+				certificates.getMinimalClientCertificate().trustStore(),
+				certificates.getMinimalClientCertificate().keyStore(),
+				certificates.getMinimalClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
+
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer(statusConnectorChannel, apiConnectorChannel, baseUrl);
 
@@ -157,8 +172,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		return new FhirWebserviceClientJersey("https://localhost:" + apiPort + CONTEXT_PATH, trustStore, keyStore,
-				keyStorePassword, null, null, null, null, 0, 0, false, "DSF Integration Test Client", fhirContext,
-				referenceCleaner);
+				keyStorePassword, null, null, null, null, Duration.ZERO, Duration.ZERO, false,
+				"DSF Integration Test Client", fhirContext, referenceCleaner);
 	}
 
 	private static WebsocketClient createWebsocketClient(int apiPort, KeyStore trustStore, KeyStore keyStore,
@@ -178,8 +193,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.db.url", "jdbc:postgresql://" + liquibaseRule.getHost() + ":"
 				+ liquibaseRule.getMappedPort(5432) + "/" + liquibaseRule.getDatabaseName());
+		initParameters.put("dev.dsf.fhir.db.user.group", DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.username", DATABASE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.password", DATABASE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", DATABASE_DELETE_USER_PASSWORD);
 
@@ -197,19 +214,38 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.fhir.client.certificate.private.key.password",
 				String.valueOf(X509Certificates.PASSWORD));
 
-		initParameters.put("dev.dsf.fhir.server.roleConfig", String.format("""
-				- practitioner-test-user:
-				    thumbprint: %s
-				    dsf-role:
-				      - CREATE
-				      - READ
-				      - UPDATE
-				      - DELETE
-				      - SEARCH
-				      - HISTORY
-				    practitioner-role:
-				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
-				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex()));
+		initParameters.put("dev.dsf.fhir.server.roleConfig",
+				String.format("""
+						- practitioner-test-user:
+						    thumbprint: %s
+						    dsf-role:
+						      - CREATE
+						      - READ
+						      - UPDATE
+						      - DELETE
+						      - SEARCH
+						      - HISTORY
+						    practitioner-role:
+						      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
+						- admin-user:
+						    thumbprint: %s
+						    dsf-role: [CREATE, READ, UPDATE, DELETE, SEARCH, HISTORY]
+						    practitioner-role:
+						      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
+						- minimal-test-user:
+						    thumbprint: %s
+						    dsf-role:
+						      - CREATE: [Task]
+						      - READ: &tqqr [Task, Questionnaire, QuestionnaireResponse]
+						      - UPDATE: [QuestionnaireResponse]
+						      - SEARCH: *tqqr
+						      - HISTORY: *tqqr
+						    practitioner-role:
+						      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
+						""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex(),
+						certificates.getAdminClientCertificate().certificateSha512ThumbprintHex(),
+						certificates.getMinimalClientCertificate().certificateSha512ThumbprintHex()));
+		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", "true");
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());
@@ -376,6 +412,16 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static FhirWebserviceClient getPractitionerWebserviceClient()
 	{
 		return practitionerWebserviceClient;
+	}
+
+	protected static FhirWebserviceClient getAdminWebserviceClient()
+	{
+		return adminWebserviceClient;
+	}
+
+	protected static FhirWebserviceClient getMinimalWebserviceClient()
+	{
+		return minimalWebserviceClient;
 	}
 
 	protected static WebsocketClient getWebsocketClient()

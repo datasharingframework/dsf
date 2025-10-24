@@ -437,7 +437,7 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 					.filter(e -> EXTENSION_PROCESS_AUTHORIZATION_REQUESTER.equals(e.getUrl()))
 					.filter(Extension::hasValue).filter(e -> e.getValue() instanceof Coding)
 					.map(e -> (Coding) e.getValue())
-					.flatMap(coding -> requesterFrom(coding, c -> true, i -> true, c -> true).stream());
+					.flatMap(coding -> requesterFrom(coding, _ -> true, _ -> true, _ -> true).stream());
 	}
 
 	@Override
@@ -454,7 +454,7 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 					.filter(e -> EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT.equals(e.getUrl()))
 					.filter(Extension::hasValue).filter(e -> e.getValue() instanceof Coding)
 					.map(e -> (Coding) e.getValue())
-					.flatMap(coding -> recipientFrom(coding, i -> true, c -> true).stream());
+					.flatMap(coding -> recipientFrom(coding, _ -> true, _ -> true).stream());
 	}
 
 	private Optional<Extension> getAuthorizationExtension(ActivityDefinition activityDefinition, String processUrl,

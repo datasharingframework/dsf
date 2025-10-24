@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.BasicResourceService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -61,12 +63,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final ParameterConverter parameterConverter;
 	protected final AuthorizationRule<R> authorizationRule;
 	protected final ResourceValidator resourceValidator;
+	protected final ValidationRules validationRules;
 
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<R> authorizationRule,
-			ResourceValidator resourceValidator)
+			ResourceValidator resourceValidator, ValidationRules validationRules)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
@@ -79,6 +82,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.parameterConverter = parameterConverter;
 		this.authorizationRule = authorizationRule;
 		this.resourceValidator = resourceValidator;
+		this.validationRules = validationRules;
 	}
 
 	@Override
@@ -95,6 +99,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(authorizationRule, "authorizationRule");
 		Objects.requireNonNull(resourceValidator, "resourceValidator");
+		Objects.requireNonNull(validationRules, "validationRules");
 	}
 
 	private String toValidationLogMessage(ValidationResult validationResult)
@@ -105,13 +110,14 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 				.collect(Collectors.joining(", ", "[", "]"));
 	}
 
-	private Response withResourceValidation(R resource, UriInfo uri, HttpHeaders headers, String method,
-			Supplier<Response> delegate)
+	private Response withResourceValidation(R resource, Predicate<R> failValidationOnErrorOrFatal, UriInfo uri,
+			HttpHeaders headers, String method, Supplier<Response> delegate)
 	{
 		ValidationResult validationResult = resourceValidator.validate(resource);
 
-		if (validationResult.getMessages().stream().anyMatch(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())))
+		if (failValidationOnErrorOrFatal.test(resource) && validationResult.getMessages().stream()
+				.anyMatch(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+						|| ResultSeverityEnum.FATAL.equals(m.getSeverity())))
 		{
 			logger.warn("{} of {} unauthorized, resource not valid: {}", method, resource.fhirType(),
 					toValidationLogMessage(validationResult));
@@ -124,8 +130,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		else
 		{
 			if (!validationResult.getMessages().isEmpty())
-				logger.warn("Resource {} validated with messages: {}", resource.fhirType(),
-						toValidationLogMessage(validationResult));
+				logger.debug("Resource {} validated with messages: {}{}", resource.fhirType(),
+						toValidationLogMessage(validationResult),
+						(validationResult.getMessages().stream()
+								.anyMatch(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+										|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
+												? ", ignoring error and fatal messages"
+												: ""));
 
 			return delegate.get();
 		}
@@ -145,32 +156,34 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			return withResourceValidation(resource, uri, headers, "Create", () ->
-			{
-				audit.info("Create of resource {} allowed for user '{}', reason: {}", resourceTypeName,
-						getCurrentIdentity().getName(), reasonCreateAllowed.get());
+			return withResourceValidation(resource, validationRules::failOnErrorOrFatalBeforeCreate, uri, headers,
+					"Create", () ->
+					{
+						audit.info("Create of resource {} allowed for user '{}', reason: {}", resourceTypeName,
+								getCurrentIdentity().getName(), reasonCreateAllowed.get());
 
-				Response created = logResultStatus(() ->
-				{
-					Response response = delegate.create(resource, uri, headers);
-					return response;
-				}, status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
-						resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
-						status.getReasonPhrase()),
-						status -> audit.info("Create of resource {} for user '{}' failed, status: {} {}",
+						Response created = logResultStatus(() ->
+						{
+							Response response = delegate.create(resource, uri, headers);
+							return response;
+						}, status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
 								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
-								status.getReasonPhrase()));
+								status.getReasonPhrase()),
+								status -> audit.info("Create of resource {} for user '{}' failed, status: {} {}",
+										resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
+										status.getReasonPhrase()));
 
-				if (created.hasEntity() && !resourceType.isInstance(created.getEntity())
-						&& !(created.getEntity() instanceof OperationOutcome))
-					logger.warn("Create returned with entity of type {}", created.getEntity().getClass().getName());
-				else if (!created.hasEntity()
-						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
-					logger.warn("Create returned with status {} {}, but no entity",
-							created.getStatusInfo().getStatusCode(), created.getStatusInfo().getReasonPhrase());
+						if (created.hasEntity() && !resourceType.isInstance(created.getEntity())
+								&& !(created.getEntity() instanceof OperationOutcome))
+							logger.warn("Create returned with entity of type {}",
+									created.getEntity().getClass().getName());
+						else if (!created.hasEntity()
+								&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
+							logger.warn("Create returned with status {} {}, but no entity",
+									created.getStatusInfo().getStatusCode(), created.getStatusInfo().getReasonPhrase());
 
-				return created;
-			});
+						return created;
+					});
 		}
 	}
 
@@ -204,6 +217,19 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		Response read = delegate.read(id, uri, headers);
 
+		return checkRead(read);
+	}
+
+	@Override
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
+	{
+		Response read = delegate.vread(id, version, uri, headers);
+
+		return checkRead(read);
+	}
+
+	protected final Response checkRead(Response read)
+	{
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
 		{
 			final R entity = resourceType.cast(read.getEntity());
@@ -228,14 +254,16 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
 						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
 								.build();
+					else if (Status.PRECONDITION_FAILED.getStatusCode() == read.getStatus())
+						return Response.status(Status.PRECONDITION_FAILED).build();
 					else
 						return read;
 				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
 						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
 								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
+								status.getStatusCode(), status.getReasonPhrase()));
 			}
 		}
 		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)
@@ -244,74 +272,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-			return read;
-		}
-		else if (read.hasEntity())
-		{
-			audit.info("Read of {} denied for identity '{}', not a {}", resourceTypeName,
-					getCurrentIdentity().getName(), resourceTypeName);
-			return forbidden("read");
-		}
-		else
-		{
-			audit.info("Read of {} for identity '{}' returned without entity, status {} {}", resourceTypeName,
-					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-
-			logger.info("Returning with status {} {}, but no entity", read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-			return read;
-		}
-	}
-
-	@Override
-	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
-	{
-		Response read = delegate.vread(id, version, uri, headers);
-
-		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
-		{
-			final R entity = resourceType.cast(read.getEntity());
-			final String entityId = entity.getIdElement().getIdPart();
-			final long entityVersion = entity.getIdElement().getVersionIdPartAsLong();
-			final Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentIdentity(),
-					entity);
-
-			if (reasonReadAllowed.isEmpty())
-			{
-				audit.info("Read of {}/{}/_history/{} denied for identity '{}'", resourceTypeName, entityId,
-						entityVersion, getCurrentIdentity().getName());
-				return forbidden("read");
-			}
-			else
-			{
-				audit.info("Read of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
-						entityId, entityVersion, getCurrentIdentity().getName(), reasonReadAllowed.get());
-				return logResultStatus(() ->
-				{
-					// if not modified remove entity
-					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
-						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
-								.build();
-					else
-						return read;
-				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
-						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
-								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
-			}
-		}
-		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)
-		{
-			audit.info("Read of {} for identity '{}' returned with OperationOutcome, status: {} {}", resourceTypeName,
-					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-
-			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
+			logger.info("Returning with OperationOutcome, status: {} {}", read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
@@ -417,31 +378,36 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			return withResourceValidation(newResource, uri, headers, "Update", () ->
-			{
-				audit.info("Update of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
-						resourceId, resourceVersion, getCurrentIdentity().getName(), reasonUpdateAllowed.get());
-				Response updated = logResultStatus(() ->
-				{
-					Response response = delegate.update(id, newResource, uri, headers);
-					return response;
-				}, status -> audit.info("Update of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-						status.getStatusCode(), status.getReasonPhrase()),
-						status -> audit.info("Update of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
+			return withResourceValidation(newResource, validationRules::failOnErrorOrFatalBeforeUpdate, uri, headers,
+					"Update", () ->
+					{
+						audit.info("Update of {}/{}/_history/{} allowed for identity '{}', reason: {}",
 								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-								status.getStatusCode(), status.getReasonPhrase()));
+								reasonUpdateAllowed.get());
+						Response updated = logResultStatus(() ->
+						{
+							Response response = delegate.update(id, newResource, uri, headers);
+							return response;
+						}, status -> audit.info(
+								"Update of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()),
+								status -> audit.info(
+										"Update of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
+										resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+										status.getStatusCode(), status.getReasonPhrase()));
 
-				if (updated.hasEntity() && !resourceType.isInstance(updated.getEntity())
-						&& !(updated.getEntity() instanceof OperationOutcome))
-					logger.warn("Update returned with entity of type {}", updated.getEntity().getClass().getName());
-				else if (!updated.hasEntity()
-						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
-					logger.warn("Update returned with status {} {}, but no entity",
-							updated.getStatusInfo().getStatusCode(), updated.getStatusInfo().getReasonPhrase());
+						if (updated.hasEntity() && !resourceType.isInstance(updated.getEntity())
+								&& !(updated.getEntity() instanceof OperationOutcome))
+							logger.warn("Update returned with entity of type {}",
+									updated.getEntity().getClass().getName());
+						else if (!updated.hasEntity()
+								&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
+							logger.warn("Update returned with status {} {}, but no entity",
+									updated.getStatusInfo().getStatusCode(), updated.getStatusInfo().getReasonPhrase());
 
-				return updated;
-			});
+						return updated;
+					});
 		}
 	}
 
@@ -525,9 +491,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
-					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					"Query contains parameter not applicable in this conditional update context: standard parameters {} will be ignored",
 					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
 			queryParameters = queryParameters.entrySet().stream()

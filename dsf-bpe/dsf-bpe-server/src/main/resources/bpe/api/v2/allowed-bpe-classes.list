@@ -3,6 +3,7 @@ com.fasterxml.jackson.core
 com.fasterxml.jackson.databind
 com.fasterxml.jackson.datatype
 com.google.common
+com.ctc.wstx.stax.WstxInputFactory
 dev.dsf.bpe.api
 jakarta.annotation.Nonnull
 jakarta.annotation.Nullable
@@ -12,9 +13,14 @@ org.apache.commons.io
 org.apache.commons.lang3
 org.apache.commons.text
 org.apache.http
+org.bouncycastle
 org.camunda.bpm.engine.delegate
+org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration
 org.camunda.bpm.engine.impl.el.FixedValue
+org.camunda.bpm.engine.impl.util.ClassDelegateUtil
 org.camunda.bpm.engine.impl.variable.serializer
+org.camunda.bpm.engine.ProcessEngine
+org.camunda.bpm.engine.RuntimeService
 org.camunda.bpm.engine.variable
 org.camunda.bpm.model.bpmn.instance
 org.glassfish.jersey
@@ -23,5 +29,8 @@ org.slf4j.LoggerFactory
 org.springframework.beans
 org.springframework.cglib
 org.springframework.context
+org.springframework.core
+org.springframework.lang
+org.springframework.util
 org.w3c.dom
 org.xml.sax

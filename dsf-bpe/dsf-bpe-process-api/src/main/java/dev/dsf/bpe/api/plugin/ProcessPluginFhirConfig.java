@@ -1,6 +1,7 @@
 package dev.dsf.bpe.api.plugin;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -50,6 +51,9 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 	private final Predicate<T> hasTaskInputMessageName;
 	private final Predicate<T> hasTaskOutput;
 
+	private final Function<S, Optional<String>> getStructureDefinitionBaseDefinition;
+	private final BiConsumer<S, String> setStructureDefinitionBaseDefinition;
+
 	public ProcessPluginFhirConfig(Class<A> activityDefinitionClass, Class<C> codeSystemClass, Class<L> libraryClass,
 			Class<M> measureClass, Class<N> namingSystemClass, Class<Q> questionnaireClass,
 			Class<S> structureDefinitionClass, Class<T> taskClass, Class<V> valueSetClass,
@@ -65,7 +69,10 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 			Function<T, Optional<String>> getTaskInstantiatesCanonical,
 			Function<T, Optional<Identifier>> getTaskIdentifier, Predicate<T> isTaskStatusDraft,
 			Function<T, Optional<Reference>> getTaskRequester, Function<T, Optional<Reference>> getTaskRecipient,
-			Predicate<T> hasTaskInput, Predicate<T> hasTaskInputMessageName, Predicate<T> hasTaskOutput)
+			Predicate<T> hasTaskInput, Predicate<T> hasTaskInputMessageName, Predicate<T> hasTaskOutput,
+
+			Function<S, Optional<String>> getStructureDefinitionBaseDefinition,
+			BiConsumer<S, String> setStructureDefinitionBaseDefinition)
 	{
 		this.activityDefinitionClass = activityDefinitionClass;
 		this.codeSystemClass = codeSystemClass;
@@ -101,6 +108,9 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 		this.hasTaskInput = hasTaskInput;
 		this.hasTaskInputMessageName = hasTaskInputMessageName;
 		this.hasTaskOutput = hasTaskOutput;
+
+		this.getStructureDefinitionBaseDefinition = getStructureDefinitionBaseDefinition;
+		this.setStructureDefinitionBaseDefinition = setStructureDefinitionBaseDefinition;
 	}
 
 	public String getOrganizationIdentifierSid()
@@ -272,5 +282,18 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 	public boolean hasTaskOutput(Object task)
 	{
 		return isTask(task) && hasTaskOutput.test(taskClass.cast(task));
+	}
+
+	public Optional<String> getStructureDefinitionBaseDefinition(Object resource)
+	{
+		return isStructureDefinition(resource)
+				? getStructureDefinitionBaseDefinition.apply(structureDefinitionClass.cast(resource))
+				: Optional.empty();
+	}
+
+	public void setStructureDefinitionBaseDefinition(Object resource, String value)
+	{
+		if (isStructureDefinition(resource))
+			setStructureDefinitionBaseDefinition.accept(structureDefinitionClass.cast(resource), value);
 	}
 }

@@ -1,37 +1,36 @@
 package dev.dsf.bpe.v2.activity;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.DelegateTask;
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 
 import dev.dsf.bpe.v2.ProcessPluginApi;
-import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
+import dev.dsf.bpe.v2.activity.values.CreateQuestionnaireResponseValues;
+import dev.dsf.bpe.v2.constants.CodeSystems;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnUserTask;
+import dev.dsf.bpe.v2.constants.NamingSystems;
 import dev.dsf.bpe.v2.variables.Variables;
 
 /**
- * Default {@link TaskListener} implementation. This listener will be added to user tasks if no other
- * {@link TaskListener} is defined for the 'create' event type.
+ * Default {@link UserTaskListener} implementation. This listener will be added to user tasks if no other
+ * {@link UserTaskListener} is defined for the 'create' event type.
  * <p>
  * BPMN user tasks need to define the form to be used with type 'Embedded or External Task Forms' and the canonical URL
  * of the a {@link Questionnaire} resource as the form key.
@@ -39,79 +38,144 @@ import dev.dsf.bpe.v2.variables.Variables;
  * To modify the behavior of the listener, for example to set default values in the created 'in-progress'
  * {@link QuestionnaireResponse}, extend this class, register it as a prototype {@link Bean} and specify the class name
  * as a task listener with event type 'create' in the BPMN.
+ * <p>
+ * This listener will add a questionnaire authorization extension to the {@link QuestionnaireResponse} if practitioner
+ * roles or practitioner identifiers are set. A single role or identifier can be configured via a BPMN field injections
+ * using fields <code>practitionerRole</code> and <code>practitioner</code> with a String constant or expression. To
+ * configure multiple roles or identifiers use fields <code>practitionerRoles</code> and <code>practitioners</code> with
+ * an expression to access a process variable of type <code>List&lt;String&gt;</code>. Note: To use field injects the
+ * fully qualified name of this class needs to be set as the task listener JavaClass.
+ * <p>
+ * This class (as is) does not need to be registered as a prototype {@link Bean}.
  */
-public class DefaultUserTaskListener implements TaskListener, InitializingBean
+public class DefaultUserTaskListener implements UserTaskListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTaskListener.class);
 
-	private final ProcessPluginApi api;
+	protected static final String PROFILE_QUESTIONNAIRE_RESPONSE = "http://dsf.dev/fhir/StructureDefinition/questionnaire-response";
+
+	private static final record KeyAndValue(String key, String value)
+	{
+		static Function<String, KeyAndValue> fromString(String defaultSystem)
+		{
+			return keyAndValue ->
+			{
+				Objects.requireNonNull(keyAndValue, "keyAndValue");
+
+				String[] split = keyAndValue.split("\\|");
+
+				if (split.length == 1)
+					return new KeyAndValue(defaultSystem, split[0]);
+				if (split.length == 2)
+					return new KeyAndValue(split[0], split[1]);
+				else
+					throw new IllegalArgumentException("Invalid format: must be a simple 'value' for default key "
+							+ defaultSystem + " or 'key|value'");
+			};
+		}
+
+		Identifier toIdentifier()
+		{
+			return new Identifier().setSystem(key).setValue(value);
+		}
+
+		Coding toCoding()
+		{
+			return new Coding().setSystem(key).setCode(value);
+		}
+	}
+
+	private final Set<KeyAndValue> practitionerRoles = new HashSet<>();
+	private final Set<KeyAndValue> practitioners = new HashSet<>();
 
 	/**
-	 * @param api
-	 *            not <code>null</code>
+	 * @param practitionerRole
+	 *            does nothing if <code>null</code> or blank
+	 * @deprecated only for field injection
 	 */
-	public DefaultUserTaskListener(ProcessPluginApi api)
+	@Deprecated
+	public void setPractitionerRole(String practitionerRole)
 	{
-		this.api = api;
+		if (practitionerRole != null && !practitionerRole.isBlank())
+			setPractitionerRoles(List.of(practitionerRole));
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception
+	/**
+	 * @param practitioner
+	 *            does nothing if <code>null</code> or blank
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setPractitioner(String practitioner)
 	{
-		Objects.requireNonNull(api, "api");
+		if (practitioner != null && !practitioner.isBlank())
+			setPractitioners(List.of(practitioner));
 	}
 
-	@Override
-	public final void notify(DelegateTask userTask)
+	/**
+	 * @param practitionerRoles
+	 *            does nothing if <code>null</code>, ignores <code>null</code> and blank values
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setPractitionerRoles(List<String> practitionerRoles)
 	{
-		final DelegateExecution execution = userTask.getExecution();
-		final Variables variables = api.getVariables(execution);
-
-		try
+		if (practitionerRoles != null)
 		{
-			logger.trace("Execution of user task with id='{}'", execution.getCurrentActivityId());
-
-			String questionnaireUrlWithVersion = userTask.getBpmnModelElementInstance().getCamundaFormKey();
-			Questionnaire questionnaire = readQuestionnaire(questionnaireUrlWithVersion);
-
-			String businessKey = execution.getBusinessKey();
-			String userTaskId = userTask.getId();
-
-			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(
-					questionnaireUrlWithVersion, businessKey, userTaskId);
-			transformQuestionnaireItemsToQuestionnaireResponseItems(questionnaireResponse, questionnaire);
-
-			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
-			checkQuestionnaireResponse(questionnaireResponse);
-
-			QuestionnaireResponse created = api.getDsfClientProvider().getLocalDsfClient().withRetryForever(60000)
-					.create(questionnaireResponse);
-
-			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
-					api.getQuestionnaireResponseHelper().getLocalVersionlessAbsoluteUrl(created));
-
-			afterQuestionnaireResponseCreate(userTask, created);
-		}
-		catch (Exception exception)
-		{
-			logger.debug("Error while executing user task listener {}", getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-					api.getTaskHelper().getLocalVersionlessAbsoluteUrl(variables.getStartTask()),
-					exception.getClass().getName(), exception.getMessage());
-
-			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
-					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
-
-			updateFailedIfInprogress(variables.getTasks(), errorMessage);
-
-			// TODO evaluate throwing exception as alternative to stopping the process instance
-			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
-					exception.getMessage());
+			practitionerRoles.stream().filter(Objects::nonNull).filter(p -> !p.isBlank())
+					.map(KeyAndValue.fromString(CodeSystems.PractitionerRole.SYSTEM))
+					.forEach(this.practitionerRoles::add);
 		}
 	}
 
-	private Questionnaire readQuestionnaire(String urlWithVersion)
+	/**
+	 * @param practitioners
+	 *            does nothing if <code>null</code>, ignores <code>null</code> and blank values
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setPractitioners(List<String> practitioners)
+	{
+		if (practitioners != null)
+		{
+			practitioners.stream().filter(Objects::nonNull).filter(p -> !p.isBlank())
+					.map(KeyAndValue.fromString(NamingSystems.PractitionerIdentifier.SID))
+					.forEach(this.practitioners::add);
+		}
+	}
+
+	@Override
+	public void notify(ProcessPluginApi api, Variables variables,
+			CreateQuestionnaireResponseValues createQuestionnaireResponseValues) throws Exception
+	{
+		logger.trace("Execution of user task with id='{}'", variables.getCurrentActivityId());
+
+		Questionnaire questionnaire = readQuestionnaire(api, createQuestionnaireResponseValues.formKey());
+		String businessKey = variables.getBusinessKey();
+
+		QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(api,
+				createQuestionnaireResponseValues.formKey(), businessKey,
+				createQuestionnaireResponseValues.userTaskId());
+		transformQuestionnaireItemsToQuestionnaireResponseItems(api, questionnaireResponse, questionnaire);
+
+		beforeQuestionnaireResponseCreate(api, variables, createQuestionnaireResponseValues, questionnaireResponse);
+		checkQuestionnaireResponse(questionnaireResponse);
+
+		QuestionnaireResponse created = createQuestionnaireResponse(api, questionnaireResponse);
+
+		logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
+				api.getQuestionnaireResponseHelper().getLocalVersionlessAbsoluteUrl(created));
+
+		afterQuestionnaireResponseCreate(api, variables, createQuestionnaireResponseValues, created);
+	}
+
+	protected QuestionnaireResponse createQuestionnaireResponse(ProcessPluginApi api,
+			QuestionnaireResponse questionnaireResponse)
+	{
+		return api.getDsfClientProvider().getLocalDsfClient().create(questionnaireResponse);
+	}
+
+	private Questionnaire readQuestionnaire(ProcessPluginApi api, String urlWithVersion)
 	{
 		Bundle search = api.getDsfClientProvider().getLocalDsfClient().search(Questionnaire.class,
 				Map.of("url", List.of(urlWithVersion)));
@@ -130,10 +194,11 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		return questionnaires.get(0);
 	}
 
-	private QuestionnaireResponse createDefaultQuestionnaireResponse(String questionnaireUrlWithVersion,
-			String businessKey, String userTaskId)
+	private QuestionnaireResponse createDefaultQuestionnaireResponse(ProcessPluginApi api,
+			String questionnaireUrlWithVersion, String businessKey, String userTaskId)
 	{
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		questionnaireResponse.getMeta().addProfile(PROFILE_QUESTIONNAIRE_RESPONSE);
 		questionnaireResponse.setQuestionnaire(questionnaireUrlWithVersion);
 		questionnaireResponse.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
 
@@ -149,18 +214,25 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 				BpmnUserTask.Codes.USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
 
+		Set<Identifier> practitioners = getPractitioners();
+		Set<Coding> practitionerRoles = getPractitionerRoles();
+
+		if (!practitioners.isEmpty() || !practitionerRoles.isEmpty())
+			questionnaireResponse.addExtension(api.getQuestionnaireResponseHelper()
+					.createQuestionnaireAuthorizationExtension(practitioners, practitionerRoles));
+
 		return questionnaireResponse;
 	}
 
-	private void transformQuestionnaireItemsToQuestionnaireResponseItems(QuestionnaireResponse questionnaireResponse,
-			Questionnaire questionnaire)
+	private void transformQuestionnaireItemsToQuestionnaireResponseItems(ProcessPluginApi api,
+			QuestionnaireResponse questionnaireResponse, Questionnaire questionnaire)
 	{
 		questionnaire.getItem().stream().filter(i -> !BpmnUserTask.Codes.BUSINESS_KEY.equals(i.getLinkId()))
 				.filter(i -> !BpmnUserTask.Codes.USER_TASK_ID.equals(i.getLinkId()))
-				.forEach(i -> transformItem(questionnaireResponse, i));
+				.forEach(i -> transformItem(api, questionnaireResponse, i));
 	}
 
-	private void transformItem(QuestionnaireResponse questionnaireResponse,
+	private void transformItem(ProcessPluginApi api, QuestionnaireResponse questionnaireResponse,
 			Questionnaire.QuestionnaireItemComponent question)
 	{
 		if (Questionnaire.QuestionnaireItemType.DISPLAY.equals(question.getType()))
@@ -196,13 +268,18 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <i>Override this method to modify the {@link QuestionnaireResponse} before it will be created in state
 	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS} on the DSF FHIR server</i>
 	 *
-	 * @param userTask
-	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
+	 * @param api
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @param createQuestionnaireResponseValues
+	 *            not <code>null</code>
 	 * @param beforeCreate
 	 *            not <code>null</code>, containing an answer placeholder for every item in the corresponding
 	 *            {@link Questionnaire}
 	 */
-	protected void beforeQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse beforeCreate)
+	protected void beforeQuestionnaireResponseCreate(ProcessPluginApi api, Variables variables,
+			CreateQuestionnaireResponseValues createQuestionnaireResponseValues, QuestionnaireResponse beforeCreate)
 	{
 		// Nothing to do in default behavior
 	}
@@ -211,51 +288,39 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <i>Override this method to execute code after the {@link QuestionnaireResponse} resource has been created on the
 	 * DSF FHIR server</i>
 	 *
-	 * @param userTask
-	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
+	 * @param api
+	 *            not <code>null</code>
+	 * @param variables
+	 *            not <code>null</code>
+	 * @param createQuestionnaireResponseValues
+	 *            not <code>null</code>
+	 *
 	 * @param afterCreate
 	 *            not <code>null</code>, created on the DSF FHIR server
 	 */
-	protected void afterQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse afterCreate)
+	protected void afterQuestionnaireResponseCreate(ProcessPluginApi api, Variables variables,
+			CreateQuestionnaireResponseValues createQuestionnaireResponseValues, QuestionnaireResponse afterCreate)
 	{
 		// Nothing to do in default behavior
 	}
 
-	private void updateFailedIfInprogress(List<Task> tasks, String errorMessage)
+	/**
+	 * <i>Override this method if you do not want to configure practitioner roles via field-injection in BPMN</i>
+	 *
+	 * @return practitioner-role entries used in creating the questionnaire authorization extension
+	 */
+	protected Set<Coding> getPractitionerRoles()
 	{
-		for (int i = tasks.size() - 1; i >= 0; i--)
-		{
-			Task task = tasks.get(i);
-
-			if (TaskStatus.INPROGRESS.equals(task.getStatus()))
-			{
-				task.setStatus(Task.TaskStatus.FAILED);
-				task.addOutput(new TaskOutputComponent(new CodeableConcept(BpmnMessage.error()),
-						new StringType(errorMessage)));
-				updateAndHandleException(task);
-			}
-			else
-			{
-				logger.debug("Not updating Task {} with status: {}",
-						api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), task.getStatus());
-			}
-		}
+		return practitionerRoles.stream().map(KeyAndValue::toCoding).collect(Collectors.toUnmodifiableSet());
 	}
 
-	private void updateAndHandleException(Task task)
+	/**
+	 * <i>Override this method if you do not want to configure practitioner identifiers via field-injection in BPMN</i>
+	 *
+	 * @return practitioner entries used in creating the questionnaire authorization extension
+	 */
+	protected Set<Identifier> getPractitioners()
 	{
-		try
-		{
-			logger.debug("Updating Task {}, new status: {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
-					task.getStatus().toCode());
-
-			api.getDsfClientProvider().getLocalDsfClient().withMinimalReturn().update(task);
-		}
-		catch (Exception e)
-		{
-			logger.debug("Unable to update Task {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task), e);
-			logger.error("Unable to update Task {}: {} - {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
-					e.getClass().getName(), e.getMessage());
-		}
+		return practitioners.stream().map(KeyAndValue::toIdentifier).collect(Collectors.toUnmodifiableSet());
 	}
 }

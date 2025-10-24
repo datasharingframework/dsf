@@ -1,5 +1,6 @@
 package dev.dsf.bpe.subscription;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,13 +36,13 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	private final ClientProvider clientProvider;
 	private final FhirContext fhirContext;
 	private final SubscriptionHandlerFactory<R> subscriptionHandlerFactory;
-	private final long retrySleepMillis;
+	private final Duration retrySleep;
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
 	public LocalFhirConnectorImpl(Class<R> resourceType, ClientProvider clientProvider,
 			SubscriptionHandlerFactory<R> subscriptionHandlerFactory, FhirContext fhirContext,
-			String subscriptionSearchParameter, long retrySleepMillis, int maxRetries)
+			String subscriptionSearchParameter, Duration retrySleep, int maxRetries)
 	{
 		this.resourceType = resourceType;
 		this.resourceName = resourceType == null ? null : resourceType.getAnnotation(ResourceDef.class).name();
@@ -49,7 +50,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		this.subscriptionHandlerFactory = subscriptionHandlerFactory;
 		this.fhirContext = fhirContext;
 		this.subscriptionSearchParameter = parse(subscriptionSearchParameter, null);
-		this.retrySleepMillis = retrySleepMillis;
+		this.retrySleep = retrySleep;
 		this.maxRetries = maxRetries;
 	}
 
@@ -81,8 +82,8 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(subscriptionSearchParameter, "subscriptionSearchParameter");
 
-		if (retrySleepMillis < 0)
-			throw new IllegalArgumentException("retrySleepMillis < 0");
+		if (retrySleep.isNegative())
+			throw new IllegalArgumentException("retrySleepMillis negative");
 
 		// maxRetries < 0 => retry forever
 	}
@@ -129,11 +130,11 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 				if (retryCounter < maxRetries)
 				{
 					logger.warn(
-							"Error while retrieving {} websocket subscription ({}), trying again in {} ms (retry {} of {})",
-							resourceName, e.getMessage(), retrySleepMillis, retryCounter + 1, maxRetries);
+							"Error while retrieving {} websocket subscription ({}), trying again in {}s (retry {} of {})",
+							resourceName, e.getMessage(), retrySleep.toSeconds(), retryCounter + 1, maxRetries);
 					try
 					{
-						Thread.sleep(retrySleepMillis);
+						Thread.sleep(retrySleep);
 					}
 					catch (InterruptedException e1)
 					{
@@ -160,11 +161,11 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 			}
 			catch (RuntimeException e)
 			{
-				logger.warn("Error while retrieving {} websocket subscription ({}), trying again in {} ms (retry {})",
-						resourceName, e.getMessage(), retrySleepMillis, retryCounter);
+				logger.warn("Error while retrieving {} websocket subscription ({}), trying again in {}s (retry {})",
+						resourceName, e.getMessage(), retrySleep.toSeconds(), retryCounter);
 				try
 				{
-					Thread.sleep(retrySleepMillis);
+					Thread.sleep(retrySleep);
 				}
 				catch (InterruptedException e1)
 				{
@@ -281,7 +282,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	}
 
 	@EventListener({ ContextClosedEvent.class })
-	public void onContextClosedEvent(ContextClosedEvent event)
+	public void onContextClosedEvent()
 	{
 		clientProvider.disconnectAll();
 	}

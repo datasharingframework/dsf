@@ -41,6 +41,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.common.ui.theme.Theme;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
@@ -79,6 +80,8 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 			"&lt;id value=\"(" + UUID + ")\"/&gt;\\n([ ]*)&lt;meta&gt;\\n([ ]*)&lt;versionId value=\"([0-9]+)\"/&gt;");
 	private static final Pattern JSON_ID_UUID_AND_VERSION_PATTERN = Pattern
 			.compile("\"id\": \"(" + UUID + ")\",\\n([ ]*)\"meta\": \\{\\n([ ]*)\"versionId\": \"([0-9]+)\",");
+
+	private static final String CODE_SYSTEM_PRACTITIONER_ROLE = "http://dsf.dev/fhir/CodeSystem/practitioner-role";
 
 	private final String serverBaseUrl;
 	private final Theme theme;
@@ -142,6 +145,27 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		context.setVariable("heading", getHeading(resource, uriInfo));
 		context.setVariable("username",
 				securityContext.getUserPrincipal() instanceof Identity i ? i.getDisplayName() : null);
+
+		String usernameTitle = "";
+		if (securityContext.getUserPrincipal() instanceof PractitionerIdentity p)
+		{
+			if (p.getPractitionerIdentifierValue().isPresent())
+				usernameTitle += "Mail: " + p.getPractitionerIdentifierValue().get();
+			if (p.getPractitionerIdentifierValue().isPresent() && !p.getPractionerRoles().isEmpty())
+				usernameTitle += " - ";
+			if (!p.getPractionerRoles().isEmpty())
+				usernameTitle += p.getPractionerRoles().stream()
+						.map(c -> CODE_SYSTEM_PRACTITIONER_ROLE.equals(c.getSystem()) ? c.getCode()
+								: c.getSystem() + "|" + c.getCode())
+						.collect(Collectors.joining(", ", "Roles: ", ""));
+		}
+		context.setVariable("usernameTitle", usernameTitle);
+
+		context.setVariable("practitionerIdentifierValue",
+				securityContext.getUserPrincipal() instanceof PractitionerIdentity p
+						? p.getPractitionerIdentifierValue().orElse(null)
+						: null);
+
 		context.setVariable("openid", "OPENID".equals(securityContext.getAuthenticationScheme()));
 		context.setVariable("xml", toXml(mediaType, resource));
 		context.setVariable("json", toJson(mediaType, resource));
@@ -163,7 +187,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		{
 			Optional<String> lastSegment = uriInfo.getPathSegments().stream().filter(Objects::nonNull)
 					.map(PathSegment::getPath).filter(Objects::nonNull).filter(s -> !s.isBlank())
-					.reduce((first, second) -> second);
+					.reduce((_, second) -> second);
 
 			return lastSegment.map(g::isResourceSupported).orElse(false);
 		}).findFirst();
@@ -276,21 +300,23 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		content = versionMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(resource, result.group(1));
-			return resourceName.map(rN -> "&lt;id value=\"<a href=\"" + rN + "/" + result.group(1) + "\">"
-					+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
-					+ "&lt;versionId value=\"" + "<a href=\"" + rN + "/" + result.group(1) + "/_history/"
-					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\"/&gt;").orElse(result.group(0));
+			return resourceName
+					.map(rN -> "&lt;id value=\"<a href=\"" + rN + "/" + result.group(1) + "?_format=html\">"
+							+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
+							+ "&lt;versionId value=\"" + "<a href=\"" + rN + "/" + result.group(1) + "/_history/"
+							+ result.group(4) + "?_format=html\">" + result.group(4) + "</a>" + "\"/&gt;")
+					.orElse(result.group(0));
 		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
 		content = urlMatcher.replaceAll(result -> "<a href=\""
 				+ result.group().replace("&amp;amp;", "&amp;").replace("&amp;apos;", "&apos;")
 						.replace("&amp;gt;", "&gt;").replace("&amp;lt;", "&lt;").replace("&amp;quot;", "&quot;")
-				+ "\">" + result.group() + "</a>");
+				+ "?_format=html\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
-		content = referenceUuidMatcher.replaceAll(
-				result -> "&lt;reference value=\"<a href=\"" + result.group(1) + "\">" + result.group(1) + "</a>\"&gt");
+		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"" + result.group(1)
+				+ "?_format=html\">" + result.group(1) + "</a>\"&gt");
 
 		return content;
 	}
@@ -374,20 +400,23 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		String content = parser.encodeResourceToString(resource).replace("<", "&lt;").replace(">", "&gt;");
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
-		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
+		content = urlMatcher
+				.replaceAll(result -> "<a href=\"" + result.group() + "?_format=html\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = JSON_REFERENCE_UUID_PATTERN.matcher(content);
-		content = referenceUuidMatcher.replaceAll(
-				result -> "\"reference\": \"<a href=\"" + result.group(1) + "\">" + result.group(1) + "</a>\",");
+		content = referenceUuidMatcher.replaceAll(result -> "\"reference\": \"<a href=\"" + result.group(1)
+				+ "?_format=html\">" + result.group(1) + "</a>\",");
 
 		Matcher idUuidMatcher = JSON_ID_UUID_AND_VERSION_PATTERN.matcher(content);
 		content = idUuidMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(resource, result.group(1));
-			return resourceName.map(rN -> "\"id\": \"<a href=\"" + rN + "/" + result.group(1) + "\">" + result.group(1)
-					+ "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3) + "\"versionId\": \""
-					+ "<a href=\"" + rN + "/" + result.group(1) + "/_history/" + result.group(4) + "\">"
-					+ result.group(4) + "</a>" + "\",").orElse(result.group(0));
+			return resourceName
+					.map(rN -> "\"id\": \"<a href=\"" + rN + "/" + result.group(1) + "?_format=html\">"
+							+ result.group(1) + "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3)
+							+ "\"versionId\": \"" + "<a href=\"" + rN + "/" + result.group(1) + "/_history/"
+							+ result.group(4) + "?_format=html\">" + result.group(4) + "</a>" + "\",")
+					.orElse(result.group(0));
 		});
 
 		return content;

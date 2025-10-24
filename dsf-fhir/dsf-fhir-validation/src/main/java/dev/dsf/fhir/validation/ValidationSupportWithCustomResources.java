@@ -59,11 +59,22 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 				.collect(Collectors.toList());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions()
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions()
 	{
-		return new ArrayList<>(structureDefinitionsByUrl.values());
+		@SuppressWarnings("unchecked")
+		List<T> definition = (List<T>) new ArrayList<>(structureDefinitionsByUrl.values());
+
+		return definition;
+	}
+
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions()
+	{
+		@SuppressWarnings("unchecked")
+		List<T> definition = (List<T>) new ArrayList<>(structureDefinitionsByUrl.values());
+
+		return definition;
 	}
 
 	@Override

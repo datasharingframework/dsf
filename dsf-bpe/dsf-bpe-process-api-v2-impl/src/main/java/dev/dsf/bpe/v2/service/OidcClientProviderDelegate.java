@@ -34,15 +34,15 @@ public class OidcClientProviderDelegate implements OidcClientProvider
 		}
 
 		@Override
-		public boolean testConnectionOnStartup()
+		public boolean startupConnectionTestEnabled()
 		{
-			return delegate.testConnectionOnStartup();
+			return delegate.isStartupConnectionTestEnabled();
 		}
 
 		@Override
-		public boolean enableDebugLogging()
+		public boolean debugLoggingEnabled()
 		{
-			return delegate.enableDebugLogging();
+			return delegate.isDebugLoggingEnabled();
 		}
 
 		@Override

@@ -72,12 +72,8 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 	@Override
 	public Jwks getJwks() throws OidcClientException
 	{
-		return getJwks(getConfiguration());
-	}
+		Configuration configuration = getConfiguration();
 
-	@Override
-	public Jwks getJwks(Configuration configuration) throws OidcClientException
-	{
 		if (jwksCache != null && jwksCache.timeout.isBefore(ZonedDateTime.now()))
 			return jwksCache.resource;
 		else
@@ -86,6 +82,13 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 			jwksCache = new CacheEntry<Jwks>(ZonedDateTime.now().plus(cacheTimeoutJwksResource), jwks);
 			return jwks;
 		}
+	}
+
+	@Override
+	public Jwks getJwks(Configuration configuration) throws OidcClientException
+	{
+		// ignoring parameter and using cached value
+		return getJwks();
 	}
 
 	@Override

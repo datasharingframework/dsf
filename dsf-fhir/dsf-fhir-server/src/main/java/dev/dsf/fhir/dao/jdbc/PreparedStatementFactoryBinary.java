@@ -1,6 +1,5 @@
 package dev.dsf.fhir.dao.jdbc;
 
-import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,39 +8,55 @@ import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.Binary;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager.OidAndSize;
+import dev.dsf.fhir.model.StreamableBase64BinaryType;
+import dev.dsf.fhir.webservice.RangeRequest;
 
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
-	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_data) VALUES (?, ?, ?)";
-	private static final String readByIdSql = "SELECT deleted, version, binary_json, binary_data FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
-	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json, binary_data FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
-	private static final String updateNewRowSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_data) VALUES (?, ?, ?, ?)";
-	private static final String updateSameRowSql = "UPDATE binaries SET binary_json = ?, binary_data = ? WHERE binary_id = ? AND version = ?";
+	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?)";
+	private static final String readByIdSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
+	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
+	private static final String updateSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?, ?)";
 
 	PreparedStatementFactoryBinary(FhirContext fhirContext)
 	{
-		super(fhirContext, Binary.class, createSql, readByIdSql, readByIdAndVersionSql, updateNewRowSql,
-				updateSameRowSql);
+		super(fhirContext, Binary.class, createSql, readByIdSql, readByIdAndVersionSql, updateSql);
 	}
 
 	@Override
-	public void configureCreateStatement(PreparedStatement statement, Binary resource, UUID uuid) throws SQLException
+	public void configureCreateStatement(LargeObjectManager largeObjectManager, PreparedStatement statement,
+			Binary resource, UUID uuid) throws SQLException
 	{
-		byte[] data = resource.getData();
+		Base64BinaryType data = resource.getDataElement();
 		resource.setData(null);
 
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setObject(2, resourceToPgObject(resource));
 
-		if (data != null)
-			statement.setBinaryStream(3, new ByteArrayInputStream(data));
+		if (data instanceof StreamableBase64BinaryType s)
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(s.getValueAsStream());
+			statement.setLong(3, oidAndSize.oid());
+			statement.setLong(4, oidAndSize.size());
+		}
+		else if (data != null && data.getValue() != null)
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(data.getValue());
+			statement.setLong(3, oidAndSize.oid());
+			statement.setLong(4, oidAndSize.size());
+		}
 		else
-			statement.setNull(3, Types.VARBINARY);
+		{
+			statement.setNull(3, Types.BLOB);
+			statement.setLong(4, 0);
+		}
 
-		resource.setData(data);
+		resource.setDataElement(data);
 	}
 
 	@Override
@@ -67,9 +82,12 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	public Binary getReadByIdResource(ResultSet result) throws SQLException
 	{
 		String json = result.getString(3);
-		byte[] data = result.getBytes(4);
+		long size = result.getLong(4);
 
-		return jsonToResource(json).setData(data);
+		Binary binary = jsonToResource(json);
+		binary.setUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE, size);
+
+		return binary;
 	}
 
 	@Override
@@ -98,47 +116,43 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	public Binary getReadByIdAndVersionResource(ResultSet result) throws SQLException
 	{
 		String json = result.getString(3);
-		byte[] data = result.getBytes(4);
+		long size = result.getLong(4);
 
-		return jsonToResource(json).setData(data);
+		Binary binary = jsonToResource(json);
+		binary.setUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE, size);
+
+		return binary;
 	}
 
 	@Override
-	public void configureUpdateNewRowSqlStatement(PreparedStatement statement, UUID uuid, long version, Binary resource)
-			throws SQLException
+	public void configureUpdateSqlStatement(LargeObjectManager largeObjectManager, PreparedStatement statement,
+			UUID uuid, long version, Binary resource) throws SQLException
 	{
-		byte[] data = resource.getData();
+		Base64BinaryType data = resource.getDataElement();
 		resource.setData(null);
 
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setLong(2, version);
 		statement.setObject(3, resourceToPgObject(resource));
 
-		if (data != null)
-			statement.setBinaryStream(4, new ByteArrayInputStream(data));
+		if (data instanceof StreamableBase64BinaryType s)
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(s.getValueAsStream());
+			statement.setLong(4, oidAndSize.oid());
+			statement.setLong(5, oidAndSize.size());
+		}
+		else if (data != null && data.getValue() != null)
+		{
+			OidAndSize oidAndSize = largeObjectManager.create(data.getValue());
+			statement.setLong(4, oidAndSize.oid());
+			statement.setLong(5, oidAndSize.size());
+		}
 		else
-			statement.setNull(4, Types.VARBINARY);
+		{
+			statement.setNull(4, Types.BLOB);
+			statement.setLong(5, 0);
+		}
 
-		resource.setData(data);
-	}
-
-	@Override
-	public void configureUpdateSameRowSqlStatement(PreparedStatement statement, UUID uuid, long version,
-			Binary resource) throws SQLException
-	{
-		byte[] data = resource.getData();
-		resource.setData(null);
-
-		statement.setObject(1, resourceToPgObject(resource));
-
-		if (data != null)
-			statement.setBinaryStream(2, new ByteArrayInputStream(data));
-		else
-			statement.setNull(2, Types.VARBINARY);
-
-		statement.setObject(3, uuidToPgObject(uuid));
-		statement.setLong(4, version);
-
-		resource.setData(data);
+		resource.setDataElement(data);
 	}
 }

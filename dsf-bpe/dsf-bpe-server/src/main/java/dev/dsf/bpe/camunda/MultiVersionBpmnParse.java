@@ -2,7 +2,6 @@ package dev.dsf.bpe.camunda;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.delegate.TaskListener;
@@ -18,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.api.plugin.ProcessPlugin;
 
 public class MultiVersionBpmnParse extends BpmnParse
 {
@@ -68,14 +66,17 @@ public class MultiVersionBpmnParse extends BpmnParse
 	{
 		super.parseTaskListeners(taskListenerElement, timerActivity, taskDefinition);
 
-		Class<? extends TaskListener> defaultUserTaskListenerClass = delegateProvider
-				.getDefaultUserTaskListenerClass(getProcessPluginApiVersion());
+		ProcessIdAndVersion processKeyAndVersion = getProcessIdAndVersion();
+
+		Class<?> defaultUserTaskListenerClass = delegateProvider.getDefaultUserTaskListenerClass(processKeyAndVersion);
 
 		if (taskDefinition.getTaskListeners().getOrDefault(TaskListener.EVENTNAME_CREATE, new ArrayList<>()).stream()
 				.filter(l -> l instanceof MultiVersionClassDelegateTaskListener)
-				.map(l -> (MultiVersionClassDelegateTaskListener) l)
-				.noneMatch(containsDefaultUserTaskListenerOrSuperClassOf(defaultUserTaskListenerClass)))
+				.map(l -> (MultiVersionClassDelegateTaskListener) l).map(l -> l.getClassName())
+				.noneMatch(cN -> delegateProvider.isDefaultUserTaskListenerOrSuperClassOf(processKeyAndVersion, cN)))
 		{
+			// adds default user task listener if no listener is already added that is or extends the default listener
+
 			logger.debug("Adding new {} for event '{}' to BPMN element with id '{}'",
 					defaultUserTaskListenerClass.getName(), TaskListener.EVENTNAME_CREATE,
 					getElementId(taskListenerElement));
@@ -93,53 +94,12 @@ public class MultiVersionBpmnParse extends BpmnParse
 		}
 	}
 
-	private String getProcessPluginApiVersion()
+	private ProcessIdAndVersion getProcessIdAndVersion()
 	{
 		Element process = getRootElement().elements().stream().filter(e -> TAGNAME_PROCESS.equals(e.getTagName()))
 				.findFirst().orElseThrow(() -> new RuntimeException("Root element does not contain process element"));
-		Element extensionElements = process.elements().stream()
-				.filter(e -> TAGNAME_EXTENSIONELEMENTS.equals(e.getTagName())).findFirst()
-				.orElseThrow(() -> new RuntimeException("Process element does not contain extensionElements element"));
-		Element properties = extensionElements.elements().stream()
-				.filter(e -> TAGNAME_PROPERTIES.equals(e.getTagName())).findFirst().orElseThrow(
-						() -> new RuntimeException("ExtensionElements element does not contain properties element"));
-		Element property = properties.elements().stream().filter(e -> TAGNAME_PROPERTY.equals(e.getTagName()))
-				.filter(e -> e.attributes().contains("name")
-						&& ProcessPlugin.MODEL_ATTRIBUTE_PROCESS_API_VERSION.equals(e.attribute("name"))
-						&& e.attributes().contains("value"))
-				.findFirst()
-				.orElseThrow(() -> new RuntimeException(
-						"Properties element does not contain property element with attribute name = "
-								+ ProcessPlugin.MODEL_ATTRIBUTE_PROCESS_API_VERSION + " and attribute value"));
-		return property.attribute("value");
-	}
 
-	private Predicate<MultiVersionClassDelegateTaskListener> containsDefaultUserTaskListenerOrSuperClassOf(
-			Class<? extends TaskListener> defaultUserTaskListenerClass)
-	{
-		return multiVersionClassDelegateTaskListener ->
-		{
-			try
-			{
-				Element process = getRootElement().elements().stream()
-						.filter(e -> TAGNAME_PROCESS.equals(e.getTagName())).findFirst()
-						.orElseThrow(() -> new RuntimeException("Root element does not contain process element"));
-
-				ProcessIdAndVersion processKeyAndVersion = new ProcessIdAndVersion(getElementId(process),
-						getElementVersion(process));
-
-				Class<?> clazz = delegateProvider.getClassLoader(processKeyAndVersion)
-						.loadClass(multiVersionClassDelegateTaskListener.getClassName());
-
-				return defaultUserTaskListenerClass.isAssignableFrom(clazz);
-			}
-			catch (Exception exception)
-			{
-				throw new RuntimeException("Could not check if '" + defaultUserTaskListenerClass.getName()
-						+ "' is assignable from '" + multiVersionClassDelegateTaskListener.getClassName() + "'",
-						exception);
-			}
-		};
+		return new ProcessIdAndVersion(getElementId(process), getElementVersion(process));
 	}
 
 	@Override

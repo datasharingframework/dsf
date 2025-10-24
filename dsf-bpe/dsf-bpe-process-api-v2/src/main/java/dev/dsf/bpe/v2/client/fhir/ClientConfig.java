@@ -15,9 +15,9 @@ public interface ClientConfig
 	 */
 	String getBaseUrl();
 
-	boolean getTestConnectionOnStartup();
+	boolean isStartupConnectionTestEnabled();
 
-	boolean getEnableDebugLogging();
+	boolean isDebugLoggingEnabled();
 
 	/**
 	 * @return never <code>null</code>
@@ -105,9 +105,9 @@ public interface ClientConfig
 		 */
 		String getDiscoveryPath();
 
-		boolean testConnectionOnStartup();
+		boolean isStartupConnectionTestEnabled();
 
-		boolean enableDebugLogging();
+		boolean isDebugLoggingEnabled();
 
 		/**
 		 * @return never <code>null</code>

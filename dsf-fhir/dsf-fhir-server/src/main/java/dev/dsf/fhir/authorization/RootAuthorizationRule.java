@@ -7,8 +7,9 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 
 public class RootAuthorizationRule implements AuthorizationRule<Resource>
 {
@@ -78,15 +79,16 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 	@Override
 	public Optional<String> reasonHistoryAllowed(Identity identity)
 	{
-		if (identity.hasDsfRole(FhirServerRole.HISTORY))
+		if (identity.getDsfRoles().stream().map(DsfRole::name)
+				.anyMatch(FhirServerRoleImpl.Operation.HISTORY.name()::equals))
 		{
 			logger.info("History of root authorized for identity '{}'", identity.getName());
-			return Optional.of("Identity has role " + FhirServerRole.HISTORY);
+			return Optional.of("Identity has role " + FhirServerRoleImpl.Operation.HISTORY);
 		}
 		else
 		{
 			logger.warn("History of root unauthorized for identity '{}', no role {}", identity.getName(),
-					FhirServerRole.HISTORY);
+					FhirServerRoleImpl.Operation.HISTORY);
 			return Optional.empty();
 		}
 	}
@@ -99,6 +101,12 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 
 	@Override
 	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, Identity identity, Resource oldResource)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Optional<String> reasonWebsocketAllowed(Identity identity, Resource existingResource)
 	{
 		throw new UnsupportedOperationException();
 	}

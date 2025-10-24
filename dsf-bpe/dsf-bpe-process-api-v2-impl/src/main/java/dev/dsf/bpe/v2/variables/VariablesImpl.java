@@ -1,19 +1,26 @@
 package dev.dsf.bpe.v2.variables;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.variable.Variables.SerializationDataFormats;
 import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.api.Constants;
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
@@ -60,10 +67,79 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	private final DelegateExecution execution;
+	private final ObjectMapper objectMapper;
 
-	public VariablesImpl(DelegateExecution execution)
+	/**
+	 * @param execution
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 */
+	public VariablesImpl(DelegateExecution execution, ObjectMapper objectMapper)
 	{
 		this.execution = Objects.requireNonNull(execution, "execution");
+		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
+	}
+
+	private JsonHolder toJsonHolder(Object json)
+	{
+		try
+		{
+			byte[] data = objectMapper.writeValueAsBytes(json);
+			String dataClassName = json.getClass().getName();
+
+			return new JsonHolder(dataClassName, data);
+		}
+		catch (JsonProcessingException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T fromJsonHolder(JsonHolder holder)
+	{
+		try
+		{
+			byte[] data = holder.getData();
+			Class<?> dataClass = getClassLoader().loadClass(holder.getDataClassName());
+
+			return (T) objectMapper.readValue(data, dataClass);
+		}
+		catch (ClassNotFoundException | IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private ClassLoader getClassLoader()
+	{
+		ClassLoader l = objectMapper.getTypeFactory().getClassLoader();
+		return l != null ? l : getClass().getClassLoader(); // fallback for start/end/continue listeners
+	}
+
+	@Override
+	public String getBusinessKey()
+	{
+		return execution.getBusinessKey();
+	}
+
+	@Override
+	public String getCurrentActivityId()
+	{
+		return execution.getCurrentActivityId();
+	}
+
+	@Override
+	public String getProcessDefinitionId()
+	{
+		return execution.getProcessDefinitionId();
+	}
+
+	@Override
+	public String getActivityInstanceId()
+	{
+		return execution.getActivityInstanceId();
 	}
 
 	@Override
@@ -142,27 +218,27 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
-	public void setResourceList(String variableName, List<? extends Resource> resources)
+	public void setFhirResourceList(String variableName, List<? extends Resource> resources)
 	{
 		FhirResourcesListValue variable = resources == null ? null : FhirResourcesListValues.create(resources);
 		execution.setVariable(variableName, variable);
 	}
 
 	@Override
-	public <R extends Resource> List<R> getResourceList(String variableName)
+	public <R extends Resource> List<R> getFhirResourceList(String variableName)
 	{
 		FhirResourcesList list = (FhirResourcesList) execution.getVariable(variableName);
 		return list != null ? list.getResourcesAndCast() : null;
 	}
 
-	private <R extends Resource> List<R> getResourceListOrDefault(String variableName, List<R> defaultList)
+	private <R extends Resource> List<R> getFhirResourceListOrDefault(String variableName, List<R> defaultList)
 	{
-		List<R> list = getResourceList(variableName);
+		List<R> list = getFhirResourceList(variableName);
 		return list != null ? list : defaultList;
 	}
 
 	@Override
-	public void setResource(String variableName, Resource resource)
+	public void setFhirResource(String variableName, Resource resource)
 	{
 		FhirResourceValue variable = resource == null ? null : FhirResourceValues.create(resource);
 		execution.setVariable(variableName, variable);
@@ -170,9 +246,38 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <R extends Resource> R getResource(String variableName)
+	public <R extends Resource> R getFhirResource(String variableName)
 	{
 		Resource resource = (Resource) execution.getVariable(variableName);
+		return (R) resource;
+	}
+
+	@Override
+	public void setFhirResourceListLocal(String variableName, List<? extends Resource> resources)
+	{
+		FhirResourcesListValue variable = resources == null ? null : FhirResourcesListValues.create(resources);
+		execution.setVariableLocal(variableName, variable);
+	}
+
+	@Override
+	public <R extends Resource> List<R> getFhirResourceListLocal(String variableName)
+	{
+		FhirResourcesList list = (FhirResourcesList) execution.getVariableLocal(variableName);
+		return list != null ? list.getResourcesAndCast() : null;
+	}
+
+	@Override
+	public void setFhirResourceLocal(String variableName, Resource resource)
+	{
+		FhirResourceValue variable = resource == null ? null : FhirResourceValues.create(resource);
+		execution.setVariableLocal(variableName, variable);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends Resource> R getFhirResourceLocal(String variableName)
+	{
+		Resource resource = (Resource) execution.getVariableLocal(variableName);
 		return (R) resource;
 	}
 
@@ -182,7 +287,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("getStartTask - parentActivityInstanceId: {}, parentId: {}",
 				execution.getParentActivityInstanceId(), execution.getParentId());
 
-		return getResource(START_TASK);
+		return getFhirResource(START_TASK);
 	}
 
 	@Override
@@ -204,7 +309,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		List<Task> tasks = Stream
 				.concat(Stream.of(getStartTask()),
 						execution.getVariables().keySet().stream().filter(k -> k.startsWith(TASKS_PREFIX))
-								.map(this::getResourceList).flatMap(List::stream).filter(r -> r instanceof Task)
+								.map(this::getFhirResourceList).flatMap(List::stream).filter(r -> r instanceof Task)
 								.map(r -> (Task) r))
 				.filter(t -> t != null).map(DistinctTask::new).distinct().map(DistinctTask::getTask).toList();
 
@@ -218,7 +323,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 				execution.getParentActivityInstanceId(), execution.getParentId());
 
 		Stream<Task> start = execution.getParentId() == null ? Stream.of(getStartTask()) : Stream.empty();
-		Stream<Task> current = getResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
+		Stream<Task> current = getFhirResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
 				List.<Task> of()).stream();
 
 		return Collections.unmodifiableList(Stream.concat(start, current).toList());
@@ -233,14 +338,14 @@ public class VariablesImpl implements Variables, ListenerVariables
 		{
 			if (getStartTask() != null
 					&& Objects.equals(getStartTask().getIdElement().getIdPart(), task.getIdElement().getIdPart()))
-				setResource(START_TASK, task);
+				setFhirResource(START_TASK, task);
 			else
 			{
 				String instanceId = execution.getParentActivityInstanceId();
-				List<Task> tasks = getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of());
+				List<Task> tasks = getFhirResourceListOrDefault(TASKS_PREFIX + instanceId, List.of());
 
 				if (tasks.stream().anyMatch(t -> t.getIdElement().getIdPart().equals(task.getIdElement().getIdPart())))
-					setResourceList(TASKS_PREFIX + instanceId, tasks);
+					setFhirResourceList(TASKS_PREFIX + instanceId, tasks);
 				else
 					logger.warn("Given task {} not part of tasks list '{}', ignoring task",
 							task.getIdElement().getIdPart(), instanceId);
@@ -253,11 +358,85 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@Override
 	public QuestionnaireResponse getLatestReceivedQuestionnaireResponse()
 	{
-		return (QuestionnaireResponse) getResource(Constants.QUESTIONNAIRE_RESPONSE_VARIABLE);
+		return (QuestionnaireResponse) getFhirResource(Constants.QUESTIONNAIRE_RESPONSE_VARIABLE);
 	}
 
 	@Override
-	public void setVariable(String variableName, TypedValue value)
+	public void setInteger(String variableName, Integer value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
+	}
+
+	@Override
+	public void setString(String variableName, String value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+	}
+
+	@Override
+	public void setStringList(String variableName, List<String> value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.objectValue(value)
+				.serializationDataFormat(SerializationDataFormats.JAVA).create());
+	}
+
+	@Override
+	public void setByteArray(String variableName, byte[] value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
+	}
+
+	@Override
+	public void setDate(String variableName, Date value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
+	}
+
+	@Override
+	public void setLong(String variableName, Long value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
+	}
+
+	@Override
+	public void setShort(String variableName, Short value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
+	}
+
+	@Override
+	public void setDouble(String variableName, Double value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
+	}
+
+	@Override
+	public void setNumber(String variableName, Number value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
+	}
+
+	@Override
+	public void setFile(String variableName, File value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
+	}
+
+	@Override
+	public void setBoolean(String variableName, Boolean value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
+	}
+
+	@Override
+	public void setJsonVariable(String variableName, Object value)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		execution.setVariable(variableName, JsonHolderValues.create(toJsonHolder(value)));
+	}
+
+	private void setVariable(String variableName, TypedValue value)
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
@@ -265,11 +444,113 @@ public class VariablesImpl implements Variables, ListenerVariables
 	}
 
 	@Override
-	public Object getVariable(String variableName)
+	@SuppressWarnings("unchecked")
+	public <T> T getVariable(String variableName)
 	{
 		Objects.requireNonNull(variableName, "variableName");
 
-		return execution.getVariable(variableName);
+		Object variable = execution.getVariable(variableName);
+
+		if (variable instanceof JsonHolder jsonVariable)
+			return (T) fromJsonHolder(jsonVariable);
+		else
+			return (T) variable;
+	}
+
+	@Override
+	public void setIntegerLocal(String variableName, Integer value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
+	}
+
+	@Override
+	public void setStringLocal(String variableName, String value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+	}
+
+	@Override
+	public void setStringListLocal(String variableName, List<String> value)
+	{
+		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.objectValue(value)
+				.serializationDataFormat(SerializationDataFormats.JAVA).create());
+	}
+
+	@Override
+	public void setByteArrayLocal(String variableName, byte[] value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
+	}
+
+	@Override
+	public void setDateLocal(String variableName, Date value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
+	}
+
+	@Override
+	public void setLongLocal(String variableName, Long value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
+	}
+
+	@Override
+	public void setShortLocal(String variableName, Short value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
+	}
+
+	@Override
+	public void setDoubleLocal(String variableName, Double value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
+	}
+
+	@Override
+	public void setNumberLocal(String variableName, Number value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
+	}
+
+	@Override
+	public void setFileLocal(String variableName, File value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
+	}
+
+	@Override
+	public void setBooleanLocal(String variableName, Boolean value)
+	{
+		setVariableLocal(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
+	}
+
+	private void setVariableLocal(String variableName, TypedValue value)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		execution.setVariableLocal(variableName, value);
+	}
+
+	@Override
+	public void setJsonVariableLocal(String variableName, Object value)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		execution.setVariableLocal(variableName, JsonHolderValues.create(toJsonHolder(value)));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getVariableLocal(String variableName)
+	{
+		Objects.requireNonNull(variableName, "variableName");
+
+		Object variable = execution.getVariable(variableName);
+
+		if (variable instanceof JsonHolder jsonHolder)
+			return (T) fromJsonHolder(jsonHolder);
+		else
+			return (T) variable;
 	}
 
 	@Override
@@ -278,7 +559,7 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("onStart - Task.id: {}", task == null ? "null" : task.getIdElement().getIdPart());
 
 		if (task != null)
-			setResource(START_TASK, task);
+			setFhirResource(START_TASK, task);
 		else
 			logger.warn("Given task is null");
 	}
@@ -292,10 +573,10 @@ public class VariablesImpl implements Variables, ListenerVariables
 		{
 			String instanceId = execution.getParentActivityInstanceId();
 
-			List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
+			List<Task> tasks = new ArrayList<>(getFhirResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
 			tasks.add(task);
 
-			setResourceList(TASKS_PREFIX + instanceId, tasks);
+			setFhirResourceList(TASKS_PREFIX + instanceId, tasks);
 		}
 		else
 			logger.warn("Given task is null");
@@ -307,8 +588,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("onEnd");
 
 		String instanceId = execution.getParentActivityInstanceId();
-		List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
+		List<Task> tasks = new ArrayList<>(getFhirResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
 		tasks.removeAll(getCurrentTasks());
-		setResourceList(TASKS_PREFIX + instanceId, tasks);
+		setFhirResourceList(TASKS_PREFIX + instanceId, tasks);
 	}
 }

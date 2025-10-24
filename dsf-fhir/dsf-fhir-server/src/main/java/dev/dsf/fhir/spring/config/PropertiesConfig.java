@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
 
@@ -24,16 +25,16 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
-import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import dev.dsf.common.config.AbstractCertificateConfig;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
+import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.ui.theme.Theme;
-import dev.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class PropertiesConfig implements InitializingBean
+public class PropertiesConfig extends AbstractCertificateConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
@@ -44,6 +45,10 @@ public class PropertiesConfig implements InitializingBean
 	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
+
+	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
+	@Value("${dev.dsf.fhir.db.user.group:fhir_users}")
+	private String dbUsersGroup;
 
 	// documentation in dev.dsf.fhir.config.FhirDbMigratorConfig
 	@Value("${dev.dsf.fhir.db.user.password}")
@@ -81,9 +86,9 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.server.init.bundle:conf/bundle.xml}")
 	private String initBundleFile;
 
-	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
-	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/server_cert_root_cas.pem}")
-	private String dsfClientTrustedServerCasFile;
+	@Documentation(description = "Folder with PEM encoded files (*.crt, *.pem) or a single PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Add file to default folder via bind mount or use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Value("${dev.dsf.fhir.client.trust.server.certificate.cas:ca/server_root_cas}")
+	private String dsfClientTrustedServerCasFileOrFolder;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
 	@Value("${dev.dsf.fhir.client.certificate}")
@@ -97,13 +102,13 @@ public class PropertiesConfig implements InitializingBean
 	@Value("${dev.dsf.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] dsfClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "Timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.fhir.client.timeout.read:10000}")
-	private int dsfClientReadTimeout;
+	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.fhir.client.timeout.read:PT10S}")
+	private String dsfClientReadTimeout;
 
-	@Documentation(description = "Timeout in milliseconds until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
-	@Value("${dev.dsf.fhir.client.timeout.connect:2000}")
-	private int dsfClientConnectTimeout;
+	@Documentation(description = "Timeout until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Value("${dev.dsf.fhir.client.timeout.connect:PT2S}")
+	private String dsfClientConnectTimeout;
 
 	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
 	@Value("${dev.dsf.fhir.client.verbose:false}")
@@ -154,8 +159,8 @@ public class PropertiesConfig implements InitializingBean
 	private boolean oidcBearerTokenEnabled;
 
 	// documentation in dev.dsf.common.config.AbstractJettyConfig
-	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_cert_ca_chains.pem}")
-	private String dsfClientTrustedClientCasFile;
+	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_ca_chains}")
+	private String dsfClientTrustedClientCasFileOrFolder;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
@@ -215,10 +220,7 @@ public class PropertiesConfig implements InitializingBean
 		try
 		{
 			X509Certificate clientCertiticate = PemReader.readCertificate(Paths.get(getDsfClientCertificateFile()));
-			List<X509Certificate> certificates = PemReader
-					.readCertificates(Paths.get(getDsfClientTrustedClientCasFile()));
-			KeyStore dsfClientTrustedClientCas = KeyStoreCreator.jksForTrustedCertificates(certificates);
-			CertificateValidator.vaildateClientCertificate(dsfClientTrustedClientCas, clientCertiticate);
+			CertificateValidator.validateClientCertificate(getDsfClientTrustedClientCas(), clientCertiticate);
 		}
 		catch (CertificateException e)
 		{
@@ -235,6 +237,11 @@ public class PropertiesConfig implements InitializingBean
 	public String getDbUsername()
 	{
 		return dbUsername;
+	}
+
+	public String getDbUsersGroup()
+	{
+		return dbUsersGroup;
 	}
 
 	public char[] getDbPassword()
@@ -282,9 +289,15 @@ public class PropertiesConfig implements InitializingBean
 		return initBundleFile;
 	}
 
-	public String getDsfClientTrustedServerCasFile()
+	public String getDsfClientTrustedServerCasFileOrFolder()
 	{
-		return dsfClientTrustedServerCasFile;
+		return dsfClientTrustedServerCasFileOrFolder;
+	}
+
+	public KeyStore getDsfClientTrustedServerCas()
+	{
+		return createTrustStore(getDsfClientTrustedServerCasFileOrFolder(),
+				"dev.dsf.fhir.client.trust.server.certificate.cas");
 	}
 
 	public String getDsfClientCertificateFile()
@@ -302,14 +315,14 @@ public class PropertiesConfig implements InitializingBean
 		return dsfClientCertificatePrivateKeyFilePassword;
 	}
 
-	public int getDsfClientReadTimeout()
+	public Duration getDsfClientReadTimeout()
 	{
-		return dsfClientReadTimeout;
+		return Duration.parse(dsfClientReadTimeout);
 	}
 
-	public int getDsfClientConnectTimeout()
+	public Duration getDsfClientConnectTimeout()
 	{
-		return dsfClientConnectTimeout;
+		return Duration.parse(dsfClientConnectTimeout);
 	}
 
 	public boolean getDsfClientVerbose()
@@ -317,9 +330,11 @@ public class PropertiesConfig implements InitializingBean
 		return dsfClientVerbose;
 	}
 
-	public String getDsfClientTrustedClientCasFile()
+	@Bean
+	public KeyStore getDsfClientTrustedClientCas()
 	{
-		return dsfClientTrustedClientCasFile;
+		return createTrustStore(dsfClientTrustedClientCasFileOrFolder,
+				"dev.dsf.server.auth.trust.client.certificate.cas");
 	}
 
 	public boolean getStaticResourceCacheEnabled()

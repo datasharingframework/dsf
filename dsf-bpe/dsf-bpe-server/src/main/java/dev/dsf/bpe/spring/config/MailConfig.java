@@ -1,12 +1,12 @@
 package dev.dsf.bpe.spring.config;
 
-import java.io.IOException;
 import java.security.KeyStore;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -23,10 +23,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.mail.LoggingMailService;
 import dev.dsf.bpe.mail.SmtpMailService;
-import dev.dsf.tools.build.BuildInfoReader;
+import dev.dsf.common.build.BuildInfoReader;
 
 @Configuration
 public class MailConfig implements InitializingBean
@@ -70,8 +72,8 @@ public class MailConfig implements InitializingBean
 
 		KeyStore trustStore = propertiesConfig.getMailServerTrustStore();
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
-		KeyStore keyStore = propertiesConfig.getMailServerKeyStore(keyStorePassword).orElse(null);
-		KeyStore signStore = propertiesConfig.getMailSmimeSigingKeyStore().orElse(null);
+		KeyStore keyStore = propertiesConfig.getMailClientKeyStore(keyStorePassword);
+		KeyStore signStore = propertiesConfig.getMailSmimeSigingKeyStore();
 
 		return new SmtpMailService(fromAddress, toAddresses, toAddressesCc, replyToAddresses, useSmtps,
 				mailServerHostname, mailServerPort, mailServerUsername, mailServerPassword, trustStore, keyStore,
@@ -97,15 +99,24 @@ public class MailConfig implements InitializingBean
 					propertiesConfig.getMailUseSmtps(), propertiesConfig.getMailServerHostname(),
 					propertiesConfig.getMailServerPort(), propertiesConfig.getMailServerUsername(),
 					propertiesConfig.getMailServerPassword() != null ? "***" : "null",
-					propertiesConfig.getMailServerTrustStoreFile(),
-					propertiesConfig.getMailServerClientCertificateFile(),
-					propertiesConfig.getMailServerClientCertificatePrivateKeyFile(),
-					propertiesConfig.getMailServerClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+					propertiesConfig.getMailServerTrustStoreFileOrFolder(),
+					propertiesConfig.getMailClientCertificateFile(),
+					propertiesConfig.getMailClientCertificatePrivateKeyFile(),
+					propertiesConfig.getMailClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 					propertiesConfig.getMailSmimeSigingKeyStoreFile(),
 					propertiesConfig.getMailSmimeSigingKeyStorePassword() != null ? "***" : "null",
 					propertiesConfig.getSendTestMailOnStartup(), propertiesConfig.getSendMailOnErrorLogEvent(),
 					propertiesConfig.getMailOnErrorLogEventBufferSize(),
 					propertiesConfig.getMailOnErrorLogEventDebugLogLocation());
+
+			if (propertiesConfig.getMailUseSmtps())
+			{
+				logger.info("Using trust-store with {} to validate mail server certificate",
+						KeyStoreFormatter
+								.toSubjectsFromCertificates(propertiesConfig.getDsfClientTrustedServerCas(),
+										X500PrincipalFormat.RFC1779)
+								.values().stream().collect(Collectors.joining("; ", "[", "]")));
+			}
 		}
 		else
 		{
@@ -128,7 +139,7 @@ public class MailConfig implements InitializingBean
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws IOException
+	public void onContextRefreshedEvent()
 	{
 		if (propertiesConfig.getSendTestMailOnStartup())
 		{

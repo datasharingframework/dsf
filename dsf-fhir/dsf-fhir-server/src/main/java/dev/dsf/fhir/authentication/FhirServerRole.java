@@ -1,22 +1,12 @@
 package dev.dsf.fhir.authentication;
 
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.ResourceType;
 
 import dev.dsf.common.auth.conf.DsfRole;
 
-public enum FhirServerRole implements DsfRole
+public interface FhirServerRole extends DsfRole
 {
-	CREATE, READ, UPDATE, DELETE, SEARCH, HISTORY, PERMANENT_DELETE, WEBSOCKET;
-
-	public static final Set<FhirServerRole> LOCAL_ORGANIZATION = EnumSet.of(CREATE, READ, UPDATE, DELETE, SEARCH,
-			HISTORY, PERMANENT_DELETE, WEBSOCKET);
-	public static final Set<FhirServerRole> REMOTE_ORGANIZATION = EnumSet.of(CREATE, READ, UPDATE, DELETE, SEARCH,
-			HISTORY);
-
-	public static boolean isValid(String role)
-	{
-		return role != null && !role.isBlank() && Stream.of(values()).map(Enum::name).anyMatch(n -> n.equals(role));
-	}
+	List<ResourceType> resourceTypes();
 }

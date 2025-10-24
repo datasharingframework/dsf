@@ -23,6 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -35,7 +36,6 @@ import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceCleaner;
-import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MediaType;
@@ -83,9 +83,8 @@ public class ReadCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		String requestUrl = entry.getRequest().getUrl();
 

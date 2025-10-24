@@ -1,6 +1,7 @@
 package dev.dsf.fhir.client;
 
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.function.Supplier;
 
 import org.apache.http.conn.ConnectTimeoutException;
@@ -17,18 +18,18 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirWebserviceClientJerseyWithRetry.class);
 
 	protected final FhirWebserviceClientJersey delegate;
-	protected final int nTimes;
-	protected final long delayMillis;
+	private final int nTimes;
+	private final Duration delay;
 
 	protected AbstractFhirWebserviceClientJerseyWithRetry(FhirWebserviceClientJersey delegate, int nTimes,
-			long delayMillis)
+			Duration delayMillis)
 	{
 		this.delegate = delegate;
 		this.nTimes = nTimes;
-		this.delayMillis = delayMillis;
+		this.delay = delayMillis;
 	}
 
-	protected final <R> R retry(int nTimes, long delayMillis, Supplier<R> supplier)
+	protected final <R> R retry(Supplier<R> supplier)
 	{
 		RuntimeException caughtException = null;
 		for (int tryNumber = 0; tryNumber <= nTimes || nTimes == RetryClient.RETRY_FOREVER; tryNumber++)
@@ -48,13 +49,13 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 				{
 					if (tryNumber < nTimes || nTimes == RetryClient.RETRY_FOREVER)
 					{
-						logger.warn("Caught {} - {}; trying again in {} ms{}", e.getClass(), e.getMessage(),
-								delayMillis,
+						logger.warn("Caught {} - {}; trying again in {}s{}", e.getClass(), e.getMessage(),
+								delay.toSeconds(),
 								nTimes == RetryClient.RETRY_FOREVER ? " (retry " + (tryNumber + 1) + ")" : "");
 
 						try
 						{
-							Thread.sleep(delayMillis);
+							Thread.sleep(delay);
 						}
 						catch (InterruptedException e1)
 						{

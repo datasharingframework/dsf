@@ -21,6 +21,7 @@ import org.springframework.core.env.Environment;
 
 import dev.dsf.bpe.api.config.BpeProxyConfig;
 import dev.dsf.bpe.api.config.DsfClientConfig;
+import dev.dsf.bpe.api.config.FhirValidationConfig;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
@@ -118,7 +119,7 @@ public class PluginFactoryConfig
 			@Override
 			public KeyStore getKeyStore()
 			{
-				return propertiesConfig.getDsfClientCertificate(keyStorePassword);
+				return propertiesConfig.getDsfClientKeyStore(keyStorePassword);
 			}
 
 			@Override
@@ -133,7 +134,7 @@ public class PluginFactoryConfig
 				return new LocalConfig()
 				{
 					@Override
-					public boolean logRequestsAndResponses()
+					public boolean isDebugLoggingEnabled()
 					{
 						return propertiesConfig.getDsfClientVerboseLocal();
 					}
@@ -164,7 +165,7 @@ public class PluginFactoryConfig
 				return new RemoteConfig()
 				{
 					@Override
-					public boolean logRequestsAndResponses()
+					public boolean isDebugLoggingEnabled()
 					{
 						return propertiesConfig.getDsfClientVerboseRemote();
 					}
@@ -208,9 +209,19 @@ public class PluginFactoryConfig
 			}
 		};
 
+		FhirValidationConfig fhirValidationConfig = new FhirValidationConfig()
+		{
+			@Override
+			public boolean isEnabled()
+			{
+				return propertiesConfig.getFhirValidationEnabled();
+			}
+		};
+
 		return new ProcessPluginApiFactory((ConfigurableEnvironment) environment, clientConfig,
-				fhirClientConnectionsConfig.fhirClientConfigs(), proxyConfig, buildInfoProvider, bpeMailService,
-				oidcClientProviderConfig.bpeOidcClientProvider(), pluginApiClassLoaderFactory());
+				fhirClientConnectionsConfig.fhirClientConfigs(), proxyConfig, fhirValidationConfig, buildInfoProvider,
+				bpeMailService, oidcClientProviderConfig.bpeOidcClientProvider(), pluginApiClassLoaderFactory(),
+				propertiesConfig.getDsfServerBaseUrl());
 	}
 
 	@Bean

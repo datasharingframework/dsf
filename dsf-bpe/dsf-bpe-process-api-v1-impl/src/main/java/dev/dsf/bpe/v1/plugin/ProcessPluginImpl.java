@@ -13,6 +13,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.camunda.bpm.engine.delegate.TaskListener;
+import org.camunda.bpm.engine.delegate.VariableScope;
+import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
+import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 import org.camunda.bpm.engine.variable.value.PrimitiveValue;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -29,37 +35,60 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import dev.dsf.bpe.api.logging.PluginMdc;
 import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
+import dev.dsf.bpe.api.plugin.FhirResourceModifier;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.api.plugin.ProcessPluginDeploymentListener;
 import dev.dsf.bpe.api.plugin.ProcessPluginFhirConfig;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
 import dev.dsf.bpe.v1.ProcessPluginDeploymentStateListener;
+import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
+import dev.dsf.bpe.v1.logging.PluginMdcImpl;
 import dev.dsf.bpe.v1.variables.FhirResourceValues;
+import dev.dsf.bpe.v1.variables.VariablesImpl;
 
-public class ProcessPluginImpl extends AbstractProcessPlugin implements ProcessPlugin
+public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> implements ProcessPlugin
 {
+	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginImpl.class);
+
 	private final ProcessPluginDefinition processPluginDefinition;
 	private final ProcessPluginApi processPluginApi;
 
+	private final PluginMdcImpl pluginMdc;
+
 	public ProcessPluginImpl(ProcessPluginDefinition processPluginDefinition, int processPluginApiVersion,
 			boolean draft, Path jarFile, ClassLoader classLoader, ConfigurableEnvironment environment,
-			ApplicationContext apiApplicationContext)
+			ApplicationContext apiApplicationContext, String serverBaseUrl)
 	{
 		super(ProcessPluginDefinition.class, processPluginApiVersion, draft, jarFile, classLoader, environment,
-				apiApplicationContext, ApiServicesSpringConfiguration.class);
+				apiApplicationContext, ApiServicesSpringConfiguration.class, JavaDelegate.class, JavaDelegate.class,
+				TaskListener.class, ExecutionListener.class, JavaDelegate.class, JavaDelegate.class,
+				DefaultUserTaskListener.class);
 
 		this.processPluginDefinition = processPluginDefinition;
 		processPluginApi = apiApplicationContext.getBean(ProcessPluginApi.class);
+
+		pluginMdc = new PluginMdcImpl(processPluginApiVersion, processPluginDefinition.getName(),
+				processPluginDefinition.getVersion(), jarFile.toString(), serverBaseUrl, VariablesImpl::new);
+	}
+
+	@Override
+	public PluginMdc getPluginMdc()
+	{
+		return pluginMdc;
 	}
 
 	@Override
@@ -148,13 +177,19 @@ public class ProcessPluginImpl extends AbstractProcessPlugin implements ProcessP
 						&& BpmnMessage.Codes.MESSAGE_NAME.equals(c.getCode())))
 				.count() == 1;
 
+		Function<StructureDefinition, Optional<String>> getStructureDefinitionBaseDefinition = s -> s
+				.hasBaseDefinitionElement() && s.getBaseDefinitionElement().hasValue()
+						? Optional.of(s.getBaseDefinitionElement().getValue())
+						: Optional.empty();
+
 		return new ProcessPluginFhirConfig<>(ActivityDefinition.class, CodeSystem.class, Library.class, Measure.class,
 				NamingSystem.class, Questionnaire.class, StructureDefinition.class, Task.class, ValueSet.class,
 				OrganizationIdentifier.SID, TaskIdentifier.SID, TaskStatus.DRAFT.toCode(), BpmnMessage.URL,
 				BpmnMessage.Codes.MESSAGE_NAME, parseResource, encodeResource, getResourceName, hasMetadataResourceUrl,
 				hasMetadataResourceVersion, getMetadataResourceVersion, getActivityDefinitionUrl, NamingSystem::hasName,
 				getTaskInstantiatesCanonical, getTaskIdentifierValue, isTaskStatusDraft, getRequester, getRecipient,
-				Task::hasInput, hasTaskInputMessageName, Task::hasOutput);
+				Task::hasInput, hasTaskInputMessageName, Task::hasOutput, getStructureDefinitionBaseDefinition,
+				StructureDefinition::setBaseDefinition);
 	}
 
 	private IParser newXmlParser()
@@ -225,6 +260,12 @@ public class ProcessPluginImpl extends AbstractProcessPlugin implements ProcessP
 	}
 
 	@Override
+	public String getPluginDefinitionPackageName()
+	{
+		return processPluginDefinition.getClass().getPackageName();
+	}
+
+	@Override
 	public PrimitiveValue<?> createFhirTaskVariable(String taskJson)
 	{
 		Task task = newJsonParser().parseResource(Task.class, taskJson);
@@ -251,5 +292,73 @@ public class ProcessPluginImpl extends AbstractProcessPlugin implements ProcessP
 							() -> l.onProcessesDeployed(activePluginProcesses),
 							ProcessPluginDeploymentStateListener.class, l.getClass()));
 		};
+	}
+
+	private <T> T get(Class<T> targetInterface, String className, List<FieldDeclaration> fieldDeclarations)
+	{
+		try
+		{
+			Class<?> targetImplClass = getProcessPluginClassLoader().loadClass(className);
+			Object target = getApplicationContext().getBean(targetImplClass);
+			ClassDelegateUtil.applyFieldDeclaration(fieldDeclarations, target);
+
+			return targetInterface.cast(target);
+		}
+		catch (BeansException | ClassNotFoundException | ClassCastException e)
+		{
+			logger.debug("Unable to create {} for {}", targetInterface.getName(), className, e);
+			logger.warn("Unable to create {} for {}: {} - {}", targetInterface.getName(), className,
+					e.getClass().getName(), e.getMessage());
+
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public JavaDelegate getMessageSendTask(String className, List<FieldDeclaration> fieldDeclarations,
+			VariableScope variableScope)
+	{
+		return get(JavaDelegate.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public JavaDelegate getServiceTask(String className, List<FieldDeclaration> fieldDeclarations,
+			VariableScope variableScope)
+	{
+		return get(JavaDelegate.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public JavaDelegate getMessageEndEvent(String className, List<FieldDeclaration> fieldDeclarations,
+			VariableScope variableScope)
+	{
+		return get(JavaDelegate.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public JavaDelegate getMessageIntermediateThrowEvent(String className, List<FieldDeclaration> fieldDeclarations,
+			VariableScope variableScope)
+	{
+		return get(JavaDelegate.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public ExecutionListener getExecutionListener(String className, List<FieldDeclaration> fieldDeclarations,
+			VariableScope variableScope)
+	{
+		return get(ExecutionListener.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public TaskListener getTaskListener(String className, List<FieldDeclaration> fieldDeclarations,
+			VariableScope variableScope)
+	{
+		return get(TaskListener.class, className, fieldDeclarations);
+	}
+
+	@Override
+	public FhirResourceModifier getFhirResourceModifier()
+	{
+		return FhirResourceModifier.identity();
 	}
 }

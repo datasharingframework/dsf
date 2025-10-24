@@ -1,6 +1,7 @@
 package dev.dsf.bpe.plugin;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -13,6 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
@@ -36,7 +39,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 
 	public static final String ORGANIZATION_IDENTIFIER_SID = "http://dsf.dev/sid/organization-identifier";
 
-	private record ProcessIdAndVersionAndProcessPlugin(ProcessIdAndVersion idAndVersion, ProcessPlugin plugin)
+	private static record ProcessByIdAndVersion(ProcessIdAndVersion idAndVersion, ProcessPlugin plugin)
 	{
 	}
 
@@ -49,14 +52,14 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 	private final String localEndpointAddress;
 	private final WebserviceClient localWebserviceClient;
 	private final int fhirServerRequestMaxRetries;
-	private final long fhirServerRetryDelayMillis;
+	private final Duration fhirServerRetryDelay;
 
 	private Map<ProcessIdAndVersion, ProcessPlugin> pluginsByProcessIdAndVersion;
 
 	public ProcessPluginManagerImpl(List<ProcessPluginConsumer> processPluginConsumers,
 			ProcessPluginLoader processPluginLoader, BpmnProcessStateChangeService bpmnProcessStateChangeService,
 			FhirResourceHandler fhirResourceHandler, String localEndpointAddress,
-			WebserviceClient localWebserviceClient, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis)
+			WebserviceClient localWebserviceClient, int fhirServerRequestMaxRetries, Duration fhirServerRetryDelay)
 	{
 		if (processPluginConsumers != null)
 			this.processPluginConsumers.addAll(processPluginConsumers);
@@ -68,7 +71,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		this.localEndpointAddress = localEndpointAddress;
 		this.localWebserviceClient = localWebserviceClient;
 		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
-		this.fhirServerRetryDelayMillis = fhirServerRetryDelayMillis;
+		this.fhirServerRetryDelay = fhirServerRetryDelay;
 	}
 
 	@Override
@@ -80,6 +83,10 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 
 		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
 		Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
+
+		if (fhirServerRequestMaxRetries < -1)
+			throw new IllegalArgumentException("fhirServerRequestMaxRetries < -1");
+		Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
 	}
 
 	@Override
@@ -89,13 +96,23 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		if (localOrganizationIdentifierValue.isEmpty())
 			logger.warn("Local organization identifier unknown, check DSF FHIR server allow list");
 
-		List<ProcessPlugin> plugins = removeDuplicates(processPluginLoader.loadPlugins().stream()
-				.filter(p -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null))));
+		List<ProcessPlugin> loadedPlugins = processPluginLoader.loadPlugins();
+
+		// set log level to debug for logger with plugin definition package name
+		loadedPlugins.stream().map(ProcessPlugin::getPluginDefinitionPackageName)
+				.forEach(name -> Configurator.setLevel(name, Level.DEBUG));
+
+		List<ProcessPlugin> plugins = removeDuplicates(
+				loadedPlugins.stream().filter(p -> p.getPluginMdc().executeWithPluginMdc(
+						() -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null)))));
 
 		if (plugins.isEmpty())
 			logger.warn("No process plugins deployed");
 
-		processPluginConsumers.forEach(c -> c.setProcessPlugins(plugins));
+		pluginsByProcessIdAndVersion = plugins.stream()
+				.flatMap(p -> p.getProcessKeysAndVersions().stream().map(iAV -> new ProcessByIdAndVersion(iAV, p)))
+				.collect(Collectors.toMap(ProcessByIdAndVersion::idAndVersion, ProcessByIdAndVersion::plugin));
+		processPluginConsumers.forEach(c -> c.setProcessPlugins(plugins, pluginsByProcessIdAndVersion));
 
 		// deploy BPMN models
 		List<BpmnFileAndModel> models = plugins.stream().flatMap(p -> p.getProcessModels().stream()).toList();
@@ -108,19 +125,14 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		fhirResourceHandler.applyStateChangesAndStoreNewResourcesInDb(resources, outcomes);
 
 		onProcessesDeployed(outcomes, plugins);
-
-		this.pluginsByProcessIdAndVersion = plugins.stream().flatMap(
-				p -> p.getProcessKeysAndVersions().stream().map(iAV -> new ProcessIdAndVersionAndProcessPlugin(iAV, p)))
-				.collect(Collectors.toMap(ProcessIdAndVersionAndProcessPlugin::idAndVersion,
-						ProcessIdAndVersionAndProcessPlugin::plugin));
 	}
 
 	private BasicWebserviceClient retryClient()
 	{
 		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
-			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
+			return localWebserviceClient.withRetryForever(fhirServerRetryDelay);
 		else
-			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);
+			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelay);
 	}
 
 	private Optional<String> getLocalOrganizationIdentifierValue()
@@ -197,10 +209,11 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.filter(c -> EnumSet.of(ProcessState.ACTIVE, ProcessState.DRAFT).contains(c.getNewProcessState()))
 				.map(ProcessStateChangeOutcome::getProcessKeyAndVersion).collect(Collectors.toSet());
 
-		plugins.stream()
-				.forEach(plugin -> plugin.getProcessPluginDeploymentListener().onProcessesDeployed(activeProcesses));
+		plugins.stream().forEach(p -> p.getPluginMdc().executeWithPluginMdc(
+				() -> p.getProcessPluginDeploymentListener().onProcessesDeployed(activeProcesses)));
 	}
 
+	@Override
 	public Optional<ProcessPlugin> getProcessPlugin(ProcessIdAndVersion processIdAndVersion)
 	{
 		if (pluginsByProcessIdAndVersion == null)

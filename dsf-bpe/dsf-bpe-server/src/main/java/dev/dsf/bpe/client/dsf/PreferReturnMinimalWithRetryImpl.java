@@ -1,5 +1,7 @@
 package dev.dsf.bpe.client.dsf;
 
+import java.time.Duration;
+
 import org.hl7.fhir.r4.model.Bundle;
 
 class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
@@ -18,22 +20,22 @@ class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
 	}
 
 	@Override
-	public PreferReturnMinimal withRetry(int nTimes, long delayMillis)
+	public PreferReturnMinimal withRetry(int nTimes, Duration delay)
 	{
 		if (nTimes < 0)
 			throw new IllegalArgumentException("nTimes < 0");
-		if (delayMillis < 0)
-			throw new IllegalArgumentException("delayMillis < 0");
+		if (delay == null || delay.isNegative())
+			throw new IllegalArgumentException("delay null or negative");
 
-		return new PreferReturnMinimalRetryImpl(delegate, nTimes, delayMillis);
+		return new PreferReturnMinimalRetryImpl(delegate, nTimes, delay);
 	}
 
 	@Override
-	public PreferReturnMinimal withRetryForever(long delayMillis)
+	public PreferReturnMinimal withRetryForever(Duration delay)
 	{
-		if (delayMillis < 0)
-			throw new IllegalArgumentException("delayMillis < 0");
+		if (delay == null || delay.isNegative())
+			throw new IllegalArgumentException("delay null or negative");
 
-		return new PreferReturnMinimalRetryImpl(delegate, RETRY_FOREVER, delayMillis);
+		return new PreferReturnMinimalRetryImpl(delegate, RETRY_FOREVER, delay);
 	}
 }

@@ -39,9 +39,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.authorization.AuthorizationRuleProvider;
 import dev.dsf.fhir.dao.ResourceDao;
-import dev.dsf.fhir.dao.command.CheckReferencesCommand;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.ResourceCreatedEvent;
+import dev.dsf.fhir.event.ResourceUpdatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -58,6 +60,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.BasicResourceService;
 import jakarta.ws.rs.WebApplicationException;
@@ -92,13 +95,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final ReferenceCleaner referenceCleaner;
 	protected final AuthorizationRuleProvider authorizationRuleProvider;
 	protected final HistoryService historyService;
+	protected final ValidationRules validationRules;
 
 	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
 			D dao, ResourceValidator validator, EventHandler eventHandler, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider,
-			HistoryService historyService)
+			HistoryService historyService, ValidationRules validationRules)
 	{
 		this.path = path;
 		this.resourceType = resourceType;
@@ -117,6 +121,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.referenceCleaner = referenceCleaner;
 		this.authorizationRuleProvider = authorizationRuleProvider;
 		this.historyService = historyService;
+		this.validationRules = validationRules;
 	}
 
 	@Override
@@ -138,6 +143,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
 		Objects.requireNonNull(historyService, "historyService");
+		Objects.requireNonNull(validationRules, "validationRules");
 	}
 
 	@Override
@@ -151,13 +157,17 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		{
 			try (Connection connection = dao.newReadWriteTransaction())
 			{
+				LargeObjectManager largeObjectManager = dao.createLargeObjectManager(connection);
+
 				try
 				{
 					resolveLogicalReferences(resource, connection);
 
-					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
+					R created = dao.createWithTransactionAndId(largeObjectManager, connection, resource,
+							UUID.randomUUID());
 
-					checkReferences(resource, connection, ref -> checkReferenceAfterCreate(resource, ref));
+					checkReferences(resource, connection,
+							ref -> validationRules.checkReferenceAfterCreate(resource, ref));
 
 					connection.commit();
 
@@ -165,27 +175,26 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				}
 				catch (SQLException e)
 				{
-					connection.rollback();
+					tryRollback(connection, largeObjectManager, e);
 
 					if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 					{
 						Response response = responseGenerator.duplicateResourceExists(resourceTypeName);
 						throw new WebApplicationException(response);
 					}
-					else
-						throw e;
+
+					throw e;
 				}
 				catch (WebApplicationException e)
 				{
-					connection.rollback();
+					tryRollback(connection, largeObjectManager, e);
+
 					throw e;
 				}
 			}
 		});
 
 		referenceCleaner.cleanLiteralReferences(createdResource);
-
-		eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 
 		if (afterCreate != null)
 			afterCreate.accept(createdResource);
@@ -198,20 +207,25 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				.location(location).build();
 	}
 
-	/**
-	 * <i>Override this method to exclude references from being checked after a create, add similar rule to
-	 * {@link CheckReferencesCommand}</i>
-	 *
-	 * @param created
-	 *            not <code>null</code>
-	 * @param ref
-	 *            not <code>null</code>
-	 * @return true if a reference should be checked
-	 * @see CheckReferencesCommand
-	 */
-	protected boolean checkReferenceAfterCreate(R created, ResourceReference ref)
+	private void tryRollback(Connection connection, LargeObjectManager largeObjectManager, Exception e)
 	{
-		return true;
+		try
+		{
+			connection.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
+
+		try
+		{
+			largeObjectManager.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
 	}
 
 	private URI toLocation(R resource)
@@ -238,8 +252,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private Optional<OperationOutcome> resolveLogicalReference(Resource resource, ResourceReference reference,
 			Connection connection)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(getCurrentIdentity(), reference,
-				connection);
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
@@ -278,11 +291,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				referenceResolver.checkLiteralExternalReference(resource, reference);
 
-			case LOGICAL ->
-				referenceResolver.checkLogicalReference(getCurrentIdentity(), resource, reference, connection);
+			case LOGICAL -> referenceResolver.checkLogicalReference(resource, reference, connection);
 
-			case CANONICAL ->
-				referenceResolver.checkCanonicalReference(getCurrentIdentity(), resource, reference, connection);
+			case CANONICAL -> referenceResolver.checkCanonicalReference(resource, reference, connection);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
@@ -295,8 +306,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
 	{
-		Optional<String> ifNoneExistHeader = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST,
-				Constants.HEADER_IF_NONE_EXIST_LC);
+		Optional<String> ifNoneExistHeader = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST);
 
 		if (ifNoneExistHeader.isEmpty())
 			return; // header not found, nothing to check against
@@ -356,14 +366,17 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		}
 	}
 
-	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
+	protected final Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
 	{
 		return Arrays.stream(headerNames).map(name -> headers.getHeaderString(name)).filter(h -> h != null).findFirst();
 	}
 
 	/**
 	 * Override to modify the given resource before db insert, throw {@link WebApplicationException} to interrupt the
-	 * normal flow
+	 * normal flow.
+	 * <p>
+	 * Default implementation calls the {@link #eventHandler} with a {@link ResourceCreatedEvent} for the created
+	 * resource.
 	 *
 	 * @param resource
 	 *            not <code>null</code>
@@ -375,7 +388,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	 */
 	protected Consumer<R> preCreate(R resource) throws WebApplicationException
 	{
-		return null;
+		return createdResource -> eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 	}
 
 	@Override
@@ -383,6 +396,25 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	{
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
+
+		return createReadResponse(uri, headers, read);
+	}
+
+	@Override
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
+	{
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
+
+		return createReadResponse(uri, headers, read);
+	}
+
+	protected final Response createReadResponse(UriInfo uri, HttpHeaders headers, Optional<R> read)
+	{
+		Optional<Long> ifMatch = getHeaderString(headers, Constants.HEADER_IF_MATCH, Constants.HEADER_IF_MATCH_LC)
+				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
+		Optional<Date> ifUnmodifiedSince = getHeaderString(headers, HttpHeaders.IF_UNMODIFIED_SINCE,
+				HttpHeaders.IF_UNMODIFIED_SINCE.toLowerCase()).flatMap(this::toDate);
 
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
 				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
@@ -394,6 +426,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			referenceCleaner.cleanLiteralReferences(resource);
 
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
+
+			// not conform to rfc9110 as we are evaluating against a weak ETag here
+			if (ifMatch.map(v -> !v.equals(resource.getIdElement().getVersionIdPartAsLong())).orElse(false))
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.status(Status.PRECONDITION_FAILED).entity(resource).build();
+			}
+			else if (ifUnmodifiedSince.map(d -> !equalsWithSecondsPrecision(d, resource.getMeta().getLastUpdated()))
+					.orElse(false))
+			{
+				// entity removed by AbstractResourceServiceSecure
+				return Response.status(Status.PRECONDITION_FAILED).entity(resource).build();
+			}
+
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
 			{
 				// entity removed by AbstractResourceServiceSecure
@@ -408,9 +454,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				return Response.notModified(resourceTag).entity(resource)
 						.lastModified(resource.getMeta().getLastUpdated()).build();
 			}
+			else if (isSpecialCase(uri, headers, resource))
+				return createSpecialCaseResponse(uri, headers, resource);
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
-
 		}).orElseGet(() ->
 		{
 			// TODO return OperationOutcome
@@ -429,6 +476,26 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		return aLdt.isAfter(bLdt);
 	}
 
+	protected final boolean equalsWithSecondsPrecision(Date a, Date b)
+	{
+		LocalDateTime aLdt = a.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+		LocalDateTime bLdt = b.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+
+		return aLdt.equals(bLdt);
+	}
+
+	protected boolean isSpecialCase(UriInfo uri, HttpHeaders headers, R resource)
+	{
+		return false;
+	}
+
+	protected Response createSpecialCaseResponse(UriInfo uri, HttpHeaders headers, R resource)
+	{
+		return null;
+	}
+
 	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
 	{
 		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
@@ -440,7 +507,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	 * @return {@link Optional} of {@link Date} in system default timezone or {@link Optional#empty()} if the given
 	 *         value could not be parsed or was null/blank
 	 */
-	private Optional<Date> toDate(String rfc1123DateValue)
+	protected final Optional<Date> toDate(String rfc1123DateValue)
 	{
 		if (rfc1123DateValue == null || rfc1123DateValue.isBlank())
 			return Optional.empty();
@@ -458,51 +525,6 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 			return Optional.empty();
 		}
-	}
-
-	@Override
-	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
-	{
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
-
-		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
-				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
-		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
-				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
-
-		return read.map(resource ->
-		{
-			referenceCleaner.cleanLiteralReferences(resource);
-
-			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
-			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
-			{
-				// entity removed by AbstractResourceServiceSecure
-				return Response.notModified(resourceTag).entity(resource)
-						.lastModified(resource.getMeta().getLastUpdated()).build();
-			}
-			// If-Modified-Since is ignored, when used in combination with If-None-Match
-			else if (ifNoneMatch.isEmpty() && ifModifiedSince
-					.map(d -> !afterWithSecondsPrecision(resource.getMeta().getLastUpdated(), d)).orElse(false))
-			{
-				// entity removed by AbstractResourceServiceSecure
-				return Response.notModified(resourceTag).entity(resource)
-						.lastModified(resource.getMeta().getLastUpdated()).build();
-			}
-			else
-				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();
-		}).orElseGet(() ->
-		{
-			// TODO return OperationOutcome
-			Response response = Response.status(Status.NOT_FOUND).build();
-			return response;
-		});
-	}
-
-	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
-	{
-		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
 
 	@Override
@@ -543,13 +565,17 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				{
 					try (Connection connection = dao.newReadWriteTransaction())
 					{
+						LargeObjectManager largeObjectManager = dao.createLargeObjectManager(connection);
+
 						try
 						{
 							resolveLogicalReferences(resource, connection);
 
-							R updated = dao.updateWithTransaction(connection, resource, ifMatch.orElse(null));
+							R updated = dao.updateWithTransaction(largeObjectManager, connection, resource,
+									ifMatch.orElse(null));
 
-							checkReferences(resource, connection, ref -> checkReferenceAfterUpdate(updated, ref));
+							checkReferences(resource, connection,
+									ref -> validationRules.checkReferenceAfterUpdate(updated, ref));
 
 							connection.commit();
 
@@ -557,26 +583,26 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						}
 						catch (SQLException e)
 						{
+							tryRollback(connection, largeObjectManager, e);
+
 							if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
 							{
 								Response response = responseGenerator.duplicateResourceExists(resourceTypeName);
 								throw new WebApplicationException(response);
 							}
 
-							connection.rollback();
 							throw e;
 						}
 						catch (WebApplicationException e)
 						{
-							connection.rollback();
+							tryRollback(connection, largeObjectManager, e);
+
 							throw e;
 						}
 					}
 				});
 
 		referenceCleaner.cleanLiteralReferences(updatedResource);
-
-		eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 
 		if (afterUpdate != null)
 			afterUpdate.accept(updatedResource);
@@ -590,24 +616,11 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	}
 
 	/**
-	 * <i>Override this method to exclude references from being checked after an update, add similar rule to
-	 * {@link CheckReferencesCommand}</i>
-	 *
-	 * @param updated
-	 *            not <code>null</code>
-	 * @param ref
-	 *            not <code>null</code>
-	 * @return true if a reference should be checked
-	 * @see CheckReferencesCommand
-	 */
-	protected boolean checkReferenceAfterUpdate(R updated, ResourceReference ref)
-	{
-		return true;
-	}
-
-	/**
 	 * Override to modify the given resource before db update, throw {@link WebApplicationException} to interrupt the
-	 * normal flow. Path id vs. resource.id.idPart is checked before this method is called
+	 * normal flow. Path id vs. resource.id.idPart is checked before this method is called.
+	 * <p>
+	 * Default implementation calls the {@link #eventHandler} with a {@link ResourceUpdatedEvent} for the updated
+	 * resource.
 	 *
 	 * @param resource
 	 *            not <code>null</code>
@@ -619,7 +632,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	 */
 	protected Consumer<R> preUpdate(R resource)
 	{
-		return null;
+		return updatedResource -> eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 	}
 
 	@Override

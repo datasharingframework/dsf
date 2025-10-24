@@ -54,6 +54,8 @@ import org.junit.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.SpringServletContainerInitializer;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -160,6 +162,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				Paths.get("src/main/resources/bpe/api/v1/allowed-bpe-classes.list"));
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTest");
 		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTestExecutor");
+		allowedBpeClassesV1.add("dev.dsf.bpe.test.PluginTestExecutor$RunnableWithException");
 		writeListFile(ALLOWED_BPE_CLASSES_LIST_FILE_V1, allowedBpeClassesV1);
 
 		// allowed bpe classes override to enable access to classes from dsf-bpe-test-plugin module for v2 test plugins
@@ -167,6 +170,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				Paths.get("src/main/resources/bpe/api/v2/allowed-bpe-classes.list"));
 		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTest");
 		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTestExecutor");
+		allowedBpeClassesV2.add("dev.dsf.bpe.test.PluginTestExecutor$RunnableWithException");
 		writeListFile(ALLOWED_BPE_CLASSES_LIST_FILE_V2, allowedBpeClassesV2);
 
 		bpeDefaultDataSource = createBpeDefaultDataSource(bpeLiquibaseRule.getHost(),
@@ -197,7 +201,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			KeyStore keyStore, char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		return new FhirWebserviceClientJersey(fhirBaseUrl, trustStore, keyStore, keyStorePassword, null, null, null,
-				null, 0, 0, false, "DSF Integration Test Client", fhirContext, referenceCleaner);
+				null, Duration.ZERO, Duration.ZERO, false, "DSF Integration Test Client", fhirContext,
+				referenceCleaner);
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()
@@ -208,8 +213,9 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static WebsocketClient getWebsocketClient()
 	{
 		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
-				Map.of("criteria:exact", List.of("Task"), "status", List.of("active"), "type", List.of("websocket"),
-						"payload", List.of("application/fhir+json")));
+				Map.of("criteria:exact",
+						List.of("Task?_profile:below=http://dsf.dev/fhir/StructureDefinition/task-test"), "status",
+						List.of("active"), "type", List.of("websocket"), "payload", List.of("application/fhir+json")));
 
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
@@ -313,8 +319,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.db.url", "jdbc:postgresql://" + fhirLiquibaseRule.getHost() + ":"
 				+ fhirLiquibaseRule.getMappedPort(5432) + "/" + fhirLiquibaseRule.getDatabaseName());
+		initParameters.put("dev.dsf.fhir.db.user.group", FHIR_DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.username", FHIR_DATABASE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.password", FHIR_DATABASE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", FHIR_DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", FHIR_DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", FHIR_DATABASE_DELETE_USER_PASSWORD);
 
@@ -333,18 +341,28 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				String.valueOf(X509Certificates.PASSWORD));
 
 		initParameters.put("dev.dsf.fhir.server.roleConfig", String.format("""
-				- practitioner-test-user:
+				- dic-user:
 				    thumbprint: %s
 				    dsf-role:
-				      - CREATE
-				      - READ
-				      - UPDATE
-				      - DELETE
-				      - SEARCH
-				      - HISTORY
+				      - CREATE: [Task]
+				      - READ: &tqqr [Task, Questionnaire, QuestionnaireResponse]
+				      - UPDATE: [QuestionnaireResponse]
+				      - SEARCH: *tqqr
+				      - HISTORY: *tqqr
 				    practitioner-role:
 				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
-				""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex()));
+				- uac-user:
+				    thumbprint: %s
+				    dsf-role:
+				      - CREATE: [Task]
+				      - READ: &tqqr [Task, Questionnaire, QuestionnaireResponse]
+				      - UPDATE: [QuestionnaireResponse]
+				      - SEARCH: *tqqr
+				      - HISTORY: *tqqr
+				    practitioner-role:
+				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|UAC_USER
+				""", certificates.getDicUserClientCertificate().certificateSha512ThumbprintHex(),
+				certificates.getUacUserClientCertificate().certificateSha512ThumbprintHex()));
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());
@@ -392,7 +410,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.bpe.db.url", "jdbc:postgresql://" + bpeLiquibaseRule.getHost() + ":"
 				+ bpeLiquibaseRule.getMappedPort(5432) + "/" + bpeLiquibaseRule.getDatabaseName());
-
+		initParameters.put("dev.dsf.bpe.db.user.group", BPE_DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.bpe.db.user.username", BPE_DATABASE_USER);
 		initParameters.put("dev.dsf.bpe.db.user.password", BPE_DATABASE_USER_PASSWORD);
 		initParameters.put("dev.dsf.bpe.db.user.camunda.username", BPE_DATABASE_CAMUNDA_USER);
@@ -430,23 +448,49 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				dsf-fhir-server:
 				  base-url: '#[fhirBaseUrl]'
 				  test-connection-on-startup: yes
-				  enable-debug-logging: yes
+				  enable-debug-logging: no
 				  cert-auth:
 				    private-key-file: '#[client.key]'
 				    certificate-file: '#[client.crt]'
 				    password: '#[password]'
 				via-proxy:
 				  base-url: 'http://via.proxy/fhir'
+				dic-user:
+				  base-url: '#[fhirBaseUrl]'
+				  test-connection-on-startup: yes
+				  enable-debug-logging: no
+				  cert-auth:
+				    private-key-file: '#[dic.client.key]'
+				    certificate-file: '#[dic.client.crt]'
+				    password: '#[password]'
+				uac-user:
+				  base-url: '#[fhirBaseUrl]'
+				  test-connection-on-startup: yes
+				  enable-debug-logging: no
+				  cert-auth:
+				    private-key-file: '#[uac.client.key]'
+				    certificate-file: '#[uac.client.crt]'
+				    password: '#[password]'
 				""".replaceAll(Pattern.quote("#[fhirBaseUrl]"), Matcher.quoteReplacement(fhirBaseUrl))
 				.replaceAll(Pattern.quote("#[client.key]"),
 						Matcher.quoteReplacement(certificates.getClientCertificatePrivateKeyFile().toString()))
 				.replaceAll(Pattern.quote("#[client.crt]"),
 						Matcher.quoteReplacement(certificates.getClientCertificateFile().toString()))
+				.replaceAll(Pattern.quote("#[dic.client.key]"),
+						Matcher.quoteReplacement(certificates.getDicUserClientCertificatePrivateKeyFile().toString()))
+				.replaceAll(Pattern.quote("#[dic.client.crt]"),
+						Matcher.quoteReplacement(certificates.getDicUserClientCertificateFile().toString()))
+				.replaceAll(Pattern.quote("#[uac.client.key]"),
+						Matcher.quoteReplacement(certificates.getUacUserClientCertificatePrivateKeyFile().toString()))
+				.replaceAll(Pattern.quote("#[uac.client.crt]"),
+						Matcher.quoteReplacement(certificates.getUacUserClientCertificateFile().toString()))
 				.replaceAll(Pattern.quote("#[password]"),
 						Matcher.quoteReplacement(String.valueOf(X509Certificates.PASSWORD)));
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config", fhirConnectionsYaml);
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
+
+		initParameters.put("dev.dsf.bpe.test.env.mandatory", "test-value");
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());
@@ -571,5 +615,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		{
 			logger.error("Error while deleting directory {}, error: {}", directory.toString(), e.toString());
 		}
+	}
+
+	protected static AnnotationConfigWebApplicationContext getBpeSpringWebApplicationContext()
+	{
+		return (AnnotationConfigWebApplicationContext) WebApplicationContextUtils
+				.getWebApplicationContext(bpeServer.getServletContext());
 	}
 }

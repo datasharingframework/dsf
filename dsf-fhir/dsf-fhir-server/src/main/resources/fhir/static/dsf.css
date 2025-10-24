@@ -452,6 +452,18 @@ pre.lang-html {
 	border-left-color: var(--color-row-border-grey);
 }
 
+.bundle>#list>table tr[resource-type="DocumentReference"] td[status="current"] {
+	border-left-color: var(--color-row-border-green);
+}
+
+.bundle>#list>table tr[resource-type="DocumentReference"] td[status="superseded"] {
+	border-left-color: var(--color-row-border-grey);
+}
+
+.bundle>#list>table tr[resource-type="DocumentReference"] td[status="entered-in-error"] {
+	border-left-color: var(--color-row-border-red);
+}
+
 .bundle>#list>table tr[resource-type="Endpoint"] td[status="active"] {
 	border-left-color: var(--color-row-border-green);
 }
@@ -496,7 +508,10 @@ pre.lang-html {
 	border-left-color: var(--color-row-border-orange);
 }
 
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"],
+.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"] {
+	border-left-color: var(--color-row-border-grey);
+}
+
 .bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="amended"] {
 	border-left-color: var(--color-row-border-green);
 }
@@ -639,6 +654,21 @@ pre.lang-html {
 	color: var(--color-info-grey);
 }
 
+#resource[resource-type="DocumentReference"][status="current"] #base-data {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#resource[resource-type="DocumentReference"][status="superseded"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#resource[resource-type="DocumentReference"][status="entered-in-error"] #base-data {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
 #resource[resource-type="Endpoint"][status="active"] #base-data {
 	background-color: var(--color-info-background-green);
 	color: var(--color-info-green);
@@ -713,7 +743,11 @@ pre.lang-html {
 	color: var(--color-info-orange);
 }
 
-#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data,
+#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data {
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
 #resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data {
 	background-color: var(--color-info-background-green);
 	color: var(--color-info-green);
@@ -800,6 +834,18 @@ pre.lang-html {
 	fill: var(--color-info-grey);
 }
 
+#resource[resource-type="DocumentReference"][status="current"] #base-data path {
+	fill: var(--color-info-green);
+}
+
+#resource[resource-type="DocumentReference"][status="superseded"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
+#resource[resource-type="DocumentReference"][status="entered-in-error"] #base-data path {
+	fill: var(--color-info-red);
+}
+
 #resource[resource-type="Endpoint"][status="active"] #base-data path {
 	fill: var(--color-info-green);
 }
@@ -860,7 +906,10 @@ pre.lang-html {
 	fill: var(--color-info-orange);
 }
 
-#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data path,
+#resource[resource-type="QuestionnaireResponse"][status="completed"] #base-data path {
+	fill: var(--color-info-grey);
+}
+
 #resource[resource-type="QuestionnaireResponse"][status="amended"] #base-data path {
 	fill: var(--color-info-green);
 }
@@ -1145,6 +1194,85 @@ div.row-text {
 	margin-bottom: 0;
 	padding: 1em 1em 0.75em 0.25em;
 	font-size: 1em;
+}
+
+a#download {
+	background-color: #326F95;
+	color: #fff;
+	padding: 12px 60px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	float: left;
+    border: 1px outset buttonborder;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.content-header {
+	display: flex;
+	justify-content: space-between;
+}
+
+.content-pre {
+	margin-bottom: 0;
+}
+
+.collapsible {
+	transition: max-height 0.3s ease;
+}
+
+.collapsed {
+	overflow: hidden;
+	max-height: 15em;
+	position: relative;
+}
+
+.collapsed::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	height: 10em;
+	width: 100%;
+	background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--color-row-background));
+	pointer-events: none;
+}
+
+.collapsable.overflow::after {
+	opacity: 1;
+}
+
+.collapsable.overflow .collapse-button {
+	opacity: 1;
+	cursor: pointer;
+}
+
+.collapsable.no-overflow::after {
+	opacity: 0;
+}
+
+.collapsable.no-overflow .collapse-button {
+	opacity: 0;
+	cursor: default;
+}
+
+.expanded {
+	max-height: none;
+}
+
+.collapse-button {
+	fill: none;
+	stroke: #aaa;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	margin-top: -0.5em;
+	margin-right: -0.25em;
+}
+
+.collapse-button-rotated {
+	transform: rotate(180deg);
 }
 
 @media print {

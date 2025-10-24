@@ -156,8 +156,8 @@ public class SmtpMailService implements BpeMailService, InitializingBean
 			MailManagerFactory factory = (name, data) -> new SmtpManager(name, session, message, data)
 			{
 			};
-			FactoryData data = new FactoryData(null, null, null, null, null, null, event -> subject, null, null, 0,
-					null, null, false, messageBufferSize, null, null);
+			FactoryData data = new FactoryData(null, null, null, null, null, null, _ -> subject, null, null, 0, null,
+					null, false, messageBufferSize, null, null);
 			manager = AbstractManager.getManager("SmtpMailService.Log4jAppender.Manager", factory, data);
 		}
 

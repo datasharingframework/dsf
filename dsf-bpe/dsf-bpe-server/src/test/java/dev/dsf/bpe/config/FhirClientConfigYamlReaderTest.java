@@ -411,7 +411,7 @@ public class FhirClientConfigYamlReaderTest
 	}
 
 	private void testConfig(FhirClientConfigs configs, String expectedFhirServerId, String expectedBaseUrl,
-			boolean expectedTestConnectionOnStartup, boolean expectedEnableDebugLogging,
+			boolean expectedStartupConnectionTestEnabled, boolean expectedDebugLoggingEnabled,
 			Duration expectedConnectionTimeout, Duration expectedReadTimeout,
 			BiConsumerWithException<String, BasicAuthentication> basicAuthenticationTester,
 			BiConsumerWithException<String, BearerAuthentication> bearerAuthenticationTester,
@@ -426,8 +426,8 @@ public class FhirClientConfigYamlReaderTest
 		assertEquals(expectedFhirServerId, expectedFhirServerId, c.fhirServerId());
 
 		assertEquals(expectedFhirServerId, expectedBaseUrl, c.baseUrl());
-		assertEquals(expectedFhirServerId, expectedTestConnectionOnStartup, c.testConnectionOnStartup());
-		assertEquals(expectedFhirServerId, expectedEnableDebugLogging, c.enableDebugLogging());
+		assertEquals(expectedFhirServerId, expectedStartupConnectionTestEnabled, c.startupConnectionTestEnabled());
+		assertEquals(expectedFhirServerId, expectedDebugLoggingEnabled, c.debugLoggingEnabled());
 		assertEquals(expectedFhirServerId, expectedConnectionTimeout, c.connectTimeout());
 		assertEquals(expectedFhirServerId, expectedReadTimeout, c.readTimeout());
 		testTrustStore(expectedFhirServerId, c.trustStore());
@@ -478,16 +478,17 @@ public class FhirClientConfigYamlReaderTest
 	}
 
 	private BiConsumerWithException<String, OidcAuthentication> testOidcAuth(String expectedBaseUrl,
-			String expectedDiscoveryPath, boolean expectedTestConnectionOnStartup, boolean expectedEnableDebugLogging,
-			Duration expectedConnectionTimeout, Duration expectedReadTimeout, String expectedClientId,
-			char[] expectedClientSecret)
+			String expectedDiscoveryPath, boolean expectedStartupConnectionTestEnabled,
+			boolean expectedDebugLoggingEnabled, Duration expectedConnectionTimeout, Duration expectedReadTimeout,
+			String expectedClientId, char[] expectedClientSecret)
 	{
 		return (expectedFhirServerId, auth) ->
 		{
 			assertEquals(expectedFhirServerId, expectedBaseUrl, auth.baseUrl());
 			assertEquals(expectedFhirServerId, expectedDiscoveryPath, auth.discoveryPath());
-			assertEquals(expectedFhirServerId, expectedTestConnectionOnStartup, auth.testConnectionOnStartup());
-			assertEquals(expectedFhirServerId, expectedEnableDebugLogging, auth.enableDebugLogging());
+			assertEquals(expectedFhirServerId, expectedStartupConnectionTestEnabled,
+					auth.startupConnectionTestEnabled());
+			assertEquals(expectedFhirServerId, expectedDebugLoggingEnabled, auth.debugLoggingEnabled());
 			assertEquals(expectedFhirServerId, expectedConnectionTimeout, auth.connectTimeout());
 			assertEquals(expectedFhirServerId, expectedReadTimeout, auth.readTimeout());
 			testTrustStore(expectedFhirServerId, auth.trustStore());

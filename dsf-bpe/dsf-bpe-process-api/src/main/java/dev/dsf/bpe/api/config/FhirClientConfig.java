@@ -17,9 +17,9 @@ public interface FhirClientConfig
 	 */
 	String baseUrl();
 
-	boolean testConnectionOnStartup();
+	boolean startupConnectionTestEnabled();
 
-	boolean enableDebugLogging();
+	boolean debugLoggingEnabled();
 
 	/**
 	 * @return never <code>null</code>
@@ -122,9 +122,9 @@ public interface FhirClientConfig
 		 */
 		String discoveryPath();
 
-		boolean testConnectionOnStartup();
+		boolean startupConnectionTestEnabled();
 
-		boolean enableDebugLogging();
+		boolean debugLoggingEnabled();
 
 		/**
 		 * @return never <code>null</code>

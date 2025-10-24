@@ -33,10 +33,8 @@ public class EventResourceHandlerImpl<R extends Resource> implements EventResour
 
 		if (resourceClass.isInstance(resource))
 		{
-			@SuppressWarnings("unchecked")
-			R cast = (R) resource;
-			handler.onResource(cast);
-			writeLastEventTime(cast.getMeta().getLastUpdated());
+			handler.onResource(resourceClass.cast(resource));
+			writeLastEventTime(resource.getMeta().getLastUpdated());
 		}
 		else
 		{

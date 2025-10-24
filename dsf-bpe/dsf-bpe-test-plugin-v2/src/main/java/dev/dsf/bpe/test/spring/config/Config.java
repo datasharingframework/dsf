@@ -1,64 +1,112 @@
 package dev.dsf.bpe.test.spring.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Objects;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import dev.dsf.bpe.test.autowire.DemoService;
+import dev.dsf.bpe.test.deployment.ProcessPluginDeploymentListenerTestImpl;
+import dev.dsf.bpe.test.fhir.FhirResourceModifierImpl;
+import dev.dsf.bpe.test.listener.StartFieldInjectionTestListener;
+import dev.dsf.bpe.test.listener.StartSendTaskTestListener;
+import dev.dsf.bpe.test.message.ContinueSendTestSend;
+import dev.dsf.bpe.test.message.SendTaskTest;
 import dev.dsf.bpe.test.service.ApiTest;
+import dev.dsf.bpe.test.service.AutowireTest;
+import dev.dsf.bpe.test.service.CompressionServiceTest;
+import dev.dsf.bpe.test.service.ContinueSendTest;
+import dev.dsf.bpe.test.service.ContinueSendTestEvaluate;
+import dev.dsf.bpe.test.service.CryptoServiceTest;
+import dev.dsf.bpe.test.service.DataLoggerTest;
+import dev.dsf.bpe.test.service.DsfClientTest;
 import dev.dsf.bpe.test.service.EndpointProviderTest;
+import dev.dsf.bpe.test.service.EnvironmentVariableTest;
+import dev.dsf.bpe.test.service.ErrorBoundaryEventTestThrow;
+import dev.dsf.bpe.test.service.ErrorBoundaryEventTestVerify;
+import dev.dsf.bpe.test.service.ExceptionTest;
+import dev.dsf.bpe.test.service.FhirBinaryVariableTestGet;
+import dev.dsf.bpe.test.service.FhirBinaryVariableTestSet;
+import dev.dsf.bpe.test.service.FhirClientConfigProviderTest;
 import dev.dsf.bpe.test.service.FhirClientProviderTest;
+import dev.dsf.bpe.test.service.FieldInjectionTest;
+import dev.dsf.bpe.test.service.JsonVariableTestGet;
+import dev.dsf.bpe.test.service.JsonVariableTestSet;
+import dev.dsf.bpe.test.service.MimeTypeServiceTest;
 import dev.dsf.bpe.test.service.OrganizationProviderTest;
 import dev.dsf.bpe.test.service.ProxyTest;
+import dev.dsf.bpe.test.service.QuestionnaireTestAnswer;
+import dev.dsf.bpe.test.service.QuestionnaireTestAnswerCheck;
+import dev.dsf.bpe.test.service.QuestionnaireTestSetIdentifies;
+import dev.dsf.bpe.test.service.TargetProviderTest;
 import dev.dsf.bpe.test.service.TestActivitySelector;
-import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.ProcessPluginDeploymentListener;
+import dev.dsf.bpe.v2.documentation.ProcessDocumentation;
+import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
+import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
 
 @Configuration
-public class Config
+public class Config implements InitializingBean
 {
-	@Autowired
-	private ProcessPluginApi api;
+	@ProcessDocumentation(description = "Mandatory property", example = "foo", required = true)
+	@Value("${dev.dsf.bpe.test.env.mandatory:#{null}}")
+	private String envVariableMandatory;
+
+	@ProcessDocumentation(description = "Property with default value", recommendation = "Override default value if necessary")
+	@Value("${dev.dsf.bpe.test.env.optional:default-value}")
+	private String envVariableOptional;
+
+	@Value("${dev.dsf.proxy.url}")
+	private String envVariableProxyUrl;
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(envVariableMandatory, "envVariableMandatory");
+	}
 
 	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public TestActivitySelector testActivitySelector()
+	public static ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
 	{
-		return new TestActivitySelector(api);
+		return new ActivityPrototypeBeanCreator(TestActivitySelector.class, ProxyTest.class, ApiTest.class,
+				OrganizationProviderTest.class, EndpointProviderTest.class, FhirClientProviderTest.class,
+				FhirClientConfigProviderTest.class, StartSendTaskTestListener.class, SendTaskTest.class,
+				StartFieldInjectionTestListener.class, FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class,
+				ErrorBoundaryEventTestVerify.class, ExceptionTest.class, CompressionServiceTest.class,
+				ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
+				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
+				MimeTypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class,
+				DsfClientTest.class, TargetProviderTest.class, DataLoggerTest.class, AutowireTest.class,
+				QuestionnaireTestAnswer.class, QuestionnaireTestAnswerCheck.class,
+				QuestionnaireTestSetIdentifies.class);
+	}
+
+	@Bean
+	public FhirResourceModifier fhirResourceModifier()
+	{
+		return new FhirResourceModifierImpl();
 	}
 
 	@Bean
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public ProxyTest proxyTest()
+	public EnvironmentVariableTest environmentVariableTest()
 	{
-		return new ProxyTest(api);
+		return new EnvironmentVariableTest(envVariableMandatory, envVariableOptional, envVariableProxyUrl);
 	}
 
 	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public ApiTest apiTest()
+	public ProcessPluginDeploymentListener processPluginDeploymentListener()
 	{
-		return new ApiTest(api);
+		return new ProcessPluginDeploymentListenerTestImpl();
 	}
 
 	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public OrganizationProviderTest organizationProviderTest()
+	public DemoService demoService()
 	{
-		return new OrganizationProviderTest(api);
-	}
-
-	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public EndpointProviderTest endpointProviderTest()
-	{
-		return new EndpointProviderTest(api);
-	}
-
-	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public FhirClientProviderTest fhirClientProviderTest()
-	{
-		return new FhirClientProviderTest(api);
+		return new DemoService();
 	}
 }

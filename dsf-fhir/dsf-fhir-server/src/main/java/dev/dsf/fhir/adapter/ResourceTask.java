@@ -221,17 +221,17 @@ public class ResourceTask extends AbstractResource<Task>
 	{
 		return switch (typedValue)
 		{
-			case BooleanType b -> "boolean";
-			case DecimalType d -> "number";
-			case IntegerType i -> "number";
-			case DateType d -> "date";
-			case DateTimeType dt -> "datetime-local";
-			case TimeType t -> "time";
-			case InstantType i -> "datetime-local";
-			case StringType s -> "text";
-			case UriType u -> "url";
-			case Coding c -> "coding";
-			case Identifier i -> "identifier";
+			case BooleanType _ -> "boolean";
+			case DecimalType _ -> "number";
+			case IntegerType _ -> "number";
+			case DateType _ -> "date";
+			case DateTimeType _ -> "datetime-local";
+			case TimeType _ -> "time";
+			case InstantType _ -> "datetime-local";
+			case StringType _ -> "text";
+			case UriType _ -> "url";
+			case Coding _ -> "coding";
+			case Identifier _ -> "identifier";
 			case Reference r when r.hasReferenceElement() -> "url";
 			case Reference r when r.hasIdentifier() -> "identifier";
 

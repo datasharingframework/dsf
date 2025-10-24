@@ -103,7 +103,7 @@ public class FhirConnectionTestClientJersey implements FhirConnectionTestClient
 
 		builder = builder.register(new FhirAdapter(fhirContext));
 
-		if (fhirClientConfig.enableDebugLogging())
+		if (fhirClientConfig.debugLoggingEnabled())
 		{
 			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
 					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));

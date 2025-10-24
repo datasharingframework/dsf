@@ -10,7 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import dev.dsf.common.auth.conf.IdentityProvider;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.RoleConfigReader;
+import dev.dsf.fhir.authentication.EndpointProvider;
+import dev.dsf.fhir.authentication.EndpointProviderImpl;
 import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.authentication.IdentityProviderImpl;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authentication.OrganizationProviderImpl;
@@ -32,23 +35,29 @@ public class AuthenticationConfig
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderImpl(daoConfig.organizationDao(), helperConfig.exceptionHandler(),
+		return new OrganizationProviderImpl(helperConfig.exceptionHandler(), daoConfig.organizationDao(),
 				propertiesConfig.getOrganizationIdentifierValue());
+	}
+
+	@Bean
+	public EndpointProvider endpointProvider()
+	{
+		return new EndpointProviderImpl(helperConfig.exceptionHandler(), daoConfig.endpointDao(),
+				propertiesConfig.getDsfServerBaseUrl());
 	}
 
 	@Bean
 	public IdentityProvider identityProvider()
 	{
-		return new IdentityProviderImpl(roleConfig(), organizationProvider(),
+		return new IdentityProviderImpl(roleConfig(), organizationProvider(), endpointProvider(),
 				propertiesConfig.getOrganizationIdentifierValue());
 	}
 
 	@Bean
-	public RoleConfig roleConfig()
+	public RoleConfig<FhirServerRole> roleConfig()
 	{
-		RoleConfig config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
-				role -> FhirServerRole.isValid(role) ? FhirServerRole.valueOf(role) : null,
-				this::practionerRoleFactory);
+		RoleConfig<FhirServerRole> config = new RoleConfigReader().read(propertiesConfig.getRoleConfig(),
+				FhirServerRoleImpl::from, this::practionerRoleFactory);
 
 		logger.info("Role config: {}", config.toString());
 		return config;

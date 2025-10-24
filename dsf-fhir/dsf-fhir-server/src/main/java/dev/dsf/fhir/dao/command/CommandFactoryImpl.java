@@ -34,12 +34,15 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.ValidationRules;
 
 public class CommandFactoryImpl implements InitializingBean, CommandFactory
 {
 	private final String serverBase;
 	private final int defaultPageCount;
 	private final DataSource dataSource;
+	private final DataSource permanentDeleteDataSource;
+	private final String dbUsersGroup;
 	private final DaoProvider daoProvider;
 	private final ReferenceExtractor referenceExtractor;
 	private final ReferenceResolver referenceResolver;
@@ -52,18 +55,23 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final AuthorizationHelper authorizationHelper;
 	private final ValidationHelper validationHelper;
 	private final SnapshotGenerator snapshotGenerator;
+	private final ValidationRules validationRules;
 	private final Function<Connection, TransactionResources> transactionResourcesFactory;
 
-	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource, DaoProvider daoProvider,
+	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource,
+			DataSource permanentDeleteDataSource, String dbUsersGroup, DaoProvider daoProvider,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, EventHandler eventHandler, EventGenerator eventGenerator,
 			AuthorizationHelper authorizationHelper, ValidationHelper validationHelper,
-			SnapshotGenerator snapshotGenerator, Function<Connection, TransactionResources> transactionResourcesFactory)
+			SnapshotGenerator snapshotGenerator, ValidationRules validationRules,
+			Function<Connection, TransactionResources> transactionResourcesFactory)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.dataSource = dataSource;
+		this.permanentDeleteDataSource = permanentDeleteDataSource;
+		this.dbUsersGroup = dbUsersGroup;
 		this.daoProvider = daoProvider;
 		this.referenceExtractor = referenceExtractor;
 		this.referenceResolver = referenceResolver;
@@ -76,6 +84,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		this.authorizationHelper = authorizationHelper;
 		this.validationHelper = validationHelper;
 		this.snapshotGenerator = snapshotGenerator;
+		this.validationRules = validationRules;
 		this.transactionResourcesFactory = transactionResourcesFactory;
 	}
 
@@ -84,6 +93,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	{
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(dataSource, "dataSource");
+		Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
+
 		Objects.requireNonNull(daoProvider, "daoProvider");
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
@@ -96,6 +107,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		Objects.requireNonNull(authorizationHelper, "authorizationHelper");
 		Objects.requireNonNull(validationHelper, "validationHelper");
 		Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
+		Objects.requireNonNull(validationRules, "validationRules");
 		Objects.requireNonNull(transactionResourcesFactory, "transactionResourcesFactory");
 	}
 
@@ -209,11 +221,12 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 			return switch (bundle.getType())
 			{
-				case BATCH -> new BatchCommandList(dataSource, exceptionHandler, commands, validationHelper,
-						snapshotGenerator, eventHandler, responseGenerator);
+				case BATCH ->
+					new BatchCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler,
+							commands, validationHelper, snapshotGenerator, eventHandler, responseGenerator);
 
-				case TRANSACTION -> new TransactionCommandList(dataSource, exceptionHandler, commands,
-						transactionResourcesFactory, responseGenerator);
+				case TRANSACTION -> new TransactionCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup,
+						exceptionHandler, commands, transactionResourcesFactory, responseGenerator);
 
 				default -> throw new BadBundleException("Unsupported bundle type " + bundle.getType());
 			};
@@ -266,13 +279,12 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 				.getDao(resource.getClass());
 
-		if (referenceExtractor.getReferences(resource).anyMatch(r -> true)) // at least one entry
+		if (referenceExtractor.getReferences(resource).anyMatch(_ -> true)) // at least one entry
 		{
-			return dao
-					.map(d -> Stream.of(cmd,
-							new CheckReferencesCommand<R, ResourceDao<R>>(index, identity, returnType, bundle, entry,
-									serverBase, authorizationHelper, resource, verb, d, exceptionHandler,
-									parameterConverter, responseGenerator, referenceExtractor, referenceResolver)))
+			return dao.map(d -> Stream.of(cmd,
+					new CheckReferencesCommand<R, ResourceDao<R>>(index, identity, returnType, bundle, entry,
+							serverBase, authorizationHelper, resource, verb, d, exceptionHandler, parameterConverter,
+							responseGenerator, referenceExtractor, referenceResolver, validationRules)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}

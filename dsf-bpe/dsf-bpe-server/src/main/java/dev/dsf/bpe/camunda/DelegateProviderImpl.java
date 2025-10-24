@@ -4,56 +4,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.engine.delegate.TaskListener;
+import org.camunda.bpm.engine.delegate.VariableScope;
+import org.camunda.bpm.engine.impl.bpmn.parser.FieldDeclaration;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
-import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 
-public class DelegateProviderImpl implements DelegateProvider, ProcessPluginConsumer, InitializingBean
+public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 {
-	private static final class ProcessByIdAndVersion
-	{
-		final ProcessIdAndVersion processIdAndVersion;
-		final ProcessPlugin plugin;
-
-		ProcessByIdAndVersion(ProcessIdAndVersion idAndVersion, ProcessPlugin plugin)
-		{
-			this.processIdAndVersion = idAndVersion;
-			this.plugin = plugin;
-		}
-
-		public ProcessIdAndVersion getProcessIdAndVersion()
-		{
-			return processIdAndVersion;
-		}
-
-		public ProcessPlugin getPlugin()
-		{
-			return plugin;
-		}
-	}
-
 	private final ClassLoader defaultClassLoader;
 	private final ApplicationContext defaultApplicationContext;
 
 	private final Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion = new HashMap<>();
-	private final Map<String, Class<? extends TaskListener>> defaultUserTaskListenerByApiVersion;
 
-	public DelegateProviderImpl(ClassLoader mainClassLoader, ApplicationContext mainApplicationContext,
-			List<ProcessPluginFactory> pluginFactories)
+	public DelegateProviderImpl(ClassLoader mainClassLoader, ApplicationContext mainApplicationContext)
 	{
 		this.defaultClassLoader = mainClassLoader;
 		this.defaultApplicationContext = mainApplicationContext;
-
-		Objects.requireNonNull(pluginFactories, "pluginFactories");
-
-		defaultUserTaskListenerByApiVersion = pluginFactories.stream().collect(Collectors
-				.toMap(f -> String.valueOf(f.getApiVersion()), ProcessPluginFactory::getDefaultUserTaskListener));
 	}
 
 	@Override
@@ -64,52 +37,87 @@ public class DelegateProviderImpl implements DelegateProvider, ProcessPluginCons
 	}
 
 	@Override
-	public void setProcessPlugins(List<ProcessPlugin> plugins)
+	public void setProcessPlugins(List<ProcessPlugin> plugins,
+			Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion)
 	{
-		processPluginsByProcessIdAndVersion.putAll(plugins.stream()
-				.flatMap(plugin -> plugin.getProcessKeysAndVersions().stream()
-						.map(idAndVersion -> new ProcessByIdAndVersion(idAndVersion, plugin)))
-				.collect(Collectors.toMap(ProcessByIdAndVersion::getProcessIdAndVersion,
-						ProcessByIdAndVersion::getPlugin)));
+		this.processPluginsByProcessIdAndVersion.putAll(processPluginsByProcessIdAndVersion);
+	}
+
+	private ProcessPlugin getPlugin(ProcessIdAndVersion processIdAndVersion)
+	{
+		return processPluginsByProcessIdAndVersion.get(processIdAndVersion);
 	}
 
 	@Override
-	public ClassLoader getClassLoader(ProcessIdAndVersion processIdAndVersion)
+	public Class<?> getDefaultUserTaskListenerClass(ProcessIdAndVersion processKeyAndVersion)
 	{
-		if (processIdAndVersion == null)
-			return defaultClassLoader;
-
-		var plugin = processPluginsByProcessIdAndVersion.get(processIdAndVersion);
-
-		if (plugin == null)
-			return defaultClassLoader;
-		else
-			return plugin.getProcessPluginClassLoader();
+		return getPlugin(processKeyAndVersion).getDefaultUserTaskListenerClass();
 	}
 
 	@Override
-	public ApplicationContext getApplicationContext(ProcessIdAndVersion processIdAndVersion)
+	public boolean isDefaultUserTaskListenerOrSuperClassOf(ProcessIdAndVersion processKeyAndVersion, String className)
 	{
-		if (processIdAndVersion == null)
-			return defaultApplicationContext;
-
-		var plugin = processPluginsByProcessIdAndVersion.get(processIdAndVersion);
-
-		if (plugin == null)
-			return defaultApplicationContext;
-		else
-			return plugin.getApplicationContext();
+		return getPlugin(processKeyAndVersion).isDefaultUserTaskListenerOrSuperClassOf(className);
 	}
 
 	@Override
-	public Class<? extends TaskListener> getDefaultUserTaskListenerClass(String processPluginApiVersion)
+	public JavaDelegate getMessageSendTask(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
 	{
-		Class<? extends TaskListener> listenerClass = defaultUserTaskListenerByApiVersion.get(processPluginApiVersion);
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageSendTask(className, fieldDeclarations, variableScope);
 
-		if (listenerClass != null)
-			return listenerClass;
-		else
-			throw new IllegalArgumentException(
-					"Process plugin api version " + processPluginApiVersion + " not supported");
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public JavaDelegate getServiceTask(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getServiceTask(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public JavaDelegate getMessageEndEvent(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageEndEvent(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public JavaDelegate getMessageIntermediateThrowEvent(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageIntermediateThrowEvent(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public ExecutionListener getExecutionListener(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		ExecutionListener executionListener = plugin.getExecutionListener(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution,
+				executionListener::notify);
+	}
+
+	@Override
+	public TaskListener getTaskListener(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		TaskListener taskListener = plugin.getTaskListener(className, fieldDeclarations, variableScope);
+
+		return delegateTask -> plugin.getPluginMdc().executeWithProcessMdc(delegateTask, taskListener::notify);
 	}
 }

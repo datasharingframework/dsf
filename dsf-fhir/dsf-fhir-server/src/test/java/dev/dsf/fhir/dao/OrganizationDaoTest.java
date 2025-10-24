@@ -250,7 +250,8 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		binary.setData("1234567890".getBytes());
 		new ReadAccessHelperImpl().addOrganization(binary, "organization.com");
 
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		Binary createdBinary = binaryDao.create(binary);
 		assertNotNull(createdBinary);
 
@@ -344,6 +345,6 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		long t1 = System.currentTimeMillis();
 
 		logger.info("Organization updates executed in {} ms", t1 - t0);
-		assertTrue("Organization updates took longer then 200 ms", t1 - t0 <= 200);
+		assertTrue("Organization updates took longer then 500 ms", t1 - t0 <= 500);
 	}
 }

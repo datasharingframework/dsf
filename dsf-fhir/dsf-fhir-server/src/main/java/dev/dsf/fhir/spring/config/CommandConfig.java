@@ -54,11 +54,12 @@ public class CommandConfig
 	public CommandFactory commandFactory()
 	{
 		return new CommandFactoryImpl(propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
-				daoConfig.dataSource(), daoConfig.daoProvider(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
-				eventConfig.eventManager(), eventConfig.eventGenerator(), authorizationConfig.authorizationHelper(),
-				validationConfig.validationHelper(), snapshotConfig.snapshotGenerator(),
+				daoConfig.dataSource(), daoConfig.permanentDeleteDataSource(), propertiesConfig.getDbUsersGroup(),
+				daoConfig.daoProvider(), referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), helperConfig.responseGenerator(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter(), eventConfig.eventManager(), eventConfig.eventGenerator(),
+				authorizationConfig.authorizationHelper(), validationConfig.validationHelper(),
+				snapshotConfig.snapshotGenerator(), validationConfig.validationRules(),
 				this::transactionResourceFactory);
 	}
 
@@ -70,7 +71,7 @@ public class CommandConfig
 
 		ValidationHelper validationHelper = new ValidationHelperImpl(
 				new ResourceValidatorImpl(fhirConfig.fhirContext(), validationSupport),
-				helperConfig.responseGenerator());
+				helperConfig.responseGenerator(), validationConfig.validationRules());
 
 		SnapshotGenerator snapshotGenerator = new SnapshotGeneratorImpl(fhirConfig.fhirContext(), validationSupport);
 

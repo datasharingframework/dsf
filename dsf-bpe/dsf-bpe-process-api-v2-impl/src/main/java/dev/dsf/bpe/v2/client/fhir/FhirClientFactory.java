@@ -73,8 +73,6 @@ public class FhirClientFactory extends RestfulClientFactory
 	public FhirClientFactory(OidcClientProvider oidcClientProvider, ClientConfig config, FhirContext fhirContext,
 			String userAgent)
 	{
-		super();
-
 		Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
 		Objects.requireNonNull(config, "config");
 		Objects.requireNonNull(fhirContext, "fhirContext");
@@ -111,16 +109,14 @@ public class FhirClientFactory extends RestfulClientFactory
 	private HttpClient getHttpClient()
 	{
 		HttpClient httpClient = httpClientReference.get();
-		if (httpClient == null)
-		{
-			HttpClient c = createHttpClient();
-			if (httpClientReference.compareAndSet(httpClient, c))
-				return c;
-			else
-				return httpClientReference.get();
-		}
-		else
+		if (httpClient != null)
 			return httpClient;
+
+		HttpClient c = createHttpClient();
+		if (httpClientReference.compareAndSet(null, c))
+			return c;
+		else
+			return httpClientReference.get();
 	}
 
 	private HttpClient createHttpClient()
@@ -180,7 +176,7 @@ public class FhirClientFactory extends RestfulClientFactory
 			client.registerInterceptor(new OidcInterceptor(oidcClient));
 		}
 
-		if (config.getEnableDebugLogging())
+		if (config.isDebugLoggingEnabled())
 			client.registerInterceptor(new LoggingInterceptor(config));
 
 		return client;
@@ -226,6 +222,7 @@ public class FhirClientFactory extends RestfulClientFactory
 	}
 
 	@Override
+	@Deprecated
 	public ServerValidationModeEnum getServerValidationModeEnum()
 	{
 		return getServerValidationMode();
@@ -298,6 +295,7 @@ public class FhirClientFactory extends RestfulClientFactory
 	}
 
 	@Override
+	@Deprecated
 	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode)
 	{
 		throw notSupported();

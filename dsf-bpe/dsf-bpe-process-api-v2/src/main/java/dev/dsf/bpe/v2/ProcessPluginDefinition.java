@@ -14,15 +14,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import dev.dsf.bpe.v2.activity.AbstractServiceDelegate;
-import dev.dsf.bpe.v2.activity.AbstractTaskMessageSend;
-import dev.dsf.bpe.v2.activity.DefaultUserTaskListener;
+import dev.dsf.bpe.v2.activity.ExecutionListener;
+import dev.dsf.bpe.v2.activity.MessageEndEvent;
+import dev.dsf.bpe.v2.activity.MessageIntermediateThrowEvent;
+import dev.dsf.bpe.v2.activity.MessageSendTask;
+import dev.dsf.bpe.v2.activity.ServiceTask;
+import dev.dsf.bpe.v2.activity.UserTaskListener;
 import dev.dsf.bpe.v2.documentation.ProcessDocumentation;
+import dev.dsf.bpe.v2.fhir.FhirResourceModifier;
+import dev.dsf.bpe.v2.spring.ActivityPrototypeBeanCreator;
 
 /**
  * A provider configuration file named "dev.dsf.ProcessPluginDefinition" containing the canonical name of the class
  * implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details on the
  * content of the provider configuration file, see {@link ServiceLoader}.
+ *
+ * @see AbstractProcessPluginDefinition
  */
 public interface ProcessPluginDefinition
 {
@@ -131,9 +138,15 @@ public interface ProcessPluginDefinition
 	 * plugin also add the {@link ProcessDocumentation} annotation.
 	 *
 	 * @return {@link Configuration} annotated classes, defining {@link Bean} annotated factory methods
-	 * @see AbstractServiceDelegate
-	 * @see AbstractTaskMessageSend
-	 * @see DefaultUserTaskListener
+	 * @see ExecutionListener
+	 * @see MessageEndEvent
+	 * @see MessageIntermediateThrowEvent
+	 * @see MessageSendTask
+	 * @see ServiceTask
+	 * @see UserTaskListener
+	 * @see ActivityPrototypeBeanCreator
+	 * @see ProcessPluginDeploymentListener
+	 * @see FhirResourceModifier
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
 	List<Class<?>> getSpringConfigurations();

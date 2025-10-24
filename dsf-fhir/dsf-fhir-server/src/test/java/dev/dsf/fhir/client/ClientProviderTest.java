@@ -10,18 +10,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.common.build.BuildInfoReader;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.service.ReferenceCleaner;
-import dev.dsf.tools.build.BuildInfoReader;
 
 public class ClientProviderTest
 {
@@ -41,8 +42,8 @@ public class ClientProviderTest
 		webserviceTrustStore.load(null);
 
 		char[] webserviceKeyStorePassword = "password".toCharArray();
-		int remoteReadTimeout = 0;
-		int remoteConnectTimeout = 0;
+		Duration remoteReadTimeout = Duration.ZERO;
+		Duration remoteConnectTimeout = Duration.ZERO;
 		char[] remoteProxyPassword = null;
 		String remoteProxyUsername = null;
 		String remoteProxySchemeHostPort = null;

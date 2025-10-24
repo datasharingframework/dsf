@@ -9,6 +9,8 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<name>DSF BPE Server</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -16,15 +18,7 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-websocket-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-build-info-reader</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-docker-secrets-reader</artifactId>
+			<artifactId>dsf-common-build-info-reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -36,11 +30,19 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-db</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-common-docker-secrets-reader</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-documentation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-common-db</artifactId>
+			<artifactId>dsf-common-oidc</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -49,6 +51,10 @@
 		<dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-common-ui</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-websocket-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
@@ -205,12 +211,6 @@
 			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- For async logging with log4j2 -->
-		<dependency>
-			<groupId>com.lmax</groupId>
-			<artifactId>disruptor</artifactId>
-			<scope>test</scope>
-		</dependency>
 		
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -259,6 +259,26 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<compilerArgs>
+						<arg>-proc:none</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
@@ -268,6 +288,7 @@
 						<exclude>**/*DaoTest</exclude>
 						<exclude>**/*IntegrationTest</exclude>
 					</excludes>
+					<argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

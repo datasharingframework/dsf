@@ -53,6 +53,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+      DEV_DSF_LOG_DATA_FILE_ENABLED: 'true'
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
@@ -66,7 +67,7 @@ services:
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://fhir/fhir
       DEV_DSF_BPE_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             dsf-role:
               - ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/ca_chain.crt

@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
 import dev.dsf.fhir.search.filter.QuestionnaireResponseIdentityFilter;
+import dev.dsf.fhir.search.parameters.QuestionnaireResponseAuthor;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseAuthored;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseIdentifier;
 import dev.dsf.fhir.search.parameters.QuestionnaireResponseQuestionnaire;
@@ -24,7 +25,10 @@ public class QuestionnaireResponseDaoJdbc extends AbstractResourceDaoJdbc<Questi
 		super(dataSource, permanentDeleteDataSource, fhirContext, QuestionnaireResponse.class,
 				"questionnaire_responses", "questionnaire_response", "questionnaire_response_id",
 				QuestionnaireResponseIdentityFilter::new,
-				List.of(factory(QuestionnaireResponseAuthored.PARAMETER_NAME, QuestionnaireResponseAuthored::new),
+				List.of(factory(QuestionnaireResponseAuthor.PARAMETER_NAME, QuestionnaireResponseAuthor::new,
+						QuestionnaireResponseAuthor.getNameModifiers(), QuestionnaireResponseAuthor::new,
+						QuestionnaireResponseAuthor.getIncludeParameterValues()),
+						factory(QuestionnaireResponseAuthored.PARAMETER_NAME, QuestionnaireResponseAuthored::new),
 						factory(QuestionnaireResponseIdentifier.PARAMETER_NAME, QuestionnaireResponseIdentifier::new,
 								QuestionnaireResponseIdentifier.getNameModifiers()),
 						factory(QuestionnaireResponseQuestionnaire.PARAMETER_NAME,

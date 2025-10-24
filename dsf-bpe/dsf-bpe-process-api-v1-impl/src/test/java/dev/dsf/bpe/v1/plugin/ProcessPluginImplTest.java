@@ -34,7 +34,6 @@ import org.springframework.core.env.StandardEnvironment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
 import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.v1.ProcessPluginApi;
@@ -172,8 +171,8 @@ public class ProcessPluginImplTest
 	@Test
 	public void testInitializeAndValidateResourcesAllNull() throws Exception
 	{
-		var definition = createPluginDefinition(null, null, null, null, null);
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		var definition = createPluginDefinition(null, null, null);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
 		try
@@ -206,8 +205,8 @@ public class ProcessPluginImplTest
 	@Test
 	public void testInitializeAndValidateResourcesEmptySpringConfigBpmnAndFhirResources() throws Exception
 	{
-		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(), List.of(), Map.of());
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		var definition = createPluginDefinition(List.of(), List.of(), Map.of());
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
 		try
@@ -240,10 +239,9 @@ public class ProcessPluginImplTest
 	@Test
 	public void testInitializeAndValidateResourcesNotExistingModelAndFhirResources() throws Exception
 	{
-		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(TestConfig.class),
-				List.of("test-plugin/does_not_exist.bpmn"),
+		var definition = createPluginDefinition(List.of(TestConfig.class), List.of("test-plugin/does_not_exist.bpmn"),
 				Map.of("testorg_test", List.of("test-plugin/does_not_exist.xml")));
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
 		try
@@ -276,19 +274,12 @@ public class ProcessPluginImplTest
 	@Test
 	public void testInitializeAndValidateResourcesNotExistingFhirResources() throws Exception
 	{
-		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(TestConfig.class),
-				List.of("test-plugin/test.bpmn"), Map.of("testorg_test", List.of("test-plugin/does_not_exist.xml")));
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		var definition = createPluginDefinition(List.of(TestConfig.class), List.of("test-plugin/test.bpmn"),
+				Map.of("testorg_test", List.of("test-plugin/does_not_exist.xml")));
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertFalse(plugin.initializeAndValidateResources(null));
-		try
-		{
-			plugin.getApplicationContext();
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException e)
-		{
-		}
+		assertNotNull(plugin.getApplicationContext());
 
 		try
 		{
@@ -311,10 +302,9 @@ public class ProcessPluginImplTest
 	@Test
 	public void testInitializeAndValidateResources() throws Exception
 	{
-		var definition = createPluginDefinition("1.0.0.0", LocalDate.now(), List.of(TestConfig.class),
-				List.of("test-plugin/test.bpmn"),
+		var definition = createPluginDefinition(List.of(TestConfig.class), List.of("test-plugin/test.bpmn"),
 				Map.of("testorg_test", List.of("test-plugin/ActivityDefinition_test.xml")));
-		AbstractProcessPlugin plugin = createPlugin(definition, false);
+		ProcessPluginImpl plugin = createPlugin(definition, false);
 
 		assertTrue(plugin.initializeAndValidateResources("test.org"));
 		assertNotNull(plugin.getApplicationContext());
@@ -324,7 +314,7 @@ public class ProcessPluginImplTest
 		List<BpmnFileAndModel> models = plugin.getProcessModels();
 		assertEquals(1, models.size());
 		BpmnFileAndModel bpmnFileAndModel = models.get(0);
-		BpmnModelInstance model = bpmnFileAndModel.getModel();
+		BpmnModelInstance model = bpmnFileAndModel.model();
 		assertNotNull(model);
 
 		Collection<Process> processes = model.getModelElementsByType(Process.class);
@@ -344,16 +334,17 @@ public class ProcessPluginImplTest
 		assertEquals(ProcessPluginFactoryImpl.API_VERSION, Integer.parseInt(property.getCamundaValue()));
 	}
 
-	private ProcessPluginDefinition createPluginDefinition(String version, LocalDate releaseDate,
-			List<Class<?>> springConfigurations, List<String> processModels, Map<String, List<String>> fhirResources)
+	private ProcessPluginDefinition createPluginDefinition(List<Class<?>> springConfigurations,
+			List<String> processModels, Map<String, List<String>> fhirResources)
 	{
-		return new TestProcessPluginDefinition(fhirResources, processModels, version, springConfigurations,
-				releaseDate);
+		return new TestProcessPluginDefinition(fhirResources, processModels, "1.0.0.0", springConfigurations,
+				LocalDate.now());
 	}
 
-	private AbstractProcessPlugin createPlugin(ProcessPluginDefinition processPluginDefinition, boolean draft)
+	private ProcessPluginImpl createPlugin(ProcessPluginDefinition processPluginDefinition, boolean draft)
 	{
 		return new ProcessPluginImpl(processPluginDefinition, ProcessPluginFactoryImpl.API_VERSION, draft,
-				Paths.get("test.jar"), getClass().getClassLoader(), environment, apiApplicationContext);
+				Paths.get("test.jar"), getClass().getClassLoader(), environment, apiApplicationContext,
+				"https://localhost/fhir");
 	}
 }

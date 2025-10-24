@@ -1,17 +1,25 @@
-<Configuration status="INFO" monitorInterval="30" verbose="false">
+<Configuration status="WARN" monitorInterval="30" verbose="false">
 
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
 			<PatternLayout pattern="%p\t%t | %m%n"/>
 		</Console>
+		<Console name="DATA" target="SYSTEM_ERR">
+			<PatternLayout pattern="%p\t%t | %m%n"/>
+		</Console>
 	</Appenders>
 
 	<Loggers>
-		<AsyncLogger name="dev.dsf" level="INFO"/>
-		<AsyncLogger name="org.eclipse.jetty" level="INFO"/>
+		<Logger name="dsf-data-logger" level="DEBUG" additivity="false">
+			<AppenderRef ref="DATA"/>
+		</Logger>
 
-		<AsyncRoot level="WARN">
+		<Logger name="dev.dsf" level="INFO"/>
+		<Logger name="org.eclipse.jetty" level="INFO"/>
+		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR"/>
+
+		<Root level="WARN">
 			<AppenderRef ref="CONSOLE"/>
-		</AsyncRoot>
+		</Root>
 	</Loggers>
 </Configuration>

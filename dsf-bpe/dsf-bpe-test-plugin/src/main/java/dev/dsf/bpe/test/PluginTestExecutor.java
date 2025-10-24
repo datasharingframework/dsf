@@ -2,8 +2,12 @@ package dev.dsf.bpe.test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,21 +26,42 @@ public final class PluginTestExecutor
 		}
 	}
 
-	public static final void execute(Object testClass, Consumer<String> addTestSucceededToStartTask,
-			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask)
+	@FunctionalInterface
+	public interface RunnableWithException
 	{
-		Arrays.stream(testClass.getClass().getDeclaredMethods())
+		void run() throws Exception;
+	}
+
+	public static final void execute(Object testClass, Consumer<String> addTestSucceededToStartTask,
+			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask, Function<Exception, Exception> onError,
+			Object testMethodArg0, Object testMethodArg1, Object... testMethodArgs) throws Exception
+	{
+		List<Exception> errorsToThrow = Arrays.stream(testClass.getClass().getDeclaredMethods())
 				.filter(m -> m.getAnnotationsByType(PluginTest.class).length == 1)
-				.filter(m -> m.getParameterCount() == 0).forEach(m ->
+				.filter(m -> m.getParameterCount() <= testMethodArgs.length + 2).map(m ->
 				{
 					try
 					{
 						logger.info("Executing test method {}.{} ...", testClass.getClass().getName(), m.getName());
-						m.invoke(testClass);
+
+						Class<?>[] parameterTypes = m.getParameterTypes();
+						Object[] values = Arrays.stream(m.getParameterTypes()).flatMap(parameterType -> Stream
+								.concat(Stream.of(testMethodArg0, testMethodArg1), Arrays.stream(testMethodArgs))
+								.filter(value -> parameterType.isAssignableFrom(value.getClass())).findFirst().stream())
+								.toArray();
+
+						if (values.length != parameterTypes.length)
+							throw new IllegalArgumentException(
+									"One or more parameters of test method '" + m.getName() + "' not supported");
+
+						m.invoke(testClass, values);
+
 						logger.info("Executing test method {}.{} [succeeded]", testClass.getClass().getName(),
 								m.getName());
 
 						addTestSucceededToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
+
+						return null;
 					}
 					catch (InvocationTargetException e)
 					{
@@ -53,6 +78,8 @@ public final class PluginTestExecutor
 									m.getName(), e.getClass().getName(), e.getMessage(), e);
 
 						addTestFailedToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
+
+						return onError.apply(e);
 					}
 					catch (Exception e)
 					{
@@ -60,10 +87,27 @@ public final class PluginTestExecutor
 								m.getName(), e.getClass().getName(), e.getMessage(), e);
 
 						addTestFailedToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
-					}
-				});
 
-		updateStartTask.run();
+						return onError.apply(e);
+					}
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+
+		try
+		{
+			updateStartTask.run();
+		}
+		finally
+		{
+			if (!errorsToThrow.isEmpty())
+			{
+				Exception error = errorsToThrow.get(0);
+
+				for (int i = 1; i < errorsToThrow.size(); i++)
+					error.addSuppressed(errorsToThrow.get(i));
+
+				throw error;
+			}
+		}
 	}
 
 	public static void expectNotNull(Object actual)
@@ -174,7 +218,7 @@ public final class PluginTestExecutor
 				"Tested " + type + " is not same as expected [expected: " + expected + ", actual: " + actual + "]");
 	}
 
-	public static void expectException(Class<?> expectedException, Runnable run)
+	public static void expectException(Class<?> expectedException, RunnableWithException run)
 	{
 		Objects.requireNonNull(expectedException, "expectedException");
 		Objects.requireNonNull(run, "run");

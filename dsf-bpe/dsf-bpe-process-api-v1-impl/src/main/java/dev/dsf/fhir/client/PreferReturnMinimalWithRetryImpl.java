@@ -1,6 +1,7 @@
 package dev.dsf.fhir.client;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,7 @@ class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new PreferReturnMinimalRetryImpl(delegate, nTimes, delayMillis);
+		return new PreferReturnMinimalRetryImpl(delegate, nTimes, Duration.ofMillis(delayMillis));
 	}
 
 	@Override
@@ -79,6 +80,6 @@ class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new PreferReturnMinimalRetryImpl(delegate, RETRY_FOREVER, delayMillis);
+		return new PreferReturnMinimalRetryImpl(delegate, RETRY_FOREVER, Duration.ofMillis(delayMillis));
 	}
 }

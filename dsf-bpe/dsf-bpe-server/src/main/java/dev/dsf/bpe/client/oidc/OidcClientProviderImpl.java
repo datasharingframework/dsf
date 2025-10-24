@@ -81,21 +81,21 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 		Objects.requireNonNull(clientSecret, "clientSecret");
 
 		String proxyHost = null, proxyUsername = null;
-		char[] proxyPassowrd = null;
+		char[] proxyPassword = null;
 		if (proxyConfig.isEnabled(baseUrl))
 		{
 			proxyHost = proxyConfig.getUrl();
 			proxyUsername = proxyConfig.getUsername();
-			proxyPassowrd = proxyConfig.getPassword();
+			proxyPassword = proxyConfig.getPassword();
 		}
 
-		OidcClientJersey client = new OidcClientJersey(baseUrl,
+		OidcClientWithDecodedJwt client = new OidcClientJersey(baseUrl,
 				discoveryPath != null ? discoveryPath : defaultDiscoveryPath, clientId, clientSecret,
 				trustStore != null ? trustStore : defaultTrustedStore, null, null, proxyHost, proxyUsername,
-				proxyPassowrd, userAgent, readTimeout != null ? readTimeout : defaultReadTimeout,
+				proxyPassword, userAgent, readTimeout != null ? readTimeout : defaultReadTimeout,
 				connectTimeout != null ? connectTimeout : defaultConnectTimeout,
 				enableDebugLogging != null ? enableDebugLogging : defaultEnableDebugLogging,
-				notBeforeIssuedAtExpiresAtLeeway);
+				notBeforeIssuedAtExpiresAtLeeway).asOidcClientWithDecodedJwt();
 
 		return cacheEnabled
 				? new OidcClientWithCache(cacheTimeoutConfigurationResource, cacheTimeoutJwksResource,
@@ -109,6 +109,6 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 		Objects.requireNonNull(config, "config");
 
 		return getOidcClient(config.baseUrl(), config.clientId(), config.clientSecret(), config.discoveryPath(),
-				config.connectTimeout(), config.readTimeout(), config.trustStore(), config.enableDebugLogging());
+				config.connectTimeout(), config.readTimeout(), config.trustStore(), config.debugLoggingEnabled());
 	}
 }

@@ -71,15 +71,13 @@ services:
       DEV_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${BUNDLE_USER_THUMBPRINT}
       DEV_DSF_FHIR_SERVER_ROLECONFIG: |
         - webbrowser_test_user:
-            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
             dsf-role:
-              - CREATE
+              - CREATE: [Task]
               - READ
-              - UPDATE
-              - DELETE
+              - UPDATE: [QuestionnaireResponse]
               - SEARCH
               - HISTORY
-              - PERMANENT_DELETE
             practitioner-role:
               - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/ca_chain.crt

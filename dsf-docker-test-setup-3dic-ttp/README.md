@@ -6,6 +6,7 @@
 
     ```sh
     mvn clean install
+    mvn dsf:generate-dev-setup-cert-files
     ```
 
 * Add one entry for each organization to your hosts file

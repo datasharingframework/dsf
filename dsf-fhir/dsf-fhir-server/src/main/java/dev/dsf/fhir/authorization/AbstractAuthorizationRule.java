@@ -2,20 +2,17 @@ package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -24,7 +21,10 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.CodeSystemDao;
@@ -55,6 +55,15 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	protected final ReadAccessHelper readAccessHelper;
 	protected final ParameterConverter parameterConverter;
 
+	protected final FhirServerRole createRole;
+	protected final FhirServerRole readRole;
+	protected final FhirServerRole updateRole;
+	protected final FhirServerRole deleteRole;
+	protected final FhirServerRole historyRole;
+	protected final FhirServerRole searchRole;
+	protected final FhirServerRole permanentDeleteRole;
+	protected final FhirServerRole websocketRole;
+
 	public AbstractAuthorizationRule(Class<R> resourceType, DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
@@ -66,6 +75,15 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		this.organizationProvider = organizationProvider;
 		this.readAccessHelper = readAccessHelper;
 		this.parameterConverter = parameterConverter;
+
+		createRole = FhirServerRoleImpl.create(resourceType);
+		readRole = FhirServerRoleImpl.read(resourceType);
+		updateRole = FhirServerRoleImpl.update(resourceType);
+		deleteRole = FhirServerRoleImpl.delete(resourceType);
+		historyRole = FhirServerRoleImpl.history(resourceType);
+		searchRole = FhirServerRoleImpl.search(resourceType);
+		permanentDeleteRole = FhirServerRoleImpl.permanentDelete(resourceType);
+		websocketRole = FhirServerRoleImpl.websocket(resourceType);
 	}
 
 	@Override
@@ -119,26 +137,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
 			return reasonReadAllowed(connection, identity, existingResource);
-		}
-		catch (SQLException e)
-		{
-			logger.debug("Error while accessing database", e);
-			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
-
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected List<OrganizationAffiliation> getAffiliations(Connection connection, String organizationIdentifierValue)
-	{
-		if (organizationIdentifierValue == null)
-			return List.of();
-
-		try
-		{
-			return daoProvider.getOrganizationAffiliationDao()
-					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-							connection, organizationIdentifierValue);
 		}
 		catch (SQLException e)
 		{
@@ -253,21 +251,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				.map(ConceptDefinitionComponent::getCode).anyMatch(c -> c.equals(cCode));
 	}
 
-	protected final boolean isCurrentIdentityPartOfReferencedOrganizations(Connection connection, Identity identity,
-			String referenceLocation, Collection<? extends Reference> references)
-	{
-		return isCurrentIdentityPartOfReferencedOrganizations(connection, identity, referenceLocation,
-				references.stream());
-	}
-
-	protected final boolean isCurrentIdentityPartOfReferencedOrganizations(Connection connection, Identity identity,
-			String referenceLocation, Stream<? extends Reference> references)
-	{
-		return references.anyMatch(
-				r -> isCurrentIdentityPartOfReferencedOrganization(connection, identity, referenceLocation, r));
-	}
-
-	protected final boolean isCurrentIdentityPartOfReferencedOrganization(Connection connection, Identity identity,
+	protected boolean isCurrentIdentityPartOfReferencedOrganization(Connection connection, Identity identity,
 			String referenceLocation, Reference reference)
 	{
 		if (reference == null)
@@ -289,7 +273,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				return false;
 			}
 
-			Optional<Resource> resource = referenceResolver.resolveReference(identity, resReference, connection);
+			Optional<Resource> resource = referenceResolver.resolveReference(resReference, connection);
 			if (resource.isPresent() && resource.get() instanceof Organization)
 			{
 				// ignoring updates (version changes) to the organization id
@@ -310,15 +294,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				return false;
 			}
 		}
-	}
-
-	protected final boolean isLocalOrganization(Organization organization)
-	{
-		if (organization == null || !organization.hasIdElement())
-			return false;
-
-		return organizationProvider.getLocalOrganization()
-				.map(localOrg -> localOrg.getIdElement().equals(organization.getIdElement())).orElse(false);
 	}
 
 	@SafeVarargs
@@ -352,16 +327,16 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	@Override
 	public final Optional<String> reasonSearchAllowed(Identity identity)
 	{
-		if (identity.hasDsfRole(FhirServerRole.SEARCH))
+		if (identity.hasDsfRole(searchRole))
 		{
 			logger.info("Search of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
 
-			return Optional.of("Identity has role " + FhirServerRole.SEARCH);
+			return Optional.of("Identity has role " + searchRole);
 		}
 		else
 		{
 			logger.warn("Search of {} unauthorized for identity '{}', no role {}", getResourceTypeName(),
-					identity.getName(), FhirServerRole.SEARCH);
+					identity.getName(), searchRole);
 
 			return Optional.empty();
 		}
@@ -370,16 +345,16 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	@Override
 	public final Optional<String> reasonHistoryAllowed(Identity identity)
 	{
-		if (identity.hasDsfRole(FhirServerRole.HISTORY))
+		if (identity.hasDsfRole(historyRole))
 		{
 			logger.info("History of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
 
-			return Optional.of("Identity has role " + FhirServerRole.HISTORY);
+			return Optional.of("Identity has role " + historyRole);
 		}
 		else
 		{
 			logger.warn("History of {} unauthorized for identity '{}', no role {}", getResourceTypeName(),
-					identity.getName(), FhirServerRole.HISTORY);
+					identity.getName(), historyRole);
 
 			return Optional.empty();
 		}
@@ -391,22 +366,65 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.PERMANENT_DELETE)
+		if (identity.isLocalIdentity() && identity.hasDsfRole(permanentDeleteRole)
 				&& reasonDeleteAllowed(connection, identity, oldResource).isPresent())
 		{
 			logger.info("Permanent delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),
 					resourceId, resourceVersion, identity.getName());
 
-			return Optional.of("Identity is local identity and has role " + FhirServerRole.PERMANENT_DELETE);
+			return Optional.of("Identity is local identity and has role " + permanentDeleteRole);
 		}
 		else
 		{
 			logger.warn(
 					"Permanent delete of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), resourceId, resourceVersion, identity.getName(),
-					FhirServerRole.PERMANENT_DELETE);
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), permanentDeleteRole);
 
 			return Optional.empty();
 		}
+	}
+
+	@Override
+	public Optional<String> reasonWebsocketAllowed(Identity identity, R existingResource)
+	{
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonWebsocketAllowed(connection, identity, existingResource);
+		}
+		catch (SQLException e)
+		{
+			logger.debug("Error while accessing database", e);
+			logger.warn("Error while accessing database: {} - {}", e.getClass().getName(), e.getMessage());
+
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Optional<String> reasonWebsocketAllowed(Connection connection, Identity identity, R existingResource)
+	{
+		final String resourceId = existingResource.getIdElement().getIdPart();
+		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
+
+		if (identity.isLocalIdentity() && identity.hasDsfRole(websocketRole))
+		{
+			logger.info("Websocket access to {}/{}/_history/{} authorized for local identity '{}'",
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName());
+
+			return Optional.of("Identity has role " + websocketRole);
+		}
+		else
+		{
+			logger.warn(
+					"Websocket access to {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), websocketRole);
+
+			return Optional.empty();
+		}
+	}
+
+	protected final boolean isLocalOrganizationOrDsfAdmin(Identity identity)
+	{
+		return identity.isLocalIdentity() && (identity instanceof OrganizationIdentity
+				|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN")));
 	}
 }

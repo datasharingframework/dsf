@@ -13,4 +13,8 @@ public interface BinaryService extends BasicResourceService<Binary>
 	Response create(InputStream in, UriInfo uri, HttpHeaders headers);
 
 	Response update(String id, InputStream in, UriInfo uri, HttpHeaders headers);
+
+	Response readHead(String id, UriInfo uri, HttpHeaders headers);
+
+	Response vreadHead(String id, long version, UriInfo uri, HttpHeaders headers);
 }

@@ -41,6 +41,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.StructureDefinitionService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -62,11 +63,11 @@ public class StructureDefinitionServiceImpl extends
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			AuthorizationRuleProvider authorizationRuleProvider, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SnapshotGenerator sanapshotGenerator, HistoryService historyService)
+			SnapshotGenerator sanapshotGenerator, HistoryService historyService, ValidationRules validationRules)
 	{
 		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService);
+				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService, validationRules);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;
@@ -83,83 +84,98 @@ public class StructureDefinitionServiceImpl extends
 	@Override
 	protected Consumer<StructureDefinition> preCreate(StructureDefinition resource) throws WebApplicationException
 	{
-		StructureDefinition forPost = resource.hasSnapshot() ? resource.copy() : null;
+		StructureDefinition requestResource = resource.hasSnapshot() ? resource.copy() : null;
 
 		resource.setSnapshot(null);
 
-		return postCreate(forPost);
+		return postCreate(requestResource);
 	}
 
-	@Override
-	protected Consumer<StructureDefinition> preUpdate(StructureDefinition resource)
+	private Consumer<StructureDefinition> postCreate(StructureDefinition requestResource)
 	{
-		StructureDefinition forPost = resource.hasSnapshot() ? resource.copy() : null;
-
-		resource.setSnapshot(null);
-
-		return postUpdate(forPost);
-	}
-
-	private Consumer<StructureDefinition> postCreate(StructureDefinition preResource)
-	{
-		return postResource ->
+		return responseResource ->
 		{
-			if (preResource != null && preResource.hasSnapshot())
+			if (requestResource != null && requestResource.hasSnapshot())
 			{
 				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-						() -> snapshotDao.createWithId(preResource,
-								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart())));
+						() -> snapshotDao.createWithId(requestResource, parameterConverter.toUuid(resourceTypeName,
+								responseResource.getIdElement().getIdPart())));
+
+				responseResource.setSnapshot(requestResource.getSnapshot());
+				eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(responseResource));
 			}
-			else if (postResource != null)
+			else
 			{
 				try
 				{
-					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
+					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(responseResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
+					{
 						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-								() -> snapshotDao.createWithId(postResource, parameterConverter.toUuid(resourceTypeName,
-										postResource.getIdElement().getIdPart())));
+								() -> snapshotDao.createWithId(s.getSnapshot(), parameterConverter
+										.toUuid(resourceTypeName, responseResource.getIdElement().getIdPart())));
+					}
+
+					eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(responseResource.copy()));
+
+					responseResource.setSnapshot(null);
 				}
 				catch (Exception e)
 				{
 					logger.debug("Error while generating snapshot for StructureDefinition with id {}",
-							postResource.getIdElement().getIdPart(), e);
+							responseResource.getIdElement().getIdPart(), e);
 					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
-							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
+							responseResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 				}
 			}
 		};
 	}
 
-	private Consumer<StructureDefinition> postUpdate(StructureDefinition preResource)
+	@Override
+	protected Consumer<StructureDefinition> preUpdate(StructureDefinition resource)
 	{
-		return postResource ->
-		{
-			if (preResource != null && preResource.hasSnapshot())
-			{
-				if (postResource != null)
-					preResource.setIdElement(postResource.getIdElement().copy());
+		StructureDefinition requestResource = resource.hasSnapshot() ? resource.copy() : null;
 
+		resource.setSnapshot(null);
+
+		return postUpdate(requestResource);
+	}
+
+	private Consumer<StructureDefinition> postUpdate(StructureDefinition requestResource)
+	{
+		return responseResource ->
+		{
+			if (requestResource != null && requestResource.hasSnapshot())
+			{
 				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-						() -> snapshotDao.update(preResource));
+						() -> snapshotDao.update(requestResource));
+
+				responseResource.setSnapshot(requestResource.getSnapshot());
+				eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(responseResource));
 			}
-			else if (postResource != null)
+			else
 			{
 				try
 				{
-					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
+					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(responseResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
+					{
 						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
 								() -> snapshotDao.update(s.getSnapshot()));
+					}
+
+					eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(responseResource.copy()));
+
+					responseResource.setSnapshot(null);
 				}
 				catch (Exception e)
 				{
 					logger.debug("Error while generating snapshot for StructureDefinition with id {}",
-							postResource.getIdElement().getIdPart(), e);
+							responseResource.getIdElement().getIdPart(), e);
 					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
-							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
+							responseResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 				}
 			}
 		};

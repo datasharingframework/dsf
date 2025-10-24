@@ -6,12 +6,7 @@ import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -20,8 +15,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.security.auth.x500.X500Principal;
 
 import org.eclipse.jetty.ee10.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.ee10.webapp.Configuration;
@@ -46,6 +39,8 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
 
@@ -254,36 +249,17 @@ public final class JettyServer
 		if (!logger.isDebugEnabled())
 			return;
 
-		try
-		{
-			if (trustStore != null)
-				logger.debug("Using trust store for https connector with: {}", getCertificateSubjects(trustStore));
+		if (trustStore != null)
+			logger.debug("Using trust store for https connector with: {}", getCertificateSubjects(trustStore));
 
-			if (keyStore != null)
-				logger.debug("Using key store for https connector with: {}", getCertificateSubjects(keyStore));
-		}
-		catch (KeyStoreException e)
-		{
-			logger.debug("Error while printing trust store / key store config", e);
-			logger.warn("Error while printing trust store / key store config: {} - {}", e.getClass().getName(),
-					e.getMessage());
-		}
+		if (keyStore != null)
+			logger.debug("Using key store for https connector with: {}", getCertificateSubjects(keyStore));
 	}
 
-	private static String getCertificateSubjects(KeyStore keyStore) throws KeyStoreException
+	private static String getCertificateSubjects(KeyStore keyStore)
 	{
-		List<String> subjects = new ArrayList<>();
-		for (Enumeration<String> e = keyStore.aliases(); e.hasMoreElements();)
-		{
-			String alias = e.nextElement();
-			Certificate certificate = keyStore.getCertificate(alias);
-			if (certificate instanceof X509Certificate)
-			{
-				X509Certificate x = (X509Certificate) certificate;
-				subjects.add(x.getSubjectX500Principal().getName(X500Principal.RFC1779));
-			}
-		}
-		return subjects.stream().collect(Collectors.joining("; ", "[", "]"));
+		return KeyStoreFormatter.toSubjectsFromCertificates(keyStore, X500PrincipalFormat.RFC1779).values().stream()
+				.collect(Collectors.joining("; ", "[", "]"));
 	}
 
 	private final Server server;

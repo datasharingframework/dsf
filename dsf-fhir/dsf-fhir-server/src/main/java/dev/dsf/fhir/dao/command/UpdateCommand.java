@@ -29,8 +29,10 @@ import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.ResourceUpdatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -262,17 +264,17 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
-		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		UriComponents components = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
-		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
-			updateById(idTranslationTable, connection, validationHelper, componentes.getPathSegments().get(0),
-					componentes.getPathSegments().get(1));
-		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
-			updateByCondition(idTranslationTable, connection, validationHelper, componentes.getPathSegments().get(0));
+		if (components.getPathSegments().size() == 2 && components.getQueryParams().isEmpty())
+			updateById(idTranslationTable, largeObjectManager, connection, validationHelper,
+					components.getPathSegments().get(0), components.getPathSegments().get(1));
+		else if (components.getPathSegments().size() == 1 && !components.getQueryParams().isEmpty())
+			updateByCondition(idTranslationTable, largeObjectManager, connection, validationHelper,
+					components.getPathSegments().get(0));
 		else
 		{
 			Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
@@ -280,8 +282,9 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 	}
 
-	private void updateById(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, String resourceTypeName, String pathId) throws SQLException
+	private void updateById(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper, String resourceTypeName, String pathId)
+			throws SQLException
 	{
 		IdType resourceId = resource.getIdElement();
 
@@ -311,13 +314,13 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
 		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName,
-				() -> updateWithTransaction(connection, resource, ifMatch.orElse(null)));
+				() -> updateWithTransaction(largeObjectManager, connection, resource, ifMatch.orElse(null)));
 	}
 
-	protected R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
-			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	protected R updateWithTransaction(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			Long expectedVersion) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
-		return dao.updateWithTransaction(connection, resource, expectedVersion);
+		return dao.updateWithTransaction(largeObjectManager, connection, resource, expectedVersion);
 	}
 
 	private void checkUpdateAllowed(Map<String, IdType> idTranslationTable, Connection connection,
@@ -349,8 +352,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 	}
 
-	private void updateByCondition(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, String resourceTypeName) throws SQLException
+	private void updateByCondition(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper, String resourceTypeName) throws SQLException
 	{
 
 		boolean foundByCondition = addMissingIdToTranslationTableAndCheckConditionFindsResource(idTranslationTable,
@@ -361,7 +364,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		{
 			resource.setIdElement(getId(idTranslationTable));
 
-			updateById(idTranslationTable, connection, validationHelper, resourceTypeName,
+			updateById(idTranslationTable, largeObjectManager, connection, validationHelper, resourceTypeName,
 					resource.getIdElement().getIdPart());
 		}
 
@@ -377,13 +380,15 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			authorizationHelper.checkCreateAllowed(index, connection, identity, resource);
 
-			updatedResource = createWithTransactionAndId(connection, resource, getUuid(idTranslationTable));
+			updatedResource = createWithTransactionAndId(largeObjectManager, connection, resource,
+					getUuid(idTranslationTable));
 		}
 	}
 
-	protected R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	protected R createWithTransactionAndId(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			UUID uuid) throws SQLException
 	{
-		return dao.createWithTransactionAndId(connection, resource, uuid);
+		return dao.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 	}
 
 	private IdType getId(Map<String, IdType> idTranslationTable)
@@ -410,17 +415,21 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
 		// retrieving the latest resource from db to include updated references
-		Resource updatedResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection, updatedResource);
+		R updatedResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection, updatedResource);
+
+		referenceCleaner.cleanLiteralReferences(updatedResourceWithResolvedReferences);
+
 		try
 		{
-			referenceCleaner.cleanLiteralReferences(updatedResourceWithResolvedReferences);
-			eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResourceWithResolvedReferences));
+			eventHandler.handleEvent(createEvent(updatedResourceWithResolvedReferences));
 		}
 		catch (Exception e)
 		{
 			logger.debug("Error while handling resource updated event", e);
 			logger.warn("Error while handling resource updated event: {} - {}", e.getClass().getName(), e.getMessage());
 		}
+
+		modifyResponseResource(updatedResourceWithResolvedReferences);
 
 		IdType location = updatedResourceWithResolvedReferences.getIdElement().withServerBase(serverBase,
 				updatedResourceWithResolvedReferences.getResourceType().name());
@@ -448,6 +457,15 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		return Optional.of(resultEntry);
 	}
 
+	protected ResourceUpdatedEvent createEvent(Resource eventResource)
+	{
+		return eventGenerator.newResourceUpdatedEvent(eventResource);
+	}
+
+	protected void modifyResponseResource(R responseResource)
+	{
+	}
+
 	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource)
 	{
 		try
@@ -465,5 +483,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public LargeObjectManager createLargeObjectManager(Connection connection)
+	{
+		return dao.createLargeObjectManager(connection);
 	}
 }

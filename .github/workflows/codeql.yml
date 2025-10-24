@@ -1,10 +1,12 @@
-name: Java 21 CodeQL
+name: DSF 2.x CodeQL
 
 on:
   push:
-    branches: develop_2
+    branches: [ "develop_2", "hotfix/2*", "release/2*" ]
   pull_request:
-    branches: develop_2
+    branches: [ "develop_2", "hotfix/2*", "release/2*" ]
+  schedule:
+    - cron: '11 15 * * 0' # Sundays, 15:11
 
 jobs:
   analyze:
@@ -21,15 +23,16 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
-    - name: Set up JDK 21
+    - name: Set up JDK 25
       if: ${{ matrix.language == 'java-kotlin' }}
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v5
       with:
         distribution: 'zulu'
-        java-version: 21
+        java-version: 25
         cache: 'maven'
+        check-latest: true
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -37,9 +40,12 @@ jobs:
         languages: ${{ matrix.language }}
         queries: security-extended, security-and-quality
 
+    - name: Display Maven Version
+      run: mvn --version
+
     - name: Compile with Maven
       if: ${{ matrix.language == 'java-kotlin' }}
-      run: mvn --batch-mode --fail-at-end --threads 1C -Dmaven.javadoc.skip=true -Dimpsort.skip=true -Dformatter.skip=true -Dgpg.skip -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests clean package
+      run: mvn --batch-mode --fail-at-end --threads 1C -Dimpsort.skip=true -Dformatter.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -Dexec.skip=true -DskipTests -DskipShadePlugin=true -P!generate-source-and-javadoc-jars clean package
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

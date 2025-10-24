@@ -1,9 +1,9 @@
 package dev.dsf.fhir.client;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -17,155 +17,162 @@ import jakarta.ws.rs.core.MediaType;
 class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
 		implements BasicFhirWebserviceClient
 {
-	BasicFhirWebserviceCientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, long delayMillis)
+	BasicFhirWebserviceCientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
 	{
-		super(delegate, nTimes, delayMillis);
+		super(delegate, nTimes, delay);
 	}
 
 	@Override
 	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.updateConditionaly(resource, criteria));
+		return retry(() -> delegate.updateConditionaly(resource, criteria));
 	}
 
 	@Override
 	public Binary updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.updateBinary(id, in, mediaType, securityContextReference));
+		return retry(() -> delegate.updateBinary(id, in, mediaType, securityContextReference));
 	}
 
 	@Override
 	public <R extends Resource> R update(R resource)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.update(resource));
+		return retry(() -> delegate.update(resource));
 	}
 
 	@Override
 	public Bundle postBundle(Bundle bundle)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.postBundle(bundle));
+		return retry(() -> delegate.postBundle(bundle));
 	}
 
 	@Override
 	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.createConditionaly(resource, ifNoneExistCriteria));
+		return retry(() -> delegate.createConditionaly(resource, ifNoneExistCriteria));
 	}
 
 	@Override
 	public Binary createBinary(InputStream in, MediaType mediaType, String securityContextReference)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.createBinary(in, mediaType, securityContextReference));
+		return retry(() -> delegate.createBinary(in, mediaType, securityContextReference));
 	}
 
 	@Override
 	public <R extends Resource> R create(R resource)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.create(resource));
+		return retry(() -> delegate.create(resource));
 	}
 
 	@Override
 	public Bundle searchWithStrictHandling(Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.searchWithStrictHandling(resourceType, parameters));
+		return retry(() -> delegate.searchWithStrictHandling(resourceType, parameters));
 	}
 
 	@Override
 	public Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.search(resourceType, parameters));
+		return retry(() -> delegate.search(resourceType, parameters));
 	}
 
 	@Override
-	public InputStream readBinary(String id, String version, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType)
 	{
-		return retry(nTimes, delayMillis, () ->
-		{
-			InputStream in = delegate.readBinary(id, version, mediaType);
-			return in;
-		});
+		return retry(() -> delegate.readBinary(id, version, mediaType));
 	}
 
 	@Override
-	public InputStream readBinary(String id, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive, Map<String, String> additionalHeaders)
 	{
-		return retry(nTimes, delayMillis, () ->
-		{
-			InputStream in = delegate.readBinary(id, mediaType);
-			return in;
-		});
+		return retry(
+				() -> delegate.readBinary(id, version, mediaType, rangeStart, rangeEndInclusive, additionalHeaders));
+	}
+
+	@Override
+	public BinaryInputStream readBinary(String id, MediaType mediaType)
+	{
+		return retry(() -> delegate.readBinary(id, mediaType));
+	}
+
+	@Override
+	public BinaryInputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive,
+			Map<String, String> additionalHeaders)
+	{
+		return retry(() -> delegate.readBinary(id, mediaType, rangeStart, rangeEndInclusive, additionalHeaders));
 	}
 
 	@Override
 	public <R extends Resource> R read(Class<R> resourceType, String id, String version)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.read(resourceType, id, version));
+		return retry(() -> delegate.read(resourceType, id, version));
 	}
 
 	@Override
 	public Resource read(String resourceTypeName, String id, String version)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.read(resourceTypeName, id, version));
+		return retry(() -> delegate.read(resourceTypeName, id, version));
 	}
 
 	@Override
 	public <R extends Resource> R read(Class<R> resourceType, String id)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.read(resourceType, id));
+		return retry(() -> delegate.read(resourceType, id));
 	}
 
 	@Override
 	public <R extends Resource> R read(R oldValue)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.read(oldValue));
+		return retry(() -> delegate.read(oldValue));
 	}
 
 	@Override
 	public Resource read(String resourceTypeName, String id)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.read(resourceTypeName, id));
+		return retry(() -> delegate.read(resourceTypeName, id));
 	}
 
 	@Override
 	public CapabilityStatement getConformance()
 	{
-		return retry(nTimes, delayMillis, () -> delegate.getConformance());
+		return retry(() -> delegate.getConformance());
 	}
 
 	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition differential)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.generateSnapshot(differential));
+		return retry(() -> delegate.generateSnapshot(differential));
 	}
 
 	@Override
 	public StructureDefinition generateSnapshot(String url)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.generateSnapshot(url));
+		return retry(() -> delegate.generateSnapshot(url));
 	}
 
 	@Override
 	public boolean exists(IdType resourceTypeIdVersion)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.exists(resourceTypeIdVersion));
+		return retry(() -> delegate.exists(resourceTypeIdVersion));
 	}
 
 	@Override
 	public <R extends Resource> boolean exists(Class<R> resourceType, String id, String version)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.exists(resourceType, id, version));
+		return retry(() -> delegate.exists(resourceType, id, version));
 	}
 
 	@Override
 	public <R extends Resource> boolean exists(Class<R> resourceType, String id)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.exists(resourceType, id));
+		return retry(() -> delegate.exists(resourceType, id));
 	}
 
 	@Override
 	public void deletePermanently(Class<? extends Resource> resourceClass, String id)
 	{
-		retry(nTimes, delayMillis, (Supplier<Void>) () ->
+		retry(() ->
 		{
 			delegate.deletePermanently(resourceClass, id);
 			return null;
@@ -175,7 +182,7 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	@Override
 	public void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
 	{
-		retry(nTimes, delayMillis, (Supplier<Void>) () ->
+		retry(() ->
 		{
 			delegate.deleteConditionaly(resourceClass, criteria);
 			return null;
@@ -185,7 +192,7 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	@Override
 	public void delete(Class<? extends Resource> resourceClass, String id)
 	{
-		retry(nTimes, delayMillis, (Supplier<Void>) () ->
+		retry(() ->
 		{
 			delegate.delete(resourceClass, id);
 			return null;
@@ -195,6 +202,6 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	@Override
 	public Bundle history(Class<? extends Resource> resourceType, String id, int page, int count)
 	{
-		return retry(nTimes, delayMillis, () -> delegate.history(resourceType, id, page, count));
+		return retry(() -> delegate.history(resourceType, id, page, count));
 	}
 }

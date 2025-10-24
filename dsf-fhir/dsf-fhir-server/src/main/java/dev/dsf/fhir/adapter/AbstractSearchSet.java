@@ -3,6 +3,7 @@ package dev.dsf.fhir.adapter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -168,6 +170,19 @@ abstract class AbstractSearchSet<MR extends Resource> extends AbstractThymeleafC
 			return defaultPageCount;
 	}
 
+	protected final <D extends DomainResource> String getIdentifierValue(D resource, Function<D, Boolean> hasIdentifier,
+			Function<D, Identifier> getIdentifier)
+	{
+		Objects.requireNonNull(hasIdentifier, "hasIdentifier");
+		Objects.requireNonNull(getIdentifier, "getIdentifier");
+
+		if (!hasIdentifier.apply(resource))
+			return "";
+
+		Identifier identifier = getIdentifier.apply(resource);
+		return (identifier != null && identifier.hasValue()) ? identifier.getValue() : "";
+	}
+
 	protected final <D extends DomainResource> String getIdentifierValues(D resource,
 			Function<D, Boolean> hasIdentifier, Function<D, List<Identifier>> getIdentifier, String identifierSystem)
 	{
@@ -182,6 +197,24 @@ abstract class AbstractSearchSet<MR extends Resource> extends AbstractThymeleafC
 			return "";
 
 		return filteredIdentifiers.get(0) + (filteredIdentifiers.size() > 1 ? ", ..." : "");
+	}
+
+	protected final <D extends DomainResource> String getReferenceIdentifierValues(D resource,
+			Function<D, Boolean> hasReference, Function<D, List<Reference>> getReference)
+	{
+		Objects.requireNonNull(hasReference, "hasReference");
+		Objects.requireNonNull(getReference, "getReference");
+
+		if (!hasReference.apply(resource))
+			return "";
+
+		List<String> identifiers = getReference.apply(resource).stream().filter(Reference::hasIdentifier)
+				.map(Reference::getIdentifier).filter(Identifier::hasValue).map(Identifier::getValue).toList();
+
+		if (identifiers.isEmpty())
+			return "";
+
+		return identifiers.get(0) + (identifiers.size() > 1 ? ", ..." : "");
 	}
 
 	protected final String getResourceType(IIdType id)

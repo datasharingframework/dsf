@@ -6,24 +6,29 @@ import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectTrue;
 
+import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
+import dev.dsf.bpe.v2.activity.ServiceTask;
+import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
+import dev.dsf.bpe.v2.variables.Variables;
 
-public class ProxyTest extends AbstractTest
+public class ProxyTest extends AbstractTest implements ServiceTask
 {
-	public ProxyTest(ProcessPluginApi api)
+	@Override
+	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		super(api);
+		executeTests(api, variables);
 	}
 
 	@PluginTest
-	public void isEnabled() throws Exception
+	public void isEnabled(ProcessPluginApi api) throws Exception
 	{
 		expectTrue(api.getProxyConfig().isEnabled());
 	}
 
 	@PluginTest
-	public void getNoProxyUrls() throws Exception
+	public void getNoProxyUrls(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getNoProxyUrls());
 		expectSame(2, api.getProxyConfig().getNoProxyUrls().size());
@@ -32,28 +37,28 @@ public class ProxyTest extends AbstractTest
 	}
 
 	@PluginTest
-	public void getPassword() throws Exception
+	public void getPassword(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getPassword());
 		expectSame("proxy_password".toCharArray(), api.getProxyConfig().getPassword());
 	}
 
 	@PluginTest
-	public void getUrl() throws Exception
+	public void getUrl(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getUrl());
 		expectSame("http://proxy:8080", api.getProxyConfig().getUrl());
 	}
 
 	@PluginTest
-	public void getUsername() throws Exception
+	public void getUsername(ProcessPluginApi api) throws Exception
 	{
 		expectNotNull(api.getProxyConfig().getUsername());
 		expectSame("proxy_username", api.getProxyConfig().getUsername());
 	}
 
 	@PluginTest
-	public void isNotProxyUrl() throws Exception
+	public void isNotProxyUrl(ProcessPluginApi api) throws Exception
 	{
 		expectTrue(api.getProxyConfig().isNoProxyUrl("https://localhost"));
 		expectTrue(api.getProxyConfig().isNoProxyUrl("http://localhost"));
