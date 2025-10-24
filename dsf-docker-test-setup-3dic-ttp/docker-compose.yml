@@ -567,6 +567,7 @@ services:
     depends_on:
       - db
       - dic1-fhir
+      - mailhog
       - keycloak
       - forward-proxy
 
@@ -656,6 +657,7 @@ services:
     depends_on:
       - db
       - dic2-fhir
+      - mailhog
       - keycloak
 
   dic3-bpe:
