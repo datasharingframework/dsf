@@ -2,6 +2,7 @@ package dev.dsf.bpe.v2.client.fhir;
 
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.List;
 
 public interface ClientConfig
 {
@@ -133,6 +134,13 @@ public interface ClientConfig
 		 * @return never <code>null</code>
 		 */
 		char[] getClientSecret();
+
+		/**
+		 * @return never <code>null</code>, may be empty
+		 */
+		List<String> getRequiredAudiences();
+
+		boolean isVerifyAuthorizedParty();
 
 		/**
 		 * @return <code>null</code> if not enabled or configured as no-proxy url

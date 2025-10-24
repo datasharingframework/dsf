@@ -557,6 +557,7 @@ services:
             test-connection-on-startup: yes
             client-id: dic1-bpe
             client-secret-file: /run/secrets/oidc_client_dic1_bpe.secret
+            required-audience: account
       DEV_DSF_BPE_FHIR_CLIENT_CONNECTIONS_CONFIG_DEFAULT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
     networks:
       dic1-bpe-frontend:

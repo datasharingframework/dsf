@@ -30,6 +30,7 @@ public class OidcClientProviderConfig
 				propertiesConfig.getFhirClientConnectionsConfigOidcClientCacheConfigurationResourceTimeout(),
 				propertiesConfig.getFhirClientConnectionsConfigOidcClientCacheJwksResourceTimeout(),
 				propertiesConfig.getFhirClientConnectionsConfigOidcClientCacheAccessTokenBeforeExpirationTimeout(),
-				propertiesConfig.getFhirClientConnectionsConfigOidcClientNotBeforeIssuedAtExpiresAtLeeway());
+				propertiesConfig.getFhirClientConnectionsConfigOidcClientNotBeforeIssuedAtExpiresAtLeeway(),
+				propertiesConfig.getFhirClientConnectionsConfigDefaultOidcVerifyAuthorizedParty());
 	}
 }

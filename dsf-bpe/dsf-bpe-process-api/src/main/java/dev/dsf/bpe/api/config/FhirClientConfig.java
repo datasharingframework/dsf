@@ -2,6 +2,7 @@ package dev.dsf.bpe.api.config;
 
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.List;
 
 public interface FhirClientConfig
 {
@@ -150,5 +151,12 @@ public interface FhirClientConfig
 		 * @return never <code>null</code>
 		 */
 		char[] clientSecret();
+
+		/**
+		 * @return never <code>null</code>, may be empty
+		 */
+		List<String> requiredAudiences();
+
+		boolean verifyAuthorizedParty();
 	}
 }
