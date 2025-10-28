@@ -36,11 +36,9 @@ import org.springframework.web.SpringServletContainerInitializer;
 import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
-
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
 import dev.dsf.common.auth.DsfLoginService;
@@ -116,8 +114,7 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 	{
 		return new FhirWebserviceClientJersey("https://localhost:" + apiPort + CONTEXT_PATH, trustStore, keyStore,
 				keyStorePassword, null, null, null, null, Duration.ZERO, Duration.ZERO, false,
-				"DSF Integration Test Client", fhirContext,
-				referenceCleaner);
+				"DSF Integration Test Client", fhirContext, referenceCleaner);
 	}
 
 	private static Map<String, String> getDefaultInitParameters(ServerSocketChannel statusConnectorChannel,
@@ -127,8 +124,8 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.server.status.port",
 				Integer.toString(statusConnectorChannel.socket().getLocalPort()));
 
-		initParameters.put("dev.dsf.fhir.db.url",
-				"jdbc:postgresql://" + liquibaseRule.getHost() + ":" + liquibaseRule.getMappedPort(5432) + "/" + liquibaseRule.getDatabaseName());
+		initParameters.put("dev.dsf.fhir.db.url", "jdbc:postgresql://" + liquibaseRule.getHost() + ":"
+				+ liquibaseRule.getMappedPort(5432) + "/" + liquibaseRule.getDatabaseName());
 		initParameters.put("dev.dsf.fhir.db.user.group", DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.username", DATABASE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.password", DATABASE_USER_PASSWORD);
@@ -150,7 +147,8 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.fhir.client.certificate.private.key.password",
 				String.valueOf(X509Certificates.PASSWORD));
 
-		initParameters.put("dev.dsf.fhir.server.roleConfig", String.format("""
+		initParameters.put("dev.dsf.fhir.server.roleConfig",
+				String.format("""
 						- practitioner-test-user:
 						    thumbprint: %s
 						    dsf-role:
@@ -178,8 +176,8 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 						    practitioner-role:
 						      - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
 						""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex(),
-				certificates.getAdminClientCertificate().certificateSha512ThumbprintHex(),
-				certificates.getMinimalClientCertificate().certificateSha512ThumbprintHex()));
+						certificates.getAdminClientCertificate().certificateSha512ThumbprintHex(),
+						certificates.getMinimalClientCertificate().certificateSha512ThumbprintHex()));
 		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", "true");
 
 		initParameters.put("dev.dsf.fhir.server.endpoint.address",
@@ -207,12 +205,10 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 				.jksForTrustedCertificates(certificates.getCaCertificate());
 		KeyStore serverCertificateKeyStore = certificates.getServerCertificate().keyStore();
 
-		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(
-				apiConnectorChannel,
+		Function<Server, ServerConnector> apiConnector = JettyServer.httpsConnector(apiConnectorChannel,
 				clientCertificateTrustStore, serverCertificateKeyStore,
 				certificates.getServerCertificate().keyStorePassword(), false);
-		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(
-				statusConnectorChannel);
+		Function<Server, ServerConnector> statusConnector = JettyServer.statusConnector(statusConnectorChannel);
 		List<Class<? extends ServletContainerInitializer>> servletContainerInitializers = List.of(
 				JakartaWebSocketServletContainerInitializer.class, JerseyServletContainerInitializer.class,
 				SpringServletContainerInitializer.class);
@@ -243,8 +239,12 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 	{
 		fhirServer = createFhirServer(getDefaultInitParameters(statusConnectorChannel, apiConnectorChannel));
 		fhirServer.start();
-		Organization organization = (Organization) webserviceClient.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0).getResource();
-		String thumbprint = organization.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint").getValue().primitiveValue();
+		Organization organization = (Organization) webserviceClient
+				.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0)
+				.getResource();
+		String thumbprint = organization
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.getValue().primitiveValue();
 		assertEquals(certificates.getClientCertificate().certificateSha512ThumbprintHex(), thumbprint);
 	}
 
@@ -253,8 +253,12 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 	{
 		fhirServer = createFhirServer(getInitParametersWithThumbprint(statusConnectorChannel, apiConnectorChannel));
 		fhirServer.start();
-		Organization organization = (Organization) webserviceClient.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0).getResource();
-		String thumbprint = organization.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint").getValue().primitiveValue();
+		Organization organization = (Organization) webserviceClient
+				.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0)
+				.getResource();
+		String thumbprint = organization
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.getValue().primitiveValue();
 		assertEquals(certificates.getClientCertificate().certificateSha512ThumbprintHex(), thumbprint);
 	}
 
