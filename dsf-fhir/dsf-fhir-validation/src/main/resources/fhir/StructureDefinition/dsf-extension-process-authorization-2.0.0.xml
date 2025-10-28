@@ -1,6 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="ALL" />
@@ -11,7 +12,7 @@
 	<name value="ProcessAuthorization" />
 	<status value="active" />
 	<experimental value="false" />
-	<date value="2025-10-15" />
+	<date value="2025-10-27" />
 	<fhirVersion value="4.0.1" />
 	<kind value="complex-type" />
 	<abstract value="false" />
@@ -36,6 +37,7 @@
 				</discriminator>
 				<rules value="open" />
 			</slicing>
+			<min value="4" />
 		</element>
 		<element id="Extension.extension:message-name">
 			<path value="Extension.extension" />
@@ -90,14 +92,15 @@
 				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization|2.0.0" />
 				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization-practitioner|2.0.0" />
 				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role|2.0.0" />
-				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role-practitioner|2.0.0" />
+				<profile
+					value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role-practitioner|2.0.0" />
 				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-all|2.0.0" />
 				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-organization|2.0.0" />
 				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-parent-organization-role|2.0.0" />
 			</type>
 			<binding>
 				<strength value="required" />
-				<valueSet value="http://dsf.dev/fhir/ValueSet/process-authorization-requester|1.0.0" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/process-authorization-requester|2.0.0" />
 			</binding>
 		</element>
 		<element id="Extension.extension:recipient">
@@ -120,7 +123,7 @@
 			</type>
 			<binding>
 				<strength value="required" />
-				<valueSet value="http://dsf.dev/fhir/ValueSet/process-authorization-recipient|1.0.0" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/process-authorization-recipient|2.0.0" />
 			</binding>
 		</element>
 		<element id="Extension.url">
