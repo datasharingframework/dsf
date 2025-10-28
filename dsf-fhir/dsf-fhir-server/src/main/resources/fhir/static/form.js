@@ -66,7 +66,6 @@ function readAndValidateTaskInput(input, row) {
 		else
 			return newTaskInputTyped(input.type, id, "value" + inputFhirType.charAt(0).toUpperCase() + inputFhirType.slice(1), htmlInputs[0].value, optional)
 	}
-
 	else if (htmlInputs?.length === 2) {
 		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
 		const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
@@ -80,6 +79,17 @@ function readAndValidateTaskInput(input, row) {
 		else if ("boolean.true" === input0FhirType && "boolean.false" == input1FhirType)
 			return newTaskInputBoolean(input.type, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
+	else if (htmlInputs?.length === 5) {
+    	const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
+    	const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
+    	const input2FhirType = htmlInputs[2].getAttribute("fhir-type")
+    	const input3FhirType = htmlInputs[3].getAttribute("fhir-type")
+    	const input4FhirType = htmlInputs[4].getAttribute("fhir-type")
+
+    	if (input0FhirType.startsWith("Quantity")) {
+    		return new newTaskInputQuantity(input.type, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
+    	}
+    }
 
 	return { input: null, valid: false }
 }
@@ -193,6 +203,27 @@ function newTaskInputBoolean(type, id, checkedTrue, checkedFalse, optional) {
 		return { input: null, valid: optional }
 }
 
+function newTaskInputQuantity(type, id, comparator, value, unit, system, code, optional) {
+	const result = validateQuantity(id, comparator, value, unit, system, code, optional, "Input")
+
+	if (result.valid && result.value !== null) {
+		return {
+			input: {
+				type: type,
+				valueQuantity: {
+					comparator: result.value.comparator,
+					value: result.value.value,
+					unit: result.value.unit,
+					system: result.value.system,
+					code: result.value.code
+				}
+			},
+			valid: true
+		}
+	} else
+		return { input: null, valid: result.valid }
+}
+
 function completeQuestionnaireResponse() {
 	const questionnaireResponse = readQuestionnaireResponseAnswersFromForm()
 
@@ -264,6 +295,17 @@ function readAndValidateQuestionnaireResponseItem(item, id) {
 			return newQuestionnaireResponseItemReferenceIdentifier(item.text, id, htmlInputs[0].value, htmlInputs[1].value, optional)
 		else if ("boolean.true" === input0FhirType && "boolean.false" == input1FhirType)
 			return newQuestionnaireResponseItemBoolean(item.text, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
+	}
+	else if (htmlInputs?.length === 5) {
+		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
+		const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
+		const input2FhirType = htmlInputs[2].getAttribute("fhir-type")
+		const input3FhirType = htmlInputs[3].getAttribute("fhir-type")
+		const input4FhirType = htmlInputs[4].getAttribute("fhir-type")
+
+		if (input0FhirType.startsWith("Quantity")) {
+			return new newQuestionnaireResponseItemQuantity(item.text, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
+		}
 	}
 
 	return { item: null, valid: false }
@@ -373,6 +415,29 @@ function newQuestionnaireResponseItemBoolean(text, id, checkedTrue, checkedFalse
 	}
 }
 
+function newQuestionnaireResponseItemQuantity(text, id, comparator, value, unit, system, code, optional) {
+	const result = validateQuantity(id, comparator, value, unit, system, code, optional, "Item")
+
+	if (result.valid && result.value !== null) {
+		const item = {
+			linkId: id,
+			text: text,
+			answer: [{
+				valueQuantity: {
+					comparator: result.value.comparator,
+					value: result.value.value,
+					unit: result.value.unit,
+					system: result.value.system,
+					code: result.value.code
+				}
+			}]
+        }
+
+    	return { item: item, valid: true }
+	} else
+		return { input: null, valid: result.valid }
+}
+
 function validateAndConvert(id, fhirType, inputValue, optional, valueName) {
 	const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
 
@@ -452,6 +517,44 @@ function validateIdentifier(id, system, value, optional, valueName) {
 	}
 }
 
+function validateQuantity(id, comparator, value, unit, system, code, optional, valueName) {
+	const comparatorEmpty = comparator === null || comparator.trim() === ""
+	const valueEmpty = value === null || value.trim() === ""
+	const unitEmpty = unit === null || unit.trim() === ""
+	const systemEmpty = system === null || system.trim() === ""
+	const codeEmpty = code === null || code.trim() === ""
+
+	if (optional && valueEmpty && unitEmpty)
+		return { value: null, valid: true }
+	else {
+		const errorListElement = document.querySelector(`ul[for="${CSS.escape(id)}"]`)
+
+		const resultComparator = validateStringInList(errorListElement, comparator, ["<", "<=", ">=", ">"], true, valueName + " comparator")
+
+		const valueIsDecimal = !valueEmpty && (value.includes(".") || value.includes(","))
+		const resultValue = valueIsDecimal ? validateDecimal(errorListElement, value, false, valueName + " value") : validateInteger(errorListElement, value, false, valueName + " value")
+		const resultUnit = validateString(errorListElement, unit, false, valueName + " unit")
+
+		const resultSystem = validateUrl(errorListElement, system, (systemEmpty && codeEmpty), valueName + " system" + (!codeEmpty ? " (if code set)" : ""))
+		const resultCode = validateString(errorListElement, code, (systemEmpty && codeEmpty), valueName + " code (if system set)")
+
+		if (resultComparator.valid && resultValue.valid && resultUnit.valid && resultSystem.valid && resultCode.valid) {
+			return {
+				value: {
+					comparator: resultComparator.value,
+					value: resultValue.value,
+					unit: resultUnit.value,
+					system: resultSystem.value,
+					code: resultCode.value
+				},
+				valid: true
+			}
+		}
+		else
+			return { value: null, valid: false }
+	}
+}
+
 function validateType(errorListElement, value, optional, valueName, typeValid, typeSpecificError, toType) {
 	const stringValid = value !== null && value.trim() !== ""
 
@@ -473,6 +576,11 @@ function validateType(errorListElement, value, optional, valueName, typeValid, t
 
 function validateString(errorListElement, value, optional, valueName) {
 	return validateType(errorListElement, value, optional, valueName, () => true, null, v => v)
+}
+
+function validateStringInList(errorListElement, value, list, optional, valueName) {
+	const valueInList = s => list.includes(s)
+	return validateType(errorListElement, value, optional, valueName, valueInList, "not in [" + list.toString() + "]" , v => v)
 }
 
 function validateInteger(errorListElement, value, optional, valueName) {

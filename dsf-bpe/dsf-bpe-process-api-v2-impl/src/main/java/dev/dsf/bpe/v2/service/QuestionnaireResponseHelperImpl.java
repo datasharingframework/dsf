@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
@@ -95,6 +96,8 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 			case DATETIME -> new DateTimeType("1900-01-01T00:00:00.000Z");
 			case URL -> new UriType("http://example.org/foo");
 			case REFERENCE -> new Reference("http://example.org/fhir/Placeholder/id");
+			case QUANTITY -> new Quantity().setValue(0).setUnit("unit")
+					.setSystem("http://example.org/fhir/CodeSystem/name").setCode("code");
 
 			default -> throw new RuntimeException("Type '" + question.getType().getDisplay()
 					+ "' in Questionnaire.item is not supported as answer type");

@@ -4,16 +4,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import org.hl7.fhir.r4.model.Age;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Count;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Distance;
+import org.hl7.fhir.r4.model.Duration;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.MoneyQuantity;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
@@ -39,7 +46,7 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 	}
 
 	private record Item(boolean show, String id, String type, String label, String fhirType, String stringValue,
-			ElementSystemValue systemValueValue, Boolean booleanValue)
+			ElementSystemValue systemValueValue, Boolean booleanValue, ElementQuantityValue quantityValue)
 	{
 	}
 
@@ -103,7 +110,7 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 		if (i.hasAnswer() && i.getAnswer().size() == 1)
 			return toItem(show, linkId, text, i.getAnswerFirstRep().getValue());
 		else
-			return new Item(show, linkId, null, text, null, null, null, null);
+			return new Item(show, linkId, null, text, null, null, null, null, null);
 	}
 
 	private Item toItem(boolean show, String id, String label, Type typedValue)
@@ -113,39 +120,42 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 		return switch (typedValue)
 		{
 			case BooleanType b ->
-				new Item(show, id, "boolean", label, fhirType, null, null, b.hasValue() ? b.getValue() : null);
+				new Item(show, id, "boolean", label, fhirType, null, null, b.hasValue() ? b.getValue() : null, null);
 
 			case DecimalType d -> new Item(show, id, "number", label, fhirType,
-					d.hasValue() ? String.valueOf(d.getValue()) : null, null, null);
+					d.hasValue() ? String.valueOf(d.getValue()) : null, null, null, null);
 
 			case IntegerType i -> new Item(show, id, "number", label, fhirType,
-					i.hasValue() ? String.valueOf(i.getValue()) : null, null, null);
+					i.hasValue() ? String.valueOf(i.getValue()) : null, null, null, null);
 
 			case DateType d -> new Item(show, id, "date", label, fhirType,
-					d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null, null, null);
+					d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null, null, null, null);
 
 			case DateTimeType dt -> new Item(show, id, "datetime-local", label, fhirType,
-					dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null, null, null);
+					dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null, null, null, null);
 
 			case TimeType t ->
-				new Item(show, id, "time", label, fhirType, t.hasValue() ? t.getValue() : null, null, null);
+				new Item(show, id, "time", label, fhirType, t.hasValue() ? t.getValue() : null, null, null, null);
 
 			case StringType s ->
-				new Item(show, id, "text", label, fhirType, s.hasValue() ? s.getValue() : null, null, null);
+				new Item(show, id, "text", label, fhirType, s.hasValue() ? s.getValue() : null, null, null, null);
 
 			case UriType u ->
-				new Item(show, id, "url", label, fhirType, u.hasValue() ? u.getValue() : null, null, null);
+				new Item(show, id, "url", label, fhirType, u.hasValue() ? u.getValue() : null, null, null, null);
 
-			case Coding c -> new Item(show, id, "coding", label, fhirType, null, ElementSystemValue.from(c), null);
+			case Coding c ->
+				new Item(show, id, "coding", label, fhirType, null, ElementSystemValue.from(c), null, null);
 
 			case Reference r when r.hasReferenceElement() -> new Item(show, id, "url", label, fhirType + ".reference",
-					r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null, null, null);
+					r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null, null, null, null);
 
 			case Reference r when r.hasIdentifier() -> new Item(show, id, "identifier", label, fhirType + ".identifier",
-					null, ElementSystemValue.from(r.getIdentifier()), null);
+					null, ElementSystemValue.from(r.getIdentifier()), null, null);
+
+			case Quantity q ->
+				new Item(show, id, "quantity", label, fhirType, null, null, null, ElementQuantityValue.from(q));
 
 			// TODO case Attachment a ->
-			// TODO case Quantity q ->
 
 			default -> {
 				logger.warn("Element of type {}, not supported", fhirType);
