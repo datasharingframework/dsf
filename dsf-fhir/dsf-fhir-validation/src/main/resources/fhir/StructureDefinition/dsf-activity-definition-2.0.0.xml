@@ -56,6 +56,10 @@
 			<path value="ActivityDefinition.version" />
 			<min value="1" />
 		</element>
+		<element id="ActivityDefinition.date">
+			<path value="ActivityDefinition.date" />
+			<min value="1" />
+		</element>
 		<element id="ActivityDefinition.kind">
 			<path value="ActivityDefinition.kind" />
 			<min value="1" />

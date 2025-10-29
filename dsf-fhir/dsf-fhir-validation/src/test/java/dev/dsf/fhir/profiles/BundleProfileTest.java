@@ -24,6 +24,7 @@ public class BundleProfileTest extends AbstractMetaTagProfileTest<Bundle>
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Bundle create()
 	{
 		Bundle b = new Bundle();

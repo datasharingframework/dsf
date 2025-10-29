@@ -24,6 +24,7 @@ public class MeasureProfileTest extends AbstractMetaTagProfileTest<Measure>
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Measure create()
 	{
 		Measure m = new Measure();

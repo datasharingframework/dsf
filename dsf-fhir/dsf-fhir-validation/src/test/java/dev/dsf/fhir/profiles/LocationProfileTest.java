@@ -23,6 +23,7 @@ public class LocationProfileTest extends AbstractMetaTagProfileTest<Location>
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Location create()
 	{
 		Location l = new Location();

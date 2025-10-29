@@ -23,6 +23,7 @@ public class PatientProfileTest extends AbstractMetaTagProfileTest<Patient>
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Patient create()
 	{
 		Patient p = new Patient();

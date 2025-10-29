@@ -25,6 +25,7 @@ public class ValueSetProfileTest extends AbstractMetaDataResourceProfileTest<Val
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected ValueSet create()
 	{
 		ValueSet s = new ValueSet();

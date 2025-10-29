@@ -23,6 +23,7 @@ public class HealthcareServiceProfileTest extends AbstractMetaTagProfileTest<Hea
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected HealthcareService create()
 	{
 		HealthcareService s = new HealthcareService();

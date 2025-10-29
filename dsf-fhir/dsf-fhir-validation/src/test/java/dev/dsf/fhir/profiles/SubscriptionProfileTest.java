@@ -25,6 +25,7 @@ public class SubscriptionProfileTest extends AbstractMetaTagProfileTest<Subscrip
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Subscription create()
 	{
 		var s = new Subscription();

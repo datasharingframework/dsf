@@ -46,6 +46,7 @@ public class StructureDefinitionProfileTest extends AbstractMetaDataResourceProf
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected StructureDefinition create()
 	{
 		StructureDefinition d = new StructureDefinition();

@@ -24,6 +24,7 @@ public class LibraryProfileTest extends AbstractMetaTagProfileTest<Library>
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Library create()
 	{
 		Library l = new Library();

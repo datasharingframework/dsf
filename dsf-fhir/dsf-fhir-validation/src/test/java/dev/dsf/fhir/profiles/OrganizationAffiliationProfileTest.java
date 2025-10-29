@@ -17,7 +17,7 @@ import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
 import dev.dsf.fhir.validation.ValidationSupportRule;
 
-public class OrganizationAffiliationProfileTest
+public class OrganizationAffiliationProfileTest extends AbstractMetaTagProfileTest<OrganizationAffiliation>
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationAffiliationProfileTest.class);
 
@@ -33,18 +33,32 @@ public class OrganizationAffiliationProfileTest
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
-	@Test
-	public void testOrganizationAffiliationProfileValid() throws Exception
+	@Override
+	protected OrganizationAffiliation create()
 	{
 		OrganizationAffiliation a = new OrganizationAffiliation();
 		a.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/organization-affiliation");
-		a.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		a.setActive(true);
 		a.getOrganization().setReference("Organization/" + UUID.randomUUID().toString());
 		a.getParticipatingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
 		a.getCodeFirstRep().getCodingFirstRep().setSystem("http://dsf.dev/fhir/CodeSystem/organization-role")
 				.setCode("DIC");
 		a.getEndpointFirstRep().setReference("Endpoint/" + UUID.randomUUID().toString());
+
+		return a;
+	}
+
+	@Test
+	public void runMetaTagTests() throws Exception
+	{
+		doRunMetaTagTests(resourceValidator);
+	}
+
+	@Test
+	public void testOrganizationAffiliationProfileValid() throws Exception
+	{
+		OrganizationAffiliation a = create();
+		a.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
 		ValidationResult result = resourceValidator.validate(a);
 		ValidationSupportRule.logValidationMessages(logger::debug, result);

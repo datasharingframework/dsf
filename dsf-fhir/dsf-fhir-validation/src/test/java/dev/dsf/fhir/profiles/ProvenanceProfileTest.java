@@ -25,6 +25,7 @@ public class ProvenanceProfileTest extends AbstractMetaTagProfileTest<Provenance
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Provenance create()
 	{
 		Provenance p = new Provenance();

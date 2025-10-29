@@ -25,6 +25,7 @@ public class BinaryProfileTest extends AbstractMetaTagProfileTest<Binary>
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Binary create()
 	{
 		Binary b = new Binary();

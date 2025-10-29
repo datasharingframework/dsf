@@ -38,7 +38,7 @@ public interface CommandFactory
 	 *            not <code>null</code>
 	 * @param handlingType
 	 *            not <code>null</code>
-	 * @param enableValidation,
+	 * @param enableValidation
 	 *            set to <code>false</code> to disable FHIR resource validation, useful for initial data loader with
 	 *            internal bundle
 	 *

@@ -23,6 +23,7 @@ public class PractitionerProfileTest extends AbstractMetaTagProfileTest<Practiti
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Practitioner create()
 	{
 		Practitioner p = new Practitioner();

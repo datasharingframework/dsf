@@ -25,6 +25,7 @@ public class DocumentReferenceProfileTest extends AbstractMetaTagProfileTest<Doc
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected DocumentReference create()
 	{
 		DocumentReference r = new DocumentReference();

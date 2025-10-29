@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -24,7 +25,7 @@ import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
 import dev.dsf.fhir.validation.ValidationSupportRule;
 
-public class ActivityDefinitionProfileTest extends AbstractProfileTest
+public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfileTest<ActivityDefinition>
 {
 	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProfileTest.class);
 
@@ -57,26 +58,12 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
-	private ActivityDefinition createActivityDefinition()
+	@Override
+	protected ActivityDefinition create()
 	{
-		var ad = new ActivityDefinition();
-		ad.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
-		ad.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		ad.setUrl("http://dsf.dev/bpe/Process/test");
-		ad.setVersion("2.0.0");
-		ad.setStatus(PublicationStatus.ACTIVE);
-		ad.setKind(ActivityDefinitionKind.TASK);
-		ad.setName("TestProcess");
+		ActivityDefinition d = createWithouAuthExtension();
 
-		return ad;
-	}
-
-	@Test
-	public void testActivityDefinitionWithProcessAuthorizationRequesterRemoteAllRecipientLocalAllValid()
-			throws Exception
-	{
-		ActivityDefinition ad = createActivityDefinition();
-		Extension processAuthorization = ad.addExtension()
+		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
@@ -86,9 +73,54 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 		processAuthorization.addExtension("recipient",
 				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 
-		logResource(ad);
+		return d;
+	}
 
-		ValidationResult result = resourceValidator.validate(ad);
+	protected ActivityDefinition createWithouAuthExtension()
+	{
+		ActivityDefinition d = new ActivityDefinition();
+		d.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
+		d.setUrl("http://dsf.dev/bpe/Process/test");
+		d.setVersion("2.0.0");
+		d.setStatus(PublicationStatus.ACTIVE);
+		d.setKind(ActivityDefinitionKind.TASK);
+		d.setName("TestProcess");
+		d.setDate(new Date());
+
+		return d;
+	}
+
+	@Test
+	public void runMetaTagTests() throws Exception
+	{
+		doRunMetaTagTests(resourceValidator);
+	}
+
+	@Test
+	public void runMetaDataResourceTests() throws Exception
+	{
+		doRunMetaDataResourceTests(resourceValidator);
+	}
+
+	@Test
+	public void testActivityDefinitionWithProcessAuthorizationRequesterRemoteAllRecipientLocalAllValid()
+			throws Exception
+	{
+		ActivityDefinition d = createWithouAuthExtension();
+		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		Extension processAuthorization = d.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
+		processAuthorization.addExtension("message-name", new StringType("foo"));
+		processAuthorization.addExtension("task-profile",
+				new CanonicalType("http://bar.org/fhir/StructureDefinition/baz"));
+		processAuthorization.addExtension("requester",
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "REMOTE_ALL", null));
+		processAuthorization.addExtension("recipient",
+				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
+
+		logResource(d);
+
+		ValidationResult result = resourceValidator.validate(d);
 
 		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
@@ -99,8 +131,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 	public void testActivityDefinitionWithProcessAuthorizationRequesterLocalPractitionerRoleRecipientLocalAllValid()
 			throws Exception
 	{
-		ActivityDefinition ad = createActivityDefinition();
-		Extension processAuthorization = ad.addExtension()
+		ActivityDefinition d = createWithouAuthExtension();
+		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
@@ -115,9 +148,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 		processAuthorization.addExtension("recipient",
 				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 
-		logResource(ad);
+		logResource(d);
 
-		ValidationResult result = resourceValidator.validate(ad);
+		ValidationResult result = resourceValidator.validate(d);
 
 		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
@@ -128,8 +161,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 	public void testActivityDefinitionWithProcessAuthorizationRequesterRemoteOrganizationRecipientLocalParentOrganizationRoleValid()
 			throws Exception
 	{
-		ActivityDefinition ad = createActivityDefinition();
-		Extension processAuthorization = ad.addExtension()
+		ActivityDefinition d = createWithouAuthExtension();
+		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
@@ -152,9 +186,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
-		logResource(ad);
+		logResource(d);
 
-		ValidationResult result = resourceValidator.validate(ad);
+		ValidationResult result = resourceValidator.validate(d);
 
 		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
@@ -165,8 +199,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 	public void testActivityDefinitionWithProcessAuthorizationRequesterOrganizationPractitionerRoleRecipientLocalParentOrganizationRoleValid()
 			throws Exception
 	{
-		ActivityDefinition ad = createActivityDefinition();
-		Extension processAuthorization = ad.addExtension()
+		ActivityDefinition d = createWithouAuthExtension();
+		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
@@ -193,9 +228,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 				new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
-		logResource(ad);
+		logResource(d);
 
-		ValidationResult result = resourceValidator.validate(ad);
+		ValidationResult result = resourceValidator.validate(d);
 
 		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
@@ -206,8 +241,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 	public void testActivityDefinitionWithProcessAuthorizationRequesterParentOrganizationRolePractitionerRoleRecipientLocalAllValid()
 			throws Exception
 	{
-		ActivityDefinition ad = createActivityDefinition();
-		Extension processAuthorization = ad.addExtension()
+		ActivityDefinition d = createWithouAuthExtension();
+		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
@@ -229,9 +265,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 		processAuthorization.addExtension("recipient",
 				new Coding("http://dsf.dev/fhir/CodeSystem/process-authorization", "LOCAL_ALL", null));
 
-		logResource(ad);
+		logResource(d);
 
-		ValidationResult result = resourceValidator.validate(ad);
+		ValidationResult result = resourceValidator.validate(d);
 
 		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
@@ -242,8 +278,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 	public void testActivityDefinitionWithProcessAuthorizationRequesterRemoteOrganizationRecipientRemoteConsortiumRoleNotValid()
 			throws Exception
 	{
-		ActivityDefinition ad = createActivityDefinition();
-		Extension processAuthorization = ad.addExtension()
+		ActivityDefinition d = createWithouAuthExtension();
+		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
 		processAuthorization.addExtension("message-name", new StringType("foo"));
 		processAuthorization.addExtension("task-profile",
@@ -260,9 +297,9 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 				null);
 		processAuthorization.addExtension("recipient", recipientCoding);
 
-		logResource(ad);
+		logResource(d);
 
-		ValidationResult result = resourceValidator.validate(ad);
+		ValidationResult result = resourceValidator.validate(d);
 
 		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
@@ -273,11 +310,12 @@ public class ActivityDefinitionProfileTest extends AbstractProfileTest
 	@Test
 	public void testActivityDefinitionWithoutProcessAuthorizationNotValid() throws Exception
 	{
-		ActivityDefinition ad = createActivityDefinition();
+		ActivityDefinition d = createWithouAuthExtension();
+		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
-		logResource(ad);
+		logResource(d);
 
-		ValidationResult result = resourceValidator.validate(ad);
+		ValidationResult result = resourceValidator.validate(d);
 
 		ValidationSupportRule.logValidationMessages(logger::debug, result);
 

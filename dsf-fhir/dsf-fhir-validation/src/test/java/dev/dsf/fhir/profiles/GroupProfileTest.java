@@ -24,6 +24,7 @@ public class GroupProfileTest extends AbstractMetaTagProfileTest<Group>
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected Group create()
 	{
 		Group g = new Group();
