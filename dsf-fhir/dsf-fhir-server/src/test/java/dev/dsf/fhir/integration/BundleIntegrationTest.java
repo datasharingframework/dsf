@@ -110,7 +110,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		newS.setKind(StructureDefinitionKind.RESOURCE);
 		newS.setAbstract(false);
 		newS.setType("Task");
-		newS.setBaseDefinition("http://dsf.dev/fhir/StructureDefinition/task-base");
+		newS.setBaseDefinition("http://dsf.dev/fhir/StructureDefinition/task");
 		newS.setDerivation(TypeDerivationRule.CONSTRAINT);
 		ElementDefinition diff = newS.getDifferential().addElement();
 		diff.setId("Task.instantiatesUri");
