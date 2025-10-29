@@ -1,5 +1,6 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
 	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="ALL" />
@@ -18,7 +19,7 @@
 	<kind value="resource" />
 	<abstract value="false" />
 	<type value="Task" />
-	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task-base" />
+	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task" />
 	<derivation value="constraint" />
 	<differential>
 		<element id="Task.instantiatesUri">
