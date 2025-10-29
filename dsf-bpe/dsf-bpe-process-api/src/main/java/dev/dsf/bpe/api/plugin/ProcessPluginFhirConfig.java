@@ -1,12 +1,14 @@
 package dev.dsf.bpe.api.plugin;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
+public final class ProcessPluginFhirConfig<R, A, C, L, M, N, Q, S, T, V>
 {
 	public static final record Identifier(Optional<String> system, Optional<String> value)
 	{
@@ -16,6 +18,7 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 	{
 	}
 
+	private final Class<R> resourceClass;
 	private final Class<A> activityDefinitionClass;
 	private final Class<C> codeSystemClass;
 	private final Class<L> libraryClass;
@@ -54,8 +57,22 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 	private final Function<S, Optional<String>> getStructureDefinitionBaseDefinition;
 	private final BiConsumer<S, String> setStructureDefinitionBaseDefinition;
 
-	public ProcessPluginFhirConfig(Class<A> activityDefinitionClass, Class<C> codeSystemClass, Class<L> libraryClass,
-			Class<M> measureClass, Class<N> namingSystemClass, Class<Q> questionnaireClass,
+	private final Function<R, List<String>> getProfiles;
+
+	private final Consumer<A> modifyActivityDefinition;
+	private final Consumer<C> modifyCodeSystem;
+	private final Consumer<L> modifyLibrary;
+	private final Consumer<M> modifyMeasure;
+	private final Consumer<N> modifyNamingSystem;
+	private final Consumer<Q> modifyQuestionnaire;
+	private final Consumer<S> modifyStructureDefinition;
+	private final Consumer<V> modifyValueSet;
+
+	private final Predicate<Q> hasQuestionnaireItemsWithRequired;
+	private final Predicate<S> hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion;
+
+	public ProcessPluginFhirConfig(Class<R> resourceClass, Class<A> activityDefinitionClass, Class<C> codeSystemClass,
+			Class<L> libraryClass, Class<M> measureClass, Class<N> namingSystemClass, Class<Q> questionnaireClass,
 			Class<S> structureDefinitionClass, Class<T> taskClass, Class<V> valueSetClass,
 
 			String organizationIdentifierSid, String taskIdentifierSid, String taskStatusDraftCode,
@@ -72,8 +89,18 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 			Predicate<T> hasTaskInput, Predicate<T> hasTaskInputMessageName, Predicate<T> hasTaskOutput,
 
 			Function<S, Optional<String>> getStructureDefinitionBaseDefinition,
-			BiConsumer<S, String> setStructureDefinitionBaseDefinition)
+			BiConsumer<S, String> setStructureDefinitionBaseDefinition,
+
+			Function<R, List<String>> getProfiles,
+
+			Consumer<A> modifyActivityDefinition, Consumer<C> modifyCodeSystem, Consumer<L> modifyLibrary,
+			Consumer<M> modifyMeasure, Consumer<N> modifyNamingSystem, Consumer<Q> modifyQuestionnaire,
+			Consumer<S> modifyStructureDefinition, Consumer<V> modifyValueSet,
+
+			Predicate<Q> hasQuestionnaireItemsWithRequired,
+			Predicate<S> hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion)
 	{
+		this.resourceClass = resourceClass;
 		this.activityDefinitionClass = activityDefinitionClass;
 		this.codeSystemClass = codeSystemClass;
 		this.libraryClass = libraryClass;
@@ -111,6 +138,20 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 
 		this.getStructureDefinitionBaseDefinition = getStructureDefinitionBaseDefinition;
 		this.setStructureDefinitionBaseDefinition = setStructureDefinitionBaseDefinition;
+
+		this.getProfiles = getProfiles;
+
+		this.modifyActivityDefinition = modifyActivityDefinition;
+		this.modifyCodeSystem = modifyCodeSystem;
+		this.modifyLibrary = modifyLibrary;
+		this.modifyMeasure = modifyMeasure;
+		this.modifyNamingSystem = modifyNamingSystem;
+		this.modifyQuestionnaire = modifyQuestionnaire;
+		this.modifyStructureDefinition = modifyStructureDefinition;
+		this.modifyValueSet = modifyValueSet;
+
+		this.hasQuestionnaireItemsWithRequired = hasQuestionnaireItemsWithRequired;
+		this.hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion = hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion;
 	}
 
 	public String getOrganizationIdentifierSid()
@@ -295,5 +336,78 @@ public final class ProcessPluginFhirConfig<A, C, L, M, N, Q, S, T, V>
 	{
 		if (isStructureDefinition(resource))
 			setStructureDefinitionBaseDefinition.accept(structureDefinitionClass.cast(resource), value);
+	}
+
+	public List<String> getProfiles(Object resource)
+	{
+		if (isResource(resource))
+			return getProfiles.apply(resourceClass.cast(resource));
+		else
+			return List.of();
+	}
+
+	public void modifyActivityDefinition(Object resource)
+	{
+		if (isActivityDefinition(resource))
+			modifyActivityDefinition.accept(activityDefinitionClass.cast(resource));
+	}
+
+	public void modifyCodeSystem(Object resource)
+	{
+		if (isCodeSystem(resource))
+			modifyCodeSystem.accept(codeSystemClass.cast(resource));
+	}
+
+	public void modifyLibrary(Object resource)
+	{
+		if (isLibrary(resource))
+			modifyLibrary.accept(libraryClass.cast(resource));
+	}
+
+	public void modifyMeasure(Object resource)
+	{
+		if (isMeasure(resource))
+			modifyMeasure.accept(measureClass.cast(resource));
+	}
+
+	public void modifyNamingSystem(Object resource)
+	{
+		if (isNamingSystem(resource))
+			modifyNamingSystem.accept(namingSystemClass.cast(resource));
+	}
+
+	public void modifyQuestionnaire(Object resource)
+	{
+		if (isQuestionnaire(resource))
+			modifyQuestionnaire.accept(questionnaireClass.cast(resource));
+	}
+
+	public void modifyStructureDefinition(Object resource)
+	{
+		if (isStructureDefinition(resource))
+			modifyStructureDefinition.accept(structureDefinitionClass.cast(resource));
+	}
+
+	public void modifyValueSet(Object resource)
+	{
+		if (isValueSet(resource))
+			modifyValueSet.accept(valueSetClass.cast(resource));
+	}
+
+	public boolean hasQuestionnaireItemsWithRequired(Object resource)
+	{
+		if (isQuestionnaire(resource))
+			return hasQuestionnaireItemsWithRequired.test(questionnaireClass.cast(resource));
+		else
+			return true;
+	}
+
+	public boolean hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion(Object resource)
+	{
+		if (isStructureDefinition(resource))
+			return hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion
+					.test(structureDefinitionClass.cast(resource));
+		else
+			return true;
 	}
 }
