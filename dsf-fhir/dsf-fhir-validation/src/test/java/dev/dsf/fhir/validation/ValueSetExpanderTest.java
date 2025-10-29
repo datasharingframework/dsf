@@ -50,7 +50,7 @@ public class ValueSetExpanderTest
 
 	private List<CodeSystem> readCodeSystems()
 	{
-		return Stream.of("dsf-read-access-tag-1.0.0.xml", "dsf-bpmn-message-1.0.0.xml")
+		return Stream.of("dsf-read-access-tag-2.0.0.xml", "dsf-bpmn-message-2.0.0.xml")
 				.map(file -> "/fhir/CodeSystem/" + file).map(this::readCodeSystem).collect(Collectors.toList());
 	}
 
@@ -70,7 +70,7 @@ public class ValueSetExpanderTest
 	public void testExpandFeasibility() throws Exception
 	{
 		ValueSetExpansionOutcome out = valueSetExpander
-				.expand(readValueSet("/fhir/ValueSet/dsf-read-access-tag-1.0.0.xml"));
+				.expand(readValueSet("/fhir/ValueSet/dsf-read-access-tag-2.0.0.xml"));
 
 		assertNotNull(out);
 		assertNull(out.getError());

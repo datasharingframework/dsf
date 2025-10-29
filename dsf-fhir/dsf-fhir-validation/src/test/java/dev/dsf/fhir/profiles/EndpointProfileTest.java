@@ -20,39 +20,63 @@ import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
 import dev.dsf.fhir.validation.ValidationSupportRule;
 
-public class EndpointProfileTest
+public class EndpointProfileTest extends AbstractMetaTagProfileTest<Endpoint>
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointProfileTest.class);
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-extension-certificate-thumbprint-2.0.0.xml", "dsf-endpoint-2.0.0.xml"),
-			List.of("dsf-read-access-tag-1.0.0.xml", "urn_ietf_bcp_13.xml"),
-			List.of("dsf-read-access-tag-1.0.0.xml", "valueset-mimetypes.xml"));
+			List.of("dsf-extension-read-access-organization-2.0.0.xml",
+					"dsf-extension-read-access-parent-organization-role-2.0.0.xml", "dsf-meta-2.0.0.xml",
+					"dsf-extension-certificate-thumbprint-2.0.0.xml", "dsf-endpoint-2.0.0.xml"),
+			List.of("dsf-organization-role-2.0.0.xml", "dsf-read-access-tag-2.0.0.xml", "urn_ietf_bcp_13.xml"),
+			List.of("dsf-organization-role-2.0.0.xml", "dsf-read-access-tag-2.0.0.xml", "valueset-mimetypes.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
+	protected Endpoint create()
+	{
+		Endpoint e = new Endpoint();
+		e.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/endpoint");
+		e.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue("fhir.test.com");
+		e.setStatus(EndpointStatus.ACTIVE);
+		e.getManagingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
+		e.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types").setCode("Task");
+		e.addPayloadMimeType(Constants.CT_FHIR_XML_NEW);
+		e.addPayloadMimeType(Constants.CT_FHIR_JSON_NEW);
+		e.setAddress("https://fhir.test.com/fhir");
+		e.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+				.setCode("hl7-fhir-rest");
+
+		return e;
+	}
+
+	@Test
+	public void runMetaTagTests() throws Exception
+	{
+		doRunMetaTagTests(resourceValidator);
+	}
+
 	@Test
 	public void testEndpointProfileValid() throws Exception
 	{
-		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/endpoint");
-		endpoint.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		endpoint.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue("fhir.test.com");
-		endpoint.setStatus(EndpointStatus.ACTIVE);
-		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+		Endpoint e = new Endpoint();
+		e.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/endpoint");
+		e.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		e.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue("fhir.test.com");
+		e.setStatus(EndpointStatus.ACTIVE);
+		e.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
 				.setCode("hl7-fhir-rest");
-		endpoint.getManagingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
-		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
-				.setCode("Task");
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
-		endpoint.setAddress("https://fhir.test.com/fhir");
+		e.getManagingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
+		e.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types").setCode("Task");
+		e.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
+		e.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
+		e.setAddress("https://fhir.test.com/fhir");
 
-		ValidationResult result = resourceValidator.validate(endpoint);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationResult result = resourceValidator.validate(e);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
@@ -61,26 +85,24 @@ public class EndpointProfileTest
 	@Test
 	public void testEndpointProfileValidWithThumbprintExtension() throws Exception
 	{
-		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/endpoint");
-		endpoint.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		endpoint.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue("fhir.test.com");
-		endpoint.setStatus(EndpointStatus.ACTIVE);
-		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+		Endpoint e = new Endpoint();
+		e.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/endpoint");
+		e.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		e.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue("fhir.test.com");
+		e.setStatus(EndpointStatus.ACTIVE);
+		e.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
 				.setCode("hl7-fhir-rest");
-		endpoint.getManagingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
-		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
-				.setCode("Task");
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
-		endpoint.setAddress("https://fhir.test.com/fhir");
-		endpoint.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+		e.getManagingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
+		e.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types").setCode("Task");
+		e.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
+		e.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
+		e.setAddress("https://fhir.test.com/fhir");
+		e.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.setValue(new StringType(
 						"6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a82a117824a4c430eb"));
 
-		ValidationResult result = resourceValidator.validate(endpoint);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationResult result = resourceValidator.validate(e);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());

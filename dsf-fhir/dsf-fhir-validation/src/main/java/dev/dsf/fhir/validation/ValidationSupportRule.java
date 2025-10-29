@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -47,15 +48,15 @@ public class ValidationSupportRule extends ExternalResource
 	private static final Pattern DATE_PATTERN2 = Pattern.compile(Pattern.quote(DATE_PATTERN_STRING2));
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+	private final FhirContext context;
 	private final String version;
 	private final LocalDate date;
 
-	private final FhirContext context;
 	private final IValidationSupport validationSupport;
 
 	public ValidationSupportRule(List<String> structureDefinitions, List<String> codeSystems, List<String> valueSets)
 	{
-		this(null, structureDefinitions, codeSystems, valueSets);
+		this((String) null, structureDefinitions, codeSystems, valueSets);
 	}
 
 	public ValidationSupportRule(String version, List<String> structureDefinitions, List<String> codeSystems,
@@ -67,10 +68,28 @@ public class ValidationSupportRule extends ExternalResource
 	public ValidationSupportRule(String version, LocalDate date, List<String> structureDefinitions,
 			List<String> codeSystems, List<String> valueSets)
 	{
+		this(FhirContext.forR4(), version, date, structureDefinitions, codeSystems, valueSets);
+	}
+
+	public ValidationSupportRule(FhirContext context, List<String> structureDefinitions, List<String> codeSystems,
+			List<String> valueSets)
+	{
+		this(context, null, structureDefinitions, codeSystems, valueSets);
+	}
+
+	public ValidationSupportRule(FhirContext context, String version, List<String> structureDefinitions,
+			List<String> codeSystems, List<String> valueSets)
+	{
+		this(context, version, LocalDate.MIN, structureDefinitions, codeSystems, valueSets);
+	}
+
+	public ValidationSupportRule(FhirContext context, String version, LocalDate date, List<String> structureDefinitions,
+			List<String> codeSystems, List<String> valueSets)
+	{
+		this.context = context;
 		this.version = version;
 		this.date = date;
 
-		context = FhirContext.forR4();
 		HapiLocalizer localizer = new HapiLocalizer()
 		{
 			@Override
@@ -180,8 +199,13 @@ public class ValidationSupportRule extends ExternalResource
 
 	public static void logValidationMessages(Logger logger, ValidationResult result)
 	{
+		logValidationMessages(logger::info, result);
+	}
+
+	public static void logValidationMessages(Consumer<String> logger, ValidationResult result)
+	{
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger);
 	}
 
 	private static String replaceVersionAndDate(String read, String version, LocalDate date)

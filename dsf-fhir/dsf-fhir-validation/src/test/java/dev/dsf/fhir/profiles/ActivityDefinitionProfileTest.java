@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -25,13 +24,15 @@ import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
 import dev.dsf.fhir.validation.ValidationSupportRule;
 
-public class ActivityDefinitionProfileTest
+public class ActivityDefinitionProfileTest extends AbstractProfileTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProfileTest.class);
 
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-activity-definition-2.0.0.xml", "dsf-extension-process-authorization-2.0.0.xml",
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(context,
+			List.of("dsf-extension-read-access-organization-2.0.0.xml",
+					"dsf-extension-read-access-parent-organization-role-2.0.0.xml", "dsf-meta-2.0.0.xml",
+					"dsf-extension-process-authorization-2.0.0.xml",
 					"dsf-extension-process-authorization-practitioner-2.0.0.xml",
 					"dsf-extension-process-authorization-organization-2.0.0.xml",
 					"dsf-extension-process-authorization-organization-practitioner-2.0.0.xml",
@@ -45,12 +46,13 @@ public class ActivityDefinitionProfileTest
 					"dsf-coding-process-authorization-local-parent-organization-role-practitioner-2.0.0.xml",
 					"dsf-coding-process-authorization-remote-all-2.0.0.xml",
 					"dsf-coding-process-authorization-remote-organization-2.0.0.xml",
-					"dsf-coding-process-authorization-remote-parent-organization-role-2.0.0.xml"),
-			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml",
-					"dsf-practitioner-role-1.0.0.xml", "dsf-process-authorization-1.0.0.xml"),
-			List.of("dsf-read-access-tag-1.0.0.xml", "dsf-organization-role-1.0.0.xml",
-					"dsf-practitioner-role-1.0.0.xml", "dsf-process-authorization-recipient-1.0.0.xml",
-					"dsf-process-authorization-requester-1.0.0.xml"));
+					"dsf-coding-process-authorization-remote-parent-organization-role-2.0.0.xml",
+					"dsf-activity-definition-2.0.0.xml"),
+			List.of("dsf-read-access-tag-2.0.0.xml", "dsf-organization-role-2.0.0.xml",
+					"dsf-practitioner-role-2.0.0.xml", "dsf-process-authorization-2.0.0.xml"),
+			List.of("dsf-read-access-tag-2.0.0.xml", "dsf-organization-role-2.0.0.xml",
+					"dsf-practitioner-role-2.0.0.xml", "dsf-process-authorization-recipient-2.0.0.xml",
+					"dsf-process-authorization-requester-2.0.0.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -61,26 +63,12 @@ public class ActivityDefinitionProfileTest
 		ad.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
 		ad.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		ad.setUrl("http://dsf.dev/bpe/Process/test");
-		ad.setVersion("1.0.0");
+		ad.setVersion("2.0.0");
 		ad.setStatus(PublicationStatus.ACTIVE);
 		ad.setKind(ActivityDefinitionKind.TASK);
 		ad.setName("TestProcess");
 
 		return ad;
-	}
-
-	private void logMessages(ValidationResult result)
-	{
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::debug);
-	}
-
-	private void logResource(Resource resource)
-	{
-		logger.trace("{}",
-				validationRule.getFhirContext().newJsonParser().setStripVersionsFromReferences(false)
-						.setOverrideResourceIdWithBundleEntryFullUrl(false).setPrettyPrint(false)
-						.encodeResourceToString(resource));
 	}
 
 	@Test
@@ -102,7 +90,7 @@ public class ActivityDefinitionProfileTest
 
 		ValidationResult result = resourceValidator.validate(ad);
 
-		logMessages(result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertTrue(result.isSuccessful());
 	}
@@ -131,7 +119,7 @@ public class ActivityDefinitionProfileTest
 
 		ValidationResult result = resourceValidator.validate(ad);
 
-		logMessages(result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertTrue(result.isSuccessful());
 	}
@@ -168,7 +156,7 @@ public class ActivityDefinitionProfileTest
 
 		ValidationResult result = resourceValidator.validate(ad);
 
-		logMessages(result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertTrue(result.isSuccessful());
 	}
@@ -209,7 +197,7 @@ public class ActivityDefinitionProfileTest
 
 		ValidationResult result = resourceValidator.validate(ad);
 
-		logMessages(result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertTrue(result.isSuccessful());
 	}
@@ -245,7 +233,7 @@ public class ActivityDefinitionProfileTest
 
 		ValidationResult result = resourceValidator.validate(ad);
 
-		logMessages(result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertTrue(result.isSuccessful());
 	}
@@ -276,10 +264,10 @@ public class ActivityDefinitionProfileTest
 
 		ValidationResult result = resourceValidator.validate(ad);
 
-		logMessages(result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertFalse(result.isSuccessful());
-		assertEquals(7, result.getMessages().size());
+		assertEquals(9, result.getMessages().size());
 	}
 
 	@Test
@@ -291,7 +279,7 @@ public class ActivityDefinitionProfileTest
 
 		ValidationResult result = resourceValidator.validate(ad);
 
-		logMessages(result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertFalse(result.isSuccessful());
 		assertEquals(2, result.getMessages().size());
