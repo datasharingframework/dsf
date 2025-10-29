@@ -14,6 +14,8 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import dev.dsf.fhir.dao.command.ValidationHelper;
 import dev.dsf.fhir.dao.command.ValidationHelperImpl;
+import dev.dsf.fhir.service.DefaultProfileProvider;
+import dev.dsf.fhir.service.DefaultProfileProviderImpl;
 import dev.dsf.fhir.service.ValidationSupportWithCacheAndEventHandler;
 import dev.dsf.fhir.service.ValidationSupportWithFetchFromDb;
 import dev.dsf.fhir.service.ValidationSupportWithFetchFromDbWithTransaction;
@@ -87,5 +89,11 @@ public class ValidationConfig
 						daoConfig.questionnaireDao(), connection)));
 
 		return validationSupport.populateCache(validationSupport().fetchAllConformanceResources());
+	}
+
+	@Bean
+	public DefaultProfileProvider defaultProfileProvider()
+	{
+		return DefaultProfileProviderImpl.ENABLED;
 	}
 }

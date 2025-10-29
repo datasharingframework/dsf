@@ -7,6 +7,7 @@ import dev.dsf.fhir.dao.OrganizationAffiliationDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -23,10 +24,10 @@ public class OrganizationAffiliationServiceSecure extends
 			ReferenceExtractor referenceExtractor, OrganizationAffiliationDao organizationDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			AuthorizationRule<OrganizationAffiliation> authorizationRule, ResourceValidator resourceValidator,
-			ValidationRules validationRules)
+			ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				OrganizationAffiliation.class, organizationDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator, validationRules);
+				resourceValidator, validationRules, defaultProfileProvider);
 	}
 }

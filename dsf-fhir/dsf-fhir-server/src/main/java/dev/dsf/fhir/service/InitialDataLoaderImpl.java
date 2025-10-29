@@ -50,7 +50,7 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 	}
 
 	@Override
-	public void load(Bundle bundle)
+	public void load(Bundle bundle, DefaultProfileProvider defaultProfileProvider)
 	{
 		if (bundle == null)
 		{
@@ -59,7 +59,7 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 		}
 
 		CommandList commands = commandFactory.createCommands(bundle, INITIAL_DATA_LOADER, PreferReturnType.MINIMAL,
-				PreferHandlingType.STRICT);
+				PreferHandlingType.STRICT, defaultProfileProvider);
 		logger.debug("Executing command list for bundle with {} entries", bundle.getEntry().size());
 		Bundle result = commands.execute();
 		result.getEntry().forEach(this::logResult);

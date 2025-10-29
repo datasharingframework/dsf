@@ -41,6 +41,7 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -60,15 +61,18 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected final ResponseGenerator responseGenerator;
 	protected final ReferenceCleaner referenceCleaner;
 	protected final EventGenerator eventGenerator;
+	protected final DefaultProfileProvider defaultProfileProvider;
 
 	protected R updatedResource;
 	protected ValidationResult validationResult;
+
 
 	public UpdateCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(3, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
@@ -77,6 +81,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		this.referenceCleaner = referenceCleaner;
 
 		this.eventGenerator = eventGenerator;
+		this.defaultProfileProvider = defaultProfileProvider;
 	}
 
 	@Override
@@ -344,6 +349,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 					idTranslationTable, connection);
 
+			defaultProfileProvider.setDefaultProfile(newResource);
 			validationResult = validationHelper.checkResourceValidForUpdate(identity, resource);
 
 			referencesHelper.resolveLogicalReferences(connection);

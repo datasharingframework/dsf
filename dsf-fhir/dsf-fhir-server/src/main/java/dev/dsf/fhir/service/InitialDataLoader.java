@@ -4,5 +4,5 @@ import org.hl7.fhir.r4.model.Bundle;
 
 public interface InitialDataLoader
 {
-	void load(Bundle bundle);
+	void load(Bundle bundle, DefaultProfileProvider defaultProfileProvider);
 }

@@ -14,6 +14,7 @@ import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.history.HistoryService;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.RootService;
@@ -31,10 +32,11 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	private final ExceptionHandler exceptionHandler;
 	private final ReferenceCleaner referenceCleaner;
 	private final HistoryService historyService;
+	private final DefaultProfileProvider defaultProfileProvider;
 
 	public RootServiceImpl(CommandFactory commandFactory, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner,
-			HistoryService historyService)
+			HistoryService historyService, DefaultProfileProvider defaultProfileProvider)
 	{
 		this.commandFactory = commandFactory;
 		this.responseGenerator = responseGenerator;
@@ -42,6 +44,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		this.exceptionHandler = exceptionHandler;
 		this.referenceCleaner = referenceCleaner;
 		this.historyService = historyService;
+		this.defaultProfileProvider = defaultProfileProvider;
 	}
 
 	@Override
@@ -53,6 +56,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(historyService, "historyService");
+		Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
 	}
 
 	@Override
@@ -69,9 +73,9 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
-		CommandList commands = exceptionHandler
-				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentIdentity(),
-						parameterConverter.getPreferReturn(headers), parameterConverter.getPreferHandling(headers)));
+		CommandList commands = exceptionHandler.handleBadBundleException(() -> commandFactory.createCommands(bundle,
+				getCurrentIdentity(), parameterConverter.getPreferReturn(headers),
+				parameterConverter.getPreferHandling(headers), defaultProfileProvider));
 
 		Bundle result = commands.execute(); // throws WebApplicationException
 

@@ -7,6 +7,7 @@ import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -22,10 +23,11 @@ public class QuestionnaireServiceSecure
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, QuestionnaireDao questionnaireDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Questionnaire> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Questionnaire.class, questionnaireDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator, validationRules);
+				resourceValidator, validationRules, defaultProfileProvider);
 	}
 }

@@ -30,6 +30,7 @@ import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -131,7 +132,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 	// create, conditional create
 	private <R extends Resource> Command post(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
-			BundleEntryComponent entry, R resource)
+			BundleEntryComponent entry, R resource, DefaultProfileProvider defaultProfileProvider)
 	{
 		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
 		{
@@ -143,11 +144,13 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				return new CreateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
 						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
 						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						eventGenerator, defaultProfileProvider, daoProvider.getStructureDefinitionSnapshotDao());
 			else
-				return dao.map(d -> new CreateCommand<>(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
-						referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
+				return dao
+						.map(d -> new CreateCommand<>(index, identity, returnType, bundle, entry, serverBase,
+								authorizationHelper, resource, d, exceptionHandler, parameterConverter,
+								responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+								eventGenerator, defaultProfileProvider))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -158,7 +161,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 	// update, conditional update
 	private <R extends Resource> Command put(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
-			BundleEntryComponent entry, R resource)
+			BundleEntryComponent entry, R resource, DefaultProfileProvider defaultProfileProvider)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank()
 				&& entry.getRequest().getUrl().startsWith(resource.getResourceType().name()))
@@ -171,11 +174,13 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				return new UpdateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
 						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
 						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						eventGenerator, defaultProfileProvider, daoProvider.getStructureDefinitionSnapshotDao());
 			else
-				return dao.map(d -> new UpdateCommand<>(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
-						referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
+				return dao
+						.map(d -> new UpdateCommand<>(index, identity, returnType, bundle, entry, serverBase,
+								authorizationHelper, resource, d, exceptionHandler, parameterConverter,
+								responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+								eventGenerator, defaultProfileProvider))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -205,25 +210,26 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 	@Override
 	public CommandList createCommands(Bundle bundle, Identity identity, PreferReturnType returnType,
-			PreferHandlingType handlingType) throws BadBundleException
+			PreferHandlingType handlingType, DefaultProfileProvider defaultProfileProvider) throws BadBundleException
 	{
 		Objects.requireNonNull(bundle, "bundle");
 		Objects.requireNonNull(identity, "identity");
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(handlingType, "handlingType");
+		Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
 
 		if (bundle.getType() != null)
 		{
-			List<Command> commands = IntStream
-					.range(0, bundle.getEntry().size()).mapToObj(index -> createCommand(index, identity, returnType,
-							handlingType, bundle, bundle.getEntry().get(index)))
+			List<Command> commands = IntStream.range(0, bundle.getEntry().size())
+					.mapToObj(index -> createCommand(index, identity, returnType, handlingType, bundle,
+							bundle.getEntry().get(index), defaultProfileProvider))
 					.flatMap(Function.identity()).collect(Collectors.toList());
 
 			return switch (bundle.getType())
 			{
-				case BATCH ->
-					new BatchCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler,
-							commands, validationHelper, snapshotGenerator, eventHandler, responseGenerator);
+				case BATCH -> new BatchCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup,
+						exceptionHandler, commands, validationHelper, snapshotGenerator, eventHandler,
+						responseGenerator);
 
 				case TRANSACTION -> new TransactionCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup,
 						exceptionHandler, commands, transactionResourcesFactory, responseGenerator);
@@ -236,7 +242,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	protected Stream<Command> createCommand(int index, Identity identity, PreferReturnType returnType,
-			PreferHandlingType handlingType, Bundle bundle, BundleEntryComponent entry)
+			PreferHandlingType handlingType, Bundle bundle, BundleEntryComponent entry,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		if (entry.hasRequest() && entry.getRequest().hasMethod())
 		{
@@ -256,11 +263,14 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			{
 				return switch (entry.getRequest().getMethod())
 				{
-					case POST ->
-						resolveReferences(post(index, identity, returnType, bundle, entry, entry.getResource()), index,
-								identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.POST);
+					case POST -> resolveReferences(
+							post(index, identity, returnType, bundle, entry, entry.getResource(),
+									defaultProfileProvider),
+							index, identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.POST);
 
-					case PUT -> resolveReferences(put(index, identity, returnType, bundle, entry, entry.getResource()),
+					case PUT -> resolveReferences(
+							put(index, identity, returnType, bundle, entry, entry.getResource(),
+									defaultProfileProvider),
 							index, identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.PUT);
 
 					default -> throw new BadBundleException("Request method " + entry.getRequest().getMethod()

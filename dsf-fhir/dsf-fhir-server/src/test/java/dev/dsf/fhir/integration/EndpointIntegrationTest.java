@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.search.PageAndCount;
@@ -38,6 +39,10 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 	private Endpoint createEndpoint()
 	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		Organization localOrganization = organizationProvider.getLocalOrganization().get();
+
 		Endpoint endpoint = new Endpoint();
 		endpoint.addIdentifier().setSystem("http://dsf.dev/sid/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
@@ -50,6 +55,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		endpoint.addPayloadMimeType("application/fhir+json");
 		endpoint.addPayloadMimeType("application/fhir+xml");
 		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
+		endpoint.getManagingOrganization()
+				.setReferenceElement(localOrganization.getIdElement().toUnqualifiedVersionless());
 		return endpoint;
 	}
 
@@ -194,21 +201,10 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	{
 		FhirContext context = FhirContext.forR4();
 
-		Organization organization = new Organization();
-		getReadAccessHelper().addAll(organization);
-		organization.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("bla-bla.de");
-		organization.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint",
-				new StringType(
-						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
-
-		Organization createdOrg = getWebserviceClient().create(organization);
-		logger.debug("Organization: {}",
-				context.newXmlParser().setPrettyPrint(true).encodeResourceToString(createdOrg));
-
 		Endpoint endpoint = createEndpoint();
 		getReadAccessHelper().addAll(endpoint);
 		endpoint.getManagingOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("bla-bla.de");
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization");
 
 		logger.debug("endpoint: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(endpoint));
 
@@ -266,6 +262,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				new StringType(
 						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
 		organization.addEndpoint().setReference(endTempId);
+		organization.setActive(true);
 
 		Endpoint endpoint = createEndpoint();
 		getReadAccessHelper().addAll(endpoint);

@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -112,6 +113,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		newS.setType("Task");
 		newS.setBaseDefinition("http://dsf.dev/fhir/StructureDefinition/task");
 		newS.setDerivation(TypeDerivationRule.CONSTRAINT);
+		newS.setDate(new Date());
 		ElementDefinition diff = newS.getDifferential().addElement();
 		diff.setId("Task.instantiatesUri");
 		diff.setPath("Task.instantiatesUri");

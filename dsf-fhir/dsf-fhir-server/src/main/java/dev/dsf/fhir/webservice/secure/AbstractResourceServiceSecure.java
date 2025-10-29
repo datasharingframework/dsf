@@ -33,6 +33,7 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -64,18 +65,21 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final AuthorizationRule<R> authorizationRule;
 	protected final ResourceValidator resourceValidator;
 	protected final ValidationRules validationRules;
+	protected final DefaultProfileProvider defaultProfileProvider;
 
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<R> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
 		this.referenceCleaner = referenceCleaner;
 		this.referenceExtractor = referenceExtractor;
 		this.resourceType = resourceType;
+		this.defaultProfileProvider = defaultProfileProvider;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
@@ -100,6 +104,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Objects.requireNonNull(authorizationRule, "authorizationRule");
 		Objects.requireNonNull(resourceValidator, "resourceValidator");
 		Objects.requireNonNull(validationRules, "validationRules");
+		Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
 	}
 
 	private String toValidationLogMessage(ValidationResult validationResult)
@@ -113,6 +118,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	private Response withResourceValidation(R resource, Predicate<R> failValidationOnErrorOrFatal, UriInfo uri,
 			HttpHeaders headers, String method, Supplier<Response> delegate)
 	{
+		defaultProfileProvider.setDefaultProfile(resource);
+		
 		ValidationResult validationResult = resourceValidator.validate(resource);
 
 		if (failValidationOnErrorOrFatal.test(resource) && validationResult.getMessages().stream()

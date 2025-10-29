@@ -25,6 +25,7 @@ import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -48,11 +49,12 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
-			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator, StructureDefinitionDao snapshotDao)
+			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
+			DefaultProfileProvider defaultProfileProvider, StructureDefinitionDao snapshotDao)
 	{
 		super(index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-				referenceCleaner, eventGenerator);
+				referenceCleaner, eventGenerator, defaultProfileProvider);
 
 		this.snapshotDao = snapshotDao;
 	}
