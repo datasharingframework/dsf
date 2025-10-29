@@ -22,7 +22,8 @@ public class MeasureServiceSecure extends AbstractResourceServiceSecure<MeasureD
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, MeasureDao measureDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Measure> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Measure.class, measureDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,

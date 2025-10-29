@@ -22,7 +22,8 @@ public class OrganizationServiceSecure extends
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, OrganizationDao organizationDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Organization> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Organization.class, organizationDao, exceptionHandler, parameterConverter, authorizationRule,

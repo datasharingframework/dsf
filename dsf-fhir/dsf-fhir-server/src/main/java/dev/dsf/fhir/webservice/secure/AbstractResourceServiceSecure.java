@@ -119,7 +119,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			HttpHeaders headers, String method, Supplier<Response> delegate)
 	{
 		defaultProfileProvider.setDefaultProfile(resource);
-		
+
 		ValidationResult validationResult = resourceValidator.validate(resource);
 
 		if (failValidationOnErrorOrFatal.test(resource) && validationResult.getMessages().stream()

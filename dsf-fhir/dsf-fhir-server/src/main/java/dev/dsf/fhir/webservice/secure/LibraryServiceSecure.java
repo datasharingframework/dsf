@@ -22,7 +22,8 @@ public class LibraryServiceSecure extends AbstractResourceServiceSecure<LibraryD
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, LibraryDao libraryDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Library> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Library.class, libraryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,

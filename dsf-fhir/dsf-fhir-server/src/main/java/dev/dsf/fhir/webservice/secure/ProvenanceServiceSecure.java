@@ -22,7 +22,8 @@ public class ProvenanceServiceSecure extends AbstractResourceServiceSecure<Prove
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, ProvenanceDao provenanceDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Provenance> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Provenance.class, provenanceDao, exceptionHandler, parameterConverter, authorizationRule,

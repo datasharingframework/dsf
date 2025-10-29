@@ -238,9 +238,9 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 			return switch (bundle.getType())
 			{
-				case BATCH -> new BatchCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup,
-						exceptionHandler, commands, validationHelper, snapshotGenerator, eventHandler,
-						responseGenerator);
+				case BATCH ->
+					new BatchCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler,
+							commands, validationHelper, snapshotGenerator, eventHandler, responseGenerator);
 
 				case TRANSACTION -> new TransactionCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup,
 						exceptionHandler, commands, transactionResourcesFactory, responseGenerator);

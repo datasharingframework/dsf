@@ -294,11 +294,21 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 						{
 							return switch (b.getValueSet())
 							{
-								case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0", "http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0", "http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0", "http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" -> false;
+								case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" ->
+									false;
 								default -> true;
 							};
 						});

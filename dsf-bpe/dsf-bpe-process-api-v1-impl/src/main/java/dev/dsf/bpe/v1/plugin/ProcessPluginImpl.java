@@ -200,7 +200,8 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 					.concat(Stream.of("http://dsf.dev/fhir/StructureDefinition/activity-definition"), oldProfiles
 							.stream().filter(CanonicalType::hasValue).map(CanonicalType::getValue).map(p -> switch (p)
 							{
-								case "http://dsf.dev/fhir/StructureDefinition/activity-definition|1.0.0" -> "http://dsf.dev/fhir/StructureDefinition/activity-definition";
+								case "http://dsf.dev/fhir/StructureDefinition/activity-definition|1.0.0" ->
+									"http://dsf.dev/fhir/StructureDefinition/activity-definition";
 								default -> p;
 							}))
 					.distinct().map(CanonicalType::new).toList();
@@ -215,7 +216,8 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 					.concat(Stream.of("http://dsf.dev/fhir/StructureDefinition/code-system"), oldProfiles.stream()
 							.filter(CanonicalType::hasValue).map(CanonicalType::getValue).map(p -> switch (p)
 							{
-								case "http://dsf.dev/fhir/StructureDefinition/code-system|1.0.0" -> "http://dsf.dev/fhir/StructureDefinition/code-system";
+								case "http://dsf.dev/fhir/StructureDefinition/code-system|1.0.0" ->
+									"http://dsf.dev/fhir/StructureDefinition/code-system";
 								default -> p;
 							}))
 					.distinct().map(CanonicalType::new).toList();
@@ -262,7 +264,9 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 			List<CanonicalType> newProfiles = oldProfiles.stream().filter(CanonicalType::hasValue)
 					.map(CanonicalType::getValue).map(p -> switch (p)
 					{
-						case "http://dsf.dev/fhir/StructureDefinition/questionnaire|1.0.0", "http://dsf.dev/fhir/StructureDefinition/questionnaire|1.5.0" -> "http://dsf.dev/fhir/StructureDefinition/questionnaire";
+						case "http://dsf.dev/fhir/StructureDefinition/questionnaire|1.0.0",
+								"http://dsf.dev/fhir/StructureDefinition/questionnaire|1.5.0" ->
+							"http://dsf.dev/fhir/StructureDefinition/questionnaire";
 						default -> p;
 					}).distinct().map(CanonicalType::new).toList();
 
@@ -276,7 +280,9 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 			String oldBaseDefinition = s.getBaseDefinition();
 			String newBaseDefinition = switch (oldBaseDefinition)
 			{
-				case "http://dsf.dev/fhir/StructureDefinition/task-base", "http://dsf.dev/fhir/StructureDefinition/task-base|1.0.0" -> "http://dsf.dev/fhir/StructureDefinition/task";
+				case "http://dsf.dev/fhir/StructureDefinition/task-base",
+						"http://dsf.dev/fhir/StructureDefinition/task-base|1.0.0" ->
+					"http://dsf.dev/fhir/StructureDefinition/task";
 				default -> oldBaseDefinition;
 			};
 			s.setBaseDefinition(newBaseDefinition);
@@ -287,11 +293,21 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 					{
 						String newValueSet = switch (b.getValueSet())
 						{
-							case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0", "http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/bpmn-message";
-							case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/organization-role";
-							case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/practitioner-role";
-							case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0", "http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/process-authorization";
-							case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0", "http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/read-access-tag";
+							case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0",
+									"http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" ->
+								"http://dsf.dev/fhir/CodeSystem/bpmn-message";
+							case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0",
+									"http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" ->
+								"http://dsf.dev/fhir/CodeSystem/organization-role";
+							case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0",
+									"http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" ->
+								"http://dsf.dev/fhir/CodeSystem/practitioner-role";
+							case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0",
+									"http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" ->
+								"http://dsf.dev/fhir/CodeSystem/process-authorization";
+							case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0",
+									"http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" ->
+								"http://dsf.dev/fhir/CodeSystem/read-access-tag";
 							default -> b.getValueSet();
 						};
 
@@ -314,7 +330,8 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 					.concat(Stream.of("http://dsf.dev/fhir/StructureDefinition/value-set"), oldProfiles.stream()
 							.filter(CanonicalType::hasValue).map(CanonicalType::getValue).map(p -> switch (p)
 							{
-								case "http://dsf.dev/fhir/StructureDefinition/value-set|1.0.0" -> "http://dsf.dev/fhir/StructureDefinition/value-set";
+								case "http://dsf.dev/fhir/StructureDefinition/value-set|1.0.0" ->
+									"http://dsf.dev/fhir/StructureDefinition/value-set";
 								default -> p;
 							}))
 					.distinct().map(CanonicalType::new).toList();
@@ -332,11 +349,21 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 						{
 							return switch (b.getValueSet())
 							{
-								case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0", "http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0", "http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" -> false;
-								case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0", "http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" -> false;
+								case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" ->
+									false;
+								case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0",
+										"http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" ->
+									false;
 								default -> true;
 							};
 						});

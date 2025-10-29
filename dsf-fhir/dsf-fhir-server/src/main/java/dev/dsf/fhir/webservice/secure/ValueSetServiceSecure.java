@@ -22,7 +22,8 @@ public class ValueSetServiceSecure extends AbstractResourceServiceSecure<ValueSe
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, ValueSetDao valueSetDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<ValueSet> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				ValueSet.class, valueSetDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,

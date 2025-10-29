@@ -12,7 +12,7 @@ public interface DefaultProfileProvider
 	 * Set the default profile if non of the {@link #getSupportedDefaultProfiles(ResourceType)} are already set.<br>
 	 * <br>
 	 * Does nothing if the given resource is <code>null</code>
-	 * 
+	 *
 	 * @param resource
 	 *            may be <code>null</code>
 	 */

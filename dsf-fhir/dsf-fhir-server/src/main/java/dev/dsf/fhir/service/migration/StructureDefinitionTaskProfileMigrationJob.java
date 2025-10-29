@@ -130,11 +130,21 @@ public class StructureDefinitionTaskProfileMigrationJob implements MigrationJob,
 				{
 					String newValueSet = switch (b.getValueSet())
 					{
-						case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0", "http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/bpmn-message";
-						case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/organization-role";
-						case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0", "http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/practitioner-role";
-						case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0", "http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/process-authorization";
-						case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0", "http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" -> "http://dsf.dev/fhir/CodeSystem/read-access-tag";
+						case "http://dsf.dev/fhir/CodeSystem/bpmn-message|1.0.0",
+								"http://dsf.dev/fhir/CodeSystem/bpmn-message|2.0.0" ->
+							"http://dsf.dev/fhir/CodeSystem/bpmn-message";
+						case "http://dsf.dev/fhir/CodeSystem/organization-role|1.0.0",
+								"http://dsf.dev/fhir/CodeSystem/organization-role|2.0.0" ->
+							"http://dsf.dev/fhir/CodeSystem/organization-role";
+						case "http://dsf.dev/fhir/CodeSystem/practitioner-role|1.0.0",
+								"http://dsf.dev/fhir/CodeSystem/practitioner-role|2.0.0" ->
+							"http://dsf.dev/fhir/CodeSystem/practitioner-role";
+						case "http://dsf.dev/fhir/CodeSystem/process-authorization|1.0.0",
+								"http://dsf.dev/fhir/CodeSystem/process-authorization|2.0.0" ->
+							"http://dsf.dev/fhir/CodeSystem/process-authorization";
+						case "http://dsf.dev/fhir/CodeSystem/read-access-tag|1.0.0",
+								"http://dsf.dev/fhir/CodeSystem/read-access-tag|2.0.0" ->
+							"http://dsf.dev/fhir/CodeSystem/read-access-tag";
 						default -> b.getValueSet();
 					};
 
