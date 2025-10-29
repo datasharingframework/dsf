@@ -10,40 +10,30 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 
-public enum DefaultProfileProviderImpl implements DefaultProfileProvider
+public class DefaultProfileProviderImpl implements DefaultProfileProvider
 {
-	ENABLED
+	@Override
+	public void setDefaultProfile(Resource resource)
 	{
-		@Override
-		public void setDefaultProfile(Resource resource)
+		if (resource != null)
 		{
-			if (resource != null)
+			ResourceType resourceType = resource.getResourceType();
+
+			List<String> oldProfiles = resource.getMeta().getProfile().stream().filter(CanonicalType::hasValue)
+					.map(CanonicalType::getValue).toList();
+
+			List<String> supportedDefaultProfiles = getSupportedDefaultProfiles(resourceType);
+
+			if (Collections.disjoint(oldProfiles, supportedDefaultProfiles))
 			{
-				ResourceType resourceType = resource.getResourceType();
+				List<CanonicalType> newProfiles = Stream
+						.concat(getDefaultProfile(resourceType).stream(), oldProfiles.stream()).filter(Objects::nonNull)
+						.distinct().map(CanonicalType::new).toList();
 
-				List<String> oldProfiles = resource.getMeta().getProfile().stream().filter(CanonicalType::hasValue)
-						.map(CanonicalType::getValue).toList();
-
-				List<String> supportedDefaultProfiles = getSupportedDefaultProfiles(resourceType);
-
-				if (Collections.disjoint(oldProfiles, supportedDefaultProfiles))
-				{
-					List<CanonicalType> newProfiles = Stream
-							.concat(getDefaultProfile(resourceType).stream(), oldProfiles.stream())
-							.filter(Objects::nonNull).distinct().map(CanonicalType::new).toList();
-
-					resource.getMeta().setProfile(newProfiles);
-				}
+				resource.getMeta().setProfile(newProfiles);
 			}
 		}
-	},
-	DISABLED
-	{
-		@Override
-		public void setDefaultProfile(Resource resource)
-		{
-		}
-	};
+	}
 
 	@Override
 	public Optional<String> getDefaultProfile(ResourceType resourceType)

@@ -60,7 +60,7 @@ public class CommandConfig
 				helperConfig.parameterConverter(), eventConfig.eventManager(), eventConfig.eventGenerator(),
 				authorizationConfig.authorizationHelper(), validationConfig.validationHelper(),
 				snapshotConfig.snapshotGenerator(), validationConfig.validationRules(),
-				this::transactionResourceFactory);
+				validationConfig.defaultProfileProvider(), this::transactionResourceFactory);
 	}
 
 	@Bean

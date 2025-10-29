@@ -22,7 +22,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
 import ca.uhn.fhir.parser.IParser;
-import dev.dsf.fhir.service.DefaultProfileProviderImpl;
 import dev.dsf.fhir.service.InitialDataLoader;
 import dev.dsf.fhir.service.InitialDataLoaderImpl;
 
@@ -57,7 +56,8 @@ public class InitialDataLoaderConfig
 		{
 			logger.info("Loading data from JAR bundle ...");
 			Bundle bundle = parseXmlBundle(p -> p.parseResource(Bundle.class, fileIn));
-			initialDataLoader().load(bundle, DefaultProfileProviderImpl.DISABLED);
+			initialDataLoader().load(bundle, false);
+			// not validating resources from internal bundle, resource are validated during build
 		}
 		catch (Exception e)
 		{
@@ -76,7 +76,7 @@ public class InitialDataLoaderConfig
 
 			logger.info("Loading data from external bundle ...");
 			Bundle bundle = parseXmlBundle(p -> p.parseResource(Bundle.class, resolved));
-			initialDataLoader().load(bundle, DefaultProfileProviderImpl.ENABLED);
+			initialDataLoader().load(bundle, true);
 		}
 		catch (Exception e)
 		{

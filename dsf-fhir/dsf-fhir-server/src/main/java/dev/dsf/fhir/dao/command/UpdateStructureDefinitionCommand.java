@@ -50,11 +50,11 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
-			DefaultProfileProvider defaultProfileProvider, StructureDefinitionDao snapshotDao)
+			DefaultProfileProvider defaultProfileProvider, boolean enableValidation, StructureDefinitionDao snapshotDao)
 	{
 		super(index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-				referenceCleaner, eventGenerator, defaultProfileProvider);
+				referenceCleaner, eventGenerator, defaultProfileProvider, enableValidation);
 
 		this.snapshotDao = snapshotDao;
 	}

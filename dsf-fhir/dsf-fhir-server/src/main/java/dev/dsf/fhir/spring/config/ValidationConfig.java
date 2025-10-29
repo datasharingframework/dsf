@@ -94,6 +94,6 @@ public class ValidationConfig
 	@Bean
 	public DefaultProfileProvider defaultProfileProvider()
 	{
-		return DefaultProfileProviderImpl.ENABLED;
+		return new DefaultProfileProviderImpl();
 	}
 }

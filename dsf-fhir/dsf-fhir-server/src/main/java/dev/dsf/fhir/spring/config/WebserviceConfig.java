@@ -912,7 +912,7 @@ public class WebserviceConfig
 	{
 		return new RootServiceImpl(commandConfig.commandFactory(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), helperConfig.exceptionHandler(), referenceConfig.referenceCleaner(),
-				historyConfig.historyService(), validationConfig.defaultProfileProvider());
+				historyConfig.historyService());
 	}
 
 	@Bean

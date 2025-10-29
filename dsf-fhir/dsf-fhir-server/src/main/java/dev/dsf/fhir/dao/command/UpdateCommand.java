@@ -62,17 +62,17 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected final ReferenceCleaner referenceCleaner;
 	protected final EventGenerator eventGenerator;
 	protected final DefaultProfileProvider defaultProfileProvider;
+	protected final boolean enableValidation;
 
 	protected R updatedResource;
 	protected ValidationResult validationResult;
-
 
 	public UpdateCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
-			DefaultProfileProvider defaultProfileProvider)
+			DefaultProfileProvider defaultProfileProvider, boolean enableValidation)
 	{
 		super(3, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
@@ -82,6 +82,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		this.eventGenerator = eventGenerator;
 		this.defaultProfileProvider = defaultProfileProvider;
+		this.enableValidation = enableValidation;
+
+		if (PreferReturnType.OPERATION_OUTCOME.equals(returnType) && !enableValidation)
+			throw new IllegalArgumentException("Return type 'operation outcome' not allowed if validation disabled");
 	}
 
 	@Override
@@ -349,8 +353,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 					idTranslationTable, connection);
 
-			defaultProfileProvider.setDefaultProfile(newResource);
-			validationResult = validationHelper.checkResourceValidForUpdate(identity, resource);
+			if (enableValidation)
+			{
+				defaultProfileProvider.setDefaultProfile(newResource);
+				validationResult = validationHelper.checkResourceValidForUpdate(identity, resource);
+			}
 
 			referencesHelper.resolveLogicalReferences(connection);
 
@@ -380,7 +387,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 					idTranslationTable, connection);
 
-			validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			if (enableValidation)
+			{
+				defaultProfileProvider.setDefaultProfile(resource);
+				validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			}
 
 			referencesHelper.resolveLogicalReferences(connection);
 
@@ -449,7 +460,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		{
 			OperationOutcome outcome = responseGenerator.updated(location.toString(),
 					updatedResourceWithResolvedReferences);
-			validationResult.populateOperationOutcome(outcome);
+
+			if (validationResult != null)
+				validationResult.populateOperationOutcome(outcome);
+
 			resultEntry.getResponse().setOutcome(outcome);
 		}
 

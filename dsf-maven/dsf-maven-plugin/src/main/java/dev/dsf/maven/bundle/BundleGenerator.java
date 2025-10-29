@@ -188,9 +188,6 @@ public class BundleGenerator
 			{
 				Resource r = newXmlParser().parseResource(resource, in);
 
-				// removing self declared profiles to allow initial data loader to make it past the FHIR validator
-				r.getMeta().setProfile(null);
-
 				String ifNoneExistValue = Files.readString(postFile);
 
 				BundleEntryComponent entry = bundle.addEntry();

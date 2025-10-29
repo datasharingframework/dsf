@@ -59,6 +59,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected final ReferenceCleaner referenceCleaner;
 	protected final EventGenerator eventGenerator;
 	protected final DefaultProfileProvider defaultProfileProvider;
+	protected final boolean enableValidation;
 
 	protected R createdResource;
 	protected Response responseResult;
@@ -69,7 +70,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
-			DefaultProfileProvider defaultProfileProvider)
+			DefaultProfileProvider defaultProfileProvider, boolean enableValidation)
 	{
 		super(2, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
@@ -79,6 +80,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		this.eventGenerator = eventGenerator;
 		this.defaultProfileProvider = defaultProfileProvider;
+		this.enableValidation = enableValidation;
+
+		if (PreferReturnType.OPERATION_OUTCOME.equals(returnType) && !enableValidation)
+			throw new IllegalArgumentException("Return type 'operation outcome' not allowed if validation disabled");
 	}
 
 	@Override
@@ -153,8 +158,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		{
 			responseResult = null;
 
-			defaultProfileProvider.setDefaultProfile(resource);
-			validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			if (enableValidation)
+			{
+				defaultProfileProvider.setDefaultProfile(resource);
+				validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			}
 
 			referencesHelper.resolveLogicalReferences(connection);
 
@@ -282,7 +290,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			{
 				OperationOutcome outcome = responseGenerator.created(location.toString(),
 						createdResourceWithResolvedReferences);
-				validationResult.populateOperationOutcome(outcome);
+
+				if (validationResult != null)
+					validationResult.populateOperationOutcome(outcome);
+
 				resultEntry.getResponse().setOutcome(outcome);
 			}
 
