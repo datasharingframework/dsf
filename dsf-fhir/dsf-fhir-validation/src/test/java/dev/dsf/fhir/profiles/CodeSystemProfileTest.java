@@ -26,6 +26,7 @@ public class CodeSystemProfileTest extends AbstractMetaDataResourceProfileTest<C
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
+	@Override
 	protected CodeSystem create()
 	{
 		CodeSystem s = new CodeSystem();
