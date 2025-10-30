@@ -871,12 +871,50 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					}
 				}
 
+				// INPROGRESS -> INPROGRESS
+				else if (TaskStatus.INPROGRESS.equals(oldResource.getStatus())
+						&& TaskStatus.INPROGRESS.equals(newResource.getStatus()))
+				{
+					final Optional<String> notSame = reasonNotSame(oldResource, newResource);
+					if (notSame.isEmpty())
+					{
+						if (taskAllowedForRecipient(connection, newResource))
+						{
+							logger.info(
+									"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status in-progress, new Task.status in-progress, process allowed for current identity",
+									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
+									TaskStatus.INPROGRESS.toCode(), identity.getName());
+
+							return Optional.of(
+									"Local identity, Task.status in-progress, Task.restriction.recipient local organization, process with instantiatesCanonical and message-name allowed for current identity"
+											+ ", Task defines needed profile, Task.instantiatesCanonical not modified, Task.requester not modified, Task.restriction not modified, Task.input not modified");
+						}
+						else
+						{
+							logger.warn(
+									"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', process with instantiatesCanonical, message-name, requester or recipient not allowed",
+									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
+									TaskStatus.INPROGRESS.toCode(), identity.getName());
+
+							return Optional.empty();
+						}
+					}
+					else
+					{
+						logger.warn(
+								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
+								oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
+								TaskStatus.INPROGRESS.toCode(), identity.getName(), notSame.get());
+
+						return Optional.empty();
+					}
+				}
 				// INPROGRESS -> COMPLETED
 				else if (TaskStatus.INPROGRESS.equals(oldResource.getStatus())
 						&& TaskStatus.COMPLETED.equals(newResource.getStatus()))
 				{
-					final Optional<String> same = reasonNotSame(oldResource, newResource);
-					if (same.isEmpty())
+					final Optional<String> notSame = reasonNotSame(oldResource, newResource);
+					if (notSame.isEmpty())
 					{
 						if (taskAllowedForRecipient(connection, newResource))
 						{
@@ -904,7 +942,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						logger.warn(
 								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
 								oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
-								TaskStatus.COMPLETED.toCode(), identity.getName(), same.get());
+								TaskStatus.COMPLETED.toCode(), identity.getName(), notSame.get());
 
 						return Optional.empty();
 					}
@@ -914,8 +952,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				else if (TaskStatus.REQUESTED.equals(oldResource.getStatus())
 						&& TaskStatus.FAILED.equals(newResource.getStatus()))
 				{
-					final Optional<String> same = reasonNotSame(oldResource, newResource);
-					if (same.isEmpty())
+					final Optional<String> notSame = reasonNotSame(oldResource, newResource);
+					if (notSame.isEmpty())
 					{
 						logger.info(
 								"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status requested, new Task.status failed",
@@ -931,7 +969,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						logger.warn(
 								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
 								oldResourceId, oldResourceVersion, TaskStatus.REQUESTED.toCode(),
-								TaskStatus.FAILED.toCode(), identity.getName(), same.get());
+								TaskStatus.FAILED.toCode(), identity.getName(), notSame.get());
 
 						return Optional.empty();
 					}
@@ -940,8 +978,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				else if (TaskStatus.INPROGRESS.equals(oldResource.getStatus())
 						&& TaskStatus.FAILED.equals(newResource.getStatus()))
 				{
-					final Optional<String> same = reasonNotSame(oldResource, newResource);
-					if (same.isEmpty())
+					final Optional<String> notSame = reasonNotSame(oldResource, newResource);
+					if (notSame.isEmpty())
 					{
 						if (taskAllowedForRecipient(connection, newResource))
 						{
@@ -969,7 +1007,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						logger.warn(
 								"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', modification of Task properties {} not allowed",
 								oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
-								TaskStatus.FAILED.toCode(), identity.getName(), same.get());
+								TaskStatus.FAILED.toCode(), identity.getName(), notSame.get());
 
 						return Optional.empty();
 					}
@@ -985,6 +1023,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 							identity.getName(),
 							Stream.of(Stream.of(TaskStatus.DRAFT, TaskStatus.DRAFT),
 									Stream.of(TaskStatus.REQUESTED, TaskStatus.INPROGRESS),
+									Stream.of(TaskStatus.INPROGRESS, TaskStatus.INPROGRESS),
 									Stream.of(TaskStatus.INPROGRESS, TaskStatus.COMPLETED),
 									Stream.of(TaskStatus.INPROGRESS, TaskStatus.FAILED))
 									.map(s -> s.map(TaskStatus::toCode).collect(Collectors.joining("->")))

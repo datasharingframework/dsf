@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v2.activity.task.BusinessKeyStrategies;
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
+import dev.dsf.bpe.v2.service.StartTaskUpdater;
 
 /**
  * Gives access to process execution variables. Includes factory methods for {@link Target} and {@link Targets} values.
@@ -247,6 +248,14 @@ public interface Variables
 	 * @see #getTasks()
 	 */
 	Task getStartTask();
+
+	/**
+	 * Returns a {@link StartTaskUpdater} to modify the start task during process execution and propagate modified
+	 * output parameters to the local DSF FHIR server.
+	 *
+	 * @return service to update the start task
+	 */
+	StartTaskUpdater getStartTaskUpdater();
 
 	/**
 	 * Returns the latest {@link Task} received by this process or subprocess via a intermediate message catch event or
