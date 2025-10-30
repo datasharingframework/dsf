@@ -26,6 +26,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -88,8 +89,8 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 	private static String baseUrl;
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
-	private static final ServerSocketChannel apiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
-	private static final ServerSocketChannel statusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+	private ServerSocketChannel apiConnectorChannel;
+	private ServerSocketChannel statusConnectorChannel;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -97,6 +98,13 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
 				liquibaseRule.getDatabaseName());
 		defaultDataSource.unwrap(BasicDataSource.class).start();
+	}
+
+	@Before
+	public void before()
+	{
+		apiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+		statusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
 
 		baseUrl = "https://localhost:" + apiConnectorChannel.socket().getLocalPort() + CONTEXT_PATH;
 
@@ -198,7 +206,8 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 		return initParameters;
 	}
 
-	private static JettyServer createFhirServer(Map<String, String> initParameters) throws Exception
+	private static JettyServer createFhirServer(Map<String, String> initParameters,
+			ServerSocketChannel apiConnectorChannel, ServerSocketChannel statusConnectorChannel) throws Exception
 	{
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
@@ -237,7 +246,8 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 	@Test
 	public void testFhirServerStartupWithoutThumbprint() throws Exception
 	{
-		fhirServer = createFhirServer(getDefaultInitParameters(statusConnectorChannel, apiConnectorChannel));
+		fhirServer = createFhirServer(getDefaultInitParameters(statusConnectorChannel, apiConnectorChannel),
+				apiConnectorChannel, statusConnectorChannel);
 		fhirServer.start();
 		Organization organization = (Organization) webserviceClient
 				.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0)
@@ -251,7 +261,8 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 	@Test
 	public void testFhirServerStartupWithThumbprint() throws Exception
 	{
-		fhirServer = createFhirServer(getInitParametersWithThumbprint(statusConnectorChannel, apiConnectorChannel));
+		fhirServer = createFhirServer(getInitParametersWithThumbprint(statusConnectorChannel, apiConnectorChannel),
+				apiConnectorChannel, statusConnectorChannel);
 		fhirServer.start();
 		Organization organization = (Organization) webserviceClient
 				.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0)
@@ -278,6 +289,36 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 			logger.error("Error while stopping FHIR Server", e);
 		}
 
+		try
+		{
+			if (apiConnectorChannel != null)
+			{
+				logger.info("Closing API Connector Channel...");
+				apiConnectorChannel.close();
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Error while closing API Connector Channel", e);
+		}
+
+		try
+		{
+			if (statusConnectorChannel != null)
+			{
+				logger.info("Closing Status Connector Channel...");
+				statusConnectorChannel.close();
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Error while closing Status Connector Channel", e);
+		}
+
+		if (webserviceClient != null)
+		{
+			webserviceClient = null;
+		}
 		defaultDataSource.unwrap(BasicDataSource.class).close();
 	}
 }
