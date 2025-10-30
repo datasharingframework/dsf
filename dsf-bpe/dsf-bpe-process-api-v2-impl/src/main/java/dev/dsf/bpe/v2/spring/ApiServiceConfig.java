@@ -260,7 +260,7 @@ public class ApiServiceConfig
 	@Bean
 	public Function<DelegateExecution, ListenerVariables> listenerVariablesFactory()
 	{
-		return execution -> new VariablesImpl(execution, objectMapper());
+		return execution -> new VariablesImpl(execution, objectMapper(), dsfClientProvider().getLocalDsfClient());
 	}
 
 	@Bean

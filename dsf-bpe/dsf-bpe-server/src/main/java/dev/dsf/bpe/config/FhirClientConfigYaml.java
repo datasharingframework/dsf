@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -336,7 +337,10 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 			@JsonProperty(OidcAuth.PROPERTY_TRUSTED_ROOT_CERTIFICATES_FILE) String trustedRootCertificatesFile,
 			@JsonProperty(OidcAuth.PROPERTY_CLIENT_ID) String clientId,
 			@JsonProperty(OidcAuth.PROPERTY_CLIENT_SECRET) char[] clientSecret,
-			@JsonProperty(OidcAuth.PROPERTY_CLIENT_SECRET_FILE) String clientSecretFile) implements WithValidation
+			@JsonProperty(OidcAuth.PROPERTY_CLIENT_SECRET_FILE) String clientSecretFile,
+			@JsonProperty(OidcAuth.PROPERTY_REQUIRED_AUDIENCE) @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<String> requiredAudiences,
+			@JsonProperty(OidcAuth.PROPERTY_VERIFY_AUTHORIZED_PARTY) Boolean verifyAuthorizedParty)
+			implements WithValidation
 	{
 
 		public static final String PROPERTY_BASE_URL = "base-url";
@@ -349,6 +353,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 		public static final String PROPERTY_CLIENT_ID = "client-id";
 		public static final String PROPERTY_CLIENT_SECRET = "client-secret";
 		public static final String PROPERTY_CLIENT_SECRET_FILE = "client-secret-file";
+		public static final String PROPERTY_REQUIRED_AUDIENCE = "required-audience";
+		public static final String PROPERTY_VERIFY_AUTHORIZED_PARTY = "verify-authorized-party";
 
 		@JsonCreator
 		public OidcAuth(@JsonProperty(OidcAuth.PROPERTY_BASE_URL) String baseUrl,
@@ -360,7 +366,9 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 				@JsonProperty(OidcAuth.PROPERTY_TRUSTED_ROOT_CERTIFICATES_FILE) String trustedRootCertificatesFile,
 				@JsonProperty(OidcAuth.PROPERTY_CLIENT_ID) String clientId,
 				@JsonProperty(OidcAuth.PROPERTY_CLIENT_SECRET) char[] clientSecret,
-				@JsonProperty(OidcAuth.PROPERTY_CLIENT_SECRET_FILE) String clientSecretFile)
+				@JsonProperty(OidcAuth.PROPERTY_CLIENT_SECRET_FILE) String clientSecretFile,
+				@JsonProperty(OidcAuth.PROPERTY_REQUIRED_AUDIENCE) List<String> requiredAudiences,
+				@JsonProperty(OidcAuth.PROPERTY_VERIFY_AUTHORIZED_PARTY) Boolean verifyAuthorizedParty)
 		{
 			this.baseUrl = baseUrl;
 			this.discoveryPath = discoveryPath;
@@ -372,6 +380,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 			this.clientId = clientId;
 			this.clientSecret = clientSecret;
 			this.clientSecretFile = clientSecretFile;
+			this.requiredAudiences = requiredAudiences;
+			this.verifyAuthorizedParty = verifyAuthorizedParty;
 		}
 
 		public String baseUrl()
@@ -398,7 +408,8 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 					+ debugLoggingEnabled + ", connectTimeout=" + connectTimeout + ", readTimeout=" + readTimeout
 					+ ", trustedRootCertificatesFile=" + trustedRootCertificatesFile + ", clientId=" + clientId
 					+ ", clientSecret=" + (clientSecret != null ? "***" : "null") + ", clientSecretFile="
-					+ clientSecretFile + "]";
+					+ clientSecretFile + ", requiredAudience=" + requiredAudiences + ", verifyAuthorizedParty="
+					+ verifyAuthorizedParty + "]";
 		}
 
 		public KeyStore readTrustStore() throws IOException
@@ -453,6 +464,7 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 							PROPERTY_CLIENT_SECRET_FILE),
 					propertiesConflicting(clientSecret, clientSecretFile, propertyPrefix, PROPERTY_CLIENT_SECRET,
 							PROPERTY_CLIENT_SECRET_FILE),
+					propertyValuesNullOrBlank(requiredAudiences, propertyPrefix, PROPERTY_REQUIRED_AUDIENCE),
 					validateClientSecretVsClientSecretFile(propertyPrefix), validateTrustStore(propertyPrefix));
 		}
 	}
@@ -653,6 +665,22 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 			return error(propertyPrefix, propertyName1, "not defined or blank");
 		else
 			return null;
+	}
+
+	private static ValidationError propertyValuesNullOrBlank(List<String> values, String propertyPrefix,
+			String propertyName)
+	{
+		if (values == null)
+			return null;
+
+		for (int i = 0; i < values.size(); i++)
+		{
+			String value = values.get(i);
+			if (value == null || value.isBlank())
+				return error(propertyPrefix, propertyName, "value at index " + i + " not defined or blank");
+		}
+
+		return null;
 	}
 
 	private static char[] doReadCharArray(Supplier<char[]> value, Supplier<String> valueFile, String valueProperty,

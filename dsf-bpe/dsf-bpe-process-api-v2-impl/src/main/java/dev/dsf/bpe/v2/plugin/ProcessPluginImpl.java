@@ -118,7 +118,8 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 
 		this.processPluginDefinition = processPluginDefinition;
 
-		variablesFactory = delegateExecution -> new VariablesImpl(delegateExecution, getObjectMapper());
+		variablesFactory = delegateExecution -> new VariablesImpl(delegateExecution, getObjectMapper(),
+				getProcessPluginApi().getDsfClientProvider().getLocalDsfClient());
 		pluginMdc = new PluginMdcImpl(processPluginApiVersion, processPluginDefinition.getName(),
 				processPluginDefinition.getVersion(), jarFile.toString(), serverBaseUrl, variablesFactory);
 	}

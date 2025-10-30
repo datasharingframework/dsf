@@ -2,6 +2,7 @@ package dev.dsf.bpe.api.service;
 
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.List;
 
 import dev.dsf.bpe.api.client.oidc.OidcClient;
 import dev.dsf.bpe.api.config.FhirClientConfig.OidcAuthentication;
@@ -19,7 +20,7 @@ public interface BpeOidcClientProvider
 	 */
 	default OidcClient getOidcClient(String baseUrl, String clientId, char[] clientSecret)
 	{
-		return getOidcClient(baseUrl, clientId, clientSecret, clientId, null, null, null, null);
+		return getOidcClient(baseUrl, clientId, clientSecret, clientId, null, null, null, null, null, null);
 	}
 
 	/**
@@ -39,10 +40,15 @@ public interface BpeOidcClientProvider
 	 *            may be <code>null</code>, will use configured default value
 	 * @param enableDebugLogging
 	 *            may be <code>null</code>, will use configured default value
+	 * @param requiredAudiences
+	 *            may be <code>null</code> or empty
+	 * @param verifyAuthorizedParty
+	 *            may be <code>null</code>, will use configured default value
 	 * @return never <code>null</code>
 	 */
 	OidcClient getOidcClient(String baseUrl, String clientId, char[] clientSecret, String discoveryPath,
-			Duration connectTimeout, Duration readTimeout, KeyStore trustStore, Boolean enableDebugLogging);
+			Duration connectTimeout, Duration readTimeout, KeyStore trustStore, Boolean enableDebugLogging,
+			List<String> requiredAudiences, Boolean verifyAuthorizedParty);
 
 	/**
 	 * @param config
