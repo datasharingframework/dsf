@@ -85,7 +85,7 @@ public class OidcClientProviderDelegate implements OidcClientProvider
 		@Override
 		public boolean verifyAuthorizedParty()
 		{
-			return delegate.isVerifyAuthorizedParty();
+			return delegate.isVerifyAuthorizedPartyEnabled();
 		}
 	}
 

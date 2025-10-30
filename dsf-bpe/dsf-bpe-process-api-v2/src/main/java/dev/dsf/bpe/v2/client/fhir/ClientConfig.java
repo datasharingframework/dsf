@@ -140,7 +140,7 @@ public interface ClientConfig
 		 */
 		List<String> getRequiredAudiences();
 
-		boolean isVerifyAuthorizedParty();
+		boolean isVerifyAuthorizedPartyEnabled();
 
 		/**
 		 * @return <code>null</code> if not enabled or configured as no-proxy url

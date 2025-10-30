@@ -170,7 +170,7 @@ public class ClientConfigDelegate implements ClientConfig
 			}
 
 			@Override
-			public boolean isVerifyAuthorizedParty()
+			public boolean isVerifyAuthorizedPartyEnabled()
 			{
 				return delegate.oidcAuthentication().verifyAuthorizedParty();
 			}
