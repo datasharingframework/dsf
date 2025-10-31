@@ -107,8 +107,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static final Path EMPTY_PROCESS_DIRECTORY = Paths.get("target", UUID.randomUUID().toString());
 	private static final List<Path> DIRECTORIES_TO_DELETE = List.of(EMPTY_PROCESS_DIRECTORY);
 
-	private static final Path FHIR_BUNDLE_FILE = Paths.get("src", "test", "resources", "integration",
-			"test-bundle.xml");
 	private static final Path ALLOWED_BPE_CLASSES_LIST_FILE_V1 = Paths.get("target",
 			UUID.randomUUID().toString() + ".list");
 	private static final Path ALLOWED_BPE_CLASSES_LIST_FILE_V2 = Paths.get("target",
@@ -260,7 +258,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.server.base.url", baseUrl);
 		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
-		initParameters.put("dev.dsf.fhir.server.init.bundle", FHIR_BUNDLE_FILE.toString());
+		initParameters.put("dev.dsf.fhir.server.init.bundle", "src/test/resources/integration/test-bundle.xml");
 
 		initParameters.put("dev.dsf.fhir.client.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());

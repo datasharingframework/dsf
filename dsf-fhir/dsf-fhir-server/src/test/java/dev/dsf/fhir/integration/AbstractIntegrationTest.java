@@ -11,7 +11,6 @@ import java.net.URI;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.time.Duration;
 import java.util.HashMap;
@@ -92,9 +91,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
 	protected static final String CONTEXT_PATH = "/fhir";
-
-	private static final Path FHIR_BUNDLE_FILE = Paths.get("src", "test", "resources", "integration",
-			"test-bundle.xml");
 
 	protected static final FhirContext fhirContext = FhirContext.forR4();
 	protected static final ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
@@ -192,7 +188,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.server.base.url", baseUrl);
 		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
-		initParameters.put("dev.dsf.fhir.server.init.bundle", FHIR_BUNDLE_FILE.toString());
+		initParameters.put("dev.dsf.fhir.server.init.bundle", "src/test/resources/integration/test-bundle.xml");
 
 		initParameters.put("dev.dsf.fhir.client.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
