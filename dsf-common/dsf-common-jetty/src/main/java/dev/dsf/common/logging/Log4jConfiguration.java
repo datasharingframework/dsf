@@ -33,12 +33,22 @@ public class Log4jConfiguration extends AbstractConfiguration
 
 	public static final class Log4jTextLayout implements Log4jLayout
 	{
+		private final boolean color;
+
+		public Log4jTextLayout(boolean color)
+		{
+			this.color = color;
+		}
+
 		@Override
 		public StringLayout consoleLayout(Configuration configuration)
 		{
-			return PatternLayout.newBuilder().withPattern(
-					"%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
-					.build();
+			if (color)
+				return PatternLayout.newBuilder().withPattern(
+						"%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
+						.build();
+			else
+				return PatternLayout.newBuilder().withPattern("%p %t - %C{1}.%M(%L) | %m%n").build();
 		}
 
 		@Override
@@ -50,12 +60,22 @@ public class Log4jConfiguration extends AbstractConfiguration
 
 	public static final class Log4jTextMdcLayout implements Log4jLayout
 	{
+		private final boolean color;
+
+		public Log4jTextMdcLayout(boolean color)
+		{
+			this.color = color;
+		}
+
 		@Override
 		public StringLayout consoleLayout(Configuration configuration)
 		{
-			return PatternLayout.newBuilder().withPattern(
-					"%highlight{%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
-					.build();
+			if (color)
+				return PatternLayout.newBuilder().withPattern(
+						"%highlight{%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
+						.build();
+			else
+				return PatternLayout.newBuilder().withPattern("%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m%n").build();
 		}
 
 		@Override
@@ -107,9 +127,10 @@ public class Log4jConfiguration extends AbstractConfiguration
 		}
 	}
 
-	public Log4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart,
-			Log4jLayout consoleOutLayout, Level consoleOutLevel, Log4jLayout consoleErrLayout, Level consoleErrLevel,
-			Log4jLayout fileLayout, Level fileLevel)
+	public Log4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart, boolean consoleOutEnabled,
+			Log4jLayout consoleOutLayout, Level consoleOutLevel, boolean consoleErrEnabled,
+			Log4jLayout consoleErrLayout, Level consoleErrLevel, boolean fileEnabled, Log4jLayout fileLayout,
+			Level fileLevel)
 	{
 		super(loggerContext, ConfigurationSource.NULL_SOURCE);
 
@@ -123,7 +144,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 		LoggerConfig root = getRootLogger();
 		root.setLevel(Level.WARN);
 
-		if (!Level.OFF.equals(consoleOutLevel))
+		if (consoleOutEnabled)
 		{
 			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.OUT").setTarget(Target.SYSTEM_OUT)
 					.setLayout(consoleOutLayout.consoleLayout(this)).build();
@@ -131,7 +152,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 			root.addAppender(console, consoleOutLevel, null);
 		}
 
-		if (!Level.OFF.equals(consoleErrLevel))
+		if (consoleErrEnabled)
 		{
 			Appender console = ConsoleAppender.newBuilder().setName("CONSOLE.ERR").setTarget(Target.SYSTEM_ERR)
 					.setLayout(consoleErrLayout.consoleLayout(this)).build();
@@ -139,7 +160,7 @@ public class Log4jConfiguration extends AbstractConfiguration
 			root.addAppender(console, consoleErrLevel, null);
 		}
 
-		if (!Level.OFF.equals(fileLevel))
+		if (fileEnabled)
 		{
 			Appender file = RollingFileAppender.newBuilder().setName("FILE")
 					.withFileName("log/" + fileNamePart + ".log")

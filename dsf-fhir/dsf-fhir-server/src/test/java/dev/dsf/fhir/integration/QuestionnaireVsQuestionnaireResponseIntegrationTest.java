@@ -4,11 +4,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -21,44 +21,31 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 	@Test
 	public void testQuestionnaireResponseQuestionnaireCanonicalChanged() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.0.0");
-		Questionnaire questionnaire2 = createQuestionnaireProfileVersion150("2.0.0");
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
-		questionnaireDao.create(questionnaire2);
 
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.0.0");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponse created = getWebserviceClient().create(questionnaireResponse);
 
 		created.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
-		String newQuestionnaireUrlAndVersion = created.getQuestionnaire().replace("1.0.0", "2.0.0");
+		String newQuestionnaireUrlAndVersion = created.getQuestionnaire().replace(QUESTIONNAIRE_VERSION, "2.1");
 		created.setQuestionnaire(newQuestionnaireUrlAndVersion);
 
 		expectForbidden(() -> getWebserviceClient().update(created));
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidatesAgainstQuestionnaireProfilVersion100QuestionnaireNotFound()
-			throws Exception
+	public void testQuestionnaireResponseValidatesAgainstQuestionnaireItemRequiredAndSet() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.0.1");
-		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
-		questionnaireDao.create(questionnaire);
-
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("2.0.1");
-		expectForbidden(() -> getWebserviceClient().create(questionnaireResponse));
-	}
-
-	@Test
-	public void testQuestionnaireResponseValidatesAgainstQuestionnaireProfilVersion100ItemSet() throws Exception
-	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.0.2");
-		addItem(questionnaire, "test", "test-item", Questionnaire.QuestionnaireItemType.STRING, Optional.empty());
+		Questionnaire questionnaire = createQuestionnaire();
+		questionnaire.addItem().setLinkId("test").setText("test-item").setType(QuestionnaireItemType.STRING)
+				.setRequired(true);
 
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.0.2");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponse createdQr = getWebserviceClient().create(questionnaireResponse);
 
 		createdQr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
@@ -71,60 +58,16 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidatesAgainstQuestionnaireProfilVersion100ItemMissing() throws Exception
+	public void testQuestionnaireResponseValidatesAgainstQuestionnaireItemRequiredNotSet() throws Exception
 	{
-		// expected to work without validation error, since not setting Questionnaire.item.required means the item is
-		// not required
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.0.3");
-		addItem(questionnaire, "test", "test-item", Questionnaire.QuestionnaireItemType.STRING, Optional.empty());
+		Questionnaire questionnaire = createQuestionnaire();
+		questionnaire.addItem().setLinkId("test").setText("test-item").setType(QuestionnaireItemType.STRING)
+				.setRequired(true);
 
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.0.3");
-		QuestionnaireResponse createdQr = getWebserviceClient().create(questionnaireResponse);
-
-		createdQr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
-		QuestionnaireResponse updatedQr = getWebserviceClient().update(createdQr);
-
-		assertNotNull(updatedQr);
-		assertNotNull(updatedQr.getIdElement().getIdPart());
-		assertNotNull(updatedQr.getIdElement().getVersionIdPart());
-	}
-
-	@Test
-	public void testQuestionnaireResponseValidatesAgainstQuestionnaireProfileVersion150ItemRequiredAndSet()
-			throws Exception
-	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.5.1");
-		addItem(questionnaire, "test", "test-item", Questionnaire.QuestionnaireItemType.STRING, Optional.of(true));
-
-		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
-		questionnaireDao.create(questionnaire);
-
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.1");
-		QuestionnaireResponse createdQr = getWebserviceClient().create(questionnaireResponse);
-
-		createdQr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
-		addItem(createdQr, "test", "test-item", new StringType("answer"));
-		QuestionnaireResponse updatedQr = getWebserviceClient().update(createdQr);
-
-		assertNotNull(updatedQr);
-		assertNotNull(updatedQr.getIdElement().getIdPart());
-		assertNotNull(updatedQr.getIdElement().getVersionIdPart());
-	}
-
-	@Test
-	public void testQuestionnaireResponseValidatesAgainstQuestionnaireProfileVersion150ItemRequiredNotSet()
-			throws Exception
-	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.5.2");
-		addItem(questionnaire, "test", "test-item", Questionnaire.QuestionnaireItemType.STRING, Optional.of(true));
-
-		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
-		questionnaireDao.create(questionnaire);
-
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.2");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponse createdQr = getWebserviceClient().create(questionnaireResponse);
 
 		createdQr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
@@ -132,16 +75,16 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidatesAgainstQuestionnaireProfileVersion150ItemOptionalNotSet()
-			throws Exception
+	public void testQuestionnaireResponseValidatesAgainstQuestionnaireItemOptionalNotSet() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.5.3");
-		addItem(questionnaire, "test", "test-item", Questionnaire.QuestionnaireItemType.STRING, Optional.of(false));
+		Questionnaire questionnaire = createQuestionnaire();
+		questionnaire.addItem().setLinkId("test").setText("test-item").setType(QuestionnaireItemType.STRING)
+				.setRequired(false);
 
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponse createdQr = getWebserviceClient().create(questionnaireResponse);
 
 		createdQr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
@@ -156,8 +99,8 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 	public void testPostQuestionnaireAndCorrespondingQuestionnaireResponseInTransactionBundleOrderQuestionnaireBeforeQuestionnaireResponse()
 			throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.5.3");
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -174,8 +117,8 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 	public void testPostQuestionnaireAndCorrespondingQuestionnaireResponseInTransactionBundleOrderQuestionnaireResponseBeforeQuestionnaire()
 			throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150("1.5.3");
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -191,7 +134,7 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 	@Test
 	public void testPostQuestionnaireResponseInTransactionBundleQuestionnaireDoesNotExistForbidden() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.5.3");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -204,14 +147,14 @@ public class QuestionnaireVsQuestionnaireResponseIntegrationTest extends Abstrac
 	@Test
 	public void testQuestionnaireResponseQuestionnaireDisplayItemChangedWithMinimalUser() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100("1.0.0");
-		questionnaire.addItem().setLinkId("display-id").setType(Questionnaire.QuestionnaireItemType.DISPLAY)
+		Questionnaire questionnaire = createQuestionnaire();
+		questionnaire.addItem().setLinkId("display-id").setType(QuestionnaireItemType.DISPLAY)
 				.setText("Default Text Value");
 
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse("1.0.0");
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		questionnaireResponse.addItem().setLinkId("display-id").setText("Default Text Value");
 
 		expectForbidden(() -> getMinimalWebserviceClient().create(questionnaireResponse));

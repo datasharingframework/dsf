@@ -16,7 +16,7 @@
 	<kind value="resource" />
 	<abstract value="false" />
 	<type value="Task" />
-	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task-base" />
+	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task" />
 	<derivation value="constraint" />
 	<differential>
 		<element id="Task.instantiatesUri">

@@ -1,5 +1,6 @@
 <ValueSet xmlns="http://hl7.org/fhir">
 	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/value-set" />
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="ALL" />

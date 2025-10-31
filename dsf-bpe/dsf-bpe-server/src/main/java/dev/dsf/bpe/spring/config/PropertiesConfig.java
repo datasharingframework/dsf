@@ -139,6 +139,10 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.enable.debug.logging:false}")
 	private boolean fhirClientConnectionsConfigDefaultEnableDebugLogging;
 
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `oidc-auth.verify-authorized-party`", recommendation = "To disable verification of the authorized party (aud) claim by default set to `false`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.enable.debug.logging:true}")
+	private boolean fhirClientConnectionsConfigDefaultOidcVerifyAuthorizedParty;
+
 	@Documentation(description = "FHIR server connections YAML: Default value for properties `connect-timeout` and `oidc-auth.connect-timeout`")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.timeout.connect:PT2S}")
 	private String fhirClientConnectionsConfigDefaultConnectTimeout;
@@ -249,6 +253,10 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Documentation(description = "Time between two retries to establish a connection with the local DSF FHIR server during process deployment")
 	@Value("${dev.dsf.bpe.process.fhir.server.retry.sleep:PT5S}")
 	private String fhirServerRetryDelay;
+
+	@Documentation(description = "Set to true to enable FHIR validation feature for process plugins, not implemented for DSF version 2.0.x")
+	@Value("${dev.dsf.bpe.process.fhir.validation.enabled:false}")
+	private boolean fhirValidationEnabled;
 
 	@Documentation(description = "Mail service sender address", example = "sender@localhost")
 	@Value("${dev.dsf.bpe.mail.fromAddress:}")
@@ -577,6 +585,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	public boolean getFhirClientConnectionsConfigDefaultEnableDebugLogging()
 	{
 		return fhirClientConnectionsConfigDefaultEnableDebugLogging;
+	}
+
+	public boolean getFhirClientConnectionsConfigDefaultOidcVerifyAuthorizedParty()
+	{
+		return fhirClientConnectionsConfigDefaultOidcVerifyAuthorizedParty;
 	}
 
 	public Duration getFhirClientConnectionsConfigDefaultConnectTimeout()
@@ -920,5 +933,10 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	public ProxyConfig proxyConfig()
 	{
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
+	}
+
+	public boolean getFhirValidationEnabled()
+	{
+		return fhirValidationEnabled;
 	}
 }

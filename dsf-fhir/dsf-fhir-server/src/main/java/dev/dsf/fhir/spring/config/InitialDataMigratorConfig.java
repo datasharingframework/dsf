@@ -14,19 +14,33 @@ import org.springframework.core.annotation.Order;
 import dev.dsf.fhir.service.InitialDataMigrator;
 import dev.dsf.fhir.service.InitialDataMigratorImpl;
 import dev.dsf.fhir.service.migration.MigrationJob;
+import dev.dsf.fhir.service.migration.QuestionnairesMigrationJob;
+import dev.dsf.fhir.service.migration.StructureDefinitionTaskProfileMigrationJob;
 
 @Configuration
 public class InitialDataMigratorConfig
 {
 	@Autowired
-	public DaoConfig daoConfig;
+	private DaoConfig daoConfig;
+
+	@Autowired
+	private SnapshotConfig snapshotConfig;
+
+	@Autowired
+	private HelperConfig helperConfig;
+
+	@Autowired
+	private EventConfig eventConfig;
 
 	@Bean
 	public List<MigrationJob> migrationJobs()
 	{
-		// currently no migration jobs
-		// add future migration jobs here
-		return List.of();
+		return List.of(
+				new StructureDefinitionTaskProfileMigrationJob(daoConfig.structureDefinitionDao(),
+						daoConfig.structureDefinitionSnapshotDao(), snapshotConfig.snapshotGenerator(),
+						helperConfig.exceptionHandler(), eventConfig.eventManager(), eventConfig.eventGenerator()),
+				new QuestionnairesMigrationJob(daoConfig.questionnaireDao(), eventConfig.eventManager(),
+						eventConfig.eventGenerator()));
 	}
 
 	@Bean

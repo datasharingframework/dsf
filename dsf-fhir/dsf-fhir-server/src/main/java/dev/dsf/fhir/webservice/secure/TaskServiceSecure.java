@@ -7,6 +7,7 @@ import dev.dsf.fhir.dao.TaskDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -20,10 +21,11 @@ public class TaskServiceSecure extends AbstractResourceServiceSecure<TaskDao, Ta
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, TaskDao taskDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Task> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Task.class, taskDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
-				validationRules);
+				validationRules, defaultProfileProvider);
 	}
 }

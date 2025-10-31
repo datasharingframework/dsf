@@ -14,12 +14,16 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class StructureDefinitionReader
 {
+	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionReader.class);
+
 	private static final String VERSION_PATTERN_STRING1 = "#{version}";
 	private static final Pattern VERSION_PATTERN1 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING1));
 	// ${...} pattern to be backwards compatible
@@ -93,6 +97,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = Files.newInputStream(xmlPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlPath);
+
 			return context.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
 		catch (DataFormatException | IOException e)
@@ -105,6 +112,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = Files.newInputStream(xmlPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlPath);
+
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
 			read = replaceVersionAndDate(read, version, date);
 
@@ -139,6 +149,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = StructureDefinitionReader.class.getResourceAsStream(xmlOnClassPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlOnClassPath);
+
 			return context.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
 		catch (DataFormatException | IOException e)
@@ -151,6 +164,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = StructureDefinitionReader.class.getResourceAsStream(xmlOnClassPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlOnClassPath);
+
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
 			read = replaceVersionAndDate(read, version, date);
 

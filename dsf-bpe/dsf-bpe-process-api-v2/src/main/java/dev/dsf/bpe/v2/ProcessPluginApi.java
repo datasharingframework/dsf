@@ -22,6 +22,7 @@ import dev.dsf.bpe.v2.service.QuestionnaireResponseHelper;
 import dev.dsf.bpe.v2.service.ReadAccessHelper;
 import dev.dsf.bpe.v2.service.TargetProvider;
 import dev.dsf.bpe.v2.service.TaskHelper;
+import dev.dsf.bpe.v2.service.ValidationServiceProvider;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 import dev.dsf.bpe.v2.variables.Variables;
 
@@ -72,4 +73,6 @@ public interface ProcessPluginApi
 	TargetProvider getTargetProvider();
 
 	DataLogger getDataLogger();
+
+	ValidationServiceProvider getValidationServiceProvider();
 }

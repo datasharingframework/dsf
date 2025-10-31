@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,6 +58,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
@@ -83,6 +85,7 @@ import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationPartici
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationPrimaryOrganizationRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
 import dev.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevInclude;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.ConformanceService;
 import dev.dsf.fhir.websocket.ServerEndpoint;
@@ -144,17 +147,20 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	private final BuildInfoReader buildInfoReader;
 	private final ParameterConverter parameterConverter;
 	private final IValidationSupport validationSupport;
+	private final DefaultProfileProvider defaultProfileProvider;
 
 	private final List<CodeableConcept> securityServices;
 
 	public ConformanceServiceImpl(String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
-			ParameterConverter parameterConverter, IValidationSupport validationSupport, boolean oAuthEnabled)
+			ParameterConverter parameterConverter, IValidationSupport validationSupport,
+			DefaultProfileProvider defaultProfileProvider, boolean oAuthEnabled)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.buildInfoReader = buildInfoReader;
 		this.parameterConverter = parameterConverter;
 		this.validationSupport = validationSupport;
+		this.defaultProfileProvider = defaultProfileProvider;
 		this.securityServices = oAuthEnabled ? List.of(CERTIFICATES, OAUTH) : List.of(CERTIFICATES);
 	}
 
@@ -165,6 +171,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(validationSupport, "validationSupport");
+		Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
 	}
 
 	@Override
@@ -319,6 +326,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		for (Class<? extends Resource> resource : resources)
 		{
+			ResourceDef resourceDefAnnotation = resource.getAnnotation(ResourceDef.class);
+			ResourceType resourceType = ResourceType.valueOf(resourceDefAnnotation.name());
+
 			CapabilityStatementRestResourceComponent r = rest.addResource();
 			r.setVersioning(ResourceVersionPolicy.VERSIONED);
 			r.setReadHistory(true);
@@ -330,9 +340,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addReferencePolicy(ReferenceHandlingPolicy.LITERAL);
 			r.addReferencePolicy(ReferenceHandlingPolicy.LOGICAL);
 
-			ResourceDef resourceDefAnnotation = resource.getAnnotation(ResourceDef.class);
+			Optional<String> defaultProfile = defaultProfileProvider.getDefaultProfile(resourceType);
+
 			r.setType(resourceDefAnnotation.name());
-			r.setProfile(resourceDefAnnotation.profile());
+			r.setProfile(defaultProfile.orElse(resourceDefAnnotation.profile()));
+
 			r.addInteraction().setCode(TypeRestfulInteraction.CREATE);
 			r.addInteraction().setCode(TypeRestfulInteraction.READ);
 			r.addInteraction().setCode(TypeRestfulInteraction.VREAD);
@@ -384,7 +396,16 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 			operations.getOrDefault(resource, List.of()).forEach(r::addOperation);
 
-			r.setSupportedProfile(profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(), List.of()));
+			List<CanonicalType> supportedProfiles = profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(),
+					List.of());
+
+			Stream<String> fromDb = supportedProfiles.stream().filter(CanonicalType::hasValue)
+					.map(CanonicalType::getValue);
+			Stream<String> fromProvider = defaultProfileProvider.getSecondaryDefaultProfiles(resourceType).stream();
+
+			r.setSupportedProfile(
+					Stream.concat(fromDb, fromProvider).filter(p -> defaultProfile.map(d -> !d.equals(p)).orElse(true))
+							.distinct().sorted().map(CanonicalType::new).toList());
 		}
 
 		return statement;

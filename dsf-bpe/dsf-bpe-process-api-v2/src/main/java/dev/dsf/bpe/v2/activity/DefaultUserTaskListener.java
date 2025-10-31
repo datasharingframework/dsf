@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,10 @@ public class DefaultUserTaskListener implements UserTaskListener
 	private final Set<KeyAndValue> practitionerRoles = new HashSet<>();
 	private final Set<KeyAndValue> practitioners = new HashSet<>();
 
+	private String taskOutputSystem;
+	private String taskOutputCode;
+	private String taskOutputVersion;
+
 	/**
 	 * @param practitionerRole
 	 *            does nothing if <code>null</code> or blank
@@ -142,6 +147,48 @@ public class DefaultUserTaskListener implements UserTaskListener
 					.map(KeyAndValue.fromString(NamingSystems.PractitionerIdentifier.SID))
 					.forEach(this.practitioners::add);
 		}
+	}
+
+	/**
+	 * If {@link #taskOutputSystem}, {@link #taskOutputCode} and {@link #taskOutputVersion} are set with not blank
+	 * values, an output parameter is added to the start Task with a reference to the created
+	 * {@link QuestionnaireResponse} resource.
+	 *
+	 * @param taskOutputSystem
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setTaskOutputSystem(String taskOutputSystem)
+	{
+		this.taskOutputSystem = taskOutputSystem;
+	}
+
+	/**
+	 * If {@link #taskOutputSystem}, {@link #taskOutputCode} and {@link #taskOutputVersion} are set with not blank
+	 * values, an output parameter is added to the start Task with a reference to the created
+	 * {@link QuestionnaireResponse} resource.
+	 *
+	 * @param taskOutputCode
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setTaskOutputCode(String taskOutputCode)
+	{
+		this.taskOutputCode = taskOutputCode;
+	}
+
+	/**
+	 * If {@link #taskOutputSystem}, {@link #taskOutputCode} and {@link #taskOutputVersion} are set with not blank
+	 * values, an output parameter is added to the start Task with a reference to the created
+	 * {@link QuestionnaireResponse} resource.
+	 *
+	 * @param taskOutputVersion
+	 * @deprecated only for field injection
+	 */
+	@Deprecated
+	public void setTaskOutputVersion(String taskOutputVersion)
+	{
+		this.taskOutputVersion = taskOutputVersion;
 	}
 
 	@Override
@@ -286,7 +333,13 @@ public class DefaultUserTaskListener implements UserTaskListener
 
 	/**
 	 * <i>Override this method to execute code after the {@link QuestionnaireResponse} resource has been created on the
-	 * DSF FHIR server</i>
+	 * DSF FHIR server</i><br>
+	 * <br>
+	 * Default implementation will add an output parameter to the start {@link Task} with a reference to the created
+	 * {@link QuestionnaireResponse} resource if {@link #taskOutputSystem}, {@link #taskOutputCode} and
+	 * {@link #taskOutputVersion} are set with not blank values.<br>
+	 * <br>
+	 * Use field inject in BPMN to set value.
 	 *
 	 * @param api
 	 *            not <code>null</code>
@@ -301,7 +354,12 @@ public class DefaultUserTaskListener implements UserTaskListener
 	protected void afterQuestionnaireResponseCreate(ProcessPluginApi api, Variables variables,
 			CreateQuestionnaireResponseValues createQuestionnaireResponseValues, QuestionnaireResponse afterCreate)
 	{
-		// Nothing to do in default behavior
+		if (taskOutputSystem != null && !taskOutputSystem.isBlank() && taskOutputCode != null
+				&& !taskOutputCode.isBlank() && taskOutputVersion != null && !taskOutputVersion.isBlank())
+		{
+			variables.getStartTaskUpdater().addOutput(taskOutputSystem, taskOutputCode, taskOutputVersion,
+					new Reference(afterCreate.getIdElement().toUnqualifiedVersionless()));
+		}
 	}
 
 	/**

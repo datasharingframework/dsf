@@ -490,6 +490,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
+      DEV_DSF_LOG_DATA_FILE_ENABLED: 'true'
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic1_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user.password
@@ -556,6 +557,7 @@ services:
             test-connection-on-startup: yes
             client-id: dic1-bpe
             client-secret-file: /run/secrets/oidc_client_dic1_bpe.secret
+            required-audience: account
       DEV_DSF_BPE_FHIR_CLIENT_CONNECTIONS_CONFIG_DEFAULT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
     networks:
       dic1-bpe-frontend:
@@ -566,6 +568,7 @@ services:
     depends_on:
       - db
       - dic1-fhir
+      - mailhog
       - keycloak
       - forward-proxy
 
@@ -607,6 +610,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
+      DEV_DSF_LOG_DATA_FILE_ENABLED: 'true'
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic2_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user.password
@@ -654,6 +658,7 @@ services:
     depends_on:
       - db
       - dic2-fhir
+      - mailhog
       - keycloak
 
   dic3-bpe:
@@ -694,6 +699,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
+      DEV_DSF_LOG_DATA_FILE_ENABLED: 'true'
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic3_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user.password
@@ -781,6 +787,7 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
+      DEV_DSF_LOG_DATA_FILE_ENABLED: 'true'
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/ttp_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user.password

@@ -1,24 +1,24 @@
-<NamingSystem xmlns="http://hl7.org/fhir"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<NamingSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/naming-system" />
 		<tag>
-			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
-			<code value="ALL"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
 		</tag>
 	</meta>
-	<name value="DsfOrganizationIdentifier"/>
-	<status value="active"/>
-	<kind value="identifier"/>
-	<date value="2023-06-28"/>
-	<publisher value="DSF"/>
-	<description value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, ukhd.de, uksh.de"/>
-	<usage value="Used withing the DSF to identify organizations"/>
+	<name value="DsfOrganizationIdentifier" />
+	<status value="active" />
+	<kind value="identifier" />
+	<date value="2025-10-27" />
+	<publisher value="DSF" />
+	<description value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, ukhd.de, uksh.de" />
+	<usage value="Used withing the DSF to identify organizations" />
 	<uniqueId>
 		<modifierExtension url="http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference">
-			<valueBoolean value="true"/>
+			<valueBoolean value="true" />
 		</modifierExtension>
-		<type value="other"/>
-		<value value="http://dsf.dev/sid/organization-identifier"/>
+		<type value="other" />
+		<value value="http://dsf.dev/sid/organization-identifier" />
 	</uniqueId>
 </NamingSystem>

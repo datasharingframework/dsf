@@ -1,36 +1,82 @@
-<StructureDefinition xmlns="http://hl7.org/fhir"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
-  <meta>
-    <tag>
-      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
-      <code value="ALL" />
-    </tag>
-  </meta>
-  <url value="http://dsf.dev/fhir/StructureDefinition/test-task" />
-  <version value="1.0" />
-  <name value="TestTask" />
-  <status value="active" />
-  <experimental value="false" />
-  <date value="2021-05-17" />
-  <fhirVersion value="4.0.1" />
-  <kind value="resource" />
-  <abstract value="false" />
-  <type value="Task" />
-  <baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task-base" />
-  <derivation value="constraint" />
-  <differential>
-    <element id="Task.instantiatesCanonical">
-      <path value="Task.instantiatesCanonical" />
-      <fixedCanonical value="http://dsf.dev/bpe/Process/test|1.0" />
-    </element>
-    <element id="Task.input:message-name">
-      <path value="Task.input" />
-      <sliceName value="message-name" />
-    </element>
-    <element id="Task.input:message-name.value[x]">
-      <path value="Task.input.value[x]" />
-      <fixedString value="test-message" />
-    </element>
-  </differential>
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/test-task" />
+	<version value="1.0" />
+	<name value="TestTask" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2021-05-17" />
+	<fhirVersion value="4.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="Task" />
+	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Task.instantiatesCanonical">
+			<path value="Task.instantiatesCanonical" />
+			<fixedCanonical value="http://dsf.dev/bpe/Process/test|1.0" />
+		</element>
+		<element id="Task.input:message-name">
+			<path value="Task.input" />
+			<sliceName value="message-name" />
+		</element>
+		<element id="Task.input:message-name.value[x]">
+			<path value="Task.input.value[x]" />
+			<fixedString value="test-message" />
+		</element>
+		<element id="Task.output:binary-ref">
+			<path value="Task.output" />
+			<sliceName value="binary-ref" />
+			<min value="0" />
+			<max value="1" />
+		</element>
+		<element id="Task.output:binary-ref.type">
+			<path value="Task.output.type" />
+			<binding>
+				<strength value="required" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/test|1.7" />
+			</binding>
+		</element>
+		<element id="Task.output:binary-ref.type.coding">
+			<path value="Task.output.type.coding" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="Task.output:binary-ref.type.coding.system">
+			<path value="Task.output.type.coding.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/test" />
+		</element>
+		<element id="Task.output:binary-ref.type.coding.version">
+			<path value="Task.output.type.coding.version" />
+			<min value="1" />
+			<fixedString value="1.7" />
+		</element>
+		<element id="Task.output:binary-ref.type.coding.code">
+			<path value="Task.output.type.coding.code" />
+			<min value="1" />
+			<fixedCode value="binary-ref" />
+		</element>
+		<element id="Task.output:binary-ref.value[x]">
+			<path value="Task.output.value[x]" />
+			<type>
+				<code value="Reference" />
+			</type>
+		</element>
+		<element id="Task.output:binary-ref.value[x].reference">
+			<path value="Task.output.value[x].reference" />
+			<min value="1" />
+		</element>
+		<element id="Task.output:binary-ref.value[x].identifier">
+			<path value="Task.output.value[x].identifier" />
+			<max value="0" />
+		</element>
+	</differential>
 </StructureDefinition>

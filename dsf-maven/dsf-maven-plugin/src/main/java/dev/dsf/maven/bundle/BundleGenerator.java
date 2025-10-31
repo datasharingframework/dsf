@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -188,6 +187,7 @@ public class BundleGenerator
 			try (InputStream in = Files.newInputStream(resourceFile))
 			{
 				Resource r = newXmlParser().parseResource(resource, in);
+
 				String ifNoneExistValue = Files.readString(postFile);
 
 				BundleEntryComponent entry = bundle.addEntry();
@@ -302,6 +302,8 @@ public class BundleGenerator
 
 	private Set<String> listDependencies(BundleEntryComponent entry)
 	{
+		// using self declared profiles as dependencies results in dependency cycles, breaking this generator
+
 		Resource resource = entry.getResource();
 
 		if (resource instanceof CodeSystem || resource instanceof Subscription)
@@ -319,7 +321,7 @@ public class BundleGenerator
 					.flatMap(List::stream).map(Extension::getUrl).map(url ->
 					{
 						if ("http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference".equals(url))
-							return url + "|1.0.0";
+							return url + "|2.0.0";
 						else
 							return url;
 					}).distinct().collect(Collectors.toSet());
@@ -373,8 +375,8 @@ public class BundleGenerator
 		SnapshotGenerator generator = new SnapshotGenerator(fhirContext, validationSupport);
 
 		bundle.getEntry().stream().map(BundleEntryComponent::getResource).filter(r -> r instanceof StructureDefinition)
-				.map(r -> (StructureDefinition) r).sorted(Comparator.comparing(StructureDefinition::getUrl).reversed())
-				.filter(s -> !s.hasSnapshot()).forEach(s -> generator.generateSnapshot(s));
+				.map(r -> (StructureDefinition) r).filter(s -> !s.hasSnapshot())
+				.forEach(s -> generator.generateSnapshot(s));
 	}
 
 	private void expandValueSets(Bundle bundle, ValidationSupportChain validationSupport)
