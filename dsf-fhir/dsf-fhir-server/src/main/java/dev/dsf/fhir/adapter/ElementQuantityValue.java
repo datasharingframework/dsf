@@ -2,9 +2,6 @@ package dev.dsf.fhir.adapter;
 
 import java.math.BigDecimal;
 
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Duration;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Quantity;
 
 public final class ElementQuantityValue
