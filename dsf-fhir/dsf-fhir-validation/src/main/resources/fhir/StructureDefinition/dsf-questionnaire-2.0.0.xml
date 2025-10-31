@@ -3,8 +3,8 @@
 	<meta>
 		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
 		<tag>
-			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
-			<code value="ALL"/>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
 		</tag>
 	</meta>
 	<url value="http://dsf.dev/fhir/StructureDefinition/questionnaire" />
@@ -28,37 +28,37 @@
 			</type>
 		</element>
 		<element id="Questionnaire.url">
-			<path value="Questionnaire.url"/>
-			<min value="1"/>
+			<path value="Questionnaire.url" />
+			<min value="1" />
 		</element>
 		<element id="Questionnaire.version">
-			<path value="Questionnaire.version"/>
-			<min value="1"/>
+			<path value="Questionnaire.version" />
+			<min value="1" />
 		</element>
 		<element id="Questionnaire.date">
-			<path value="Questionnaire.date"/>
-			<min value="1"/>
+			<path value="Questionnaire.date" />
+			<min value="1" />
 		</element>
 		<!-- TODO: Questionnaire.useContext with link to process (possibly ActivityDefinition) -->
 		<element id="Questionnaire.item">
 			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-				<valueString value="Parameter"/>
+				<valueString value="Parameter" />
 			</extension>
-			<path value="Questionnaire.item"/>
+			<path value="Questionnaire.item" />
 			<slicing>
 				<discriminator>
-					<type value="value"/>
-					<path value="linkId"/>
+					<type value="value" />
+					<path value="linkId" />
 				</discriminator>
-				<rules value="closed"/>
+				<rules value="closed" />
 			</slicing>
-			<min value="1"/>
+			<min value="1" />
 			<constraint>
-				<key value="type-code"/>
-				<severity value="error"/>
-				<human value="Constrains available types from ValueSet 'http://hl7.org/fhir/item-type'"/>
+				<key value="type-code" />
+				<severity value="error" />
+				<human value="Constrains available types from ValueSet 'http://hl7.org/fhir/item-type'" />
 				<expression
-						value="(type = 'display') or
+					value="(type = 'display') or
  						(type = 'string') or
  						(type = 'text') or
  						(type = 'integer') or
@@ -70,158 +70,158 @@
  						(type = 'reference') or
  						(type = 'url') or
  						(type = 'choice') or
-						(type = 'quantity') "/>
+						(type = 'quantity') " />
 			</constraint>
 			<constraint>
-				<key value="required-exists"/>
-				<severity value="error"/>
-				<human value="Required field must be set if type is not display"/>
-				<expression value="(type != 'display') implies required.exists()"/>
+				<key value="required-exists" />
+				<severity value="error" />
+				<human value="Required field must be set if type is not display" />
+				<expression value="(type != 'display') implies required.exists()" />
 			</constraint>
 		</element>
 		<element id="Questionnaire.item:user-task-id">
-			<path value="Questionnaire.item"/>
-			<sliceName value="user-task-id"/>
-			<min value="1"/>
-			<max value="1"/>
+			<path value="Questionnaire.item" />
+			<sliceName value="user-task-id" />
+			<min value="1" />
+			<max value="1" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.linkId">
-			<path value="Questionnaire.item.linkId"/>
-			<fixedString value="user-task-id"/>
+			<path value="Questionnaire.item.linkId" />
+			<fixedString value="user-task-id" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.definition">
-			<path value="Questionnaire.item.definition"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.definition" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.code">
-			<path value="Questionnaire.item.code"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.code" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.prefix">
-			<path value="Questionnaire.item.prefix"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.prefix" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.text">
-			<path value="Questionnaire.item.text"/>
-			<min value="1"/>
-			<fixedString value="The user-task-id of the process execution"/>
+			<path value="Questionnaire.item.text" />
+			<min value="1" />
+			<fixedString value="The user-task-id of the process execution" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.type">
-			<path value="Questionnaire.item.type"/>
-			<fixedCode value="string"/>
+			<path value="Questionnaire.item.type" />
+			<fixedCode value="string" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.enableWhen">
-			<path value="Questionnaire.item.enableWhen"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.enableWhen" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.required">
-			<path value="Questionnaire.item.required"/>
-			<fixedBoolean value="true"/>
+			<path value="Questionnaire.item.required" />
+			<fixedBoolean value="true" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.answerOption">
-			<path value="Questionnaire.item.answerOption"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.answerOption" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.initial">
-			<path value="Questionnaire.item.initial"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.initial" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:user-task-id.item">
-			<path value="Questionnaire.item.item"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.item" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:business-key">
-			<path value="Questionnaire.item"/>
-			<sliceName value="business-key"/>
-			<min value="0"/>
-			<max value="1"/>
+			<path value="Questionnaire.item" />
+			<sliceName value="business-key" />
+			<min value="0" />
+			<max value="1" />
 		</element>
 		<element id="Questionnaire.item:business-key.linkId">
-			<path value="Questionnaire.item.linkId"/>
-			<fixedString value="business-key"/>
+			<path value="Questionnaire.item.linkId" />
+			<fixedString value="business-key" />
 		</element>
 		<element id="Questionnaire.item:business-key.definition">
-			<path value="Questionnaire.item.definition"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.definition" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:business-key.code">
-			<path value="Questionnaire.item.code"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.code" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:business-key.prefix">
-			<path value="Questionnaire.item.prefix"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.prefix" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:business-key.text">
-			<path value="Questionnaire.item.text"/>
-			<min value="1"/>
-			<fixedString value="The business-key of the process execution"/>
+			<path value="Questionnaire.item.text" />
+			<min value="1" />
+			<fixedString value="The business-key of the process execution" />
 		</element>
 		<element id="Questionnaire.item:business-key.type">
-			<path value="Questionnaire.item.type"/>
-			<fixedCode value="string"/>
+			<path value="Questionnaire.item.type" />
+			<fixedCode value="string" />
 		</element>
 		<element id="Questionnaire.item:business-key.enableWhen">
-			<path value="Questionnaire.item.enableWhen"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.enableWhen" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:business-key.required">
-			<path value="Questionnaire.item.required"/>
-			<fixedBoolean value="true"/>
+			<path value="Questionnaire.item.required" />
+			<fixedBoolean value="true" />
 		</element>
 		<element id="Questionnaire.item:business-key.answerOption">
-			<path value="Questionnaire.item.answerOption"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.answerOption" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:business-key.initial">
-			<path value="Questionnaire.item.initial"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.initial" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:business-key.item">
-			<path value="Questionnaire.item.item"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.item" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:@default">
-			<path value="Questionnaire.item"/>
-			<sliceName value="@default"/>
-			<min value="0"/>
-			<max value="*"/>
+			<path value="Questionnaire.item" />
+			<sliceName value="@default" />
+			<min value="0" />
+			<max value="*" />
 		</element>
 		<element id="Questionnaire.item:@default.definition">
-			<path value="Questionnaire.item.definition"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.definition" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:@default.code">
-			<path value="Questionnaire.item.code"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.code" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:@default.prefix">
-			<path value="Questionnaire.item.prefix"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.prefix" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:@default.text">
-			<path value="Questionnaire.item.text"/>
-			<min value="1"/>
+			<path value="Questionnaire.item.text" />
+			<min value="1" />
 		</element>
 		<element id="Questionnaire.item:@default.type">
-			<path value="Questionnaire.item.type"/>
-			<min value="1"/>
+			<path value="Questionnaire.item.type" />
+			<min value="1" />
 		</element>
 		<element id="Questionnaire.item:@default.enableWhen">
-			<path value="Questionnaire.item.enableWhen"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.enableWhen" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:@default.answerOption">
-			<path value="Questionnaire.item.answerOption"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.answerOption" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:@default.initial">
-			<path value="Questionnaire.item.initial"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.initial" />
+			<max value="0" />
 		</element>
 		<element id="Questionnaire.item:@default.item">
-			<path value="Questionnaire.item.item"/>
-			<max value="0"/>
+			<path value="Questionnaire.item.item" />
+			<max value="0" />
 		</element>
 	</differential>
 </StructureDefinition>
