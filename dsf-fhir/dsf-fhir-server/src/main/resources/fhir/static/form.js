@@ -81,10 +81,6 @@ function readAndValidateTaskInput(input, row) {
 	}
 	else if (htmlInputs?.length === 5) {
     	const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
-    	const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
-    	const input2FhirType = htmlInputs[2].getAttribute("fhir-type")
-    	const input3FhirType = htmlInputs[3].getAttribute("fhir-type")
-    	const input4FhirType = htmlInputs[4].getAttribute("fhir-type")
 
     	if (input0FhirType.startsWith("Quantity")) {
     		return new newTaskInputQuantity(input.type, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
@@ -296,15 +292,14 @@ function readAndValidateQuestionnaireResponseItem(item, id) {
 		else if ("boolean.true" === input0FhirType && "boolean.false" == input1FhirType)
 			return newQuestionnaireResponseItemBoolean(item.text, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
-	else if (htmlInputs?.length === 5) {
+	// TODO: False positive validation error for QuestionnaireResponse.item.answer.valueQuantity.comparator,
+	// adapt to === 5, remove "" and add htmlInputs[4].value before optional as soon as
+	// https://github.com/hapifhir/org.hl7.fhir.core/issues/2224 is fixed
+	else if (htmlInputs?.length === 4) {
 		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
-		const input1FhirType = htmlInputs[1].getAttribute("fhir-type")
-		const input2FhirType = htmlInputs[2].getAttribute("fhir-type")
-		const input3FhirType = htmlInputs[3].getAttribute("fhir-type")
-		const input4FhirType = htmlInputs[4].getAttribute("fhir-type")
 
 		if (input0FhirType.startsWith("Quantity")) {
-			return new newQuestionnaireResponseItemQuantity(item.text, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
+			return new newQuestionnaireResponseItemQuantity(item.text, id, "", htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, optional)
 		}
 	}
 
@@ -417,7 +412,6 @@ function newQuestionnaireResponseItemBoolean(text, id, checkedTrue, checkedFalse
 
 function newQuestionnaireResponseItemQuantity(text, id, comparator, value, unit, system, code, optional) {
 	const result = validateQuantity(id, comparator, value, unit, system, code, optional, "Item")
-
 	if (result.valid && result.value !== null) {
 		const item = {
 			linkId: id,
@@ -432,7 +426,6 @@ function newQuestionnaireResponseItemQuantity(text, id, comparator, value, unit,
 				}
 			}]
         }
-
     	return { item: item, valid: true }
 	} else
 		return { input: null, valid: result.valid }
@@ -585,19 +578,16 @@ function validateStringInList(errorListElement, value, list, optional, valueName
 
 function validateInteger(errorListElement, value, optional, valueName) {
 	const integerValid = v => Number.isSafeInteger(parseInt(v)) && parseInt(v) == v
-
 	return validateType(errorListElement, value, optional, valueName, integerValid, "not an integer", parseInt)
 }
 
 function validateDecimal(errorListElement, value, optional, valueName) {
 	const decimalValid = v => !isNaN(parseFloat(v)) && parseFloat(v) == v
-
 	return validateType(errorListElement, value, optional, valueName, decimalValid, "not a decimal", parseFloat)
 }
 
 function validateDate(errorListElement, value, optional, valueName) {
 	const dateValid = v => !isNaN(new Date(v))
-
 	return validateType(errorListElement, value, optional, valueName, dateValid, "is not a date", v => new Date(v).toISOString().substring(0, 10))
 }
 
@@ -614,13 +604,11 @@ function validateDateTime(errorListElement, value, optional, valueName) {
 	// TODO precision YYYY, YYYY-MM, YYYY-MM-DD also valid
 
 	const dateValid = v => !isNaN(new Date(v))
-
 	return validateType(errorListElement, value, optional, valueName, dateValid, "is not a date-time", v => new Date(v).toISOString())
 }
 
 function validateInstant(errorListElement, value, optional, valueName) {
 	const dateValid = v => !isNaN(new Date(v))
-
 	return validateType(errorListElement, value, optional, valueName, dateValid, "is not a date-time", v => new Date(v).toISOString())
 }
 
