@@ -98,6 +98,9 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 			case REFERENCE -> new Reference("http://example.org/fhir/Placeholder/id");
 			case QUANTITY -> new Quantity().setValue(0).setUnit("unit")
 					.setSystem("http://example.org/fhir/CodeSystem/name").setCode("code");
+			// TODO: False positive validation error for QuestionnaireResponse.item.answer.valueQuantity.comparator,
+			// add comparator to Quantity as soon as https://github.com/hapifhir/org.hl7.fhir.core/issues/2224 is fixed
+			// .setComparator(Quantity.QuantityComparator.LESS_OR_EQUAL);
 
 			default -> throw new RuntimeException("Type '" + question.getType().getDisplay()
 					+ "' in Questionnaire.item is not supported as answer type");
