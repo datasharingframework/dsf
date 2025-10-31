@@ -20,7 +20,7 @@
 	<hierarchyMeaning value="grouped-by" />
 	<versionNeeded value="false" />
 	<content value="complete" />
-	<count value="10" />
+	<count value="12" />
 	<concept>
 		<code value="UAC_USER" />
 		<display value="Use-and-Access Committee Member" />
@@ -56,6 +56,14 @@
 	<concept>
 		<code value="AMS_USER" />
 		<display value="Allowlist Management Site Member" />
+	</concept>
+	<concept>
+		<code value="ASP_USER" />
+		<display value="Analysis Service Provider Member" />
+	</concept>
+	<concept>
+		<code value="SPR_USER" />
+		<display value="Service Provider Registry Member" />
 	</concept>
 	<concept>
 		<code value="DSF_ADMIN" />

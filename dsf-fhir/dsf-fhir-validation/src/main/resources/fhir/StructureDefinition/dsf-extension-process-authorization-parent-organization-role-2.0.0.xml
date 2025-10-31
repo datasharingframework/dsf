@@ -9,7 +9,7 @@
 	</meta>
 	<url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role" />
 	<version value="2.0.0" />
-	<name value="ProcessAuthorizationParentOrganizatioRole" />
+	<name value="ProcessAuthorizationParentOrganizationRole" />
 	<status value="active" />
 	<experimental value="false" />
 	<date value="2025-10-27" />

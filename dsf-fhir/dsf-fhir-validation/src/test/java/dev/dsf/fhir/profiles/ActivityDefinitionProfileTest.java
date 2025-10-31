@@ -61,7 +61,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	@Override
 	protected ActivityDefinition create()
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 
 		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
@@ -76,7 +76,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 		return d;
 	}
 
-	protected ActivityDefinition createWithouAuthExtension()
+	private ActivityDefinition createWithoutAuthExtension()
 	{
 		ActivityDefinition d = new ActivityDefinition();
 		d.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/activity-definition");
@@ -106,7 +106,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	public void testActivityDefinitionWithProcessAuthorizationRequesterRemoteAllRecipientLocalAllValid()
 			throws Exception
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
@@ -131,7 +131,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	public void testActivityDefinitionWithProcessAuthorizationRequesterLocalPractitionerRoleRecipientLocalAllValid()
 			throws Exception
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
@@ -161,7 +161,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	public void testActivityDefinitionWithProcessAuthorizationRequesterRemoteOrganizationRecipientLocalParentOrganizationRoleValid()
 			throws Exception
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
@@ -199,7 +199,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	public void testActivityDefinitionWithProcessAuthorizationRequesterOrganizationPractitionerRoleRecipientLocalParentOrganizationRoleValid()
 			throws Exception
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
@@ -241,7 +241,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	public void testActivityDefinitionWithProcessAuthorizationRequesterParentOrganizationRolePractitionerRoleRecipientLocalAllValid()
 			throws Exception
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
@@ -278,7 +278,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	public void testActivityDefinitionWithProcessAuthorizationRequesterRemoteOrganizationRecipientRemoteConsortiumRoleNotValid()
 			throws Exception
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		Extension processAuthorization = d.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-process-authorization");
@@ -310,7 +310,7 @@ public class ActivityDefinitionProfileTest extends AbstractMetaDataResourceProfi
 	@Test
 	public void testActivityDefinitionWithoutProcessAuthorizationNotValid() throws Exception
 	{
-		ActivityDefinition d = createWithouAuthExtension();
+		ActivityDefinition d = createWithoutAuthExtension();
 		d.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
 		logResource(d);
