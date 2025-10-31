@@ -96,6 +96,7 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 			case DATETIME -> new DateTimeType("1900-01-01T00:00:00.000Z");
 			case URL -> new UriType("http://example.org/foo");
 			case REFERENCE -> new Reference("http://example.org/fhir/Placeholder/id");
+			case CHOICE -> new Coding().setSystem("http://example.org/fhir/CodeSystem/name").setCode("code");
 			case QUANTITY -> new Quantity().setValue(0).setUnit("unit")
 					.setSystem("http://example.org/fhir/CodeSystem/name").setCode("code");
 			// TODO: False positive validation error for QuestionnaireResponse.item.answer.valueQuantity.comparator,
