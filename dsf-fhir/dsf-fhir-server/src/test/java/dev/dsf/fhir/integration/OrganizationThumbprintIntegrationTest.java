@@ -1,16 +1,8 @@
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.KeyStore;
 import java.time.Duration;
 import java.util.HashMap;
@@ -30,21 +22,19 @@ import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Subscription;
-import org.junit.AfterClass;
+import org.hl7.fhir.r4.model.Organization;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.SpringServletContainerInitializer;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.testcontainers.utility.DockerImageName;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
@@ -54,23 +44,17 @@ import dev.dsf.common.auth.DsfLoginService;
 import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
 import dev.dsf.common.jetty.JettyServer;
-import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
-import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClientJersey;
-import dev.dsf.fhir.client.WebsocketClient;
-import dev.dsf.fhir.client.WebsocketClientTyrus;
 import dev.dsf.fhir.dao.AbstractDbTest;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceCleanerImpl;
 import dev.dsf.fhir.service.ReferenceExtractorImpl;
 import jakarta.servlet.ServletContainerInitializer;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 
-public abstract class AbstractIntegrationTest extends AbstractDbTest
+public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 {
 	@ClassRule
 	public static final X509Certificates certificates = new X509Certificates();
@@ -94,17 +78,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	protected static final FhirContext fhirContext = FhirContext.forR4();
 	protected static final ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
-	protected static final ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
 
 	private static final ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
 	private static String baseUrl;
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
-	private static FhirWebserviceClient externalWebserviceClient;
-	private static FhirWebserviceClient practitionerWebserviceClient;
-	private static FhirWebserviceClient adminWebserviceClient;
-	private static FhirWebserviceClient minimalWebserviceClient;
+	private ServerSocketChannel apiConnectorChannel;
+	private ServerSocketChannel statusConnectorChannel;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -112,66 +93,35 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
 				liquibaseRule.getDatabaseName());
 		defaultDataSource.unwrap(BasicDataSource.class).start();
+	}
 
-		ServerSocketChannel statusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
-		ServerSocketChannel apiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+	@Before
+	public void before()
+	{
+		apiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
+		statusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
 
 		baseUrl = "https://localhost:" + apiConnectorChannel.socket().getLocalPort() + CONTEXT_PATH;
 
 		logger.info("Creating webservice client ...");
 		webserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
 				certificates.getClientCertificate().trustStore(), certificates.getClientCertificate().keyStore(),
-				certificates.getClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
-
-		logger.info("Creating external webservice client ...");
-		externalWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
-				certificates.getExternalClientCertificate().trustStore(),
-				certificates.getExternalClientCertificate().keyStore(),
-				certificates.getExternalClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
-
-		logger.info("Creating practitioner client ...");
-		practitionerWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
-				certificates.getPractitionerClientCertificate().trustStore(),
-				certificates.getPractitionerClientCertificate().keyStore(),
-				certificates.getPractitionerClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
-
-		logger.info("Creating admin client ...");
-		adminWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
-				certificates.getAdminClientCertificate().trustStore(),
-				certificates.getAdminClientCertificate().keyStore(),
-				certificates.getAdminClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
-
-		logger.info("Creating minimal client ...");
-		minimalWebserviceClient = createWebserviceClient(apiConnectorChannel.socket().getLocalPort(),
-				certificates.getMinimalClientCertificate().trustStore(),
-				certificates.getMinimalClientCertificate().keyStore(),
-				certificates.getMinimalClientCertificate().keyStorePassword(), fhirContext, referenceCleaner);
-
-		logger.info("Starting FHIR Server ...");
-		fhirServer = startFhirServer(statusConnectorChannel, apiConnectorChannel, baseUrl);
+				certificates.getClientCertificate().keyStorePassword());
 
 		logger.info("Creating template database ...");
 		liquibaseRule.createTemplateDatabase();
 	}
 
 	private static FhirWebserviceClient createWebserviceClient(int apiPort, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
+			char[] keyStorePassword)
 	{
 		return new FhirWebserviceClientJersey("https://localhost:" + apiPort + CONTEXT_PATH, trustStore, keyStore,
 				keyStorePassword, null, null, null, null, Duration.ZERO, Duration.ZERO, false,
 				"DSF Integration Test Client", fhirContext, referenceCleaner);
 	}
 
-	private static WebsocketClient createWebsocketClient(int apiPort, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, String subscriptionIdPart)
-	{
-		return new WebsocketClientTyrus(() ->
-		{}, URI.create("wss://localhost:" + apiPort + CONTEXT_PATH + "/ws"), trustStore, keyStore, keyStorePassword,
-				null, null, null, "Integration Test Client", subscriptionIdPart);
-	}
-
-	private static JettyServer startFhirServer(ServerSocketChannel statusConnectorChannel,
-			ServerSocketChannel apiConnectorChannel, String baseUrl) throws Exception
+	private static Map<String, String> getDefaultInitParameters(ServerSocketChannel statusConnectorChannel,
+			ServerSocketChannel apiConnectorChannel)
 	{
 		Map<String, String> initParameters = new HashMap<>();
 		initParameters.put("dev.dsf.server.status.port",
@@ -233,13 +183,27 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 						certificates.getMinimalClientCertificate().certificateSha512ThumbprintHex()));
 		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", "true");
 
-		initParameters.put("dev.dsf.fhir.server.organization.thumbprint",
-				certificates.getClientCertificate().certificateSha512ThumbprintHex());
 		initParameters.put("dev.dsf.fhir.server.endpoint.address",
 				"https://localhost:" + apiConnectorChannel.socket().getLocalPort() + "/fhir");
+
+		initParameters.put("dev.dsf.fhir.server.endpoint.address.external", "https://localhost:80010/fhir");
 		initParameters.put("dev.dsf.fhir.server.organization.thumbprint.external",
 				certificates.getExternalClientCertificate().certificateSha512ThumbprintHex());
-		initParameters.put("dev.dsf.fhir.server.endpoint.address.external", "https://localhost:80010/fhir");
+		return initParameters;
+	}
+
+	private static Map<String, String> getInitParametersWithThumbprint(ServerSocketChannel statusConnectorChannel,
+			ServerSocketChannel apiConnectorChannel)
+	{
+		Map<String, String> initParameters = getDefaultInitParameters(statusConnectorChannel, apiConnectorChannel);
+		initParameters.put("dev.dsf.fhir.server.organization.thumbprint",
+				certificates.getClientCertificate().certificateSha512ThumbprintHex());
+		return initParameters;
+	}
+
+	private static JettyServer createFhirServer(Map<String, String> initParameters,
+			ServerSocketChannel apiConnectorChannel, ServerSocketChannel statusConnectorChannel) throws Exception
+	{
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());
@@ -270,49 +234,42 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			webAppContext.setSecurityHandler(securityHandler);
 		};
 
-		JettyServer server = new JettyServer(apiConnector, statusConnector, "dsf-fhir-server", CONTEXT_PATH,
+		return new JettyServer(apiConnector, statusConnector, "dsf-fhir-server", CONTEXT_PATH,
 				servletContainerInitializers, initParameters, securityHandlerConfigurer);
-
-		server.start();
-
-		return server;
 	}
 
-	protected static Bundle readBundle(Path bundleTemplateFile, IParser parser)
+	@Test
+	public void testFhirServerStartupWithoutThumbprint() throws Exception
 	{
-		try (InputStream in = Files.newInputStream(bundleTemplateFile))
-		{
-			Bundle bundle = parser.parseResource(Bundle.class, in);
-			return referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
-		}
-		catch (IOException e)
-		{
-			logger.error("Error while reading bundle from {}", bundleTemplateFile.toString(), e);
-			throw new RuntimeException(e);
-		}
+		fhirServer = createFhirServer(getDefaultInitParameters(statusConnectorChannel, apiConnectorChannel),
+				apiConnectorChannel, statusConnectorChannel);
+		fhirServer.start();
+		Organization organization = (Organization) webserviceClient
+				.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0)
+				.getResource();
+		String thumbprint = organization
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.getValue().primitiveValue();
+		assertEquals(certificates.getClientCertificate().certificateSha512ThumbprintHex(), thumbprint);
 	}
 
-	protected static IParser newXmlParser()
+	@Test
+	public void testFhirServerStartupWithThumbprint() throws Exception
 	{
-		return newParser(fhirContext::newXmlParser);
+		fhirServer = createFhirServer(getInitParametersWithThumbprint(statusConnectorChannel, apiConnectorChannel),
+				apiConnectorChannel, statusConnectorChannel);
+		fhirServer.start();
+		Organization organization = (Organization) webserviceClient
+				.search(Organization.class, Map.of("identifier", List.of("Test_Organization"))).getEntry().get(0)
+				.getResource();
+		String thumbprint = organization
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.getValue().primitiveValue();
+		assertEquals(certificates.getClientCertificate().certificateSha512ThumbprintHex(), thumbprint);
 	}
 
-	protected static IParser newJsonParser()
-	{
-		return newParser(fhirContext::newJsonParser);
-	}
-
-	private static IParser newParser(Supplier<IParser> supplier)
-	{
-		IParser p = supplier.get();
-		p.setStripVersionsFromReferences(false);
-		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		p.setPrettyPrint(true);
-		return p;
-	}
-
-	@AfterClass
-	public static void afterClass() throws Exception
+	@After
+	public void cleanUp() throws Exception
 	{
 		try
 		{
@@ -327,110 +284,36 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			logger.error("Error while stopping FHIR Server", e);
 		}
 
-		defaultDataSource.unwrap(BasicDataSource.class).close();
-	}
-
-	protected AnnotationConfigWebApplicationContext getSpringWebApplicationContext()
-	{
-		return (AnnotationConfigWebApplicationContext) WebApplicationContextUtils
-				.getWebApplicationContext(fhirServer.getServletContext());
-	}
-
-	protected static String getBaseUrl()
-	{
-		return baseUrl;
-	}
-
-	protected static FhirWebserviceClient getWebserviceClient()
-	{
-		return webserviceClient;
-	}
-
-	protected static FhirWebserviceClient getExternalWebserviceClient()
-	{
-		return externalWebserviceClient;
-	}
-
-	protected static FhirWebserviceClient getPractitionerWebserviceClient()
-	{
-		return practitionerWebserviceClient;
-	}
-
-	protected static FhirWebserviceClient getAdminWebserviceClient()
-	{
-		return adminWebserviceClient;
-	}
-
-	protected static FhirWebserviceClient getMinimalWebserviceClient()
-	{
-		return minimalWebserviceClient;
-	}
-
-	protected static WebsocketClient getWebsocketClient()
-	{
-		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
-				Map.of("criteria", List.of("Task?status=requested"), "status", List.of("active"), "type",
-						List.of("websocket"), "payload", List.of("application/fhir+json")));
-
-		assertNotNull(bundle);
-		assertEquals(1, bundle.getTotal());
-		assertNotNull(bundle.getEntryFirstRep());
-		assertTrue(bundle.getEntryFirstRep().getResource() instanceof Subscription);
-
-		Subscription subscription = (Subscription) bundle.getEntryFirstRep().getResource();
-		assertNotNull(subscription.getIdElement());
-		assertNotNull(subscription.getIdElement().getIdPart());
-
-		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().trustStore(),
-				certificates.getClientCertificate().keyStore(), certificates.getClientCertificate().keyStorePassword(),
-				subscription.getIdElement().getIdPart());
-	}
-
-	protected static final ReadAccessHelper getReadAccessHelper()
-	{
-		return readAccessHelper;
-	}
-
-	protected static final ProcessAuthorizationHelper getProcessAuthorizationHelper()
-	{
-		return processAuthorizationHelper;
-	}
-
-	protected static void expectBadRequest(Runnable operation) throws Exception
-	{
-		expectWebApplicationException(operation, Status.BAD_REQUEST);
-	}
-
-	protected static void expectForbidden(Runnable operation) throws Exception
-	{
-		expectWebApplicationException(operation, Status.FORBIDDEN);
-	}
-
-	protected static void expectNotFound(Runnable operation) throws Exception
-	{
-		expectWebApplicationException(operation, Status.NOT_FOUND);
-	}
-
-	protected static void expectNotAcceptable(Runnable operation) throws Exception
-	{
-		expectWebApplicationException(operation, Status.NOT_ACCEPTABLE);
-	}
-
-	protected static void expectGone(Runnable operation) throws Exception
-	{
-		expectWebApplicationException(operation, Status.GONE);
-	}
-
-	protected static void expectWebApplicationException(Runnable operation, Status status) throws Exception
-	{
 		try
 		{
-			operation.run();
-			fail("WebApplicationException expected");
+			if (apiConnectorChannel != null)
+			{
+				logger.info("Closing API Connector Channel...");
+				apiConnectorChannel.close();
+			}
 		}
-		catch (WebApplicationException e)
+		catch (Exception e)
 		{
-			assertEquals(status.getStatusCode(), e.getResponse().getStatus());
+			logger.error("Error while closing API Connector Channel", e);
 		}
+
+		try
+		{
+			if (statusConnectorChannel != null)
+			{
+				logger.info("Closing Status Connector Channel...");
+				statusConnectorChannel.close();
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Error while closing Status Connector Channel", e);
+		}
+
+		if (webserviceClient != null)
+		{
+			webserviceClient = null;
+		}
+		defaultDataSource.unwrap(BasicDataSource.class).close();
 	}
 }
