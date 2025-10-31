@@ -2,6 +2,7 @@ package dev.dsf.maven.dev;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.List;
@@ -51,6 +52,8 @@ public class CertificateWriter extends AbstractIo
 				toRuntimeException(() -> writePrivateKey(cert.getCn(), capk, target));
 			else if (target.getFileName().toString().endsWith(".key.plain"))
 				toRuntimeException(() -> writePrivateKeyPlain(cert.getCn(), capk, target));
+			else if (target.getFileName().toString().endsWith(".key.password"))
+				toRuntimeException(() -> writePassword(cert.getCn(), capk, target));
 			else if (target.getFileName().toString().endsWith(".p12"))
 				toRuntimeException(() -> writePkcs12(cert.getCn(), capk, target));
 			else
@@ -132,6 +135,13 @@ public class CertificateWriter extends AbstractIo
 		logger.info("Writing private-key unencrypted (cn: {}) to {}", cn, projectBasedir.relativize(target));
 
 		PemWriter.writePrivateKey(capk.privateKey()).asPkcs8().notEncrypted().toFile(target);
+	}
+
+	private void writePassword(String cn, CertificateAndPrivateKey capk, Path target) throws IOException
+	{
+		logger.info("Writing key password (cn: {}) to {}", cn, projectBasedir.relativize(target));
+
+		Files.writeString(target, new String(privateKeyPassword));
 	}
 
 	private void writePkcs12(String cn, CertificateAndPrivateKey capk, Path target) throws IOException

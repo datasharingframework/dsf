@@ -722,6 +722,7 @@
 										<targets>
 											<target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.crt</target>
 											<target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.key</target>
+											<target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.key.password</target>
 										</targets>
 									</cert>
 								</certs>

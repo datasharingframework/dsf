@@ -375,6 +375,7 @@ services:
       - root_ca.crt
       - ttp.crt
       - ttp.key
+      - ttp.key.password
       - ca_chain.crt
       - oidc_client_ttp_fhir.secret
     volumes:
@@ -407,7 +408,7 @@ services:
       DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/ttp.crt
       DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/ttp.key
-      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD: 'password'
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/ttp.key.password
       DEV_DSF_FHIR_SERVER_UI_THEME: dev
       DEV_DSF_FHIR_DB_USER_GROUP: ttp_fhir_users
       DEV_DSF_FHIR_DB_USER_USERNAME: ttp_fhir_server_user
@@ -759,6 +760,7 @@ services:
       - root_ca.crt
       - ttp.crt
       - ttp.key
+      - ttp.key.password
       - ca_chain.crt
       - oidc_client_ttp_bpe.secret
     volumes:
@@ -791,7 +793,7 @@ services:
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/ttp.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/ttp.key
-      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD: 'password'
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/ttp.key.password
       DEV_DSF_BPE_DB_USER_GROUP: ttp_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: ttp_bpe_server_user
       DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: ttp_camunda_users
@@ -872,6 +874,8 @@ secrets:
     file: ./secrets/ttp.crt
   ttp.key:
     file: ./secrets/ttp.key
+  ttp.key.password:
+    file: ./secrets/ttp.key.password
 
   root_ca.crt:
     file: ./secrets/root_ca.crt

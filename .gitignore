@@ -91,6 +91,7 @@ dsf-docker-test-setup-3dic-ttp/secrets/localhost.key.plain
 dsf-docker-test-setup-3dic-ttp/secrets/root_ca.crt
 dsf-docker-test-setup-3dic-ttp/secrets/ttp.crt
 dsf-docker-test-setup-3dic-ttp/secrets/ttp.key
+dsf-docker-test-setup-3dic-ttp/secrets/ttp.key.password
 dsf-docker-test-setup-3dic-ttp/.env
 dsf-docker-test-setup-3dic-ttp/docker-compose.override.yml
 
