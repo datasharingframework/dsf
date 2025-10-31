@@ -12,6 +12,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+/**
+ * Generates default CA files required by DSF for dev setups.
+ * <p>
+ * This goal creates all required default CA files (client issuing CAs, client CA chains, server root CAs) and copies
+ * them to the configured target directory.
+ */
 @Mojo(name = "generate-default-ca-files", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true)
 public class GenerateDefaultCaFilesMojo extends AbstractMojo
 {

@@ -149,6 +149,12 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<!-- TODO remove maven-pmd-plugin version override when it supports Java 25 -->
+				<version>3.28.0</version>
+			</plugin>
 		</plugins>
 	</reporting>
 </project>
