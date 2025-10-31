@@ -667,19 +667,7 @@ function parseStructureDefinition(bundle) {
 function parseQuestionnaire(bundle) {
 	if (bundle.entry.length > 0 && bundle.entry[0].resource !== null) {
 		const questionnaire = bundle.entry[0].resource
-
-		if (questionnaire.meta !== null && questionnaire.meta.profile !== null && questionnaire.meta.profile.length > 0) {
-			const profile = questionnaire.meta.profile[0]
-			const urlVersion = profile.split('|')
-
-			if (urlVersion.length > 1) {
-				const version = urlVersion[1]
-
-				if (version !== '1.0.0' && questionnaire.item !== undefined) {
-					questionnaire.item.forEach(modifyQuestionnaireInputRow)
-				}
-			}
-		}
+		questionnaire.item.forEach(modifyQuestionnaireInputRow)
 	}
 }
 

@@ -39,6 +39,7 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -57,6 +58,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected final ResponseGenerator responseGenerator;
 	protected final ReferenceCleaner referenceCleaner;
 	protected final EventGenerator eventGenerator;
+	protected final DefaultProfileProvider defaultProfileProvider;
+	protected final boolean enableValidation;
 
 	protected R createdResource;
 	protected Response responseResult;
@@ -66,7 +69,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
+			DefaultProfileProvider defaultProfileProvider, boolean enableValidation)
 	{
 		super(2, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
@@ -75,6 +79,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		this.referenceCleaner = referenceCleaner;
 
 		this.eventGenerator = eventGenerator;
+		this.defaultProfileProvider = defaultProfileProvider;
+		this.enableValidation = enableValidation;
+
+		if (PreferReturnType.OPERATION_OUTCOME.equals(returnType) && !enableValidation)
+			throw new IllegalArgumentException("Return type 'operation outcome' not allowed if validation disabled");
 	}
 
 	@Override
@@ -149,7 +158,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		{
 			responseResult = null;
 
-			validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			if (enableValidation)
+			{
+				defaultProfileProvider.setDefaultProfile(resource);
+				validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			}
 
 			referencesHelper.resolveLogicalReferences(connection);
 
@@ -277,7 +290,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			{
 				OperationOutcome outcome = responseGenerator.created(location.toString(),
 						createdResourceWithResolvedReferences);
-				validationResult.populateOperationOutcome(outcome);
+
+				if (validationResult != null)
+					validationResult.populateOperationOutcome(outcome);
+
 				resultEntry.getResponse().setOutcome(outcome);
 			}
 

@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.Identity;
@@ -30,6 +32,7 @@ import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -38,6 +41,8 @@ import dev.dsf.fhir.validation.ValidationRules;
 
 public class CommandFactoryImpl implements InitializingBean, CommandFactory
 {
+	private static final Logger logger = LoggerFactory.getLogger(CommandFactoryImpl.class);
+
 	private final String serverBase;
 	private final int defaultPageCount;
 	private final DataSource dataSource;
@@ -56,6 +61,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final ValidationHelper validationHelper;
 	private final SnapshotGenerator snapshotGenerator;
 	private final ValidationRules validationRules;
+	private final DefaultProfileProvider defaultProfileProvider;
 	private final Function<Connection, TransactionResources> transactionResourcesFactory;
 
 	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource,
@@ -65,6 +71,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			ParameterConverter parameterConverter, EventHandler eventHandler, EventGenerator eventGenerator,
 			AuthorizationHelper authorizationHelper, ValidationHelper validationHelper,
 			SnapshotGenerator snapshotGenerator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider,
 			Function<Connection, TransactionResources> transactionResourcesFactory)
 	{
 		this.serverBase = serverBase;
@@ -85,6 +92,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		this.validationHelper = validationHelper;
 		this.snapshotGenerator = snapshotGenerator;
 		this.validationRules = validationRules;
+		this.defaultProfileProvider = defaultProfileProvider;
 		this.transactionResourcesFactory = transactionResourcesFactory;
 	}
 
@@ -131,7 +139,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 	// create, conditional create
 	private <R extends Resource> Command post(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
-			BundleEntryComponent entry, R resource)
+			BundleEntryComponent entry, R resource, boolean enableValidation)
 	{
 		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
 		{
@@ -143,11 +151,14 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				return new CreateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
 						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
 						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						eventGenerator, defaultProfileProvider, enableValidation,
+						daoProvider.getStructureDefinitionSnapshotDao());
 			else
-				return dao.map(d -> new CreateCommand<>(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
-						referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
+				return dao
+						.map(d -> new CreateCommand<>(index, identity, returnType, bundle, entry, serverBase,
+								authorizationHelper, resource, d, exceptionHandler, parameterConverter,
+								responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+								eventGenerator, defaultProfileProvider, enableValidation))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -158,7 +169,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 	// update, conditional update
 	private <R extends Resource> Command put(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
-			BundleEntryComponent entry, R resource)
+			BundleEntryComponent entry, R resource, boolean enableValidation)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank()
 				&& entry.getRequest().getUrl().startsWith(resource.getResourceType().name()))
@@ -171,11 +182,14 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				return new UpdateStructureDefinitionCommand(index, identity, returnType, bundle, entry, serverBase,
 						authorizationHelper, s, (StructureDefinitionDao) dao.get(), exceptionHandler,
 						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao());
+						eventGenerator, defaultProfileProvider, enableValidation,
+						daoProvider.getStructureDefinitionSnapshotDao());
 			else
-				return dao.map(d -> new UpdateCommand<>(index, identity, returnType, bundle, entry, serverBase,
-						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
-						referenceExtractor, referenceResolver, referenceCleaner, eventGenerator))
+				return dao
+						.map(d -> new UpdateCommand<>(index, identity, returnType, bundle, entry, serverBase,
+								authorizationHelper, resource, d, exceptionHandler, parameterConverter,
+								responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+								eventGenerator, defaultProfileProvider, enableValidation))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -205,18 +219,21 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 	@Override
 	public CommandList createCommands(Bundle bundle, Identity identity, PreferReturnType returnType,
-			PreferHandlingType handlingType) throws BadBundleException
+			PreferHandlingType handlingType, boolean enableValidation)
 	{
 		Objects.requireNonNull(bundle, "bundle");
 		Objects.requireNonNull(identity, "identity");
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(handlingType, "handlingType");
 
+		if (!enableValidation)
+			logger.debug("FHIR resource validation disabled");
+
 		if (bundle.getType() != null)
 		{
-			List<Command> commands = IntStream
-					.range(0, bundle.getEntry().size()).mapToObj(index -> createCommand(index, identity, returnType,
-							handlingType, bundle, bundle.getEntry().get(index)))
+			List<Command> commands = IntStream.range(0, bundle.getEntry().size())
+					.mapToObj(index -> createCommand(index, identity, returnType, handlingType, bundle,
+							bundle.getEntry().get(index), enableValidation))
 					.flatMap(Function.identity()).collect(Collectors.toList());
 
 			return switch (bundle.getType())
@@ -236,7 +253,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	protected Stream<Command> createCommand(int index, Identity identity, PreferReturnType returnType,
-			PreferHandlingType handlingType, Bundle bundle, BundleEntryComponent entry)
+			PreferHandlingType handlingType, Bundle bundle, BundleEntryComponent entry, boolean enableValidation)
 	{
 		if (entry.hasRequest() && entry.getRequest().hasMethod())
 		{
@@ -256,11 +273,12 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			{
 				return switch (entry.getRequest().getMethod())
 				{
-					case POST ->
-						resolveReferences(post(index, identity, returnType, bundle, entry, entry.getResource()), index,
-								identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.POST);
+					case POST -> resolveReferences(
+							post(index, identity, returnType, bundle, entry, entry.getResource(), enableValidation),
+							index, identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.POST);
 
-					case PUT -> resolveReferences(put(index, identity, returnType, bundle, entry, entry.getResource()),
+					case PUT -> resolveReferences(
+							put(index, identity, returnType, bundle, entry, entry.getResource(), enableValidation),
 							index, identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.PUT);
 
 					default -> throw new BadBundleException("Request method " + entry.getRequest().getMethod()

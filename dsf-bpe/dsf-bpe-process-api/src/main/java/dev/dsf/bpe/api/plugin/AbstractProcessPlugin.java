@@ -116,8 +116,17 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 	private static final String ORGANIZATION_RESOURCE_TYPE_NAME = "Organization";
 
-	private static final String STRUCTURE_DEFINITION_BASE_TASK_URL = "http://dsf.dev/fhir/StructureDefinition/task-base";
-	private static final String STRUCTURE_DEFINITION_BASE_TASK_URL_V1 = "http://dsf.dev/fhir/StructureDefinition/task-base|1.0.0";
+	private static final String P_ACTIVITY_DEFINITION = "http://dsf.dev/fhir/StructureDefinition/activity-definition";
+	private static final String P_CODE_SYSTEM = "http://dsf.dev/fhir/StructureDefinition/code-system";
+	private static final String P_LIBRARY = "http://dsf.dev/fhir/StructureDefinition/library";
+	private static final String P_MEASURE = "http://dsf.dev/fhir/StructureDefinition/measure";
+	private static final String P_NAMING_SYSTEM = "http://dsf.dev/fhir/StructureDefinition/naming-system";
+	private static final String P_QUESTIONNAIRE = "http://dsf.dev/fhir/StructureDefinition/questionnaire";
+	private static final String P_STRUCTURE_DEFINITION = "http://dsf.dev/fhir/StructureDefinition/structure-definition";
+	private static final String P_VALUE_SET = "http://dsf.dev/fhir/StructureDefinition/value-set";
+
+	private static final String BD_TASK_BASE = "http://dsf.dev/fhir/StructureDefinition/task-base";
+	private static final String BD_TASK_BASE_1_0_0 = "http://dsf.dev/fhir/StructureDefinition/task-base|1.0.0";
 
 	private final String processPluginDefinitionTypeName;
 	private final int processPluginApiVersion;
@@ -136,7 +145,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	private final Class<?> messageEndEventInterface;
 	private final Class<?> defaultUserTaskListenerClass;
 
-	private final ProcessPluginFhirConfig<?, ?, ?, ?, ?, ?, ?, ?, ?> fhirConfig;
+	private final ProcessPluginFhirConfig<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> fhirConfig;
 
 	private AnnotationConfigApplicationContext applicationContext;
 	private List<BpmnFileAndModel> processModels;
@@ -185,7 +194,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		this.fhirConfig = createFhirConfig();
 	}
 
-	protected abstract ProcessPluginFhirConfig<?, ?, ?, ?, ?, ?, ?, ?, ?> createFhirConfig();
+	protected abstract ProcessPluginFhirConfig<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> createFhirConfig();
 
 	protected abstract List<Class<?>> getDefinitionSpringConfigurations();
 
@@ -596,7 +605,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		{
 			if (!file.endsWith(BPMN_SUFFIX))
 			{
-				logger.warn("Ignoring BPMN model {} from process plugin {}-{}: Filename not ending in '{}'", file,
+				logger.warn("Ignoring BPMN model {} of process plugin {}-{}: Filename not ending in '{}'", file,
 						getDefinitionName(), getDefinitionVersion(), BPMN_SUFFIX);
 
 				return null;
@@ -604,7 +613,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 			String resourceDateValue = getDefinitionResourceReleaseDate().format(DATE_FORMAT);
 			logger.debug(
-					"Reading BPMN model {} from process plugin {}-{} and replacing all occurrences of {} with {}, {} with {} and {} with {}",
+					"Reading BPMN model {} of process plugin {}-{} and replacing all occurrences of {} with {}, {} with {} and {} with {}",
 					file, getDefinitionName(), getDefinitionVersion(), VERSION_PLACEHOLDER_PATTERN_STRING,
 					getDefinitionResourceVersion(), DATE_PLACEHOLDER_PATTERN_STRING, resourceDateValue,
 					ORGANIZATION_PLACEHOLDER_PATTERN_STRING, localOrganizationIdentifierValue);
@@ -614,7 +623,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 				if (in == null)
 				{
 					logger.warn(
-							"Ignoring BPMN model {} from process plugin {}-{}: File not readable, process plugin class loader getResourceAsStream returned null",
+							"Ignoring BPMN model {} of process plugin {}-{}: File not readable, process plugin class loader getResourceAsStream returned null",
 							file, getDefinitionName(), getDefinitionVersion());
 
 					return null;
@@ -684,9 +693,9 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			}
 			catch (IOException e)
 			{
-				logger.debug("Ignoring BPMN model {} from process plugin {}-{}", file, getDefinitionName(),
+				logger.debug("Ignoring BPMN model {} of process plugin {}-{}", file, getDefinitionName(),
 						getDefinitionVersion(), e);
-				logger.warn("Ignoring BPMN model {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
+				logger.warn("Ignoring BPMN model {} of process plugin {}-{}: {} - {}", file, getDefinitionName(),
 						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 
 				return null;
@@ -968,7 +977,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		{
 			if (!file.endsWith(JSON_SUFFIX) && !file.endsWith(XML_SUFFIX))
 			{
-				logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Filename not ending in '{}' or '{}'",
+				logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Filename not ending in '{}' or '{}'",
 						file, getDefinitionName(), getDefinitionVersion(), JSON_SUFFIX, XML_SUFFIX);
 
 				return null;
@@ -977,7 +986,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			String resourceDateValue = getDefinitionResourceReleaseDate().format(DATE_FORMAT);
 
 			logger.debug(
-					"Reading FHIR resource {} from process plugin {}-{} and replacing all occurrences of {} with {}, {} with {} and {} with {}",
+					"Reading FHIR resource {} of process plugin {}-{} and replacing all occurrences of {} with {}, {} with {} and {} with {}",
 					file, getDefinitionName(), getDefinitionVersion(), VERSION_PLACEHOLDER_PATTERN_STRING,
 					getDefinitionResourceVersion(), DATE_PLACEHOLDER_PATTERN_STRING, resourceDateValue,
 					ORGANIZATION_PLACEHOLDER_PATTERN_STRING, localOrganizationIdentifierValue);
@@ -987,7 +996,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 				if (in == null)
 				{
 					logger.warn(
-							"Ignoring FHIR resource {} from process plugin {}-{}: Not readable, process plugin class loader getResourceAsStream returned null",
+							"Ignoring FHIR resource {} of process plugin {}-{}: Not readable, process plugin class loader getResourceAsStream returned null",
 							file, getDefinitionName(), getDefinitionVersion());
 					return null;
 				}
@@ -1008,62 +1017,70 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 				if (fhirConfig.isActivityDefinition(resource))
 				{
 					resource = fhirResourceModifier.modifyActivityDefinition(file, resource);
+					fhirConfig.modifyActivityDefinition(resource);
 					if (isValidActivityDefinition(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isCodeSystem(resource))
 				{
 					resource = fhirResourceModifier.modifyCodeSystem(file, resource);
+					fhirConfig.modifyCodeSystem(resource);
 					if (isValidCodeSystem(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isLibrary(resource))
 				{
 					resource = fhirResourceModifier.modifyLibrary(file, resource);
+					fhirConfig.modifyLibrary(resource);
 					if (isValidLibrary(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isMeasure(resource))
 				{
 					resource = fhirResourceModifier.modifyMeasure(file, resource);
+					fhirConfig.modifyMeasure(resource);
 					if (isValidMeasure(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isNamingSystem(resource))
 				{
 					resource = fhirResourceModifier.modifyNamingSystem(file, resource);
+					fhirConfig.modifyNamingSystem(resource);
 					if (isValidNamingSystem(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isQuestionnaire(resource))
 				{
 					resource = fhirResourceModifier.modifyQuestionnaire(file, resource);
+					fhirConfig.modifyQuestionnaire(resource);
 					if (isValidQuestionnaire(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isStructureDefinition(resource))
 				{
-					resource = modifyBaseDefinitionIfTaskProfile(resource, file);
 					resource = fhirResourceModifier.modifyStructureDefinition(file, resource);
+					fhirConfig.modifyStructureDefinition(resource);
 					if (isValidStructureDefinition(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isTask(resource))
 				{
 					resource = fhirResourceModifier.modifyTask(file, resource);
+					// no modification
 					if (isValidTask(file, resource, localOrganizationIdentifierValue))
 						return FileAndResource.of(file, resource);
 				}
 				else if (fhirConfig.isValueSet(resource))
 				{
 					resource = fhirResourceModifier.modifyValueSet(file, resource);
+					fhirConfig.modifyValueSet(resource);
 					if (isValidValueSet(file, resource))
 						return FileAndResource.of(file, resource);
 				}
 				else
 				{
 					logger.warn(
-							"Ignoring FHIR resource {} from process plugin {}-{}: Not a ActivityDefinition, CodeSystem, Library, Measure, NamingSystem, Questionnaire, StructureDefinition, Task or ValueSet",
+							"Ignoring FHIR resource {} of process plugin {}-{}: Not a ActivityDefinition, CodeSystem, Library, Measure, NamingSystem, Questionnaire, StructureDefinition, Task or ValueSet",
 							file, getDefinitionName(), getDefinitionVersion());
 				}
 
@@ -1071,9 +1088,9 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			}
 			catch (IOException e)
 			{
-				logger.debug("Ignoring FHIR resource {} from process plugin {}-{}", file, getDefinitionName(),
+				logger.debug("Ignoring FHIR resource {} of process plugin {}-{}", file, getDefinitionName(),
 						getDefinitionVersion(), e);
-				logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {} - {}", file, getDefinitionName(),
+				logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: {} - {}", file, getDefinitionName(),
 						getDefinitionVersion(), e.getClass().getName(), e.getMessage());
 
 				return null;
@@ -1090,18 +1107,18 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 		if (!urlOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {}.url empty", file, getDefinitionName(),
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: {}.url empty", file, getDefinitionName(),
 					getDefinitionVersion(), fhirConfig.getResourceName(resource).orElse(""));
 		}
 
 		if (!versionDefined)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {}.version empty", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: {}.version empty", file,
 					getDefinitionName(), getDefinitionVersion(), fhirConfig.getResourceName(resource).orElse(""));
 		}
 		else if (!versionOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: {}.version not equal to {} but {}", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: {}.version not equal to {} but {}", file,
 					getDefinitionName(), getDefinitionVersion(), fhirConfig.getResourceName(resource).orElse(""),
 					getDefinitionResourceVersion(), fhirConfig.getMetadataResourceVersion(resource).orElse(""));
 		}
@@ -1109,87 +1126,120 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		return urlOk && versionOk;
 	}
 
+	private boolean hasProfile(String file, Object resource, String profile)
+	{
+		List<String> profiles = fhirConfig.getProfiles(resource);
+		boolean profileOk = profiles.contains(profile);
+
+		if (!profileOk)
+		{
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: {} not declared as profile", file,
+					getDefinitionName(), getDefinitionVersion(), profile);
+		}
+
+		return profileOk;
+	}
+
 	private boolean isValidActivityDefinition(String file, Object resource)
 	{
+		boolean hasProfile = hasProfile(file, resource, P_ACTIVITY_DEFINITION);
 		boolean metadataResourceOk = isValidMetadataResouce(resource, file);
 		boolean urlOk = fhirConfig.getActivityDefinitionUrl(resource)
 				.map(u -> ACTIVITY_DEFINITION_URL_PATTERN.matcher(u).matches()).orElse(false);
 
 		if (!urlOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: ActivityDefinition.url not matching {}",
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: ActivityDefinition.url not matching {}",
 					file, getDefinitionName(), getDefinitionVersion(), ACTIVITY_DEFINITION_URL_PATTERN_STRING);
 		}
 
-		return metadataResourceOk && urlOk;
+		return hasProfile && metadataResourceOk && urlOk;
 	}
 
 	private boolean isValidCodeSystem(String file, Object resource)
 	{
-		// TODO add additional validation steps
-		return isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_CODE_SYSTEM) && isValidMetadataResouce(resource, file);
 	}
 
 	private boolean isValidLibrary(String file, Object resource)
 	{
-		// TODO add additional validation steps
-		return isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_LIBRARY) && isValidMetadataResouce(resource, file);
 	}
 
 	private boolean isValidMeasure(String file, Object resource)
 	{
-		// TODO add additional validation steps
-		return isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_MEASURE) && isValidMetadataResouce(resource, file);
 	}
 
 	private boolean isValidNamingSystem(String file, Object resource)
 	{
+		boolean hasProfile = hasProfile(file, resource, P_NAMING_SYSTEM);
 		boolean nameOk = fhirConfig.hasNamingSystemName(resource);
 
 		if (!nameOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: NamingSystem.name empty", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: NamingSystem.name empty", file,
 					getDefinitionName(), getDefinitionVersion());
 		}
 
-		return nameOk;
+		return hasProfile && nameOk;
 	}
 
 	private boolean isValidQuestionnaire(String file, Object resource)
 	{
-		// TODO add additional validation steps
-		return isValidMetadataResouce(resource, file);
-	}
-
-	private Object modifyBaseDefinitionIfTaskProfile(Object resource, String file)
-	{
-		Optional<String> baseDefinition = fhirConfig.getStructureDefinitionBaseDefinition(resource);
-		baseDefinition.filter(d -> STRUCTURE_DEFINITION_BASE_TASK_URL_V1.equals(d)).ifPresent(_ ->
+		boolean hasProfile = hasProfile(file, resource, P_QUESTIONNAIRE);
+		boolean hasQuestionnaireItemsWithRequired = fhirConfig.hasQuestionnaireItemsWithRequired(resource);
+		if (!hasQuestionnaireItemsWithRequired)
 		{
-			logger.info(
-					"Setting StructureDefinition.baseDefinition to {} for FHIR resource {} from process plugin {}-{}",
-					STRUCTURE_DEFINITION_BASE_TASK_URL, file, getDefinitionName(), getDefinitionVersion());
+			logger.warn(
+					"Ignoring FHIR resource {} of process plugin {}-{}: Questionnaire has Items without required property",
+					file, getDefinitionName(), getDefinitionVersion());
+		}
 
-			fhirConfig.setStructureDefinitionBaseDefinition(resource, STRUCTURE_DEFINITION_BASE_TASK_URL);
-		});
-
-		return resource;
+		return hasProfile && hasQuestionnaireItemsWithRequired && isValidMetadataResouce(resource, file);
 	}
 
 	private boolean isValidStructureDefinition(String file, Object resource)
 	{
-		// TODO add additional validation steps
-		return isValidMetadataResouce(resource, file);
+		boolean hasProfile = hasProfile(file, resource, P_STRUCTURE_DEFINITION);
+		boolean hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion = fhirConfig
+				.hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion(resource);
+		if (!hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion)
+		{
+			logger.warn(
+					"Ignoring FHIR resource {} of process plugin {}-{}: StructureDefinition has DSF ValueSet bindings with version",
+					file, getDefinitionName(), getDefinitionVersion());
+		}
+
+		Optional<String> baseDefinition = fhirConfig.getStructureDefinitionBaseDefinition(resource);
+		boolean baseDefinitionOk = baseDefinition.isEmpty()
+				|| !baseDefinition.map(d -> BD_TASK_BASE.equals(d) || BD_TASK_BASE_1_0_0.equals(d)).get();
+		if (!baseDefinitionOk)
+		{
+			logger.warn(
+					"Ignoring FHIR resource {} of process plugin {}-{}: StructureDefinition.baseDefinition {} not allowed",
+					file, getDefinitionName(), getDefinitionVersion(), baseDefinition.get());
+		}
+
+		return hasProfile && hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion && baseDefinitionOk
+				&& isValidMetadataResouce(resource, file);
 	}
 
 	private boolean isValidTask(String file, Object resource, String localOrganizationIdentifierValue)
 	{
+		boolean profileOk = !fhirConfig.getProfiles(resource).isEmpty();
+		if (!profileOk)
+		{
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: No profile specified", file,
+					getDefinitionName(), getDefinitionVersion());
+		}
+
 		Optional<ProcessPluginFhirConfig.Identifier> identifier = fhirConfig.getTaskIdentifier(resource);
 		boolean identifierOk = false;
 		if (identifier.isEmpty())
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: No Task.identifier with system '{}'",
-					file, getDefinitionName(), getDefinitionVersion(), fhirConfig.getTaskIdentifierSid());
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: No Task.identifier with system '{}'", file,
+					getDefinitionName(), getDefinitionVersion(), fhirConfig.getTaskIdentifierSid());
 		}
 		else
 		{
@@ -1199,7 +1249,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 			if (!identifierOk)
 				logger.warn(
-						"Ignoring FHIR resource {} from process plugin {}-{}: No Task.identifier with system '{}' and value, or value contains | character",
+						"Ignoring FHIR resource {} of process plugin {}-{}: No Task.identifier with system '{}' and value, or value contains | character",
 						file, getDefinitionName(), getDefinitionVersion(), fhirConfig.getTaskIdentifierSid());
 			// Additional checks see instantiatesCanonicalMatchesProcessIdAndIdentifierValid(...)
 		}
@@ -1207,14 +1257,14 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		boolean statusOk = fhirConfig.isTaskStatusDraft(resource);
 		if (!statusOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.status not '{}'", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.status not '{}'", file,
 					getDefinitionName(), getDefinitionVersion(), fhirConfig.getTaskStatusDraftCode());
 		}
 
 		boolean requesterOk = false;
 		if (fhirConfig.getTaskRequester(resource).isEmpty())
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.requester not defined", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.requester not defined", file,
 					getDefinitionName(), getDefinitionVersion());
 		}
 		else
@@ -1226,7 +1276,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		boolean recipientOk = false;
 		if (fhirConfig.getTaskRecipient(resource).isEmpty())
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.restriction.recipient not defined",
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.restriction.recipient not defined",
 					file, getDefinitionName(), getDefinitionVersion());
 		}
 		else
@@ -1239,8 +1289,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 				.map(ic -> INSTANTIATES_CANONICAL_PATTERN.matcher(ic).matches()).orElse(false);
 		if (!instantiatesCanonicalOk)
 		{
-			logger.warn(
-					"Ignoring FHIR resource {} from process plugin {}-{}: Task.instantiatesCanonical not matching {}",
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.instantiatesCanonical not matching {}",
 					file, getDefinitionName(), getDefinitionVersion(), INSTANTIATES_CANONICAL_PATTERN_STRING);
 			// Additional checks see instantiatesCanonicalMatchesProcessIdAndIdentifierValid(...)
 		}
@@ -1249,7 +1298,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		if (!fhirConfig.hasTaskInput(resource))
 		{
 			logger.warn(
-					"Ignoring FHIR resource {} from process plugin {}-{}: Task.input empty, input parameter with {}|{} expected",
+					"Ignoring FHIR resource {} of process plugin {}-{}: Task.input empty, input parameter with {}|{} expected",
 					file, getDefinitionName(), getDefinitionVersion(),
 					fhirConfig.getTaskInputParameterMessageNameSystem(),
 					fhirConfig.getTaskInputParameterMessageNameCode());
@@ -1259,7 +1308,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			inputOk = fhirConfig.hasTaskInputMessageName(resource);
 			if (!inputOk)
 				logger.warn(
-						"Ignoring FHIR resource {} from process plugin {}-{}: One input parameter with {}|{} expected",
+						"Ignoring FHIR resource {} of process plugin {}-{}: One input parameter with {}|{} expected",
 						file, getDefinitionName(), getDefinitionVersion(),
 						fhirConfig.getTaskInputParameterMessageNameSystem(),
 						fhirConfig.getTaskInputParameterMessageNameCode());
@@ -1268,12 +1317,12 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		boolean outputOk = !fhirConfig.hasTaskOutput(resource);
 		if (!outputOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.output not empty", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.output not empty", file,
 					getDefinitionName(), getDefinitionVersion());
 		}
 
-		// TODO add additional validation steps
-		return identifierOk && statusOk && requesterOk && recipientOk && instantiatesCanonicalOk && inputOk && outputOk;
+		return profileOk && identifierOk && statusOk && requesterOk && recipientOk && instantiatesCanonicalOk && inputOk
+				&& outputOk;
 	}
 
 	private boolean isLocalOrganization(Reference reference, String refLocation, String file,
@@ -1281,7 +1330,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	{
 		if (localOrganizationIdentifierValue == null)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Local organization identifier unknown",
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Local organization identifier unknown",
 					file, getDefinitionName(), getDefinitionVersion());
 			return false;
 		}
@@ -1294,18 +1343,18 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 		if (!typeOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.{}.type not '{}'", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.{}.type not '{}'", file,
 					getDefinitionName(), getDefinitionVersion(), refLocation, ORGANIZATION_RESOURCE_TYPE_NAME);
 		}
 		if (!identifierSystemOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.{}.identifier.system not '{}'", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.{}.identifier.system not '{}'", file,
 					getDefinitionName(), getDefinitionVersion(), refLocation,
 					fhirConfig.getOrganizationIdentifierSid());
 		}
 		if (!identifierValueOk)
 		{
-			logger.warn("Ignoring FHIR resource {} from process plugin {}-{}: Task.{}.identifier.value not '{}'", file,
+			logger.warn("Ignoring FHIR resource {} of process plugin {}-{}: Task.{}.identifier.value not '{}'", file,
 					getDefinitionName(), getDefinitionVersion(), refLocation, localOrganizationIdentifierValue);
 		}
 
@@ -1314,8 +1363,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 	private boolean isValidValueSet(String file, Object resource)
 	{
-		// TODO add additional validation steps
-		return isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_VALUE_SET) && isValidMetadataResouce(resource, file);
 	}
 
 	private List<BpmnFileAndModel> filterBpmnModelsWithoutMatchingActivityDefinitions(
@@ -1335,7 +1383,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			if (resources.isEmpty())
 			{
 				logger.warn(
-						"Ignoring BPMN model {} from process plugin {}-{}: No FHIR metadata resources found for process-id '{}'",
+						"Ignoring BPMN model {} of process plugin {}-{}: No FHIR metadata resources found for process-id '{}'",
 						model.file(), getDefinitionName(), getDefinitionVersion(),
 						model.toProcessIdAndVersion().getId());
 
@@ -1348,7 +1396,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			if (definitions.size() != 1)
 			{
 				logger.warn(
-						"Ignoring BPMN model {} from process plugin {}-{}: No ActivityDefinition found for process-id '{}'",
+						"Ignoring BPMN model {} of process plugin {}-{}: No ActivityDefinition found for process-id '{}'",
 						model.file(), getDefinitionName(), getDefinitionVersion(),
 						model.toProcessIdAndVersion().getId());
 
@@ -1360,7 +1408,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 				Matcher urlMatcher = ACTIVITY_DEFINITION_URL_PATTERN.matcher(url);
 				if (!urlMatcher.matches())
 					throw new IllegalStateException("ActivityDefinition " + definitions.get(0).file()
-							+ " from process plugin " + getDefinitionName() + "-" + getDefinitionVersion()
+							+ " of process plugin " + getDefinitionName() + "-" + getDefinitionVersion()
 							+ " has url not matching " + ACTIVITY_DEFINITION_URL_PATTERN_STRING);
 
 				String processDomain = urlMatcher.group("domain").replace(".", "");
@@ -1370,7 +1418,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 				if (!processId.equals(processIdAndVersion.getId()))
 				{
 					logger.warn(
-							"Ignoring BPMN model {} from process plugin {}-{}: Found ActivityDefinition.url does not match process id (url: '{}' vs. process-id '{}')",
+							"Ignoring BPMN model {} of process plugin {}-{}: Found ActivityDefinition.url does not match process id (url: '{}' vs. process-id '{}')",
 							model.file(), getDefinitionName(), getDefinitionVersion(), url,
 							model.toProcessIdAndVersion().getId());
 
@@ -1423,7 +1471,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			if (!processIdOk)
 			{
 				logger.warn(
-						"Ignoring FHIR resource {} from process plugin {}-{} for process {}: Task.instantiatesCanonical does not match process id (instantiatesCanonical: '{}' vs. process-id '{}')",
+						"Ignoring FHIR resource {} of process plugin {}-{} for process {}: Task.instantiatesCanonical does not match process id (instantiatesCanonical: '{}' vs. process-id '{}')",
 						fileAndResource.file(), getDefinitionName(), getDefinitionVersion(),
 						expectedProcessIdAndVersion.getId(), instantiatesCanonical,
 						expectedProcessIdAndVersion.getId());
@@ -1433,7 +1481,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			if (!processVersionOk)
 			{
 				logger.warn(
-						"Ignoring FHIR resource {} from process plugin {}-{} for process {}: Task.instantiatesCanonical|version does not match declared resource version (instantiatesCanonical: '{}' vs. resource-version '{}')",
+						"Ignoring FHIR resource {} of process plugin {}-{} for process {}: Task.instantiatesCanonical|version does not match declared resource version (instantiatesCanonical: '{}' vs. resource-version '{}')",
 						fileAndResource.file(), getDefinitionName(), getDefinitionVersion(),
 						expectedProcessIdAndVersion.getId(), instantiatesCanonical,
 						expectedProcessIdAndVersion.getVersion());
@@ -1444,7 +1492,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 			if (!identifierValueOk)
 			{
 				logger.warn(
-						"Ignoring FHIR resource {} from process plugin {}-{} for process {}: Task.identifier.value is invalid (identifier.value: '{}' not starting with '{}')",
+						"Ignoring FHIR resource {} of process plugin {}-{} for process {}: Task.identifier.value is invalid (identifier.value: '{}' not starting with '{}')",
 						fileAndResource.file(), getDefinitionName(), getDefinitionVersion(),
 						expectedProcessIdAndVersion.getId(), identifierValue, expectedIdentifierValueStart);
 			}

@@ -28,5 +28,6 @@
 	<url value="http://dsf.dev/bpe/Process/test" />
 	<version value="1.7" />
 	<status value="active" />
+	<date value="2025-10-29" />
 	<kind value="Task" />
 </ActivityDefinition>

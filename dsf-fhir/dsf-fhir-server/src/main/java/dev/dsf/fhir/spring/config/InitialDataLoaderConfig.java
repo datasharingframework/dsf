@@ -56,7 +56,8 @@ public class InitialDataLoaderConfig
 		{
 			logger.info("Loading data from JAR bundle ...");
 			Bundle bundle = parseXmlBundle(p -> p.parseResource(Bundle.class, fileIn));
-			initialDataLoader().load(bundle);
+			initialDataLoader().load(bundle, false);
+			// not validating resources from internal bundle, resource are validated during build
 		}
 		catch (Exception e)
 		{
@@ -75,7 +76,7 @@ public class InitialDataLoaderConfig
 
 			logger.info("Loading data from external bundle ...");
 			Bundle bundle = parseXmlBundle(p -> p.parseResource(Bundle.class, resolved));
-			initialDataLoader().load(bundle);
+			initialDataLoader().load(bundle, true);
 		}
 		catch (Exception e)
 		{

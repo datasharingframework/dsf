@@ -17,6 +17,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionKind;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
@@ -31,6 +32,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
@@ -56,6 +58,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.process.Recipient;
 import dev.dsf.fhir.authorization.process.Requester;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
@@ -1534,7 +1537,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	{
 		ActivityDefinition aD = new ActivityDefinition().setUrl(ACTIVITY_DEFINITION_URL)
 				.setVersion(ACTIVITY_DEFINITION_VERSION).setStatus(PublicationStatus.ACTIVE)
-				.setName("TestActivityDefinition");
+				.setName("TestActivityDefinition").setDate(new Date()).setKind(ActivityDefinitionKind.TASK);
 
 		getProcessAuthorizationHelper().add(aD, "test-message", "http://test.com/fhir/StructureDefinition/task-profile",
 				Requester.remoteAll(), Recipient.localAll());
@@ -1548,7 +1551,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	{
 		CodeSystem cS = new CodeSystem().setUrl(CODE_SYSTEM_URL).setVersion(CODE_SYSTEM_VERSION)
 				.setStatus(PublicationStatus.ACTIVE).setStatus(PublicationStatus.ACTIVE).setName("TestCodeSystem")
-				.setContent(CodeSystemContentMode.COMPLETE);
+				.setContent(CodeSystemContentMode.COMPLETE).setDate(new Date());
 
 		getReadAccessHelper().addAll(cS);
 
@@ -1562,16 +1565,22 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 
 	private Endpoint createEndpoint(String identifierValue, String address)
 	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		IdType orgId = organizationProvider.getLocalOrganization().map(Organization::getIdElement)
+				.map(IdType::toUnqualifiedVersionless).get();
+
 		Endpoint e = new Endpoint()
 				.addIdentifier(
 						new Identifier().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue(identifierValue))
 				.setAddress(address)
 				.addPayloadType(new CodeableConcept()
 						.addCoding(new Coding().setSystem("http://hl7.org/fhir/resource-types").setCode("Task")))
+				.addPayloadMimeType("application/fhir+xml").addPayloadMimeType("application/fhir+json")
 				.setConnectionType(
 						new Coding().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
 								.setCode("hl7-fhir-rest"))
-				.setStatus(EndpointStatus.ACTIVE);
+				.setStatus(EndpointStatus.ACTIVE).setManagingOrganization(new Reference().setReferenceElement(orgId));
 
 		getReadAccessHelper().addAll(e);
 
@@ -1643,7 +1652,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				.setName("TestStructureDefinition").setStatus(PublicationStatus.ACTIVE)
 				.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Patient")
 				.setKind(StructureDefinitionKind.RESOURCE).setAbstract(false).setType("Patient")
-				.setDerivation(TypeDerivationRule.CONSTRAINT);
+				.setDerivation(TypeDerivationRule.CONSTRAINT).setDate(new Date());
 
 		ElementDefinition e = sD.getDifferential().addElement();
 		e.setId("Patient.active");
@@ -1690,7 +1699,8 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	private ValueSet createValueSet()
 	{
 		ValueSet vS = new ValueSet().setUrl(VALUE_SET_URL).setVersion(VALUE_SET_VERSION)
-				.setStatus(PublicationStatus.ACTIVE).setStatus(PublicationStatus.ACTIVE).setName("TestValueSet");
+				.setStatus(PublicationStatus.ACTIVE).setStatus(PublicationStatus.ACTIVE).setName("TestValueSet")
+				.setDate(new Date());
 
 		getReadAccessHelper().addAll(vS);
 

@@ -1,5 +1,4 @@
-<ActivityDefinition xmlns="http://hl7.org/fhir"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<ActivityDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
 		<tag>
@@ -42,5 +41,6 @@
 	<url value="http://dsf.dev/bpe/Process/test" />
 	<version value="1.0" />
 	<status value="active" />
+	<date value="2025-10-29" />
 	<kind value="Task" />
 </ActivityDefinition>

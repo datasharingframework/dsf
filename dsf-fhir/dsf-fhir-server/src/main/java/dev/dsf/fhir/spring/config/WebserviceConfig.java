@@ -187,7 +187,7 @@ public class WebserviceConfig
 				referenceConfig.referenceExtractor(), daoConfig.activityDefinitionDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.activityDefinitionAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ActivityDefinitionServiceImpl activityDefinitionServiceImpl()
@@ -216,7 +216,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.binaryDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.binaryAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private BinaryService binaryServiceImpl()
@@ -243,7 +243,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.bundleDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.bundleAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private BundleService bundleServiceImpl()
@@ -270,7 +270,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.codeSystemDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.codeSystemAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private CodeSystemServiceImpl codeSystemServiceImpl()
@@ -297,7 +297,8 @@ public class WebserviceConfig
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				referenceConfig.referenceExtractor(), daoConfig.documentReferenceDao(), helperConfig.exceptionHandler(),
 				helperConfig.parameterConverter(), authorizationConfig.documentReferenceAuthorizationRule(),
-				validationConfig.resourceValidator(), validationConfig.validationRules());
+				validationConfig.resourceValidator(), validationConfig.validationRules(),
+				validationConfig.defaultProfileProvider());
 	}
 
 	private DocumentReferenceServiceImpl documentReferenceServiceImpl()
@@ -325,7 +326,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.endpointDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.endpointAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private EndpointServiceImpl endpointServiceImpl()
@@ -352,7 +353,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.groupDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.groupAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private GroupServiceImpl groupServiceImpl()
@@ -379,7 +380,8 @@ public class WebserviceConfig
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				referenceConfig.referenceExtractor(), daoConfig.healthcareServiceDao(), helperConfig.exceptionHandler(),
 				helperConfig.parameterConverter(), authorizationConfig.healthcareServiceAuthorizationRule(),
-				validationConfig.resourceValidator(), validationConfig.validationRules());
+				validationConfig.resourceValidator(), validationConfig.validationRules(),
+				validationConfig.defaultProfileProvider());
 	}
 
 	private HealthcareServiceServiceImpl healthcareServiceServiceImpl()
@@ -407,7 +409,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.libraryDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.libraryAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private LibraryServiceImpl libraryServiceImpl()
@@ -434,7 +436,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.locationDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.locationAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private LocationServiceImpl locationServiceImpl()
@@ -467,7 +469,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.measureDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.measureAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private MeasureServiceImpl measureServiceImpl()
@@ -494,7 +496,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.measureReportDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.measureReportAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private MeasureReportServiceImpl measureReportServiceImpl()
@@ -521,7 +523,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.namingSystemDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.namingSystemAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private NamingSystemService namingSystemServiceImpl()
@@ -548,7 +550,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.organizationDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.organizationAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private OrganizationServiceImpl organizationServiceImpl()
@@ -576,7 +578,7 @@ public class WebserviceConfig
 				referenceConfig.referenceExtractor(), daoConfig.organizationAffiliationDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.organizationAffiliationAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private OrganizationAffiliationServiceImpl organizationAffiliationServiceImpl()
@@ -604,7 +606,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.patientDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.patientAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private PatientServiceImpl patientServiceImpl()
@@ -631,7 +633,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(),
 				daoConfig.practitionerRoleDao(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.practitionerRoleAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private PractitionerRoleServiceImpl practitionerRoleServiceImpl()
@@ -659,7 +661,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.practitionerDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.practitionerAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private PractitionerServiceImpl practitionerServiceImpl()
@@ -686,7 +688,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.provenanceDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.provenanceAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ProvenanceServiceImpl provenanceServiceImpl()
@@ -713,7 +715,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.questionnaireDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.questionnaireAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private QuestionnaireServiceImpl questionnaireServiceImpl()
@@ -741,7 +743,7 @@ public class WebserviceConfig
 				referenceConfig.referenceExtractor(), daoConfig.questionnaireResponseDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.questionnaireResponseAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private QuestionnaireResponseServiceImpl questionnaireResponseServiceImpl()
@@ -769,7 +771,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.researchStudyDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.researchStudyAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ResearchStudyServiceImpl researchStudyServiceImpl()
@@ -797,7 +799,7 @@ public class WebserviceConfig
 				referenceConfig.referenceExtractor(), daoConfig.structureDefinitionDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.structureDefinitionAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private StructureDefinitionServiceImpl structureDefinitionServiceImpl()
@@ -825,7 +827,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.subscriptionDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.subscriptionAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private SubscriptionServiceImpl subscriptionServiceImpl()
@@ -852,7 +854,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.taskDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.taskAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private TaskServiceImpl taskServiceImpl()
@@ -879,7 +881,7 @@ public class WebserviceConfig
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.valueSetDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.valueSetAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ValueSetServiceImpl valueSetServiceImpl()
@@ -930,6 +932,7 @@ public class WebserviceConfig
 		return new ConformanceServiceImpl(propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), buildInfoReaderConfig.buildInfoReader(),
 				helperConfig.parameterConverter(), validationConfig.validationSupport(),
+				validationConfig.defaultProfileProvider(),
 				propertiesConfig.getOidcAuthorizationCodeFlowEnabled() || propertiesConfig.getOidcBearerTokenEnabled());
 	}
 

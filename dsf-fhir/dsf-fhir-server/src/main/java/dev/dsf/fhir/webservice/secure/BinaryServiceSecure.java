@@ -9,6 +9,7 @@ import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -26,11 +27,12 @@ public class BinaryServiceSecure extends AbstractResourceServiceSecure<BinaryDao
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, BinaryDao binaryDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<Binary> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				Binary.class, binaryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator,
-				validationRules);
+				validationRules, defaultProfileProvider);
 	}
 
 	@Override

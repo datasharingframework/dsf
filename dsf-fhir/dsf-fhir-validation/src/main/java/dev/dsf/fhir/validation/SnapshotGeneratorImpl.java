@@ -89,7 +89,8 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 		}
 
 		// FIXME workaround HAPI ProfileUtilities bug
-		if ("http://dsf.dev/fhir/StructureDefinition/task-base".equals(differential.getBaseDefinition()))
+		if ("http://dsf.dev/fhir/StructureDefinition/task-base".equals(differential.getBaseDefinition())
+				|| "http://dsf.dev/fhir/StructureDefinition/task".equals(differential.getBaseDefinition()))
 		{
 			Optional<ElementDefinition> taskInputValueX = differential.getSnapshot().getElement().stream()
 					.filter(e -> "Task.input.value[x]".equals(e.getId()) && e.getFixed() instanceof StringType s

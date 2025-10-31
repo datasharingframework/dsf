@@ -18,7 +18,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 	@Test
 	public void testCreateValidByLocalUser()
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		Questionnaire created = getWebserviceClient().create(questionnaire);
 
 		assertNotNull(created);
@@ -29,7 +29,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 	@Test
 	public void testSearchByDate() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -50,7 +50,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 	@Test
 	public void testSearchByIdentifier() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -72,7 +72,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 	@Test
 	public void testSearchByStatus() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -93,7 +93,7 @@ public class QuestionnaireIntegrationTest extends AbstractQuestionnaireIntegrati
 	@Test
 	public void testSearchByUrlAndVersion() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
