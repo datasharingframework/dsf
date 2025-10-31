@@ -511,7 +511,6 @@ function validateIdentifier(id, system, value, optional, valueName) {
 }
 
 function validateQuantity(id, comparator, value, unit, system, code, optional, valueName) {
-	const comparatorEmpty = comparator === null || comparator.trim() === ""
 	const valueEmpty = value === null || value.trim() === ""
 	const unitEmpty = unit === null || unit.trim() === ""
 	const systemEmpty = system === null || system.trim() === ""
