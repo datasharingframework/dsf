@@ -124,14 +124,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<!-- TODO remove ASM dependency version override when maven-plugin-plugin supports Java 25 -->
-				<dependencies>
-					<dependency>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm</artifactId>
-						<version>9.8</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
@@ -148,12 +140,6 @@
 						</reports>
 					</reportSet>
 				</reportSets>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<!-- TODO remove maven-pmd-plugin version override when it supports Java 25 -->
-				<version>3.28.0</version>
 			</plugin>
 		</plugins>
 	</reporting>
