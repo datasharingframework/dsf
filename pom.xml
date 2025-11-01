@@ -655,8 +655,8 @@
 										</sans>
 										<type>SERVER</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.chain.crt</target>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.key.plain</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/localhost.chain.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/localhost.key.plain</target>
 										</targets>
 									</cert>
 									<cert>
@@ -666,8 +666,8 @@
 										</sans>
 										<type>SERVER</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.chain.crt</target>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.key.plain</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.chain.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.key.plain</target>
 										</targets>
 									</cert>
 									<cert>
@@ -679,11 +679,11 @@
 										<targets>
 											<target>dsf-bpe/dsf-bpe-server-jetty/cert/bpe.crt</target>
 											<target>dsf-bpe/dsf-bpe-server-jetty/cert/bpe.key</target>
-											<target>dsf-docker-test-setup/bpe/secrets/bpe.crt</target>
-											<target>dsf-docker-test-setup/bpe/secrets/bpe.key</target>
-											<target>dsf-docker-test-setup/bpe/secrets/bpe.key.plain</target>
-											<target>dsf-docker-test-setup/fhir/secrets/bpe.crt</target>
-											<target>dsf-docker-test-setup/fhir/secrets/bpe.key</target>
+											<target>dsf-docker-dev-setup/bpe/secrets/bpe.crt</target>
+											<target>dsf-docker-dev-setup/bpe/secrets/bpe.key</target>
+											<target>dsf-docker-dev-setup/bpe/secrets/bpe.key.plain</target>
+											<target>dsf-docker-dev-setup/fhir/secrets/bpe.crt</target>
+											<target>dsf-docker-dev-setup/fhir/secrets/bpe.key</target>
 											<target>dsf-fhir/dsf-fhir-server-jetty/cert/bpe.crt</target>
 											<target>dsf-fhir/dsf-fhir-server-jetty/cert/bpe.key</target>
 										</targets>
@@ -695,8 +695,8 @@
 										</sans>
 										<type>SERVER</type>
 										<targets>
-											<target>dsf-docker-test-setup/fhir/secrets/fhir.crt</target>
-											<target>dsf-docker-test-setup/fhir/secrets/fhir.key.plain</target>
+											<target>dsf-docker-dev-setup/fhir/secrets/fhir.crt</target>
+											<target>dsf-docker-dev-setup/fhir/secrets/fhir.key.plain</target>
 											<target>dsf-fhir/dsf-fhir-server-jetty/cert/fhir.crt</target>
 											<target>dsf-fhir/dsf-fhir-server-jetty/cert/fhir.key</target>
 										</targets>
@@ -705,61 +705,61 @@
 										<cn>dic1</cn>
 										<type>CLIENT</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/dic1.crt</target>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/dic1.key</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic1.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic1.key</target>
 										</targets>
 									</cert>
 									<cert>
 										<cn>dic2</cn>
 										<type>CLIENT</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/dic2.crt</target>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/dic2.key</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic2.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic2.key</target>
 										</targets>
 									</cert>
 									<cert>
 										<cn>dic3</cn>
 										<type>CLIENT</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/dic3.crt</target>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/dic3.key</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic3.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic3.key</target>
 										</targets>
 									</cert>
 									<cert>
 										<cn>ttp</cn>
 										<type>CLIENT</type>
 										<targets>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.crt</target>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.key</target>
-											<target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.key.password</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key.password</target>
 										</targets>
 									</cert>
 								</certs>
 								<rootCa>
 									<targets>
 										<target>dsf-bpe/dsf-bpe-server-jetty/cert/root_ca.crt</target>
-										<target>dsf-docker-test-setup/bpe/secrets/root_ca.crt</target>
-										<target>dsf-docker-test-setup/fhir/secrets/root_ca.crt</target>
-										<target>dsf-docker-test-setup-3dic-ttp/secrets/root_ca.crt</target>
+										<target>dsf-docker-dev-setup/bpe/secrets/root_ca.crt</target>
+										<target>dsf-docker-dev-setup/fhir/secrets/root_ca.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/root_ca.crt</target>
 										<target>dsf-fhir/dsf-fhir-server-jetty/cert/root_ca.crt</target>
 									</targets>
 								</rootCa>
 								<issuingCa>
 									<targets>
 										<target>dsf-bpe/dsf-bpe-server-jetty/cert/issuing_ca.crt</target>
-										<target>dsf-docker-test-setup/bpe/secrets/issuing_ca.crt</target>
-										<target>dsf-docker-test-setup/fhir/secrets/issuing_ca.crt</target>
-										<target>dsf-docker-test-setup-3dic-ttp/secrets/issuing_ca.crt</target>
-										<target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak_trust_store.jks</target>
+										<target>dsf-docker-dev-setup/bpe/secrets/issuing_ca.crt</target>
+										<target>dsf-docker-dev-setup/fhir/secrets/issuing_ca.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/issuing_ca.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak_trust_store.jks</target>
 										<target>dsf-fhir/dsf-fhir-server-jetty/cert/issuing_ca.crt</target>
 									</targets>
 								</issuingCa>
 								<caChain>
 									<targets>
 										<target>dsf-bpe/dsf-bpe-server-jetty/cert/ca_chain.crt</target>
-										<target>dsf-docker-test-setup/bpe/secrets/ca_chain.crt</target>
-										<target>dsf-docker-test-setup/fhir/secrets/ca_chain.crt</target>
-										<target>dsf-docker-test-setup-3dic-ttp/secrets/ca_chain.crt</target>
+										<target>dsf-docker-dev-setup/bpe/secrets/ca_chain.crt</target>
+										<target>dsf-docker-dev-setup/fhir/secrets/ca_chain.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/ca_chain.crt</target>
 										<target>dsf-fhir/dsf-fhir-server-jetty/cert/ca_chain.crt</target>
 									</targets>
 								</caChain>
@@ -769,16 +769,16 @@
 										<target>dsf-bpe/dsf-bpe-server-jetty/conf/config.properties</target>
 									</template>
 									<template>
-										<source>src/main/resources/templates/dsf-docker-test-setup-bpe.env</source>
-										<target>dsf-docker-test-setup/bpe/.env</target>
+										<source>src/main/resources/templates/dsf-docker-dev-setup-bpe.env</source>
+										<target>dsf-docker-dev-setup/bpe/.env</target>
 									</template>
 									<template>
-										<source>src/main/resources/templates/dsf-docker-test-setup-fhir.env</source>
-										<target>dsf-docker-test-setup/fhir/.env</target>
+										<source>src/main/resources/templates/dsf-docker-dev-setup-fhir.env</source>
+										<target>dsf-docker-dev-setup/fhir/.env</target>
 									</template>
 									<template>
-										<source>src/main/resources/templates/dsf-docker-test-setup-3dic-ttp.env</source>
-										<target>dsf-docker-test-setup-3dic-ttp/.env</target>
+										<source>src/main/resources/templates/dsf-docker-dev-setup-3dic-ttp.env</source>
+										<target>dsf-docker-dev-setup-3dic-ttp/.env</target>
 									</template>
 									<template>
 										<source>src/main/resources/templates/java-test-fhir-bundle.xml</source>
@@ -854,7 +854,6 @@
 										<goals>
 											<goal>generate-config-doc</goal>
 											<goal>generate-default-ca-files</goal>
-											<goal>generate-dev-setup-files</goal>
 											<goal>generate-fhir-bundle</goal>
 										</goals>
 									</pluginExecutionFilter>
@@ -898,7 +897,7 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>dsf-docker-test-setup/bpe/log</directory>
+							<directory>dsf-docker-dev-setup/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -906,7 +905,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup/fhir/log</directory>
+							<directory>dsf-docker-dev-setup/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -914,7 +913,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic1/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic1/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -922,7 +921,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic1/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic1/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -930,7 +929,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic2/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic2/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -938,7 +937,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic2/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic2/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -946,7 +945,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic3/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic3/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -954,7 +953,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic3/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic3/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -962,7 +961,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/ttp/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/ttp/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -970,7 +969,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/ttp/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/ttp/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>

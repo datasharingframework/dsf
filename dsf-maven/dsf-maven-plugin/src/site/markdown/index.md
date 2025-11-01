@@ -208,9 +208,9 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                         <type>SERVER</type>
                         <targets>
                             <!-- output format for the certificate is a PEM file with chain -->
-                            <target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.chain.crt</target>
+                            <target>dsf-docker-dev-setup-3dic-ttp/secrets/localhost.chain.crt</target>
                             <!-- output format for the key is a plain PEM file without password -->
-                            <target>dsf-docker-test-setup-3dic-ttp/secrets/localhost.key.plain</target>
+                            <target>dsf-docker-dev-setup-3dic-ttp/secrets/localhost.key.plain</target>
                         </targets>
                     </cert>
                     <!-- extra certificate for another server to be able to integrate them as well in a dev setup -->
@@ -221,8 +221,8 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                         </sans>
                         <type>SERVER</type>
                         <targets>
-                            <target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.chain.crt</target>
-                            <target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak.key.plain</target>
+                            <target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.chain.crt</target>
+                            <target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.key.plain</target>
                         </targets>
                     </cert>
                     <!-- ... -->
@@ -232,11 +232,11 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                         <type>CLIENT</type>
                         <targets>
                             <!-- the certificate file, this time without the chain -->
-                            <target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.crt</target>
+                            <target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.crt</target>
                             <!-- the key is password protected -->
-                            <target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.key</target>
+                            <target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key</target>
                             <!-- password for the protected key -->
-                            <target>dsf-docker-test-setup-3dic-ttp/secrets/ttp.key.password</target>
+                            <target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key.password</target>
                         </targets>
                     </cert>
                 </certs>
@@ -244,9 +244,9 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                     <targets>
                         <!-- the root CA files can be written to multiple places -->
                         <target>dsf-bpe/dsf-bpe-server-jetty/cert/root_ca.crt</target>
-                        <target>dsf-docker-test-setup/bpe/secrets/root_ca.crt</target>
-                        <target>dsf-docker-test-setup/fhir/secrets/root_ca.crt</target>
-                        <target>dsf-docker-test-setup-3dic-ttp/secrets/root_ca.crt</target>
+                        <target>dsf-docker-dev-setup/bpe/secrets/root_ca.crt</target>
+                        <target>dsf-docker-dev-setup/fhir/secrets/root_ca.crt</target>
+                        <target>dsf-docker-dev-setup-3dic-ttp/secrets/root_ca.crt</target>
                         <target>dsf-fhir/dsf-fhir-server-jetty/cert/root_ca.crt</target>
                     </targets>
                 </rootCa>
@@ -254,11 +254,11 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                     <targets>
                         <!-- the issuing CA files can be written to multiple places as well -->
                         <target>dsf-bpe/dsf-bpe-server-jetty/cert/issuing_ca.crt</target>
-                        <target>dsf-docker-test-setup/bpe/secrets/issuing_ca.crt</target>
-                        <target>dsf-docker-test-setup/fhir/secrets/issuing_ca.crt</target>
-                        <target>dsf-docker-test-setup-3dic-ttp/secrets/issuing_ca.crt</target>
+                        <target>dsf-docker-dev-setup/bpe/secrets/issuing_ca.crt</target>
+                        <target>dsf-docker-dev-setup/fhir/secrets/issuing_ca.crt</target>
+                        <target>dsf-docker-dev-setup-3dic-ttp/secrets/issuing_ca.crt</target>
                         <!-- additionally create a Java KeyStore for Keycloak truststore -->
-                        <target>dsf-docker-test-setup-3dic-ttp/secrets/keycloak_trust_store.jks</target>
+                        <target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak_trust_store.jks</target>
                         <target>dsf-fhir/dsf-fhir-server-jetty/cert/issuing_ca.crt</target>
                     </targets>
                 </issuingCa>
@@ -266,9 +266,9 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                     <targets>
                         <!-- the CA chain files can be written to multiple places as well -->
                         <target>dsf-bpe/dsf-bpe-server-jetty/cert/ca_chain.crt</target>
-                        <target>dsf-docker-test-setup/bpe/secrets/ca_chain.crt</target>
-                        <target>dsf-docker-test-setup/fhir/secrets/ca_chain.crt</target>
-                        <target>dsf-docker-test-setup-3dic-ttp/secrets/ca_chain.crt</target>
+                        <target>dsf-docker-dev-setup/bpe/secrets/ca_chain.crt</target>
+                        <target>dsf-docker-dev-setup/fhir/secrets/ca_chain.crt</target>
+                        <target>dsf-docker-dev-setup-3dic-ttp/secrets/ca_chain.crt</target>
                         <target>dsf-fhir/dsf-fhir-server-jetty/cert/ca_chain.crt</target>
                     </targets>
                 </caChain>
@@ -276,9 +276,9 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                     <!-- templates for configuration files used in the dev setups -->
                     <template>
                         <!-- the source file will contain placeholders, see below -->
-                        <source>src/main/resources/templates/dsf-docker-test-setup-3dic-ttp.env</source>
+                        <source>src/main/resources/templates/dsf-docker-dev-setup-3dic-ttp.env</source>
                         <!-- the target file is where the processed template will be written to -->
-                        <target>dsf-docker-test-setup-3dic-ttp/.env</target>
+                        <target>dsf-docker-dev-setup-3dic-ttp/.env</target>
                     </template>
                     <!-- you can add multiple templates as needed -->
                 </templates>
@@ -289,7 +289,7 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
 </plugin>
 ```
 
-Example template file (`dsf-docker-test-setup-3dic-ttp.env`):
+Example template file (`dsf-docker-dev-setup-3dic-ttp.env`):
 
 ```
 WEBBROWSER_TEST_USER_THUMBPRINT=${Webbrowser Test User.thumbprint}

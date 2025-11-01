@@ -39,61 +39,61 @@ dsf-docker/fhir_proxy/ca/client_ca_chains/*.crt
 dsf-docker/fhir_proxy/ca/client_issuing_cas/*.crt
 
 ###
-# dsf-docker-test-setup ignores
+# dsf-docker-dev-setup ignores
 ###
-dsf-docker-test-setup/bpe/log/*.log
-dsf-docker-test-setup/bpe/log/*.log.gz
-dsf-docker-test-setup/bpe/lib_external/*.jar
-dsf-docker-test-setup/bpe/process/*.jar
-dsf-docker-test-setup/bpe/secrets/bpe.crt
-dsf-docker-test-setup/bpe/secrets/bpe.key
-dsf-docker-test-setup/bpe/secrets/bpe.key.plain
-dsf-docker-test-setup/bpe/secrets/ca_chain.crt
-dsf-docker-test-setup/bpe/secrets/issuing_ca.crt
-dsf-docker-test-setup/bpe/secrets/root_ca.crt
-dsf-docker-test-setup/bpe/.env
+dsf-docker-dev-setup/bpe/log/*.log
+dsf-docker-dev-setup/bpe/log/*.log.gz
+dsf-docker-dev-setup/bpe/lib_external/*.jar
+dsf-docker-dev-setup/bpe/process/*.jar
+dsf-docker-dev-setup/bpe/secrets/bpe.crt
+dsf-docker-dev-setup/bpe/secrets/bpe.key
+dsf-docker-dev-setup/bpe/secrets/bpe.key.plain
+dsf-docker-dev-setup/bpe/secrets/ca_chain.crt
+dsf-docker-dev-setup/bpe/secrets/issuing_ca.crt
+dsf-docker-dev-setup/bpe/secrets/root_ca.crt
+dsf-docker-dev-setup/bpe/.env
 
-dsf-docker-test-setup/fhir/log/*.log
-dsf-docker-test-setup/fhir/log/*.log.gz
-dsf-docker-test-setup/fhir/secrets/bpe.crt
-dsf-docker-test-setup/fhir/secrets/bpe.key
-dsf-docker-test-setup/fhir/secrets/ca_chain.crt
-dsf-docker-test-setup/fhir/secrets/fhir.crt
-dsf-docker-test-setup/fhir/secrets/fhir.key.plain
-dsf-docker-test-setup/fhir/secrets/issuing_ca.crt
-dsf-docker-test-setup/fhir/secrets/root_ca.crt
-dsf-docker-test-setup/fhir/.env
+dsf-docker-dev-setup/fhir/log/*.log
+dsf-docker-dev-setup/fhir/log/*.log.gz
+dsf-docker-dev-setup/fhir/secrets/bpe.crt
+dsf-docker-dev-setup/fhir/secrets/bpe.key
+dsf-docker-dev-setup/fhir/secrets/ca_chain.crt
+dsf-docker-dev-setup/fhir/secrets/fhir.crt
+dsf-docker-dev-setup/fhir/secrets/fhir.key.plain
+dsf-docker-dev-setup/fhir/secrets/issuing_ca.crt
+dsf-docker-dev-setup/fhir/secrets/root_ca.crt
+dsf-docker-dev-setup/fhir/.env
 
 ###
-# dsf-docker-test-setup-3dic-ttp ignores
+# dsf-docker-dev-setup-3dic-ttp ignores
 ###
-dsf-docker-test-setup-3dic-ttp/**/bpe/log/*.log
-dsf-docker-test-setup-3dic-ttp/**/bpe/log/*.log.gz
-dsf-docker-test-setup-3dic-ttp/**/bpe/lib_external/*.jar
-dsf-docker-test-setup-3dic-ttp/**/bpe/process/*.jar
+dsf-docker-dev-setup-3dic-ttp/**/bpe/log/*.log
+dsf-docker-dev-setup-3dic-ttp/**/bpe/log/*.log.gz
+dsf-docker-dev-setup-3dic-ttp/**/bpe/lib_external/*.jar
+dsf-docker-dev-setup-3dic-ttp/**/bpe/process/*.jar
 
-dsf-docker-test-setup-3dic-ttp/**/fhir/log/*.log
-dsf-docker-test-setup-3dic-ttp/**/fhir/log/*.log.gz
+dsf-docker-dev-setup-3dic-ttp/**/fhir/log/*.log
+dsf-docker-dev-setup-3dic-ttp/**/fhir/log/*.log.gz
 
-dsf-docker-test-setup-3dic-ttp/secrets/ca_chain.crt
-dsf-docker-test-setup-3dic-ttp/secrets/dic1.crt
-dsf-docker-test-setup-3dic-ttp/secrets/dic1.key
-dsf-docker-test-setup-3dic-ttp/secrets/dic2.crt
-dsf-docker-test-setup-3dic-ttp/secrets/dic2.key
-dsf-docker-test-setup-3dic-ttp/secrets/dic3.crt
-dsf-docker-test-setup-3dic-ttp/secrets/dic3.key
-dsf-docker-test-setup-3dic-ttp/secrets/issuing_ca.crt
-dsf-docker-test-setup-3dic-ttp/secrets/keycloak.chain.crt
-dsf-docker-test-setup-3dic-ttp/secrets/keycloak.key.plain
-dsf-docker-test-setup-3dic-ttp/secrets/keycloak_trust_store.jks
-dsf-docker-test-setup-3dic-ttp/secrets/localhost.chain.crt
-dsf-docker-test-setup-3dic-ttp/secrets/localhost.key.plain
-dsf-docker-test-setup-3dic-ttp/secrets/root_ca.crt
-dsf-docker-test-setup-3dic-ttp/secrets/ttp.crt
-dsf-docker-test-setup-3dic-ttp/secrets/ttp.key
-dsf-docker-test-setup-3dic-ttp/secrets/ttp.key.password
-dsf-docker-test-setup-3dic-ttp/.env
-dsf-docker-test-setup-3dic-ttp/docker-compose.override.yml
+dsf-docker-dev-setup-3dic-ttp/secrets/ca_chain.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/dic1.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/dic1.key
+dsf-docker-dev-setup-3dic-ttp/secrets/dic2.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/dic2.key
+dsf-docker-dev-setup-3dic-ttp/secrets/dic3.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/dic3.key
+dsf-docker-dev-setup-3dic-ttp/secrets/issuing_ca.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.chain.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.key.plain
+dsf-docker-dev-setup-3dic-ttp/secrets/keycloak_trust_store.jks
+dsf-docker-dev-setup-3dic-ttp/secrets/localhost.chain.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/localhost.key.plain
+dsf-docker-dev-setup-3dic-ttp/secrets/root_ca.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/ttp.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key
+dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key.password
+dsf-docker-dev-setup-3dic-ttp/.env
+dsf-docker-dev-setup-3dic-ttp/docker-compose.override.yml
 
 ###
 # dsf-fhir ignores
