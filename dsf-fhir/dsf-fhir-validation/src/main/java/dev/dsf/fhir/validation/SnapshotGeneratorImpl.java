@@ -99,7 +99,7 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 
 			taskInputValueX.ifPresent(e ->
 			{
-				logger.warn("Removing fixedString value '{}' from StructureDefinition '{}|{}' snapshot element '{}'",
+				logger.debug("Removing fixedString value '{}' from StructureDefinition '{}|{}' snapshot element '{}'",
 						((StringType) e.getFixed()).getValue(), differential.getUrl(), differential.getVersion(),
 						e.getId());
 

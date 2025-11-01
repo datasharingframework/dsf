@@ -13,13 +13,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.camunda.bpm.engine.delegate.BpmnError;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
 import org.junit.Test;
+import org.operaton.bpm.engine.delegate.BpmnError;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.instance.Process;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonProperties;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -321,17 +321,17 @@ public class ProcessPluginImplTest
 		assertNotNull(processes);
 		assertEquals(1, processes.size());
 		Process process = processes.stream().findFirst().get();
-		Collection<CamundaProperties> camundaPropertiesElements = process.getExtensionElements()
-				.getChildElementsByType(CamundaProperties.class);
+		Collection<OperatonProperties> camundaPropertiesElements = process.getExtensionElements()
+				.getChildElementsByType(OperatonProperties.class);
 		assertNotNull(camundaPropertiesElements);
 		assertEquals(1, camundaPropertiesElements.size());
-		CamundaProperties camundaProperties = camundaPropertiesElements.stream().findFirst().get();
-		Collection<CamundaProperty> camundaPropertyElements = camundaProperties.getCamundaProperties();
+		OperatonProperties camundaProperties = camundaPropertiesElements.stream().findFirst().get();
+		Collection<OperatonProperty> camundaPropertyElements = camundaProperties.getOperatonProperties();
 		assertNotNull(camundaPropertyElements);
 		assertEquals(1, camundaPropertyElements.size());
-		CamundaProperty property = camundaPropertyElements.stream().findFirst().get();
-		assertEquals(ProcessPlugin.MODEL_ATTRIBUTE_PROCESS_API_VERSION, property.getCamundaName());
-		assertEquals(ProcessPluginFactoryImpl.API_VERSION, Integer.parseInt(property.getCamundaValue()));
+		OperatonProperty property = camundaPropertyElements.stream().findFirst().get();
+		assertEquals(ProcessPlugin.MODEL_ATTRIBUTE_PROCESS_API_VERSION, property.getOperatonName());
+		assertEquals(ProcessPluginFactoryImpl.API_VERSION, Integer.parseInt(property.getOperatonValue()));
 	}
 
 	private ProcessPluginDefinition createPluginDefinition(List<Class<?>> springConfigurations,

@@ -1,18 +1,16 @@
 package dev.dsf.bpe.listener;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.impl.bpmn.parser.AbstractBpmnParseListener;
-import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
-import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
-import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
-import org.camunda.bpm.engine.impl.util.xml.Element;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParseListener;
+import org.operaton.bpm.engine.impl.pvm.process.ActivityImpl;
+import org.operaton.bpm.engine.impl.pvm.process.ScopeImpl;
+import org.operaton.bpm.engine.impl.util.xml.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
-		implements BpmnParseListener, InitializingBean
+public class DebugLoggingBpmnParseListener implements BpmnParseListener, InitializingBean
 {
 	private static final class ExecutionListenerLogger implements ExecutionListener
 	{

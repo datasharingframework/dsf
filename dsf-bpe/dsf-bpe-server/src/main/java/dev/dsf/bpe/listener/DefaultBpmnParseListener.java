@@ -8,15 +8,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.impl.bpmn.parser.AbstractBpmnParseListener;
-import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
-import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
-import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
-import org.camunda.bpm.engine.impl.pvm.process.ProcessDefinitionImpl;
-import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
-import org.camunda.bpm.engine.impl.util.xml.Element;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParse;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParseListener;
+import org.operaton.bpm.engine.impl.persistence.entity.ExecutionEntity;
+import org.operaton.bpm.engine.impl.pvm.process.ActivityImpl;
+import org.operaton.bpm.engine.impl.pvm.process.ProcessDefinitionImpl;
+import org.operaton.bpm.engine.impl.pvm.process.ScopeImpl;
+import org.operaton.bpm.engine.impl.util.xml.Element;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.camunda.ProcessPluginConsumer;
 
-public class DefaultBpmnParseListener extends AbstractBpmnParseListener implements ProcessPluginConsumer
+public class DefaultBpmnParseListener implements BpmnParseListener, ProcessPluginConsumer
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultBpmnParseListener.class);
 

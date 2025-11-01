@@ -28,12 +28,12 @@
 		<tyrus.version>2.2.0</tyrus.version>
 		<spring.version>6.2.10</spring.version>
 		<jackson.version>2.20.0</jackson.version>
-		<camunda.version>7.23.0</camunda.version>
+		<operaton.version>1.0.0-rc-2</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.0</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>8.4.0</hapi.fhir.version>
-		<bouncycastle.version>1.81</bouncycastle.version>
+		<bouncycastle.version>1.82</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.0</crypto-utils.version.v2>
 		<crypto-utils.version>5.2.0</crypto-utils.version>
@@ -444,19 +444,19 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.camunda.bpm</groupId>
-				<artifactId>camunda-engine</artifactId>
-				<version>${camunda.version}</version>
+				<groupId>org.operaton.bpm</groupId>
+				<artifactId>operaton-engine</artifactId>
+				<version>${operaton.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.camunda.bpm</groupId>
-				<artifactId>camunda-engine-spring</artifactId>
-				<version>${camunda.version}</version>
+				<groupId>org.operaton.bpm</groupId>
+				<artifactId>operaton-engine-spring</artifactId>
+				<version>${operaton.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.camunda.bpm.model</groupId>
-				<artifactId>camunda-bpmn-model</artifactId>
-				<version>${camunda.version}</version>
+				<groupId>org.operaton.bpm.model</groupId>
+				<artifactId>operaton-bpmn-model</artifactId>
+				<version>${operaton.version}</version>
 			</dependency>
 
 			<dependency>
@@ -469,6 +469,12 @@
 				<groupId>com.fasterxml.uuid</groupId>
 				<artifactId>java-uuid-generator</artifactId>
 				<version>4.3.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm</artifactId>
+				<version>9.8</version>
 			</dependency>
 
 			<!-- maven plugin -->

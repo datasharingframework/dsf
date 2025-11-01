@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.operaton.bpm.engine.variable.value.TypedValue;
 
 import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
 
@@ -305,7 +305,7 @@ public interface Variables
 	 */
 	default void setInteger(String variableName, Integer value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.integerValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.integerValue(value));
 	}
 
 	/**
@@ -336,7 +336,7 @@ public interface Variables
 	 */
 	default void setString(String variableName, String value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.stringValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.stringValue(value));
 	}
 
 	/**
@@ -367,7 +367,7 @@ public interface Variables
 	 */
 	default void setBoolean(String variableName, Boolean value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.booleanValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.booleanValue(value));
 	}
 
 	/**
@@ -398,7 +398,7 @@ public interface Variables
 	 */
 	default void setByteArray(String variableName, byte[] value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.byteArrayValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.byteArrayValue(value));
 	}
 
 	/**
@@ -429,7 +429,7 @@ public interface Variables
 	 */
 	default void setDate(String variableName, Date value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.dateValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.dateValue(value));
 	}
 
 	/**
@@ -460,7 +460,7 @@ public interface Variables
 	 */
 	default void setLong(String variableName, Long value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.longValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.longValue(value));
 	}
 
 	/**
@@ -491,7 +491,7 @@ public interface Variables
 	 */
 	default void setShort(String variableName, Short value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.shortValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.shortValue(value));
 	}
 
 	/**
@@ -522,7 +522,7 @@ public interface Variables
 	 */
 	default void setDouble(String variableName, Double value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.doubleValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.doubleValue(value));
 	}
 
 	/**
@@ -553,7 +553,7 @@ public interface Variables
 	 */
 	default void setNumber(String variableName, Number value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.numberValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.numberValue(value));
 	}
 
 	/**
@@ -584,7 +584,7 @@ public interface Variables
 	 */
 	default void setFile(String variableName, File value)
 	{
-		setVariable(variableName, org.camunda.bpm.engine.variable.Variables.fileValue(value));
+		setVariable(variableName, org.operaton.bpm.engine.variable.Variables.fileValue(value));
 	}
 
 	/**

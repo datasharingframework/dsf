@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.Process;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.instance.Process;
 
 public class ProcessIdAndVersion implements Comparable<ProcessIdAndVersion>
 {
@@ -42,7 +42,7 @@ public class ProcessIdAndVersion implements Comparable<ProcessIdAndVersion>
 		Objects.requireNonNull(model, "model");
 
 		Process process = model.getModelElementsByType(Process.class).stream().findFirst().get();
-		return new ProcessIdAndVersion(process.getId(), process.getCamundaVersionTag());
+		return new ProcessIdAndVersion(process.getId(), process.getOperatonVersionTag());
 	}
 
 	private final String id;
