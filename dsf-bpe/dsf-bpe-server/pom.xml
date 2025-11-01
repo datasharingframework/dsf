@@ -155,6 +155,12 @@
 		<dependency>
 			<groupId>org.operaton.bpm</groupId>
 			<artifactId>operaton-engine</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.jupiter</groupId>
+					<artifactId>junit-jupiter</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.operaton.bpm</groupId>

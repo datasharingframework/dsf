@@ -28,7 +28,7 @@
 		<tyrus.version>2.2.0</tyrus.version>
 		<spring.version>6.2.10</spring.version>
 		<jackson.version>2.20.0</jackson.version>
-		<operaton.version>1.0.0-rc-1</operaton.version>
+		<operaton.version>1.0.0-rc-2</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.0</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
