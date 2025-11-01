@@ -53,7 +53,7 @@ public class CertificateWriter extends AbstractIo
 			else if (target.getFileName().toString().endsWith(".key.plain"))
 				toRuntimeException(() -> writePrivateKeyPlain(cert.getCn(), capk, target));
 			else if (target.getFileName().toString().endsWith(".key.password"))
-				toRuntimeException(() -> writePassword(cert.getCn(), capk, target));
+				toRuntimeException(() -> writePassword(cert.getCn(), target));
 			else if (target.getFileName().toString().endsWith(".p12"))
 				toRuntimeException(() -> writePkcs12(cert.getCn(), capk, target));
 			else
@@ -137,7 +137,7 @@ public class CertificateWriter extends AbstractIo
 		PemWriter.writePrivateKey(capk.privateKey()).asPkcs8().notEncrypted().toFile(target);
 	}
 
-	private void writePassword(String cn, CertificateAndPrivateKey capk, Path target) throws IOException
+	private void writePassword(String cn, Path target) throws IOException
 	{
 		logger.info("Writing key password (cn: {}) to {}", cn, projectBasedir.relativize(target));
 
