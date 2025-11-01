@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -56,17 +57,19 @@ public class ResourceTask extends AbstractResource<Task>
 	}
 
 	private record InputItem(String id, String type, String label, String labelTitle, String fhirType,
-			String stringValue, ElementSystemValue systemValueValue, Boolean booleanValue)
+			String stringValue, ElementSystemValue systemValueValue, Boolean booleanValue,
+			ElementQuantityValue quantityValue)
 	{
 	}
 
 	private record OutputItem(String id, String type, String label, String labelTitle, String stringValue,
-			ElementSystemValue systemValueValue, Boolean booleanValue, List<ExtensionItem> extension)
+			ElementSystemValue systemValueValue, Boolean booleanValue, ElementQuantityValue quantityValue,
+			List<ExtensionItem> extension)
 	{
 	}
 
 	private record ExtensionItem(String id, String type, String url, String stringValue,
-			ElementSystemValue systemValueValue, Boolean booleanValue)
+			ElementSystemValue systemValueValue, Boolean booleanValue, ElementQuantityValue quantityValue)
 	{
 	}
 
@@ -177,11 +180,13 @@ public class ResourceTask extends AbstractResource<Task>
 		String stringValue = getStringValue(typedValue);
 		ElementSystemValue systemValueValue = getSystemValueValue(typedValue);
 		Boolean booleanValue = getBooleanValue(typedValue);
+		ElementQuantityValue quantityValue = getQuantityValue(typedValue);
 
-		if (stringValue == null && systemValueValue == null && booleanValue == null)
-			logger.warn("Output parameter with {} value, not supported", fhirType);
+		if (stringValue == null && systemValueValue == null && booleanValue == null && quantityValue == null)
+			logger.warn("Input parameter with {} value, not supported", fhirType);
 
-		return new InputItem(id, type, label, labelTitle, fhirType, stringValue, systemValueValue, booleanValue);
+		return new InputItem(id, type, label, labelTitle, fhirType, stringValue, systemValueValue, booleanValue,
+				quantityValue);
 	}
 
 	private OutputItem toOutputItem(TaskOutputComponent o)
@@ -208,13 +213,14 @@ public class ResourceTask extends AbstractResource<Task>
 		String stringValue = getStringValue(typedValue);
 		ElementSystemValue systemValueValue = getSystemValueValue(typedValue);
 		Boolean booleanValue = getBooleanValue(typedValue);
+		ElementQuantityValue quantityValue = getQuantityValue(typedValue);
 
-		if (stringValue == null && systemValueValue == null && booleanValue == null)
+		if (stringValue == null && systemValueValue == null && booleanValue == null && quantityValue == null)
 			logger.warn("Output parameter with {} value, not supported",
 					typedValue.getClass().getAnnotation(DatatypeDef.class).name());
 
 		return new OutputItem(UUID.randomUUID().toString(), type, label, labelTitle, stringValue, systemValueValue,
-				booleanValue, extension);
+				booleanValue, quantityValue, extension);
 	}
 
 	private String getHtmlInputType(Type typedValue)
@@ -232,6 +238,7 @@ public class ResourceTask extends AbstractResource<Task>
 			case UriType _ -> "url";
 			case Coding _ -> "coding";
 			case Identifier _ -> "identifier";
+			case Quantity _ -> "quantity";
 			case Reference r when r.hasReferenceElement() -> "url";
 			case Reference r when r.hasIdentifier() -> "identifier";
 
@@ -294,6 +301,14 @@ public class ResourceTask extends AbstractResource<Task>
 			return null;
 	}
 
+	private ElementQuantityValue getQuantityValue(Type typedValue)
+	{
+		if (typedValue instanceof Quantity q)
+			return ElementQuantityValue.from(q);
+		else
+			return null;
+	}
+
 	private List<ExtensionItem> toExtensionItems(List<Extension> extensions)
 	{
 		List<ExtensionItem> items = new ArrayList<>();
@@ -310,10 +325,11 @@ public class ResourceTask extends AbstractResource<Task>
 		String stringValue = extension.hasValue() ? getStringValue(extension.getValue()) : null;
 		ElementSystemValue systemValueValue = extension.hasValue() ? getSystemValueValue(extension.getValue()) : null;
 		Boolean booleanValue = extension.hasValue() ? getBooleanValue(extension.getValue()) : null;
+		ElementQuantityValue quantityValue = extension.hasValue() ? getQuantityValue(extension.getValue()) : null;
 
-		if (stringValue != null || systemValueValue != null || booleanValue != null)
+		if (stringValue != null || systemValueValue != null || booleanValue != null || quantityValue != null)
 			items.add(new ExtensionItem(UUID.randomUUID().toString(), type, url, stringValue, systemValueValue,
-					booleanValue));
+					booleanValue, quantityValue));
 
 		if (extension.hasExtension())
 			extension.getExtension().forEach(e -> addExtensionItem(url, e, items));

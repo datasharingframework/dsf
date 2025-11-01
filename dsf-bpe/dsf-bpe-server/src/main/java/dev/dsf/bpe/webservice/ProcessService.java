@@ -14,10 +14,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.repository.Deployment;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.repository.Deployment;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
 import org.springframework.beans.factory.InitializingBean;
 import org.thymeleaf.context.Context;
 

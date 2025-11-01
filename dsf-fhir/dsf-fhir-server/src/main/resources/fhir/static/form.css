@@ -129,7 +129,7 @@ select,
 textarea {
 	width: 100%;
 	min-width: 200px;
-	padding: 12px;
+	padding: 0.9em;
 	border: 1px solid var(--color-input-border);
 	border-radius: 4px;
 	box-sizing: border-box;
@@ -143,7 +143,7 @@ input[type=datetime-local],
 input[type=number] {
 	width: 100%;
 	min-width: 200px;
-	padding: 12px;
+	padding: 0.9em;
 	border: 1px solid var(--color-input-border);
 	border-radius: 4px;
 	box-sizing: border-box;
@@ -161,6 +161,14 @@ input[type=number] {
 .input-group {
 	display: flex;
 	flex-direction: row;
+}
+
+.input-group-display {
+	margin-top: 0.3em;
+	padding: 0.25em 0 0 0.9em;
+    font-size: small;
+    color: var(--color-disabled-text);
+    font-style: italic;
 }
 
 .extensions {
@@ -223,8 +231,8 @@ input[type=number] {
 	display: none;
 }
 
-input.identifier-coding-code {
-	margin-top: 6px;
+.identifier-coding-code {
+	margin-top: 0.3em;
 }
 
 .invisible {

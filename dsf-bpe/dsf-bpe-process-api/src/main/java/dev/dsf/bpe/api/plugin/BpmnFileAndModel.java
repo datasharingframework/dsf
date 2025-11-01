@@ -2,7 +2,7 @@ package dev.dsf.bpe.api.plugin;
 
 import java.nio.file.Path;
 
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
 
 public final record BpmnFileAndModel(int processPluginApiVersion, boolean draft, String file, BpmnModelInstance model,
 		Path jar)

@@ -2,12 +2,12 @@ package dev.dsf.bpe.v2.variables;
 
 import java.util.Map;
 
-import org.camunda.bpm.engine.variable.impl.type.PrimitiveValueTypeImpl;
-import org.camunda.bpm.engine.variable.impl.value.PrimitiveTypeValueImpl;
-import org.camunda.bpm.engine.variable.type.PrimitiveValueType;
-import org.camunda.bpm.engine.variable.value.PrimitiveValue;
-import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.hl7.fhir.r4.model.Resource;
+import org.operaton.bpm.engine.variable.impl.type.PrimitiveValueTypeImpl;
+import org.operaton.bpm.engine.variable.impl.value.PrimitiveTypeValueImpl;
+import org.operaton.bpm.engine.variable.type.PrimitiveValueType;
+import org.operaton.bpm.engine.variable.value.PrimitiveValue;
+import org.operaton.bpm.engine.variable.value.TypedValue;
 
 public final class FhirResourceValues
 {

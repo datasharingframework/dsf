@@ -68,7 +68,9 @@
  						(type = 'time') or
  						(type = 'dateTime') or
  						(type = 'reference') or
- 						(type = 'url')" />
+ 						(type = 'url') or
+ 						(type = 'choice') or
+						(type = 'quantity') " />
 			</constraint>
 			<constraint>
 				<key value="required-exists" />
