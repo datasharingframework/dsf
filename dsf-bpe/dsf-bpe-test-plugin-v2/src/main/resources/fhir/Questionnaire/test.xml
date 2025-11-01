@@ -1,6 +1,6 @@
 <Questionnaire xmlns="http://hl7.org/fhir">
 	<meta>
-		<profile value="http://dsf.dev/fhir/StructureDefinition/questionnaire|1.5.0" />
+		<profile value="http://dsf.dev/fhir/StructureDefinition/questionnaire" />
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="ALL" />
@@ -89,6 +89,18 @@
 		<linkId value="boolean-example" />
 		<type value="boolean" />
 		<text value="Do you approve the release of the data-set?" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="choice-example" />
+		<type value="choice" />
+		<text value="Add a coding to test the choice type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="quantity-example" />
+		<type value="quantity" />
+		<text value="Add a quantity to test the quantity type" />
 		<required value="false" />
 	</item>
 </Questionnaire>

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -22,6 +23,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -125,6 +127,11 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 										.setValue("External_Test_Organization")));
 
 				case "boolean-example" -> test(item, new BooleanType(true));
+
+				case "choice-example" ->
+					test(item, new Coding().setSystem("http://example.org/fhir/CodeSystem/name").setCode("code"));
+
+				case "quantity-example" -> test(item, new Quantity().setValue(0).setUnit("unit"));
 			}
 		});
 
@@ -159,6 +166,21 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 				expectTrue(r.getIdentifier().hasValue());
 				expectSame(((Reference) expected).getIdentifier().getSystem(), r.getIdentifier().getSystem());
 				expectSame(((Reference) expected).getIdentifier().getValue(), r.getIdentifier().getValue());
+
+			}
+
+			case Coding c -> {
+				expectTrue(c.hasSystem());
+				expectSame(((Coding) expected).getSystem(), c.getSystem());
+				expectTrue(c.hasCode());
+				expectSame(((Coding) expected).getCode(), c.getCode());
+			}
+
+			case Quantity q -> {
+				expectTrue(q.hasValue());
+				expectSame(((Quantity) expected).getValue(), q.getValue());
+				expectTrue(q.hasUnit());
+				expectSame(((Quantity) expected).getUnit(), q.getUnit());
 			}
 
 			default ->

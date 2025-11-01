@@ -5,9 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.StandardCharsets;
@@ -42,10 +39,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -64,7 +57,6 @@ import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
 import dev.dsf.bpe.dao.AbstractDbTest;
-import dev.dsf.bpe.integration.X509Certificates.CertificateAndPrivateKey;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
 import dev.dsf.common.auth.DsfLoginService;
@@ -115,12 +107,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static final Path EMPTY_PROCESS_DIRECTORY = Paths.get("target", UUID.randomUUID().toString());
 	private static final List<Path> DIRECTORIES_TO_DELETE = List.of(EMPTY_PROCESS_DIRECTORY);
 
-	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
 	private static final Path ALLOWED_BPE_CLASSES_LIST_FILE_V1 = Paths.get("target",
 			UUID.randomUUID().toString() + ".list");
 	private static final Path ALLOWED_BPE_CLASSES_LIST_FILE_V2 = Paths.get("target",
 			UUID.randomUUID().toString() + ".list");
-	private static final List<Path> FILES_TO_DELETE = List.of(FHIR_BUNDLE_FILE, ALLOWED_BPE_CLASSES_LIST_FILE_V1,
+	private static final List<Path> FILES_TO_DELETE = List.of(ALLOWED_BPE_CLASSES_LIST_FILE_V1,
 			ALLOWED_BPE_CLASSES_LIST_FILE_V2);
 
 	protected static final FhirContext fhirContext = FhirContext.forR4();
@@ -140,10 +131,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		ServerSocketChannel fhirStatusConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
 		ServerSocketChannel fhirApiConnectorChannel = JettyServer.serverSocketChannel("127.0.0.1");
-
-		logger.info("Creating FHIR Bundle ...");
-		createTestBundle(certificates.getClientCertificate(), certificates.getExternalClientCertificate(),
-				fhirApiConnectorChannel.socket().getLocalPort());
 
 		String fhirBaseUrl = "https://localhost:" + fhirApiConnectorChannel.socket().getLocalPort() + FHIR_CONTEXT_PATH;
 
@@ -239,11 +226,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				keyStorePassword, null, null, null, "Integration Test Client", subscriptionIdPart);
 	}
 
-	protected static IParser newXmlParser()
-	{
-		return newParser(fhirContext::newXmlParser);
-	}
-
 	protected static IParser newJsonParser()
 	{
 		return newParser(fhirContext::newJsonParser);
@@ -256,58 +238,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 		p.setPrettyPrint(true);
 		return p;
-	}
-
-	private static void createTestBundle(CertificateAndPrivateKey clientCertificate,
-			CertificateAndPrivateKey externalClientCertificate, int fhirApiPort)
-	{
-		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
-
-		Bundle testBundle = readBundle(testBundleTemplateFile, newXmlParser());
-
-		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
-		Extension thumbprintExtension = organization
-				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
-		thumbprintExtension.setValue(new StringType(clientCertificate.certificateSha512ThumbprintHex()));
-
-		Endpoint endpoint = (Endpoint) testBundle.getEntry().get(1).getResource();
-		endpoint.setAddress("https://localhost:" + fhirApiPort + "/fhir");
-
-		Organization externalOrganization = (Organization) testBundle.getEntry().get(2).getResource();
-		Extension externalThumbprintExtension = externalOrganization
-				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
-		externalThumbprintExtension
-				.setValue(new StringType(externalClientCertificate.certificateSha512ThumbprintHex()));
-
-		writeBundle(FHIR_BUNDLE_FILE, testBundle);
-	}
-
-	private static Bundle readBundle(Path bundleTemplateFile, IParser parser)
-	{
-		try (InputStream in = Files.newInputStream(bundleTemplateFile))
-		{
-			Bundle bundle = parser.parseResource(Bundle.class, in);
-			return referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
-		}
-		catch (IOException e)
-		{
-			logger.error("Error while reading bundle from {}", bundleTemplateFile.toString(), e);
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static void writeBundle(Path bundleFile, Bundle bundle)
-	{
-		try (OutputStream out = Files.newOutputStream(bundleFile);
-				OutputStreamWriter writer = new OutputStreamWriter(out))
-		{
-			newXmlParser().encodeResourceToWriter(bundle, writer);
-		}
-		catch (IOException e)
-		{
-			logger.error("Error while writing bundle to {}", bundleFile.toString(), e);
-			throw new RuntimeException(e);
-		}
 	}
 
 	private static JettyServer startFhirServer(ServerSocketChannel statusConnectorChannel,
@@ -328,7 +258,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		initParameters.put("dev.dsf.fhir.server.base.url", baseUrl);
 		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
-		initParameters.put("dev.dsf.fhir.server.init.bundle", FHIR_BUNDLE_FILE.toString());
+		initParameters.put("dev.dsf.fhir.server.init.bundle", "src/test/resources/integration/test-bundle.xml");
 
 		initParameters.put("dev.dsf.fhir.client.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
@@ -363,6 +293,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				      - http://dsf.dev/fhir/CodeSystem/practitioner-role|UAC_USER
 				""", certificates.getDicUserClientCertificate().certificateSha512ThumbprintHex(),
 				certificates.getUacUserClientCertificate().certificateSha512ThumbprintHex()));
+
+		initParameters.put("dev.dsf.fhir.server.organization.thumbprint",
+				certificates.getClientCertificate().certificateSha512ThumbprintHex());
+		initParameters.put("dev.dsf.fhir.server.endpoint.address",
+				"https://localhost:" + apiConnectorChannel.socket().getLocalPort() + "/fhir");
+		initParameters.put("dev.dsf.fhir.server.organization.thumbprint.external",
+				certificates.getExternalClientCertificate().certificateSha512ThumbprintHex());
+		initParameters.put("dev.dsf.fhir.server.endpoint.address.external", "https://localhost:80010/fhir");
 
 		KeyStore clientCertificateTrustStore = KeyStoreCreator
 				.jksForTrustedCertificates(certificates.getCaCertificate());

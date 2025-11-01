@@ -34,11 +34,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testCreateValidByLocalUser() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponse created = getWebserviceClient().create(questionnaireResponse);
 
 		assertNotNull(created);
@@ -49,7 +49,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testCreateNotAllowedByLocalUserStatusCompleted() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
 		expectForbidden(() -> getWebserviceClient().create(questionnaireResponse));
@@ -58,7 +58,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testCreateNotAllowedByLocalUserQuestionnaireDoesNotExists() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 
 		expectForbidden(() -> getWebserviceClient().create(questionnaireResponse));
 	}
@@ -66,7 +66,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testCreateNotAllowedByRemoteUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 
 		expectForbidden(() -> getExternalWebserviceClient().create(questionnaireResponse));
 	}
@@ -74,11 +74,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateAllowedByLocalUser() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -96,7 +96,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateNotAllowedByLocalUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -107,7 +107,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateNotAllowedByLocalUserNoUserTaskId() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -121,7 +121,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateNotAllowedByLocalUserChangedUserTaskId() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -138,7 +138,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSecondUpdateNotAllowedByLocalUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -151,7 +151,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateNotAllowedByRemoteUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -164,7 +164,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchByDate() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
@@ -187,7 +187,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchByIdentifier() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
@@ -211,7 +211,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchByIdentifierRemoteUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
@@ -237,11 +237,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 
 	private void testSearchByQuestionnaire(String questionnaireUrl) throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
@@ -274,12 +274,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchByQuestionnaireNoVersion() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100().setVersion(null);
+		Questionnaire questionnaire = createQuestionnaire().setVersion(null);
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse()
-				.setQuestionnaire(QUESTIONNAIRE_URL);
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse().setQuestionnaire(QUESTIONNAIRE_URL);
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
@@ -313,19 +312,19 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	{
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 
-		Questionnaire questionnaire1 = createQuestionnaireProfileVersion100().setVersion("0.1.0");
+		Questionnaire questionnaire1 = createQuestionnaire().setVersion("0.1.0");
 		questionnaireDao.create(questionnaire1);
 
-		Questionnaire questionnaire2 = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire2 = createQuestionnaire();
 		questionnaireDao.create(questionnaire2);
 
-		Questionnaire questionnaire3 = createQuestionnaireProfileVersion100().setVersion("0.2.0");
+		Questionnaire questionnaire3 = createQuestionnaire().setVersion("0.2.0");
 		questionnaireDao.create(questionnaire3);
 
-		Questionnaire questionnaire4 = createQuestionnaireProfileVersion100().setVersion(null);
+		Questionnaire questionnaire4 = createQuestionnaire().setVersion(null);
 		questionnaireDao.create(questionnaire4);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
@@ -360,7 +359,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchByStatus() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
@@ -387,7 +386,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 				.getBean(OrganizationProvider.class);
 		Organization localOrganization = organizationProvider.getLocalOrganization().get();
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		questionnaireResponse.getSubject().setType(ResourceType.Organization.name())
 				.setReferenceElement(localOrganization.getIdElement().toVersionless()).getIdentifier()
 				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization");
@@ -429,7 +428,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testDeleteAllowedByLocalUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -440,7 +439,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testDeleteNotAllowedByRemoteUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -452,7 +451,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testReadAllowedByLocalUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -470,7 +469,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testReadNotAllowedByRemoteUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -482,7 +481,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testReadNotAllowedByRemoteUserWithVersion() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -494,7 +493,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testNotModifiedCheckAllowedByLocalUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -507,7 +506,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testNotModifiedCheckNotAllowedByRemoteUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -518,7 +517,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testNotModifiedCheckAllowedByLocalUserWithModification() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -535,7 +534,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testNotModifiedCheckNotAllowedByRemoteUserWithModification() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -550,7 +549,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	{
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
-		QuestionnaireResponse created = questionnaireResponseDao.create(createInProgressQuestionnaireResponse());
+		QuestionnaireResponse created = questionnaireResponseDao.create(createQuestionnaireResponse());
 
 		Bundle historyBundle = getWebserviceClient().history(QuestionnaireResponse.class,
 				created.getIdElement().getIdPart());
@@ -586,7 +585,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	{
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
-		QuestionnaireResponse created = questionnaireResponseDao.create(createInProgressQuestionnaireResponse());
+		QuestionnaireResponse created = questionnaireResponseDao.create(createQuestionnaireResponse());
 
 		Bundle historyBundle = getExternalWebserviceClient().history(QuestionnaireResponse.class,
 				created.getIdElement().getIdPart());
@@ -614,7 +613,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testDeletePermanentlyAllowedByLocalUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -626,7 +625,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testDeletePermanentlyNotAllowedByRemoteUser() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
@@ -639,11 +638,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateAllowedByMinimalUserWithRole() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		Extension authExtension = questionnaireResponse.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 		authExtension.addExtension().setUrl("practitioner-role")
@@ -669,11 +668,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateNotAllowedByMinimalUserWithoutRole() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		Extension authExtension = questionnaireResponse.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 		authExtension.addExtension().setUrl("practitioner-role")
@@ -694,11 +693,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testReadNotAllowedByPractitionerUserWithoutRole() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		Extension authExtension = questionnaireResponse.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 		authExtension.addExtension().setUrl("practitioner-role")
@@ -754,11 +753,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testReadAllowedByPractitionerUserWithRole() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		Extension authExtension = questionnaireResponse.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 		authExtension.addExtension().setUrl("practitioner-role")
@@ -824,11 +823,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testReadNotAllowedByPractitionerUserWithoutIdentifier() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		Extension authExtension = questionnaireResponse.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 		authExtension.addExtension().setUrl("practitioner")
@@ -885,11 +884,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testReadAllowedByPractitionerUserWithIdentifier() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		Extension authExtension = questionnaireResponse.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 		authExtension.addExtension().setUrl("practitioner")
@@ -956,11 +955,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateCompletedAmendedAllowedOrganizationUser() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse qr = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse qr = createQuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr.setAuthored(new Date());
 		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
@@ -977,11 +976,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateCompletedAmendedAllowedDsfAdmin() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse qr = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse qr = createQuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr.setAuthored(new Date());
 		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
@@ -998,11 +997,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateCompletedAmendedNotAllowed() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse qr = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse qr = createQuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr.setAuthored(new Date());
 		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
@@ -1020,11 +1019,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchAllowedByMinimalUserWithRole() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
-		QuestionnaireResponse questionnaireResponse = createInProgressQuestionnaireResponse();
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
 		Extension authExtension = questionnaireResponse.addExtension()
 				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
 		authExtension.addExtension().setUrl("practitioner-role")

@@ -1,6 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="ALL" />
@@ -11,10 +12,10 @@
 	<name value="QuestionnaireResponse" />
 	<status value="active" />
 	<experimental value="false" />
-	<date value="2025-10-15" />
+	<date value="2025-10-27" />
 	<fhirVersion value="4.0.1" />
 	<kind value="resource" />
-	<abstract value="true" />
+	<abstract value="false" />
 	<type value="QuestionnaireResponse" />
 	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse" />
 	<derivation value="constraint" />
@@ -31,7 +32,8 @@
 				<key value="author-if-completed-or-amended" />
 				<severity value="error" />
 				<human value="Author must be set if QuestionnaireResponse.status equals completed or amended" />
-				<expression value="((%resource.status = 'completed' or %resource.status = 'amended') implies author.exists()) and
+				<expression
+					value="((%resource.status = 'completed' or %resource.status = 'amended') implies author.exists()) and
 				                   ((%resource.status = 'completed' or %resource.status = 'amended') implies author.identifier.exists())" />
 			</constraint>
 		</element>
@@ -70,14 +72,18 @@
 			<constraint>
 				<key value="author-identifier-type-organization" />
 				<severity value="error" />
-				<human value="QuestionnaireResponse.author.identifier.type must be 'Organization' if QuestionnaireResponse.author.identifier.system is http://dsf.dev/sid/organization-identifier" />
-				<expression value="identifier.system = 'http://dsf.dev/sid/organization-identifier' implies type.empty() or type = 'Organization'" />
+				<human
+					value="QuestionnaireResponse.author.identifier.type must be 'Organization' if QuestionnaireResponse.author.identifier.system is http://dsf.dev/sid/organization-identifier" />
+				<expression
+					value="identifier.system = 'http://dsf.dev/sid/organization-identifier' implies type.empty() or type = 'Organization'" />
 			</constraint>
 			<constraint>
 				<key value="author-identifier-type-practitioner" />
 				<severity value="error" />
-				<human value="QuestionnaireResponse.author.identifier.type must be 'Practitioner' if QuestionnaireResponse.author.identifier.system is http://dsf.dev/sid/practitioner-identifier" />
-				<expression value="identifier.system = 'http://dsf.dev/sid/practitioner-identifier' implies type.empty() or type = 'Practitioner'" />
+				<human
+					value="QuestionnaireResponse.author.identifier.type must be 'Practitioner' if QuestionnaireResponse.author.identifier.system is http://dsf.dev/sid/practitioner-identifier" />
+				<expression
+					value="identifier.system = 'http://dsf.dev/sid/practitioner-identifier' implies type.empty() or type = 'Practitioner'" />
 			</constraint>
 		</element>
 		<element id="QuestionnaireResponse.author.reference">
@@ -94,8 +100,10 @@
 			<constraint>
 				<key value="author-identifier-system" />
 				<severity value="error" />
-				<human value="QuestionnaireResponse.author.identifier.system must be 'http://dsf.dev/sid/organization-identifier' or 'http://dsf.dev/sid/practitioner-identifier'" />
-				<expression value="$this = 'http://dsf.dev/sid/organization-identifier' or $this = 'http://dsf.dev/sid/practitioner-identifier'" />
+				<human
+					value="QuestionnaireResponse.author.identifier.system must be 'http://dsf.dev/sid/organization-identifier' or 'http://dsf.dev/sid/practitioner-identifier'" />
+				<expression
+					value="$this = 'http://dsf.dev/sid/organization-identifier' or $this = 'http://dsf.dev/sid/practitioner-identifier'" />
 			</constraint>
 		</element>
 		<element id="QuestionnaireResponse.author.identifier.value">
@@ -243,6 +251,12 @@
 			</type>
 			<type>
 				<code value="Reference" />
+			</type>
+			<type>
+				<code value="Coding" />
+			</type>
+			<type>
+				<code value="Quantity" />
 			</type>
 		</element>
 		<element id="QuestionnaireResponse.item:@default.answer.item">

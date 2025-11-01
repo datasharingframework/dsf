@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
@@ -95,6 +96,12 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 			case DATETIME -> new DateTimeType("1900-01-01T00:00:00.000Z");
 			case URL -> new UriType("http://example.org/foo");
 			case REFERENCE -> new Reference("http://example.org/fhir/Placeholder/id");
+			case CHOICE -> new Coding().setSystem("http://example.org/fhir/CodeSystem/name").setCode("code");
+			case QUANTITY -> new Quantity().setValue(0).setUnit("unit")
+					.setSystem("http://example.org/fhir/CodeSystem/name").setCode("code");
+			// TODO: False positive validation error for QuestionnaireResponse.item.answer.valueQuantity.comparator,
+			// add comparator to Quantity as soon as https://github.com/hapifhir/org.hl7.fhir.core/issues/2224 is fixed
+			// .setComparator(Quantity.QuantityComparator.LESS_OR_EQUAL);
 
 			default -> throw new RuntimeException("Type '" + question.getType().getDisplay()
 					+ "' in Questionnaire.item is not supported as answer type");

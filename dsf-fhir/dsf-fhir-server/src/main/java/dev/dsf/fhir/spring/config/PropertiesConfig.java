@@ -1,14 +1,20 @@
 package dev.dsf.fhir.spring.config;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Properties;
 
@@ -169,6 +175,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 
 		injectEndpointProperties(environment);
+		computeOrganizationThumbprintPropertyIfPossible(environment);
 
 		return new PropertySourcesPlaceholderConfigurer();
 	}
@@ -185,11 +192,38 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 			properties.put("dev.dsf.fhir.server.endpoint.address", baseUrl.toString());
 			properties.put("dev.dsf.fhir.server.endpoint.identifier.value", baseUrl.getHost());
 
-			environment.getPropertySources().addFirst(new PropertiesPropertySource("enpoint-properties", properties));
+			environment.getPropertySources().addFirst(new PropertiesPropertySource("endpoint-properties", properties));
 		}
 		catch (MalformedURLException | IllegalStateException | URISyntaxException e)
 		{
-			throw new RuntimeException(e);
+			logger.warn("Exception while injecting endpoint properties", e);
+		}
+	}
+
+	private static void computeOrganizationThumbprintPropertyIfPossible(ConfigurableEnvironment environment)
+	{
+		try
+		{
+			String organizationThumbprint = environment.getProperty("dev.dsf.fhir.server.organization.thumbprint");
+
+			if (organizationThumbprint == null)
+			{
+				Path clientCertPath = Paths.get(environment.getRequiredProperty("dev.dsf.fhir.client.certificate"));
+				X509Certificate clientCert = PemReader.readCertificate(clientCertPath);
+				MessageDigest md = MessageDigest.getInstance("SHA-512");
+				HexFormat hexFormat = HexFormat.of();
+				String thumbprint = hexFormat.formatHex(md.digest(clientCert.getEncoded())).toLowerCase();
+
+				Properties properties = new Properties();
+				properties.put("dev.dsf.fhir.server.organization.thumbprint", thumbprint);
+
+				environment.getPropertySources()
+						.addFirst(new PropertiesPropertySource("organization-thumbprint-properties", properties));
+			}
+		}
+		catch (IOException | NoSuchAlgorithmException | CertificateEncodingException e)
+		{
+			logger.warn("Exception while computing organization thumbprint property", e);
 		}
 	}
 

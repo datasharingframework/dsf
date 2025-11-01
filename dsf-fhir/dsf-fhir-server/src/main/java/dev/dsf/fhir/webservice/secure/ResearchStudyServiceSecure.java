@@ -7,6 +7,7 @@ import dev.dsf.fhir.dao.ResearchStudyDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -22,10 +23,11 @@ public class ResearchStudyServiceSecure
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, ResearchStudyDao researchStudyDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<ResearchStudy> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				ResearchStudy.class, researchStudyDao, exceptionHandler, parameterConverter, authorizationRule,
-				resourceValidator, validationRules);
+				resourceValidator, validationRules, defaultProfileProvider);
 	}
 }

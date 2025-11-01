@@ -32,6 +32,19 @@
 			</ul>
 		</div>
 
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="quantity"  th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<span th:if="${quantity}">
+				<th:block th:if="${quantity.value != null and quantity.system != null and quantity.code != null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]] ([[${quantity.system}]] | [[${quantity.code}]])</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system != null and quantity.code != null and quantity.unit == null}">[[${quantity.value}]] [[${quantity.code}]] ([[${quantity.system}]])</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system != null and quantity.code == null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]] ([[${quantity.system}]])</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code != null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]]</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code != null and quantity.unit == null}">[[${quantity.value}]] [[${quantity.code}]]</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code == null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]]</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code == null and quantity.unit == null}">[[${quantity.value}]]</th:block>
+			</span>
+		</div>
+
 		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="id" th:assert="${label}">
 			<label th:text="${label}">label</label>
 			<a href="#" title="Open" th:href="${id.href}" th:title="'Open ' + ${id.resourceType}" th:text="${id.value}" th:if="${id}">id</a>

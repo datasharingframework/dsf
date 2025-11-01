@@ -1,6 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
 		<tag>
 			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
 			<code value="ALL" />
@@ -11,7 +12,7 @@
 	<name value="ProcessAuthorizationLocalAllPractitioner" />
 	<status value="active" />
 	<experimental value="false" />
-	<date value="2025-10-15" />
+	<date value="2025-10-27" />
 	<fhirVersion value="4.0.1" />
 	<kind value="complex-type" />
 	<abstract value="false" />
@@ -28,6 +29,7 @@
 				</discriminator>
 				<rules value="open" />
 			</slicing>
+			<min value="1" />
 		</element>
 		<element id="Coding.extension:practitioner">
 			<path value="Coding.extension" />

@@ -31,9 +31,9 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-task-base-2.0.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
-			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"),
-			List.of("dsf-bpmn-message-1.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"));
+			List.of("dsf-task-2.0.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
+			List.of("dsf-bpmn-message-2.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"),
+			List.of("dsf-bpmn-message-2.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -131,7 +131,7 @@ public class TaskProfileTest
 	private Task createTask(Task.TaskStatus status)
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-base");
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task");
 		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/foo|0.1.0");
 		task.setStatus(status);
 		task.setIntent(Task.TaskIntent.ORDER);
@@ -168,8 +168,7 @@ public class TaskProfileTest
 	private ValidationResult validate(Task task)
 	{
 		ValidationResult result = resourceValidator.validate(task);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		return result;
 	}
@@ -194,7 +193,7 @@ public class TaskProfileTest
 				.setSystem("http://dsf.dev/fhir/CodeSystem/test|1.4").setCode("string-example");
 
 		ValidationResult result = resourceValidator.validate(task);
-		ValidationSupportRule.logValidationMessages(logger, result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
@@ -220,7 +219,7 @@ public class TaskProfileTest
 				.setSystem("http://dsf.dev/fhir/CodeSystem/test|2.0").setCode("integer-example");
 
 		ValidationResult result = resourceValidator.validate(task);
-		ValidationSupportRule.logValidationMessages(logger, result);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());

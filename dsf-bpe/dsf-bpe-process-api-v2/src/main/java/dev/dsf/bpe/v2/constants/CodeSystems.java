@@ -276,6 +276,8 @@ public final class CodeSystems
 			public static final String HRP = "HRP";
 			public static final String TTP = "TTP";
 			public static final String AMS = "AMS";
+			public static final String ASP = "ASP";
+			public static final String SPR = "SPR";
 		}
 
 		public static final Coding uac()
@@ -323,6 +325,16 @@ public final class CodeSystems
 			return new Coding(SYSTEM, Codes.AMS, "Allowlist Management Site");
 		}
 
+		public static final Coding asp()
+		{
+			return new Coding(SYSTEM, Codes.ASP, "Analysis Service Provider");
+		}
+
+		public static final Coding SPR()
+		{
+			return new Coding(SYSTEM, Codes.SPR, "Service Provider Registry");
+		}
+
 		public static final boolean isUac(Coding coding)
 		{
 			return isSame(SYSTEM, Codes.UAC, coding);
@@ -367,6 +379,16 @@ public final class CodeSystems
 		{
 			return isSame(SYSTEM, Codes.AMS, coding);
 		}
+
+		public static final boolean isAsp(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.ASP, coding);
+		}
+
+		public static final boolean isSpr(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.SPR, coding);
+		}
 	}
 
 	public static final class PractitionerRole
@@ -397,6 +419,8 @@ public final class CodeSystems
 			public static final String HRP_USER = "HRP_USER";
 			public static final String TTP_USER = "TTP_USER";
 			public static final String AMS_USER = "AMS_USER";
+			public static final String ASP_USER = "ASP_USER";
+			public static final String SPR_USER = "SPR_USER";
 			public static final String DSF_ADMIN = "DSF_ADMIN";
 		}
 
@@ -443,6 +467,16 @@ public final class CodeSystems
 		public static final Coding amsUser()
 		{
 			return new Coding(SYSTEM, Codes.AMS_USER, "Allowlist Management Site Member");
+		}
+
+		public static final Coding aspUser()
+		{
+			return new Coding(SYSTEM, Codes.ASP_USER, "Analysis Service Provider Member");
+		}
+
+		public static final Coding sprUser()
+		{
+			return new Coding(SYSTEM, Codes.SPR_USER, "Service Provider Registry Member");
 		}
 
 		public static final Coding dsfAdmin()
@@ -493,6 +527,16 @@ public final class CodeSystems
 		public static final boolean isAmsUser(Coding coding)
 		{
 			return isSame(SYSTEM, Codes.AMS_USER, coding);
+		}
+
+		public static final boolean isAspUser(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.ASP_USER, coding);
+		}
+
+		public static final boolean isSprUser(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.SPR_USER, coding);
 		}
 
 		public static final boolean isDsfAdmin(Coding coding)

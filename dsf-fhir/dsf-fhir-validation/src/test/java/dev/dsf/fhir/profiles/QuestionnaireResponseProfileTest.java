@@ -39,7 +39,7 @@ public class QuestionnaireResponseProfileTest
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			List.of("dsf-questionnaire-response-2.0.0.xml", "dsf-extension-questionnaire-authorization-2.0.0.xml"),
-			List.of("dsf-practitioner-role-1.0.0.xml"), List.of("dsf-practitioner-role-1.0.0.xml"));
+			List.of("dsf-practitioner-role-2.0.0.xml"), List.of("dsf-practitioner-role-2.0.0.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -159,8 +159,7 @@ public class QuestionnaireResponseProfileTest
 	private void testQuestionnaireResponse(QuestionnaireResponse r, int numberOfExpectedErrors)
 	{
 		ValidationResult result = resourceValidator.validate(r);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(numberOfExpectedErrors,
 				result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
@@ -175,9 +174,7 @@ public class QuestionnaireResponseProfileTest
 	// Coding().setSystem("http://system.foo").setCode("code"));
 	//
 	// ValidationResult result = resourceValidator.validate(res);
-	// result.getMessages().stream()
-	// .map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - "
-	// + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+	// ValidationSupportRule.logValidationMessages(logger::debug, result);
 	//
 	// assertEquals(1, result.getMessages().stream()
 	// .filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL.equals(
@@ -215,8 +212,7 @@ public class QuestionnaireResponseProfileTest
 		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
 
 		ValidationResult result = resourceValidator.validate(r);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(2, result.getMessages().stream()
 				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
@@ -234,8 +230,7 @@ public class QuestionnaireResponseProfileTest
 		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.AMENDED);
 
 		ValidationResult result = resourceValidator.validate(r);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(2, result.getMessages().stream()
 				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
@@ -255,8 +250,7 @@ public class QuestionnaireResponseProfileTest
 		r.setAuthor(new Reference("Organization/" + UUID.randomUUID().toString()));
 
 		ValidationResult result = resourceValidator.validate(r);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(1, result.getMessages().stream()
 				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())

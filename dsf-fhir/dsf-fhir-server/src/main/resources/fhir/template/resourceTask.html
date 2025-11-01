@@ -73,6 +73,38 @@
 								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
 							</div>
 						</th:block>
+						<th:block th:if="${i.type == 'quantity'}">
+							<label class="row-label" th:if="${i.label}" th:for="${i.id + '-value'}" th:title="${i.labelTitle}">[[${i.label}]]<span class="cardinalities"></span></label>
+							<div class="flex-container">
+								<div class="input-group flex-child-margin-right comparator" th:if="${resource.status == 'draft' or i.quantityValue.comparator != null}">
+									<input type="text" placeholder="quantity.comparator" th:id="${i.id} + '-comparator'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.comparator} ?: _, fhir-type = ${i.fhirType + '.comparator'}">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.comparator} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child flex-child-margin-right">
+									<input type="number" placeholder="quantity.value" th:id="${i.id} + '-value'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.value} ?: _, fhir-type = ${i.fhirType + '.value'}">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.value} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child">
+									<input type="text" placeholder="quantity.unit" th:id="${i.id} + '-unit'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.unit} ?: _, fhir-type = ${i.fhirType + '.unit'}">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.unit} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+							<div class="flex-container">
+								<div class="input-group flex-child flex-child-margin-right" th:if="${resource.status == 'draft' or i.quantityValue.system != null}">
+									<input type="url" placeholder="quantity.system" th:id="${i.id} + '-system'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.system} ?: _, fhir-type = ${i.fhirType + '.system'}" class="identifier-coding-code">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.system} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child" th:if="${resource.status == 'draft' or i.quantityValue.code != null}">
+									<input type="text" placeholder="quantity.code" th:id="${i.id} + '-code'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.code} ?: _, fhir-type = ${i.fhirType + '.code'}" class="identifier-coding-code">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.code} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+						</th:block>
 						<ul class="error-list" th:for="${i.id}" th:if="${resource.status == 'draft'}"></ul>
 					</div>
 					<div class="row-submit" th:if="${resource.status == 'draft'}">
@@ -130,6 +162,33 @@
 								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
 							</div>
 						</th:block>
+						<th:block th:if="${o.type == 'quantity'}">
+							<label class="row-label" th:if="${o.label}" th:for="${o.id + '-value'}" th:title="${o.labelTitle}" th:text="${o.label}">label</label>
+							<div class="flex-container">
+								<div class="input-group flex-child-margin-right comparator" th:if="${o.quantityValue.comparator != null}">
+									<input type="text" th:id="${o.id} + '-comparator'" th:value="${o.quantityValue.comparator}">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child flex-child-margin-right">
+									<input type="number" th:id="${o.id} + '-value'" th:value="${o.quantityValue.value}">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child">
+									<input type="text" th:id="${o.id} + '-unit'" th:value="${o.quantityValue.unit}">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+							<div class="flex-container">
+								<div class="input-group flex-child flex-child-margin-right" th:if="${o.quantityValue.system != null}">
+									<input type="url" th:id="${o.id} + '-system'" th:value="${o.quantityValue.system}" class="identifier-coding-code">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child" th:if="${o.quantityValue.code != null}">
+									<input type="text" th:id="${o.id} + '-code'" th:value="${o.quantityValue.code}" class="identifier-coding-code">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+						</th:block>
 						
 						<div class="extensions" th:if="${o.extension and not #lists.isEmpty(o.extension)}">
 							<div class="extension" th:each="e : ${o.extension}">
@@ -173,6 +232,33 @@
 									<div class="input-group">
 										<input type="text" th:id="${e.id} + '-code'" th:value="${e.systemValueValue.value}" class="identifier-coding-code">
 										<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+									</div>
+								</th:block>
+								<th:block th:if="${e.type == 'quantity'}">
+									<label class="extension-label" th:if="${e.url}" th:for="${e.id + '-value'}" th:title="${e.url}" th:text="${e.url}">url</label>
+									<div class="flex-container">
+										<div class="input-group flex-child-margin-right comparator" th:if="${e.quantityValue.comparator != null}">
+											<input type="text" th:id="${e.id} + '-comparator'" th:value="${e.quantityValue.comparator}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+										<div class="input-group flex-child flex-child-margin-right">
+											<input type="number" th:id="${e.id} + '-value'" th:value="${e.quantityValue.value}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+										<div class="input-group flex-child">
+											<input type="text" th:id="${e.id} + '-unit'" th:value="${e.quantityValue.unit}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+									</div>
+									<div class="flex-container identifier-coding-code">
+										<div class="input-group flex-child flex-child-margin-right" th:if="${e.quantityValue.system != null}">
+											<input type="url" th:id="${e.id} + '-system'" th:value="${e.quantityValue.system}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+										<div class="input-group flex-child" th:if="${e.quantityValue.code != null}">
+											<input type="text" th:id="${e.id} + '-code'" th:value="${e.quantityValue.code}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
 									</div>
 								</th:block>
 							</div>

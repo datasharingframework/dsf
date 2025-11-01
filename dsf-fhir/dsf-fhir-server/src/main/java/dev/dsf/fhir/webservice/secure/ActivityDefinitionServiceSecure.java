@@ -7,6 +7,7 @@ import dev.dsf.fhir.dao.ActivityDefinitionDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -23,10 +24,10 @@ public class ActivityDefinitionServiceSecure
 			ReferenceExtractor referenceExtractor, ActivityDefinitionDao activityDefinitionDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			AuthorizationRule<ActivityDefinition> authorizationRule, ResourceValidator resourceValidator,
-			ValidationRules validationRules)
+			ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				ActivityDefinition.class, activityDefinitionDao, exceptionHandler, parameterConverter,
-				authorizationRule, resourceValidator, validationRules);
+				authorizationRule, resourceValidator, validationRules, defaultProfileProvider);
 	}
 }

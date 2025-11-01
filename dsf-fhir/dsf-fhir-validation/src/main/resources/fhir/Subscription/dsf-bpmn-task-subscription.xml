@@ -1,17 +1,17 @@
-<Subscription xmlns="http://hl7.org/fhir"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<Subscription xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/subscription" />
 		<tag>
-			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
-			<code value="LOCAL"/>
-		</tag>		
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="LOCAL" />
+		</tag>
 	</meta>
-	<status value="active"/>
-	<reason value="Businness Process Engine"/>
-	<criteria value="Task?status=requested"/>
+	<status value="active" />
+	<reason value="Businness Process Engine" />
+	<criteria value="Task?status=requested" />
 	<channel>
-		<type value="websocket"/>
-		<payload value="application/fhir+json"/>
+		<type value="websocket" />
+		<payload value="application/fhir+json" />
 	</channel>
 </Subscription>

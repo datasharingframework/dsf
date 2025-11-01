@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -192,6 +193,11 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 										.setValue("External_Test_Organization")));
 
 				case "boolean-example" -> set(item, new BooleanType(true));
+
+				case "choice-example" ->
+					set(item, new Coding().setSystem("http://example.org/fhir/CodeSystem/name").setCode("code"));
+
+				case "quantity-example" -> set(item, new Quantity().setValue(0).setUnit("unit"));
 			}
 		});
 

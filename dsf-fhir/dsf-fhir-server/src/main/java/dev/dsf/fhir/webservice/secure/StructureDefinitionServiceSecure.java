@@ -8,6 +8,7 @@ import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -27,11 +28,11 @@ public class StructureDefinitionServiceSecure
 			ReferenceExtractor referenceExtractor, StructureDefinitionDao structureDefinitionDao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			AuthorizationRule<StructureDefinition> authorizationRule, ResourceValidator resourceValidator,
-			ValidationRules validationRules)
+			ValidationRules validationRules, DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
 				StructureDefinition.class, structureDefinitionDao, exceptionHandler, parameterConverter,
-				authorizationRule, resourceValidator, validationRules);
+				authorizationRule, resourceValidator, validationRules, defaultProfileProvider);
 	}
 
 	@Override

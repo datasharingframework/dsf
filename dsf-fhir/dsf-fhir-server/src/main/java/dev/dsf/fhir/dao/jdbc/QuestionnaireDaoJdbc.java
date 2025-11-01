@@ -1,8 +1,12 @@
 package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -74,5 +78,29 @@ public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire>
 			throws SQLException
 	{
 		return readByUrl.readByUrlAndVersionWithTransaction(connection, url, version);
+	}
+
+	@Override
+	public List<Questionnaire> readAllByProfileWithTransaction(Connection connection, String profile)
+			throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(profile, "profile");
+
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT questionnaire FROM current_questionnaires WHERE questionnaire->'meta'->'profile' ?? ?"))
+		{
+			statement.setString(1, profile);
+
+			try (ResultSet result = statement.executeQuery())
+			{
+				List<Questionnaire> byProfile = new ArrayList<>();
+
+				while (result.next())
+					byProfile.add(getResource(result, 1));
+
+				return byProfile;
+			}
+		}
 	}
 }

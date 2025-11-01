@@ -1158,31 +1158,21 @@ div.row-text {
 	background: var(--color-row-border-blue);
 }
 
-.flex-element {
+.flex-container {
 	display: flex;
 	flex-direction: row;
 }
 
-.flex-element-100 {
-	width: 100%;
-	margin-right: 0em;
+.flex-child {
+	flex: 1;
 }
 
-.flex-element-67 {
-	width: 67%;
+.flex-child-margin-right {
+	margin-right: 0.5em
 }
 
-.flex-element-50 {
-	width: 50%;
-	margin-right: 0em;
-}
-
-.flex-element-33 {
-	width: 33%;
-}
-
-.flex-element-margin {
-	margin-right: 0.7em;
+.comparator {
+	flex: 0;
 }
 
 .authorization {
