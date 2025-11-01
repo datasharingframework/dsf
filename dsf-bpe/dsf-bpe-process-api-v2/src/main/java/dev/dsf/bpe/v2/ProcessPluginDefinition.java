@@ -38,7 +38,8 @@ public interface ProcessPluginDefinition
 	Pattern PLUGIN_VERSION_PATTERN = Pattern.compile(PLUGIN_VERSION_PATTERN_STRING);
 
 	/**
-	 * @return process plugin name, same as jar name excluding suffix <code>-&lt;version&gt;.jar</code>
+	 * @return process plugin name, same as jar name excluding suffix <code>-&lt;version&gt;.jar</code>, same as
+	 *         "artifactId" when using maven
 	 */
 	String getName();
 
@@ -77,6 +78,44 @@ public interface ProcessPluginDefinition
 	default LocalDate getResourceReleaseDate()
 	{
 		return getReleaseDate();
+	}
+
+	/**
+	 * @return process plugin human readable name, <code>null</code> by default
+	 */
+	default String getTitle()
+	{
+		return null;
+	}
+
+	/**
+	 * @return process plugin publisher name, <code>null</code> by default
+	 */
+	default String getPublisher()
+	{
+		return null;
+	}
+
+	/**
+	 * @return process plugin publisher e-mail, <code>null</code> by default
+	 */
+	default String getPublisherEmail()
+	{
+		return null;
+	}
+
+	enum License
+	{
+		Apache2, MIT, Other
+	}
+
+	/**
+	 * @return process plugin license, <code>null</code> by default, {@link License#Other} if specified via
+	 *         {@link #getLicenseFile()}
+	 */
+	default License getLicense()
+	{
+		return null;
 	}
 
 	/**
@@ -150,4 +189,30 @@ public interface ProcessPluginDefinition
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
 	List<Class<?>> getSpringConfigurations();
+
+	/**
+	 * @return location of the optional plugin description markdown file
+	 */
+	default String getDescriptionFile()
+	{
+		return "doc/description.md";
+	}
+
+	/**
+	 * @return location of the optional plugin configuration markdown file
+	 */
+	default String getConfigurationFile()
+	{
+		return "doc/configuration.md";
+	}
+
+	/**
+	 * If the license file exists, {@link #getLicense()} is expected to return {@link License#Other}.
+	 *
+	 * @return location of the optional plugin license markdown file
+	 */
+	default String getLicenseFile()
+	{
+		return "doc/license.md";
+	}
 }
