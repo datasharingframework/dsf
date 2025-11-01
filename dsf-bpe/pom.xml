@@ -29,19 +29,6 @@
 
 	<name>DSF BPE Parent POM</name>
 
-	<repositories>
-		<repository>
-			<id>camunda-bpm</id>
-			<url>https://app.camunda.com/nexus/content/repositories/camunda-bpm/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<!-- Logging -->
 		<dependency>

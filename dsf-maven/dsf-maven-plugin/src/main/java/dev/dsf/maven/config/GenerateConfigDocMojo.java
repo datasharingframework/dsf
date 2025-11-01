@@ -11,6 +11,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+/**
+ * Generates configuration documentation for the DSF and process plugins.
+ */
 @Mojo(name = "generate-config-doc", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE, threadSafe = true)
 public class GenerateConfigDocMojo extends AbstractMojo
 {
@@ -20,6 +23,9 @@ public class GenerateConfigDocMojo extends AbstractMojo
 	@Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
 	private List<String> compileClasspathElements;
 
+	/**
+	 * The packages to scan for configuration classes.
+	 */
 	@Parameter(property = "dsf.configDocPackages", required = true)
 	private List<String> configDocPackages;
 

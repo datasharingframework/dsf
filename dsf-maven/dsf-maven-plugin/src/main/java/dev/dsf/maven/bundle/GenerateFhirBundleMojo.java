@@ -10,6 +10,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+/**
+ * Generates a FHIR Bundle containing all resources found in the configured base folder.
+ */
 @Mojo(name = "generate-fhir-bundle", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true)
 public class GenerateFhirBundleMojo extends AbstractMojo
 {

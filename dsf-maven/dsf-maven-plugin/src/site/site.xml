@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site xmlns="http://maven.apache.org/SITE/2.0.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd"
+      name="DSF Maven Plugin">
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>2.1.0</version>
+    </skin>
+    <custom>
+        <fluidoSkin>
+            <topBarEnabled>true</topBarEnabled>
+            <topBarIcon>
+                <name>DSF Maven Plugin</name>
+                <alt>DSF Maven Plugin</alt>
+                <href>/index.html</href>
+            </topBarIcon>
+            <sideBarEnabled>false</sideBarEnabled>
+        </fluidoSkin>
+    </custom>
+    <body>
+        <menu name="DSF Maven Plugin">
+            <item name="Overview" href="index.html"/>
+            <item name="Plugin Goals" href="plugin-info.html"/>
+        </menu>
+        <menu ref="reports"/>
+        <footer>© DSF Team / Heilbronn University</footer>
+    </body>
+</site>
