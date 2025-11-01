@@ -91,4 +91,16 @@
 		<text value="Do you approve the release of the data-set?" />
 		<required value="false" />
 	</item>
+	<item>
+		<linkId value="choice-example" />
+		<type value="choice" />
+		<text value="Add a coding to test the choice type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="quantity-example" />
+		<type value="quantity" />
+		<text value="Add a quantity to test the quantity type" />
+		<required value="false" />
+	</item>
 </Questionnaire>

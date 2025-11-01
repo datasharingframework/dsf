@@ -6,10 +6,12 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
@@ -175,7 +177,7 @@ public class QuestionnaireResponseTest
 		assertTrue(type instanceof Reference);
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testQuestionTypeChoiceToAnswerType()
 	{
 		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl("https://foo/fhir");
@@ -183,7 +185,8 @@ public class QuestionnaireResponseTest
 		Questionnaire.QuestionnaireItemComponent question = new Questionnaire.QuestionnaireItemComponent()
 				.setType(Questionnaire.QuestionnaireItemType.CHOICE);
 
-		qrh.transformQuestionTypeToAnswerType(question);
+		Type type = qrh.transformQuestionTypeToAnswerType(question);
+		assertTrue(type instanceof Coding);
 	}
 
 	@Test(expected = RuntimeException.class)
@@ -197,7 +200,7 @@ public class QuestionnaireResponseTest
 		qrh.transformQuestionTypeToAnswerType(question);
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testQuestionTypeQuantityToAnswerType()
 	{
 		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl("https://foo/fhir");
@@ -205,7 +208,8 @@ public class QuestionnaireResponseTest
 		Questionnaire.QuestionnaireItemComponent question = new Questionnaire.QuestionnaireItemComponent()
 				.setType(Questionnaire.QuestionnaireItemType.QUANTITY);
 
-		qrh.transformQuestionTypeToAnswerType(question);
+		Type type = qrh.transformQuestionTypeToAnswerType(question);
+		assertTrue(type instanceof Quantity);
 	}
 
 	@Test(expected = RuntimeException.class)

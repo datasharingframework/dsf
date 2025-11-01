@@ -99,6 +99,18 @@ public class QuestionnaireProfileTest extends AbstractMetaTagProfileTest<Questio
 		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DISPLAY);
 	}
 
+	@Test
+	public void testQuestionnaireValidTypeChoice()
+	{
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.CHOICE);
+	}
+
+	@Test
+	public void testQuestionnaireInvalidTypeQuantity()
+	{
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.QUANTITY);
+	}
+
 	private void testQuestionnaireValidType(Questionnaire.QuestionnaireItemType type)
 	{
 		Questionnaire res = createQuestionnaire(type);
@@ -123,12 +135,6 @@ public class QuestionnaireProfileTest extends AbstractMetaTagProfileTest<Questio
 	}
 
 	@Test
-	public void testQuestionnaireInvalidTypeChoice()
-	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.CHOICE);
-	}
-
-	@Test
 	public void testQuestionnaireInvalidTypeOpenChoice()
 	{
 		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.OPENCHOICE);
@@ -138,12 +144,6 @@ public class QuestionnaireProfileTest extends AbstractMetaTagProfileTest<Questio
 	public void testQuestionnaireInvalidTypeAttachment()
 	{
 		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.ATTACHMENT);
-	}
-
-	@Test
-	public void testQuestionnaireInvalidTypeQuantity()
-	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.QUANTITY);
 	}
 
 	private void testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType type)

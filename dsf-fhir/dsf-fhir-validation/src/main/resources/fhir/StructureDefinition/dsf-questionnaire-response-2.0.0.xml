@@ -252,6 +252,12 @@
 			<type>
 				<code value="Reference" />
 			</type>
+			<type>
+				<code value="Coding" />
+			</type>
+			<type>
+				<code value="Quantity" />
+			</type>
 		</element>
 		<element id="QuestionnaireResponse.item:@default.answer.item">
 			<path value="QuestionnaireResponse.item.answer.item" />
