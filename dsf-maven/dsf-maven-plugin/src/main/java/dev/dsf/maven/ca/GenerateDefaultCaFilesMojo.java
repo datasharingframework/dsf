@@ -13,7 +13,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
- * Generates default CA files required by DSF for dev setups.
+ * Generates default CA files for DSF docker images.
  * <p>
  * This goal creates all required default CA files (client issuing CAs, client CA chains, server root CAs) and copies
  * them to the configured target directory.
