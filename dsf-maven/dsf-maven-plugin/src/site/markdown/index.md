@@ -293,10 +293,9 @@ Example template file (`dsf-docker-test-setup-3dic-ttp.env`):
 
 ```
 WEBBROWSER_TEST_USER_THUMBPRINT=${Webbrowser Test User.thumbprint}
-DIC1_BUNDLE_USER_THUMBPRINT=${dic1.thumbprint}
-DIC2_BUNDLE_USER_THUMBPRINT=${dic2.thumbprint}
-DIC3_BUNDLE_USER_THUMBPRINT=${dic3.thumbprint}
-TTP_BUNDLE_USER_THUMBPRINT=${ttp.thumbprint}
+DIC1_THUMBPRINT=${dic1.thumbprint}
+DIC2_THUMBPRINT=${dic2.thumbprint}
+DIC3_THUMBPRINT=${dic3.thumbprint}
 ```
 ---
 
