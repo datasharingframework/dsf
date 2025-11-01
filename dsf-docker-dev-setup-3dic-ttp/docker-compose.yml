@@ -46,7 +46,7 @@ services:
       TZ: Europe/Berlin
 
   db:
-    image: postgres:15
+    image: postgres:18
     restart: "no"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d postgres" ]
@@ -71,8 +71,8 @@ services:
       - db_liquibase.password
     volumes:
       - type: volume
-        source: db-data
-        target: /var/lib/postgresql/data
+        source: postgresql
+        target: /var/lib/postgresql
       - type: bind
         source: ./db/init-db.sh
         target: /docker-entrypoint-initdb.d/init-db.sh
@@ -1002,5 +1002,5 @@ networks:
   forward-proxy:
 
 volumes:
-  db-data:
-    name: db-data
+  postgresql:
+    name: postgresql

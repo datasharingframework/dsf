@@ -48,7 +48,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
-			DockerImageName.parse("postgres:15"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
+			DockerImageName.parse("postgres:18"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
 			CHANGE_LOG_PARAMETERS, true);
 
 	@Rule
