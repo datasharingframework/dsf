@@ -37,49 +37,70 @@ body {
 	background-color: var(--color-background);
 }
 
-table#header {
-	margin-bottom: 0.4em;
+#header {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-rows: auto auto;
+	margin-bottom: 1em;
 }
 
-table#header img {
-	height: 7em;
-	padding-bottom: 0.38em;
-	display: block;
+#logo {
+	grid-row: 1 / span 2;
+	margin-bottom: 0.41em;
 }
 
-td#heading {
-	vertical-align: bottom;
+#icons {
+	grid-column: 2;
+  	grid-row: 1;
+	display: flex;
+	column-gap: 0.25em;
+	justify-self: right;
 }
 
-td#heading h1 {
+#heading {
+	grid-column: 2;
+	grid-row: 2;
 	font-size: 2em;
 	font-family: monospace;
 	color: var(--color-prime);
+	align-self: end;
 	margin: 0 0 0 1em;
 	word-break: break-word;
 }
 
-td#heading h1 a {
-	white-space: nowrap;
+@media ( max-width: 64rem) {
+	#header {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto auto;
+		height: auto;
+	}
+	#icons {
+		grid-column: 1;
+		grid-row: 1;
+		margin: 0 0 1em 0;
+	}
+	#logo {
+		grid-column: 1;
+		grid-row: 2;
+		margin: 0;
+		height: 14vw;
+	}
+	#heading {
+		grid-column: 1;
+		grid-row: 3;
+		margin: 1em 0 0 0;
+	}
 }
 
-td#heading h1 a:link,
-td#heading h1 a:visited,
-td#heading h1 a:active {
+#heading a:link,
+#heading a:visited,
+#heading a:active {
 	color: var(--color-prime);
 	text-decoration: none;
 }
 
-td#heading h1 a:hover {
+#heading a:hover {
 	text-decoration: underline;
-}
-
-#icons {
-	position: absolute;
-	top: 2em;
-	right: 2em;
-	display: flex;
-	column-gap: 0.25em;
 }
 
 #hello-user {

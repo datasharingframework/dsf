@@ -1,5 +1,6 @@
 package dev.dsf.fhir.adapter;
 
+import java.security.Principal;
 import java.util.function.BiConsumer;
 
 import org.hl7.fhir.r4.model.Resource;
@@ -10,7 +11,7 @@ public interface ThymeleafContext
 
 	boolean isResourceSupported(String requestPathLastElement);
 
-	default boolean isRootSupported(Resource resource)
+	default boolean isRootSupported(Resource resource, Principal principal)
 	{
 		return false;
 	}

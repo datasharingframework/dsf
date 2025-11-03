@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 	<div class="bundle" th:fragment="content">
-		<div id="header">
+		<div id="bundle-header">
 			<table>
 				<tr>
 					<td>
@@ -20,7 +20,7 @@
 				</tr>
 			</table>
 		</div>
-		<div id="list">
+		<div id="bundle-list">
 			<table>
 				<tr th:replace="~{${searchset.htmlRowFragment}::header}"></tr>
 				<tr th:each="e : ${searchset.elements}" th:insert="~{${searchset.htmlRowFragment}::row}" th:with="element=${e}" th:remove="tag"></tr>

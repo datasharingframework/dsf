@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -171,7 +172,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		context.setVariable("json", toJson(mediaType, resource));
 		context.setVariable("resourceId", ElementId.from(resource));
 
-		getContext(type, uriInfo, resource).ifPresent(tContext ->
+		getContext(type, uriInfo, resource, securityContext.getUserPrincipal()).ifPresent(tContext ->
 		{
 			context.setVariable("htmlFragment", tContext.getHtmlFragment());
 			tContext.setVariables(context::setVariable, resource);
@@ -181,7 +182,8 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		templateEngine.process("main", context, writer);
 	}
 
-	private Optional<ThymeleafContext> getContext(Class<?> type, UriInfo uriInfo, Resource resource)
+	private Optional<ThymeleafContext> getContext(Class<?> type, UriInfo uriInfo, Resource resource,
+			Principal principal)
 	{
 		return contextsByResourceType.getOrDefault(type, List.of()).stream().filter(g ->
 		{
@@ -189,7 +191,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 					.map(PathSegment::getPath).filter(Objects::nonNull).filter(s -> !s.isBlank())
 					.reduce((_, second) -> second);
 
-			return lastSegment.map(g::isResourceSupported).orElseGet(() -> g.isRootSupported(resource));
+			return lastSegment.map(g::isResourceSupported).orElseGet(() -> g.isRootSupported(resource, principal));
 		}).findFirst();
 	}
 

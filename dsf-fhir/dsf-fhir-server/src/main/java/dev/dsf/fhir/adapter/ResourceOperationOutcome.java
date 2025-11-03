@@ -1,5 +1,6 @@
 package dev.dsf.fhir.adapter;
 
+import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -11,6 +12,8 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.common.build.BuildInfoReader;
 import dev.dsf.fhir.dao.StatisticsDao;
 import dev.dsf.fhir.dao.StatisticsDao.Statistics;
@@ -63,9 +66,12 @@ public class ResourceOperationOutcome extends AbstractThymeleafContext implement
 	}
 
 	@Override
-	public boolean isRootSupported(Resource resource)
+	public boolean isRootSupported(Resource resource, Principal principal)
 	{
-		return resource instanceof OperationOutcome o && (boolean) o.getUserData(RootServiceImpl.ROOT_GET);
+		// only show statistics when GET of root URL, TODO move principal logic to authorization rules
+		return resource instanceof OperationOutcome o && (boolean) o.getUserData(RootServiceImpl.ROOT_GET)
+				&& ((principal instanceof OrganizationIdentity org && org.isLocalIdentity())
+						|| (principal instanceof PractitionerIdentity prc && prc.hasPractionerRole("DSF_ADMIN")));
 	}
 
 	@Override
@@ -111,7 +117,7 @@ public class ResourceOperationOutcome extends AbstractThymeleafContext implement
 						String.format("%.2f", binariesSize.value()), null),
 				new Element("active", null, ResourceType.ActivityDefinition.name(),
 						ResourceType.ActivityDefinition.name(), null, null,
-						String.valueOf(statistics.activitDefinitions()),
+						String.valueOf(statistics.activityDefinitions()),
 						ResourceType.ActivityDefinition.name() + "?_sort=status,url,version"),
 				new Element(null, null, ResourceType.Binary.name(), ResourceType.Binary.name(), null, null,
 						String.valueOf(statistics.binaries()), ResourceType.Binary.name()),

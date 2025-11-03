@@ -30,15 +30,22 @@ public class BrowserPolicyHeaderResponseFilter implements ContainerResponseFilte
 			headers.add("Cross-Origin-Resource-Policy", "same-site");
 			headers.add("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
 
-			if (requestContext.getUriInfo() != null && requestContext.getUriInfo().getPath() != null
-					&& requestContext.getUriInfo().getPath().startsWith("Binary/"))
-				headers.add("Content-Security-Policy",
-						"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
-								+ " script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
-			else
-				headers.add("Content-Security-Policy",
-						"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
-								+ " script-src 'self'; style-src 'self'");
+			// Don't send Content-Security-Policy header for non html content
+			if (!requestContext.getUriInfo().getPath().startsWith("static/")
+					|| (requestContext.getUriInfo().getPath().startsWith("static/")
+							&& (requestContext.getUriInfo().getPath().endsWith(".html")
+									|| requestContext.getUriInfo().getPath().endsWith(".htm"))))
+			{
+				if (requestContext.getUriInfo() != null && requestContext.getUriInfo().getPath() != null
+						&& requestContext.getUriInfo().getPath().startsWith("Binary/"))
+					headers.add("Content-Security-Policy",
+							"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
+									+ " script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
+				else
+					headers.add("Content-Security-Policy",
+							"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
+									+ " script-src 'self'; style-src 'self'");
+			}
 		}
 	}
 }

@@ -72,7 +72,7 @@ public class StatisticsDaoJdbc implements StatisticsDao, InitializingBean
 			long organizationsParent = result.getLong(2);
 			long endpoints = result.getLong(3);
 			long organizationAffiliations = result.getLong(4);
-			long activitDefinitions = result.getLong(5);
+			long activityDefinitions = result.getLong(5);
 			long tasksDraft = result.getLong(6);
 			long tasksInProgress24h = result.getLong(7);
 			long tasksInProgress30d = result.getLong(8);
@@ -98,7 +98,7 @@ public class StatisticsDaoJdbc implements StatisticsDao, InitializingBean
 			long binariesSize = result.getLong(28);
 
 			return new Statistics(organizationsMember, organizationsParent, endpoints, organizationAffiliations,
-					activitDefinitions, tasksDraft, tasksInProgress24h, tasksInProgress30d, tasksInProgress,
+					activityDefinitions, tasksDraft, tasksInProgress24h, tasksInProgress30d, tasksInProgress,
 					tasksCompleted24h, tasksCompleted30d, tasksCompleted, tasksFailed24h, tasksFailed30d, tasksFailed,
 					questionnaireResponsesInProgress24h, questionnaireResponsesInProgress30d,
 					questionnaireResponsesInProgress, questionnaireResponsesAmended24h,
