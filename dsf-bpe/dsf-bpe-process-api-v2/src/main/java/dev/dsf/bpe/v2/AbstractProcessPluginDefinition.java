@@ -14,11 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implements {@link #getName()}, {@link #getVersion()} and {@link #getReleaseDate()} based on properties defined in a
- * {@value #PROPERTIES_FILE} file. The UTF-8 encoded file needs to contain property entries for {@value #NAME_PROPERTY},
+ * Implements {@link #getName()}, {@link #getVersion()}, {@link #getReleaseDate()}, {@link #getTitle()},
+ * {@link #getPublisher()} and {@link #getPublisherEmail()} based on properties defined in a {@value #PROPERTIES_FILE}
+ * file. The UTF-8 encoded file needs to contain property entries for {@value #NAME_PROPERTY},
  * {@value #VERSION_PROPERTY} (suffixes like <code>-SNAPSHOT</code> will be removed from the value, regex:
- * <code>-.*$</code>) and {@value #RELEASE_DATE_PROPERTY} (with the value formated as a ISO-8601 timestamp, see
- * {@link ZonedDateTime#parse(CharSequence)}).
+ * <code>-.*$</code>) and {@value #RELEASE_DATE_PROPERTY} (value formated as a ISO-8601 timestamp, see
+ * {@link ZonedDateTime#parse(CharSequence)}). The properties {@value #TITLE_PROPERTY}, {@value #PUBLISHER_PROPERTY} and
+ * {@value #PUBLISHER_EMAIL_PROPERTY} are optional, with the corresponding get-methods returning <code>null</code> if
+ * not specified.
  * <p>
  * Using maven the file should be located at <code>src/main/resources/plugin.properties</code> with the following
  * content:
@@ -26,6 +29,9 @@ import org.slf4j.LoggerFactory;
  * release-date=${project.build.outputTimestamp}
  * version=${project.version}
  * name=${project.artifactId}
+ * title=${project.description}
+ * publisher=${project.organization.name}
+ * publisher-email=mail@test.com
  * }
  * <p>
  * The maven pom.xml file needs to define the <code>project.build.outputTimestamp</code> property (also needed for
@@ -66,10 +72,16 @@ public abstract class AbstractProcessPluginDefinition implements ProcessPluginDe
 	private static final String NAME_PROPERTY = "name";
 	private static final String VERSION_PROPERTY = "version";
 	private static final String RELEASE_DATE_PROPERTY = "release-date";
+	private static final String TITLE_PROPERTY = "title";
+	private static final String PUBLISHER_PROPERTY = "publisher";
+	private static final String PUBLISHER_EMAIL_PROPERTY = "publisher-email";
 
 	private final String name;
 	private final String version;
 	private final LocalDate releaseDate;
+	private final String title;
+	private final String publisher;
+	private final String publisherEmail;
 
 	public AbstractProcessPluginDefinition()
 	{
@@ -99,6 +111,10 @@ public abstract class AbstractProcessPluginDefinition implements ProcessPluginDe
 						RELEASE_DATE_PROPERTY, PROPERTIES_FILE, e.getClass().getName(), e.getMessage());
 				throw e;
 			}
+
+			title = properties.getProperty(TITLE_PROPERTY);
+			publisher = properties.getProperty(PUBLISHER_PROPERTY);
+			publisherEmail = properties.getProperty(PUBLISHER_EMAIL_PROPERTY);
 		}
 		catch (IOException e)
 		{
@@ -141,5 +157,23 @@ public abstract class AbstractProcessPluginDefinition implements ProcessPluginDe
 	public LocalDate getReleaseDate()
 	{
 		return releaseDate;
+	}
+
+	@Override
+	public String getTitle()
+	{
+		return title;
+	}
+
+	@Override
+	public String getPublisher()
+	{
+		return publisher;
+	}
+
+	@Override
+	public String getPublisherEmail()
+	{
+		return publisherEmail;
 	}
 }

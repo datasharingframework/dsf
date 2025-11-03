@@ -55,4 +55,28 @@ public class TestProcessPluginDefinition implements ProcessPluginDefinition
 
 		return Map.of("dsfdev_test", List.of(aTest, cTest, qTest, sContinueSentTest, sTest, vTest));
 	}
+
+	@Override
+	public String getTitle()
+	{
+		return "API v2 Test Process Plugin";
+	}
+
+	@Override
+	public String getPublisher()
+	{
+		return "Heilbronn University of Applied Sciences";
+	}
+
+	@Override
+	public String getPublisherEmail()
+	{
+		return "dsf-gecko@hs-heilbronn.de";
+	}
+
+	@Override
+	public License getLicense()
+	{
+		return License.Apache2;
+	}
 }
