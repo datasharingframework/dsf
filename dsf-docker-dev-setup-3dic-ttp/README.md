@@ -1,4 +1,4 @@
-# 3-DIC TTP Docker Test Setup
+# 3-DIC TTP Docker Dev Setup
 
 ### Preparations
 
@@ -19,7 +19,7 @@
     127.0.0.1	keycloak
     ```
 
-* Build the docker images in the sub-folder `dsf/dsf-docker-test-setup-3dic-ttp` by executing:
+* Build the docker images in the sub-folder `dsf/dsf-docker-dev-setup-3dic-ttp` by executing:
 
     **Windows:**
     ```sh
@@ -31,8 +31,8 @@
     ./docker-build.sh
     ```
 
-* Add processes to the corresponding sub-folder `dsf/dsf-docker-test-setup-3dic-ttp/<organization>/bpe/process`
-* Start dsf instances of each organization in the sub-folder `dsf/dsf-docker-test-setup-3dic-ttp`
+* Add processes to the corresponding sub-folder `dsf/dsf-docker-dev-setup-3dic-ttp/<organization>/bpe/process`
+* Start dsf instances of each organization in the sub-folder `dsf/dsf-docker-dev-setup-3dic-ttp`
 
 ### DIC1
 

@@ -13,7 +13,7 @@ import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 
 @Ignore
-// Needs keycloak service from 3dic-ttp test setup, "Service accounts roles" needs to be activated for dic1-fhir client
+// Needs keycloak service from 3dic-ttp dev setup, "Service accounts roles" needs to be activated for dic1-fhir client
 public class OidcClientJerseyTest
 {
 	@Test

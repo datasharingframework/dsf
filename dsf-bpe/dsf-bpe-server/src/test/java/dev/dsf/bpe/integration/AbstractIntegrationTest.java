@@ -82,7 +82,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule bpeLiquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
-			DockerImageName.parse("postgres:15"), ROOT_USER, "bpe", "bpe_template", BPE_CHANGE_LOG_FILE,
+			DockerImageName.parse("postgres:18"), ROOT_USER, "bpe", "bpe_template", BPE_CHANGE_LOG_FILE,
 			BPE_CHANGE_LOG_PARAMETERS, false);
 
 	@Rule
@@ -90,7 +90,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule fhirLiquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
-			DockerImageName.parse("postgres:15"), ROOT_USER, "fhir", "fhir_template", FHIR_CHANGE_LOG_FILE,
+			DockerImageName.parse("postgres:18"), ROOT_USER, "fhir", "fhir_template", FHIR_CHANGE_LOG_FILE,
 			FHIR_CHANGE_LOG_PARAMETERS, false);
 
 	@Rule

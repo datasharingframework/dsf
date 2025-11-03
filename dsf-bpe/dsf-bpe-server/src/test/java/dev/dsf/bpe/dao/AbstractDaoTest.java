@@ -21,7 +21,7 @@ public class AbstractDaoTest extends AbstractDbTest
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
-			DockerImageName.parse("postgres:15"), ROOT_USER, "bpe", "bpe_template", BPE_CHANGE_LOG_FILE,
+			DockerImageName.parse("postgres:18"), ROOT_USER, "bpe", "bpe_template", BPE_CHANGE_LOG_FILE,
 			BPE_CHANGE_LOG_PARAMETERS, true);
 
 	@Rule
