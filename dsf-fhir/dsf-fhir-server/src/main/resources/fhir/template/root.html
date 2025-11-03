@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="root" th:fragment="content">
+		<th:block th:each="e : ${elements}">
+			<th:block th:if="${e.link != null}">
+				<a href="link" th:href="${e.link}">
+					<div class="element"
+						th:attr="resource-type=${e.type},active=${e.active},status=${e.status}">
+						<h1 th:text="${e.title}">title</h1>
+						<h2 th:text="${e.subtitle}">subtitle</h2>
+						<p class="unit" th:text="${e.unit}">unit</p>
+						<p class="value" th:text="${e.value}">value</p>
+					</div>
+				</a>
+			</th:block>
+
+			<th:block th:if="${e.link == null}">
+				<div class="element"
+					th:attr="resource-type=${e.type},active=${e.active},status=${e.status}">
+					<h1 th:text="${e.title}">title</h1>
+					<h2 th:text="${e.subtitle}">subtitle</h2>
+					<p class="unit" th:text="${e.unit}">unit</p>
+					<p class="value" th:text="${e.value}">value</p>
+				</div>
+			</th:block>
+		</th:block>
+	</div>
+</body>
+</html>

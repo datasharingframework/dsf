@@ -171,17 +171,18 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		context.setVariable("json", toJson(mediaType, resource));
 		context.setVariable("resourceId", ElementId.from(resource));
 
-		getContext(type, uriInfo).ifPresent(tContext ->
+		getContext(type, uriInfo, resource).ifPresent(tContext ->
 		{
 			context.setVariable("htmlFragment", tContext.getHtmlFragment());
-			tContext.setVariables(context::setVariable, resource);
+			tContext.setVariables(context::setVariable, resource,
+					securityContext.getUserPrincipal() instanceof Identity i ? i : null);
 		});
 
 		OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
 		templateEngine.process("main", context, writer);
 	}
 
-	private Optional<ThymeleafContext> getContext(Class<?> type, UriInfo uriInfo)
+	private Optional<ThymeleafContext> getContext(Class<?> type, UriInfo uriInfo, Resource resource)
 	{
 		return contextsByResourceType.getOrDefault(type, List.of()).stream().filter(g ->
 		{
@@ -189,7 +190,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 					.map(PathSegment::getPath).filter(Objects::nonNull).filter(s -> !s.isBlank())
 					.reduce((_, second) -> second);
 
-			return lastSegment.map(g::isResourceSupported).orElse(false);
+			return lastSegment.map(g::isResourceSupported).orElseGet(() -> g.isRootSupported(resource));
 		}).findFirst();
 	}
 

@@ -27,7 +27,7 @@ import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import jakarta.ws.rs.core.MultivaluedMap;
 
-abstract class AbstractSearchSet<MR extends Resource> extends AbstractThymeleafContext<Bundle>
+abstract class AbstractSearchSet<MR extends Resource> extends AbstractResourceThymeleafContext<Bundle>
 {
 	protected static final String INSTANTIATES_CANONICAL_PATTERN_STRING = "(?<processUrl>http[s]{0,1}://(?<domain>(?:(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\.)+(?:[a-zA-Z0-9]{1,63}))"
 			+ "/bpe/Process/(?<processName>[a-zA-Z0-9-]+))\\|(?<processVersion>\\d+\\.\\d+)$";

@@ -98,40 +98,69 @@ body {
 	background-color: var(--color-background);
 }
 
-table#header {
-	margin-bottom: 0.4em;
+#header {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-rows: auto auto;
+	margin-bottom: 1em;
 }
 
-table#header img {
-	height: 7em;
-	padding-bottom: 0.38em;
-	display: block;
+#logo {
+	grid-row: 1 / span 2;
+	margin-bottom: 0.41em;
 }
 
-td#url {
-	vertical-align: bottom;
+#icons {
+	grid-column: 2;
+  	grid-row: 1;
+	display: flex;
+	column-gap: 0.25em;
+	justify-self: right;
 }
 
-td#url h1 {
+#url {
+	grid-column: 2;
+	grid-row: 2;
 	font-size: 2em;
 	font-family: monospace;
 	color: var(--color-prime);
+	align-self: end;
 	margin: 0 0 0 1em;
 	word-break: break-word;
 }
 
-td#url h1 a {
-	white-space: nowrap;
+@media ( max-width: 64rem) {
+	#header {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto auto;
+		height: auto;
+	}
+	#icons {
+		grid-column: 1;
+		grid-row: 1;
+		margin: 0 0 1em 0;
+	}
+	#logo {
+		grid-column: 1;
+		grid-row: 2;
+		margin: 0;
+		height: 14vw;
+	}
+	#url {
+		grid-column: 1;
+		grid-row: 3;
+		margin: 1em 0 0 0;
+	}
 }
 
-td#url h1 a:link,
-td#url h1 a:visited,
-td#url h1 a:active {
+#url a:link,
+#url a:visited,
+#url a:active {
 	color: var(--color-prime);
 	text-decoration: none;
 }
 
-td#url h1 a:hover {
+#url h1 a:hover {
 	text-decoration: underline;
 }
 
@@ -179,13 +208,14 @@ pre.lang-html {
 	font-family: monospace;
 }
 
+/*
 #icons {
 	position: absolute;
 	top: 2em;
 	right: 2em;
 	display: flex;
 	column-gap: 0.25em;
-}
+}*/
 
 #hello-user {
 	margin-right: 0.5em;
@@ -1086,6 +1116,82 @@ pre.lang-html {
 #resource .element-sub1-50 {
 	background-color: var(--color-row-background-deep);
 	width: calc(50% - 2.5em);
+}
+
+#root {
+	border: 1px solid #ccc;
+	padding: 20px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(17.2rem, 1fr));
+	gap: 20px;
+	margin: 0 auto;
+}
+
+#root .element {
+	border-radius: 0.4em;
+	aspect-ratio: 2.8 / 1;
+	padding: 0.5rem;
+	display: grid;
+	grid-template-columns: auto 1fr;
+  	grid-template-rows: auto auto 1fr;
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#root a {
+	text-decoration: none;
+}
+
+#root .element[resource-type="Task"][status="draft"] {
+	background-color: var(--color-info-background-blue);
+	color: var(--color-info-blue);
+}
+
+#root .element[resource-type="Endpoint"][status="active"],
+#root .element[resource-type="Organization"][active="true"],
+#root .element[resource-type="OrganizationAffiliation"][active="true"],
+#root .element[resource-type="QuestionnaireResponse"][status="amended"],
+#root .element[resource-type="Task"][status="completed"] {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#root .element[resource-type="QuestionnaireResponse"][status="in-progress"],
+#root .element[resource-type="Task"][status="in-progress"] {
+	background-color: var(--color-info-background-orange);
+	color: var(--color-info-orange);
+}
+
+#root .element[resource-type="Task"][status="failed"] {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
+#root .element h1 {
+	font-size: 1.2rem;
+	font-weight: bold;
+	margin: 0 0 0.2em 0;
+	grid-column: 1 / span 2;
+}
+
+#root .element h2 {
+	font-size: 1rem;
+	font-weight: normal;
+	margin: 0;
+	grid-column: 1 / span 2;
+}
+
+#root .element .unit {
+	font-size: 1rem;
+	margin: 0.2em 0 0 0;
+	align-self: end;
+}
+
+#root .element .value {
+	font-size: 1.5rem;
+	margin: 0.2em 0 0 0;
+	align-self: end;
+	text-align: right;
 }
 
 .meta {
