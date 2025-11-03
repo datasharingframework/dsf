@@ -67,8 +67,10 @@ window.addEventListener('DOMContentLoaded', () => {
 					if (input?.placeholder !== '') {
 						if (input.type === 'radio')
 							input.checked = input.placeholder === 'true'
-						else
+						else {
 							input.value = input.placeholder
+							input.focus()
+						}
 					}
 				})
 			})
@@ -103,8 +105,10 @@ window.addEventListener('DOMContentLoaded', () => {
 					if (input?.placeholder !== '') {
 						if (input.type === 'radio')
 							input.checked = input.placeholder === 'true'
-						else
+						else {
 							input.value = input.placeholder
+							input.focus()
+						}
 					}
 				})
 			})
