@@ -11,7 +11,6 @@
 	</parent>
 
 	<modules>
-		<module>dsf-fhir-auth</module>
 		<module>dsf-fhir-rest-adapter</module>
 		<module>dsf-fhir-server</module>
 		<module>dsf-fhir-server-jetty</module>
@@ -89,11 +88,6 @@
 				<version>${project.version}</version>
 			</dependency>
 			
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-auth</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-fhir-rest-adapter</artifactId>

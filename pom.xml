@@ -1207,7 +1207,6 @@
 								<excludeArtifact>dsf-common-oidc</excludeArtifact>
 								<excludeArtifact>dsf-common-status</excludeArtifact>
 								<excludeArtifact>dsf-common-ui</excludeArtifact>
-								<excludeArtifact>dsf-fhir-auth</excludeArtifact>
 								<excludeArtifact>dsf-fhir-rest-adapter</excludeArtifact>
 								<excludeArtifact>dsf-fhir-server</excludeArtifact>
 								<excludeArtifact>dsf-fhir-server-jetty</excludeArtifact>
