@@ -153,7 +153,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 				|| isPackageAllowed(packageName))
 			return true;
 
-		logger.debug("{} TODO: Should bpe class {} be allowed? [default: false]", getName(), className);
+		logger.debug("{}: BPE class {} not allowed", getName(), className);
 		return false;
 	}
 
@@ -184,8 +184,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 		if ("jar".equals(apiResourceUrl.getProtocol()) && resourcesWithPriority.contains(name))
 			return true;
 
-		logger.debug("{} TODO: Should api resource {} / {} have priority? [default: false]", getName(), name,
-				apiResourceUrl);
+		logger.debug("{}: BPE resource {} / {} has priority", getName(), name, apiResourceUrl);
 		return false;
 	}
 
@@ -199,8 +198,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 		if ("jar".equals(bpeResourcetUrl.getProtocol()) && allowedBpeResources.contains(name))
 			return true;
 
-		logger.debug("{} TODO: Should bpe resource {} / {} be allowed? [default: false]", getName(), name,
-				bpeResourcetUrl);
+		logger.debug("{}: BPE resource {} / {} not allowed", getName(), name, bpeResourcetUrl);
 		return false;
 	}
 }
