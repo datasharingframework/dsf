@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -27,54 +26,11 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
 
-abstract class AbstractThymeleafContext<R extends Resource> implements ThymeleafContext
+public abstract class AbstractThymeleafContext implements ThymeleafContext
 {
 	private static final DateTimeFormatter DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	private static final DateTimeFormatter DATE_TIME_DISPLAY_FORMAT = DateTimeFormatter
 			.ofPattern("dd.MM.yyyy HH:mm:ss");
-
-	private final Class<R> resourceType;
-	private final String htmlFragment;
-
-	protected AbstractThymeleafContext(Class<R> resourceType, String htmlFragment)
-	{
-		this.resourceType = Objects.requireNonNull(resourceType, "resourceType");
-		this.htmlFragment = Objects.requireNonNull(htmlFragment, "htmlFragment");
-	}
-
-	@Override
-	public Class<R> getResourceType()
-	{
-		return resourceType;
-	}
-
-	@Override
-	public String getHtmlFragment()
-	{
-		return htmlFragment;
-	}
-
-	@Override
-	public final void setVariables(BiConsumer<String, Object> variables, Resource resource)
-	{
-		if (resourceType.isInstance(resource))
-			doSetVariables(variables, resourceType.cast(resource));
-		else
-			throw new IllegalStateException("Unsupported resource of type " + resource.getClass().getName()
-					+ ", expected " + resourceType.getName());
-	}
-
-	protected abstract void doSetVariables(BiConsumer<String, Object> variables, R resource);
-
-	protected final String formatDate(Date date)
-	{
-		return format(date, DATE_DISPLAY_FORMAT);
-	}
-
-	protected final String formatDateTime(Date date)
-	{
-		return format(date, DATE_TIME_DISPLAY_FORMAT);
-	}
 
 	protected final String format(Date date, DateTimeFormatter formatter)
 	{
@@ -84,6 +40,17 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 			return null;
 		else
 			return formatter.format(LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()));
+	}
+
+
+	protected final String formatDate(Date date)
+	{
+		return format(date, DATE_DISPLAY_FORMAT);
+	}
+
+	protected final String formatDateTime(Date date)
+	{
+		return format(date, DATE_TIME_DISPLAY_FORMAT);
 	}
 
 	protected final String formatLastUpdated(Resource resource)

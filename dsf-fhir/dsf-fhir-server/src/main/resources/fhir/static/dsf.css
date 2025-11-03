@@ -98,40 +98,69 @@ body {
 	background-color: var(--color-background);
 }
 
-table#header {
-	margin-bottom: 0.4em;
+#header {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-rows: auto auto;
+	margin-bottom: 1em;
 }
 
-table#header img {
-	height: 7em;
-	padding-bottom: 0.38em;
-	display: block;
+#logo {
+	grid-row: 1 / span 2;
+	margin-bottom: 0.41em;
 }
 
-td#url {
-	vertical-align: bottom;
+#icons {
+	grid-column: 2;
+  	grid-row: 1;
+	display: flex;
+	column-gap: 0.25em;
+	justify-self: right;
 }
 
-td#url h1 {
+#url {
+	grid-column: 2;
+	grid-row: 2;
 	font-size: 2em;
 	font-family: monospace;
 	color: var(--color-prime);
+	align-self: end;
 	margin: 0 0 0 1em;
 	word-break: break-word;
 }
 
-td#url h1 a {
-	white-space: nowrap;
+@media ( max-width: 64rem) {
+	#header {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto auto;
+		height: auto;
+	}
+	#icons {
+		grid-column: 1;
+		grid-row: 1;
+		margin: 0 0 1em 0;
+	}
+	#logo {
+		grid-column: 1;
+		grid-row: 2;
+		margin: 0;
+		height: 14vw;
+	}
+	#url {
+		grid-column: 1;
+		grid-row: 3;
+		margin: 1em 0 0 0;
+	}
 }
 
-td#url h1 a:link,
-td#url h1 a:visited,
-td#url h1 a:active {
+#url a:link,
+#url a:visited,
+#url a:active {
 	color: var(--color-prime);
 	text-decoration: none;
 }
 
-td#url h1 a:hover {
+#url a:hover {
 	text-decoration: underline;
 }
 
@@ -177,14 +206,6 @@ pre.lang-html {
 	display: none;
 	border: 0;
 	font-family: monospace;
-}
-
-#icons {
-	position: absolute;
-	top: 2em;
-	right: 2em;
-	display: flex;
-	column-gap: 0.25em;
 }
 
 #hello-user {
@@ -347,52 +368,52 @@ pre.lang-html {
 	color: var(--color-prime);
 }
 
-.bundle>#header>table {
+.bundle #bundle-header table {
 	width: 100%
 }
 
-.bundle>#header>table td:nth-child(2) {
+.bundle #bundle-header table td:nth-child(2) {
 	text-align: center;
 	vertical-align: top;
 }
 
-.bundle>#header>table td:nth-child(3) {
+.bundle #bundle-header table td:nth-child(3) {
 	text-align: right;
 }
 
-.bundle>#header #resources {
+.bundle #bundle-header #resources {
 	padding-right: 1em;
 	color: #aaa
 }
 
-.bundle>#header #page {
+.bundle #bundle-header #page {
 	padding-left: 1em;
 	color: #aaa
 }
 
-.bundle>#list {
+.bundle #bundle-list {
 	overflow-x: auto;
 }
 
-.bundle>#list>table {
+.bundle>#bundle-list>table {
 	border-collapse: separate;
 	border-spacing: 0 1rem;
 	width: 100%
 }
 
-.bundle>#list>table tr:not(:first-child) {
+.bundle>#bundle-list>table tr:not(:first-child) {
 	cursor: pointer;
 }
 
-.bundle>#list>table th:first-child {
+.bundle>#bundle-list>table th:first-child {
 	border-left: 0.5rem solid var(--color-row-background-deep);
 }
 
-.bundle>#list>table td:first-child {
+.bundle>#bundle-list>table td:first-child {
 	border-left: 0.5rem solid var(--color-row-background);
 }
 
-.bundle>#list>table th {
+.bundle>#bundle-list>table th {
 	color: var(--color-prime);
 	background-color: var(--color-row-background-deep);
 	padding: 1rem 0 1rem 1rem;
@@ -400,164 +421,164 @@ pre.lang-html {
 	text-align: left;
 }
 
-.bundle>#list>table td {
+.bundle>#bundle-list>table td {
 	background-color: var(--color-row-background);
 	padding: 1rem 0 1rem 1rem;
 	white-space: nowrap;
 	text-align: left;
 }
 
-.bundle>#list>table tr:hover td {
+.bundle>#bundle-list>table tr:hover td {
 	background-color: var(--color-row-background-hover);
 }
 
-.bundle>#list>table th:last-child {
+.bundle>#bundle-list>table th:last-child {
 	padding-right: 1rem;
 }
 
-.bundle>#list>table td:last-child {
+.bundle>#bundle-list>table td:last-child {
 	padding-right: 1rem;
 }
 
-.bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="draft"],
-.bundle>#list>table tr[resource-type="CodeSystem"] td[status="draft"],
-.bundle>#list>table tr[resource-type="Library"] td[status="draft"],
-.bundle>#list>table tr[resource-type="Measure"] td[status="draft"],
-.bundle>#list>table tr[resource-type="NamingSystem"] td[status="draft"],
-.bundle>#list>table tr[resource-type="Questionnaire"] td[status="draft"],
-.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="draft"],
-.bundle>#list>table tr[resource-type="ValueSet"] td[status="draft"] {
+.bundle>#bundle-list>table tr[resource-type="ActivityDefinition"] td[status="draft"],
+.bundle>#bundle-list>table tr[resource-type="CodeSystem"] td[status="draft"],
+.bundle>#bundle-list>table tr[resource-type="Library"] td[status="draft"],
+.bundle>#bundle-list>table tr[resource-type="Measure"] td[status="draft"],
+.bundle>#bundle-list>table tr[resource-type="NamingSystem"] td[status="draft"],
+.bundle>#bundle-list>table tr[resource-type="Questionnaire"] td[status="draft"],
+.bundle>#bundle-list>table tr[resource-type="StructureDefinition"] td[status="draft"],
+.bundle>#bundle-list>table tr[resource-type="ValueSet"] td[status="draft"] {
 	border-left-color: var(--color-row-border-blue);
 }
 
-.bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="active"],
-.bundle>#list>table tr[resource-type="CodeSystem"] td[status="active"],
-.bundle>#list>table tr[resource-type="Library"] td[status="active"],
-.bundle>#list>table tr[resource-type="Measure"] td[status="active"],
-.bundle>#list>table tr[resource-type="NamingSystem"] td[status="active"],
-.bundle>#list>table tr[resource-type="Questionnaire"] td[status="active"],
-.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="active"],
-.bundle>#list>table tr[resource-type="ValueSet"] td[status="active"] {
+.bundle>#bundle-list>table tr[resource-type="ActivityDefinition"] td[status="active"],
+.bundle>#bundle-list>table tr[resource-type="CodeSystem"] td[status="active"],
+.bundle>#bundle-list>table tr[resource-type="Library"] td[status="active"],
+.bundle>#bundle-list>table tr[resource-type="Measure"] td[status="active"],
+.bundle>#bundle-list>table tr[resource-type="NamingSystem"] td[status="active"],
+.bundle>#bundle-list>table tr[resource-type="Questionnaire"] td[status="active"],
+.bundle>#bundle-list>table tr[resource-type="StructureDefinition"] td[status="active"],
+.bundle>#bundle-list>table tr[resource-type="ValueSet"] td[status="active"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="ActivityDefinition"] td[status="retired"],
-.bundle>#list>table tr[resource-type="CodeSystem"] td[status="retired"],
-.bundle>#list>table tr[resource-type="Library"] td[status="retired"],
-.bundle>#list>table tr[resource-type="Measure"] td[status="retired"],
-.bundle>#list>table tr[resource-type="NamingSystem"] td[status="retired"],
-.bundle>#list>table tr[resource-type="Questionnaire"] td[status="retired"],
-.bundle>#list>table tr[resource-type="StructureDefinition"] td[status="retired"],
-.bundle>#list>table tr[resource-type="ValueSet"] td[status="retired"] {
+.bundle>#bundle-list>table tr[resource-type="ActivityDefinition"] td[status="retired"],
+.bundle>#bundle-list>table tr[resource-type="CodeSystem"] td[status="retired"],
+.bundle>#bundle-list>table tr[resource-type="Library"] td[status="retired"],
+.bundle>#bundle-list>table tr[resource-type="Measure"] td[status="retired"],
+.bundle>#bundle-list>table tr[resource-type="NamingSystem"] td[status="retired"],
+.bundle>#bundle-list>table tr[resource-type="Questionnaire"] td[status="retired"],
+.bundle>#bundle-list>table tr[resource-type="StructureDefinition"] td[status="retired"],
+.bundle>#bundle-list>table tr[resource-type="ValueSet"] td[status="retired"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="DocumentReference"] td[status="current"] {
+.bundle>#bundle-list>table tr[resource-type="DocumentReference"] td[status="current"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="DocumentReference"] td[status="superseded"] {
+.bundle>#bundle-list>table tr[resource-type="DocumentReference"] td[status="superseded"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="DocumentReference"] td[status="entered-in-error"] {
+.bundle>#bundle-list>table tr[resource-type="DocumentReference"] td[status="entered-in-error"] {
 	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table tr[resource-type="Endpoint"] td[status="active"] {
+.bundle>#bundle-list>table tr[resource-type="Endpoint"] td[status="active"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="Endpoint"] td[status="off"],
-.bundle>#list>table tr[resource-type="Endpoint"] td[status="suspended"]	{
+.bundle>#bundle-list>table tr[resource-type="Endpoint"] td[status="off"],
+.bundle>#bundle-list>table tr[resource-type="Endpoint"] td[status="suspended"]	{
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="Endpoint"] td[status="error"],
-.bundle>#list>table tr[resource-type="Endpoint"] td[status="entered-in-error"] {
+.bundle>#bundle-list>table tr[resource-type="Endpoint"] td[status="error"],
+.bundle>#bundle-list>table tr[resource-type="Endpoint"] td[status="entered-in-error"] {
 	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table tr[resource-type="Endpoint"] td[status="test"] {
+.bundle>#bundle-list>table tr[resource-type="Endpoint"] td[status="test"] {
 	border-left-color: var(--color-row-border-blue);
 }
 
-.bundle>#list>table tr[resource-type="MeasureReport"] td[status="complete"] {
+.bundle>#bundle-list>table tr[resource-type="MeasureReport"] td[status="complete"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="MeasureReport"] td[status="pending"] {
+.bundle>#bundle-list>table tr[resource-type="MeasureReport"] td[status="pending"] {
 	border-left-color: var(--color-row-border-orange);
 }
 
-.bundle>#list>table tr[resource-type="MeasureReport"] td[status="error"] {
+.bundle>#bundle-list>table tr[resource-type="MeasureReport"] td[status="error"] {
 	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table tr[resource-type="Organization"] td[active="true"],
-.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="true"] {
+.bundle>#bundle-list>table tr[resource-type="Organization"] td[active="true"],
+.bundle>#bundle-list>table tr[resource-type="OrganizationAffiliation"] td[active="true"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="Organization"] td[active="false"],
-.bundle>#list>table tr[resource-type="OrganizationAffiliation"] td[active="false"] {
+.bundle>#bundle-list>table tr[resource-type="Organization"] td[active="false"],
+.bundle>#bundle-list>table tr[resource-type="OrganizationAffiliation"] td[active="false"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="in-progress"] {
+.bundle>#bundle-list>table tr[resource-type="QuestionnaireResponse"] td[status="in-progress"] {
 	border-left-color: var(--color-row-border-orange);
 }
 
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"] {
+.bundle>#bundle-list>table tr[resource-type="QuestionnaireResponse"] td[status="completed"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="amended"] {
+.bundle>#bundle-list>table tr[resource-type="QuestionnaireResponse"] td[status="amended"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="entered-in-error"],
-.bundle>#list>table tr[resource-type="QuestionnaireResponse"] td[status="stopped"] {
+.bundle>#bundle-list>table tr[resource-type="QuestionnaireResponse"] td[status="entered-in-error"],
+.bundle>#bundle-list>table tr[resource-type="QuestionnaireResponse"] td[status="stopped"] {
 	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table tr[resource-type="Subscription"] td[status="requested"] {
+.bundle>#bundle-list>table tr[resource-type="Subscription"] td[status="requested"] {
 	border-left-color: var(--color-row-border-blue);
 }
 
-.bundle>#list>table tr[resource-type="Subscription"] td[status="active"] {
+.bundle>#bundle-list>table tr[resource-type="Subscription"] td[status="active"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="Subscription"] td[status="error"] {
+.bundle>#bundle-list>table tr[resource-type="Subscription"] td[status="error"] {
 	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table tr[resource-type="Subscription"] td[status="off"] {
+.bundle>#bundle-list>table tr[resource-type="Subscription"] td[status="off"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="Task"] td[status="draft"] {
+.bundle>#bundle-list>table tr[resource-type="Task"] td[status="draft"] {
 	border-left-color: var(--color-row-border-blue);
 }
 
-.bundle>#list>table tr[resource-type="Task"] td[status="requested"] {
+.bundle>#bundle-list>table tr[resource-type="Task"] td[status="requested"] {
 	border-left-color: var(--color-row-border-grey);
 }
 
-.bundle>#list>table tr[resource-type="Task"] td[status="in-progress"] {
+.bundle>#bundle-list>table tr[resource-type="Task"] td[status="in-progress"] {
 	border-left-color: var(--color-row-border-orange);
 }
 
-.bundle>#list>table tr[resource-type="Task"] td[status="completed"] {
+.bundle>#bundle-list>table tr[resource-type="Task"] td[status="completed"] {
 	border-left-color: var(--color-row-border-green);
 }
 
-.bundle>#list>table tr[resource-type="Task"] td[status="failed"] {
+.bundle>#bundle-list>table tr[resource-type="Task"] td[status="failed"] {
 	border-left-color: var(--color-row-border-red);
 }
 
-.bundle>#list>table td.id-value {
+.bundle>#bundle-list>table td.id-value {
 	font-family: monospace;
 }
 
@@ -572,14 +593,14 @@ pre.lang-html {
 	text-decoration: underline;
 }
 
-.bundle>#list>table td:first-child,
-.bundle>#list>table th:first-child {
+.bundle>#bundle-list>table td:first-child,
+.bundle>#bundle-list>table th:first-child {
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
 }
 
-.bundle>#list>table td:last-child,
-.bundle>#list>table th:last-child {
+.bundle>#bundle-list>table td:last-child,
+.bundle>#bundle-list>table th:last-child {
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
 }
@@ -1086,6 +1107,82 @@ pre.lang-html {
 #resource .element-sub1-50 {
 	background-color: var(--color-row-background-deep);
 	width: calc(50% - 2.5em);
+}
+
+#root {
+	border: 1px solid #ccc;
+	padding: 20px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(17.2rem, 1fr));
+	gap: 20px;
+	margin: 0 auto;
+}
+
+#root .element {
+	border-radius: 0.4em;
+	aspect-ratio: 2.8 / 1;
+	padding: 0.5rem;
+	display: grid;
+	grid-template-columns: auto 1fr;
+  	grid-template-rows: auto auto 1fr;
+	background-color: var(--color-info-background-grey);
+	color: var(--color-info-grey);
+}
+
+#root a {
+	text-decoration: none;
+}
+
+#root .element[resource-type="Task"][status="draft"] {
+	background-color: var(--color-info-background-blue);
+	color: var(--color-info-blue);
+}
+
+#root .element[resource-type="Endpoint"][status="active"],
+#root .element[resource-type="Organization"][active="true"],
+#root .element[resource-type="OrganizationAffiliation"][active="true"],
+#root .element[resource-type="QuestionnaireResponse"][status="amended"],
+#root .element[resource-type="Task"][status="completed"] {
+	background-color: var(--color-info-background-green);
+	color: var(--color-info-green);
+}
+
+#root .element[resource-type="QuestionnaireResponse"][status="in-progress"],
+#root .element[resource-type="Task"][status="in-progress"] {
+	background-color: var(--color-info-background-orange);
+	color: var(--color-info-orange);
+}
+
+#root .element[resource-type="Task"][status="failed"] {
+	background-color: var(--color-info-background-red);
+	color: var(--color-info-red);
+}
+
+#root .element h1 {
+	font-size: 1.2rem;
+	font-weight: bold;
+	margin: 0 0 0.2em 0;
+	grid-column: 1 / span 2;
+}
+
+#root .element h2 {
+	font-size: 1rem;
+	font-weight: normal;
+	margin: 0;
+	grid-column: 1 / span 2;
+}
+
+#root .element .unit {
+	font-size: 1rem;
+	margin: 0.2em 0 0 0;
+	align-self: end;
+}
+
+#root .element .value {
+	font-size: 1.5rem;
+	margin: 0.2em 0 0 0;
+	align-self: end;
+	text-align: right;
 }
 
 .meta {

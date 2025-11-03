@@ -55,9 +55,9 @@
 
 	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.recreate-current_binaries-and-dependent-views">
 		<createView viewName="current_binaries" replaceIfExists="true">
-			SELECT binary_id, version, binary_json, binary_oid
+			SELECT binary_id, version, binary_json, binary_oid, binary_size
 			FROM (
-			SELECT DISTINCT ON (binary_id) binary_id, version, deleted, binary_json, binary_oid
+			SELECT DISTINCT ON (binary_id) binary_id, version, deleted, binary_json, binary_oid, binary_size
 			FROM binaries ORDER BY binary_id, version DESC
 			) AS current_b
 			WHERE deleted IS NULL

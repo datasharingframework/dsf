@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-abstract class AbstractResource<R extends Resource> extends AbstractThymeleafContext<R>
+abstract class AbstractResource<R extends Resource> extends AbstractResourceThymeleafContext<R>
 {
 	private record ResourceData(String type, String id, String version, String lastUpdated, String profiles,
 			Boolean active, String status)

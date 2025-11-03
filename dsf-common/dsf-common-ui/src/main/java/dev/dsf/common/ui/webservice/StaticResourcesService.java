@@ -168,9 +168,9 @@ public class StaticResourcesService
 	private static final String FILENAME_PATTERN_STRING = "^[0-9a-zA-Z_-]+\\.[0-9a-zA-Z]+$";
 	private static final Pattern FILENAME_PATTERN = Pattern.compile(FILENAME_PATTERN_STRING);
 
-	private static final Map<String, String> MIME_TYPE_BY_SUFFIX = Map.of("css", "text/css", "js", "text/javascript",
-			"html", "text/html", "pdf", "application/pdf", "png", "image/png", "svg", "image/svg+xml", "jpg",
-			"image/jpeg");
+	private static final Map<String, String> MIME_TYPE_BY_SUFFIX = Map.of("css", "text/css; charset=utf-8", "js",
+			"text/javascript; charset=utf-8", "html", "text/html; charset=utf-8", "pdf", "application/pdf", "png",
+			"image/png", "svg", "image/svg+xml; charset=utf-8", "jpg", "image/jpeg");
 
 	private final AbstractCache cache;
 	private final CacheControl cacheControl;

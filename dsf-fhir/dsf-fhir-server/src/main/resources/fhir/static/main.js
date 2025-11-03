@@ -45,7 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	if (resourceType != null && resourceType[1] && resourceType[2] === undefined && resourceType[3] === undefined && resourceType[4] === undefined) {
 
 		// search bundle rows
-		document.querySelectorAll('div#html > div.bundle > div#list td.id-value:first-child').forEach(td => {
+		document.querySelectorAll('div#html > div.bundle > div#bundle-list td.id-value:first-child').forEach(td => {
 			if (td?.firstChild?.href) {
 				td.parentElement.addEventListener('click', event => {
 					if (event.target?.tagName?.toLowerCase() !== 'a')
@@ -67,8 +67,10 @@ window.addEventListener('DOMContentLoaded', () => {
 					if (input?.placeholder !== '') {
 						if (input.type === 'radio')
 							input.checked = input.placeholder === 'true'
-						else
+						else {
 							input.value = input.placeholder
+							input.focus()
+						}
 					}
 				})
 			})
@@ -103,8 +105,10 @@ window.addEventListener('DOMContentLoaded', () => {
 					if (input?.placeholder !== '') {
 						if (input.type === 'radio')
 							input.checked = input.placeholder === 'true'
-						else
+						else {
 							input.value = input.placeholder
+							input.focus()
+						}
 					}
 				})
 			})

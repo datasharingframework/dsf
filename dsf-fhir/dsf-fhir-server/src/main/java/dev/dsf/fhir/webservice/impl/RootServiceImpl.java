@@ -25,6 +25,8 @@ import jakarta.ws.rs.core.UriInfo;
 
 public class RootServiceImpl extends AbstractBasicService implements RootService, InitializingBean
 {
+	public static final String ROOT_GET = RootServiceImpl.class.getCanonicalName() + ".get";
+
 	private final CommandFactory commandFactory;
 	private final ResponseGenerator responseGenerator;
 	private final ParameterConverter parameterConverter;
@@ -60,6 +62,8 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	{
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"This is the base URL of the FHIR server. GET method not allowed, use POST to execute batch and transaction Bundle resources");
+		outcome.setUserData(ROOT_GET, true);
+
 		return responseGenerator
 				.response(Status.METHOD_NOT_ALLOWED, outcome,
 						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))

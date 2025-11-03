@@ -24,6 +24,7 @@ import dev.dsf.fhir.adapter.ResourceLibrary;
 import dev.dsf.fhir.adapter.ResourceMeasure;
 import dev.dsf.fhir.adapter.ResourceMeasureReport;
 import dev.dsf.fhir.adapter.ResourceNamingSystem;
+import dev.dsf.fhir.adapter.ResourceOperationOutcome;
 import dev.dsf.fhir.adapter.ResourceOrganization;
 import dev.dsf.fhir.adapter.ResourceOrganizationAffiliation;
 import dev.dsf.fhir.adapter.ResourceQuestionnaire;
@@ -61,6 +62,15 @@ public class AdapterConfig
 	@Autowired
 	private ReferenceConfig referenceConfig;
 
+	@Autowired
+	private BuildInfoReaderConfig buildInfoReaderConfig;
+
+	@Autowired
+	private DaoConfig daoConfig;
+
+	@Autowired
+	private HelperConfig helperConfig;
+
 	@Bean
 	public FhirAdapter fhirAdapter()
 	{
@@ -74,6 +84,8 @@ public class AdapterConfig
 				new ResourceBinary(propertiesConfig.getDsfServerBaseUrl()), new ResourceCodeSystem(),
 				new ResourceDocumentReference(), new ResourceEndpoint(), new ResourceLibrary(), new ResourceMeasure(),
 				new ResourceMeasureReport(propertiesConfig.getDsfServerBaseUrl()), new ResourceNamingSystem(),
+				new ResourceOperationOutcome(buildInfoReaderConfig.buildInfoReader(), daoConfig.statisticsDao(),
+						helperConfig.exceptionHandler()),
 				new ResourceOrganizationAffiliation(), new ResourceOrganization(), new ResourceQuestionnaire(),
 				new ResourceQuestionnaireResponse(), new ResourceStructureDefinition(), new ResourceSubscription(),
 				new ResourceTask(), new ResourceValueSet(),
