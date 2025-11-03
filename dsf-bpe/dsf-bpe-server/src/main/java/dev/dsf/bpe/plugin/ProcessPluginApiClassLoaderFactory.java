@@ -137,7 +137,7 @@ public class ProcessPluginApiClassLoaderFactory implements InitializingBean
 		{
 			logger.debug("Reading api v{} file {} from {} ...", apiVersion, file,
 					externalFile.toAbsolutePath().normalize().toString());
-			return new HashSet<>(Files.readAllLines(externalFile));
+			return new HashSet<>(Files.readAllLines(externalFile).stream().filter(s -> !s.startsWith("#")).toList());
 		}
 		catch (IOException e)
 		{
@@ -162,6 +162,9 @@ public class ProcessPluginApiClassLoaderFactory implements InitializingBean
 				String line = reader.readLine();
 				if (line == null)
 					break;
+				if (line.startsWith("#"))
+					continue;
+
 				result.add(line);
 			}
 			return new HashSet<>(result);
