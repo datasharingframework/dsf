@@ -174,8 +174,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		getContext(type, uriInfo, resource).ifPresent(tContext ->
 		{
 			context.setVariable("htmlFragment", tContext.getHtmlFragment());
-			tContext.setVariables(context::setVariable, resource,
-					securityContext.getUserPrincipal() instanceof Identity i ? i : null);
+			tContext.setVariables(context::setVariable, resource);
 		});
 
 		OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);

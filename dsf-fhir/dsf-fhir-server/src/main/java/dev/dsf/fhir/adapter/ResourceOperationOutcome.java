@@ -11,7 +11,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.build.BuildInfoReader;
 import dev.dsf.fhir.dao.StatisticsDao;
 import dev.dsf.fhir.dao.StatisticsDao.Statistics;
@@ -76,7 +75,7 @@ public class ResourceOperationOutcome extends AbstractThymeleafContext implement
 	}
 
 	@Override
-	public void setVariables(BiConsumer<String, Object> variables, Resource resource, Identity identity)
+	public void setVariables(BiConsumer<String, Object> variables, Resource resource)
 	{
 		variables.accept("elements", Stream.concat(buildInfoElements(), statisticsElements()).toList());
 	}

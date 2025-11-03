@@ -4,8 +4,6 @@ import java.util.function.BiConsumer;
 
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.common.auth.conf.Identity;
-
 public interface ThymeleafContext
 {
 	Class<? extends Resource> getResourceType();
@@ -19,5 +17,5 @@ public interface ThymeleafContext
 
 	String getHtmlFragment();
 
-	void setVariables(BiConsumer<String, Object> variables, Resource resource, Identity identity);
+	void setVariables(BiConsumer<String, Object> variables, Resource resource);
 }

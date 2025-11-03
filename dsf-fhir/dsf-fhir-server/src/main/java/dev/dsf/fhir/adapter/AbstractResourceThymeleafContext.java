@@ -5,8 +5,6 @@ import java.util.function.BiConsumer;
 
 import org.hl7.fhir.r4.model.Resource;
 
-import dev.dsf.common.auth.conf.Identity;
-
 abstract class AbstractResourceThymeleafContext<R extends Resource> extends AbstractThymeleafContext
 {
 	private final Class<R> resourceType;
@@ -31,7 +29,7 @@ abstract class AbstractResourceThymeleafContext<R extends Resource> extends Abst
 	}
 
 	@Override
-	public final void setVariables(BiConsumer<String, Object> variables, Resource resource, Identity identity)
+	public final void setVariables(BiConsumer<String, Object> variables, Resource resource)
 	{
 		if (resourceType.isInstance(resource))
 			doSetVariables(variables, resourceType.cast(resource));
