@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.plugin;
 
 import java.io.IOException;
@@ -153,7 +168,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 				|| isPackageAllowed(packageName))
 			return true;
 
-		logger.debug("{} TODO: Should bpe class {} be allowed? [default: false]", getName(), className);
+		logger.debug("{}: BPE class {} not allowed", getName(), className);
 		return false;
 	}
 
@@ -184,8 +199,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 		if ("jar".equals(apiResourceUrl.getProtocol()) && resourcesWithPriority.contains(name))
 			return true;
 
-		logger.debug("{} TODO: Should api resource {} / {} have priority? [default: false]", getName(), name,
-				apiResourceUrl);
+		logger.debug("{}: BPE resource {} / {} has priority", getName(), name, apiResourceUrl);
 		return false;
 	}
 
@@ -199,8 +213,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 		if ("jar".equals(bpeResourcetUrl.getProtocol()) && allowedBpeResources.contains(name))
 			return true;
 
-		logger.debug("{} TODO: Should bpe resource {} / {} be allowed? [default: false]", getName(), name,
-				bpeResourcetUrl);
+		logger.debug("{}: BPE resource {} / {} not allowed", getName(), name, bpeResourcetUrl);
 		return false;
 	}
 }

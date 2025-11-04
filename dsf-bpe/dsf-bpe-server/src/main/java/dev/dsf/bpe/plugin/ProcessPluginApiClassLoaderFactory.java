@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.plugin;
 
 import java.io.BufferedReader;
@@ -137,7 +152,7 @@ public class ProcessPluginApiClassLoaderFactory implements InitializingBean
 		{
 			logger.debug("Reading api v{} file {} from {} ...", apiVersion, file,
 					externalFile.toAbsolutePath().normalize().toString());
-			return new HashSet<>(Files.readAllLines(externalFile));
+			return new HashSet<>(Files.readAllLines(externalFile).stream().filter(s -> !s.startsWith("#")).toList());
 		}
 		catch (IOException e)
 		{
@@ -162,6 +177,9 @@ public class ProcessPluginApiClassLoaderFactory implements InitializingBean
 				String line = reader.readLine();
 				if (line == null)
 					break;
+				if (line.startsWith("#"))
+					continue;
+
 				result.add(line);
 			}
 			return new HashSet<>(result);

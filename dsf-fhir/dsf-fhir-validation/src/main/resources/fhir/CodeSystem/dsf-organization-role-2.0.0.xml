@@ -1,3 +1,20 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <CodeSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
 	<meta>
@@ -20,7 +37,7 @@
 	<hierarchyMeaning value="grouped-by" />
 	<versionNeeded value="false" />
 	<content value="complete" />
-	<count value="11" />
+	<count value="14" />
 	<concept>
 		<code value="UAC" />
 		<display value="Use-and-Access Committee" />
@@ -64,5 +81,17 @@
 	<concept>
 		<code value="SPR" />
 		<display value="Service Provider Registry" />
+	</concept>
+	<concept>
+		<code value="TSP" />
+		<display value="Terminology Service Provider" />
+	</concept>
+	<concept>
+		<code value="PPH" />
+		<display value="Process Plugin Hub" />
+	</concept>
+	<concept>
+		<code value="BIO" />
+		<display value="Biobank" />
 	</concept>
 </CodeSystem>

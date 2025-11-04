@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.docker.secrets;
 
 import java.io.IOException;
@@ -8,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -29,16 +45,15 @@ public class DockerSecretsPropertySourceFactory
 	{
 		Stream<String> passwordProperties = environment.getPropertySources().stream()
 				.filter(s -> s instanceof EnumerablePropertySource).map(s -> (EnumerablePropertySource<?>) s)
-				.flatMap(s -> List.of(s.getPropertyNames()).stream()).filter(key -> key != null)
-				.filter(key -> key.toLowerCase().endsWith(".password.file")
-						|| key.toLowerCase().endsWith("_password_file") || key.toLowerCase().endsWith(".secret.file")
-						|| key.toLowerCase().endsWith("_secret_file"));
+				.flatMap(s -> List.of(s.getPropertyNames()).stream()).filter(Objects::nonNull)
+				.filter(p -> p.toLowerCase().endsWith(".password.file") || p.toLowerCase().endsWith("_password_file")
+						|| p.toLowerCase().endsWith(".secret.file") || p.toLowerCase().endsWith("_secret_file"));
 
-		passwordProperties.forEach(key ->
+		passwordProperties.forEach(property ->
 		{
-			String fileName = environment.getProperty(key, String.class, null);
-			secretFilesByFinalPropertyName.put(key.toLowerCase().replace('_', '.').substring(0, key.length() - 5),
-					fileName);
+			String fileName = environment.getProperty(property, String.class, null);
+			secretFilesByFinalPropertyName
+					.put(property.toLowerCase().replace('_', '.').substring(0, property.length() - 5), fileName);
 		});
 
 		this.environment = environment;
@@ -56,21 +71,21 @@ public class DockerSecretsPropertySourceFactory
 	{
 		Properties properties = new Properties();
 
-		secretFilesByFinalPropertyName.forEach((key, secretsFile) ->
+		secretFilesByFinalPropertyName.forEach((property, secretsFile) ->
 		{
-			String readSecretsFileValue = readSecretsFile(key, secretsFile);
+			String readSecretsFileValue = readSecretsFile(property, secretsFile);
 			if (readSecretsFileValue != null)
-				properties.put(key, readSecretsFileValue);
+				properties.put(property, readSecretsFileValue);
 		});
 
 		return new PropertiesPropertySource("docker-secrets", properties);
 	}
 
-	private String readSecretsFile(String key, String secretsFile)
+	private String readSecretsFile(String property, String secretsFile)
 	{
 		if (secretsFile == null)
 		{
-			logger.debug("Secrets file for property {} not defined", key);
+			logger.debug("Secrets file for property {} not defined", property);
 			return null;
 		}
 
@@ -78,7 +93,7 @@ public class DockerSecretsPropertySourceFactory
 
 		if (!Files.isReadable(secretsFilePath))
 		{
-			logger.warn("Secrets file at {} for property {} not readable", secretsFilePath.toString(), key);
+			logger.warn("Secrets file at {} for property {} not readable", secretsFilePath.toString(), property);
 			return null;
 		}
 
@@ -88,19 +103,19 @@ public class DockerSecretsPropertySourceFactory
 
 			if (secretLines.isEmpty())
 			{
-				logger.warn("Secrets file at {} for property {} is empty", secretsFilePath.toString(), key);
+				logger.warn("Secrets file at {} for property {} is empty", secretsFilePath.toString(), property);
 				return null;
 			}
 
 			if (secretLines.size() > 1)
 				logger.warn("Secrets file at {} for property {} contains multiple lines, using only the first line",
-						secretsFilePath.toString(), key);
+						secretsFilePath.toString(), property);
 
 			return secretLines.get(0);
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error while reading secrets file {} for property {}: {}", secretsFilePath.toString(), key,
+			logger.warn("Error while reading secrets file {} for property {}: {}", secretsFilePath.toString(), property,
 					e.getMessage());
 			throw new RuntimeException(e);
 		}
