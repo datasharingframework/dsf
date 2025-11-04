@@ -20,7 +20,7 @@
 	</modules>
 
 	<properties>
-		<main.basedir>${project.basedir}/../..</main.basedir>
+		<main.basedir>${project.parent.basedir}</main.basedir>
 	</properties>
 
 	<name>DSF FHIR Parent POM</name>

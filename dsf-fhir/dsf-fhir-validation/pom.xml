@@ -9,6 +9,10 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<main.basedir>${project.parent.parent.basedir}</main.basedir>
+	</properties>
+
 	<name>DSF FHIR Validation</name>
 
 	<dependencies>
@@ -103,6 +107,21 @@
 					<systemPropertyVariables>
 						<log4j.configurationFile>log4j2-maven-surefire-config.xml</log4j.configurationFile>
 					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+  				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<licenseSets>
+						<licenseSet>
+							<excludes>
+								<exclude>src/main/resources/fhir/**/*.post</exclude>
+								<exclude>src/main/resources/fhir/bundle.xml</exclude>
+								<exclude>src/main/resources/fhir/resources.delete</exclude>
+							</excludes>
+						</licenseSet>
+					</licenseSets>
 				</configuration>
 			</plugin>
 		</plugins>

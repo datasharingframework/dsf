@@ -9,6 +9,10 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<main.basedir>${project.parent.parent.basedir}</main.basedir>
+	</properties>
+
 	<name>DSF FHIR Server Jetty</name>
 
 	<dependencies>
@@ -204,6 +208,23 @@
 					<serverRootCas>
 						docker/ca/server_root_cas
 					</serverRootCas>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+  				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<licenseSets>
+						<licenseSet>
+							<excludes>
+								<exclude>cert/*</exclude>
+								<exclude>conf/bundle.xml</exclude>
+								<exclude>conf/config.properties</exclude>
+								<exclude>docker/ca/**/*.crt</exclude>
+								<exclude>docker/.dockerignore</exclude>
+							</excludes>
+						</licenseSet>
+					</licenseSets>
 				</configuration>
 			</plugin>
 		</plugins>

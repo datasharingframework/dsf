@@ -626,6 +626,11 @@
 					<version>3.15.2</version>
 				</plugin>
 				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>5.0.0</version>
+				</plugin>
+				<plugin>
 					<groupId>dev.dsf</groupId>
 					<artifactId>dsf-maven-plugin</artifactId>
 					<version>${project.version}</version>
@@ -980,10 +985,60 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>net.revelc.code.formatter</groupId>
-				<artifactId>formatter-maven-plugin</artifactId>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>check-license-headers</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-					<configFile>${main.basedir}/src/main/resources/formatter/eclipse-formatter-config.xml</configFile>
+					<licenseSets>
+						<licenseSet>
+							<header>${main.basedir}/src/main/resources/license/header.txt</header>
+							<!-- additional excludes configured in modules -->
+							<excludes>
+								<exclude>cert/*</exclude>
+								<exclude>dsf-docker/bpe_proxy/ca/**/*.crt</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/extra/host.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/extra/host-ssl.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/extra/httpd-ssl.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/httpd.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/.dockerignore</exclude>
+								<exclude>dsf-docker/fhir_proxy/ca/**/*.crt</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/extra/host.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/extra/host-ssl.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/extra/httpd-ssl.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/httpd.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/.dockerignore</exclude>
+								<exclude>dsf-docker-dev-setup/bpe/secrets/*</exclude>
+								<exclude>dsf-docker-dev-setup/bpe/.env</exclude>
+								<exclude>dsf-docker-dev-setup/fhir/secrets/*</exclude>
+								<exclude>dsf-docker-dev-setup/fhir/.env</exclude>
+								<exclude>dsf-docker-dev-setup-3dic-ttp/secrets/*</exclude>
+								<exclude>dsf-docker-dev-setup-3dic-ttp/.env</exclude>
+								<exclude>dsf-docker-dev-setup-3dic-ttp/docker-compose.override.yml</exclude>
+								<exclude>src/main/resources/cert/*.pem</exclude>
+								<exclude>src/main/resources/license/header.txt</exclude>
+								<exclude>CITATION.cff</exclude>
+								<exclude>SECURITY_CERTIFICATE.pem</exclude>
+							</excludes>
+							<includes>
+								<include>**/*.svg</include>
+							</includes>
+						</licenseSet>
+					</licenseSets>
+					<mapping>
+						<bpmn>XML_STYLE</bpmn>
+						<svg>XML_STYLE</svg>
+						<list>SCRIPT_STYLE</list>
+						<conf>SCRIPT_STYLE</conf>
+						<env>SCRIPT_STYLE</env>
+					</mapping>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -994,6 +1049,13 @@
 					<staticGroups>java,*</staticGroups>
 					<!-- TODO remove config option when impsort-maven-plugin support Java 25 -->
 					<ignoreParseErrorsBelowImports>true</ignoreParseErrorsBelowImports>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>net.revelc.code.formatter</groupId>
+				<artifactId>formatter-maven-plugin</artifactId>
+				<configuration>
+					<configFile>${main.basedir}/src/main/resources/formatter/eclipse-formatter-config.xml</configFile>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -1045,6 +1107,19 @@
 
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>com.mycila</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>format-license-headers</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>format</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>net.revelc.code.formatter</groupId>
 						<artifactId>formatter-maven-plugin</artifactId>
