@@ -1,18 +1,35 @@
-<Configuration status="WARN" monitorInterval="30" verbose="false">
+<!--
 
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<Configuration xmlns="https://logging.apache.org/xml/ns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd" status="WARN"
+	monitorInterval="30" verbose="false">
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout pattern="%p\t%t | %m%n"/>
+			<PatternLayout pattern="%p\t%t | %m%n" />
 		</Console>
 	</Appenders>
-
 	<Loggers>
-		<Logger name="dev.dsf" level="INFO"/>
-		<Logger name="org.eclipse.jetty" level="INFO"/>
-		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR"/>
+		<Logger name="dev.dsf" level="INFO" />
+		<Logger name="org.eclipse.jetty" level="INFO" />
+		<Logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="ERROR" />
 
 		<Root level="WARN">
-			<AppenderRef ref="CONSOLE"/>
+			<AppenderRef ref="CONSOLE" />
 		</Root>
 	</Loggers>
 </Configuration>
