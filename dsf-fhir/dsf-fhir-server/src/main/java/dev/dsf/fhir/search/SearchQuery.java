@@ -380,8 +380,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 					if (!supportedRevIncludeValues.contains(value))
 					{
 						supportedRevIncludeValues.add(value);
-						revIncludeParameters.add(revIncludeParameterFactory.createQueryRevIncludeParameter()
-								.configureRevInclude(errors, value));
+						revIncludeParameters.add(
+								revIncludeParameterFactory.createQueryRevIncludeParameter().configureRevInclude(value));
 					}
 					else
 					{

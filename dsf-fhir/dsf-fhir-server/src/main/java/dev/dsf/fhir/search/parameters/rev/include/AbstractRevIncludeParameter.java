@@ -16,21 +16,18 @@
 package dev.dsf.fhir.search.parameters.rev.include;
 
 import java.sql.Connection;
-import java.util.List;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.search.IncludeParts;
 import dev.dsf.fhir.search.SearchQueryIncludeParameterConfiguration;
-import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryRevIncludeParameter;
 
 public abstract class AbstractRevIncludeParameter implements SearchQueryRevIncludeParameter
 {
 	@Override
-	public SearchQueryIncludeParameterConfiguration configureRevInclude(List<? super SearchQueryParameterError> errors,
-			String queryParameterRevIncludeValue)
+	public SearchQueryIncludeParameterConfiguration configureRevInclude(String queryParameterRevIncludeValue)
 	{
 		IncludeParts includeParts = IncludeParts.fromString(queryParameterRevIncludeValue);
 		String revIncludeSql = getRevIncludeSql(includeParts);
