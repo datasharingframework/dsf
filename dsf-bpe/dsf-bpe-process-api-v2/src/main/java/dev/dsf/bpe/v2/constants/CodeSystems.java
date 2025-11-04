@@ -293,6 +293,9 @@ public final class CodeSystems
 			public static final String AMS = "AMS";
 			public static final String ASP = "ASP";
 			public static final String SPR = "SPR";
+			public static final String TSP = "TSP";
+			public static final String PPH = "PPH";
+			public static final String BIO = "BIO";
 		}
 
 		public static final Coding uac()
@@ -350,6 +353,21 @@ public final class CodeSystems
 			return new Coding(SYSTEM, Codes.SPR, "Service Provider Registry");
 		}
 
+		public static final Coding TSP()
+		{
+			return new Coding(SYSTEM, Codes.TSP, "Terminology Service Provider");
+		}
+
+		public static final Coding PPH()
+		{
+			return new Coding(SYSTEM, Codes.PPH, "Process Plugin Hub");
+		}
+
+		public static final Coding BIO()
+		{
+			return new Coding(SYSTEM, Codes.BIO, "Biobank");
+		}
+
 		public static final boolean isUac(Coding coding)
 		{
 			return isSame(SYSTEM, Codes.UAC, coding);
@@ -403,6 +421,21 @@ public final class CodeSystems
 		public static final boolean isSpr(Coding coding)
 		{
 			return isSame(SYSTEM, Codes.SPR, coding);
+		}
+
+		public static final boolean isTsp(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.TSP, coding);
+		}
+
+		public static final boolean isPph(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.PPH, coding);
+		}
+
+		public static final boolean isBio(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.BIO, coding);
 		}
 	}
 

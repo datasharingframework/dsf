@@ -37,7 +37,7 @@
 	<hierarchyMeaning value="grouped-by" />
 	<versionNeeded value="false" />
 	<content value="complete" />
-	<count value="11" />
+	<count value="14" />
 	<concept>
 		<code value="UAC" />
 		<display value="Use-and-Access Committee" />
@@ -81,5 +81,17 @@
 	<concept>
 		<code value="SPR" />
 		<display value="Service Provider Registry" />
+	</concept>
+	<concept>
+		<code value="TSP" />
+		<display value="Terminology Service Provider" />
+	</concept>
+	<concept>
+		<code value="PPH" />
+		<display value="Process Plugin Hub" />
+	</concept>
+	<concept>
+		<code value="BIO" />
+		<display value="Biobank" />
 	</concept>
 </CodeSystem>
