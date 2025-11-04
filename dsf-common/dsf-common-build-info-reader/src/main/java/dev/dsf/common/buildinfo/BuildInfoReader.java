@@ -1,4 +1,4 @@
-package dev.dsf.common.build;
+package dev.dsf.common.buildinfo;
 
 import java.time.ZonedDateTime;
 import java.util.Date;

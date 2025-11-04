@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import dev.dsf.common.build.BuildInfoReader;
+import dev.dsf.common.buildinfo.BuildInfoReader;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;

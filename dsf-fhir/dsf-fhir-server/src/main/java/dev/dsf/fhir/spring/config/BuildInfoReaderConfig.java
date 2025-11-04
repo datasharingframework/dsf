@@ -3,8 +3,8 @@ package dev.dsf.fhir.spring.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import dev.dsf.common.build.BuildInfoReader;
-import dev.dsf.common.build.BuildInfoReaderImpl;
+import dev.dsf.common.buildinfo.BuildInfoReader;
+import dev.dsf.common.buildinfo.BuildInfoReaderImpl;
 
 @Configuration
 public class BuildInfoReaderConfig

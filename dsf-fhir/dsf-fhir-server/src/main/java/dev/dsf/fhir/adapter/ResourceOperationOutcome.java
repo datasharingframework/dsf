@@ -14,7 +14,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
-import dev.dsf.common.build.BuildInfoReader;
+import dev.dsf.common.buildinfo.BuildInfoReader;
 import dev.dsf.fhir.dao.StatisticsDao;
 import dev.dsf.fhir.dao.StatisticsDao.Statistics;
 import dev.dsf.fhir.help.ExceptionHandler;

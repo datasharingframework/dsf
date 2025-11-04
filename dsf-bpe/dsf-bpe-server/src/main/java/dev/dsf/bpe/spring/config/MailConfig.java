@@ -28,7 +28,7 @@ import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.mail.LoggingMailService;
 import dev.dsf.bpe.mail.SmtpMailService;
-import dev.dsf.common.build.BuildInfoReader;
+import dev.dsf.common.buildinfo.BuildInfoReader;
 
 @Configuration
 public class MailConfig implements InitializingBean

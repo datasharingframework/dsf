@@ -72,7 +72,7 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.common.build.BuildInfoReader;
+import dev.dsf.common.buildinfo.BuildInfoReader;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.SummaryMode;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
