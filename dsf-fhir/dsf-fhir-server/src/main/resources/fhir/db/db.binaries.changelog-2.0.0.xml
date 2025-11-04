@@ -71,9 +71,6 @@
 	</changeSet>
 
 	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.recreate-current_binaries-and-dependent-views">
-		<validCheckSum>9:03cadff0655c5f697ed88ac41e6380c4</validCheckSum>
-		<validCheckSum>9:803b2a6316d4d045ec5821b7d1eedf1e</validCheckSum>
-
 		<createView viewName="current_binaries" replaceIfExists="true">
 			SELECT binary_id, version, binary_json, binary_oid, binary_size
 			FROM (
