@@ -469,62 +469,80 @@ public final class CodeSystems
 			public static final String AMS_USER = "AMS_USER";
 			public static final String ASP_USER = "ASP_USER";
 			public static final String SPR_USER = "SPR_USER";
+			public static final String TSP_USER = "TSP_USER";
+			public static final String PPH_USER = "PPH_USER";
+			public static final String BIO_USER = "BIO_USER";
 			public static final String DSF_ADMIN = "DSF_ADMIN";
 		}
 
 		public static final Coding uacUser()
 		{
-			return new Coding(SYSTEM, Codes.UAC_USER, "Use-and-Access Committee Member");
+			return new Coding(SYSTEM, Codes.UAC_USER, "Use-and-Access Committee User");
 		}
 
 		public static final Coding cosUser()
 		{
-			return new Coding(SYSTEM, Codes.COS_USER, "Coordinating Site Member");
+			return new Coding(SYSTEM, Codes.COS_USER, "Coordinating Site User");
 		}
 
 		public static final Coding crrUser()
 		{
-			return new Coding(SYSTEM, Codes.CRR_USER, "Central Research Repository Member");
+			return new Coding(SYSTEM, Codes.CRR_USER, "Central Research Repository User");
 		}
 
 		public static final Coding dicUser()
 		{
-			return new Coding(SYSTEM, Codes.DIC_USER, "Data Integration Center Member");
+			return new Coding(SYSTEM, Codes.DIC_USER, "Data Integration Center User");
 		}
 
 		public static final Coding dmsUser()
 		{
-			return new Coding(SYSTEM, Codes.DMS_USER, "Data Management Site Member");
+			return new Coding(SYSTEM, Codes.DMS_USER, "Data Management Site User");
 		}
 
 		public static final Coding dtsUser()
 		{
-			return new Coding(SYSTEM, Codes.DTS_USER, "Data Transfer Site Member");
+			return new Coding(SYSTEM, Codes.DTS_USER, "Data Transfer Site User");
 		}
 
 		public static final Coding hrpUser()
 		{
-			return new Coding(SYSTEM, Codes.HRP_USER, "Health Research Platform Member");
+			return new Coding(SYSTEM, Codes.HRP_USER, "Health Research Platform User");
 		}
 
 		public static final Coding ttpUser()
 		{
-			return new Coding(SYSTEM, Codes.TTP_USER, "Trusted Third Party Member");
+			return new Coding(SYSTEM, Codes.TTP_USER, "Trusted Third Party User");
 		}
 
 		public static final Coding amsUser()
 		{
-			return new Coding(SYSTEM, Codes.AMS_USER, "Allowlist Management Site Member");
+			return new Coding(SYSTEM, Codes.AMS_USER, "Allowlist Management Site User");
 		}
 
 		public static final Coding aspUser()
 		{
-			return new Coding(SYSTEM, Codes.ASP_USER, "Analysis Service Provider Member");
+			return new Coding(SYSTEM, Codes.ASP_USER, "Analysis Service Provider User");
 		}
 
 		public static final Coding sprUser()
 		{
-			return new Coding(SYSTEM, Codes.SPR_USER, "Service Provider Registry Member");
+			return new Coding(SYSTEM, Codes.SPR_USER, "Service Provider Registry User");
+		}
+
+		public static final Coding tspUser()
+		{
+			return new Coding(SYSTEM, Codes.TSP_USER, "Terminology Service Provider User");
+		}
+
+		public static final Coding pphUser()
+		{
+			return new Coding(SYSTEM, Codes.PPH_USER, "Process Plugin Hub User");
+		}
+
+		public static final Coding bioUser()
+		{
+			return new Coding(SYSTEM, Codes.BIO_USER, "Biobank User");
 		}
 
 		public static final Coding dsfAdmin()
@@ -585,6 +603,21 @@ public final class CodeSystems
 		public static final boolean isSprUser(Coding coding)
 		{
 			return isSame(SYSTEM, Codes.SPR_USER, coding);
+		}
+
+		public static final boolean isTspUser(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.TSP_USER, coding);
+		}
+
+		public static final boolean isPphUser(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.PPH_USER, coding);
+		}
+
+		public static final boolean isBioUser(Coding coding)
+		{
+			return isSame(SYSTEM, Codes.BIO_USER, coding);
 		}
 
 		public static final boolean isDsfAdmin(Coding coding)
