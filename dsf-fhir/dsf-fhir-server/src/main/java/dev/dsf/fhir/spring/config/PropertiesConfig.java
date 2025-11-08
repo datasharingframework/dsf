@@ -91,7 +91,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
 
-	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments im configured; supported values: `dev`, `test` and `prod`")
+	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments if configured; supported values: `dev`, `test` and `prod`")
 	@Value("${dev.dsf.fhir.server.ui.theme:}")
 	private String uiTheme;
 

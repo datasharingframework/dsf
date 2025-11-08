@@ -82,7 +82,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 
-	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments im configured; supported values: `dev`, `test` and `prod`")
+	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments if configured; supported values: `dev`, `test` and `prod`")
 	@Value("${dev.dsf.bpe.server.ui.theme:}")
 	private String uiTheme;
 
@@ -150,7 +150,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.test.connection.on.startup:false}")
 	private boolean fhirClientConnectionsConfigDefaultTestConnectionOnStartup;
 
-	@Documentation(description = "FHIR server connections YAML: Default value for properties `enable-debug-logging` and `oidc-auth.enable-debug-logging`", recommendation = "To enable debug logging of requests and reponses to configured FHIR servers by default set to `true`")
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `enable-debug-logging` and `oidc-auth.enable-debug-logging`", recommendation = "To enable debug logging of requests and responses to configured FHIR servers by default set to `true`")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.enable.debug.logging:false}")
 	private boolean fhirClientConnectionsConfigDefaultEnableDebugLogging;
 
@@ -174,7 +174,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.oidc.discovery.path:/.well-known/openid-configuration}")
 	private String fhirClientConnectionsConfigDefaultOidcDiscoveryPath;
 
-	@Documentation(description = "Set `false` to disable caching of OIDC dicovery and jwks resources as well as access tokens in the 'Client Credentials Grant' client; access tokens are evicted 10 seconds before they expire")
+	@Documentation(description = "Set `false` to disable caching of OIDC discovery and jwks resources as well as access tokens in the 'Client Credentials Grant' client; access tokens are evicted 10 seconds before they expire")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache:true}")
 	private boolean fhirClientConnectionsConfigOidcClientCacheEnabled;
 
@@ -186,7 +186,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.jwks.resource:PT1H}")
 	private String fhirClientConnectionsConfigOidcClientCacheJwksResourceTimeout;
 
-	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of access tokens before they expire, duration is subtracted from the expires at value of the acess token")
+	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of access tokens before they expire, duration is subtracted from the expires at value of the access token")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.access.token:PT10S}")
 	private String fhirClientConnectionsConfigOidcClientCacheAccessTokenBeforeExpirationTimeout;
 
@@ -222,7 +222,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.process.api.directory:api}")
 	private String apiClassPathBaseDirectory;
 
-	@Documentation(description = "Map with files containing qualified classs names allowed to be loaded by plugins for api versions; map key must match "
+	@Documentation(description = "Map with files containing qualified class names allowed to be loaded by plugins for api versions; map key must match "
 			+ API_VERSION_PATTERN_STRING, recommendation = "Change only during development", example = "{v1: 'some/example.file', v2: 'other.file'}")
 	@Value("#{${dev.dsf.bpe.process.api.allowed.bpe.classes:{:}}}")
 	private Map<String, String> apiAllowedBpeClasses;
@@ -301,11 +301,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.mail.port:0}")
 	private int mailServerPort;
 
-	@Documentation(description = "SMTP server authentication username", recommendation = "Configure if the SMTP server reqiures username/password authentication; enable SMTP over TLS via *DEV_DSF_BPE_MAIL_USESMTPS*")
+	@Documentation(description = "SMTP server authentication username", recommendation = "Configure if the SMTP server requires username/password authentication; enable SMTP over TLS via *DEV_DSF_BPE_MAIL_USESMTPS*")
 	@Value("${dev.dsf.bpe.mail.username:#{null}}")
 	private String mailServerUsername;
 
-	@Documentation(description = "SMTP server authentication password", recommendation = "Configure if the SMTP server reqiures username/password authentication; use docker secret file to configure using *${env_variable}_FILE*; enable SMTP over TLS via *DEV_DSF_BPE_MAIL_USESMTPS*")
+	@Documentation(description = "SMTP server authentication password", recommendation = "Configure if the SMTP server requires username/password authentication; use docker secret file to configure using *${env_variable}_FILE*; enable SMTP over TLS via *DEV_DSF_BPE_MAIL_USESMTPS*")
 	@Value("${dev.dsf.bpe.mail.password:#{null}}")
 	private char[] mailServerPassword;
 
