@@ -393,7 +393,7 @@ public class ConfigDocGenerator
 					getString(documentation, "recommendation"));
 			String example = getDocumentationStringMonospace("Example", getString(documentation, "example"));
 
-			String defaultValueString = devalueValue != null && devalueValue.length() > 1
+			String defaultValueString = devalueValue != null && !devalueValue.isBlank()
 					&& !"#{null}".equals(devalueValue) ? getDocumentationStringMonospace("Default", devalueValue) : "";
 
 			return new DocumentationEntry(propertyName,
