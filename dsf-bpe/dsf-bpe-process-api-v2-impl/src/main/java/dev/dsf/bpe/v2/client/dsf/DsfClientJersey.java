@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -968,7 +967,7 @@ public class DsfClientJersey implements DsfClient
 	}
 
 	@Override
-	public Future<Bundle> searchAsync(Duration initialPollingInterval, Class<? extends Resource> resourceType,
+	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, Class<? extends Resource> resourceType,
 			Map<String, List<String>> parameters)
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
@@ -980,19 +979,19 @@ public class DsfClientJersey implements DsfClient
 				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
 		}
 
-		return doSearchAsync(initialPollingInterval, target, false);
+		return doSearchAsync(delayStrategy, target, false);
 	}
 
 	@Override
-	public Future<Bundle> searchAsync(Duration initialPollingInterval, String url)
+	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, String url)
 	{
 		checkUri(url);
 
-		return doSearchAsync(initialPollingInterval, client.target(url), false);
+		return doSearchAsync(delayStrategy, client.target(url), false);
 	}
 
 	@Override
-	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval,
+	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy,
 			Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
@@ -1004,15 +1003,15 @@ public class DsfClientJersey implements DsfClient
 				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
 		}
 
-		return doSearchAsync(initialPollingInterval, target, true);
+		return doSearchAsync(delayStrategy, target, true);
 	}
 
 	@Override
-	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval, String url)
+	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy, String url)
 	{
 		checkUri(url);
 
-		return doSearchAsync(initialPollingInterval, client.target(url), true);
+		return doSearchAsync(delayStrategy, client.target(url), true);
 	}
 
 	private void checkUri(String url)
@@ -1022,9 +1021,11 @@ public class DsfClientJersey implements DsfClient
 			throw new RuntimeException("url is blank");
 		if (!url.startsWith(baseUrl))
 			throw new RuntimeException("url not starting with client base url");
+		if (url.startsWith(baseUrl + "@"))
+			throw new RuntimeException("url starting with client base url + @");
 	}
 
-	private Future<Bundle> doSearchAsync(Duration initialPollingInterval, WebTarget target, boolean strict)
+	private CompletableFuture<Bundle> doSearchAsync(DelayStrategy delayStrategy, WebTarget target, boolean strict)
 	{
 		Builder requestBuilder = target.request().header(Constants.HEADER_PREFER,
 				Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -1044,11 +1045,22 @@ public class DsfClientJersey implements DsfClient
 				else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
 				{
 					String location = response.getHeaderString(HttpHeaders.LOCATION);
-					if (location == null)
-						throw new RuntimeException("202 Accepted without Location header");
+					if (location == null || location.isBlank())
+					{
+						logger.warn("202 Accepted without Location header");
+
+						location = response.getHeaderString(HttpHeaders.CONTENT_LOCATION);
+						if (location == null || location.isBlank())
+							throw new RuntimeException(
+									"202 Accepted without Location and without Content-Location header");
+						else
+							logger.warn("202 Accepted with Content-Location header");
+					}
+
+					checkUri(location);
 
 					response.close();
-					pollUntilComplete(location, initialPollingInterval.toMillis(), resultFuture);
+					pollUntilComplete(location, delayStrategy, resultFuture);
 				}
 				else
 					resultFuture.completeExceptionally(handleError(response));
@@ -1064,36 +1076,32 @@ public class DsfClientJersey implements DsfClient
 		return resultFuture;
 	}
 
-	private void pollUntilComplete(String pollUrl, long pollIntervalMillis, CompletableFuture<Bundle> resultFuture)
+	private void pollUntilComplete(String location, DelayStrategy delayStrategy, CompletableFuture<Bundle> resultFuture)
 	{
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
 		Runnable poll = new Runnable()
 		{
-			private long pollInterval = pollIntervalMillis;
+			private Duration delay = delayStrategy.getFirstDelay();
 
 			@Override
 			public void run()
 			{
+				if (resultFuture.isCancelled())
+					return;
+
 				try
 				{
-					checkUri(pollUrl);
-
-					Response response = client.target(pollUrl).request().get();
+					Response response = client.target(location).request().get();
 
 					if (Status.OK.getStatusCode() == response.getStatus())
 						resultFuture.complete(response.readEntity(Bundle.class));
 					else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
 					{
-						String location = response.getHeaderString(HttpHeaders.LOCATION);
-						if (location == null)
-							throw new RuntimeException("202 Accepted without Location header");
-
 						response.close();
 
-						pollInterval *= 2;
-
-						executor.schedule(this, pollInterval, TimeUnit.MILLISECONDS);
+						delay = delayStrategy.getNextDelay(delay);
+						executor.schedule(this, delay.toMillis(), TimeUnit.MILLISECONDS);
 					}
 					else
 						resultFuture.completeExceptionally(handleError(response));
@@ -1106,7 +1114,7 @@ public class DsfClientJersey implements DsfClient
 			}
 		};
 
-		executor.schedule(poll, pollIntervalMillis, TimeUnit.MILLISECONDS);
+		executor.schedule(poll, delayStrategy.getFirstDelay().toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -1165,23 +1173,21 @@ public class DsfClientJersey implements DsfClient
 	}
 
 	@Override
-	public BasicDsfClient withRetry(int nTimes, Duration delay)
+	public BasicDsfClient withRetry(int nTimes, DelayStrategy delayStrategy)
 	{
 		if (nTimes < 0)
 			throw new IllegalArgumentException("nTimes < 0");
-		if (delay == null || delay.isNegative())
-			throw new IllegalArgumentException("delay null or negative");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
 
-		return new BasicDsfClientWithRetryImpl(this, nTimes, delay);
+		return new BasicDsfClientWithRetryImpl(this, nTimes, delayStrategy);
 	}
 
 	@Override
-	public BasicDsfClient withRetryForever(Duration delay)
+	public BasicDsfClient withRetryForever(DelayStrategy delayStrategy)
 	{
-		if (delay == null || delay.isNegative())
-			throw new IllegalArgumentException("delay null or negative");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
 
-		return new BasicDsfClientWithRetryImpl(this, RETRY_FOREVER, delay);
+		return new BasicDsfClientWithRetryImpl(this, RETRY_FOREVER, delayStrategy);
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,12 @@ import org.slf4j.LoggerFactory;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 
+import ca.uhn.fhir.rest.api.Constants;
 import de.hsheilbronn.mi.utils.crypto.context.SSLContextFactory;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import dev.dsf.bpe.integration.X509Certificates.CertificateAndPrivateKey;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response.Status;
 
 public class TestFhirDataServer
 {
@@ -53,13 +57,17 @@ public class TestFhirDataServer
 			server.setHttpsConfigurator(
 					new HttpsConfigurator(SSLContextFactory.createSSLContext(null, keyStore, keyStorePassword, "TLS")));
 
+			AtomicReference<Integer> counter = new AtomicReference<>(0);
+
 			server.createContext("/Patient", exchange ->
 			{
 				logger.info("GET /Patient");
 
-				exchange.getResponseHeaders().set("Location",
+				counter.set(0);
+
+				exchange.getResponseHeaders().set(HttpHeaders.LOCATION,
 						"https://localhost:" + server.getAddress().getPort() + "/async");
-				exchange.sendResponseHeaders(202, 0);
+				exchange.sendResponseHeaders(Status.ACCEPTED.getStatusCode(), 0);
 				exchange.close();
 			});
 
@@ -67,16 +75,31 @@ public class TestFhirDataServer
 			{
 				logger.info("GET /async");
 
+				Integer c = counter.updateAndGet(i -> ++i);
+				if (c <= 2)
+				{
+					exchange.sendResponseHeaders(Status.ACCEPTED.getStatusCode(), 0);
+					exchange.close();
+				}
+
 				String jsonResponse = "{\"resourceType\":\"Bundle\",\"type\":\"searchset\",\"total\":0}";
 
-				exchange.getResponseHeaders().set("Content-Type", "application/fhir+json");
-				exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+				exchange.getResponseHeaders().set(HttpHeaders.CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+				exchange.sendResponseHeaders(Status.OK.getStatusCode(), jsonResponse.getBytes().length);
 
 				try (OutputStream os = exchange.getResponseBody())
 				{
 					os.write(jsonResponse.getBytes());
 				}
 
+				exchange.close();
+			});
+
+			server.createContext("/Observation", exchange ->
+			{
+				logger.info("GET /Observation");
+
+				exchange.sendResponseHeaders(Status.GATEWAY_TIMEOUT.getStatusCode(), 0);
 				exchange.close();
 			});
 		}

@@ -16,10 +16,9 @@
 package dev.dsf.bpe.v2.client.dsf;
 
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -32,9 +31,9 @@ import jakarta.ws.rs.core.MediaType;
 
 class BasicDsfClientWithRetryImpl extends AbstractDsfClientJerseyWithRetry implements BasicDsfClient
 {
-	BasicDsfClientWithRetryImpl(DsfClientJersey delegate, int nTimes, Duration delay)
+	BasicDsfClientWithRetryImpl(DsfClientJersey delegate, int nTimes, DelayStrategy delayStrategy)
 	{
-		super(delegate, nTimes, delay);
+		super(delegate, nTimes, delayStrategy);
 	}
 
 	@Override
@@ -92,29 +91,29 @@ class BasicDsfClientWithRetryImpl extends AbstractDsfClientJerseyWithRetry imple
 	}
 
 	@Override
-	public Future<Bundle> searchAsync(Duration initialPollingInterval, Class<? extends Resource> resourceType,
+	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, Class<? extends Resource> resourceType,
 			Map<String, List<String>> parameters)
 	{
-		return retry(() -> delegate.searchAsync(initialPollingInterval, resourceType, parameters));
+		return retry(() -> delegate.searchAsync(delayStrategy, resourceType, parameters));
 	}
 
 	@Override
-	public Future<Bundle> searchAsync(Duration initialPollingInterval, String url)
+	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, String url)
 	{
-		return retry(() -> delegate.searchAsync(initialPollingInterval, url));
+		return retry(() -> delegate.searchAsync(delayStrategy, url));
 	}
 
 	@Override
-	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval,
+	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy,
 			Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
 	{
-		return retry(() -> delegate.searchAsyncWithStrictHandling(initialPollingInterval, resourceType, parameters));
+		return retry(() -> delegate.searchAsyncWithStrictHandling(delayStrategy, resourceType, parameters));
 	}
 
 	@Override
-	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval, String url)
+	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy, String url)
 	{
-		return retry(() -> delegate.searchAsyncWithStrictHandling(initialPollingInterval, url));
+		return retry(() -> delegate.searchAsyncWithStrictHandling(delayStrategy, url));
 	}
 
 	@Override

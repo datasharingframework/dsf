@@ -15,21 +15,23 @@
  */
 package dev.dsf.bpe.test.service;
 
+import static dev.dsf.bpe.test.PluginTestExecutor.expectException;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectTrue;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 
 import dev.dsf.bpe.test.AbstractTest;
@@ -37,9 +39,11 @@ import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.client.dsf.BinaryInputStream;
+import dev.dsf.bpe.v2.client.dsf.DelayStrategy;
 import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
 import dev.dsf.bpe.v2.variables.Variables;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 
 public class DsfClientTest extends AbstractTest implements ServiceTask
@@ -153,7 +157,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
 		expectTrue(client.isPresent());
 
-		Future<Bundle> fBundle = client.get().searchAsync(Duration.ofMillis(200), Patient.class, Map.of());
+		CompletableFuture<Bundle> fBundle = client.get().searchAsync(Patient.class, Map.of());
 		expectNotNull(fBundle);
 
 		Bundle bundle = fBundle.get();
@@ -167,8 +171,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
 		expectTrue(client.isPresent());
 
-		Future<Bundle> fBundle = client.get().searchAsync(Duration.ofMillis(200),
-				client.get().getBaseUrl() + "/Patient");
+		CompletableFuture<Bundle> fBundle = client.get().searchAsync(client.get().getBaseUrl() + "/Patient");
 		expectNotNull(fBundle);
 
 		Bundle bundle = fBundle.get();
@@ -182,8 +185,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
 		expectTrue(client.isPresent());
 
-		Future<Bundle> fBundle = client.get().searchAsyncWithStrictHandling(Duration.ofMillis(200), Patient.class,
-				Map.of());
+		CompletableFuture<Bundle> fBundle = client.get().searchAsyncWithStrictHandling(Patient.class, Map.of());
 		expectNotNull(fBundle);
 
 		Bundle bundle = fBundle.get();
@@ -197,12 +199,25 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
 		expectTrue(client.isPresent());
 
-		Future<Bundle> fBundle = client.get().searchAsyncWithStrictHandling(Duration.ofMillis(200),
-				client.get().getBaseUrl() + "/Patient");
+		CompletableFuture<Bundle> fBundle = client.get()
+				.searchAsyncWithStrictHandling(client.get().getBaseUrl() + "/Patient");
 		expectNotNull(fBundle);
 
 		Bundle bundle = fBundle.get();
 		expectNotNull(bundle);
 		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void readWithRetry(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		expectException(WebApplicationException.class, () ->
+		{
+			client.get().withRetry(5, DelayStrategy.EXPONENTIAL_BACKOFF).read(Observation.class,
+					UUID.randomUUID().toString());
+		});
 	}
 }

@@ -16,7 +16,6 @@
 package dev.dsf.bpe.v2.client.dsf;
 
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -78,22 +77,22 @@ class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
 	}
 
 	@Override
-	public PreferReturnMinimal withRetry(int nTimes, Duration delay)
+	public PreferReturnMinimal withRetry(int nTimes, DelayStrategy delayStrategy)
 	{
 		if (nTimes < 0)
 			throw new IllegalArgumentException("nTimes < 0");
-		if (delay == null || delay.isNegative())
-			throw new IllegalArgumentException("delay null or negative");
+		if (delayStrategy == null)
+			throw new IllegalArgumentException("delayStrategy null");
 
-		return new PreferReturnMinimalRetryImpl(delegate, nTimes, delay);
+		return new PreferReturnMinimalRetryImpl(delegate, nTimes, delayStrategy);
 	}
 
 	@Override
-	public PreferReturnMinimal withRetryForever(Duration delay)
+	public PreferReturnMinimal withRetryForever(DelayStrategy delayStrategy)
 	{
-		if (delay == null || delay.isNegative())
-			throw new IllegalArgumentException("delay null or negative");
+		if (delayStrategy == null)
+			throw new IllegalArgumentException("delayStrategy null");
 
-		return new PreferReturnMinimalRetryImpl(delegate, RETRY_FOREVER, delay);
+		return new PreferReturnMinimalRetryImpl(delegate, RETRY_FOREVER, delayStrategy);
 	}
 }

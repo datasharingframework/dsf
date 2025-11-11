@@ -16,7 +16,6 @@
 package dev.dsf.bpe.v2.client.dsf;
 
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +27,9 @@ import jakarta.ws.rs.core.MediaType;
 
 class PreferReturnMinimalRetryImpl extends AbstractDsfClientJerseyWithRetry implements PreferReturnMinimal
 {
-	PreferReturnMinimalRetryImpl(DsfClientJersey delegate, int nTimes, Duration delay)
+	PreferReturnMinimalRetryImpl(DsfClientJersey delegate, int nTimes, DelayStrategy delayStrategy)
 	{
-		super(delegate, nTimes, delay);
+		super(delegate, nTimes, delayStrategy);
 	}
 
 	@Override
