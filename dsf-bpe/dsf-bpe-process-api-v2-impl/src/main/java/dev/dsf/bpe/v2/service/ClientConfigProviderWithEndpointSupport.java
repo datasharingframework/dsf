@@ -25,13 +25,12 @@ import javax.net.ssl.SSLContext;
 import dev.dsf.bpe.api.config.FhirClientConfig;
 import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 
-public class FhirClientConfigProviderWithEndpointSupport implements FhirClientConfigProvider
+public class ClientConfigProviderWithEndpointSupport implements ClientConfigProvider
 {
 	private final EndpointProvider endpointProvider;
-	private final FhirClientConfigProvider delegate;
+	private final ClientConfigProvider delegate;
 
-	public FhirClientConfigProviderWithEndpointSupport(EndpointProvider endpointProvider,
-			FhirClientConfigProvider delegate)
+	public ClientConfigProviderWithEndpointSupport(EndpointProvider endpointProvider, ClientConfigProvider delegate)
 	{
 		this.endpointProvider = endpointProvider;
 		this.delegate = delegate;

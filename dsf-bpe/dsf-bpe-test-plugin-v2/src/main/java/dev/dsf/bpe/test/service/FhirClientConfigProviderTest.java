@@ -31,7 +31,7 @@ import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
-import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
+import dev.dsf.bpe.v2.service.ClientConfigProvider;
 import dev.dsf.bpe.v2.variables.Variables;
 
 public class FhirClientConfigProviderTest extends AbstractTest implements ServiceTask
@@ -49,7 +49,7 @@ public class FhirClientConfigProviderTest extends AbstractTest implements Servic
 	}
 
 	@PluginTest
-	public void getClientConfigDsfFhirServer(FhirClientConfigProvider configProvider) throws Exception
+	public void getClientConfigDsfFhirServer(ClientConfigProvider configProvider) throws Exception
 	{
 		expectNotNull(configProvider.getClientConfig("dsf-fhir-server"));
 		expectTrue(configProvider.getClientConfig("dsf-fhir-server").isPresent());
@@ -83,8 +83,7 @@ public class FhirClientConfigProviderTest extends AbstractTest implements Servic
 	}
 
 	@PluginTest
-	public void getClientConfigDsfFhirServerViaEndpointIdentifier(FhirClientConfigProvider configProvider)
-			throws Exception
+	public void getClientConfigDsfFhirServerViaEndpointIdentifier(ClientConfigProvider configProvider) throws Exception
 	{
 		expectNotNull(configProvider.getClientConfig("#Test_Endpoint"));
 		expectTrue(configProvider.getClientConfig("#Test_Endpoint").isPresent());
@@ -118,7 +117,7 @@ public class FhirClientConfigProviderTest extends AbstractTest implements Servic
 	}
 
 	@PluginTest
-	public void getClientConfigDsfFhirServerViaLocal(FhirClientConfigProvider configProvider) throws Exception
+	public void getClientConfigDsfFhirServerViaLocal(ClientConfigProvider configProvider) throws Exception
 	{
 		expectNotNull(configProvider.getClientConfig("#local"));
 		expectTrue(configProvider.getClientConfig("#local").isPresent());
@@ -152,7 +151,7 @@ public class FhirClientConfigProviderTest extends AbstractTest implements Servic
 	}
 
 	@PluginTest
-	public void getClientConfigViaProxy(FhirClientConfigProvider configProvider) throws Exception
+	public void getClientConfigViaProxy(ClientConfigProvider configProvider) throws Exception
 	{
 		expectNotNull(configProvider.getClientConfig("via-proxy"));
 		expectTrue(configProvider.getClientConfig("via-proxy").isPresent());
@@ -187,14 +186,14 @@ public class FhirClientConfigProviderTest extends AbstractTest implements Servic
 	}
 
 	@PluginTest
-	public void getClientConfigWithNotConfiguredServerId(FhirClientConfigProvider configProvider) throws Exception
+	public void getClientConfigWithNotConfiguredServerId(ClientConfigProvider configProvider) throws Exception
 	{
 		expectNotNull(configProvider.getClientConfig("not-configured"));
 		expectFalse(configProvider.getClientConfig("not-configured").isPresent());
 	}
 
 	@PluginTest
-	public void getDefaultTrustStore(FhirClientConfigProvider configProvider) throws Exception
+	public void getDefaultTrustStore(ClientConfigProvider configProvider) throws Exception
 	{
 		KeyStore trustStore = configProvider.createDefaultTrustStore();
 
@@ -205,7 +204,7 @@ public class FhirClientConfigProviderTest extends AbstractTest implements Servic
 	}
 
 	@PluginTest
-	public void getDefaultSslContext(FhirClientConfigProvider configProvider) throws Exception
+	public void getDefaultSslContext(ClientConfigProvider configProvider) throws Exception
 	{
 		expectNotNull(configProvider.createDefaultSslContext());
 	}

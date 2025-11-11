@@ -234,12 +234,12 @@ public class DefaultUserTaskListener implements UserTaskListener
 	protected QuestionnaireResponse createQuestionnaireResponse(ProcessPluginApi api,
 			QuestionnaireResponse questionnaireResponse)
 	{
-		return api.getDsfClientProvider().getLocalDsfClient().create(questionnaireResponse);
+		return api.getDsfClientProvider().getLocal().create(questionnaireResponse);
 	}
 
 	private Questionnaire readQuestionnaire(ProcessPluginApi api, String urlWithVersion)
 	{
-		Bundle search = api.getDsfClientProvider().getLocalDsfClient().search(Questionnaire.class,
+		Bundle search = api.getDsfClientProvider().getLocal().search(Questionnaire.class,
 				Map.of("url", List.of(urlWithVersion)));
 
 		List<Questionnaire> questionnaires = search.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)

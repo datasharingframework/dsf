@@ -23,12 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.ClientConfigProvider;
 import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
-import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MimeTypeService;
@@ -49,7 +49,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final FhirContext fhirContext;
 	private final DsfClientProvider dsfClientProvider;
 	private final FhirClientProvider fhirClientProvider;
-	private final FhirClientConfigProvider fhirClientConfigProvider;
+	private final ClientConfigProvider fhirClientConfigProvider;
 	private final OidcClientProvider oidcClientProvider;
 	private final MailService mailService;
 	private final MimeTypeService mimeTypeService;
@@ -67,7 +67,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 
 	public ProcessPluginApiImpl(ProcessPluginDefinition processPluginDefinition, ProxyConfig proxyConfig,
 			EndpointProvider endpointProvider, FhirContext fhirContext, DsfClientProvider dsfClientProvider,
-			FhirClientProvider fhirClientProvider, FhirClientConfigProvider fhirClientConfigProvider,
+			FhirClientProvider fhirClientProvider, ClientConfigProvider fhirClientConfigProvider,
 			OidcClientProvider oidcClientProvider, MailService mailService, MimeTypeService mimeTypeService,
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
 			ProcessAuthorizationHelper processAuthorizationHelper,
@@ -161,7 +161,7 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	}
 
 	@Override
-	public FhirClientConfigProvider getFhirClientConfigProvider()
+	public ClientConfigProvider getFhirClientConfigProvider()
 	{
 		return fhirClientConfigProvider;
 	}

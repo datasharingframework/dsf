@@ -18,14 +18,19 @@ package dev.dsf.bpe.test.service;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
+import static dev.dsf.bpe.test.PluginTestExecutor.expectTrue;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Future;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 
 import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
@@ -42,7 +47,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 	@Override
 	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		DsfClient localDsfClient = api.getDsfClientProvider().getLocalDsfClient();
+		DsfClient localDsfClient = api.getDsfClientProvider().getLocal();
 
 		Bundle search = localDsfClient.search(Binary.class, Map.of("_count", List.of("1")));
 		IdType testBinaryId = search.getEntry().stream().filter(BundleEntryComponent::hasResource)
@@ -140,5 +145,64 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 			expectSame(0, allBytes[0]);
 			expectSame(1, allBytes[1]);
 		}
+	}
+
+	@PluginTest
+	public void searchAsyncResourceMap(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		Future<Bundle> fBundle = client.get().searchAsync(Duration.ofMillis(200), Patient.class, Map.of());
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void searchAsyncUrl(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		Future<Bundle> fBundle = client.get().searchAsync(Duration.ofMillis(200),
+				client.get().getBaseUrl() + "/Patient");
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void searchAsyncResourceMapStrict(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		Future<Bundle> fBundle = client.get().searchAsyncWithStrictHandling(Duration.ofMillis(200), Patient.class,
+				Map.of());
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void searchAsyncUrlStrict(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		Future<Bundle> fBundle = client.get().searchAsyncWithStrictHandling(Duration.ofMillis(200),
+				client.get().getBaseUrl() + "/Patient");
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
 	}
 }

@@ -17,6 +17,7 @@ package dev.dsf.bpe.v2.client.oidc;
 
 import java.io.IOException;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -35,7 +36,8 @@ public class OidcInterceptor implements IClientInterceptor
 	public void interceptRequest(IHttpRequest request)
 	{
 		char[] accessToken = oidcClient.getAccessToken();
-		request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + String.valueOf(accessToken));
+		request.addHeader(HttpHeaders.AUTHORIZATION,
+				Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + String.valueOf(accessToken));
 	}
 
 	@Override

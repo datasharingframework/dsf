@@ -15,6 +15,7 @@
  */
 package dev.dsf.bpe.v2.client.dsf;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
@@ -26,7 +27,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +46,7 @@ import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.hl7.fhir.r4.model.Binary;
@@ -60,15 +67,23 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.bpe.v2.client.dsf.BinaryInputStream.Range;
+import dev.dsf.bpe.v2.client.fhir.ClientConfig.BasicAuthentication;
+import dev.dsf.bpe.v2.client.fhir.ClientConfig.BearerAuthentication;
+import dev.dsf.bpe.v2.client.fhir.ClientConfig.OidcAuthentication;
+import dev.dsf.bpe.v2.service.OidcClientProvider;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.client.InvocationCallback;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Feature;
+import jakarta.ws.rs.core.FeatureContext;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -105,16 +120,85 @@ public class DsfClientJersey implements DsfClient
 		}
 	}
 
+	private static final class BearerAuthenticationFeature implements Feature
+	{
+		final Supplier<char[]> tokenProvider;
+
+		BearerAuthenticationFeature(Supplier<char[]> tokenProvider)
+		{
+			this.tokenProvider = Objects.requireNonNull(tokenProvider, "tokenProvider");
+		}
+
+		@Override
+		public boolean configure(FeatureContext context)
+		{
+			context.register(new ClientRequestFilter()
+			{
+				@Override
+				public void filter(ClientRequestContext requestContext) throws IOException
+				{
+					requestContext.getHeaders().add(HttpHeaders.AUTHORIZATION,
+							Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + String.valueOf(tokenProvider.get()));
+				}
+			});
+
+			return true;
+		}
+	}
+
 	private final Client client;
 	private final String baseUrl;
 
 	private final PreferReturnMinimalWithRetry preferReturnMinimal;
 	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
 
+
+	public DsfClientJersey(dev.dsf.bpe.v2.client.fhir.ClientConfig clientConfig, OidcClientProvider oidcClientProvider,
+			String userAgent, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
+	{
+		this(clientConfig.getBaseUrl(), clientConfig.getTrustStore(),
+				clientConfig.getCertificateAuthentication() == null ? null
+						: clientConfig.getCertificateAuthentication().getKeyStore(),
+				clientConfig.getCertificateAuthentication() == null ? null
+						: clientConfig.getCertificateAuthentication().getKeyStorePassword(),
+				clientConfig.getProxy() == null ? null : clientConfig.getProxy().getUrl(),
+				clientConfig.getProxy() == null ? null : clientConfig.getProxy().getUsername(),
+				clientConfig.getProxy() == null ? null : clientConfig.getProxy().getPassword(),
+				clientConfig.getConnectTimeout(), clientConfig.getReadTimeout(), clientConfig.isDebugLoggingEnabled(),
+				userAgent, fhirContext, referenceCleaner, authFeatures(clientConfig, oidcClientProvider));
+	}
+
+	private static Stream<Feature> authFeatures(dev.dsf.bpe.v2.client.fhir.ClientConfig clientConfig,
+			OidcClientProvider oidcClientProvider)
+	{
+		BasicAuthentication basicAuth = clientConfig.getBasicAuthentication();
+		Feature basicAuthFeature = basicAuth == null ? null
+				: HttpAuthenticationFeature.basic(basicAuth.getUsername(), new String(basicAuth.getPassword()));
+
+		BearerAuthentication bearerAuth = clientConfig.getBearerAuthentication();
+		Feature bearerAuthFeature = bearerAuth == null ? null : new BearerAuthenticationFeature(bearerAuth::getToken);
+
+		OidcAuthentication oidcAuth = clientConfig.getOidcAuthentication();
+		Feature oidcAuthFeature = oidcAuth == null ? null
+				: new BearerAuthenticationFeature(oidcClientProvider.getOidcClient(oidcAuth)::getAccessToken);
+
+		return Stream.of(basicAuthFeature, bearerAuthFeature, oidcAuthFeature).filter(Objects::nonNull);
+	}
+
 	public DsfClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, Duration connectTimeout,
 			Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue, FhirContext fhirContext,
 			ReferenceCleaner referenceCleaner)
+	{
+		this(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
+				connectTimeout, readTimeout, logRequestsAndResponses, userAgentValue, fhirContext, referenceCleaner,
+				Stream.of());
+	}
+
+	private DsfClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
+			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, Duration connectTimeout,
+			Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue, FhirContext fhirContext,
+			ReferenceCleaner referenceCleaner, Stream<Feature> authFeatures)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
@@ -125,28 +209,30 @@ public class DsfClientJersey implements DsfClient
 
 		ClientBuilder builder = ClientBuilder.newBuilder();
 
+		authFeatures.forEach(builder::register);
+
 		if (sslContext != null)
-			builder = builder.sslContext(sslContext);
+			builder.sslContext(sslContext);
 
 		ClientConfig config = new ClientConfig();
 		config.connectorProvider(new ApacheConnectorProvider());
 		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
 		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
 		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
-		builder = builder.withConfig(config);
+		builder.withConfig(config);
 
 		if (userAgentValue != null && !userAgentValue.isBlank())
-			builder = builder.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
+			builder.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
 					.add(HttpHeaders.USER_AGENT, userAgentValue));
 
-		builder = builder.readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
-				.connectTimeout(connectTimeout.toMillis(), TimeUnit.MILLISECONDS);
+		builder.readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS).connectTimeout(connectTimeout.toMillis(),
+				TimeUnit.MILLISECONDS);
 
-		builder = builder.register(new FhirAdapter(fhirContext, referenceCleaner));
+		builder.register(new FhirAdapter(fhirContext, referenceCleaner));
 
 		if (logRequestsAndResponses)
 		{
-			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
+			builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
 					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
 		}
 
@@ -879,6 +965,148 @@ public class DsfClientJersey implements DsfClient
 			return response.readEntity(Bundle.class);
 		else
 			throw handleError(response);
+	}
+
+	@Override
+	public Future<Bundle> searchAsync(Duration initialPollingInterval, Class<? extends Resource> resourceType,
+			Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
+		if (parameters != null)
+		{
+			for (Entry<String, List<String>> entry : parameters.entrySet())
+				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+		}
+
+		return doSearchAsync(initialPollingInterval, target, false);
+	}
+
+	@Override
+	public Future<Bundle> searchAsync(Duration initialPollingInterval, String url)
+	{
+		checkUri(url);
+
+		return doSearchAsync(initialPollingInterval, client.target(url), false);
+	}
+
+	@Override
+	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval,
+			Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
+		if (parameters != null)
+		{
+			for (Entry<String, List<String>> entry : parameters.entrySet())
+				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+		}
+
+		return doSearchAsync(initialPollingInterval, target, true);
+	}
+
+	@Override
+	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval, String url)
+	{
+		checkUri(url);
+
+		return doSearchAsync(initialPollingInterval, client.target(url), true);
+	}
+
+	private void checkUri(String url)
+	{
+		Objects.requireNonNull(url, "url");
+		if (url.isBlank())
+			throw new RuntimeException("url is blank");
+		if (!url.startsWith(baseUrl))
+			throw new RuntimeException("url not starting with client base url");
+	}
+
+	private Future<Bundle> doSearchAsync(Duration initialPollingInterval, WebTarget target, boolean strict)
+	{
+		Builder requestBuilder = target.request().header(Constants.HEADER_PREFER,
+				Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+		if (strict)
+			requestBuilder.header(Constants.HEADER_PREFER, PreferHandlingType.STRICT.getHeaderValue());
+
+		CompletableFuture<Bundle> resultFuture = new CompletableFuture<>();
+
+		requestBuilder.async().get(new InvocationCallback<Response>()
+		{
+			@Override
+			public void completed(Response response)
+			{
+				if (Status.OK.getStatusCode() == response.getStatus())
+					resultFuture.complete(response.readEntity(Bundle.class));
+				else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
+				{
+					String location = response.getHeaderString(HttpHeaders.LOCATION);
+					if (location == null)
+						throw new RuntimeException("202 Accepted without Location header");
+
+					response.close();
+					pollUntilComplete(location, initialPollingInterval.toMillis(), resultFuture);
+				}
+				else
+					resultFuture.completeExceptionally(handleError(response));
+			}
+
+			@Override
+			public void failed(Throwable throwable)
+			{
+				resultFuture.completeExceptionally(throwable);
+			}
+		});
+
+		return resultFuture;
+	}
+
+	private void pollUntilComplete(String pollUrl, long pollIntervalMillis, CompletableFuture<Bundle> resultFuture)
+	{
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+		Runnable poll = new Runnable()
+		{
+			private long pollInterval = pollIntervalMillis;
+
+			@Override
+			public void run()
+			{
+				try
+				{
+					checkUri(pollUrl);
+
+					Response response = client.target(pollUrl).request().get();
+
+					if (Status.OK.getStatusCode() == response.getStatus())
+						resultFuture.complete(response.readEntity(Bundle.class));
+					else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
+					{
+						String location = response.getHeaderString(HttpHeaders.LOCATION);
+						if (location == null)
+							throw new RuntimeException("202 Accepted without Location header");
+
+						response.close();
+
+						pollInterval *= 2;
+
+						executor.schedule(this, pollInterval, TimeUnit.MILLISECONDS);
+					}
+					else
+						resultFuture.completeExceptionally(handleError(response));
+
+				}
+				catch (Exception e)
+				{
+					resultFuture.completeExceptionally(e);
+				}
+			}
+		};
+
+		executor.schedule(poll, pollIntervalMillis, TimeUnit.MILLISECONDS);
 	}
 
 	@Override

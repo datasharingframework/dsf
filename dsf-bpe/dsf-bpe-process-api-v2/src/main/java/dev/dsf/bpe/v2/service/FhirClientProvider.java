@@ -23,10 +23,10 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import dev.dsf.bpe.v2.constants.NamingSystems;
 
 /**
- * Provides connection configurations and HAPI FHIR clients for configured (non DSF) FHIR servers and DSF FHIR servers.
+ * Provides HAPI FHIR clients for configured (non DSF) FHIR servers and DSF FHIR servers.
  *
  * @see DsfClientProvider
- * @see FhirClientConfigProvider
+ * @see ClientConfigProvider
  */
 public interface FhirClientProvider
 {
@@ -42,7 +42,6 @@ public interface FhirClientProvider
 	 *            may be <code>null</code>
 	 * @return never <code>null</code>, {@link Optional#empty()} if no client is configured for the given
 	 *         <b>fhirServerId</b>
-	 * @see DsfClientProvider
 	 */
-	Optional<IGenericClient> getClient(String fhirServerId);
+	Optional<IGenericClient> getById(String fhirServerId);
 }

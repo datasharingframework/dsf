@@ -15,8 +15,10 @@
  */
 package dev.dsf.bpe.v2.client.dsf;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -171,9 +173,75 @@ public interface BasicDsfClient extends PreferReturnResource
 
 	boolean exists(IdType resourceTypeIdVersion);
 
+	/**
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param parameters
+	 *            may be <code>null</code>
+	 * @return
+	 */
 	Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
 
+	/**
+	 * Send "Prefer: handling=strict" header
+	 *
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param parameters
+	 *            may be <code>null</code>
+	 * @return search result
+	 */
 	Bundle searchWithStrictHandling(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
+
+	/**
+	 * Send "Prefer: respond-async" header and handles async response
+	 *
+	 * @param initialPollingInterval
+	 *            not <code>null</code>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param parameters
+	 *            may be <code>null</code>
+	 * @return async search result
+	 */
+	Future<Bundle> searchAsync(Duration initialPollingInterval, Class<? extends Resource> resourceType,
+			Map<String, List<String>> parameters);
+
+	/**
+	 * Send "Prefer: respond-async" header and handles async response
+	 *
+	 * @param initialPollingInterval
+	 *            not <code>null</code>
+	 * @param url
+	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
+	 *            optional query parameters
+	 * @return async search result
+	 */
+	Future<Bundle> searchAsync(Duration initialPollingInterval, String url);
+
+	/**
+	 * @param initialPollingInterval
+	 *            not <code>null</code>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param parameters
+	 *            may be <code>null</code>
+	 * @return async search result
+	 */
+	Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval,
+			Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
+
+	/**
+	 * Send "Prefer: respond-async, handling=strict" header and handles async response
+	 *
+	 * @param initialPollingInterval
+	 *            not <code>null</code>
+	 * @param url
+	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
+	 *            optional query parameters
+	 * @return async search result
+	 */
+	Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval, String url);
 
 	CapabilityStatement getConformance();
 

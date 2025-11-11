@@ -133,6 +133,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 	private static final ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
+	protected static TestFhirDataServer testFhirDataServer;
+
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
 	private static JettyServer bpeServer;
@@ -156,8 +158,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer(fhirStatusConnectorChannel, fhirApiConnectorChannel, fhirBaseUrl);
-
-		// --- bpe ---
 
 		// allowed bpe classes override to enable access to classes from dsf-bpe-test-plugin module for v1 test plugins
 		List<String> allowedBpeClassesV1 = readListFile(
@@ -185,6 +185,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		String bpeBaseUrl = "https://localhost:" + bpeApiConnectorChannel.socket().getLocalPort() + BPE_CONTEXT_PATH;
 
 		Files.createDirectories(EMPTY_PROCESS_DIRECTORY);
+
+		testFhirDataServer = new TestFhirDataServer(certificates.getFhirServerCertificate());
 
 		logger.info("Starting BPE Server ...");
 		bpeServer = startBpeServer(bpeStatusConnectorChannel, bpeApiConnectorChannel, bpeBaseUrl, fhirBaseUrl);
@@ -398,6 +400,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.proxy.noProxy", "localhost, noproxy:443");
 
 		final String fhirConnectionsYaml = """
+				test-fhir-data-server:
+				  base-url: '#[testFhirDataServerBaseUrl]'
 				dsf-fhir-server:
 				  base-url: '#[fhirBaseUrl]'
 				  test-connection-on-startup: yes
@@ -424,7 +428,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				    private-key-file: '#[uac.client.key]'
 				    certificate-file: '#[uac.client.crt]'
 				    password: '#[password]'
-				""".replaceAll(Pattern.quote("#[fhirBaseUrl]"), Matcher.quoteReplacement(fhirBaseUrl))
+				"""
+				.replaceAll(Pattern.quote("#[testFhirDataServerBaseUrl]"),
+						Matcher.quoteReplacement("https://localhost:" + testFhirDataServer.getAddress().getPort()))
+				.replaceAll(Pattern.quote("#[fhirBaseUrl]"), Matcher.quoteReplacement(fhirBaseUrl))
 				.replaceAll(Pattern.quote("#[client.key]"),
 						Matcher.quoteReplacement(certificates.getClientCertificatePrivateKeyFile().toString()))
 				.replaceAll(Pattern.quote("#[client.crt]"),

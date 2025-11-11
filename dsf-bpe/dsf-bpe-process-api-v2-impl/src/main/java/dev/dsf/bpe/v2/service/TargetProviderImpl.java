@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -34,6 +35,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.constants.NamingSystems.EndpointIdentifier;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v2.variables.Target;
@@ -131,9 +133,9 @@ public class TargetProviderImpl extends AbstractResourceProvider implements Targ
 		}
 	}
 
-	public TargetProviderImpl(DsfClientProvider clientProvider, String localEndpointAddress)
+	public TargetProviderImpl(Supplier<DsfClient> localDsfClient, String localEndpointAddress)
 	{
-		super(clientProvider, localEndpointAddress);
+		super(localDsfClient, localEndpointAddress);
 	}
 
 	protected BuilderImpl createBuilder(Identifier... memberOrganizationIdentifier)

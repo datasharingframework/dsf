@@ -95,7 +95,7 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 			Thread.sleep(Duration.ofMillis(250));
 
 			logger.info("searching ...");
-			resultBundle = api.getDsfClientProvider().getLocalDsfClient().search(QuestionnaireResponse.class,
+			resultBundle = api.getDsfClientProvider().getLocal().search(QuestionnaireResponse.class,
 					Map.of("status", List.of(QuestionnaireResponseStatus.INPROGRESS.toCode())));
 
 			if (resultBundle != null && resultBundle.getTotal() == 1)
@@ -222,7 +222,7 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 			expectTrue(update(api, qr, "dic-user", "dic-user@test.org"));
 		}
 		else
-			api.getDsfClientProvider().getLocalDsfClient().update(qr);
+			api.getDsfClientProvider().getLocal().update(qr);
 	}
 
 	private void set(QuestionnaireResponseItemComponent item, Type value)
@@ -235,7 +235,7 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name())
 				.setIdentifier(NamingSystems.PractitionerIdentifier.withValue(identifierValue));
 
-		Optional<IGenericClient> oClient = api.getFhirClientProvider().getClient(clientId);
+		Optional<IGenericClient> oClient = api.getFhirClientProvider().getById(clientId);
 
 		expectTrue(oClient.isPresent());
 

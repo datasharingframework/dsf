@@ -95,7 +95,7 @@ public class DefaultTaskSender implements TaskSender
 
 	protected IdType doSend(Task task, String targetEndpointUrl)
 	{
-		return api.getDsfClientProvider().getDsfClient(targetEndpointUrl).withMinimalReturn().create(task);
+		return api.getDsfClientProvider().getByEndpointUrl(targetEndpointUrl).withMinimalReturn().create(task);
 	}
 
 	protected TaskAndConfig createTaskAndConfig(BusinessKeyStrategy businessKeyStrategy)

@@ -47,21 +47,21 @@ public class FhirClientProviderTest extends AbstractTest implements ServiceTask
 	@PluginTest
 	public void getClientWithConfiguredServerId(FhirClientProvider clientProvider) throws Exception
 	{
-		expectNotNull(clientProvider.getClient("dsf-fhir-server"));
-		expectTrue(clientProvider.getClient("dsf-fhir-server").isPresent());
+		expectNotNull(clientProvider.getById("dsf-fhir-server"));
+		expectTrue(clientProvider.getById("dsf-fhir-server").isPresent());
 	}
 
 	@PluginTest
 	public void getClientWithNotConfiguredServerId(FhirClientProvider clientProvider) throws Exception
 	{
-		expectNotNull(clientProvider.getClient("not-configured"));
-		expectFalse(clientProvider.getClient("not-configured").isPresent());
+		expectNotNull(clientProvider.getById("not-configured"));
+		expectFalse(clientProvider.getById("not-configured").isPresent());
 	}
 
 	@PluginTest
 	public void getClientConfigTestConnection(FhirClientProvider clientProvider) throws Exception
 	{
-		clientProvider.getClient("dsf-fhir-server").ifPresent(client ->
+		clientProvider.getById("dsf-fhir-server").ifPresent(client ->
 		{
 			CapabilityStatement statement = client.capabilities().ofType(CapabilityStatement.class).execute();
 			expectNotNull(statement);
@@ -72,7 +72,7 @@ public class FhirClientProviderTest extends AbstractTest implements ServiceTask
 	@PluginTest
 	public void getClientConfigTestConnectionViaEndpointIdentifier(FhirClientProvider clientProvider) throws Exception
 	{
-		clientProvider.getClient("#Test_Endpoint").ifPresent(client ->
+		clientProvider.getById("#Test_Endpoint").ifPresent(client ->
 		{
 			CapabilityStatement statement = client.capabilities().ofType(CapabilityStatement.class).execute();
 			expectNotNull(statement);

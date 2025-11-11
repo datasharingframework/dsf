@@ -257,14 +257,23 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	@Test
 	public void startDsfClientTest() throws Exception
 	{
-		Binary binary = new Binary();
-		new ReadAccessHelperImpl().addLocal(binary);
-		binary.setData(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-		binary.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-		Binary created = getWebserviceClient().create(binary);
-		assertNotNull(created);
+		testFhirDataServer.start();
 
-		executePluginTest(createTestTask("DsfClientTest"));
+		try
+		{
+			Binary binary = new Binary();
+			new ReadAccessHelperImpl().addLocal(binary);
+			binary.setData(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+			binary.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+			Binary created = getWebserviceClient().create(binary);
+			assertNotNull(created);
+
+			executePluginTest(createTestTask("DsfClientTest"));
+		}
+		finally
+		{
+			testFhirDataServer.stop();
+		}
 	}
 
 	@Test

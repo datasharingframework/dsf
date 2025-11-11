@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -88,6 +89,32 @@ class BasicDsfClientWithRetryImpl extends AbstractDsfClientJerseyWithRetry imple
 	public Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
 	{
 		return retry(() -> delegate.search(resourceType, parameters));
+	}
+
+	@Override
+	public Future<Bundle> searchAsync(Duration initialPollingInterval, Class<? extends Resource> resourceType,
+			Map<String, List<String>> parameters)
+	{
+		return retry(() -> delegate.searchAsync(initialPollingInterval, resourceType, parameters));
+	}
+
+	@Override
+	public Future<Bundle> searchAsync(Duration initialPollingInterval, String url)
+	{
+		return retry(() -> delegate.searchAsync(initialPollingInterval, url));
+	}
+
+	@Override
+	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval,
+			Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
+	{
+		return retry(() -> delegate.searchAsyncWithStrictHandling(initialPollingInterval, resourceType, parameters));
+	}
+
+	@Override
+	public Future<Bundle> searchAsyncWithStrictHandling(Duration initialPollingInterval, String url)
+	{
+		return retry(() -> delegate.searchAsyncWithStrictHandling(initialPollingInterval, url));
 	}
 
 	@Override
