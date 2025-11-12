@@ -79,6 +79,10 @@
 		<element id="OrganizationAffiliation.code.coding">
 			<path value="OrganizationAffiliation.code.coding" />
 			<min value="1" />
+			<binding>
+				<strength value="preferred" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/organization-role|2.0.0" />
+			</binding>
 		</element>
 		<element id="OrganizationAffiliation.code.coding.system">
 			<path value="OrganizationAffiliation.code.coding.system" />
