@@ -33,6 +33,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.webservice.base.AbstractBasicService;
 import dev.dsf.fhir.webservice.specification.RootService;
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -41,6 +42,13 @@ import jakarta.ws.rs.core.UriInfo;
 public class RootServiceImpl extends AbstractBasicService implements RootService, InitializingBean
 {
 	public static final String ROOT_GET = RootServiceImpl.class.getCanonicalName() + ".get";
+
+	private static final CacheControl NO_STORE = new CacheControl();
+	static
+	{
+		// no-transform set by default
+		NO_STORE.setNoStore(true); // never store this response
+	}
 
 	private final CommandFactory commandFactory;
 	private final ResponseGenerator responseGenerator;
@@ -82,7 +90,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		return responseGenerator
 				.response(Status.METHOD_NOT_ALLOWED, outcome,
 						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
-				.allow(HttpMethod.POST).build();
+				.allow(HttpMethod.POST).cacheControl(NO_STORE).build();
 	}
 
 	@Override
