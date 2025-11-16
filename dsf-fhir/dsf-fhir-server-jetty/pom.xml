@@ -130,7 +130,6 @@
 						<configuration>
 							<outputDirectory>docker/lib</outputDirectory>
 							<includeScope>compile</includeScope>
-							<excludeArtifactIds>camunda-bpmn-model,camunda-xml-model</excludeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
