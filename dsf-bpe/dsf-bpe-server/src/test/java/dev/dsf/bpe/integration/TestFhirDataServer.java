@@ -23,15 +23,21 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import de.hsheilbronn.mi.utils.crypto.context.SSLContextFactory;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
@@ -47,6 +53,8 @@ public class TestFhirDataServer
 
 	public TestFhirDataServer(CertificateAndPrivateKey serverCertificate)
 	{
+		FhirContext context = FhirContext.forR4();
+
 		try
 		{
 			char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
@@ -67,6 +75,9 @@ public class TestFhirDataServer
 
 				exchange.getResponseHeaders().set(HttpHeaders.LOCATION,
 						"https://localhost:" + server.getAddress().getPort() + "/async");
+				exchange.getResponseHeaders().set(HttpHeaders.RETRY_AFTER,
+						DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss O").withZone(ZoneOffset.UTC)
+								.format(ZonedDateTime.now().plusSeconds(2)));
 				exchange.sendResponseHeaders(Status.ACCEPTED.getStatusCode(), 0);
 				exchange.close();
 			});
@@ -78,11 +89,15 @@ public class TestFhirDataServer
 				Integer c = counter.updateAndGet(i -> ++i);
 				if (c <= 2)
 				{
+					exchange.getResponseHeaders().set(HttpHeaders.RETRY_AFTER, "1");
 					exchange.sendResponseHeaders(Status.ACCEPTED.getStatusCode(), 0);
 					exchange.close();
 				}
 
-				String jsonResponse = "{\"resourceType\":\"Bundle\",\"type\":\"searchset\",\"total\":0}";
+				Bundle response = new Bundle().setType(BundleType.BATCHRESPONSE);
+				response.addEntry().setResource(new Bundle().setType(BundleType.SEARCHSET).setTotal(0)).getResponse()
+						.setStatus("200 OK").setLocation("Patient");
+				String jsonResponse = context.newJsonParser().encodeResourceToString(response);
 
 				exchange.getResponseHeaders().set(HttpHeaders.CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 				exchange.sendResponseHeaders(Status.OK.getStatusCode(), jsonResponse.getBytes().length);

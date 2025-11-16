@@ -20,12 +20,16 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -50,6 +54,9 @@ import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -107,6 +114,8 @@ public class DsfClientJersey implements DsfClient
 	private static final String CONTENT_RANGE_PATTERN_TEXT = "bytes (?<start>\\d+)-(?<end>\\d+)\\/(?<size>\\d+)";
 	private static final Pattern CONTENT_RANGE_PATTERN = Pattern.compile(CONTENT_RANGE_PATTERN_TEXT);
 
+	private static final Pattern HTTP_STATUS_PATTERN = Pattern.compile("^[12345][0-9]{2}(?: |$)");
+
 	private static Class<?> getFhirClass(ResourceType type)
 	{
 		try
@@ -150,7 +159,6 @@ public class DsfClientJersey implements DsfClient
 
 	private final PreferReturnMinimalWithRetry preferReturnMinimal;
 	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
-
 
 	public DsfClientJersey(dev.dsf.bpe.v2.client.fhir.ClientConfig clientConfig, OidcClientProvider oidcClientProvider,
 			String userAgent, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
@@ -1035,7 +1043,7 @@ public class DsfClientJersey implements DsfClient
 
 		CompletableFuture<Bundle> resultFuture = new CompletableFuture<>();
 
-		requestBuilder.async().get(new InvocationCallback<Response>()
+		requestBuilder.accept(Constants.CT_FHIR_JSON_NEW).async().get(new InvocationCallback<Response>()
 		{
 			@Override
 			public void completed(Response response)
@@ -1044,23 +1052,31 @@ public class DsfClientJersey implements DsfClient
 					resultFuture.complete(response.readEntity(Bundle.class));
 				else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
 				{
-					String location = response.getHeaderString(HttpHeaders.LOCATION);
-					if (location == null || location.isBlank())
-					{
-						logger.warn("202 Accepted without Location header");
+					response.close();
 
-						location = response.getHeaderString(HttpHeaders.CONTENT_LOCATION);
-						if (location == null || location.isBlank())
-							throw new RuntimeException(
-									"202 Accepted without Location and without Content-Location header");
-						else
-							logger.warn("202 Accepted with Content-Location header");
+					Optional<Duration> retryAfter = parseRetryAfter(response.getHeaderString(HttpHeaders.RETRY_AFTER));
+
+					String contentLocation = response.getHeaderString(HttpHeaders.CONTENT_LOCATION);
+					if (contentLocation != null && !contentLocation.isBlank())
+					{
+						checkUri(contentLocation);
+						pollUntilComplete(contentLocation, false, delayStrategy, retryAfter, resultFuture);
+
+						return;
 					}
 
-					checkUri(location);
+					String location = response.getHeaderString(HttpHeaders.LOCATION);
+					if (location != null && !location.isBlank())
+					{
+						checkUri(location);
+						pollUntilComplete(location, true, delayStrategy, retryAfter, resultFuture);
 
-					response.close();
-					pollUntilComplete(location, delayStrategy, resultFuture);
+						return;
+					}
+
+					resultFuture.completeExceptionally(
+							new WebApplicationException("Reponse from server without " + HttpHeaders.CONTENT_LOCATION
+									+ " or " + HttpHeaders.LOCATION + " header", Status.BAD_GATEWAY));
 				}
 				else
 					resultFuture.completeExceptionally(handleError(response));
@@ -1076,7 +1092,8 @@ public class DsfClientJersey implements DsfClient
 		return resultFuture;
 	}
 
-	private void pollUntilComplete(String location, DelayStrategy delayStrategy, CompletableFuture<Bundle> resultFuture)
+	private void pollUntilComplete(String location, boolean sendAcceptHeader, DelayStrategy delayStrategy,
+			Optional<Duration> retryAfter, CompletableFuture<Bundle> resultFuture)
 	{
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -1092,15 +1109,28 @@ public class DsfClientJersey implements DsfClient
 
 				try
 				{
-					Response response = client.target(location).request().get();
+					Builder request = client.target(location).request();
+					if (sendAcceptHeader)
+						request = request.accept(Constants.CT_FHIR_JSON_NEW);
+
+					Response response = request.get();
 
 					if (Status.OK.getStatusCode() == response.getStatus())
-						resultFuture.complete(response.readEntity(Bundle.class));
+					{
+						Bundle bundle = response.readEntity(Bundle.class);
+						bundle = DsfClientJersey.this.unpack(bundle);
+
+						resultFuture.complete(bundle);
+					}
 					else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
 					{
 						response.close();
 
-						delay = delayStrategy.getNextDelay(delay);
+						Optional<Duration> retryAfter = parseRetryAfter(
+								response.getHeaderString(HttpHeaders.RETRY_AFTER));
+
+						delay = retryAfter.orElse(delayStrategy.getNextDelay(delay));
+						logger.debug("Status 202, trying again in {}", delay);
 						executor.schedule(this, delay.toMillis(), TimeUnit.MILLISECONDS);
 					}
 					else
@@ -1114,7 +1144,117 @@ public class DsfClientJersey implements DsfClient
 			}
 		};
 
-		executor.schedule(poll, delayStrategy.getFirstDelay().toMillis(), TimeUnit.MILLISECONDS);
+		Duration delay = retryAfter.orElse(delayStrategy.getFirstDelay());
+		logger.debug("Status 202, trying again in {}", delay);
+		executor.schedule(poll, delay.toMillis(), TimeUnit.MILLISECONDS);
+	}
+
+	private Optional<Duration> parseRetryAfter(String headerValue)
+	{
+		if (headerValue == null || headerValue.isBlank())
+			return Optional.empty();
+
+		String trimmed = headerValue.trim();
+		if (trimmed.chars().allMatch(Character::isDigit))
+		{
+			try
+			{
+				long seconds = Long.parseLong(trimmed);
+				return Optional.of(Duration.ofSeconds(seconds));
+			}
+			catch (NumberFormatException e)
+			{
+				logger.warn("Unable to parse header value: {}", e.getMessage());
+				return Optional.empty();
+			}
+		}
+
+		try
+		{
+			ZonedDateTime retryTime = ZonedDateTime.parse(trimmed, DateTimeFormatter.ofPattern(RFC_7231_FORMAT));
+			Duration duration = Duration.between(ZonedDateTime.now(), retryTime);
+			return Optional.of(duration.isNegative() ? Duration.ZERO : duration);
+		}
+		catch (DateTimeParseException e)
+		{
+			logger.warn("Unable to parse header value: {}", e.getMessage());
+			return Optional.empty();
+		}
+	}
+
+	private Bundle unpack(Bundle bundle)
+	{
+		if (BundleType.BATCHRESPONSE.equals(bundle.getType()))
+		{
+			List<BundleEntryComponent> entries = bundle.getEntry();
+			if (entries.size() == 1)
+			{
+				BundleEntryComponent entry = entries.get(0);
+				if (entry.hasResponse())
+				{
+					BundleEntryResponseComponent response = entry.getResponse();
+					if (response.hasStatus())
+					{
+						String status = response.getStatus();
+						if ("200 OK".equals(status) || "200".equals(status))
+						{
+							if (entry.hasResource())
+							{
+								if (entry.getResource() instanceof Bundle b)
+									return b;
+								else
+									throw new WebApplicationException(
+											"Reponse from server not a Bundle with Bundle.entry[0].resource of type Bundle but "
+													+ entry.getResource().getResourceType().name(),
+											Status.BAD_GATEWAY);
+							}
+							else
+								throw new WebApplicationException(
+										"Reponse from server not a Bundle with Bundle.entry[0].resource",
+										Status.BAD_GATEWAY);
+						}
+						else
+						{
+							Matcher statusMatcher = HTTP_STATUS_PATTERN.matcher(status);
+							if (statusMatcher.matches())
+							{
+								try
+								{
+									int code = Integer.parseInt(statusMatcher.group());
+									throw new WebApplicationException("Bundle.entry[0].response.status: " + status,
+											Status.fromStatusCode(code));
+								}
+								catch (NumberFormatException e)
+								{
+									throw new WebApplicationException(
+											"Reponse from server not a Bundle with unkown Bundle.entry[0].response.status: "
+													+ status,
+											Status.BAD_GATEWAY);
+								}
+							}
+							else
+								throw new WebApplicationException(
+										"Reponse from server not a Bundle with unkown Bundle.entry[0].response.status: "
+												+ status,
+										Status.BAD_GATEWAY);
+						}
+					}
+					else
+						throw new WebApplicationException(
+								"Reponse from server not a Bundle with Bundle.entry[0].response.status",
+								Status.BAD_GATEWAY);
+				}
+				else
+					throw new WebApplicationException("Reponse from server not a Bundle with Bundle.entry[0].response",
+							Status.BAD_GATEWAY);
+			}
+			else
+				throw new WebApplicationException(
+						"Reponse from server not a Bundle with one entry but " + entries.size(), Status.BAD_GATEWAY);
+		}
+		else
+			throw new WebApplicationException("Reponse from server not a Bundle with type " + BundleType.BATCHRESPONSE
+					+ " but " + bundle.getType(), Status.BAD_GATEWAY);
 	}
 
 	@Override

@@ -224,7 +224,7 @@ public interface BasicDsfClient extends PreferReturnResource
 			Map<String, List<String>> parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF}.<br>
+	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async" header and handles async response
 	 *
@@ -242,7 +242,7 @@ public interface BasicDsfClient extends PreferReturnResource
 	 * Send "Prefer: respond-async" header and handles async response
 	 *
 	 * @param delayStrategy
-	 *            not <code>null</code>
+	 *            not <code>null</code>, will be ignored if the server sends <i>Retry-After</i> headers
 	 * @param url
 	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
 	 *            optional query parameters
@@ -251,7 +251,7 @@ public interface BasicDsfClient extends PreferReturnResource
 	CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, String url);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF}.<br>
+	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, handling=strict" header and handles async response
 	 *
@@ -271,7 +271,7 @@ public interface BasicDsfClient extends PreferReturnResource
 	 * Send "Prefer: respond-async, handling=strict" header and handles async response
 	 *
 	 * @param delayStrategy
-	 *            not <code>null</code>
+	 *            not <code>null</code>, will be ignored if the server sends <i>Retry-After</i> headers
 	 * @param resourceType
 	 *            not <code>null</code>
 	 * @param parameters
@@ -283,7 +283,7 @@ public interface BasicDsfClient extends PreferReturnResource
 
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF}.<br>
+	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, handling=strict" header and handles async response
 	 *
@@ -301,7 +301,7 @@ public interface BasicDsfClient extends PreferReturnResource
 	 * Send "Prefer: respond-async, handling=strict" header and handles async response
 	 *
 	 * @param delayStrategy
-	 *            not <code>null</code>
+	 *            not <code>null</code>, will be ignored if the server sends <i>Retry-After</i> headers
 	 * @param url
 	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
 	 *            optional query parameters
