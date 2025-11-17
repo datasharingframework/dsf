@@ -13,10 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.bpe.camunda;
+package dev.dsf.bpe.engine;
 
-import org.operaton.bpm.engine.impl.variable.serializer.VariableSerializerFactory;
+import org.operaton.bpm.engine.impl.telemetry.dto.TelemetryDataImpl;
+import org.operaton.bpm.engine.spring.SpringProcessEngineConfiguration;
 
-public interface FallbackSerializerFactory extends VariableSerializerFactory, ProcessPluginConsumer
+public class MultiVersionSpringProcessEngineConfiguration extends SpringProcessEngineConfiguration
 {
+	public MultiVersionSpringProcessEngineConfiguration(DelegateProvider delegateProvider)
+	{
+		bpmnParseFactory = new MultiVersionBpmnParseFactory(delegateProvider);
+	}
+
+	@Override
+	protected void initDiagnostics()
+	{
+		// override to turn telemetry collection of
+
+		setTelemetryData(new TelemetryDataImpl(null, null));
+	}
 }

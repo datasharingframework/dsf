@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.bpe.camunda;
+package dev.dsf.bpe.engine;
 
-import org.operaton.bpm.engine.impl.telemetry.dto.TelemetryDataImpl;
-import org.operaton.bpm.engine.spring.SpringProcessEngineConfiguration;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParse;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParser;
+import org.operaton.bpm.engine.impl.cfg.BpmnParseFactory;
 
-public class MultiVersionSpringProcessEngineConfiguration extends SpringProcessEngineConfiguration
+public class MultiVersionBpmnParseFactory implements BpmnParseFactory
 {
-	public MultiVersionSpringProcessEngineConfiguration(DelegateProvider delegateProvider)
+	private final DelegateProvider delegateProvider;
+
+	public MultiVersionBpmnParseFactory(DelegateProvider delegateProvider)
 	{
-		bpmnParseFactory = new MultiVersionBpmnParseFactory(delegateProvider);
+		this.delegateProvider = delegateProvider;
 	}
 
 	@Override
-	protected void initDiagnostics()
+	public BpmnParse createBpmnParse(BpmnParser bpmnParser)
 	{
-		// override to turn telemetry collection of
-
-		setTelemetryData(new TelemetryDataImpl(null, null));
+		return new MultiVersionBpmnParse(bpmnParser, delegateProvider);
 	}
 }

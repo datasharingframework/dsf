@@ -368,8 +368,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.db.user.group", BPE_DATABASE_USERS_GROUP);
 		initParameters.put("dev.dsf.bpe.db.user.username", BPE_DATABASE_USER);
 		initParameters.put("dev.dsf.bpe.db.user.password", BPE_DATABASE_USER_PASSWORD);
-		initParameters.put("dev.dsf.bpe.db.user.camunda.username", BPE_DATABASE_CAMUNDA_USER);
-		initParameters.put("dev.dsf.bpe.db.user.camunda.password", BPE_DATABASE_CAMUNDA_USER_PASSWORD);
+		initParameters.put("dev.dsf.bpe.db.user.engine.username", BPE_DATABASE_ENGINE_USER);
+		initParameters.put("dev.dsf.bpe.db.user.engine.password", BPE_DATABASE_ENGINE_USER_PASSWORD);
 
 		initParameters.put("dev.dsf.bpe.fhir.client.certificate", certificates.getClientCertificateFile().toString());
 		initParameters.put("dev.dsf.bpe.fhir.client.certificate.private.key",

@@ -21,24 +21,24 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<include file="bpe/db/db.rename-db-users.changelog-2.0.0.xml" />
-	<include file="bpe/db/db.create-db-users.changelog-1.0.0.xml" />
-	
-	<include file="bpe/db/db.camunda_engine.changelog-1.0.0.xml" />
-	<include file="bpe/db/db.camunda_identity.changelog-1.0.0.xml" />
-
-	<include file="bpe/db/db.process_plugin_resources.changelog-1.0.0.xml" />
-	<include file="bpe/db/db.process_states.changelog-1.0.0.xml" />
-
-	<include file="bpe/db/db.last_event.changelog-1.0.0.xml" />
-
-	<include file="bpe/db/db.camunda_engine.changelog-1.3.0.xml" />
-
-	<include file="bpe/db/db.camunda_engine.changelog-1.5.1.xml" />
-
-	<include file="bpe/db/db.camunda_engine.changelog-1.6.0.xml" />
-
-	<include file="bpe/db/db.camunda_engine.changelog-1.8.0.xml" />
-	
-	<include file="bpe/db/db.camunda_engine.changelog-1.9.0.xml" />
+	<changeSet author="hhund" id="db.rename-db-users.changelog-2.0.0-engine-users-group" dbms="postgresql" runOnChange="true">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_roles WHERE rolname='camunda_users'</sqlCheck>
+			</and>
+		</preConditions>
+		<sql>
+			ALTER ROLE camunda_users RENAME TO ${db.engine_users_group};
+		</sql>
+	</changeSet>
+	<changeSet author="hhund" id="db.rename-db-users.changelog-2.0.0-engine-user" dbms="postgresql" runOnChange="true">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_roles WHERE rolname='camunda_server_user'</sqlCheck>
+			</and>
+		</preConditions>
+		<sql>
+			ALTER ROLE camunda_server_user RENAME TO ${db.engine_user};
+		</sql>
+	</changeSet>
 </databaseChangeLog>

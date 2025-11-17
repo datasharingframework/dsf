@@ -41,9 +41,9 @@ public abstract class AbstractDbTest
 	protected static final String BPE_DATABASE_USER = "server_user";
 	protected static final String BPE_DATABASE_USER_PASSWORD = "server_user_password";
 
-	protected static final String BPE_DATABASE_CAMUNDA_USERS_GROUP = "camunda_users_group";
-	protected static final String BPE_DATABASE_CAMUNDA_USER = "camunda_user";
-	protected static final String BPE_DATABASE_CAMUNDA_USER_PASSWORD = "camunda_user_password";
+	protected static final String BPE_DATABASE_ENGINE_USERS_GROUP = "engine_users_group";
+	protected static final String BPE_DATABASE_ENGINE_USER = "engine_user";
+	protected static final String BPE_DATABASE_ENGINE_USER_PASSWORD = "engine_user_password";
 
 	protected static final String FHIR_CHANGE_LOG_FILE = "fhir/db/db.changelog.xml";
 
@@ -59,9 +59,9 @@ public abstract class AbstractDbTest
 
 	protected static final Map<String, String> BPE_CHANGE_LOG_PARAMETERS = Map.of("db.liquibase_user", ROOT_USER,
 			"db.server_users_group", BPE_DATABASE_USERS_GROUP, "db.server_user", BPE_DATABASE_USER,
-			"db.server_user_password", BPE_DATABASE_USER_PASSWORD, "db.camunda_users_group",
-			BPE_DATABASE_CAMUNDA_USERS_GROUP, "db.camunda_user", BPE_DATABASE_CAMUNDA_USER, "db.camunda_user_password",
-			BPE_DATABASE_CAMUNDA_USER_PASSWORD);
+			"db.server_user_password", BPE_DATABASE_USER_PASSWORD, "db.engine_users_group",
+			BPE_DATABASE_ENGINE_USERS_GROUP, "db.engine_user", BPE_DATABASE_ENGINE_USER, "db.engine_user_password",
+			BPE_DATABASE_ENGINE_USER_PASSWORD);
 
 	protected static final Map<String, String> FHIR_CHANGE_LOG_PARAMETERS = Map.of("db.liquibase_user", ROOT_USER,
 			"db.server_users_group", FHIR_DATABASE_USERS_GROUP, "db.server_user", FHIR_DATABASE_USER,
@@ -89,8 +89,8 @@ public abstract class AbstractDbTest
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
 		dataSource.setUrl("jdbc:postgresql://" + host + ":" + port + "/" + databaseName);
-		dataSource.setUsername(BPE_DATABASE_CAMUNDA_USER);
-		dataSource.setPassword(BPE_DATABASE_CAMUNDA_USER_PASSWORD);
+		dataSource.setUsername(BPE_DATABASE_ENGINE_USER);
+		dataSource.setPassword(BPE_DATABASE_ENGINE_USER_PASSWORD);
 		dataSource.setDefaultReadOnly(true);
 
 		dataSource.setTestOnBorrow(true);

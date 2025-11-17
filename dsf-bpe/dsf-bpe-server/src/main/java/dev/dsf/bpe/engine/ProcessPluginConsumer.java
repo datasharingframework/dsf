@@ -13,24 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.bpe.camunda;
+package dev.dsf.bpe.engine;
 
-import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParse;
-import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParser;
-import org.operaton.bpm.engine.impl.cfg.BpmnParseFactory;
+import java.util.List;
+import java.util.Map;
 
-public class MultiVersionBpmnParseFactory implements BpmnParseFactory
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+
+public interface ProcessPluginConsumer
 {
-	private final DelegateProvider delegateProvider;
-
-	public MultiVersionBpmnParseFactory(DelegateProvider delegateProvider)
-	{
-		this.delegateProvider = delegateProvider;
-	}
-
-	@Override
-	public BpmnParse createBpmnParse(BpmnParser bpmnParser)
-	{
-		return new MultiVersionBpmnParse(bpmnParser, delegateProvider);
-	}
+	void setProcessPlugins(List<ProcessPlugin> plugins,
+			Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion);
 }

@@ -44,9 +44,9 @@ import org.springframework.beans.factory.InitializingBean;
 import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
-import dev.dsf.bpe.camunda.ProcessPluginConsumer;
 import dev.dsf.bpe.client.dsf.BasicWebserviceClient;
 import dev.dsf.bpe.client.dsf.WebserviceClient;
+import dev.dsf.bpe.engine.ProcessPluginConsumer;
 
 public class ProcessPluginManagerImpl implements ProcessPluginManager, InitializingBean
 {

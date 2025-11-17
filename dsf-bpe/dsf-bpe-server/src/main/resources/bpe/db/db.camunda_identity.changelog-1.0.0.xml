@@ -24,21 +24,24 @@
 	logicalFilePath="db/db.camunda_identity.changelog-1.0.0.xml">
 
 	<changeSet author="camunda.org" id="db.camunda_identity.changelog-1.0.0">
+		<validCheckSum>9:09445d67a79866964af3de295fa58b94</validCheckSum>
 		<sqlFile dbms="postgresql" encoding="utf8" path="bpe/db/camunda/postgres_identity_7.19.0.sql" />
+	</changeSet>
 			
+	<changeSet author="hhund" id="db.camunda_identity.changelog-1.0.0-grant" runOnChange="true">
 		<sql dbms="postgresql">
 			GRANT ALL ON TABLE ACT_ID_GROUP TO ${db.liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_GROUP TO ${db.camunda_users_group};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_GROUP TO ${db.engine_users_group};
 			GRANT ALL ON TABLE ACT_ID_MEMBERSHIP TO ${db.liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_MEMBERSHIP TO ${db.camunda_users_group};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_MEMBERSHIP TO ${db.engine_users_group};
 			GRANT ALL ON TABLE ACT_ID_USER TO ${db.liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_USER TO ${db.camunda_users_group};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_USER TO ${db.engine_users_group};
 			GRANT ALL ON TABLE ACT_ID_INFO TO ${db.liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_INFO TO ${db.camunda_users_group};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_INFO TO ${db.engine_users_group};
 			GRANT ALL ON TABLE ACT_ID_TENANT TO ${db.liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT TO ${db.camunda_users_group};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT TO ${db.engine_users_group};
 			GRANT ALL ON TABLE ACT_ID_TENANT_MEMBER TO ${db.liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT_MEMBER TO ${db.camunda_users_group};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT_MEMBER TO ${db.engine_users_group};
 		</sql>
 	</changeSet>
 

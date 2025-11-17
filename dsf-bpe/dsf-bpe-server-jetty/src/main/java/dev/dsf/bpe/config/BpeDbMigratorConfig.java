@@ -24,6 +24,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import dev.dsf.bpe.spring.config.PropertiesConfig;
 import dev.dsf.common.db.migration.DbMigrator;
 import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
@@ -37,9 +38,9 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	private static final String DB_SERVER_USERS_GROUP = "db.server_users_group";
 	private static final String DB_SERVER_USER = "db.server_user";
 	private static final String DB_SERVER_USER_PASSWORD = "db.server_user_password";
-	private static final String DB_CAMUNDA_USERS_GROUP = "db.camunda_users_group";
-	private static final String DB_CAMUNDA_USER = "db.camunda_user";
-	private static final String DB_CAMUNDA_USER_PASSWORD = "db.camunda_user_password";
+	private static final String DB_ENGINE_USERS_GROUP = "db.engine_users_group";
+	private static final String DB_ENGINE_USER = "db.engine_user";
+	private static final String DB_ENGINE_USER_PASSWORD = "db.engine_user_password";
 
 	@Documentation(required = true, description = "Address of the database used for the DSF BPE server", recommendation = "Change only if you don't use the provided docker-compose from the installation guide or made changes to the database settings/networking in the docker-compose", example = "jdbc:postgresql://db/bpe")
 	@Value("${dev.dsf.bpe.db.url}")
@@ -73,23 +74,25 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	@Value("${dev.dsf.bpe.db.liquibase.lockWaitTime:2}")
 	private long dbLiquibaseLockWaitTime;
 
-	@Documentation(description = "Name of the user group to access the database from the DSF BPE server for camunda processes")
-	@Value("${dev.dsf.bpe.db.user.camunda.group:camunda_users}")
-	private String dbCamundaUsersGroup;
+	@Documentation(description = "Name of the user group to access the database from the DSF BPE server workflow engine")
+	@Value("${dev.dsf.bpe.db.user.engine.group:bpe_engine_users}")
+	private String dbEngineUsersGroup;
 
-	@Documentation(description = "Username to access the database from the DSF BPE server for camunda processes", recommendation = "Use a different user then in *DEV_DSF_BPE_DB_USER_USERNAME*")
-	@Value("${dev.dsf.bpe.db.user.camunda.username:camunda_server_user}")
-	private String dbCamundaUsername;
+	@Documentation(description = "Username to access the database from the DSF BPE server workflow engine", recommendation = "Use a different user then in *DEV_DSF_BPE_DB_USER_USERNAME*")
+	@Value("${dev.dsf.bpe.db.user.engine.username:bpe_server_engine_user}")
+	private String dbEngineUsername;
 
-	@Documentation(required = true, description = "Password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
-	@Value("${dev.dsf.bpe.db.user.camunda.password}")
-	private char[] dbCamundaPassword;
+	@Documentation(required = true, description = "Password to access the database from the DSF BPE server workflow engine", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_engine.password")
+	@Value("${dev.dsf.bpe.db.user.engine.password}")
+	private char[] dbEnginePassword;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
 	{
 		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
+
+		PropertiesConfig.injectEngineProperties(environment);
 
 		return new PropertySourcesPlaceholderConfigurer();
 	}
@@ -122,8 +125,8 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	public Map<String, String> getChangeLogParameters()
 	{
 		return Map.of(DB_LIQUIBASE_USER, dbLiquibaseUsername, DB_SERVER_USERS_GROUP, dbUsersGroup, DB_SERVER_USER,
-				dbUsername, DB_SERVER_USER_PASSWORD, toString(dbPassword), DB_CAMUNDA_USERS_GROUP, dbCamundaUsersGroup,
-				DB_CAMUNDA_USER, dbCamundaUsername, DB_CAMUNDA_USER_PASSWORD, toString(dbCamundaPassword));
+				dbUsername, DB_SERVER_USER_PASSWORD, toString(dbPassword), DB_ENGINE_USERS_GROUP, dbEngineUsersGroup,
+				DB_ENGINE_USER, dbEngineUsername, DB_ENGINE_USER_PASSWORD, toString(dbEnginePassword));
 	}
 
 	private String toString(char[] password)

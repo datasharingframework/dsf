@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -43,6 +44,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
@@ -75,12 +77,12 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private char[] dbPassword;
 
 	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
-	@Value("${dev.dsf.bpe.db.user.camunda.username:camunda_server_user}")
-	private String dbCamundaUsername;
+	@Value("${dev.dsf.bpe.db.user.engine.username:bpe_server_engine_user}")
+	private String dbEngineUsername;
 
 	// documentation in dev.dsf.bpe.config.BpeDbMigratorConfig
-	@Value("${dev.dsf.bpe.db.user.camunda.password}")
-	private char[] dbCamundaPassword;
+	@Value("${dev.dsf.bpe.db.user.engine.password}")
+	private char[] dbEnginePassword;
 
 	@Documentation(description = "UI theme parameter, adds a color indicator to the ui to distinguish `dev`, `test` and `prod` environments if configured; supported values: `dev`, `test` and `prod`")
 	@Value("${dev.dsf.bpe.server.ui.theme:}")
@@ -407,7 +409,43 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	{
 		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 
+		injectEngineProperties(environment);
+
 		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	public static void injectEngineProperties(ConfigurableEnvironment environment)
+	{
+		Properties properties = new Properties();
+
+		injectEngineProperty(environment, "dev.dsf.bpe.db.user.camunda.group", "dev.dsf.bpe.db.user.engine.group",
+				properties);
+		injectEngineProperty(environment, "dev.dsf.bpe.db.user.camunda.username", "dev.dsf.bpe.db.user.engine.username",
+				properties);
+		injectEngineProperty(environment, "dev.dsf.bpe.db.user.camunda.password", "dev.dsf.bpe.db.user.engine.password",
+				properties);
+
+		if (!properties.isEmpty())
+			environment.getPropertySources().addFirst(new PropertiesPropertySource("engine-properties", properties));
+	}
+
+	private static void injectEngineProperty(ConfigurableEnvironment environment, String oldPropertyName,
+			String newPropertyName, Properties properties)
+	{
+		String oldPropertyValue = environment.getProperty(oldPropertyName);
+		String newPropertyValue = environment.getProperty(newPropertyName);
+
+		if (oldPropertyValue != null && newPropertyValue != null)
+		{
+			logger.error("Property '{}' and old property '{}' defined", newPropertyName, oldPropertyName);
+			throw new RuntimeException(
+					"Property '" + newPropertyName + "' and old property '" + oldPropertyName + "' defined");
+		}
+		else if (oldPropertyValue != null && newPropertyValue == null)
+		{
+			logger.warn("Setting property '{}' with value from old property '{}'", newPropertyName, oldPropertyName);
+			properties.put(newPropertyName, oldPropertyValue);
+		}
 	}
 
 	@Override
@@ -475,14 +513,14 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 		return dbPassword;
 	}
 
-	public String getDbCamundaUsername()
+	public String getDbEngineUsername()
 	{
-		return dbCamundaUsername;
+		return dbEngineUsername;
 	}
 
-	public char[] getDbCamundaPassword()
+	public char[] getDbEnginePassword()
 	{
-		return dbCamundaPassword;
+		return dbEnginePassword;
 	}
 
 	public Theme getUiTheme()

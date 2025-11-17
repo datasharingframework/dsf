@@ -73,7 +73,7 @@ public abstract class AbstractPluginMdc implements PluginMdc
 		ProcessValues processValues = getProcessValues(delegateExecution);
 		if (processValues != null)
 		{
-			// business-key added to mdc by camunda
+			// business-key added to mdc by workflow engine
 			MDC.put(DSF_PROCESS, processValues.processUrl());
 			MDC.put(DSF_PROCESS_TASK_START, processValues.startTaskUrl());
 			MDC.put(DSF_PROCESS_REQUESTER_START, processValues.startRequesterIdentifierValue());

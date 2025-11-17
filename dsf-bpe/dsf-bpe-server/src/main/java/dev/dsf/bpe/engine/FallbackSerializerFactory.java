@@ -13,16 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.bpe.camunda;
+package dev.dsf.bpe.engine;
 
-import java.util.List;
-import java.util.Map;
+import org.operaton.bpm.engine.impl.variable.serializer.VariableSerializerFactory;
 
-import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.api.plugin.ProcessPlugin;
-
-public interface ProcessPluginConsumer
+public interface FallbackSerializerFactory extends VariableSerializerFactory, ProcessPluginConsumer
 {
-	void setProcessPlugins(List<ProcessPlugin> plugins,
-			Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion);
 }
