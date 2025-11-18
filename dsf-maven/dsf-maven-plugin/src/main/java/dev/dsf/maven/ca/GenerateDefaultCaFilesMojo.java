@@ -45,6 +45,9 @@ public class GenerateDefaultCaFilesMojo extends AbstractMojo
 	@Parameter(property = "dsf.clientOnlyCaCommonNames", required = true)
 	private List<String> clientOnlyCaCommonNames;
 
+	@Parameter(property = "dsf.serverOnlyCaCommonNames", required = true)
+	private List<String> serverOnlyCaCommonNames;
+
 	@Parameter(property = "dsf.clientIssuingCas", required = true)
 	private List<File> clientIssuingCas;
 
@@ -60,15 +63,16 @@ public class GenerateDefaultCaFilesMojo extends AbstractMojo
 		getLog().debug("projectBasedir: " + projectBasedir);
 		getLog().debug("certFolder: " + certFolder);
 		getLog().debug("clientOnlyCaCommonNames: " + clientOnlyCaCommonNames);
+		getLog().debug("serverOnlyCaCommonNames: " + serverOnlyCaCommonNames);
 		getLog().debug("clientIssuingCas: " + clientIssuingCas);
 		getLog().debug("clientCaChains: " + clientCaChains);
 		getLog().debug("serverRootCas: " + serverRootCas);
 
 		try
 		{
-			new DefaultCaFilesGenerator(projectBasedir.toPath(), certFolder.toPath(), clientOnlyCaCommonNames)
-					.createFiles(clientIssuingCas.stream().map(File::toPath), clientCaChains.stream().map(File::toPath),
-							serverRootCas.stream().map(File::toPath));
+			new DefaultCaFilesGenerator(projectBasedir.toPath(), certFolder.toPath(), clientOnlyCaCommonNames,
+					serverOnlyCaCommonNames).createFiles(clientIssuingCas.stream().map(File::toPath),
+							clientCaChains.stream().map(File::toPath), serverRootCas.stream().map(File::toPath));
 		}
 		catch (IOException e)
 		{

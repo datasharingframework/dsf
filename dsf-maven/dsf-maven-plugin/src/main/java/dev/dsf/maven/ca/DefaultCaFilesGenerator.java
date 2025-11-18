@@ -59,15 +59,18 @@ public class DefaultCaFilesGenerator
 	{
 		final X509Certificate certificate;
 		final Predicate<String> isClientOnly;
+		final Predicate<String> isServerOnly;
 		final JcaX509CertificateHolder certificateHolder;
 
 		final List<X509CertificateHolder> children = new ArrayList<>();
 		X509CertificateHolder parent;
 
-		X509CertificateHolder(X509Certificate certificate, Predicate<String> isClientOnly)
+		X509CertificateHolder(X509Certificate certificate, Predicate<String> isClientOnly,
+				Predicate<String> isServerOnly)
 		{
 			this.certificate = certificate;
 			this.isClientOnly = isClientOnly;
+			this.isServerOnly = isServerOnly;
 
 			try
 			{
@@ -104,6 +107,12 @@ public class DefaultCaFilesGenerator
 		{
 			return getChildren().isEmpty() ? isClientOnly.test(getSubjectCommonName())
 					: getChildren().stream().allMatch(X509CertificateHolder::isClientOnly);
+		}
+
+		boolean isServerOnly()
+		{
+			return getChildren().isEmpty() ? isServerOnly.test(getSubjectCommonName())
+					: getChildren().stream().allMatch(X509CertificateHolder::isServerOnly);
 		}
 
 		X500Name getSubject()
@@ -151,13 +160,15 @@ public class DefaultCaFilesGenerator
 	private final Path projectBasedir;
 	private final Path certFolder;
 	private final List<String> clientOnlyCaCommonNames;
+	private final List<String> serverOnlyCaCommonNames;
 
-	public DefaultCaFilesGenerator(Path projectBasedir, Path certFolder, List<String> clientOnlyCaCommonNames)
-			throws MojoExecutionException
+	public DefaultCaFilesGenerator(Path projectBasedir, Path certFolder, List<String> clientOnlyCaCommonNames,
+			List<String> serverOnlyCaCommonNames) throws MojoExecutionException
 	{
 		this.projectBasedir = projectBasedir;
 		this.certFolder = certFolder;
 		this.clientOnlyCaCommonNames = clientOnlyCaCommonNames;
+		this.serverOnlyCaCommonNames = serverOnlyCaCommonNames;
 
 		if (projectBasedir == null)
 			throw new MojoExecutionException("projectBasedir not defined");
@@ -165,8 +176,10 @@ public class DefaultCaFilesGenerator
 			throw new MojoExecutionException("certFolder not defined");
 		if (!Files.isReadable(certFolder))
 			throw new MojoExecutionException("certFolder '" + certFolder.toString() + "' not readable");
-		if (clientOnlyCaCommonNames == null || clientOnlyCaCommonNames.isEmpty())
-			throw new MojoExecutionException("clientOnlyCaCommonNames not defined or empty");
+		if (clientOnlyCaCommonNames == null)
+			throw new MojoExecutionException("clientOnlyCaCommonNames not defined");
+		if (serverOnlyCaCommonNames == null)
+			throw new MojoExecutionException("serverOnlyCaCommonNames not defined");
 	}
 
 	public void createFiles(Stream<Path> clientIssuingCas, Stream<Path> clientCaChains, Stream<Path> serverRootCas)
@@ -186,7 +199,7 @@ public class DefaultCaFilesGenerator
 		if (iToWrite.isEmpty() && cToWrite.isEmpty() && sWrite.isEmpty())
 			return;
 
-		List<X509CertificateHolder> certificates = readCertificates(certFolder, clientOnlyCaCommonNames);
+		List<X509CertificateHolder> certificates = readCertificates();
 
 		try
 		{
@@ -215,14 +228,13 @@ public class DefaultCaFilesGenerator
 		};
 	}
 
-	private List<X509CertificateHolder> readCertificates(Path certFolder, List<String> clientOnlyCaCommonNames)
-			throws IOException
+	private List<X509CertificateHolder> readCertificates() throws IOException
 	{
 		List<X509CertificateHolder> certificates = new ArrayList<>();
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(certFolder,
 				entry -> entry.getFileName().toString().endsWith(".pem")))
 		{
-			directoryStream.forEach(readCertificate(certificates, clientOnlyCaCommonNames));
+			directoryStream.forEach(readCertificate(certificates));
 		}
 
 		Map<X500Name, X509CertificateHolder> certificatesBySubject = certificates.stream()
@@ -232,8 +244,7 @@ public class DefaultCaFilesGenerator
 		return certificates;
 	}
 
-	private Consumer<? super Path> readCertificate(List<X509CertificateHolder> certificates,
-			List<String> clientOnlyCaCommonNames)
+	private Consumer<? super Path> readCertificate(List<X509CertificateHolder> certificates)
 	{
 		return file ->
 		{
@@ -241,7 +252,7 @@ public class DefaultCaFilesGenerator
 			{
 				logger.info("Reading certificate from {}", projectBasedir.relativize(file));
 				X509CertificateHolder certificate = new X509CertificateHolder(PemReader.readCertificate(file),
-						clientOnlyCaCommonNames::contains);
+						clientOnlyCaCommonNames::contains, serverOnlyCaCommonNames::contains);
 
 				if (!certificate.isCa())
 					throw new RuntimeException("Certificate in " + file.toString() + " is not a CA certificate");
@@ -274,6 +285,7 @@ public class DefaultCaFilesGenerator
 	private Consumer<Path> writeClientIssuingCas(List<X509CertificateHolder> certificates, String logMessage)
 	{
 		List<X509CertificateHolder> issuingCas = certificates.stream().filter(X509CertificateHolder::isIssuingCa)
+				.filter(Predicate.not(X509CertificateHolder::isServerOnly))
 				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).toList();
 
 		return folder -> issuingCas.forEach(writeCert(folder, logMessage));
@@ -282,6 +294,7 @@ public class DefaultCaFilesGenerator
 	private Consumer<Path> writeClientCaChains(List<X509CertificateHolder> certificates, String logMessage)
 	{
 		List<X509CertificateHolder> caChains = certificates.stream().filter(X509CertificateHolder::isRoot)
+				.filter(Predicate.not(X509CertificateHolder::isServerOnly))
 				.sorted(Comparator.comparing(X509CertificateHolder::getSubjectCommonName)).flatMap(childern()).toList();
 
 		return folder -> caChains.forEach(writeCert(folder, logMessage));
