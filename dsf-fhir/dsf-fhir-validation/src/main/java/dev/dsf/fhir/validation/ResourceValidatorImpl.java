@@ -27,6 +27,7 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidatorExtens
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -196,9 +197,12 @@ public class ResourceValidatorImpl implements ResourceValidator
 	{
 		ValidationResult result = validator.validateWithResult(resource);
 
-		// TODO: remove after HAPI validator is fixed: https://github.com/hapifhir/org.hl7.fhir.core/issues/193
+		// TODO remove after HAPI validator is fixed: https://github.com/hapifhir/org.hl7.fhir.core/issues/193
 		adaptDefaultSliceValidationErrorToWarning(result);
 		adaptQuestionnaireTextNotSameValidationErrorToWarning(result);
+
+		// TODO remove if MII plugins with error no longer in circulation
+		adaptMiiPluginsBundleFullUrlUuidNullErrorToWarning(resource, result);
 
 		return new ValidationResult(context,
 				result.getMessages().stream().filter(m -> !(ResultSeverityEnum.WARNING.equals(m.getSeverity())
@@ -219,5 +223,19 @@ public class ResourceValidatorImpl implements ResourceValidator
 				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) && m.getMessage()
 						.startsWith("If text exists, it must match the questionnaire definition for linkId"))
 				.forEach(m -> m.setSeverity(ResultSeverityEnum.WARNING));
+	}
+
+	private void adaptMiiPluginsBundleFullUrlUuidNullErrorToWarning(Resource resource, ValidationResult result)
+	{
+		if (resource instanceof Bundle b && b.hasIdentifier()
+				&& "http://medizininformatik-initiative.de/fhir/CodeSystem/cryptography"
+						.equals(b.getIdentifier().getSystem())
+				&& "public-key".equals(b.getIdentifier().getValue()))
+		{
+			result.getMessages().stream()
+					.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+							&& "UUIDs must be valid and lowercase (null)".equals(m.getMessage()))
+					.forEach(m -> m.setSeverity(ResultSeverityEnum.WARNING));
+		}
 	}
 }

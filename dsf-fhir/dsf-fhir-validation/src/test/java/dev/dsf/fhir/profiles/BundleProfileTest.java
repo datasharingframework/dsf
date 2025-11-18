@@ -16,9 +16,13 @@
 package dev.dsf.fhir.profiles;
 
 import java.util.List;
+import java.util.UUID;
 
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -53,5 +57,24 @@ public class BundleProfileTest extends AbstractMetaTagProfileTest<Bundle>
 	public void runMetaTagTests() throws Exception
 	{
 		doRunMetaTagTests(resourceValidator);
+	}
+
+	@Test
+	public void testBundleWithUrnUuidNull() throws Exception
+	{
+		Binary binary = new Binary().setContentType("text/plain");
+
+		String binaryUuid = "urn:uuid:" + UUID.randomUUID().toString();
+
+		DocumentReference documentReference = new DocumentReference().setStatus(DocumentReferenceStatus.CURRENT);
+		documentReference.addContent().getAttachment().setContentType("text/plain").setUrl(binaryUuid);
+
+		Bundle bundle = new Bundle().setType(BundleType.COLLECTION);
+		bundle.getIdentifier().setSystem("http://medizininformatik-initiative.de/fhir/CodeSystem/cryptography")
+				.setValue("public-key");
+		bundle.addEntry().setResource(documentReference).setFullUrl("urn:uuid:null");
+		bundle.addEntry().setResource(binary).setFullUrl(binaryUuid);
+
+		testValid(resourceValidator, bundle);
 	}
 }
