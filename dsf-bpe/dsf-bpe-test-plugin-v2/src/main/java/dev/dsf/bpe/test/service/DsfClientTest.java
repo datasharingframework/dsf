@@ -217,7 +217,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 
 		expectException(WebApplicationException.class, () ->
 		{
-			client.get().withRetry(5, DelayStrategy.EXPONENTIAL_BACKOFF).read(Observation.class,
+			client.get().withRetry(5, DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF).read(Observation.class,
 					UUID.randomUUID().toString());
 		});
 	}

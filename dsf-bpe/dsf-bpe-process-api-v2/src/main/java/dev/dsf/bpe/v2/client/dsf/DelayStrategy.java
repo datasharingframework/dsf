@@ -22,7 +22,7 @@ public interface DelayStrategy
 	/**
 	 * Waits for 100ms, 200ms, 400ms, 800ms, 800ms, ...
 	 */
-	DelayStrategy EXPONENTIAL_BACKOFF = new DelayStrategy()
+	DelayStrategy TRUNCATED_EXPONENTIAL_BACKOFF = new DelayStrategy()
 	{
 		@Override
 		public Duration getFirstDelay()

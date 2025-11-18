@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.Resource;
 public interface AsyncPreferReturnMinimal
 {
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=minimal" header and handles async response
 	 *
@@ -36,7 +36,7 @@ public interface AsyncPreferReturnMinimal
 	 */
 	default CompletableFuture<IdType> operationAsync(String operationName, Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, operationName, parameters);
 	}
 
 	/**
@@ -53,7 +53,7 @@ public interface AsyncPreferReturnMinimal
 	CompletableFuture<IdType> operationAsync(DelayStrategy delayStrategy, String operationName, Parameters parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=minimal" header and handles async response
 	 *
@@ -70,7 +70,7 @@ public interface AsyncPreferReturnMinimal
 	default <T extends Resource> CompletableFuture<IdType> operationAsync(Class<T> resourceType, String operationName,
 			Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, operationName, parameters);
 	}
 
 	/**
@@ -92,7 +92,7 @@ public interface AsyncPreferReturnMinimal
 			String operationName, Parameters parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=minimal" header and handles async response
 	 *
@@ -111,7 +111,7 @@ public interface AsyncPreferReturnMinimal
 	default <T extends Resource> CompletableFuture<IdType> operationAsync(Class<T> resourceType, String id,
 			String operationName, Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, id, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, id, operationName, parameters);
 	}
 
 	/**
@@ -135,7 +135,7 @@ public interface AsyncPreferReturnMinimal
 			String id, String operationName, Parameters parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=minimal" header and handles async response
 	 *
@@ -156,7 +156,8 @@ public interface AsyncPreferReturnMinimal
 	default <T extends Resource> CompletableFuture<IdType> operationAsync(Class<T> resourceType, String id,
 			String version, String operationName, Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, id, version, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, id, version, operationName,
+				parameters);
 	}
 
 	/**

@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.Resource;
 public interface AsyncPreferReturnOutcome
 {
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=OperationOutcome" header and handles async response
 	 *
@@ -36,7 +36,7 @@ public interface AsyncPreferReturnOutcome
 	 */
 	default CompletableFuture<OperationOutcome> operationAsync(String operationName, Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, operationName, parameters);
 	}
 
 	/**
@@ -54,7 +54,7 @@ public interface AsyncPreferReturnOutcome
 			Parameters parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=OperationOutcome" header and handles async response
 	 *
@@ -71,7 +71,7 @@ public interface AsyncPreferReturnOutcome
 	default <T extends Resource> CompletableFuture<OperationOutcome> operationAsync(Class<T> resourceType,
 			String operationName, Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, operationName, parameters);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public interface AsyncPreferReturnOutcome
 			Class<T> resourceType, String operationName, Parameters parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=OperationOutcome" header and handles async response
 	 *
@@ -112,7 +112,7 @@ public interface AsyncPreferReturnOutcome
 	default <T extends Resource> CompletableFuture<OperationOutcome> operationAsync(Class<T> resourceType, String id,
 			String operationName, Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, id, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, id, operationName, parameters);
 	}
 
 	/**
@@ -136,7 +136,7 @@ public interface AsyncPreferReturnOutcome
 			Class<T> resourceType, String id, String operationName, Parameters parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=OperationOutcome" header and handles async response
 	 *
@@ -157,7 +157,8 @@ public interface AsyncPreferReturnOutcome
 	default <T extends Resource> CompletableFuture<OperationOutcome> operationAsync(Class<T> resourceType, String id,
 			String version, String operationName, Parameters parameters)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, id, version, operationName, parameters);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, id, version, operationName,
+				parameters);
 	}
 
 	/**

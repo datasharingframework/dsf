@@ -26,7 +26,7 @@ import org.hl7.fhir.r4.model.Resource;
 public interface AsyncDsfClient
 {
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF}.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF}.<br>
 	 * <br>
 	 * Send "Prefer: respond-async" header and handles async response
 	 *
@@ -39,7 +39,7 @@ public interface AsyncDsfClient
 	default CompletableFuture<Bundle> searchAsync(Class<? extends Resource> resourceType,
 			Map<String, List<String>> parameters)
 	{
-		return searchAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, parameters);
+		return searchAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, parameters);
 	}
 
 	/**
@@ -57,7 +57,7 @@ public interface AsyncDsfClient
 			Map<String, List<String>> parameters);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async" header and handles async response
 	 *
@@ -68,7 +68,7 @@ public interface AsyncDsfClient
 	 */
 	default CompletableFuture<Bundle> searchAsync(String url)
 	{
-		return searchAsync(DelayStrategy.EXPONENTIAL_BACKOFF, url);
+		return searchAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, url);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public interface AsyncDsfClient
 	CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, String url);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, handling=strict" header and handles async response
 	 *
@@ -97,7 +97,7 @@ public interface AsyncDsfClient
 	default CompletableFuture<Bundle> searchAsyncWithStrictHandling(Class<? extends Resource> resourceType,
 			Map<String, List<String>> parameters)
 	{
-		return searchAsyncWithStrictHandling(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, parameters);
+		return searchAsyncWithStrictHandling(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, parameters);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public interface AsyncDsfClient
 
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, handling=strict" header and handles async response
 	 *
@@ -127,7 +127,7 @@ public interface AsyncDsfClient
 	 */
 	default CompletableFuture<Bundle> searchAsyncWithStrictHandling(String url)
 	{
-		return searchAsyncWithStrictHandling(DelayStrategy.EXPONENTIAL_BACKOFF, url);
+		return searchAsyncWithStrictHandling(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, url);
 	}
 
 	/**
@@ -143,7 +143,7 @@ public interface AsyncDsfClient
 	CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy, String url);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=representation" header and handles async response
 	 *
@@ -160,7 +160,7 @@ public interface AsyncDsfClient
 	default <R extends Resource> CompletableFuture<R> operationAsync(String operationName, Parameters parameters,
 			Class<R> returnType)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, operationName, parameters, returnType);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, operationName, parameters, returnType);
 	}
 
 	/**
@@ -182,7 +182,7 @@ public interface AsyncDsfClient
 			Parameters parameters, Class<R> returnType);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=representation" header and handles async response
 	 *
@@ -203,7 +203,8 @@ public interface AsyncDsfClient
 	default <R extends Resource, T extends Resource> CompletableFuture<R> operationAsync(Class<T> resourceType,
 			String operationName, Parameters parameters, Class<R> returnType)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, operationName, parameters, returnType);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, operationName, parameters,
+				returnType);
 	}
 
 	/**
@@ -229,7 +230,7 @@ public interface AsyncDsfClient
 			Class<T> resourceType, String operationName, Parameters parameters, Class<R> returnType);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=representation" header and handles async response
 	 *
@@ -252,7 +253,7 @@ public interface AsyncDsfClient
 	default <R extends Resource, T extends Resource> CompletableFuture<R> operationAsync(Class<T> resourceType,
 			String id, String operationName, Parameters parameters, Class<R> returnType)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, id, operationName, parameters,
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, id, operationName, parameters,
 				returnType);
 	}
 
@@ -281,7 +282,7 @@ public interface AsyncDsfClient
 			Class<T> resourceType, String id, String operationName, Parameters parameters, Class<R> returnType);
 
 	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
+	 * Uses {@link DelayStrategy#TRUNCATED_EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
 	 * <br>
 	 * Send "Prefer: respond-async, return=representation" header and handles async response
 	 *
@@ -306,8 +307,8 @@ public interface AsyncDsfClient
 	default <R extends Resource, T extends Resource> CompletableFuture<R> operationAsync(Class<T> resourceType,
 			String id, String version, String operationName, Parameters parameters, Class<R> returnType)
 	{
-		return operationAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, id, version, operationName, parameters,
-				returnType);
+		return operationAsync(DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF, resourceType, id, version, operationName,
+				parameters, returnType);
 	}
 
 	/**
