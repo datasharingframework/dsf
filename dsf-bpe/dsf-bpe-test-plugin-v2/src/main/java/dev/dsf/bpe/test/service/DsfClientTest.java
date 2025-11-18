@@ -15,26 +15,36 @@
  */
 package dev.dsf.bpe.test.service;
 
+import static dev.dsf.bpe.test.PluginTestExecutor.expectException;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
+import static dev.dsf.bpe.test.PluginTestExecutor.expectTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 
 import dev.dsf.bpe.test.AbstractTest;
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v2.ProcessPluginApi;
 import dev.dsf.bpe.v2.activity.ServiceTask;
 import dev.dsf.bpe.v2.client.dsf.BinaryInputStream;
+import dev.dsf.bpe.v2.client.dsf.DelayStrategy;
 import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.error.ErrorBoundaryEvent;
 import dev.dsf.bpe.v2.variables.Variables;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 
 public class DsfClientTest extends AbstractTest implements ServiceTask
@@ -42,7 +52,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 	@Override
 	public void execute(ProcessPluginApi api, Variables variables) throws ErrorBoundaryEvent, Exception
 	{
-		DsfClient localDsfClient = api.getDsfClientProvider().getLocalDsfClient();
+		DsfClient localDsfClient = api.getDsfClientProvider().getLocal();
 
 		Bundle search = localDsfClient.search(Binary.class, Map.of("_count", List.of("1")));
 		IdType testBinaryId = search.getEntry().stream().filter(BundleEntryComponent::hasResource)
@@ -140,5 +150,89 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 			expectSame(0, allBytes[0]);
 			expectSame(1, allBytes[1]);
 		}
+	}
+
+	@PluginTest
+	public void searchAsyncResourceMap(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		CompletableFuture<Bundle> fBundle = client.get().searchAsync(Patient.class, Map.of());
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void searchAsyncUrl(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		CompletableFuture<Bundle> fBundle = client.get().searchAsync(client.get().getBaseUrl() + "/Patient");
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void searchAsyncResourceMapStrict(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		CompletableFuture<Bundle> fBundle = client.get().searchAsyncWithStrictHandling(Patient.class, Map.of());
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void searchAsyncUrlStrict(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		CompletableFuture<Bundle> fBundle = client.get()
+				.searchAsyncWithStrictHandling(client.get().getBaseUrl() + "/Patient");
+		expectNotNull(fBundle);
+
+		Bundle bundle = fBundle.get();
+		expectNotNull(bundle);
+		expectSame(0, bundle.getTotal());
+	}
+
+	@PluginTest
+	public void readWithRetry(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		expectException(WebApplicationException.class, () ->
+		{
+			client.get().withRetry(5, DelayStrategy.TRUNCATED_EXPONENTIAL_BACKOFF).read(Observation.class,
+					UUID.randomUUID().toString());
+		});
+	}
+
+	@PluginTest
+	public void operationAsync(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		CompletableFuture<DiagnosticReport> operationAsync = client.get().operationAsync(DiagnosticReport.class, "test",
+				null, DiagnosticReport.class);
+		expectNotNull(operationAsync);
+
+		DiagnosticReport r = operationAsync.get();
+		expectNotNull(r);
 	}
 }

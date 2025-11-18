@@ -21,7 +21,8 @@ public interface RetryClient<T>
 {
 	int RETRY_ONCE = 1;
 	int RETRY_FOREVER = -1;
-	Duration FIVE_SECONDS = Duration.ofSeconds(5);
+
+	DelayStrategy FIVE_SECONDS = DelayStrategy.constant(Duration.ofSeconds(5));
 
 	/**
 	 * retries once after a delay of {@link RetryClient#FIVE_SECONDS}
@@ -59,27 +60,27 @@ public interface RetryClient<T>
 	 */
 	default T withRetry(Duration delay)
 	{
-		return withRetry(RETRY_ONCE, delay);
+		return withRetry(RETRY_ONCE, DelayStrategy.constant(delay));
 	}
 
 	/**
 	 * @param nTimes
 	 *            {@code >= 0}
-	 * @param delay
-	 *            not <code>null</code>, not {@link Duration#isNegative()}
+	 * @param delayStrategy
+	 *            not <code>null</code>
 	 * @return T
 	 *
 	 * @throws IllegalArgumentException
 	 *             if given <b>nTimes</b> or <b>delay</b> is <code>null</code> or {@link Duration#isNegative()}
 	 */
-	T withRetry(int nTimes, Duration delay);
+	T withRetry(int nTimes, DelayStrategy delayStrategy);
 
 	/**
-	 * @param delay
-	 *            not <code>null</code>, not {@link Duration#isNegative()}
+	 * @param delayStrategy
+	 *            not <code>null</code>
 	 * @return T
 	 * @throws IllegalArgumentException
 	 *             if given <b>delay</b> is <code>null</code> or {@link Duration#isNegative()}
 	 */
-	T withRetryForever(Duration delay);
+	T withRetryForever(DelayStrategy delayStrategy);
 }

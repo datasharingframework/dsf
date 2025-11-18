@@ -46,7 +46,7 @@
 	<concept>
 		<code value="business-key" />
 		<display value="Business Key" />
-		<definition value="Camunda business key used to identify process instances" />
+		<definition value="Workflow engine business key used to identify process instances" />
 	</concept>
 	<concept>
 		<code value="correlation-key" />

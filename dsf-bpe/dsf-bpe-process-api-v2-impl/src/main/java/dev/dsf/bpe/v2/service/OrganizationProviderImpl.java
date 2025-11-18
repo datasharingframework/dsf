@@ -18,6 +18,7 @@ package dev.dsf.bpe.v2.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,19 +32,21 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
+
 public class OrganizationProviderImpl extends AbstractResourceProvider implements OrganizationProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationProviderImpl.class);
 
-	public OrganizationProviderImpl(DsfClientProvider clientProvider, String localEndpointAddress)
+	public OrganizationProviderImpl(Supplier<DsfClient> localDsfClient, String localEndpointAddress)
 	{
-		super(clientProvider, localEndpointAddress);
+		super(localDsfClient, localEndpointAddress);
 	}
 
 	@Override
 	public Optional<Organization> getLocalOrganization()
 	{
-		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Endpoint.class,
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress), "_include",
 						List.of("Endpoint:organization")));
 
@@ -85,7 +88,7 @@ public class OrganizationProviderImpl extends AbstractResourceProvider implement
 
 		String organizationIdSp = toSearchParameter(organizationIdentifier);
 
-		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Organization.class,
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(Organization.class,
 				Map.of("active", List.of("true"), "identifier", List.of(organizationIdSp)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1

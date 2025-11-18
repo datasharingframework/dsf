@@ -37,50 +37,62 @@
 	<hierarchyMeaning value="grouped-by" />
 	<versionNeeded value="false" />
 	<content value="complete" />
-	<count value="12" />
+	<count value="15" />
 	<concept>
 		<code value="UAC_USER" />
-		<display value="Use-and-Access Committee Member" />
+		<display value="Use-and-Access Committee User" />
 	</concept>
 	<concept>
 		<code value="COS_USER" />
-		<display value="Coordinating Site Member" />
+		<display value="Coordinating Site User" />
 	</concept>
 	<concept>
 		<code value="CRR_USER" />
-		<display value="Central Research Repository Member" />
+		<display value="Central Research Repository User" />
 	</concept>
 	<concept>
 		<code value="DIC_USER" />
-		<display value="Data Integration Center Member" />
+		<display value="Data Integration Center User" />
 	</concept>
 	<concept>
 		<code value="DMS_USER" />
-		<display value="Data Management Site Member" />
+		<display value="Data Management Site User" />
 	</concept>
 	<concept>
 		<code value="DTS_USER" />
-		<display value="Data Transfer Site Member" />
+		<display value="Data Transfer Site User" />
 	</concept>
 	<concept>
 		<code value="HRP_USER" />
-		<display value="Health Research Platform Member" />
+		<display value="Health Research Platform User" />
 	</concept>
 	<concept>
 		<code value="TTP_USER" />
-		<display value="Trusted Third Party Member" />
+		<display value="Trusted Third Party User" />
 	</concept>
 	<concept>
 		<code value="AMS_USER" />
-		<display value="Allowlist Management Site Member" />
+		<display value="Allowlist Management Site User" />
 	</concept>
 	<concept>
 		<code value="ASP_USER" />
-		<display value="Analysis Service Provider Member" />
+		<display value="Analysis Service Provider User" />
 	</concept>
 	<concept>
 		<code value="SPR_USER" />
-		<display value="Service Provider Registry Member" />
+		<display value="Service Provider Registry User" />
+	</concept>
+	<concept>
+		<code value="TSP_USER" />
+		<display value="Terminology Service Provider User" />
+	</concept>
+	<concept>
+		<code value="PPH_USER" />
+		<display value="Process Plugin Hub User" />
+	</concept>
+	<concept>
+		<code value="BIO_USER" />
+		<display value="Biobank User" />
 	</concept>
 	<concept>
 		<code value="DSF_ADMIN" />

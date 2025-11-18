@@ -15,18 +15,28 @@
  */
 package dev.dsf.bpe.v2.client.dsf;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,10 +50,14 @@ import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -60,15 +74,24 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.bpe.v2.client.dsf.BinaryInputStream.Range;
+import dev.dsf.bpe.v2.client.fhir.ClientConfig.BasicAuthentication;
+import dev.dsf.bpe.v2.client.fhir.ClientConfig.BearerAuthentication;
+import dev.dsf.bpe.v2.client.fhir.ClientConfig.OidcAuthentication;
+import dev.dsf.bpe.v2.service.OidcClientProvider;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.AsyncInvoker;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.client.InvocationCallback;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Feature;
+import jakarta.ws.rs.core.FeatureContext;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -93,6 +116,8 @@ public class DsfClientJersey implements DsfClient
 	private static final String CONTENT_RANGE_PATTERN_TEXT = "bytes (?<start>\\d+)-(?<end>\\d+)\\/(?<size>\\d+)";
 	private static final Pattern CONTENT_RANGE_PATTERN = Pattern.compile(CONTENT_RANGE_PATTERN_TEXT);
 
+	private static final Pattern HTTP_STATUS_PATTERN = Pattern.compile("^[12345][0-9]{2}(?: |$)");
+
 	private static Class<?> getFhirClass(ResourceType type)
 	{
 		try
@@ -105,17 +130,90 @@ public class DsfClientJersey implements DsfClient
 		}
 	}
 
+	private static final class BearerAuthenticationFeature implements Feature
+	{
+		final Supplier<char[]> tokenProvider;
+
+		BearerAuthenticationFeature(Supplier<char[]> tokenProvider)
+		{
+			this.tokenProvider = Objects.requireNonNull(tokenProvider, "tokenProvider");
+		}
+
+		@Override
+		public boolean configure(FeatureContext context)
+		{
+			context.register(new ClientRequestFilter()
+			{
+				@Override
+				public void filter(ClientRequestContext requestContext) throws IOException
+				{
+					requestContext.getHeaders().add(HttpHeaders.AUTHORIZATION,
+							Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + String.valueOf(tokenProvider.get()));
+				}
+			});
+
+			return true;
+		}
+	}
+
 	private final Client client;
 	private final String baseUrl;
 
 	private final PreferReturnMinimalWithRetry preferReturnMinimal;
 	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
 
-	public DsfClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, Duration connectTimeout,
-			Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue, FhirContext fhirContext,
+	private final ScheduledExecutorService scheduler;
+
+	public DsfClientJersey(ScheduledExecutorService scheduler, dev.dsf.bpe.v2.client.fhir.ClientConfig clientConfig,
+			OidcClientProvider oidcClientProvider, String userAgent, FhirContext fhirContext,
 			ReferenceCleaner referenceCleaner)
 	{
+		this(scheduler, clientConfig.getBaseUrl(), clientConfig.getTrustStore(),
+				clientConfig.getCertificateAuthentication() == null ? null
+						: clientConfig.getCertificateAuthentication().getKeyStore(),
+				clientConfig.getCertificateAuthentication() == null ? null
+						: clientConfig.getCertificateAuthentication().getKeyStorePassword(),
+				clientConfig.getProxy() == null ? null : clientConfig.getProxy().getUrl(),
+				clientConfig.getProxy() == null ? null : clientConfig.getProxy().getUsername(),
+				clientConfig.getProxy() == null ? null : clientConfig.getProxy().getPassword(),
+				clientConfig.getConnectTimeout(), clientConfig.getReadTimeout(), clientConfig.isDebugLoggingEnabled(),
+				userAgent, fhirContext, referenceCleaner, authFeatures(clientConfig, oidcClientProvider));
+	}
+
+	private static Stream<Feature> authFeatures(dev.dsf.bpe.v2.client.fhir.ClientConfig clientConfig,
+			OidcClientProvider oidcClientProvider)
+	{
+		BasicAuthentication basicAuth = clientConfig.getBasicAuthentication();
+		Feature basicAuthFeature = basicAuth == null ? null
+				: HttpAuthenticationFeature.basic(basicAuth.getUsername(), new String(basicAuth.getPassword()));
+
+		BearerAuthentication bearerAuth = clientConfig.getBearerAuthentication();
+		Feature bearerAuthFeature = bearerAuth == null ? null : new BearerAuthenticationFeature(bearerAuth::getToken);
+
+		OidcAuthentication oidcAuth = clientConfig.getOidcAuthentication();
+		Feature oidcAuthFeature = oidcAuth == null ? null
+				: new BearerAuthenticationFeature(oidcClientProvider.getOidcClient(oidcAuth)::getAccessToken);
+
+		return Stream.of(basicAuthFeature, bearerAuthFeature, oidcAuthFeature).filter(Objects::nonNull);
+	}
+
+	public DsfClientJersey(ScheduledExecutorService scheduler, String baseUrl, KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
+			Duration connectTimeout, Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue,
+			FhirContext fhirContext, ReferenceCleaner referenceCleaner)
+	{
+		this(scheduler, baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName,
+				proxyPassword, connectTimeout, readTimeout, logRequestsAndResponses, userAgentValue, fhirContext,
+				referenceCleaner, Stream.of());
+	}
+
+	private DsfClientJersey(ScheduledExecutorService scheduler, String baseUrl, KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
+			Duration connectTimeout, Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue,
+			FhirContext fhirContext, ReferenceCleaner referenceCleaner, Stream<Feature> authFeatures)
+	{
+		this.scheduler = scheduler;
+
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
 			sslContext = SslConfigurator.newInstance().trustStore(trustStore).createSSLContext();
@@ -125,28 +223,30 @@ public class DsfClientJersey implements DsfClient
 
 		ClientBuilder builder = ClientBuilder.newBuilder();
 
+		authFeatures.forEach(builder::register);
+
 		if (sslContext != null)
-			builder = builder.sslContext(sslContext);
+			builder.sslContext(sslContext);
 
 		ClientConfig config = new ClientConfig();
 		config.connectorProvider(new ApacheConnectorProvider());
 		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
 		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
 		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
-		builder = builder.withConfig(config);
+		builder.withConfig(config);
 
 		if (userAgentValue != null && !userAgentValue.isBlank())
-			builder = builder.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
+			builder.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
 					.add(HttpHeaders.USER_AGENT, userAgentValue));
 
-		builder = builder.readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
-				.connectTimeout(connectTimeout.toMillis(), TimeUnit.MILLISECONDS);
+		builder.readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS).connectTimeout(connectTimeout.toMillis(),
+				TimeUnit.MILLISECONDS);
 
-		builder = builder.register(new FhirAdapter(fhirContext, referenceCleaner));
+		builder.register(new FhirAdapter(fhirContext, referenceCleaner));
 
 		if (logRequestsAndResponses)
 		{
-			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
+			builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
 					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
 		}
 
@@ -208,14 +308,26 @@ public class DsfClientJersey implements DsfClient
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 	}
 
-	private PreferReturn toPreferReturn(PreferReturnType returnType, Class<? extends Resource> resourceType,
+	private <R extends Resource> PreferReturn<R> toPreferReturn(PreferReturnType returnType, Class<R> resourceType,
 			Response response)
 	{
 		return switch (returnType)
 		{
 			case REPRESENTATION -> PreferReturn.resource(response.readEntity(resourceType));
-			case MINIMAL -> PreferReturn.minimal(response.getLocation());
+
+			case MINIMAL -> {
+				response.close();
+
+				String location = response.getLocation() == null ? null : response.getLocation().toString();
+
+				if (location == null)
+					location = response.getHeaderString(HttpHeaders.CONTENT_LOCATION);
+
+				yield PreferReturn.minimal(location);
+			}
+
 			case OPERATION_OUTCOME -> PreferReturn.outcome(response.readEntity(OperationOutcome.class));
+
 			default ->
 				throw new RuntimeException(PreferReturn.class.getName() + " value " + returnType + " not supported");
 		};
@@ -233,52 +345,55 @@ public class DsfClientJersey implements DsfClient
 		return preferReturnOutcome;
 	}
 
-	PreferReturn create(PreferReturnType returnType, Resource resource)
+	<R extends Resource> PreferReturn<R> create(PreferReturnType preferReturnType, Class<R> returnType, R resource)
 	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
 
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
-				.header(Constants.HEADER_PREFER, returnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW)
+				.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW)
 				.post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
 
 		logStatusAndHeaders(response);
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, resource.getClass(), response);
+			return toPreferReturn(preferReturnType, returnType, response);
 		else
 			throw handleError(response);
 	}
 
-	PreferReturn createConditionaly(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
+	<R extends Resource> PreferReturn<R> createConditionaly(PreferReturnType preferReturnType, Class<R> returnType,
+			R resource, String ifNoneExistCriteria)
 	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(ifNoneExistCriteria, "ifNoneExistCriteria");
 
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
-				.header(Constants.HEADER_PREFER, returnType.getHeaderValue())
+				.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue())
 				.header(Constants.HEADER_IF_NONE_EXIST, ifNoneExistCriteria).accept(Constants.CT_FHIR_JSON_NEW)
 				.post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
 
 		logStatusAndHeaders(response);
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, resource.getClass(), response);
+			return toPreferReturn(preferReturnType, returnType, response);
 		else
 			throw handleError(response);
 	}
 
-	PreferReturn createBinary(PreferReturnType returnType, InputStream in, MediaType mediaType,
+	PreferReturn<Binary> createBinary(PreferReturnType preferReturnType, InputStream in, MediaType mediaType,
 			String securityContextReference)
 	{
-		Objects.requireNonNull(returnType, "returnType");
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
 		Objects.requireNonNull(in, "in");
 		Objects.requireNonNull(mediaType, "mediaType");
 		// securityContextReference may be null
 
 		Builder request = getResource().path("Binary").request().header(Constants.HEADER_PREFER,
-				returnType.getHeaderValue());
+				preferReturnType.getHeaderValue());
 		if (securityContextReference != null && !securityContextReference.isBlank())
 			request = request.header(Constants.HEADER_X_SECURITY_CONTEXT, securityContextReference);
 		Response response = request.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(in, mediaType));
@@ -286,19 +401,20 @@ public class DsfClientJersey implements DsfClient
 		logStatusAndHeaders(response);
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, Binary.class, response);
+			return toPreferReturn(preferReturnType, Binary.class, response);
 		else
 			throw handleError(response);
 	}
 
-	PreferReturn update(PreferReturnType returnType, Resource resource)
+	<R extends Resource> PreferReturn<R> update(PreferReturnType preferReturnType, Class<R> returnType, R resource)
 	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
 
 		Builder builder = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
 				.path(resource.getIdElement().getIdPart()).request()
-				.header(Constants.HEADER_PREFER, returnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW);
+				.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW);
 
 		if (resource.getMeta().hasVersionId())
 			builder.header(Constants.HEADER_IF_MATCH, new EntityTag(resource.getMeta().getVersionId(), true));
@@ -308,13 +424,15 @@ public class DsfClientJersey implements DsfClient
 		logStatusAndHeaders(response);
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, resource.getClass(), response);
+			return toPreferReturn(preferReturnType, returnType, response);
 		else
 			throw handleError(response);
 	}
 
-	PreferReturn updateConditionaly(PreferReturnType returnType, Resource resource, Map<String, List<String>> criteria)
+	<R extends Resource> PreferReturn<R> updateConditionaly(PreferReturnType preferReturnType, Class<R> returnType,
+			R resource, Map<String, List<String>> criteria)
 	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(criteria, "criteria");
@@ -327,7 +445,7 @@ public class DsfClientJersey implements DsfClient
 			target = target.queryParam(entry.getKey(), entry.getValue().toArray());
 
 		Builder builder = target.request().accept(Constants.CT_FHIR_JSON_NEW).header(Constants.HEADER_PREFER,
-				returnType.getHeaderValue());
+				preferReturnType.getHeaderValue());
 
 		if (resource.getMeta().hasVersionId())
 			builder.header(Constants.HEADER_IF_MATCH, new EntityTag(resource.getMeta().getVersionId(), true));
@@ -337,22 +455,22 @@ public class DsfClientJersey implements DsfClient
 		logStatusAndHeaders(response);
 
 		if (Status.CREATED.getStatusCode() == response.getStatus() || Status.OK.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, resource.getClass(), response);
+			return toPreferReturn(preferReturnType, returnType, response);
 		else
 			throw handleError(response);
 	}
 
-	PreferReturn updateBinary(PreferReturnType returnType, String id, InputStream in, MediaType mediaType,
+	PreferReturn<Binary> updateBinary(PreferReturnType preferReturnType, String id, InputStream in, MediaType mediaType,
 			String securityContextReference)
 	{
-		Objects.requireNonNull(returnType, "returnType");
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(in, "in");
 		Objects.requireNonNull(mediaType, "mediaType");
 		// securityContextReference may be null
 
 		Builder request = getResource().path("Binary").path(id).request().header(Constants.HEADER_PREFER,
-				returnType.getHeaderValue());
+				preferReturnType.getHeaderValue());
 		if (securityContextReference != null && !securityContextReference.isBlank())
 			request = request.header(Constants.HEADER_X_SECURITY_CONTEXT, securityContextReference);
 		Response response = request.accept(Constants.CT_FHIR_JSON_NEW).put(Entity.entity(in, mediaType));
@@ -360,7 +478,7 @@ public class DsfClientJersey implements DsfClient
 		logStatusAndHeaders(response);
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, Binary.class, response);
+			return toPreferReturn(preferReturnType, Binary.class, response);
 		else
 			throw handleError(response);
 	}
@@ -384,42 +502,44 @@ public class DsfClientJersey implements DsfClient
 	@SuppressWarnings("unchecked")
 	public <R extends Resource> R create(R resource)
 	{
-		return (R) create(PreferReturnType.REPRESENTATION, resource).getResource();
+		return (R) create(PreferReturnType.REPRESENTATION, (Class<R>) resource.getClass(), resource).resource();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
 	{
-		return (R) createConditionaly(PreferReturnType.REPRESENTATION, resource, ifNoneExistCriteria).getResource();
+		return (R) createConditionaly(PreferReturnType.REPRESENTATION, (Class<R>) resource.getClass(), resource,
+				ifNoneExistCriteria).resource();
 	}
 
 	@Override
 	public Binary createBinary(InputStream in, MediaType mediaType, String securityContextReference)
 	{
 		return (Binary) createBinary(PreferReturnType.REPRESENTATION, in, mediaType, securityContextReference)
-				.getResource();
+				.resource();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <R extends Resource> R update(R resource)
 	{
-		return (R) update(PreferReturnType.REPRESENTATION, resource).getResource();
+		return (R) update(PreferReturnType.REPRESENTATION, (Class<R>) resource.getClass(), resource).resource();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
 	{
-		return (R) updateConditionaly(PreferReturnType.REPRESENTATION, resource, criteria).getResource();
+		return (R) updateConditionaly(PreferReturnType.REPRESENTATION, (Class<R>) resource.getClass(), resource,
+				criteria).resource();
 	}
 
 	@Override
 	public Binary updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference)
 	{
 		return (Binary) updateBinary(PreferReturnType.REPRESENTATION, id, in, mediaType, securityContextReference)
-				.getResource();
+				.resource();
 	}
 
 	@Override
@@ -882,6 +1002,330 @@ public class DsfClientJersey implements DsfClient
 	}
 
 	@Override
+	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, Class<? extends Resource> resourceType,
+			Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
+		if (parameters != null)
+		{
+			for (Entry<String, List<String>> entry : parameters.entrySet())
+				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+		}
+
+		return searchAsync(delayStrategy, target, false);
+	}
+
+	@Override
+	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, String url)
+	{
+		checkUri(url);
+
+		return searchAsync(delayStrategy, client.target(url), false);
+	}
+
+	@Override
+	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy,
+			Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
+		if (parameters != null)
+		{
+			for (Entry<String, List<String>> entry : parameters.entrySet())
+				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+		}
+
+		return searchAsync(delayStrategy, target, true);
+	}
+
+	@Override
+	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy, String url)
+	{
+		checkUri(url);
+
+		return searchAsync(delayStrategy, client.target(url), true);
+	}
+
+	private void checkUri(String url)
+	{
+		Objects.requireNonNull(url, "url");
+		if (url.isBlank())
+			throw new RuntimeException("url is blank");
+		if (!url.startsWith(baseUrl))
+			throw new RuntimeException("url not starting with client base url");
+		if (url.startsWith(baseUrl + "@"))
+			throw new RuntimeException("url starting with client base url + @");
+	}
+
+	private CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, WebTarget target, boolean strict)
+	{
+		Builder requestBuilder = target.request().header(Constants.HEADER_PREFER,
+				Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+		if (strict)
+			requestBuilder.header(Constants.HEADER_PREFER, PreferHandlingType.STRICT.getHeaderValue());
+
+		return executeAsync(delayStrategy, requestBuilder, Bundle.class, PreferReturnType.REPRESENTATION,
+				AsyncInvoker::get).thenApply(PreferReturn::resource);
+	}
+
+	private <R extends Resource> CompletableFuture<PreferReturn<R>> executeAsync(DelayStrategy delayStrategy,
+			Builder requestBuilder, Class<R> returnType, PreferReturnType preferReturnType,
+			BiFunction<AsyncInvoker, InvocationCallback<Response>, Future<Response>> httpMethod)
+	{
+		CompletableFuture<PreferReturn<R>> resultFuture = new CompletableFuture<>();
+		InvocationCallback<Response> callback = new InvocationCallback<Response>()
+		{
+			@Override
+			public void completed(Response response)
+			{
+				if (Status.OK.getStatusCode() == response.getStatus())
+				{
+					PreferReturn<R> preferReturn = toPreferReturn(preferReturnType, returnType, response);
+					resultFuture.complete(preferReturn);
+				}
+				else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
+				{
+					response.close();
+
+					Optional<Duration> retryAfter = parseRetryAfter(response.getHeaderString(HttpHeaders.RETRY_AFTER));
+
+					String contentLocation = response.getHeaderString(HttpHeaders.CONTENT_LOCATION);
+					if (contentLocation != null && !contentLocation.isBlank())
+					{
+						checkUri(contentLocation);
+						pollUntilComplete(contentLocation, false, delayStrategy, retryAfter, resultFuture, returnType,
+								preferReturnType);
+
+						return;
+					}
+
+					String location = response.getHeaderString(HttpHeaders.LOCATION);
+					if (location != null && !location.isBlank())
+					{
+						checkUri(location);
+						pollUntilComplete(location, true, delayStrategy, retryAfter, resultFuture, returnType,
+								preferReturnType);
+
+						return;
+					}
+
+					resultFuture.completeExceptionally(
+							new WebApplicationException("Reponse from server without " + HttpHeaders.CONTENT_LOCATION
+									+ " or " + HttpHeaders.LOCATION + " header", Status.BAD_GATEWAY));
+				}
+				else
+					resultFuture.completeExceptionally(handleError(response));
+			}
+
+			@Override
+			public void failed(Throwable throwable)
+			{
+				resultFuture.completeExceptionally(throwable);
+			}
+		};
+
+		AsyncInvoker async = requestBuilder.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue())
+				.accept(Constants.CT_FHIR_JSON_NEW).async();
+
+		httpMethod.apply(async, callback);
+
+		return resultFuture;
+	}
+
+	private <R extends Resource> void pollUntilComplete(String location, boolean sendAcceptHeader,
+			DelayStrategy delayStrategy, Optional<Duration> retryAfter, CompletableFuture<PreferReturn<R>> resultFuture,
+			Class<R> resourceType, PreferReturnType preferReturnType)
+	{
+		Runnable poll = new Runnable()
+		{
+			private Duration delay = delayStrategy.getFirstDelay();
+
+			@Override
+			public void run()
+			{
+				if (resultFuture.isCancelled())
+					return;
+
+				try
+				{
+					Builder request = client.target(location).request();
+					if (sendAcceptHeader)
+						request = request.accept(Constants.CT_FHIR_JSON_NEW);
+
+					Response response = request.get();
+
+					if (Status.OK.getStatusCode() == response.getStatus())
+					{
+						Bundle bundle = response.readEntity(Bundle.class);
+						PreferReturn<R> r = DsfClientJersey.this.unpack(bundle, resourceType, preferReturnType);
+
+						resultFuture.complete(r);
+					}
+					else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
+					{
+						response.close();
+
+						Optional<Duration> retryAfter = parseRetryAfter(
+								response.getHeaderString(HttpHeaders.RETRY_AFTER));
+
+						delay = retryAfter.orElse(delayStrategy.getNextDelay(delay));
+						logger.debug("Status 202, trying again in {}", delay);
+						scheduler.schedule(this, delay.toMillis(), TimeUnit.MILLISECONDS);
+					}
+					else
+						resultFuture.completeExceptionally(handleError(response));
+				}
+				catch (Exception e)
+				{
+					resultFuture.completeExceptionally(e);
+				}
+			}
+		};
+
+		Duration delay = retryAfter.orElse(delayStrategy.getFirstDelay());
+		logger.debug("Status 202, trying again in {}", delay);
+		scheduler.schedule(poll, delay.toMillis(), TimeUnit.MILLISECONDS);
+	}
+
+	private Optional<Duration> parseRetryAfter(String headerValue)
+	{
+		if (headerValue == null || headerValue.isBlank())
+			return Optional.empty();
+
+		String trimmed = headerValue.trim();
+		if (trimmed.chars().allMatch(Character::isDigit))
+		{
+			try
+			{
+				long seconds = Long.parseLong(trimmed);
+				return Optional.of(Duration.ofSeconds(seconds));
+			}
+			catch (NumberFormatException e)
+			{
+				logger.warn("Unable to parse header value: {}", e.getMessage());
+				return Optional.empty();
+			}
+		}
+
+		try
+		{
+			ZonedDateTime retryTime = ZonedDateTime.parse(trimmed, DateTimeFormatter.ofPattern(RFC_7231_FORMAT));
+			Duration duration = Duration.between(ZonedDateTime.now(), retryTime);
+			return Optional.of(duration.isNegative() ? Duration.ZERO : duration);
+		}
+		catch (DateTimeParseException e)
+		{
+			logger.warn("Unable to parse header value: {}", e.getMessage());
+			return Optional.empty();
+		}
+	}
+
+	private <R extends Resource> PreferReturn<R> unpack(Bundle bundle, Class<R> resourceType,
+			PreferReturnType preferReturnType)
+	{
+		if (BundleType.BATCHRESPONSE.equals(bundle.getType()))
+		{
+			List<BundleEntryComponent> entries = bundle.getEntry();
+			if (entries.size() == 1)
+			{
+				BundleEntryComponent entry = entries.get(0);
+				if (entry.hasResponse())
+				{
+					BundleEntryResponseComponent response = entry.getResponse();
+					if (response.hasStatus())
+					{
+						String status = response.getStatus();
+						if ("200 OK".equals(status) || "200".equals(status))
+						{
+							if (PreferReturnType.MINIMAL.equals(preferReturnType))
+								return PreferReturn.minimal(response.getLocation());
+							else if (PreferReturnType.OPERATION_OUTCOME.equals(preferReturnType))
+							{
+								if (response.hasOutcome())
+								{
+									Resource outcome = response.getOutcome();
+
+									if (outcome instanceof OperationOutcome o)
+										return PreferReturn.outcome(o);
+									else
+										throw new ProcessingException(
+												"Reponse from server not a Bundle with Bundle.entry[0].response.outcome of type OperationOutcome but "
+														+ outcome.getResourceType().name());
+								}
+								else
+									throw new ProcessingException(
+											"Reponse from server not a Bundle with Bundle.entry[0].response.outcome");
+							}
+							else if (PreferReturnType.REPRESENTATION.equals(preferReturnType))
+							{
+								if (entry.hasResource())
+								{
+									Resource resource = entry.getResource();
+
+									if (resourceType.isInstance(resource))
+										return PreferReturn.resource(resourceType.cast(resource));
+									else
+									{
+										String resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
+
+										throw new ProcessingException(
+												"Reponse from server not a Bundle with Bundle.entry[0].resource of type "
+														+ resourceTypeName + " but "
+														+ resource.getResourceType().name());
+									}
+								}
+								else
+									throw new ProcessingException(
+											"Reponse from server not a Bundle with Bundle.entry[0].resource");
+							}
+							else
+								throw new IllegalArgumentException(preferReturnType + " not supported");
+						}
+						else
+						{
+							Matcher statusMatcher = HTTP_STATUS_PATTERN.matcher(status);
+							if (statusMatcher.matches())
+							{
+								try
+								{
+									int code = Integer.parseInt(statusMatcher.group());
+									throw new WebApplicationException("Bundle.entry[0].response.status: " + status,
+											Status.fromStatusCode(code));
+								}
+								catch (NumberFormatException e)
+								{
+									throw new ProcessingException(
+											"Reponse from server not a Bundle with unkown Bundle.entry[0].response.status: "
+													+ status,
+											e);
+								}
+							}
+							else
+								throw new ProcessingException(
+										"Reponse from server not a Bundle with unkown Bundle.entry[0].response.status: "
+												+ status);
+						}
+					}
+					else
+						throw new ProcessingException(
+								"Reponse from server not a Bundle with Bundle.entry[0].response.status");
+				}
+				else
+					throw new ProcessingException("Reponse from server not a Bundle with Bundle.entry[0].response");
+			}
+			else
+				throw new ProcessingException("Reponse from server not a Bundle with one entry but " + entries.size());
+		}
+		else
+			throw new ProcessingException("Reponse from server not a Bundle with type " + BundleType.BATCHRESPONSE
+					+ " but " + bundle.getType());
+	}
+
+	@Override
 	public CapabilityStatement getConformance()
 	{
 		Response response = getResource().path("metadata").request()
@@ -937,23 +1381,21 @@ public class DsfClientJersey implements DsfClient
 	}
 
 	@Override
-	public BasicDsfClient withRetry(int nTimes, Duration delay)
+	public BasicDsfClient withRetry(int nTimes, DelayStrategy delayStrategy)
 	{
 		if (nTimes < 0)
 			throw new IllegalArgumentException("nTimes < 0");
-		if (delay == null || delay.isNegative())
-			throw new IllegalArgumentException("delay null or negative");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
 
-		return new BasicDsfClientWithRetryImpl(this, nTimes, delay);
+		return new BasicDsfClientWithRetryImpl(this, nTimes, delayStrategy);
 	}
 
 	@Override
-	public BasicDsfClient withRetryForever(Duration delay)
+	public BasicDsfClient withRetryForever(DelayStrategy delayStrategy)
 	{
-		if (delay == null || delay.isNegative())
-			throw new IllegalArgumentException("delay null or negative");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
 
-		return new BasicDsfClientWithRetryImpl(this, RETRY_FOREVER, delay);
+		return new BasicDsfClientWithRetryImpl(this, RETRY_FOREVER, delayStrategy);
 	}
 
 	@Override
@@ -981,5 +1423,248 @@ public class DsfClientJersey implements DsfClient
 			return response.readEntity(Bundle.class);
 		else
 			throw handleError(response);
+	}
+
+	<R extends Resource> PreferReturn<R> operation(PreferReturnType preferReturnType, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Response response = getResource().path(operationName).request()
+				.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW)
+				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return toPreferReturn(preferReturnType, returnType, response);
+		else
+			throw handleError(response);
+	}
+
+	<R extends Resource, T extends Resource> PreferReturn<R> operation(PreferReturnType preferReturnType,
+			Class<T> resourceType, String operationName, Parameters parameters, Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(operationName)
+				.request().header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue())
+				.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return toPreferReturn(preferReturnType, returnType, response);
+		else
+			throw handleError(response);
+	}
+
+	<R extends Resource, T extends Resource> PreferReturn<R> operation(PreferReturnType preferReturnType,
+			Class<T> resourceType, String id, String operationName, Parameters parameters, Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path(operationName).request().header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue())
+				.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return toPreferReturn(preferReturnType, returnType, response);
+		else
+			throw handleError(response);
+	}
+
+	<R extends Resource, T extends Resource> PreferReturn<R> operation(PreferReturnType preferReturnType,
+			Class<T> resourceType, String id, String version, String operationName, Parameters parameters,
+			Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("_history").path(version).path(operationName).request()
+				.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW)
+				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return toPreferReturn(preferReturnType, returnType, response);
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public <R extends Resource> R operation(String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return operation(PreferReturnType.REPRESENTATION, operationName, parameters, returnType).resource();
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		return operation(PreferReturnType.REPRESENTATION, resourceType, operationName, parameters, returnType)
+				.resource();
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		return operation(PreferReturnType.REPRESENTATION, resourceType, id, operationName, parameters, returnType)
+				.resource();
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return operation(PreferReturnType.REPRESENTATION, resourceType, id, version, operationName, parameters,
+				returnType).resource();
+	}
+
+	<R extends Resource> CompletableFuture<PreferReturn<R>> operationAsync(PreferReturnType preferReturnType,
+			DelayStrategy delayStrategy, String operationName, Parameters parameters, Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Builder requestBuilder = getResource().path(operationName).request()
+				.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW);
+
+		return executeAsync(delayStrategy, requestBuilder, returnType, preferReturnType,
+				(async, callback) -> async.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW), callback));
+	}
+
+	<R extends Resource, T extends Resource> CompletableFuture<PreferReturn<R>> operationAsync(
+			PreferReturnType preferReturnType, DelayStrategy delayStrategy, Class<T> resourceType, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Builder requestBuilder = getResource().path(resourceType.getAnnotation(ResourceDef.class).name())
+				.path(operationName).request().header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue())
+				.accept(Constants.CT_FHIR_JSON_NEW);
+
+		return executeAsync(delayStrategy, requestBuilder, returnType, preferReturnType,
+				(async, callback) -> async.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW), callback));
+	}
+
+	<R extends Resource, T extends Resource> CompletableFuture<PreferReturn<R>> operationAsync(
+			PreferReturnType preferReturnType, DelayStrategy delayStrategy, Class<T> resourceType, String id,
+			String operationName, Parameters parameters, Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Builder requestBuilder = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path(operationName).request().header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue())
+				.accept(Constants.CT_FHIR_JSON_NEW);
+
+		return executeAsync(delayStrategy, requestBuilder, returnType, preferReturnType,
+				(async, callback) -> async.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW), callback));
+	}
+
+	<R extends Resource, T extends Resource> CompletableFuture<PreferReturn<R>> operationAsync(
+			PreferReturnType preferReturnType, DelayStrategy delayStrategy, Class<T> resourceType, String id,
+			String version, String operationName, Parameters parameters, Class<R> returnType)
+	{
+		Objects.requireNonNull(preferReturnType, "preferReturnType");
+		Objects.requireNonNull(delayStrategy, "delayStrategy");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+		Objects.requireNonNull(operationName, "operationName");
+		// parameters may be null
+		Objects.requireNonNull(returnType, "returnType");
+
+		operationName = !operationName.startsWith("$") ? "$" + operationName : operationName;
+
+		Builder requestBuilder = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("_history").path(version).path(operationName).request()
+				.header(Constants.HEADER_PREFER, preferReturnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW);
+
+		return executeAsync(delayStrategy, requestBuilder, returnType, preferReturnType,
+				(async, callback) -> async.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW), callback));
+	}
+
+	@Override
+	public <R extends Resource> CompletableFuture<R> operationAsync(DelayStrategy delayStrategy, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		return operationAsync(PreferReturnType.REPRESENTATION, delayStrategy, operationName, parameters, returnType)
+				.thenApply(PreferReturn::resource);
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> CompletableFuture<R> operationAsync(DelayStrategy delayStrategy,
+			Class<T> resourceType, String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return operationAsync(PreferReturnType.REPRESENTATION, delayStrategy, resourceType, operationName, parameters,
+				returnType).thenApply(PreferReturn::resource);
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> CompletableFuture<R> operationAsync(DelayStrategy delayStrategy,
+			Class<T> resourceType, String id, String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return operationAsync(PreferReturnType.REPRESENTATION, delayStrategy, resourceType, id, operationName,
+				parameters, returnType).thenApply(PreferReturn::resource);
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> CompletableFuture<R> operationAsync(DelayStrategy delayStrategy,
+			Class<T> resourceType, String id, String version, String operationName, Parameters parameters,
+			Class<R> returnType)
+	{
+		return operationAsync(PreferReturnType.REPRESENTATION, delayStrategy, resourceType, id, version, operationName,
+				parameters, returnType).thenApply(PreferReturn::resource);
 	}
 }

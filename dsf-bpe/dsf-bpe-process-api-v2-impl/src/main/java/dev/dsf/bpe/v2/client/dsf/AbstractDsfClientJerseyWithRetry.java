@@ -34,18 +34,20 @@ public abstract class AbstractDsfClientJerseyWithRetry
 
 	protected final DsfClientJersey delegate;
 	private final int nTimes;
-	private final Duration delay;
+	private final DelayStrategy delayStrategy;
 
-	protected AbstractDsfClientJerseyWithRetry(DsfClientJersey delegate, int nTimes, Duration delay)
+	protected AbstractDsfClientJerseyWithRetry(DsfClientJersey delegate, int nTimes, DelayStrategy delayStrategy)
 	{
 		this.delegate = delegate;
 		this.nTimes = nTimes;
-		this.delay = delay;
+		this.delayStrategy = delayStrategy;
 	}
 
 	protected final <R> R retry(Supplier<R> supplier)
 	{
 		RuntimeException caughtException = null;
+		Duration delay = delayStrategy.getFirstDelay();
+
 		for (int tryNumber = 0; tryNumber <= nTimes || nTimes == RetryClient.RETRY_FOREVER; tryNumber++)
 		{
 			try
@@ -63,8 +65,11 @@ public abstract class AbstractDsfClientJerseyWithRetry
 				{
 					if (tryNumber < nTimes || nTimes == RetryClient.RETRY_FOREVER)
 					{
-						logger.warn("Caught {} - {}; trying again in {}s{}", e.getClass(), e.getMessage(),
-								delay.toSeconds(),
+						if (tryNumber > 0)
+							delay = delayStrategy.getNextDelay(delay);
+
+						logger.warn("Caught {} - {}; trying again in {}{}", e.getClass(), e.getMessage(),
+								delay.toString(),
 								nTimes == RetryClient.RETRY_FOREVER ? " (retry " + (tryNumber + 1) + ")" : "");
 
 						try

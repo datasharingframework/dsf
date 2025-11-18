@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -34,21 +35,23 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
+
 public abstract class AbstractResourceProvider implements InitializingBean
 {
-	protected final DsfClientProvider clientProvider;
+	protected final Supplier<DsfClient> localDsfClient;
 	protected final String localEndpointAddress;
 
-	public AbstractResourceProvider(DsfClientProvider clientProvider, String localEndpointAddress)
+	public AbstractResourceProvider(Supplier<DsfClient> localDsfClient, String localEndpointAddress)
 	{
-		this.clientProvider = clientProvider;
+		this.localDsfClient = localDsfClient;
 		this.localEndpointAddress = localEndpointAddress;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(clientProvider, "clientProvider");
+		Objects.requireNonNull(localDsfClient, "localDsfClient");
 		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
 	}
 
@@ -98,6 +101,6 @@ public abstract class AbstractResourceProvider implements InitializingBean
 		if (!parameters.containsKey("_sort"))
 			parametersAndPage.put("_sort", List.of("_id"));
 
-		return clientProvider.getLocalDsfClient().searchWithStrictHandling(searchType, parametersAndPage);
+		return localDsfClient.get().searchWithStrictHandling(searchType, parametersAndPage);
 	}
 }

@@ -131,7 +131,7 @@ public abstract class AbstractErrorHandler implements ErrorBoundaryEventErrorHan
 			logger.debug("Updating Task {}, new status: {}", api.getTaskHelper().getLocalVersionlessAbsoluteUrl(task),
 					task.getStatus().toCode());
 
-			api.getDsfClientProvider().getLocalDsfClient().withMinimalReturn().update(task);
+			api.getDsfClientProvider().getLocal().withMinimalReturn().update(task);
 		}
 		catch (Exception e)
 		{

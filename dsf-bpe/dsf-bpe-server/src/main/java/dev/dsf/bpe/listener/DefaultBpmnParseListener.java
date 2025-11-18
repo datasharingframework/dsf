@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import dev.dsf.bpe.api.listener.ListenerFactory;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
-import dev.dsf.bpe.camunda.ProcessPluginConsumer;
+import dev.dsf.bpe.engine.ProcessPluginConsumer;
 
 public class DefaultBpmnParseListener implements BpmnParseListener, ProcessPluginConsumer
 {

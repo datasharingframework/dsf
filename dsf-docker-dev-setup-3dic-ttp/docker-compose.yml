@@ -474,7 +474,7 @@ services:
     secrets:
       - db_liquibase.password
       - db_dic1_bpe_user.password
-      - db_dic1_bpe_user_camunda.password
+      - db_dic1_bpe_user_engine.password
       - root_ca.crt
       - dic1.crt
       - dic1.key
@@ -507,15 +507,15 @@ services:
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic1_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user.password
-      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user_camunda.password
+      DEV_DSF_BPE_DB_USER_ENGINE_PASSWORD_FILE: /run/secrets/db_dic1_bpe_user_engine.password
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/dic1.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/dic1.key
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD: 'password'
       DEV_DSF_BPE_DB_USER_GROUP: dic1_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: dic1_bpe_server_user
-      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic1_camunda_users
-      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic1_camunda_server_user
+      DEV_DSF_BPE_DB_USER_ENGINE_GROUP: dic1_engine_users
+      DEV_DSF_BPE_DB_USER_ENGINE_USERNAME: dic1_engine_server_user
       DEV_DSF_BPE_SERVER_BASE_URL: https://dic1/bpe
       DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic1/fhir
@@ -594,7 +594,7 @@ services:
     secrets:
       - db_liquibase.password
       - db_dic2_bpe_user.password
-      - db_dic2_bpe_user_camunda.password
+      - db_dic2_bpe_user_engine.password
       - root_ca.crt
       - dic2.crt
       - dic2.key
@@ -627,15 +627,15 @@ services:
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic2_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user.password
-      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user_camunda.password
+      DEV_DSF_BPE_DB_USER_ENGINE_PASSWORD_FILE: /run/secrets/db_dic2_bpe_user_engine.password
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/dic2.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/dic2.key
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD: 'password'
       DEV_DSF_BPE_DB_USER_GROUP: dic2_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: dic2_bpe_server_user
-      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic2_camunda_users
-      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic2_camunda_server_user
+      DEV_DSF_BPE_DB_USER_ENGINE_GROUP: dic2_engine_users
+      DEV_DSF_BPE_DB_USER_ENGINE_USERNAME: dic2_engine_server_user
       DEV_DSF_BPE_SERVER_BASE_URL: https://dic2/bpe
       DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic2/fhir
@@ -683,7 +683,7 @@ services:
     secrets:
       - db_liquibase.password
       - db_dic3_bpe_user.password
-      - db_dic3_bpe_user_camunda.password
+      - db_dic3_bpe_user_engine.password
       - root_ca.crt
       - dic3.crt
       - dic3.key
@@ -716,15 +716,15 @@ services:
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic3_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user.password
-      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user_camunda.password
+      DEV_DSF_BPE_DB_USER_ENGINE_PASSWORD_FILE: /run/secrets/db_dic3_bpe_user_engine.password
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/dic3.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/dic3.key
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD: 'password'
       DEV_DSF_BPE_DB_USER_GROUP: dic3_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: dic3_bpe_server_user
-      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic3_camunda_users
-      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic3_camunda_server_user
+      DEV_DSF_BPE_DB_USER_ENGINE_GROUP: dic3_engine_users
+      DEV_DSF_BPE_DB_USER_ENGINE_USERNAME: dic3_engine_server_user
       DEV_DSF_BPE_SERVER_BASE_URL: https://dic3/bpe
       DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic3/fhir
@@ -772,7 +772,7 @@ services:
     secrets:
       - db_liquibase.password
       - db_ttp_bpe_user.password
-      - db_ttp_bpe_user_camunda.password
+      - db_ttp_bpe_user_engine.password
       - root_ca.crt
       - ttp.crt
       - ttp.key
@@ -805,15 +805,15 @@ services:
       DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/ttp_bpe
       DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user.password
-      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user_camunda.password
+      DEV_DSF_BPE_DB_USER_ENGINE_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user_engine.password
       DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/ttp.crt
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/ttp.key
       DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/ttp.key.password
       DEV_DSF_BPE_DB_USER_GROUP: ttp_bpe_users
       DEV_DSF_BPE_DB_USER_USERNAME: ttp_bpe_server_user
-      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: ttp_camunda_users
-      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
+      DEV_DSF_BPE_DB_USER_ENGINE_GROUP: TTP_ENGINE_USERS
+      DEV_DSF_BPE_DB_USER_ENGINE_USERNAME: ttp_engine_server_user
       DEV_DSF_BPE_SERVER_BASE_URL: https://ttp/bpe
       DEV_DSF_BPE_SERVER_UI_THEME: dev
       DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp/fhir
@@ -905,8 +905,8 @@ secrets:
     
   db_dic1_bpe_user.password:
     file: ./secrets/db_dic1_bpe_user.password
-  db_dic1_bpe_user_camunda.password:
-    file: ./secrets/db_dic1_bpe_user_camunda.password
+  db_dic1_bpe_user_engine.password:
+    file: ./secrets/db_dic1_bpe_user_engine.password
   db_dic1_fhir_user.password:
     file: ./secrets/db_dic1_fhir_user.password
   db_dic1_fhir_user_permanent_delete.password:
@@ -914,8 +914,8 @@ secrets:
     
   db_dic2_bpe_user.password:
     file: ./secrets/db_dic2_bpe_user.password
-  db_dic2_bpe_user_camunda.password:
-    file: ./secrets/db_dic2_bpe_user_camunda.password
+  db_dic2_bpe_user_engine.password:
+    file: ./secrets/db_dic2_bpe_user_engine.password
   db_dic2_fhir_user.password:
     file: ./secrets/db_dic2_fhir_user.password
   db_dic2_fhir_user_permanent_delete.password:
@@ -923,8 +923,8 @@ secrets:
     
   db_dic3_bpe_user.password:
     file: ./secrets/db_dic3_bpe_user.password
-  db_dic3_bpe_user_camunda.password:
-    file: ./secrets/db_dic3_bpe_user_camunda.password
+  db_dic3_bpe_user_engine.password:
+    file: ./secrets/db_dic3_bpe_user_engine.password
   db_dic3_fhir_user.password:
     file: ./secrets/db_dic3_fhir_user.password
   db_dic3_fhir_user_permanent_delete.password:
@@ -932,8 +932,8 @@ secrets:
     
   db_ttp_bpe_user.password:
     file: ./secrets/db_ttp_bpe_user.password
-  db_ttp_bpe_user_camunda.password:
-    file: ./secrets/db_ttp_bpe_user_camunda.password
+  db_ttp_bpe_user_engine.password:
+    file: ./secrets/db_ttp_bpe_user_engine.password
   db_ttp_fhir_user.password:
     file: ./secrets/db_ttp_fhir_user.password
   db_ttp_fhir_user_permanent_delete.password:

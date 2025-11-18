@@ -18,36 +18,53 @@ package dev.dsf.bpe.v2.service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.config.BpeProxyConfig;
 import dev.dsf.bpe.api.config.DsfClientConfig;
 import dev.dsf.bpe.api.config.DsfClientConfig.BaseConfig;
-import dev.dsf.bpe.api.service.BuildInfoProvider;
 import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.client.dsf.DsfClientJersey;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleaner;
+import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 
-public class DsfClientProviderImpl implements DsfClientProvider, InitializingBean
+public class DsfClientProviderImpl implements DsfClientProvider, InitializingBean, DisposableBean
 {
-	private final Map<String, DsfClient> webserviceClientsByUrl = new HashMap<>();
+	private static final Logger logger = LoggerFactory.getLogger(DsfClientProviderImpl.class);
+
+	private final Map<String, DsfClientJersey> clientsByUrlOrId = new HashMap<>();
 
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;
 	private final DsfClientConfig dsfClientConfig;
 	private final BpeProxyConfig proxyConfig;
-	private final BuildInfoProvider buildInfoProvider;
+	private final OidcClientProvider oidcClientProvider;
+	private final String userAgent;
+	private final ClientConfigProvider configProvider;
+
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8,
+			r -> new Thread(r, "dsf-client-async-scheduler"));
 
 	public DsfClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
-			DsfClientConfig dsfClientConfig, BpeProxyConfig proxyConfig, BuildInfoProvider buildInfoProvider)
+			DsfClientConfig dsfClientConfig, BpeProxyConfig proxyConfig, OidcClientProvider oidcClientProvider,
+			String userAgent, ClientConfigProvider configProvider)
 	{
 		this.fhirContext = fhirContext;
 		this.referenceCleaner = referenceCleaner;
 		this.dsfClientConfig = dsfClientConfig;
 		this.proxyConfig = proxyConfig;
-		this.buildInfoProvider = buildInfoProvider;
+		this.oidcClientProvider = oidcClientProvider;
+		this.userAgent = userAgent;
+		this.configProvider = configProvider;
 	}
 
 	@Override
@@ -57,15 +74,65 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
 		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
+		Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
+		Objects.requireNonNull(userAgent, "userAgent");
+		Objects.requireNonNull(configProvider, "configProvider");
 	}
 
-	private DsfClient getClient(String webserviceUrl)
+	@Override
+	public Optional<DsfClient> getById(String fhirServerId)
 	{
-		synchronized (webserviceClientsByUrl)
+		return configProvider.getClientConfig(fhirServerId).flatMap(this::doGetById);
+	}
+
+	private Optional<DsfClient> doGetById(ClientConfig clientConfig)
+	{
+		if (clientConfig == null)
+			return Optional.empty();
+
+		synchronized (clientsByUrlOrId)
 		{
-			if (webserviceClientsByUrl.containsKey(webserviceUrl))
-				return webserviceClientsByUrl.get(webserviceUrl);
+			DsfClientJersey client = clientsByUrlOrId.get(clientConfig.getFhirServerId());
+
+			if (client == null)
+			{
+				client = new DsfClientJersey(scheduler, clientConfig, oidcClientProvider, userAgent, fhirContext,
+						referenceCleaner);
+				clientsByUrlOrId.put(clientConfig.getFhirServerId(), client);
+			}
+
+			return Optional.of(client);
+		}
+	}
+
+	@Override
+	public DsfClient getLocal()
+	{
+		return getByEndpointUrl(dsfClientConfig.getLocalConfig().getBaseUrl());
+	}
+
+	@Override
+	public DsfClient getByEndpointUrl(String webserviceUrl)
+	{
+		Objects.requireNonNull(webserviceUrl, "webserviceUrl");
+
+		DsfClient cachedClient = clientsByUrlOrId.get(webserviceUrl);
+		if (cachedClient != null)
+			return cachedClient;
+		else
+		{
+			DsfClientJersey newClient = doGetByUrl(webserviceUrl);
+			clientsByUrlOrId.put(webserviceUrl, newClient);
+			return newClient;
+		}
+	}
+
+	private DsfClientJersey doGetByUrl(String webserviceUrl)
+	{
+		synchronized (clientsByUrlOrId)
+		{
+			if (clientsByUrlOrId.containsKey(webserviceUrl))
+				return clientsByUrlOrId.get(webserviceUrl);
 
 			String proxyHost = null, proxyUsername = null;
 			char[] proxyPassword = null;
@@ -80,36 +147,34 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 					? dsfClientConfig.getLocalConfig()
 					: dsfClientConfig.getRemoteConfig();
 
-			DsfClient client = new DsfClientJersey(webserviceUrl, dsfClientConfig.getTrustStore(),
+			DsfClientJersey client = new DsfClientJersey(scheduler, webserviceUrl, dsfClientConfig.getTrustStore(),
 					dsfClientConfig.getKeyStore(), dsfClientConfig.getKeyStorePassword(), proxyHost, proxyUsername,
 					proxyPassword, config.getConnectTimeout(), config.getReadTimeout(), config.isDebugLoggingEnabled(),
-					buildInfoProvider.getUserAgentValue(), fhirContext, referenceCleaner);
+					userAgent, fhirContext, referenceCleaner);
 
-			webserviceClientsByUrl.put(webserviceUrl, client);
+			clientsByUrlOrId.put(webserviceUrl, client);
 
 			return client;
 		}
 	}
 
 	@Override
-	public DsfClient getLocalDsfClient()
+	public void destroy() throws Exception
 	{
-		return getDsfClient(dsfClientConfig.getLocalConfig().getBaseUrl());
-	}
-
-	@Override
-	public DsfClient getDsfClient(String webserviceUrl)
-	{
-		Objects.requireNonNull(webserviceUrl, "webserviceUrl");
-
-		DsfClient cachedClient = webserviceClientsByUrl.get(webserviceUrl);
-		if (cachedClient != null)
-			return cachedClient;
-		else
+		scheduler.shutdown();
+		try
 		{
-			DsfClient newClient = getClient(webserviceUrl);
-			webserviceClientsByUrl.put(webserviceUrl, newClient);
-			return newClient;
+			if (!scheduler.awaitTermination(60, TimeUnit.SECONDS))
+			{
+				scheduler.shutdownNow();
+				if (!scheduler.awaitTermination(60, TimeUnit.SECONDS))
+					logger.warn("DsfClientProvider scheduler did not terminate");
+			}
+		}
+		catch (InterruptedException ie)
+		{
+			scheduler.shutdownNow();
+			Thread.currentThread().interrupt();
 		}
 	}
 }

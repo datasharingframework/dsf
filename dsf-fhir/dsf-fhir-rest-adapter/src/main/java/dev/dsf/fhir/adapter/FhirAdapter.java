@@ -140,7 +140,8 @@ public class FhirAdapter implements MessageBodyReader<BaseResource>, MessageBody
 				writer.write(split[0]);
 				writer.flush();
 
-				Base64OutputStream base64 = new Base64OutputStream(entityStream, true, Integer.MIN_VALUE, null);
+				Base64OutputStream base64 = Base64OutputStream.builder().setOutputStream(entityStream).setEncode(true)
+						.get();
 				data.writeExternal(base64);
 				base64.eof();
 				base64.flush();
@@ -191,7 +192,8 @@ public class FhirAdapter implements MessageBodyReader<BaseResource>, MessageBody
 					writer.write(split[0]);
 					writer.flush();
 
-					Base64OutputStream base64 = new Base64OutputStream(entityStream, true, Integer.MIN_VALUE, null);
+					Base64OutputStream base64 = Base64OutputStream.builder().setOutputStream(entityStream)
+							.setEncode(true).get();
 					data.writeExternal(base64);
 					base64.eof();
 					base64.flush();

@@ -17,6 +17,7 @@ package dev.dsf.bpe.v2.spring;
 
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.tika.detect.Detector;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
@@ -24,6 +25,7 @@ import org.operaton.bpm.engine.delegate.ExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,6 +40,7 @@ import dev.dsf.bpe.api.listener.ListenerFactoryImpl;
 import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.api.service.BpeOidcClientProvider;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleaner;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleanerImpl;
 import dev.dsf.bpe.v2.client.dsf.ReferenceExtractor;
@@ -51,6 +54,9 @@ import dev.dsf.bpe.v2.listener.EndListener;
 import dev.dsf.bpe.v2.listener.ListenerVariables;
 import dev.dsf.bpe.v2.listener.StartListener;
 import dev.dsf.bpe.v2.plugin.ProcessPluginFactoryImpl;
+import dev.dsf.bpe.v2.service.ClientConfigProvider;
+import dev.dsf.bpe.v2.service.ClientConfigProviderImpl;
+import dev.dsf.bpe.v2.service.ClientConfigProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CompressionServiceImpl;
 import dev.dsf.bpe.v2.service.CryptoService;
@@ -61,9 +67,6 @@ import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.DsfClientProviderImpl;
 import dev.dsf.bpe.v2.service.EndpointProvider;
 import dev.dsf.bpe.v2.service.EndpointProviderImpl;
-import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
-import dev.dsf.bpe.v2.service.FhirClientConfigProviderImpl;
-import dev.dsf.bpe.v2.service.FhirClientConfigProviderWithEndpointSupport;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.FhirClientProviderImpl;
 import dev.dsf.bpe.v2.service.MailService;
@@ -129,7 +132,7 @@ public class ApiServiceConfig
 	@Bean
 	public EndpointProvider endpointProvider()
 	{
-		return new EndpointProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
+		return new EndpointProviderImpl(getLocal(), dsfClientConfig.getLocalConfig().getBaseUrl());
 	}
 
 	@Bean
@@ -149,10 +152,18 @@ public class ApiServiceConfig
 	}
 
 	@Bean
+	@Lazy
+	public Supplier<DsfClient> getLocal()
+	{
+		// lazy and indirect to break dependency cycle
+		return () -> dsfClientProvider().getLocal();
+	}
+
+	@Bean
 	public DsfClientProvider dsfClientProvider()
 	{
 		return new DsfClientProviderImpl(fhirContext(), referenceCleaner(), dsfClientConfig, proxyConfig,
-				buildInfoProvider);
+				oidcClientProvider(), buildInfoProvider.getUserAgentValue(), fhirClientConfigProvider());
 	}
 
 	@Bean
@@ -163,10 +174,10 @@ public class ApiServiceConfig
 	}
 
 	@Bean
-	public FhirClientConfigProvider fhirClientConfigProvider()
+	public ClientConfigProvider fhirClientConfigProvider()
 	{
-		return new FhirClientConfigProviderWithEndpointSupport(endpointProvider(),
-				new FhirClientConfigProviderImpl(fhirClientConfigs.defaultTrustStore(), clientConfigsDelegate()));
+		return new ClientConfigProviderWithEndpointSupport(endpointProvider(),
+				new ClientConfigProviderImpl(fhirClientConfigs.defaultTrustStore(), clientConfigsDelegate()));
 	}
 
 	@Bean
@@ -197,7 +208,7 @@ public class ApiServiceConfig
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
+		return new OrganizationProviderImpl(getLocal(), dsfClientConfig.getLocalConfig().getBaseUrl());
 	}
 
 	@Bean
@@ -275,7 +286,7 @@ public class ApiServiceConfig
 	@Bean
 	public Function<DelegateExecution, ListenerVariables> listenerVariablesFactory()
 	{
-		return execution -> new VariablesImpl(execution, objectMapper(), dsfClientProvider().getLocalDsfClient());
+		return execution -> new VariablesImpl(execution, objectMapper(), dsfClientProvider().getLocal());
 	}
 
 	@Bean
@@ -288,7 +299,7 @@ public class ApiServiceConfig
 	public ExecutionListener endListener()
 	{
 		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), listenerVariablesFactory(),
-				dsfClientProvider().getLocalDsfClient());
+				dsfClientProvider().getLocal());
 	}
 
 	@Bean
@@ -319,7 +330,7 @@ public class ApiServiceConfig
 	@Bean
 	public TargetProvider targetProvider()
 	{
-		return new TargetProviderImpl(dsfClientProvider(), dsfClientConfig.getLocalConfig().getBaseUrl());
+		return new TargetProviderImpl(getLocal(), dsfClientConfig.getLocalConfig().getBaseUrl());
 	}
 
 	@Bean

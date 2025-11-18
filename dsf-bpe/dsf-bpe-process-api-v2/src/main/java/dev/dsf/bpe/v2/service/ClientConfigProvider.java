@@ -31,7 +31,7 @@ import dev.dsf.bpe.v2.constants.NamingSystems;
  * `dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas` as default for the YAML properties
  * `trusted-root-certificates-file` and `oidc-auth.trusted-root-certificates-file`
  */
-public interface FhirClientConfigProvider
+public interface ClientConfigProvider
 {
 	/**
 	 * <i>Every call to this method creates a new {@link SSLContext} object.</i>

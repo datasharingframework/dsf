@@ -34,9 +34,9 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	private final ProxyConfig proxyConfig;
 	private final OidcClientProvider oidcClientProvider;
 	private final String userAgent;
-	private final FhirClientConfigProvider configProvider;
+	private final ClientConfigProvider configProvider;
 
-	private final Map<String, FhirClientFactory> clientFactoriesByFhirServerId = new HashMap<>();
+	private final Map<String, FhirClientFactory> factoriesById = new HashMap<>();
 
 	/**
 	 * @param fhirContext
@@ -51,7 +51,7 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	 *            not <code>null</code>
 	 */
 	public FhirClientProviderImpl(FhirContext fhirContext, ProxyConfig proxyConfig,
-			OidcClientProvider oidcClientProvider, String userAgent, FhirClientConfigProvider configProvider)
+			OidcClientProvider oidcClientProvider, String userAgent, ClientConfigProvider configProvider)
 	{
 		this.fhirContext = fhirContext;
 		this.proxyConfig = proxyConfig;
@@ -70,19 +70,19 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 		Objects.requireNonNull(configProvider, "configProvider");
 	}
 
-	protected Optional<IGenericClient> getClient(ClientConfig clientConfig)
+	private Optional<IGenericClient> doGetById(ClientConfig clientConfig)
 	{
 		if (clientConfig == null)
 			return Optional.empty();
 
-		synchronized (clientFactoriesByFhirServerId)
+		synchronized (factoriesById)
 		{
-			FhirClientFactory factory = clientFactoriesByFhirServerId.get(clientConfig.getFhirServerId());
+			FhirClientFactory factory = factoriesById.get(clientConfig.getFhirServerId());
 
 			if (factory == null)
 			{
 				factory = createClientFactory(clientConfig);
-				clientFactoriesByFhirServerId.put(clientConfig.getFhirServerId(), factory);
+				factoriesById.put(clientConfig.getFhirServerId(), factory);
 			}
 
 			return Optional.of(factory.newGenericClient(clientConfig.getBaseUrl()));
@@ -90,9 +90,9 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	}
 
 	@Override
-	public Optional<IGenericClient> getClient(String fhirServerId)
+	public Optional<IGenericClient> getById(String fhirServerId)
 	{
-		return configProvider.getClientConfig(fhirServerId).flatMap(this::getClient);
+		return configProvider.getClientConfig(fhirServerId).flatMap(this::doGetById);
 	}
 
 	protected FhirClientFactory createClientFactory(ClientConfig config)

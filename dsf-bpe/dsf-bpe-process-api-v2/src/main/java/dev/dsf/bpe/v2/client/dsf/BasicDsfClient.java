@@ -171,8 +171,24 @@ public interface BasicDsfClient extends PreferReturnResource
 
 	boolean exists(IdType resourceTypeIdVersion);
 
+	/**
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param parameters
+	 *            may be <code>null</code>
+	 * @return
+	 */
 	Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
 
+	/**
+	 * Send "Prefer: handling=strict" header
+	 *
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param parameters
+	 *            may be <code>null</code>
+	 * @return search result
+	 */
 	Bundle searchWithStrictHandling(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
 
 	CapabilityStatement getConformance();

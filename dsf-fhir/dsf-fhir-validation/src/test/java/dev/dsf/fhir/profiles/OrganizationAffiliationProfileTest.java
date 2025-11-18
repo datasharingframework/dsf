@@ -102,4 +102,20 @@ public class OrganizationAffiliationProfileTest extends AbstractMetaTagProfileTe
 		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
+
+	@Test
+	public void testOrganizationAffiliationProfileNoDsfOrganizationRole() throws Exception
+	{
+		OrganizationAffiliation a = create();
+		a.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
+
+		a.getCodeFirstRep().getCodingFirstRep().setSystem("http://test.org/fhir/CodeSystem/special-role")
+				.setCode("Foo");
+
+		ValidationResult result = resourceValidator.validate(a);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
 }

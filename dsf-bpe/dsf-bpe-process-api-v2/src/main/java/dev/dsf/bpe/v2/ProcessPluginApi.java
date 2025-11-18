@@ -22,12 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.v2.config.ProxyConfig;
+import dev.dsf.bpe.v2.service.ClientConfigProvider;
 import dev.dsf.bpe.v2.service.CompressionService;
 import dev.dsf.bpe.v2.service.CryptoService;
 import dev.dsf.bpe.v2.service.DataLogger;
 import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.EndpointProvider;
-import dev.dsf.bpe.v2.service.FhirClientConfigProvider;
 import dev.dsf.bpe.v2.service.FhirClientProvider;
 import dev.dsf.bpe.v2.service.MailService;
 import dev.dsf.bpe.v2.service.MimeTypeService;
@@ -61,7 +61,7 @@ public interface ProcessPluginApi
 
 	FhirClientProvider getFhirClientProvider();
 
-	FhirClientConfigProvider getFhirClientConfigProvider();
+	ClientConfigProvider getFhirClientConfigProvider();
 
 	OidcClientProvider getOidcClientProvider();
 

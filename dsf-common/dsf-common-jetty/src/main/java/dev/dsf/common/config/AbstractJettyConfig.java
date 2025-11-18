@@ -158,7 +158,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.server.auth.oidc.provider.realm.base.url:#{null}}")
 	private String oidcProviderRealmBaseUrl;
 
-	@Documentation(description = "OIDC provider dicovery path")
+	@Documentation(description = "OIDC provider discovery path")
 	@Value("${dev.dsf.server.auth.oidc.provider.discovery.path:/.well-known/openid-configuration}")
 	private String oidcProviderDiscoveryPath;
 
@@ -214,7 +214,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
-	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or against (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
 	private List<String> proxyNoProxy;
 

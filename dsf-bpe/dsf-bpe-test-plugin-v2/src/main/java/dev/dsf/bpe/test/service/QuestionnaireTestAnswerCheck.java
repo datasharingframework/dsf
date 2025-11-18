@@ -86,7 +86,7 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 	@PluginTest
 	public void checkQuestionnaireResponse(ProcessPluginApi api) throws Exception
 	{
-		Bundle resultBundle = api.getDsfClientProvider().getLocalDsfClient().search(QuestionnaireResponse.class,
+		Bundle resultBundle = api.getDsfClientProvider().getLocal().search(QuestionnaireResponse.class,
 				Map.of("status", List.of(QuestionnaireResponseStatus.AMENDED.toCode())));
 
 		expectNotNull(resultBundle);
@@ -205,7 +205,7 @@ public class QuestionnaireTestAnswerCheck extends AbstractTest implements Servic
 
 	private boolean read(ProcessPluginApi api, IdType id, String clientId)
 	{
-		Optional<IGenericClient> oClient = api.getFhirClientProvider().getClient(clientId);
+		Optional<IGenericClient> oClient = api.getFhirClientProvider().getById(clientId);
 
 		expectTrue(oClient.isPresent());
 

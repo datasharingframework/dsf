@@ -18,6 +18,7 @@ package dev.dsf.bpe.v2.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,19 +32,21 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
+
 public class EndpointProviderImpl extends AbstractResourceProvider implements EndpointProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointProviderImpl.class);
 
-	public EndpointProviderImpl(DsfClientProvider clientProvider, String localEndpointAddress)
+	public EndpointProviderImpl(Supplier<DsfClient> localDsfClient, String localEndpointAddress)
 	{
-		super(clientProvider, localEndpointAddress);
+		super(localDsfClient, localEndpointAddress);
 	}
 
 	@Override
 	public Optional<Endpoint> getLocalEndpoint()
 	{
-		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Endpoint.class,
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 1
@@ -74,7 +77,7 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 
 		String endpointIdSp = toSearchParameter(endpointIdentifier);
 
-		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(Endpoint.class,
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(Endpoint.class,
 				Map.of("status", List.of("active"), "identifier", List.of(endpointIdSp)));
 
 		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1
@@ -112,7 +115,7 @@ public class EndpointProviderImpl extends AbstractResourceProvider implements En
 		String memberOrganizationIdSp = toSearchParameter(memberOrganizationIdentifier);
 		String memberOrganizationRoleSp = toSearchParameter(memberOrganizationRole);
 
-		Bundle resultBundle = clientProvider.getLocalDsfClient().searchWithStrictHandling(OrganizationAffiliation.class,
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(OrganizationAffiliation.class,
 				Map.of("active", List.of("true"), "primary-organization:identifier", List.of(parentOrganizationIdSp),
 						"participating-organization:identifier", List.of(memberOrganizationIdSp), "role",
 						List.of(memberOrganizationRoleSp), "_include", List.of("OrganizationAffiliation:endpoint")));

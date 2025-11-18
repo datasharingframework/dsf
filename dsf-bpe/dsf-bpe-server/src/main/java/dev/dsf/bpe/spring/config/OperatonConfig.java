@@ -34,11 +34,11 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
-import dev.dsf.bpe.camunda.DelegateProvider;
-import dev.dsf.bpe.camunda.DelegateProviderImpl;
-import dev.dsf.bpe.camunda.FallbackSerializerFactory;
-import dev.dsf.bpe.camunda.FallbackSerializerFactoryImpl;
-import dev.dsf.bpe.camunda.MultiVersionSpringProcessEngineConfiguration;
+import dev.dsf.bpe.engine.DelegateProvider;
+import dev.dsf.bpe.engine.DelegateProviderImpl;
+import dev.dsf.bpe.engine.FallbackSerializerFactory;
+import dev.dsf.bpe.engine.FallbackSerializerFactoryImpl;
+import dev.dsf.bpe.engine.MultiVersionSpringProcessEngineConfiguration;
 import dev.dsf.bpe.listener.DebugLoggingBpmnParseListener;
 import dev.dsf.bpe.listener.DefaultBpmnParseListener;
 
@@ -57,23 +57,23 @@ public class OperatonConfig
 	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
-		return new DataSourceTransactionManager(camundaDataSource());
+		return new DataSourceTransactionManager(engineDataSource());
 	}
 
 	@Bean
 	public TransactionAwareDataSourceProxy transactionAwareDataSource()
 	{
-		return new TransactionAwareDataSourceProxy(camundaDataSource());
+		return new TransactionAwareDataSourceProxy(engineDataSource());
 	}
 
 	@Bean
-	public BasicDataSource camundaDataSource()
+	public BasicDataSource engineDataSource()
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
 		dataSource.setUrl(propertiesConfig.getDbUrl());
-		dataSource.setUsername(propertiesConfig.getDbCamundaUsername());
-		dataSource.setPassword(toString(propertiesConfig.getDbCamundaPassword()));
+		dataSource.setUsername(propertiesConfig.getDbEngineUsername());
+		dataSource.setPassword(toString(propertiesConfig.getDbEnginePassword()));
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");

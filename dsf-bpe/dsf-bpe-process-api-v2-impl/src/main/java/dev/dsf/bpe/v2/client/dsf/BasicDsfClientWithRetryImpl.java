@@ -16,7 +16,6 @@
 package dev.dsf.bpe.v2.client.dsf;
 
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
@@ -31,9 +31,9 @@ import jakarta.ws.rs.core.MediaType;
 
 class BasicDsfClientWithRetryImpl extends AbstractDsfClientJerseyWithRetry implements BasicDsfClient
 {
-	BasicDsfClientWithRetryImpl(DsfClientJersey delegate, int nTimes, Duration delay)
+	BasicDsfClientWithRetryImpl(DsfClientJersey delegate, int nTimes, DelayStrategy delayStrategy)
 	{
-		super(delegate, nTimes, delay);
+		super(delegate, nTimes, delayStrategy);
 	}
 
 	@Override
@@ -217,5 +217,32 @@ class BasicDsfClientWithRetryImpl extends AbstractDsfClientJerseyWithRetry imple
 	public Bundle history(Class<? extends Resource> resourceType, String id, int page, int count)
 	{
 		return retry(() -> delegate.history(resourceType, id, page, count));
+	}
+
+	@Override
+	public <R extends Resource> R operation(String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(operationName, parameters, returnType));
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(resourceType, operationName, parameters, returnType));
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(resourceType, id, operationName, parameters, returnType));
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(resourceType, id, version, operationName, parameters, returnType));
 	}
 }

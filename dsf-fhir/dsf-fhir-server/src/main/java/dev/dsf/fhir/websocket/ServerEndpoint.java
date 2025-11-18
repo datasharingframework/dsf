@@ -53,7 +53,8 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	private static final String PINGER_PROPERTY = ServerEndpoint.class.getName() + ".pinger";
 	private static final String BIND_MESSAGE_START = "bind ";
 
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2,
+			r -> new Thread(r, "websocket-server-endpoint-scheduler"));
 
 	private final WebSocketSubscriptionManager subscriptionManager;
 

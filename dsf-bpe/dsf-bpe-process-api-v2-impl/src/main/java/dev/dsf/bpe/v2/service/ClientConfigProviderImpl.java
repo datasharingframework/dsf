@@ -40,12 +40,12 @@ import de.hsheilbronn.mi.utils.crypto.context.SSLContextFactory;
 import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 import dev.dsf.bpe.v2.client.fhir.ClientConfigs;
 
-public class FhirClientConfigProviderImpl implements FhirClientConfigProvider, InitializingBean
+public class ClientConfigProviderImpl implements ClientConfigProvider, InitializingBean
 {
 	private final Map<String, ClientConfig> clientConfigsByFhirServerId = new HashMap<>();
 	private final KeyStore defaultTrustStore;
 
-	public FhirClientConfigProviderImpl(KeyStore defaultTrustStore, ClientConfigs clientConfigs)
+	public ClientConfigProviderImpl(KeyStore defaultTrustStore, ClientConfigs clientConfigs)
 	{
 		this.defaultTrustStore = defaultTrustStore;
 

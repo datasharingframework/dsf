@@ -393,8 +393,9 @@ public class ConfigDocGenerator
 					getString(documentation, "recommendation"));
 			String example = getDocumentationStringMonospace("Example", getString(documentation, "example"));
 
-			String defaultValueString = devalueValue != null && devalueValue.length() > 1
-					&& !"#{null}".equals(devalueValue) ? getDocumentationStringMonospace("Default", devalueValue) : "";
+			String defaultValueString = devalueValue != null && !"#{null}".equals(devalueValue)
+					? getDocumentationStringMonospace("Default", devalueValue)
+					: "";
 
 			return new DocumentationEntry(propertyName,
 					String.format("### %s%n%s%s%s%s%s%s%n", environment, propertyString, required, description,
@@ -432,7 +433,7 @@ public class ConfigDocGenerator
 
 	private String getDocumentationStringMonospace(String title, String value)
 	{
-		if (title == null || title.isBlank() || value == null || value.isBlank())
+		if (title == null || title.isBlank())
 			return "";
 
 		return String.format("- **%s:** `%s`%n", title, value);
