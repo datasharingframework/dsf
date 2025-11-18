@@ -18,14 +18,16 @@ package dev.dsf.bpe.v2.client.dsf;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import jakarta.ws.rs.core.MediaType;
 
-class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
+class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry, AsyncPreferReturnOutcome
 {
 	private final DsfClientJersey delegate;
 
@@ -37,34 +39,35 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 	@Override
 	public OperationOutcome create(Resource resource)
 	{
-		return delegate.create(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome();
+		return delegate.create(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource).operationOutcome();
 	}
 
 	@Override
 	public OperationOutcome createConditionaly(Resource resource, String ifNoneExistCriteria)
 	{
-		return delegate.createConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
-				.getOperationOutcome();
+		return delegate
+				.createConditionaly(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource, ifNoneExistCriteria)
+				.operationOutcome();
 	}
 
 	@Override
 	public OperationOutcome createBinary(InputStream in, MediaType mediaType, String securityContextReference)
 	{
 		return delegate.createBinary(PreferReturnType.OPERATION_OUTCOME, in, mediaType, securityContextReference)
-				.getOperationOutcome();
+				.operationOutcome();
 	}
 
 	@Override
 	public OperationOutcome update(Resource resource)
 	{
-		return delegate.update(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome();
+		return delegate.update(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource).operationOutcome();
 	}
 
 	@Override
 	public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
 	{
-		return delegate.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
-				.getOperationOutcome();
+		return delegate.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource, criteria)
+				.operationOutcome();
 	}
 
 	@Override
@@ -72,7 +75,7 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 			String securityContextReference)
 	{
 		return delegate.updateBinary(PreferReturnType.OPERATION_OUTCOME, id, in, mediaType, securityContextReference)
-				.getOperationOutcome();
+				.operationOutcome();
 	}
 
 	@Override
@@ -99,5 +102,69 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 			throw new IllegalArgumentException("delayStrategy null");
 
 		return new PreferReturnOutcomeRetryImpl(delegate, RETRY_FOREVER, delayStrategy);
+	}
+
+	@Override
+	public OperationOutcome operation(String operationName, Parameters parameters)
+	{
+		return delegate.operation(PreferReturnType.OPERATION_OUTCOME, operationName, parameters, Resource.class)
+				.operationOutcome();
+	}
+
+	@Override
+	public <T extends Resource> OperationOutcome operation(Class<T> resourceType, String operationName,
+			Parameters parameters)
+	{
+		return delegate
+				.operation(PreferReturnType.OPERATION_OUTCOME, resourceType, operationName, parameters, Resource.class)
+				.operationOutcome();
+	}
+
+	@Override
+	public <T extends Resource> OperationOutcome operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters)
+	{
+		return delegate.operation(PreferReturnType.OPERATION_OUTCOME, resourceType, id, operationName, parameters,
+				Resource.class).operationOutcome();
+	}
+
+	@Override
+	public <T extends Resource> OperationOutcome operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters)
+	{
+		return delegate.operation(PreferReturnType.OPERATION_OUTCOME, resourceType, id, version, operationName,
+				parameters, Resource.class).operationOutcome();
+	}
+
+	@Override
+	public CompletableFuture<OperationOutcome> operationAsync(DelayStrategy delayStrategy, String operationName,
+			Parameters parameters)
+	{
+		return delegate.operationAsync(PreferReturnType.OPERATION_OUTCOME, delayStrategy, operationName, parameters,
+				Resource.class).thenApply(PreferReturn::operationOutcome);
+	}
+
+	@Override
+	public <T extends Resource> CompletableFuture<OperationOutcome> operationAsync(DelayStrategy delayStrategy,
+			Class<T> resourceType, String operationName, Parameters parameters)
+	{
+		return delegate.operationAsync(PreferReturnType.OPERATION_OUTCOME, delayStrategy, resourceType, operationName,
+				parameters, Resource.class).thenApply(PreferReturn::operationOutcome);
+	}
+
+	@Override
+	public <T extends Resource> CompletableFuture<OperationOutcome> operationAsync(DelayStrategy delayStrategy,
+			Class<T> resourceType, String id, String operationName, Parameters parameters)
+	{
+		return delegate.operationAsync(PreferReturnType.OPERATION_OUTCOME, delayStrategy, resourceType, id,
+				operationName, parameters, Resource.class).thenApply(PreferReturn::operationOutcome);
+	}
+
+	@Override
+	public <T extends Resource> CompletableFuture<OperationOutcome> operationAsync(DelayStrategy delayStrategy,
+			Class<T> resourceType, String id, String version, String operationName, Parameters parameters)
+	{
+		return delegate.operationAsync(PreferReturnType.OPERATION_OUTCOME, delayStrategy, resourceType, id, version,
+				operationName, parameters, Resource.class).thenApply(PreferReturn::operationOutcome);
 	}
 }

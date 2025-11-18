@@ -30,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -219,5 +220,19 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 			client.get().withRetry(5, DelayStrategy.EXPONENTIAL_BACKOFF).read(Observation.class,
 					UUID.randomUUID().toString());
 		});
+	}
+
+	@PluginTest
+	public void operationAsync(ProcessPluginApi api) throws Exception
+	{
+		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
+		expectTrue(client.isPresent());
+
+		CompletableFuture<DiagnosticReport> operationAsync = client.get().operationAsync(DiagnosticReport.class, "test",
+				null, DiagnosticReport.class);
+		expectNotNull(operationAsync);
+
+		DiagnosticReport r = operationAsync.get();
+		expectNotNull(r);
 	}
 }

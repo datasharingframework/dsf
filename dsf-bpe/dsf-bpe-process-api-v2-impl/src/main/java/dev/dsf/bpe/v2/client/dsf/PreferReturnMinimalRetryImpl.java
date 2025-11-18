@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import jakarta.ws.rs.core.MediaType;
@@ -35,45 +36,76 @@ class PreferReturnMinimalRetryImpl extends AbstractDsfClientJerseyWithRetry impl
 	@Override
 	public IdType create(Resource resource)
 	{
-		return retry(() -> delegate.create(PreferReturnType.MINIMAL, resource).getId());
+		return retry(() -> delegate.create(PreferReturnType.MINIMAL, Resource.class, resource).id());
 	}
 
 	@Override
 	public IdType createConditionaly(Resource resource, String ifNoneExistCriteria)
 	{
-		return retry(
-				() -> delegate.createConditionaly(PreferReturnType.MINIMAL, resource, ifNoneExistCriteria).getId());
+		return retry(() -> delegate
+				.createConditionaly(PreferReturnType.MINIMAL, Resource.class, resource, ifNoneExistCriteria).id());
 	}
 
 	@Override
 	public IdType createBinary(InputStream in, MediaType mediaType, String securityContextReference)
 	{
 		return retry(
-				() -> delegate.createBinary(PreferReturnType.MINIMAL, in, mediaType, securityContextReference).getId());
+				() -> delegate.createBinary(PreferReturnType.MINIMAL, in, mediaType, securityContextReference).id());
 	}
 
 	@Override
 	public IdType update(Resource resource)
 	{
-		return retry(() -> delegate.update(PreferReturnType.MINIMAL, resource).getId());
+		return retry(() -> delegate.update(PreferReturnType.MINIMAL, Resource.class, resource).id());
 	}
 
 	@Override
 	public IdType updateConditionaly(Resource resource, Map<String, List<String>> criteria)
 	{
-		return retry(() -> delegate.updateConditionaly(PreferReturnType.MINIMAL, resource, criteria).getId());
+		return retry(
+				() -> delegate.updateConditionaly(PreferReturnType.MINIMAL, Resource.class, resource, criteria).id());
 	}
 
 	@Override
 	public IdType updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference)
 	{
 		return retry(() -> delegate.updateBinary(PreferReturnType.MINIMAL, id, in, mediaType, securityContextReference)
-				.getId());
+				.id());
 	}
 
 	@Override
 	public Bundle postBundle(Bundle bundle)
 	{
 		return retry(() -> delegate.postBundle(PreferReturnType.MINIMAL, bundle));
+	}
+
+	@Override
+	public IdType operation(String operationName, Parameters parameters)
+	{
+		return retry(
+				() -> delegate.operation(PreferReturnType.MINIMAL, operationName, parameters, Resource.class).id());
+	}
+
+	@Override
+	public <T extends Resource> IdType operation(Class<T> resourceType, String operationName, Parameters parameters)
+	{
+		return retry(() -> delegate
+				.operation(PreferReturnType.MINIMAL, resourceType, operationName, parameters, Resource.class).id());
+	}
+
+	@Override
+	public <T extends Resource> IdType operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters)
+	{
+		return retry(() -> delegate
+				.operation(PreferReturnType.MINIMAL, resourceType, id, operationName, parameters, Resource.class).id());
+	}
+
+	@Override
+	public <T extends Resource> IdType operation(Class<T> resourceType, String id, String version, String operationName,
+			Parameters parameters)
+	{
+		return retry(() -> delegate.operation(PreferReturnType.MINIMAL, resourceType, id, version, operationName,
+				parameters, Resource.class).id());
 	}
 }

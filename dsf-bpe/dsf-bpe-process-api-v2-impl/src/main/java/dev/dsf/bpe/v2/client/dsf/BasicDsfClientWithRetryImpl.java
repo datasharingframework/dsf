@@ -18,12 +18,12 @@ package dev.dsf.bpe.v2.client.dsf;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
@@ -88,32 +88,6 @@ class BasicDsfClientWithRetryImpl extends AbstractDsfClientJerseyWithRetry imple
 	public Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
 	{
 		return retry(() -> delegate.search(resourceType, parameters));
-	}
-
-	@Override
-	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, Class<? extends Resource> resourceType,
-			Map<String, List<String>> parameters)
-	{
-		return retry(() -> delegate.searchAsync(delayStrategy, resourceType, parameters));
-	}
-
-	@Override
-	public CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, String url)
-	{
-		return retry(() -> delegate.searchAsync(delayStrategy, url));
-	}
-
-	@Override
-	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy,
-			Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
-	{
-		return retry(() -> delegate.searchAsyncWithStrictHandling(delayStrategy, resourceType, parameters));
-	}
-
-	@Override
-	public CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy, String url)
-	{
-		return retry(() -> delegate.searchAsyncWithStrictHandling(delayStrategy, url));
 	}
 
 	@Override
@@ -243,5 +217,32 @@ class BasicDsfClientWithRetryImpl extends AbstractDsfClientJerseyWithRetry imple
 	public Bundle history(Class<? extends Resource> resourceType, String id, int page, int count)
 	{
 		return retry(() -> delegate.history(resourceType, id, page, count));
+	}
+
+	@Override
+	public <R extends Resource> R operation(String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(operationName, parameters, returnType));
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(resourceType, operationName, parameters, returnType));
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(resourceType, id, operationName, parameters, returnType));
+	}
+
+	@Override
+	public <R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters, Class<R> returnType)
+	{
+		return retry(() -> delegate.operation(resourceType, id, version, operationName, parameters, returnType));
 	}
 }

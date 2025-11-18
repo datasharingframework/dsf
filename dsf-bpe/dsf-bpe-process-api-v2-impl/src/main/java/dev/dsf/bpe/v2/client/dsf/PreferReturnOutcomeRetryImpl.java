@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import jakarta.ws.rs.core.MediaType;
@@ -35,15 +36,16 @@ class PreferReturnOutcomeRetryImpl extends AbstractDsfClientJerseyWithRetry impl
 	@Override
 	public OperationOutcome create(Resource resource)
 	{
-		return retry(() -> delegate.create(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome());
+		return retry(
+				() -> delegate.create(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource).operationOutcome());
 	}
 
 	@Override
 	public OperationOutcome createConditionaly(Resource resource, String ifNoneExistCriteria)
 	{
-		return retry(
-				() -> delegate.createConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
-						.getOperationOutcome());
+		return retry(() -> delegate
+				.createConditionaly(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource, ifNoneExistCriteria)
+				.operationOutcome());
 	}
 
 	@Override
@@ -51,20 +53,22 @@ class PreferReturnOutcomeRetryImpl extends AbstractDsfClientJerseyWithRetry impl
 	{
 		return retry(
 				() -> delegate.createBinary(PreferReturnType.OPERATION_OUTCOME, in, mediaType, securityContextReference)
-						.getOperationOutcome());
+						.operationOutcome());
 	}
 
 	@Override
 	public OperationOutcome update(Resource resource)
 	{
-		return retry(() -> delegate.update(PreferReturnType.OPERATION_OUTCOME, resource).getOperationOutcome());
+		return retry(
+				() -> delegate.update(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource).operationOutcome());
 	}
 
 	@Override
 	public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
 	{
-		return retry(() -> delegate.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
-				.getOperationOutcome());
+		return retry(() -> delegate
+				.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, Resource.class, resource, criteria)
+				.operationOutcome());
 	}
 
 	@Override
@@ -73,12 +77,45 @@ class PreferReturnOutcomeRetryImpl extends AbstractDsfClientJerseyWithRetry impl
 	{
 		return retry(() -> delegate
 				.updateBinary(PreferReturnType.OPERATION_OUTCOME, id, in, mediaType, securityContextReference)
-				.getOperationOutcome());
+				.operationOutcome());
 	}
 
 	@Override
 	public Bundle postBundle(Bundle bundle)
 	{
 		return retry(() -> delegate.postBundle(PreferReturnType.OPERATION_OUTCOME, bundle));
+	}
+
+	@Override
+	public OperationOutcome operation(String operationName, Parameters parameters)
+	{
+		return retry(
+				() -> delegate.operation(PreferReturnType.OPERATION_OUTCOME, operationName, parameters, Resource.class)
+						.operationOutcome());
+	}
+
+	@Override
+	public <T extends Resource> OperationOutcome operation(Class<T> resourceType, String operationName,
+			Parameters parameters)
+	{
+		return retry(() -> delegate
+				.operation(PreferReturnType.OPERATION_OUTCOME, resourceType, operationName, parameters, Resource.class)
+				.operationOutcome());
+	}
+
+	@Override
+	public <T extends Resource> OperationOutcome operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters)
+	{
+		return retry(() -> delegate.operation(PreferReturnType.OPERATION_OUTCOME, resourceType, id, operationName,
+				parameters, Resource.class).operationOutcome());
+	}
+
+	@Override
+	public <T extends Resource> OperationOutcome operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters)
+	{
+		return retry(() -> delegate.operation(PreferReturnType.OPERATION_OUTCOME, resourceType, id, version,
+				operationName, parameters, Resource.class).operationOutcome());
 	}
 }

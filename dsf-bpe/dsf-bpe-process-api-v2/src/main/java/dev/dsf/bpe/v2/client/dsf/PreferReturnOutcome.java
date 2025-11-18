@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import jakarta.ws.rs.core.MediaType;
@@ -33,13 +34,21 @@ public interface PreferReturnOutcome
 
 	OperationOutcome createBinary(InputStream in, MediaType mediaType, String securityContextReference);
 
-
 	OperationOutcome update(Resource resource);
 
 	OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria);
 
 	OperationOutcome updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
 
-
 	Bundle postBundle(Bundle bundle);
+
+	OperationOutcome operation(String operationName, Parameters parameters);
+
+	<T extends Resource> OperationOutcome operation(Class<T> resourceType, String operationName, Parameters parameters);
+
+	<T extends Resource> OperationOutcome operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters);
+
+	<T extends Resource> OperationOutcome operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters);
 }

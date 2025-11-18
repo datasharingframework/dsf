@@ -15,7 +15,13 @@
  */
 package dev.dsf.bpe.v2.client.dsf;
 
-public interface DsfClient extends BasicDsfClient, RetryClient<BasicDsfClient>
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+
+/**
+ * All request methods may throw {@link WebApplicationException} and {@link ProcessingException}
+ */
+public interface DsfClient extends BasicDsfClient, AsyncDsfClient, RetryClient<BasicDsfClient>
 {
 	String getBaseUrl();
 

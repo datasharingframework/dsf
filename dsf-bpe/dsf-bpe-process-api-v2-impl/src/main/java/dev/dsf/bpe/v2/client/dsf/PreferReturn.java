@@ -15,52 +15,24 @@
  */
 package dev.dsf.bpe.v2.client.dsf;
 
-import java.net.URI;
-
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 
-public class PreferReturn
+public record PreferReturn<R extends Resource>(IdType id, R resource, OperationOutcome operationOutcome)
 {
-	private final IdType id;
-	private final Resource resource;
-	private final OperationOutcome operationOutcome;
-
-	private PreferReturn(IdType id, Resource resource, OperationOutcome operationOutcome)
+	public static <R extends Resource> PreferReturn<R> minimal(String location)
 	{
-		this.id = id;
-		this.resource = resource;
-		this.operationOutcome = operationOutcome;
+		return new PreferReturn<>(new IdType(location), null, null);
 	}
 
-	public static PreferReturn minimal(URI location)
+	public static <R extends Resource> PreferReturn<R> resource(R resource)
 	{
-		return new PreferReturn(new IdType(location.toString()), null, null);
+		return new PreferReturn<>(null, resource, null);
 	}
 
-	public static PreferReturn resource(Resource resource)
+	public static <R extends Resource> PreferReturn<R> outcome(OperationOutcome operationOutcome)
 	{
-		return new PreferReturn(null, resource, null);
-	}
-
-	public static PreferReturn outcome(OperationOutcome operationOutcome)
-	{
-		return new PreferReturn(null, null, operationOutcome);
-	}
-
-	public IdType getId()
-	{
-		return id;
-	}
-
-	public Resource getResource()
-	{
-		return resource;
-	}
-
-	public OperationOutcome getOperationOutcome()
-	{
-		return operationOutcome;
+		return new PreferReturn<>(null, null, operationOutcome);
 	}
 }

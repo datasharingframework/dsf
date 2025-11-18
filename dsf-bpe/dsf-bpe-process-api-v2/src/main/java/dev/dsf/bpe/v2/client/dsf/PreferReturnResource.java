@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import jakarta.ws.rs.core.MediaType;
@@ -33,13 +34,22 @@ public interface PreferReturnResource
 
 	Binary createBinary(InputStream in, MediaType mediaType, String securityContextReference);
 
-
 	<R extends Resource> R update(R resource);
 
 	<R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
 
 	Binary updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
 
-
 	Bundle postBundle(Bundle bundle);
+
+	<R extends Resource> R operation(String operationName, Parameters parameters, Class<R> returnType);
+
+	<R extends Resource, T extends Resource> R operation(Class<T> resourceType, String operationName,
+			Parameters parameters, Class<R> returnType);
+
+	<R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters, Class<R> returnType);
+
+	<R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters, Class<R> returnType);
 }

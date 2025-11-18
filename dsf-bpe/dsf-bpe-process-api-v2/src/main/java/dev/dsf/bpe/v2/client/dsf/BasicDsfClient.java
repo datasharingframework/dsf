@@ -17,7 +17,6 @@ package dev.dsf.bpe.v2.client.dsf;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -191,123 +190,6 @@ public interface BasicDsfClient extends PreferReturnResource
 	 * @return search result
 	 */
 	Bundle searchWithStrictHandling(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
-
-	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF}.<br>
-	 * <br>
-	 * Send "Prefer: respond-async" header and handles async response
-	 *
-	 * @param resourceType
-	 *            not <code>null</code>
-	 * @param parameters
-	 *            may be <code>null</code>
-	 * @return async search result
-	 */
-	default CompletableFuture<Bundle> searchAsync(Class<? extends Resource> resourceType,
-			Map<String, List<String>> parameters)
-	{
-		return searchAsync(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, parameters);
-	}
-
-	/**
-	 * Send "Prefer: respond-async" header and handles async response
-	 *
-	 * @param delayStrategy
-	 *            not <code>null</code>
-	 * @param resourceType
-	 *            not <code>null</code>
-	 * @param parameters
-	 *            may be <code>null</code>
-	 * @return async search result
-	 */
-	CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, Class<? extends Resource> resourceType,
-			Map<String, List<String>> parameters);
-
-	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
-	 * <br>
-	 * Send "Prefer: respond-async" header and handles async response
-	 *
-	 * @param url
-	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
-	 *            optional query parameters
-	 * @return async search result
-	 */
-	default CompletableFuture<Bundle> searchAsync(String url)
-	{
-		return searchAsync(DelayStrategy.EXPONENTIAL_BACKOFF, url);
-	}
-
-	/**
-	 * Send "Prefer: respond-async" header and handles async response
-	 *
-	 * @param delayStrategy
-	 *            not <code>null</code>, will be ignored if the server sends <i>Retry-After</i> headers
-	 * @param url
-	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
-	 *            optional query parameters
-	 * @return async search result
-	 */
-	CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, String url);
-
-	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
-	 * <br>
-	 * Send "Prefer: respond-async, handling=strict" header and handles async response
-	 *
-	 * @param resourceType
-	 *            not <code>null</code>
-	 * @param parameters
-	 *            may be <code>null</code>
-	 * @return async search result
-	 */
-	default CompletableFuture<Bundle> searchAsyncWithStrictHandling(Class<? extends Resource> resourceType,
-			Map<String, List<String>> parameters)
-	{
-		return searchAsyncWithStrictHandling(DelayStrategy.EXPONENTIAL_BACKOFF, resourceType, parameters);
-	}
-
-	/**
-	 * Send "Prefer: respond-async, handling=strict" header and handles async response
-	 *
-	 * @param delayStrategy
-	 *            not <code>null</code>, will be ignored if the server sends <i>Retry-After</i> headers
-	 * @param resourceType
-	 *            not <code>null</code>
-	 * @param parameters
-	 *            may be <code>null</code>
-	 * @return async search result
-	 */
-	CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy,
-			Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
-
-
-	/**
-	 * Uses {@link DelayStrategy#EXPONENTIAL_BACKOFF} unless the server sends <i>Retry-After</i> headers.<br>
-	 * <br>
-	 * Send "Prefer: respond-async, handling=strict" header and handles async response
-	 *
-	 * @param url
-	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
-	 *            optional query parameters
-	 * @return async search result
-	 */
-	default CompletableFuture<Bundle> searchAsyncWithStrictHandling(String url)
-	{
-		return searchAsyncWithStrictHandling(DelayStrategy.EXPONENTIAL_BACKOFF, url);
-	}
-
-	/**
-	 * Send "Prefer: respond-async, handling=strict" header and handles async response
-	 *
-	 * @param delayStrategy
-	 *            not <code>null</code>, will be ignored if the server sends <i>Retry-After</i> headers
-	 * @param url
-	 *            not <code>null</code>, not empty, expected to contain path with a valid FHIR resource name and
-	 *            optional query parameters
-	 * @return async search result
-	 */
-	CompletableFuture<Bundle> searchAsyncWithStrictHandling(DelayStrategy delayStrategy, String url);
 
 	CapabilityStatement getConformance();
 

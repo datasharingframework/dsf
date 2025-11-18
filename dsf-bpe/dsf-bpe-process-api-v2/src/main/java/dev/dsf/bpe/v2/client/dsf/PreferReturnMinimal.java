@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import jakarta.ws.rs.core.MediaType;
@@ -40,4 +41,14 @@ public interface PreferReturnMinimal
 	IdType updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
 
 	Bundle postBundle(Bundle bundle);
+
+	IdType operation(String operationName, Parameters parameters);
+
+	<T extends Resource> IdType operation(Class<T> resourceType, String operationName, Parameters parameters);
+
+	<T extends Resource> IdType operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters);
+
+	<T extends Resource> IdType operation(Class<T> resourceType, String id, String version, String operationName,
+			Parameters parameters);
 }
