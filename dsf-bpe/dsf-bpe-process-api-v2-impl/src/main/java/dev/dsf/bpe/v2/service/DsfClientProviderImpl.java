@@ -19,7 +19,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,9 +37,11 @@ import dev.dsf.bpe.v2.client.dsf.DsfClientJersey;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleaner;
 import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 
-public class DsfClientProviderImpl implements DsfClientProvider, InitializingBean
+public class DsfClientProviderImpl implements DsfClientProvider, InitializingBean, DisposableBean
 {
-	private final Map<String, DsfClient> clientsByUrlOrId = new HashMap<>();
+	private static final Logger logger = LoggerFactory.getLogger(DsfClientProviderImpl.class);
+
+	private final Map<String, DsfClientJersey> clientsByUrlOrId = new HashMap<>();
 
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;
@@ -42,6 +50,9 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 	private final OidcClientProvider oidcClientProvider;
 	private final String userAgent;
 	private final ClientConfigProvider configProvider;
+
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8,
+			r -> new Thread(r, "dsf-client-async-scheduler"));
 
 	public DsfClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
 			DsfClientConfig dsfClientConfig, BpeProxyConfig proxyConfig, OidcClientProvider oidcClientProvider,
@@ -81,11 +92,11 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 
 		synchronized (clientsByUrlOrId)
 		{
-			DsfClient client = clientsByUrlOrId.get(clientConfig.getFhirServerId());
+			DsfClientJersey client = clientsByUrlOrId.get(clientConfig.getFhirServerId());
 
 			if (client == null)
 			{
-				client = new DsfClientJersey(clientConfig, oidcClientProvider, userAgent, fhirContext,
+				client = new DsfClientJersey(scheduler, clientConfig, oidcClientProvider, userAgent, fhirContext,
 						referenceCleaner);
 				clientsByUrlOrId.put(clientConfig.getFhirServerId(), client);
 			}
@@ -110,13 +121,13 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 			return cachedClient;
 		else
 		{
-			DsfClient newClient = doGetByUrl(webserviceUrl);
+			DsfClientJersey newClient = doGetByUrl(webserviceUrl);
 			clientsByUrlOrId.put(webserviceUrl, newClient);
 			return newClient;
 		}
 	}
 
-	private DsfClient doGetByUrl(String webserviceUrl)
+	private DsfClientJersey doGetByUrl(String webserviceUrl)
 	{
 		synchronized (clientsByUrlOrId)
 		{
@@ -136,7 +147,7 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 					? dsfClientConfig.getLocalConfig()
 					: dsfClientConfig.getRemoteConfig();
 
-			DsfClient client = new DsfClientJersey(webserviceUrl, dsfClientConfig.getTrustStore(),
+			DsfClientJersey client = new DsfClientJersey(scheduler, webserviceUrl, dsfClientConfig.getTrustStore(),
 					dsfClientConfig.getKeyStore(), dsfClientConfig.getKeyStorePassword(), proxyHost, proxyUsername,
 					proxyPassword, config.getConnectTimeout(), config.getReadTimeout(), config.isDebugLoggingEnabled(),
 					userAgent, fhirContext, referenceCleaner);
@@ -144,6 +155,26 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 			clientsByUrlOrId.put(webserviceUrl, client);
 
 			return client;
+		}
+	}
+
+	@Override
+	public void destroy() throws Exception
+	{
+		scheduler.shutdown();
+		try
+		{
+			if (!scheduler.awaitTermination(60, TimeUnit.SECONDS))
+			{
+				scheduler.shutdownNow();
+				if (!scheduler.awaitTermination(60, TimeUnit.SECONDS))
+					logger.warn("DsfClientProvider scheduler did not terminate");
+			}
+		}
+		catch (InterruptedException ie)
+		{
+			scheduler.shutdownNow();
+			Thread.currentThread().interrupt();
 		}
 	}
 }

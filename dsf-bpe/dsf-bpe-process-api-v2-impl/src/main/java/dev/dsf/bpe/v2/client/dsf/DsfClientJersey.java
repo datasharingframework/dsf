@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -163,10 +162,13 @@ public class DsfClientJersey implements DsfClient
 	private final PreferReturnMinimalWithRetry preferReturnMinimal;
 	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
 
-	public DsfClientJersey(dev.dsf.bpe.v2.client.fhir.ClientConfig clientConfig, OidcClientProvider oidcClientProvider,
-			String userAgent, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
+	private final ScheduledExecutorService scheduler;
+
+	public DsfClientJersey(ScheduledExecutorService scheduler, dev.dsf.bpe.v2.client.fhir.ClientConfig clientConfig,
+			OidcClientProvider oidcClientProvider, String userAgent, FhirContext fhirContext,
+			ReferenceCleaner referenceCleaner)
 	{
-		this(clientConfig.getBaseUrl(), clientConfig.getTrustStore(),
+		this(scheduler, clientConfig.getBaseUrl(), clientConfig.getTrustStore(),
 				clientConfig.getCertificateAuthentication() == null ? null
 						: clientConfig.getCertificateAuthentication().getKeyStore(),
 				clientConfig.getCertificateAuthentication() == null ? null
@@ -195,21 +197,23 @@ public class DsfClientJersey implements DsfClient
 		return Stream.of(basicAuthFeature, bearerAuthFeature, oidcAuthFeature).filter(Objects::nonNull);
 	}
 
-	public DsfClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, Duration connectTimeout,
-			Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue, FhirContext fhirContext,
-			ReferenceCleaner referenceCleaner)
+	public DsfClientJersey(ScheduledExecutorService scheduler, String baseUrl, KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
+			Duration connectTimeout, Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue,
+			FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
-		this(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
-				connectTimeout, readTimeout, logRequestsAndResponses, userAgentValue, fhirContext, referenceCleaner,
-				Stream.of());
+		this(scheduler, baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName,
+				proxyPassword, connectTimeout, readTimeout, logRequestsAndResponses, userAgentValue, fhirContext,
+				referenceCleaner, Stream.of());
 	}
 
-	private DsfClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, Duration connectTimeout,
-			Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue, FhirContext fhirContext,
-			ReferenceCleaner referenceCleaner, Stream<Feature> authFeatures)
+	private DsfClientJersey(ScheduledExecutorService scheduler, String baseUrl, KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
+			Duration connectTimeout, Duration readTimeout, boolean logRequestsAndResponses, String userAgentValue,
+			FhirContext fhirContext, ReferenceCleaner referenceCleaner, Stream<Feature> authFeatures)
 	{
+		this.scheduler = scheduler;
+
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
 			sslContext = SslConfigurator.newInstance().trustStore(trustStore).createSSLContext();
@@ -1010,7 +1014,7 @@ public class DsfClientJersey implements DsfClient
 				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
 		}
 
-		return doSearchAsync(delayStrategy, target, false);
+		return searchAsync(delayStrategy, target, false);
 	}
 
 	@Override
@@ -1018,7 +1022,7 @@ public class DsfClientJersey implements DsfClient
 	{
 		checkUri(url);
 
-		return doSearchAsync(delayStrategy, client.target(url), false);
+		return searchAsync(delayStrategy, client.target(url), false);
 	}
 
 	@Override
@@ -1034,7 +1038,7 @@ public class DsfClientJersey implements DsfClient
 				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
 		}
 
-		return doSearchAsync(delayStrategy, target, true);
+		return searchAsync(delayStrategy, target, true);
 	}
 
 	@Override
@@ -1042,7 +1046,7 @@ public class DsfClientJersey implements DsfClient
 	{
 		checkUri(url);
 
-		return doSearchAsync(delayStrategy, client.target(url), true);
+		return searchAsync(delayStrategy, client.target(url), true);
 	}
 
 	private void checkUri(String url)
@@ -1056,7 +1060,7 @@ public class DsfClientJersey implements DsfClient
 			throw new RuntimeException("url starting with client base url + @");
 	}
 
-	private CompletableFuture<Bundle> doSearchAsync(DelayStrategy delayStrategy, WebTarget target, boolean strict)
+	private CompletableFuture<Bundle> searchAsync(DelayStrategy delayStrategy, WebTarget target, boolean strict)
 	{
 		Builder requestBuilder = target.request().header(Constants.HEADER_PREFER,
 				Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -1136,8 +1140,6 @@ public class DsfClientJersey implements DsfClient
 			DelayStrategy delayStrategy, Optional<Duration> retryAfter, CompletableFuture<PreferReturn<R>> resultFuture,
 			Class<R> resourceType, PreferReturnType preferReturnType)
 	{
-		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
 		Runnable poll = new Runnable()
 		{
 			private Duration delay = delayStrategy.getFirstDelay();
@@ -1146,10 +1148,7 @@ public class DsfClientJersey implements DsfClient
 			public void run()
 			{
 				if (resultFuture.isCancelled())
-				{
-					executor.shutdownNow();
 					return;
-				}
 
 				try
 				{
@@ -1165,7 +1164,6 @@ public class DsfClientJersey implements DsfClient
 						PreferReturn<R> r = DsfClientJersey.this.unpack(bundle, resourceType, preferReturnType);
 
 						resultFuture.complete(r);
-						executor.shutdownNow();
 					}
 					else if (Status.ACCEPTED.getStatusCode() == response.getStatus())
 					{
@@ -1176,25 +1174,21 @@ public class DsfClientJersey implements DsfClient
 
 						delay = retryAfter.orElse(delayStrategy.getNextDelay(delay));
 						logger.debug("Status 202, trying again in {}", delay);
-						executor.schedule(this, delay.toMillis(), TimeUnit.MILLISECONDS);
+						scheduler.schedule(this, delay.toMillis(), TimeUnit.MILLISECONDS);
 					}
 					else
-					{
 						resultFuture.completeExceptionally(handleError(response));
-						executor.shutdownNow();
-					}
 				}
 				catch (Exception e)
 				{
 					resultFuture.completeExceptionally(e);
-					executor.shutdownNow();
 				}
 			}
 		};
 
 		Duration delay = retryAfter.orElse(delayStrategy.getFirstDelay());
 		logger.debug("Status 202, trying again in {}", delay);
-		executor.schedule(poll, delay.toMillis(), TimeUnit.MILLISECONDS);
+		scheduler.schedule(poll, delay.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	private Optional<Duration> parseRetryAfter(String headerValue)
