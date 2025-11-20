@@ -22,6 +22,7 @@
 				   logicalFilePath="db/db.binaries.changelog-2.0.0.xml">
 
 	<changeSet author="retwet" id="db.binaries.changelog-2.0.0.add-binary_oid-column">
+		<validCheckSum>9:0dde1d3e22c313b9449712244c788771</validCheckSum>
 		<sql dbms="postgresql">
 			CREATE EXTENSION IF NOT EXISTS lo;
 		</sql>
@@ -39,7 +40,7 @@
 			GRANT UPDATE ON TABLE binaries TO ${db.server_permanent_delete_users_group};
 			GRANT ${db.server_permanent_delete_user} TO ${db.liquibase_user};
 			SET ROLE ${db.server_permanent_delete_user};
-			UPDATE binaries SET binary_oid = lo_from_bytea(0, binary_data) WHERE binary_data IS NOT NULL;
+			UPDATE binaries SET binary_oid = lo_from_bytea(0, COALESCE(binary_data, ''::bytea));
 			DO '
 			DECLARE
 				lo_oid oid;
