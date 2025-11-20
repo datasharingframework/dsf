@@ -44,6 +44,11 @@ public class ProcessPluginApiFactory implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginApiFactory.class);
 
+	public static final int API_V1 = 1;
+	public static final int API_V2 = 2;
+
+	public static final String API_V1_STRING = "1";
+
 	private final ConfigurableEnvironment environment;
 	private final DsfClientConfig dsfClientConfig;
 	private final FhirClientConfigs fhirClientConfigs;
@@ -90,7 +95,7 @@ public class ProcessPluginApiFactory implements InitializingBean
 
 	public List<ProcessPluginFactory> initialize()
 	{
-		return IntStream.of(1, 2).mapToObj(this::init).toList();
+		return IntStream.of(API_V1, API_V2).mapToObj(this::init).toList();
 	}
 
 	private ProcessPluginFactory init(int apiVersion)

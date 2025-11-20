@@ -39,6 +39,7 @@ import dev.dsf.bpe.api.listener.ListenerFactory;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.engine.ProcessPluginConsumer;
+import dev.dsf.bpe.plugin.ProcessPluginApiFactory;
 
 public class DefaultBpmnParseListener implements BpmnParseListener, ProcessPluginConsumer
 {
@@ -75,7 +76,7 @@ public class DefaultBpmnParseListener implements BpmnParseListener, ProcessPlugi
 			String apiVersion = withTenant.getTenantId();
 
 			if (apiVersion == null)
-				return Optional.empty();
+				return Optional.ofNullable(listenerFactoriesByApiVersion.get(ProcessPluginApiFactory.API_V1_STRING));
 			else
 				return Optional.ofNullable(listenerFactoriesByApiVersion.get(apiVersion));
 		}
