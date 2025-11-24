@@ -31,28 +31,18 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
+import dev.dsf.bpe.v2.constants.CodeSystems;
+import dev.dsf.bpe.v2.constants.NamingSystems;
+
 public class ReadAccessHelperImpl implements ReadAccessHelper
 {
-	private static final String READ_ACCESS_TAG_SYSTEM = "http://dsf.dev/fhir/CodeSystem/read-access-tag";
-	private static final String READ_ACCESS_TAG_VALUE_LOCAL = "LOCAL";
-	private static final String READ_ACCESS_TAG_VALUE_ORGANIZATION = "ORGANIZATION";
-	private static final String READ_ACCESS_TAG_VALUE_ROLE = "ROLE";
-	private static final String READ_ACCESS_TAG_VALUE_ALL = "ALL";
-
-	private static final String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
-
-	private static final String EXTENSION_READ_ACCESS_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization";
-
-	private static final String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role";
-	private static final String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION = "parent-organization";
-	private static final String EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE = "organization-role";
-
-	private static final List<String> READ_ACCESS_TAG_VALUES = List.of(READ_ACCESS_TAG_VALUE_LOCAL,
-			READ_ACCESS_TAG_VALUE_ORGANIZATION, READ_ACCESS_TAG_VALUE_ROLE, READ_ACCESS_TAG_VALUE_ALL);
+	private static final List<String> READ_ACCESS_TAG_VALUES = List.of(CodeSystems.ReadAccessTag.Codes.LOCAL,
+			CodeSystems.ReadAccessTag.Codes.ORGANIZATION, CodeSystems.ReadAccessTag.Codes.ROLE,
+			CodeSystems.ReadAccessTag.Codes.ALL);
 
 	private Predicate<Coding> matchesTagValue(String value)
 	{
-		return c -> c != null && READ_ACCESS_TAG_SYSTEM.equals(c.getSystem()) && c.hasCode()
+		return c -> c != null && CodeSystems.ReadAccessTag.SYSTEM.equals(c.getSystem()) && c.hasCode()
 				&& c.getCode().equals(value);
 	}
 
@@ -62,8 +52,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null)
 			return null;
 
-		resource.getMeta().getTag().removeIf(matchesTagValue(READ_ACCESS_TAG_VALUE_ALL));
-		resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_LOCAL);
+		resource.getMeta().getTag().removeIf(matchesTagValue(CodeSystems.ReadAccessTag.Codes.ALL));
+		resource.getMeta().addTag(CodeSystems.ReadAccessTag.local());
 
 		return resource;
 	}
@@ -76,12 +66,13 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 
 		Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
 
-		if (resource.getMeta().getTag().stream().noneMatch(matchesTagValue(READ_ACCESS_TAG_VALUE_LOCAL)))
+		if (resource.getMeta().getTag().stream().noneMatch(matchesTagValue(CodeSystems.ReadAccessTag.Codes.LOCAL)))
 			addLocal(resource);
 
-		resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_ORGANIZATION)
-				.addExtension().setUrl(EXTENSION_READ_ACCESS_ORGANIZATION)
-				.setValue(new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(organizationIdentifier));
+		resource.getMeta().addTag().setSystem(CodeSystems.ReadAccessTag.SYSTEM)
+				.setCode(CodeSystems.ReadAccessTag.Codes.ORGANIZATION).addExtension()
+				.setUrl(EXTENSION_READ_ACCESS_ORGANIZATION)
+				.setValue(NamingSystems.OrganizationIdentifier.withValue(organizationIdentifier));
 
 		return resource;
 	}
@@ -97,12 +88,13 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (!organization.hasIdentifier())
 			throw new IllegalArgumentException("organization has no identifier");
 
-		Optional<String> identifierValue = organization.getIdentifier().stream().filter(Identifier::hasSystem)
-				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())).filter(Identifier::hasValue)
-				.map(Identifier::getValue).filter(v -> !v.isBlank()).findFirst();
+		Optional<String> identifierValue = NamingSystems.OrganizationIdentifier.findFirst(organization)
+				.map(Identifier::getValue).filter(v -> !v.isBlank());
 
-		return addOrganization(resource, identifierValue.orElseThrow(() -> new IllegalArgumentException(
-				"organization has no non blank identifier value with system " + ORGANIZATION_IDENTIFIER_SYSTEM)));
+		return addOrganization(resource,
+				identifierValue.orElseThrow(
+						() -> new IllegalArgumentException("organization has no non blank identifier value with system "
+								+ NamingSystems.OrganizationIdentifier.SID)));
 	}
 
 	@Override
@@ -116,13 +108,14 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		Objects.requireNonNull(roleSystem, "roleSystem");
 		Objects.requireNonNull(roleCode, "roleCode");
 
-		if (resource.getMeta().getTag().stream().noneMatch(matchesTagValue(READ_ACCESS_TAG_VALUE_LOCAL)))
+		if (resource.getMeta().getTag().stream().noneMatch(matchesTagValue(CodeSystems.ReadAccessTag.Codes.LOCAL)))
 			addLocal(resource);
 
-		Extension ex = resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_ROLE)
-				.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE);
-		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION).setValue(
-				new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(parentOrganizationIdentifier));
+		Extension ex = resource.getMeta().addTag().setSystem(CodeSystems.ReadAccessTag.SYSTEM)
+				.setCode(CodeSystems.ReadAccessTag.Codes.ROLE).addExtension()
+				.setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE);
+		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION)
+				.setValue(NamingSystems.OrganizationIdentifier.withValue(parentOrganizationIdentifier));
 		ex.addExtension().setUrl(EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE)
 				.setValue(new Coding().setSystem(roleSystem).setCode(roleCode));
 		return resource;
@@ -139,11 +132,11 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			throw new IllegalArgumentException("affiliation has no parent-organization reference");
 		if (!affiliation.getOrganization().hasIdentifier())
 			throw new IllegalArgumentException("affiliation has no parent-organization reference with identifier");
-		if (!affiliation.getOrganization().getIdentifier().hasSystem()
-				|| !ORGANIZATION_IDENTIFIER_SYSTEM.equals(affiliation.getOrganization().getIdentifier().getSystem()))
+		if (!affiliation.getOrganization().getIdentifier().hasSystem() || !NamingSystems.OrganizationIdentifier.SID
+				.equals(affiliation.getOrganization().getIdentifier().getSystem()))
 			throw new IllegalArgumentException(
 					"affiliation has no parent-organization reference with identifier system "
-							+ ORGANIZATION_IDENTIFIER_SYSTEM);
+							+ NamingSystems.OrganizationIdentifier.SID);
 		if (!affiliation.getOrganization().getIdentifier().hasValue()
 				|| affiliation.getOrganization().getIdentifier().getValue().isBlank())
 			throw new IllegalArgumentException(
@@ -170,11 +163,12 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			return null;
 
 		resource.getMeta().getTag()
-				.removeIf(matchesTagValue(READ_ACCESS_TAG_VALUE_LOCAL)
-						.or(matchesTagValue(READ_ACCESS_TAG_VALUE_ORGANIZATION))
-						.or(matchesTagValue(READ_ACCESS_TAG_VALUE_ROLE)));
+				.removeIf(matchesTagValue(CodeSystems.ReadAccessTag.Codes.LOCAL)
+						.or(matchesTagValue(CodeSystems.ReadAccessTag.Codes.ORGANIZATION))
+						.or(matchesTagValue(CodeSystems.ReadAccessTag.Codes.ROLE)));
 
-		resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_ALL);
+		resource.getMeta().addTag(CodeSystems.ReadAccessTag.all());
+
 		return resource;
 	}
 
@@ -184,7 +178,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasTag())
 			return false;
 
-		return resource.getMeta().getTag(READ_ACCESS_TAG_SYSTEM, READ_ACCESS_TAG_VALUE_LOCAL) != null;
+		return resource.getMeta().getTag(CodeSystems.ReadAccessTag.SYSTEM,
+				CodeSystems.ReadAccessTag.Codes.LOCAL) != null;
 	}
 
 	@Override
@@ -193,8 +188,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasTag())
 			return false;
 
-		Stream<Extension> extensions = getTagExtensions(resource, READ_ACCESS_TAG_SYSTEM,
-				READ_ACCESS_TAG_VALUE_ORGANIZATION, EXTENSION_READ_ACCESS_ORGANIZATION);
+		Stream<Extension> extensions = getTagExtensions(resource, CodeSystems.ReadAccessTag.SYSTEM,
+				CodeSystems.ReadAccessTag.Codes.ORGANIZATION, EXTENSION_READ_ACCESS_ORGANIZATION);
 
 		return extensions.filter(Extension::hasValue).map(Extension::getValue).filter(v -> v instanceof Identifier)
 				.map(v -> (Identifier) v).filter(Identifier::hasValue)
@@ -208,8 +203,9 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			return false;
 
 		return organization.hasIdentifier() && organization.getIdentifier().stream().filter(Identifier::hasSystem)
-				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())).filter(Identifier::hasValue)
-				.map(Identifier::getValue).anyMatch(identifier -> hasOrganization(resource, identifier));
+				.filter(i -> NamingSystems.OrganizationIdentifier.SID.equals(i.getSystem()))
+				.filter(Identifier::hasValue).map(Identifier::getValue)
+				.anyMatch(identifier -> hasOrganization(resource, identifier));
 	}
 
 	private Stream<Extension> getTagExtensions(Resource resource, String tagSystem, String tagCode, String extensionUrl)
@@ -225,7 +221,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasTag())
 			return false;
 
-		return resource.getMeta().getTag(READ_ACCESS_TAG_SYSTEM, READ_ACCESS_TAG_VALUE_ORGANIZATION) != null;
+		return resource.getMeta().getTag(CodeSystems.ReadAccessTag.SYSTEM,
+				CodeSystems.ReadAccessTag.Codes.ORGANIZATION) != null;
 	}
 
 	@Override
@@ -234,8 +231,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasTag())
 			return false;
 
-		Stream<Extension> extensions = getTagExtensions(resource, READ_ACCESS_TAG_SYSTEM, READ_ACCESS_TAG_VALUE_ROLE,
-				EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE);
+		Stream<Extension> extensions = getTagExtensions(resource, CodeSystems.ReadAccessTag.SYSTEM,
+				CodeSystems.ReadAccessTag.Codes.ROLE, EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE);
 
 		return extensions.filter(Extension::hasExtension)
 				.anyMatch(matches(parentOrganizationIdentifier, roleSystem, roleCode));
@@ -260,7 +257,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 							EXTENSION_READ_ACCESS_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION))
 					.filter(Extension::hasValue).map(Extension::getValue).filter(v -> v instanceof Identifier)
 					.map(v -> (Identifier) v).filter(Identifier::hasSystem).filter(Identifier::hasValue)
-					.anyMatch(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem())
+					.anyMatch(i -> NamingSystems.OrganizationIdentifier.SID.equals(i.getSystem())
 							&& Objects.equals(i.getValue(), parentOrganizationIdentifier));
 			boolean role = extensions.getExtension().stream().filter(Extension::hasUrl)
 					.filter(e -> Objects.equals(e.getUrl(),
@@ -298,7 +295,8 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasTag())
 			return false;
 
-		return resource.getMeta().getTag(READ_ACCESS_TAG_SYSTEM, READ_ACCESS_TAG_VALUE_ROLE) != null;
+		return resource.getMeta().getTag(CodeSystems.ReadAccessTag.SYSTEM,
+				CodeSystems.ReadAccessTag.Codes.ROLE) != null;
 	}
 
 	@Override
@@ -307,7 +305,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		if (resource == null || !resource.hasMeta() || !resource.getMeta().hasTag())
 			return false;
 
-		return resource.getMeta().getTag(READ_ACCESS_TAG_SYSTEM, READ_ACCESS_TAG_VALUE_ALL) != null;
+		return resource.getMeta().getTag(CodeSystems.ReadAccessTag.SYSTEM, CodeSystems.ReadAccessTag.Codes.ALL) != null;
 	}
 
 	@Override
@@ -328,16 +326,16 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		// all({LOCAL, ORGANIZATION, ROLE, ALL}) valid
 
 		long tagsCount = resource.getMeta().getTag().stream().filter(Coding::hasSystem).filter(Coding::hasCode)
-				.filter(c -> READ_ACCESS_TAG_SYSTEM.equals(c.getSystem()))
+				.filter(c -> CodeSystems.ReadAccessTag.SYSTEM.equals(c.getSystem()))
 				.filter(c -> READ_ACCESS_TAG_VALUES.contains(c.getCode())).count();
 		boolean local = resource.getMeta().getTag().stream().filter(Coding::hasSystem).filter(Coding::hasCode)
-				.filter(c -> READ_ACCESS_TAG_SYSTEM.equals(c.getSystem()))
-				.filter(c -> READ_ACCESS_TAG_VALUE_LOCAL.equals(c.getCode())).count() == 1;
+				.filter(c -> CodeSystems.ReadAccessTag.SYSTEM.equals(c.getSystem()))
+				.filter(c -> CodeSystems.ReadAccessTag.Codes.LOCAL.equals(c.getCode())).count() == 1;
 		boolean all = resource.getMeta().getTag().stream().filter(Coding::hasSystem).filter(Coding::hasCode)
-				.filter(c -> READ_ACCESS_TAG_SYSTEM.equals(c.getSystem()))
-				.filter(c -> READ_ACCESS_TAG_VALUE_ALL.equals(c.getCode())).count() == 1;
+				.filter(c -> CodeSystems.ReadAccessTag.SYSTEM.equals(c.getSystem()))
+				.filter(c -> CodeSystems.ReadAccessTag.Codes.ALL.equals(c.getCode())).count() == 1;
 		boolean tagsValid = resource.getMeta().getTag().stream().filter(Coding::hasSystem).filter(Coding::hasCode)
-				.filter(c -> READ_ACCESS_TAG_SYSTEM.equals(c.getSystem()))
+				.filter(c -> CodeSystems.ReadAccessTag.SYSTEM.equals(c.getSystem()))
 				.filter(c -> READ_ACCESS_TAG_VALUES.contains(c.getCode()))
 				.allMatch(isValidReadAccessTag(organizationWithIdentifierExists, roleExists));
 
@@ -349,12 +347,12 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	{
 		return coding -> switch (coding.getCode())
 		{
-			case READ_ACCESS_TAG_VALUE_LOCAL -> true;
-			case READ_ACCESS_TAG_VALUE_ORGANIZATION ->
+			case CodeSystems.ReadAccessTag.Codes.LOCAL -> true;
+			case CodeSystems.ReadAccessTag.Codes.ORGANIZATION ->
 				isValidOrganizationReadAccessTag(coding, organizationWithIdentifierExists);
-			case READ_ACCESS_TAG_VALUE_ROLE ->
+			case CodeSystems.ReadAccessTag.Codes.ROLE ->
 				isValidRoleReadAccessTag(coding, organizationWithIdentifierExists, roleExists);
-			case READ_ACCESS_TAG_VALUE_ALL -> true;
+			case CodeSystems.ReadAccessTag.Codes.ALL -> true;
 			default -> false;
 		};
 	}
@@ -379,7 +377,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private boolean isValidOrganizationIdentifier(Identifier identifier,
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
-		return identifier.hasSystem() && ORGANIZATION_IDENTIFIER_SYSTEM.equals(identifier.getSystem())
+		return identifier.hasSystem() && NamingSystems.OrganizationIdentifier.SID.equals(identifier.getSystem())
 				&& identifier.hasValue() && organizationWithIdentifierExists.test(identifier);
 	}
 

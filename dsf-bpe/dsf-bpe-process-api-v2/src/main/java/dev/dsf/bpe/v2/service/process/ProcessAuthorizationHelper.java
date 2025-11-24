@@ -27,6 +27,29 @@ import org.hl7.fhir.r4.model.Identifier;
 
 public interface ProcessAuthorizationHelper
 {
+	String EXTENSION_PROCESS_AUTHORIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization";
+	String EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME = "message-name";
+	String EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE = "task-profile";
+	String EXTENSION_PROCESS_AUTHORIZATION_REQUESTER = "requester";
+	String EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT = "recipient";
+
+	String EXTENSION_PROCESS_AUTHORIZATION_PRACTITIONER = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-practitioner";
+
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization";
+
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization-practitioner";
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION = "organization";
+	String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE = "practitioner-role";
+
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION = "parent-organization";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE = "organization-role";
+
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role-practitioner";
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER_PARENT_ORGANIZATION = EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PARENT_ORGANIZATION;
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER_ORGANIZATION_ROLE = EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_ORGANIZATION_ROLE;
+	String EXTENSION_PROCESS_AUTHORIZATION_PARENT_ORGANIZATION_ROLE_PRACTITIONER_PRACTITIONER_ROLE = "practitioner-role";
+
 	interface RecipientFactory
 	{
 		Recipient localAll();

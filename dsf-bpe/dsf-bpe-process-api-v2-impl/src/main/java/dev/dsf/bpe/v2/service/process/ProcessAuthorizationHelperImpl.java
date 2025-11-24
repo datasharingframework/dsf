@@ -35,12 +35,6 @@ import dev.dsf.bpe.v2.constants.CodeSystems.ProcessAuthorization;
 
 public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelper
 {
-	private static final String EXTENSION_PROCESS_AUTHORIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization";
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_MESSAGE_NAME = "message-name";
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE = "task-profile";
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_REQUESTER = "requester";
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT = "recipient";
-
 	private static final class RecipientFactoryImpl implements RecipientFactory
 	{
 		@Override
