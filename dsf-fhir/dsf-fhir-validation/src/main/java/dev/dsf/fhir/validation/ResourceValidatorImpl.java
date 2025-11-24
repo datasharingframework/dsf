@@ -82,10 +82,17 @@ public class ResourceValidatorImpl implements ResourceValidator
 				return true;
 			else if (path != null && (path.startsWith("ActivityDefinition") || path.startsWith("Binary")
 					|| path.startsWith("Bundle") || path.startsWith("CodeSystem")
-					|| path.startsWith("DocumentReference") || path.startsWith("Endpoint") || path.startsWith("Library")
-					|| path.startsWith("Organization") || path.startsWith("QuestionnaireResponse")
-					|| path.startsWith("ResearchStudy") || path.startsWith("StructureDefinition")
-					|| path.startsWith("Task")))
+					|| path.startsWith("DocumentReference") || path.startsWith("ElementDefinition")
+					|| path.startsWith("Endpoint") || path.startsWith("Extension") || path.startsWith("Group")
+					|| path.startsWith("HealthcareService") || path.startsWith("Library") || path.startsWith("Location")
+					|| path.startsWith("Measure") || path.startsWith("MeasureReport") || path.startsWith("NamingSystem")
+					|| path.startsWith("Organization") || path.startsWith("OrganizationAffiliation")
+					|| path.startsWith("Patient") || path.startsWith("Practitioner")
+					|| path.startsWith("PractitionerRole") || path.startsWith("Provenance")
+					|| path.startsWith("Questionnaire") || path.startsWith("QuestionnaireResponse")
+					|| path.startsWith("Reference") || path.startsWith("ResearchStudy")
+					|| path.startsWith("StructureDefinition") || path.startsWith("Subscription")
+					|| path.startsWith("Task") || path.startsWith("ValueSet")))
 				return true;
 
 			logger.debug("Not resolving [path: {}, url: {}, type: {}, canonical: {}]", path, url, type, canonical);
