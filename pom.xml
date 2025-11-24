@@ -43,13 +43,13 @@
 		<jetty.version>12.1.4</jetty.version>
 		<jersey.version>3.1.11</jersey.version>
 		<tyrus.version>2.2.1</tyrus.version>
-		<spring.version>6.2.13</spring.version>
+		<spring.version>6.2.14</spring.version>
 		<jackson.version>2.20.1</jackson.version>
 		<operaton.version>1.0.0</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
-		<hapi.fhir.version.v2>8.4.0</hapi.fhir.version.v2>
+		<hapi.fhir.version.v2>8.4.1</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
-		<hapi.fhir.version>8.4.0</hapi.fhir.version>
+		<hapi.fhir.version>8.4.1</hapi.fhir.version>
 		<bouncycastle.version>1.82</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.0</crypto-utils.version.v2>
@@ -407,7 +407,7 @@
 			<dependency>
 				<groupId>org.tukaani</groupId>
 				<artifactId>xz</artifactId>
-				<version>1.10</version>
+				<version>1.11</version>
 			</dependency>
 
 			<!-- managing out-dated dependencies from hapi fhir -->
@@ -621,7 +621,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.9.8.1</version>
+					<version>4.9.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
