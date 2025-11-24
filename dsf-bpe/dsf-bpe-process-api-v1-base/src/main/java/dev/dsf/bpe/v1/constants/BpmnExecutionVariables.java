@@ -15,14 +15,12 @@
  */
 package dev.dsf.bpe.v1.constants;
 
-import dev.dsf.bpe.v1.activity.AbstractTaskMessageSend;
 import dev.dsf.bpe.v1.variables.Target;
-import dev.dsf.bpe.v1.variables.Variables;
 
 /**
  * Defines names of standard process engine variables used by the bpe
  *
- * @see Variables
+ * @see dev.dsf.bpe.v1.variables.Variables
  */
 public final class BpmnExecutionVariables
 {
@@ -31,13 +29,13 @@ public final class BpmnExecutionVariables
 	}
 
 	/**
-	 * Values from the <code>target</code> variable are used to configure {@link AbstractTaskMessageSend} activities for
-	 * sending Task resource messages
+	 * Values from the <code>target</code> variable are used to configure
+	 * {@link dev.dsf.bpe.v1.activity.AbstractTaskMessageSend} activities for sending Task resource messages
 	 *
-	 * @see Variables#createTarget(String, String, String, String)
-	 * @see Variables#createTarget(String, String, String)
-	 * @see Variables#setTarget(dev.dsf.bpe.v1.variables.Target)
-	 * @see Variables#getTarget()
+	 * @see dev.dsf.bpe.v1.variables.Variables#createTarget(String, String, String, String)
+	 * @see dev.dsf.bpe.v1.variables.Variables#createTarget(String, String, String)
+	 * @see dev.dsf.bpe.v1.variables.Variables#setTarget(dev.dsf.bpe.v1.variables.Target)
+	 * @see dev.dsf.bpe.v1.variables.Variables#getTarget()
 	 */
 	public static final String TARGET = "target";
 
@@ -45,10 +43,10 @@ public final class BpmnExecutionVariables
 	 * The <code>targets</code> variable is typically used to iterate over {@link Target} variables in multi instance
 	 * send/receive tasks or multi instance subprocesses
 	 *
-	 * @see Variables#createTargets(java.util.List)
-	 * @see Variables#createTargets(dev.dsf.bpe.v1.variables.Target...)
-	 * @see Variables#setTargets(dev.dsf.bpe.v1.variables.Targets)
-	 * @see Variables#getTargets()
+	 * @see dev.dsf.bpe.v1.variables.Variables#createTargets(java.util.List)
+	 * @see dev.dsf.bpe.v1.variables.Variables#createTargets(dev.dsf.bpe.v1.variables.Target...)
+	 * @see dev.dsf.bpe.v1.variables.Variables#setTargets(dev.dsf.bpe.v1.variables.Targets)
+	 * @see dev.dsf.bpe.v1.variables.Variables#getTargets()
 	 */
 	public static final String TARGETS = "targets";
 
@@ -63,10 +61,10 @@ public final class BpmnExecutionVariables
 	/**
 	 * Value of the <code>alternativeBusinessKey</code> variable is used to correlated incoming Task resource to a
 	 * waiting process instance if an alternative business-key was created for a communication target. See corresponding
-	 * <code>protected</code> method in {@link AbstractTaskMessageSend} on how to create and use an alternative
-	 * business-key.
+	 * <code>protected</code> method in {@link dev.dsf.bpe.v1.activity.AbstractTaskMessageSend} on how to create and use
+	 * an alternative business-key.
 	 *
-	 * @see AbstractTaskMessageSend
+	 * @see dev.dsf.bpe.v1.activity.AbstractTaskMessageSend
 	 */
 	public static final String ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
 }

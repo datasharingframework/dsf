@@ -18,7 +18,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>dsf-bpe-process-api-v1</artifactId>
+	<artifactId>dsf-bpe-process-api-v1-base</artifactId>
 
 	<parent>
 		<groupId>dev.dsf</groupId>
@@ -30,22 +30,13 @@
 		<main.basedir>${project.parent.parent.basedir}</main.basedir>
 	</properties>
 
-	<name>DSF BPE Process API v1</name>
+	<name>DSF BPE Process API v1 (Base)</name>
 
 	<dependencies>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-bpe-process-api-v1-base</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>${hapi.fhir.version.v1}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.camunda.bpm</groupId>
-			<artifactId>camunda-engine</artifactId>
-			<version>7.24.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -94,29 +85,9 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<artifactSet>
-								<includes>
-									<include>dev.dsf:dsf-bpe-process-api-v1-base</include>
-								</includes>
-							</artifactSet>
-							<createDependencyReducedPom>true</createDependencyReducedPom>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<sourcepath>src/main/java;../dsf-bpe-process-api-v1-base/src/main/java</sourcepath>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -21,9 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.DelegateTask;
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -35,6 +32,9 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.DelegateTask;
+import org.operaton.bpm.engine.delegate.TaskListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -87,7 +87,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		{
 			logger.trace("Execution of user task with id='{}'", execution.getCurrentActivityId());
 
-			String questionnaireUrlWithVersion = userTask.getBpmnModelElementInstance().getCamundaFormKey();
+			String questionnaireUrlWithVersion = userTask.getBpmnModelElementInstance().getOperatonFormKey();
 			Questionnaire questionnaire = readQuestionnaire(questionnaireUrlWithVersion);
 
 			String businessKey = execution.getBusinessKey();

@@ -17,8 +17,8 @@ package dev.dsf.bpe.test.service;
 
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
 
-import org.operaton.bpm.engine.delegate.BpmnError;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.BpmnError;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v1.ProcessPluginApi;

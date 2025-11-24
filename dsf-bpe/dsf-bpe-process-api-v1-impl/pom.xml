@@ -39,7 +39,7 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-bpe-process-api-v1</artifactId>
+			<artifactId>dsf-bpe-process-api-v1-operaton</artifactId>
 		</dependency>
 
 		<dependency>
@@ -117,7 +117,7 @@
 							<artifactItems>
 								<artifactItem>
 									<groupId>dev.dsf</groupId>
-									<artifactId>dsf-bpe-process-api-v1</artifactId>
+									<artifactId>dsf-bpe-process-api-v1-operaton</artifactId>
 								</artifactItem>
 								<artifactItem>
 									<groupId>dev.dsf</groupId>

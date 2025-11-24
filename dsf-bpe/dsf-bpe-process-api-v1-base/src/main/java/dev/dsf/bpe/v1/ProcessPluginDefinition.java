@@ -29,9 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
-import dev.dsf.bpe.v1.activity.AbstractTaskMessageSend;
-import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
 import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 
 /**
@@ -146,9 +143,9 @@ public interface ProcessPluginDefinition
 	 * plugin also add the {@link ProcessDocumentation} annotation.
 	 *
 	 * @return {@link Configuration} annotated classes, defining {@link Bean} annotated factory methods
-	 * @see AbstractServiceDelegate
-	 * @see AbstractTaskMessageSend
-	 * @see DefaultUserTaskListener
+	 * @see dev.dsf.bpe.v1.activity.AbstractServiceDelegate
+	 * @see dev.dsf.bpe.v1.activity.AbstractTaskMessageSend
+	 * @see dev.dsf.bpe.v1.activity.DefaultUserTaskListener
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
 	List<Class<?>> getSpringConfigurations();

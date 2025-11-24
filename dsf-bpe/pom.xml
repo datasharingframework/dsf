@@ -30,7 +30,9 @@
 	<modules>
 		<module>dsf-bpe-process-api</module>
 		<module>dsf-bpe-process-api-v1</module>
+		<module>dsf-bpe-process-api-v1-base</module>
 		<module>dsf-bpe-process-api-v1-impl</module>
+		<module>dsf-bpe-process-api-v1-operaton</module>
 		<module>dsf-bpe-process-api-v2</module>
 		<module>dsf-bpe-process-api-v2-impl</module>
 		<module>dsf-bpe-server</module>
@@ -75,7 +77,17 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api-v1-base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-bpe-process-api-v1-impl</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-bpe-process-api-v1-operaton</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

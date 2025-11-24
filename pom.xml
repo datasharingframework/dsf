@@ -528,7 +528,8 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.5.0</version>
+					<!-- 4.0.0 not working with eclipse, see https://github.com/eclipse-m2e/m2e-core/issues/2084 -->
+					<version>3.4.2</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -646,6 +647,11 @@
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
 					<version>5.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>dev.dsf</groupId>
@@ -1289,7 +1295,9 @@
 							<deploymentName>DSF 2.x</deploymentName>
 							<excludeArtifacts>
 								<excludeArtifact>dsf-bpe-process-api</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v1-base</excludeArtifact>
 								<excludeArtifact>dsf-bpe-process-api-v1-impl</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v1-operaton</excludeArtifact>
 								<excludeArtifact>dsf-bpe-process-api-v2-impl</excludeArtifact>
 								<excludeArtifact>dsf-bpe-server</excludeArtifact>
 								<excludeArtifact>dsf-bpe-server-jetty</excludeArtifact>

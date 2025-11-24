@@ -16,6 +16,8 @@ cert/**
 ###
 # dsf-bpe ignores
 ###
+dsf-bpe/dsf-bpe-process-api-v1/dependency-reduced-pom.xml
+dsf-bpe/dsf-bpe-process-api-v1-operaton/dependency-reduced-pom.xml
 dsf-bpe/dsf-bpe-server-jetty/cert/*.crt
 dsf-bpe/dsf-bpe-server-jetty/cert/*.key
 dsf-bpe/dsf-bpe-server-jetty/conf/config.properties
