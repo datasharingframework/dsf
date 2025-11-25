@@ -92,7 +92,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.server.base.url:https://localhost/bpe}")
 	private String bpeServerBaseUrl;
 
-	@Documentation(description = "Role config YAML as defined in [FHIR Server: Access Control](access-control)")
+	@Documentation(description = "Role config YAML as defined in [BPE Server: Access Control](access-control)")
 	@Value("${dev.dsf.bpe.server.roleConfig:}")
 	private String roleConfig;
 

@@ -15,12 +15,10 @@
  */
 package dev.dsf.bpe.v1.variables;
 
-import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
-
 /**
  * Specifies a communication target for FHIR Task resources.
  *
- * @see BpmnExecutionVariables#TARGET
+ * @see dev.dsf.bpe.v1.constants.BpmnExecutionVariables#TARGET
  * @see Variables#createTarget(String, String, String, String)
  * @see Variables#createTarget(String, String, String)
  * @see Targets

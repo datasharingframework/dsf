@@ -303,6 +303,9 @@ public class BundleGenerator
 			Set<String> dependencies = resourcesAndDirectDependencies.get(entry.getKey());
 			return !dependencies.isEmpty() && dependencies.stream().flatMap(d ->
 			{
+				if (d != null && d.startsWith("http://hl7.org/fhir/StructureDefinition"))
+					return Stream.of(); // ignore base profiles from hl7
+
 				Set<String> set = resourcesAndDirectDependencies.get(new EntryAndLabel(null, d));
 				if (set == null)
 				{

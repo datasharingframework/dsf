@@ -18,12 +18,10 @@ package dev.dsf.bpe.v1.variables;
 import java.util.Collection;
 import java.util.List;
 
-import dev.dsf.bpe.v1.constants.BpmnExecutionVariables;
-
 /**
  * Specifies a list of communication targets for FHIR Task resources.
  *
- * @see BpmnExecutionVariables#TARGETS
+ * @see dev.dsf.bpe.v1.constants.BpmnExecutionVariables#TARGETS
  * @see Variables#createTargets(List)
  * @see Variables#createTargets(Target...)
  * @see Target

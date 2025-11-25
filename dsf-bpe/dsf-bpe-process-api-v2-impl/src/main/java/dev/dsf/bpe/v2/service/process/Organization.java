@@ -33,15 +33,6 @@ import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
 
 public class Organization implements Recipient, Requester
 {
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_REQUESTER = "requester";
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT = "recipient";
-
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization";
-
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER = "http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization-practitioner";
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION = "organization";
-	private static final String EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE = "practitioner-role";
-
 	private final String organizationIdentifier;
 	private final boolean localIdentity;
 
@@ -111,13 +102,14 @@ public class Organization implements Recipient, Requester
 	@Override
 	public Extension toRecipientExtension()
 	{
-		return new Extension().setUrl(EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT).setValue(toCoding(false));
+		return new Extension().setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT)
+				.setValue(toCoding(false));
 	}
 
 	@Override
 	public Extension toRequesterExtension()
 	{
-		return new Extension().setUrl(EXTENSION_PROCESS_AUTHORIZATION_REQUESTER)
+		return new Extension().setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER)
 				.setValue(toCoding(needsPractitionerRole()));
 	}
 
@@ -129,15 +121,18 @@ public class Organization implements Recipient, Requester
 		if (needsPractitionerRole)
 		{
 			Extension extension = coding.addExtension()
-					.setUrl(EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER);
-			extension.addExtension(EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION,
+					.setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER);
+			extension.addExtension(
+					ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION,
 					organization);
-			extension.addExtension(EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE,
+			extension.addExtension(
+					ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE,
 					new Coding(practitionerRoleSystem, practitionerRoleCode, null));
 		}
 		else
 		{
-			coding.addExtension().setUrl(EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION).setValue(organization);
+			coding.addExtension().setUrl(ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION)
+					.setValue(organization);
 		}
 
 		return coding;
@@ -160,13 +155,14 @@ public class Organization implements Recipient, Requester
 	@Override
 	public boolean requesterMatches(Extension requesterExtension)
 	{
-		return matches(requesterExtension, EXTENSION_PROCESS_AUTHORIZATION_REQUESTER, needsPractitionerRole());
+		return matches(requesterExtension, ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_REQUESTER,
+				needsPractitionerRole());
 	}
 
 	@Override
 	public boolean recipientMatches(Extension recipientExtension)
 	{
-		return matches(recipientExtension, EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT, false);
+		return matches(recipientExtension, ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_RECIPIENT, false);
 	}
 
 	private boolean matches(Extension extension, String url, boolean needsPractitionerRole)
@@ -185,15 +181,16 @@ public class Organization implements Recipient, Requester
 	{
 		if (needsPractitionerRole)
 		{
-			return extension -> EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER.equals(extension.getUrl())
-					&& !extension.hasValue() && hasMatchingSubOrganizationExtension(extension.getExtension())
+			return extension -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER
+					.equals(extension.getUrl()) && !extension.hasValue()
+					&& hasMatchingSubOrganizationExtension(extension.getExtension())
 					&& hasMatchingPractitionerExtension(extension.getExtension());
 		}
 		else
 		{
-			return extension -> EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION.equals(extension.getUrl())
-					&& extension.hasValue() && extension.getValue() instanceof Identifier value
-					&& organizationIdentifierMatches(value);
+			return extension -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION
+					.equals(extension.getUrl()) && extension.hasValue()
+					&& extension.getValue() instanceof Identifier value && organizationIdentifierMatches(value);
 		}
 	}
 
@@ -211,8 +208,8 @@ public class Organization implements Recipient, Requester
 
 	private boolean subOrganizationExtensionMatches(Extension extension)
 	{
-		return EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION.equals(extension.getUrl())
-				&& extension.hasValue() && extension.getValue() instanceof Identifier value
+		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION
+				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Identifier value
 				&& organizationIdentifierMatches(value);
 	}
 
@@ -223,8 +220,8 @@ public class Organization implements Recipient, Requester
 
 	private boolean practitionerExtensionMatches(Extension extension)
 	{
-		return EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE.equals(extension.getUrl())
-				&& extension.hasValue() && extension.getValue() instanceof Coding value
+		return ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE
+				.equals(extension.getUrl()) && extension.hasValue() && extension.getValue() instanceof Coding value
 				&& practitionerRoleMatches(value);
 	}
 
@@ -273,8 +270,8 @@ public class Organization implements Recipient, Requester
 	{
 		if (coding != null && coding.hasExtension())
 		{
-			List<Extension> organizations = coding.getExtension().stream().filter(Extension::hasUrl)
-					.filter(e -> EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION.equals(e.getUrl()))
+			List<Extension> organizations = coding.getExtension().stream().filter(Extension::hasUrl).filter(
+					e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION.equals(e.getUrl()))
 					.collect(Collectors.toList());
 			if (organizations.size() == 1)
 			{
@@ -297,19 +294,20 @@ public class Organization implements Recipient, Requester
 		if (coding != null && coding.hasExtension())
 		{
 			List<Extension> organizationPractitioners = coding.getExtension().stream().filter(Extension::hasUrl)
-					.filter(e -> EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER.equals(e.getUrl()))
+					.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER
+							.equals(e.getUrl()))
 					.collect(Collectors.toList());
 			if (organizationPractitioners.size() == 1)
 			{
 				Extension organizationPractitioner = organizationPractitioners.get(0);
 				List<Extension> organizations = organizationPractitioner.getExtension().stream()
 						.filter(Extension::hasUrl)
-						.filter(e -> EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION
+						.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_ORGANIZATION
 								.equals(e.getUrl()))
 						.collect(Collectors.toList());
 				List<Extension> practitionerRoles = organizationPractitioner.getExtension().stream()
 						.filter(Extension::hasUrl)
-						.filter(e -> EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE
+						.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_ORGANIZATION_PRACTITIONER_PRACTITIONER_ROLE
 								.equals(e.getUrl()))
 						.collect(Collectors.toList());
 				if (organizations.size() == 1 && practitionerRoles.size() == 1)

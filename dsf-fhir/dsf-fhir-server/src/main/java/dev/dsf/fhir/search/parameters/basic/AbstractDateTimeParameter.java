@@ -271,7 +271,7 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 
 	private String getDateTimeQuery(String operator)
 	{
-		return "(" + timestampColumn + ")::timestamp " + operator + " ?";
+		return "(" + timestampColumn + ")::timestamptz " + operator + " ?";
 	}
 
 	private String getDateQuery(String operator)
@@ -377,6 +377,6 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(" + timestampColumn + ")::timestamp" + sortDirectionWithSpacePrefix;
+		return "(" + timestampColumn + ")::timestamptz" + sortDirectionWithSpacePrefix;
 	}
 }

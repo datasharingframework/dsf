@@ -16,6 +16,8 @@ cert/**
 ###
 # dsf-bpe ignores
 ###
+dsf-bpe/dsf-bpe-process-api-v1/dependency-reduced-pom.xml
+dsf-bpe/dsf-bpe-process-api-v1-operaton/dependency-reduced-pom.xml
 dsf-bpe/dsf-bpe-server-jetty/cert/*.crt
 dsf-bpe/dsf-bpe-server-jetty/cert/*.key
 dsf-bpe/dsf-bpe-server-jetty/conf/config.properties
@@ -52,6 +54,7 @@ dsf-docker-dev-setup/bpe/secrets/ca_chain.crt
 dsf-docker-dev-setup/bpe/secrets/issuing_ca.crt
 dsf-docker-dev-setup/bpe/secrets/root_ca.crt
 dsf-docker-dev-setup/bpe/.env
+dsf-docker-dev-setup/bpe/docker-compose.override.yml
 
 dsf-docker-dev-setup/fhir/log/*.log
 dsf-docker-dev-setup/fhir/log/*.log.gz
@@ -63,6 +66,7 @@ dsf-docker-dev-setup/fhir/secrets/fhir.key.plain
 dsf-docker-dev-setup/fhir/secrets/issuing_ca.crt
 dsf-docker-dev-setup/fhir/secrets/root_ca.crt
 dsf-docker-dev-setup/fhir/.env
+dsf-docker-dev-setup/fhir/docker-compose.override.yml
 
 ###
 # dsf-docker-dev-setup-3dic-ttp ignores

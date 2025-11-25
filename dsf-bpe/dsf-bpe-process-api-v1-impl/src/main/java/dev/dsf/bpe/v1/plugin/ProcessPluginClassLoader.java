@@ -98,7 +98,14 @@ public class ProcessPluginClassLoader extends URLClassLoader
 						public void visitMethodInsn(int opcode, String owner, String name, String descriptor,
 								boolean isInterface)
 						{
-							super.visitMethodInsn(opcode, replace(owner), name, replace(descriptor), isInterface);
+							if ((FROM_PACKAGE + "/model/bpmn/instance/UserTask").equals(owner)
+									&& "getCamundaFormKey".equals(name) && "()Ljava/lang/String;".equals(descriptor))
+							{
+								super.visitMethodInsn(opcode, TO_PACKAGE + "/bpm/model/bpmn/instance/UserTask",
+										"getOperatonFormKey", "()Ljava/lang/String;", isInterface);
+							}
+							else
+								super.visitMethodInsn(opcode, replace(owner), name, replace(descriptor), isInterface);
 						}
 
 						@Override
