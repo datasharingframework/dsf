@@ -1,3 +1,20 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -9,20 +26,27 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<main.basedir>${project.parent.parent.basedir}</main.basedir>
+	</properties>
+
 	<name>DSF FHIR Validation</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-r5</artifactId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation</artifactId>
+			<version>${hapi.fhir.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -33,10 +57,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<version>${hapi.fhir.version}</version>
 		</dependency>
 
 		<dependency>
@@ -53,61 +74,33 @@
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-			<!-- <scope>test</scope> -->
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j2-impl</artifactId>
-			<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-			<!-- <scope>test</scope> -->
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-		<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-bundle-generator</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<testCompilerArgument>-proc:none</testCompilerArgument>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<goals>
-							<goal>java</goal>
+							<goal>generate-fhir-bundle</goal>
 						</goals>
-						<phase>generate-resources</phase>
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>dev.dsf.tools.generator.BundleGenerator</mainClass>
-					<arguments>
-						<argument>${project.basedir}/src/main/resources/fhir</argument>
-					</arguments>
-					<workingDirectory>${project.basedir}</workingDirectory>
-					<cleanupDaemonThreads>false</cleanupDaemonThreads>
-					<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-					<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-					<!-- <includePluginDependencies>true</includePluginDependencies> <includeProjectDependencies>false</includeProjectDependencies> -->
-					<!-- <executableDependency> <groupId>dev.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> </executableDependency> -->
+					<baseFolder>src/main/resources/fhir</baseFolder>
 				</configuration>
-				<!-- Workaround for exec maven plugin version 3.1.0 issue -->
-				<!-- https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-				<!-- <dependencies> <dependency> <groupId>dev.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>2.0.0-SNAPSHOT</version> </dependency>
-					</dependencies> -->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -124,35 +117,30 @@
 					</filesets>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<log4j.configurationFile>log4j2-maven-surefire-config.xml</log4j.configurationFile>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+  				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<licenseSets>
+						<licenseSet>
+							<excludes>
+								<exclude>src/main/resources/fhir/**/*.post</exclude>
+								<exclude>src/main/resources/fhir/bundle.xml</exclude>
+								<exclude>src/main/resources/fhir/resources.delete</exclude>
+							</excludes>
+						</licenseSet>
+					</licenseSets>
+				</configuration>
+			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>exec-maven-plugin</artifactId>
-										<versionRange>[1.6.0,)</versionRange>
-										<goals>
-											<goal>java</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

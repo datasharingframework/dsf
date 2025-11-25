@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.adapter;
 
 import java.io.IOException;
@@ -6,6 +21,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -53,6 +73,25 @@ public class ThymeleafAdapter implements MessageBodyWriter<Resource>, Initializi
 			MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
+		if (resource instanceof Binary b)
+			modifyBinary(b);
+		else if (resource instanceof Bundle b && BundleType.SEARCHSET.equals(b.getType())
+				&& b.getEntry().stream().anyMatch(c -> c.hasResource() && c.getResource() instanceof Binary))
+			modifyBinaries(b);
+
 		thymeleafTemplateService.writeTo(resource, type, mediaType, uriInfo, securityContext, entityStream);
+	}
+
+	private void modifyBinary(Binary b)
+	{
+		b.setData(null);
+		b.getDataElement().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason")
+				.setValue(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked", null));
+	}
+
+	private void modifyBinaries(Bundle b)
+	{
+		b.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.filter(r -> r instanceof Binary).map(r -> (Binary) r).forEach(this::modifyBinary);
 	}
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import java.io.IOException;
@@ -5,77 +20,60 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
+import java.time.Period;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.rwh.utils.crypto.CertificateAuthority;
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.CertificationRequestBuilder;
-import de.rwh.utils.crypto.io.CertificateWriter;
-import de.rwh.utils.crypto.io.PemIo;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificateAuthority;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest.CertificationRequestAndPrivateKey;
+import de.hsheilbronn.mi.utils.crypto.io.PemWriter;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 
 public class X509Certificates extends ExternalResource
 {
-	public static final class ClientCertificate
+	public static final String PRACTITIONER_CLIENT_MAIL = "practitioner@invalid";
+	public static final String MINIMAL_CLIENT_MAIL = "minimal@invalid";
+	public static final String ADMIN_CLIENT_MAIL = "admin@invalid";
+
+	public static record CertificateAndPrivateKey(X509Certificate caCertificate, X509Certificate certificate,
+			PrivateKey privateKey)
 	{
-		private final X509Certificate certificate;
-		private final KeyStore trustStore;
-		private final KeyStore keyStore;
-		private final char[] keyStorePassword;
-
-		ClientCertificate(X509Certificate certificate, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword)
+		public KeyStore trustStore()
 		{
-			this.certificate = certificate;
-			this.trustStore = trustStore;
-			this.keyStore = keyStore;
-			this.keyStorePassword = keyStorePassword;
+			return KeyStoreCreator.jksForTrustedCertificates(caCertificate);
 		}
 
-		public X509Certificate getCertificate()
+		public KeyStore keyStore()
 		{
-			return certificate;
+			return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, PASSWORD, certificate);
 		}
 
-		public KeyStore getTrustStore()
+		public char[] keyStorePassword()
 		{
-			return trustStore;
+			return PASSWORD;
 		}
 
-		public KeyStore getKeyStore()
-		{
-			return keyStore;
-		}
-
-		public char[] getKeyStorePassword()
-		{
-			return keyStorePassword;
-		}
-
-		public String getCertificateSha512ThumbprintHex()
+		public String certificateSha512ThumbprintHex()
 		{
 			try
 			{
-				return Hex.encodeHexString(MessageDigest.getInstance("SHA-512").digest(getCertificate().getEncoded()));
+				return Hex.encodeHexString(MessageDigest.getInstance("SHA-512").digest(certificate().getEncoded()));
 			}
 			catch (CertificateEncodingException | NoSuchAlgorithmException e)
 			{
@@ -86,158 +84,131 @@ public class X509Certificates extends ExternalResource
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(X509Certificates.class);
-	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
+
 	public static final char[] PASSWORD = "password".toCharArray();
 
-	private boolean beforeRun;
-
-	private final X509Certificates parent;
-
-	private ClientCertificate clientCertificate;
-	private ClientCertificate practitionerClientCertificate;
-	private ClientCertificate externalClientCertificate;
+	private X509Certificate caCertificate;
+	private CertificateAndPrivateKey serverCertificate;
+	private CertificateAndPrivateKey clientCertificate;
+	private CertificateAndPrivateKey practitionerClientCertificate;
+	private CertificateAndPrivateKey adminClientCertificate;
+	private CertificateAndPrivateKey minimalClientCertificate;
+	private CertificateAndPrivateKey externalClientCertificate;
 
 	private Path caCertificateFile;
-	private Path serverCertificateFile;
-	private Path serverCertificatePrivateKeyFile;
 	private Path clientCertificateFile;
 	private Path clientCertificatePrivateKeyFile;
 	private Path externalClientCertificateFile;
 	private Path externalClientCertificatePrivateKeyFile;
 	private Path practitionerClientCertificateFile;
 	private Path practitionerClientCertificatePrivateKeyFile;
+	private Path adminClientCertificateFile;
+	private Path adminClientCertificatePrivateKeyFile;
+	private Path minimalClientCertificateFile;
+	private Path minimalClientCertificatePrivateKeyFile;
 
 	private List<Path> filesToDelete;
-
-	public X509Certificates()
-	{
-		this(null);
-	}
-
-	public X509Certificates(X509Certificates parent)
-	{
-		this.parent = parent;
-	}
-
-	private boolean parentBeforeRan()
-	{
-		return parent != null && parent.beforeRun;
-	}
 
 	@Override
 	protected void before() throws Throwable
 	{
-		if (parentBeforeRan())
-			logger.debug("X509Certificates created by parent");
-		else
-			createX509Certificates();
-
-		beforeRun = true;
+		createX509Certificates();
 	}
 
 	@Override
 	protected void after()
 	{
-		if (parentBeforeRan())
-			logger.debug("X509Certificates will be deleted by parent");
-		else
-			deleteX509Certificates();
+		deleteX509Certificates();
 	}
 
-	public ClientCertificate getClientCertificate()
+	public CertificateAndPrivateKey getServerCertificate()
 	{
-		if (parentBeforeRan())
-			return parent.getClientCertificate();
-		else
-			return clientCertificate;
+		return serverCertificate;
 	}
 
-	public ClientCertificate getExternalClientCertificate()
+	public CertificateAndPrivateKey getClientCertificate()
 	{
-		if (parentBeforeRan())
-			return parent.getExternalClientCertificate();
-		else
-			return externalClientCertificate;
+		return clientCertificate;
 	}
 
-	public ClientCertificate getPractitionerClientCertificate()
+	public CertificateAndPrivateKey getExternalClientCertificate()
 	{
-		if (parentBeforeRan())
-			return parent.getPractitionerClientCertificate();
-		else
-			return practitionerClientCertificate;
+		return externalClientCertificate;
+	}
+
+	public CertificateAndPrivateKey getPractitionerClientCertificate()
+	{
+		return practitionerClientCertificate;
+	}
+
+	public CertificateAndPrivateKey getAdminClientCertificate()
+	{
+		return adminClientCertificate;
+	}
+
+	public CertificateAndPrivateKey getMinimalClientCertificate()
+	{
+		return minimalClientCertificate;
+	}
+
+	public X509Certificate getCaCertificate()
+	{
+		return caCertificate;
 	}
 
 	public Path getCaCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getCaCertificateFile();
-
 		return caCertificateFile;
-	}
-
-	public Path getServerCertificateFile()
-	{
-		if (parentBeforeRan())
-			return parent.getServerCertificateFile();
-
-		return serverCertificateFile;
-	}
-
-	public Path getServerCertificatePrivateKeyFile()
-	{
-		if (parentBeforeRan())
-			return parent.getServerCertificatePrivateKeyFile();
-
-		return serverCertificatePrivateKeyFile;
 	}
 
 	public Path getClientCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getClientCertificateFile();
-
 		return clientCertificateFile;
 	}
 
 	public Path getClientCertificatePrivateKeyFile()
 	{
-		if (parentBeforeRan())
-			return parent.getClientCertificatePrivateKeyFile();
-
 		return clientCertificatePrivateKeyFile;
 	}
 
 	public Path getExternalClientCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getExternalClientCertificateFile();
-
 		return externalClientCertificateFile;
 	}
 
 	public Path getExternalClientCertificatePrivateKeyFile()
 	{
-		if (parentBeforeRan())
-			return parent.getExternalClientCertificatePrivateKeyFile();
-
 		return externalClientCertificatePrivateKeyFile;
 	}
 
 	public Path getPractitionerClientCertificateFile()
 	{
-		if (parentBeforeRan())
-			return parent.getPractitionerClientCertificateFile();
-
 		return practitionerClientCertificateFile;
 	}
 
 	public Path getPractitionerClientCertificatePrivateKeyFile()
 	{
-		if (parentBeforeRan())
-			return parent.getPractitionerClientCertificatePrivateKeyFile();
-
 		return practitionerClientCertificatePrivateKeyFile;
+	}
+
+	public Path getAdminClientCertificateFile()
+	{
+		return adminClientCertificateFile;
+	}
+
+	public Path getAdminClientCertificatePrivateKeyFile()
+	{
+		return adminClientCertificatePrivateKeyFile;
+	}
+
+	public Path getMinimalClientCertificateFile()
+	{
+		return minimalClientCertificateFile;
+	}
+
+	public Path getMinimalClientCertificatePrivateKeyFile()
+	{
+		return minimalClientCertificatePrivateKeyFile;
 	}
 
 	private void createX509Certificates() throws InvalidKeyException, NoSuchAlgorithmException, KeyStoreException,
@@ -246,119 +217,109 @@ public class X509Certificates extends ExternalResource
 		logger.info("Creating certificates ...");
 
 		Path caCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
-		Path serverCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
-		Path serverCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path clientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path clientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path externalClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path externalClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path practitionerClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 		Path practitionerClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path adminClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path adminClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path minimalClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path minimalClientCertificatePrivateKeyFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
 
-		CertificateAuthority.registerBouncyCastleProvider();
-
-		CertificateAuthority ca = new CertificateAuthority("DE", null, null, null, null, "test-ca");
-		ca.initialize();
+		CertificateAuthority ca = CertificateAuthority
+				.builderSha384EcdsaSecp384r1("DE", null, null, null, null, "Junit Test CA")
+				.setValidityPeriod(Period.ofDays(1)).build();
 		X509Certificate caCertificate = ca.getCertificate();
-
-		PemIo.writeX509CertificateToPem(caCertificate, caCertificateFile);
+		PemWriter.writeCertificate(caCertificate, caCertificateFile);
 
 		// -- server
-		X500Name serverSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, "test-server");
-		KeyPair serverRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
-		JcaPKCS10CertificationRequest serverRequest = CertificationRequestBuilder
-				.createServerCertificationRequest(serverSubject, serverRsaKeyPair, null, "localhost");
-
-		X509Certificate serverCertificate = ca.signWebServerCertificate(serverRequest);
-
-		CertificateWriter.toPkcs12(serverCertificateFile, serverRsaKeyPair.getPrivate(), PASSWORD, serverCertificate,
-				caCertificate, "test-server");
-
-		PemIo.writeX509CertificateToPem(serverCertificate, serverCertificateFile);
-		PemIo.writeAes128EncryptedPrivateKeyToPkcs8(provider, serverCertificatePrivateKeyFile,
-				serverRsaKeyPair.getPrivate(), PASSWORD);
-
+		CertificationRequestAndPrivateKey serverRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "test-server").generateKeyPair().addDnsName("localhost")
+				.build();
+		X509Certificate serverCertificate = ca.signServerCertificate(serverRequest, Period.ofDays(1));
 		// server --
 
 		// -- client
-		X500Name clientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, "test-client");
-		KeyPair clientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
-		JcaPKCS10CertificationRequest clientRequest = CertificationRequestBuilder
-				.createClientCertificationRequest(clientSubject, clientRsaKeyPair);
-
-		X509Certificate clientCertificate = ca.signWebClientCertificate(clientRequest);
-
-		KeyStore clientKeyStore = CertificateHelper.toPkcs12KeyStore(clientRsaKeyPair.getPrivate(),
-				new Certificate[] { clientCertificate, caCertificate }, "test-client", PASSWORD);
-
-		PemIo.writeX509CertificateToPem(clientCertificate, clientCertificateFile);
-		PemIo.writeAes128EncryptedPrivateKeyToPkcs8(provider, clientCertificatePrivateKeyFile,
-				clientRsaKeyPair.getPrivate(), PASSWORD);
+		CertificationRequestAndPrivateKey clientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "test-client").generateKeyPair().build();
+		X509Certificate clientCertificate = ca.signClientCertificate(clientRequest, Period.ofDays(1));
+		PemWriter.writeCertificate(clientCertificate, clientCertificateFile);
+		PemWriter.writePrivateKey(clientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(clientCertificatePrivateKeyFile);
 		// client --
 
 		// -- external client
-		X500Name externalClientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-				"external-client");
-		KeyPair externalClientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
-		JcaPKCS10CertificationRequest externalClientRequest = CertificationRequestBuilder
-				.createClientCertificationRequest(externalClientSubject, externalClientRsaKeyPair);
-
-		X509Certificate externalClientCertificate = ca.signWebClientCertificate(externalClientRequest);
-
-		KeyStore externalClientKeyStore = CertificateHelper.toPkcs12KeyStore(externalClientRsaKeyPair.getPrivate(),
-				new Certificate[] { externalClientCertificate, caCertificate }, "external-client", PASSWORD);
-
-		CertificateWriter.toPkcs12(externalClientCertificateFile, externalClientRsaKeyPair.getPrivate(), PASSWORD,
-				externalClientCertificate, caCertificate, "client");
-
-		PemIo.writeX509CertificateToPem(externalClientCertificate, externalClientCertificateFile);
-		PemIo.writeAes128EncryptedPrivateKeyToPkcs8(provider, externalClientCertificatePrivateKeyFile,
-				externalClientRsaKeyPair.getPrivate(), PASSWORD);
+		CertificationRequestAndPrivateKey externalClientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "external-client").generateKeyPair().build();
+		X509Certificate externalClientCertificate = ca.signClientCertificate(externalClientRequest, Period.ofDays(1));
+		PemWriter.writeCertificate(externalClientCertificate, externalClientCertificateFile);
+		PemWriter.writePrivateKey(externalClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(externalClientCertificatePrivateKeyFile);
 		// external client --
 
 		// -- practitioner client
-		X500Name practitionerClientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-				"practitioner-client");
-		KeyPair practitionerClientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
-		JcaPKCS10CertificationRequest practitionerClientRequest = CertificationRequestBuilder
-				.createClientCertificationRequest(practitionerClientSubject, practitionerClientRsaKeyPair,
-						"practitioner@test.org");
-
-		X509Certificate practitionerClientCertificate = ca.signWebClientCertificate(practitionerClientRequest);
-
-		KeyStore practitionerClientKeyStore = CertificateHelper.toPkcs12KeyStore(
-				practitionerClientRsaKeyPair.getPrivate(),
-				new Certificate[] { practitionerClientCertificate, caCertificate }, "practitioner-client", PASSWORD);
-
-		CertificateWriter.toPkcs12(practitionerClientCertificateFile, practitionerClientRsaKeyPair.getPrivate(),
-				PASSWORD, practitionerClientCertificate, caCertificate, "client");
-
-		PemIo.writeX509CertificateToPem(practitionerClientCertificate, practitionerClientCertificateFile);
-		PemIo.writeAes128EncryptedPrivateKeyToPkcs8(provider, practitionerClientCertificatePrivateKeyFile,
-				practitionerClientRsaKeyPair.getPrivate(), PASSWORD);
+		CertificationRequestAndPrivateKey practitionerClientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "practitioner-client").generateKeyPair()
+				.setEmail(PRACTITIONER_CLIENT_MAIL).build();
+		X509Certificate practitionerClientCertificate = ca.signClientCertificate(practitionerClientRequest);
+		PemWriter.writeCertificate(practitionerClientCertificate, practitionerClientCertificateFile);
+		PemWriter.writePrivateKey(practitionerClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(practitionerClientCertificatePrivateKeyFile);
 		// practitioner client --
 
-		this.clientCertificate = new ClientCertificate(clientCertificate,
-				CertificateHelper.extractTrust(clientKeyStore), clientKeyStore, PASSWORD);
-		this.externalClientCertificate = new ClientCertificate(externalClientCertificate,
-				CertificateHelper.extractTrust(externalClientKeyStore), externalClientKeyStore, PASSWORD);
-		this.practitionerClientCertificate = new ClientCertificate(practitionerClientCertificate,
-				CertificateHelper.extractTrust(practitionerClientKeyStore), practitionerClientKeyStore, PASSWORD);
+		// -- admin client
+		CertificationRequestAndPrivateKey adminClientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "admin-client").generateKeyPair().setEmail(ADMIN_CLIENT_MAIL)
+				.build();
+		X509Certificate adminClientCertificate = ca.signClientCertificate(adminClientRequest, Period.ofDays(1));
+		PemWriter.writeCertificate(adminClientCertificate, adminClientCertificateFile);
+		PemWriter.writePrivateKey(adminClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(adminClientCertificatePrivateKeyFile);
+		// admin client --
+
+		// -- minimal client
+		CertificationRequestAndPrivateKey minimalClientRequest = CertificationRequest
+				.builder(ca, "DE", null, null, null, null, "minimal-client").generateKeyPair()
+				.setEmail(MINIMAL_CLIENT_MAIL).build();
+		X509Certificate minimalClientCertificate = ca.signClientCertificate(minimalClientRequest, Period.ofDays(1));
+		PemWriter.writeCertificate(minimalClientCertificate, minimalClientCertificateFile);
+		PemWriter.writePrivateKey(minimalClientRequest.getPrivateKey()).asPkcs8().encryptedAes128(PASSWORD)
+				.toFile(minimalClientCertificatePrivateKeyFile);
+		// minimal client --
+
+		this.caCertificate = caCertificate;
+		this.serverCertificate = new CertificateAndPrivateKey(caCertificate, serverCertificate,
+				serverRequest.getPrivateKey());
+		this.clientCertificate = new CertificateAndPrivateKey(caCertificate, clientCertificate,
+				clientRequest.getPrivateKey());
+		this.externalClientCertificate = new CertificateAndPrivateKey(caCertificate, externalClientCertificate,
+				externalClientRequest.getPrivateKey());
+		this.practitionerClientCertificate = new CertificateAndPrivateKey(caCertificate, practitionerClientCertificate,
+				practitionerClientRequest.getPrivateKey());
+		this.adminClientCertificate = new CertificateAndPrivateKey(caCertificate, adminClientCertificate,
+				adminClientRequest.getPrivateKey());
+		this.minimalClientCertificate = new CertificateAndPrivateKey(caCertificate, minimalClientCertificate,
+				minimalClientRequest.getPrivateKey());
 
 		this.caCertificateFile = caCertificateFile;
-		this.serverCertificateFile = serverCertificateFile;
-		this.serverCertificatePrivateKeyFile = serverCertificatePrivateKeyFile;
 		this.clientCertificateFile = clientCertificateFile;
 		this.clientCertificatePrivateKeyFile = clientCertificatePrivateKeyFile;
 		this.externalClientCertificateFile = externalClientCertificateFile;
 		this.externalClientCertificatePrivateKeyFile = externalClientCertificatePrivateKeyFile;
 		this.practitionerClientCertificateFile = practitionerClientCertificateFile;
 		this.practitionerClientCertificatePrivateKeyFile = practitionerClientCertificatePrivateKeyFile;
+		this.adminClientCertificateFile = adminClientCertificateFile;
+		this.adminClientCertificatePrivateKeyFile = adminClientCertificatePrivateKeyFile;
+		this.minimalClientCertificateFile = minimalClientCertificateFile;
+		this.minimalClientCertificatePrivateKeyFile = minimalClientCertificatePrivateKeyFile;
 
-		this.filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, serverCertificatePrivateKeyFile,
-				clientCertificateFile, clientCertificatePrivateKeyFile, externalClientCertificateFile,
-				externalClientCertificatePrivateKeyFile, practitionerClientCertificateFile,
-				practitionerClientCertificatePrivateKeyFile);
+		filesToDelete = List.of(caCertificateFile, clientCertificateFile, clientCertificatePrivateKeyFile,
+				externalClientCertificateFile, externalClientCertificatePrivateKeyFile,
+				practitionerClientCertificateFile, practitionerClientCertificatePrivateKeyFile,
+				adminClientCertificateFile, adminClientCertificatePrivateKeyFile, minimalClientCertificateFile,
+				minimalClientCertificatePrivateKeyFile);
 	}
 
 	private void deleteX509Certificates()

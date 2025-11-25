@@ -1,10 +1,24 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.profiles;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -19,17 +33,17 @@ import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
 import dev.dsf.fhir.validation.ValidationSupportRule;
 
-public class QuestionnaireProfileTest
+public class QuestionnaireProfileTest extends AbstractMetaTagProfileTest<Questionnaire>
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProfileTest.class);
 
-	private static final String VERSION_1_0_0 = "1.0.0";
-	private static final String VERSION_1_5_0 = "1.5.0";
-
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-questionnaire-1.0.0.xml", "dsf-questionnaire-1.5.0.xml"), Collections.emptyList(),
-			Collections.emptyList());
+			List.of("dsf-extension-read-access-organization-2.0.0.xml",
+					"dsf-extension-read-access-parent-organization-role-2.0.0.xml", "dsf-meta-2.0.0.xml",
+					"dsf-questionnaire-2.0.0.xml"),
+			List.of("dsf-read-access-tag-2.0.0.xml", "dsf-organization-role-2.0.0.xml"),
+			List.of("dsf-read-access-tag-2.0.0.xml", "dsf-organization-role-2.0.0.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -37,87 +51,87 @@ public class QuestionnaireProfileTest
 	@Test
 	public void testQuestionnaireValidTypeString()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.STRING);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.STRING);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.STRING);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeText()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.TEXT);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.TEXT);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.TEXT);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeInteger()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.INTEGER);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.INTEGER);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.INTEGER);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDecimal()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DECIMAL);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DECIMAL);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DECIMAL);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeBoolean()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.BOOLEAN);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.BOOLEAN);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.BOOLEAN);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDate()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DATE);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DATE);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DATE);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeTime()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.TIME);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.TIME);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.TIME);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDateTime()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DATETIME);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DATETIME);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DATETIME);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeUrl()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.URL);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.URL);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.URL);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeReference()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.REFERENCE);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.REFERENCE);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.REFERENCE);
 	}
 
 	@Test
 	public void testQuestionnaireValidTypeDisplay()
 	{
-		testQuestionnaireValidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.DISPLAY);
-		testQuestionnaireValidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.DISPLAY);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DISPLAY);
 	}
 
-	private void testQuestionnaireValidType(String profileVersion, Questionnaire.QuestionnaireItemType type)
+	@Test
+	public void testQuestionnaireValidTypeChoice()
 	{
-		Questionnaire res = createQuestionnaire(profileVersion, type);
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.CHOICE);
+	}
+
+	@Test
+	public void testQuestionnaireInvalidTypeQuantity()
+	{
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.QUANTITY);
+	}
+
+	private void testQuestionnaireValidType(Questionnaire.QuestionnaireItemType type)
+	{
+		Questionnaire res = createQuestionnaire(type);
 
 		ValidationResult result = resourceValidator.validate(res);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
@@ -126,79 +140,75 @@ public class QuestionnaireProfileTest
 	@Test
 	public void testQuestionnaireInvalidTypeGroup()
 	{
-		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.GROUP);
-		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.GROUP);
+		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.GROUP);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeQuestion()
 	{
-		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.QUESTION);
-		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.QUESTION);
-	}
-
-	@Test
-	public void testQuestionnaireInvalidTypeChoice()
-	{
-		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.CHOICE);
-		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.CHOICE);
+		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.QUESTION);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeOpenChoice()
 	{
-		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.OPENCHOICE);
-		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.OPENCHOICE);
+		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.OPENCHOICE);
 	}
 
 	@Test
 	public void testQuestionnaireInvalidTypeAttachment()
 	{
-		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.ATTACHMENT);
-		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.ATTACHMENT);
+		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.ATTACHMENT);
 	}
 
-	@Test
-	public void testQuestionnaireInvalidTypeQuantity()
+	private void testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType type)
 	{
-		testQuestionnaireInvalidType(VERSION_1_0_0, Questionnaire.QuestionnaireItemType.QUANTITY);
-		testQuestionnaireInvalidType(VERSION_1_5_0, Questionnaire.QuestionnaireItemType.QUANTITY);
-	}
+		Questionnaire q = createQuestionnaire(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("invalid-type").setType(type).setText("Invalid type");
 
-	private void testQuestionnaireInvalidType(String profileVersion, Questionnaire.QuestionnaireItemType type)
-	{
-		Questionnaire res = createQuestionnaire(profileVersion, Questionnaire.QuestionnaireItemType.STRING);
-		res.addItem().setLinkId("invalid-type").setType(type).setText("Invalid type");
-
-		ValidationResult result = resourceValidator.validate(res);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationResult result = resourceValidator.validate(q);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		assertEquals(1,
 				result.getMessages().stream()
 						.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 								|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
-						.filter(m -> m.getMessage() != null).filter(m -> m.getMessage().startsWith("type-code"))
-						.count());
+						.filter(m -> m.getMessage() != null)
+						.filter(m -> m.getMessage().startsWith("Constraint failed: type-code")).count());
 	}
 
-	private Questionnaire createQuestionnaire(String profileVersion, Questionnaire.QuestionnaireItemType type)
+	private Questionnaire createQuestionnaire(Questionnaire.QuestionnaireItemType type)
 	{
-		Questionnaire res = new Questionnaire();
-		res.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire|" + profileVersion);
-		res.setUrl("http://dsf.dev/fhir/Questionnaire/hello-world");
-		res.setVersion("0.1.0");
-		res.setDate(new Date());
-		res.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		res.addItem().setLinkId("business-key").setType(Questionnaire.QuestionnaireItemType.STRING)
-				.setText("The business-key of the process execution").setRequired(true);
-		res.addItem().setLinkId("user-task-id").setType(Questionnaire.QuestionnaireItemType.STRING)
-				.setText("The user-task-id of the process execution").setRequired(true);
+		Questionnaire q = create();
+		q.getMeta().addTag().setSystem(CS_READ_ACCESS_TAG).setCode(TAG_ALL);
 
-		var item = res.addItem().setLinkId("valid-type").setType(type).setText("valid type");
+		var item = q.addItem().setLinkId("valid-type").setType(type).setText("valid type");
 		if (!Questionnaire.QuestionnaireItemType.DISPLAY.equals(type))
 			item.setRequired(true);
 
-		return res;
+		return q;
+	}
+
+	@Override
+	protected Questionnaire create()
+	{
+		Questionnaire q = new Questionnaire();
+		q.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire");
+		q.setUrl("http://dsf.dev/fhir/Questionnaire/hello-world");
+		q.setVersion("0.1.0");
+		q.setDate(new Date());
+		q.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		q.addItem().setLinkId("business-key").setType(Questionnaire.QuestionnaireItemType.STRING)
+				.setText("The business-key of the process execution").setRequired(true);
+		q.addItem().setLinkId("user-task-id").setType(Questionnaire.QuestionnaireItemType.STRING)
+				.setText("The user-task-id of the process execution").setRequired(true);
+
+		return q;
+	}
+
+	@Test
+	public void runMetaTagTests() throws Exception
+	{
+		doRunMetaTagTests(resourceValidator);
 	}
 }

@@ -1,0 +1,288 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/questionnaire-response" />
+	<version value="2.0.0" />
+	<name value="QuestionnaireResponse" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-10-27" />
+	<fhirVersion value="4.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="QuestionnaireResponse" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="QuestionnaireResponse">
+			<path value="QuestionnaireResponse" />
+			<constraint>
+				<key value="authored-if-completed-or-amended" />
+				<severity value="error" />
+				<human value="Authored must be set if QuestionnaireResponse.status equals completed or amended" />
+				<expression value="(%resource.status = 'completed' or %resource.status = 'amended') implies authored.exists()" />
+			</constraint>
+			<constraint>
+				<key value="author-if-completed-or-amended" />
+				<severity value="error" />
+				<human value="Author must be set if QuestionnaireResponse.status equals completed or amended" />
+				<expression
+					value="((%resource.status = 'completed' or %resource.status = 'amended') implies author.exists()) and
+				                   ((%resource.status = 'completed' or %resource.status = 'amended') implies author.identifier.exists())" />
+			</constraint>
+		</element>
+		<element id="QuestionnaireResponse.extension">
+			<path value="QuestionnaireResponse.extension" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="url" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+			<min value="0" />
+		</element>
+		<element id="QuestionnaireResponse.extension:questionnaire-authorization">
+			<path value="QuestionnaireResponse.extension" />
+			<sliceName value="questionnaire-authorization" />
+			<min value="0" />
+			<max value="1" />
+			<type>
+				<code value="Extension" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization|2.0.0" />
+			</type>
+		</element>
+		<element id="QuestionnaireResponse.questionnaire">
+			<path value="QuestionnaireResponse.questionnaire" />
+			<min value="1" />
+		</element>
+		<element id="QuestionnaireResponse.author">
+			<path value="QuestionnaireResponse.author" />
+			<min value="0" />
+			<type>
+				<code value="Reference" />
+				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization|2.0.0" />
+			</type>
+			<constraint>
+				<key value="author-identifier-type-organization" />
+				<severity value="error" />
+				<human
+					value="QuestionnaireResponse.author.identifier.type must be 'Organization' if QuestionnaireResponse.author.identifier.system is http://dsf.dev/sid/organization-identifier" />
+				<expression
+					value="identifier.system = 'http://dsf.dev/sid/organization-identifier' implies type.empty() or type = 'Organization'" />
+			</constraint>
+			<constraint>
+				<key value="author-identifier-type-practitioner" />
+				<severity value="error" />
+				<human
+					value="QuestionnaireResponse.author.identifier.type must be 'Practitioner' if QuestionnaireResponse.author.identifier.system is http://dsf.dev/sid/practitioner-identifier" />
+				<expression
+					value="identifier.system = 'http://dsf.dev/sid/practitioner-identifier' implies type.empty() or type = 'Practitioner'" />
+			</constraint>
+		</element>
+		<element id="QuestionnaireResponse.author.reference">
+			<path value="QuestionnaireResponse.author.reference" />
+			<min value="0" />
+		</element>
+		<element id="QuestionnaireResponse.author.identifier">
+			<path value="QuestionnaireResponse.author.identifier" />
+			<min value="1" />
+		</element>
+		<element id="QuestionnaireResponse.author.identifier.system">
+			<path value="QuestionnaireResponse.author.identifier.system" />
+			<min value="1" />
+			<constraint>
+				<key value="author-identifier-system" />
+				<severity value="error" />
+				<human
+					value="QuestionnaireResponse.author.identifier.system must be 'http://dsf.dev/sid/organization-identifier' or 'http://dsf.dev/sid/practitioner-identifier'" />
+				<expression
+					value="$this = 'http://dsf.dev/sid/organization-identifier' or $this = 'http://dsf.dev/sid/practitioner-identifier'" />
+			</constraint>
+		</element>
+		<element id="QuestionnaireResponse.author.identifier.value">
+			<path value="QuestionnaireResponse.author.identifier.value" />
+			<min value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item">
+			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+				<valueString value="Parameter" />
+			</extension>
+			<path value="QuestionnaireResponse.item" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="linkId" />
+				</discriminator>
+				<rules value="closed" />
+			</slicing>
+			<min value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id">
+			<path value="QuestionnaireResponse.item" />
+			<sliceName value="user-task-id" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id.linkId">
+			<path value="QuestionnaireResponse.item.linkId" />
+			<fixedString value="user-task-id" />
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id.definition">
+			<path value="QuestionnaireResponse.item.definition" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id.text">
+			<path value="QuestionnaireResponse.item.text" />
+			<min value="1" />
+			<fixedString value="The user-task-id of the process execution" />
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id.answer">
+			<path value="QuestionnaireResponse.item.answer" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id.answer.value[x]">
+			<path value="QuestionnaireResponse.item.answer.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id.answer.item">
+			<path value="QuestionnaireResponse.item.answer.item" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:user-task-id.item">
+			<path value="QuestionnaireResponse.item.item" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:business-key">
+			<path value="QuestionnaireResponse.item" />
+			<sliceName value="business-key" />
+			<min value="0" />
+			<max value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item:business-key.linkId">
+			<path value="QuestionnaireResponse.item.linkId" />
+			<fixedString value="business-key" />
+		</element>
+		<element id="QuestionnaireResponse.item:business-key.definition">
+			<path value="QuestionnaireResponse.item.definition" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:business-key.text">
+			<path value="QuestionnaireResponse.item.text" />
+			<min value="1" />
+			<fixedString value="The business-key of the process execution" />
+		</element>
+		<element id="QuestionnaireResponse.item:business-key.answer">
+			<path value="QuestionnaireResponse.item.answer" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item:business-key.answer.value[x]">
+			<path value="QuestionnaireResponse.item.answer.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+		<element id="QuestionnaireResponse.item:business-key.answer.item">
+			<path value="QuestionnaireResponse.item.answer.item" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:business-key.item">
+			<path value="QuestionnaireResponse.item.item" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:@default">
+			<path value="QuestionnaireResponse.item" />
+			<sliceName value="@default" />
+			<min value="0" />
+			<max value="*" />
+		</element>
+		<element id="QuestionnaireResponse.item:@default.definition">
+			<path value="QuestionnaireResponse.item.definition" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:@default.text">
+			<path value="QuestionnaireResponse.item.text" />
+			<min value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item:@default.answer">
+			<path value="QuestionnaireResponse.item.answer" />
+			<min value="0" />
+			<max value="1" />
+		</element>
+		<element id="QuestionnaireResponse.item:@default.answer.value[x]">
+			<path value="QuestionnaireResponse.item.answer.value[x]" />
+			<min value="1" />
+			<max value="1" />
+			<type>
+				<code value="string" />
+			</type>
+			<type>
+				<code value="integer" />
+			</type>
+			<type>
+				<code value="decimal" />
+			</type>
+			<type>
+				<code value="boolean" />
+			</type>
+			<type>
+				<code value="date" />
+			</type>
+			<type>
+				<code value="time" />
+			</type>
+			<type>
+				<code value="dateTime" />
+			</type>
+			<type>
+				<code value="uri" />
+			</type>
+			<type>
+				<code value="Reference" />
+			</type>
+			<type>
+				<code value="Coding" />
+			</type>
+			<type>
+				<code value="Quantity" />
+			</type>
+		</element>
+		<element id="QuestionnaireResponse.item:@default.answer.item">
+			<path value="QuestionnaireResponse.item.answer.item" />
+			<max value="0" />
+		</element>
+		<element id="QuestionnaireResponse.item:@default.item">
+			<path value="QuestionnaireResponse.item.item" />
+			<max value="0" />
+		</element>
+	</differential>
+</StructureDefinition>

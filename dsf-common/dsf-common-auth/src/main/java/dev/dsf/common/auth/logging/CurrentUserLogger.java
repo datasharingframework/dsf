@@ -1,62 +1,51 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth.logging;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
-import jakarta.annotation.Priority;
-import jakarta.ws.rs.ConstrainedTo;
-import jakarta.ws.rs.RuntimeType;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.container.PreMatching;
-import jakarta.ws.rs.core.SecurityContext;
 
-@ConstrainedTo(RuntimeType.SERVER)
-@PreMatching
-@Priority(Integer.MIN_VALUE)
-public class CurrentUserLogger implements ContainerRequestFilter
+public class CurrentUserLogger extends AbstractUserLogger
 {
 	private static final Logger logger = LoggerFactory.getLogger(CurrentUserLogger.class);
 
 	@Override
-	public void filter(ContainerRequestContext requestContext) throws IOException
+	protected void before(OrganizationIdentity organization)
 	{
-		Identity identity = getCurrentIdentity(requestContext.getSecurityContext());
-
-		if (identity instanceof OrganizationIdentity)
-		{
-			logger.debug("Current organization identity '{}', dsf-roles {}", identity.getName(),
-					identity.getDsfRoles());
-		}
-		else if (identity instanceof PractitionerIdentity practitioner)
-		{
-			logger.debug("Current practitioner identity '{}', dsf-roles {}, practitioner-roles {}", identity.getName(),
-					identity.getDsfRoles(), practitioner.getPractionerRoles().stream()
-							.map(c -> c.getSystem() + "|" + c.getCode()).collect(Collectors.joining(", ", "[", "]")));
-		}
+		logger.debug("Current organization identity '{}', dsf-roles {}", organization.getName(),
+				organization.getDsfRoles());
 	}
 
-	private Identity getCurrentIdentity(SecurityContext context)
+	@Override
+	protected void before(PractitionerIdentity practitioner)
 	{
-		Principal principal = context.getUserPrincipal();
-		if (principal != null)
-		{
-			if (principal instanceof Identity identity)
-				return identity;
-			else
-			{
-				logger.warn("Unknown current user principal of type {}", principal.getClass().getName());
-				return null;
-			}
-		}
-		else
-			return null;
+		logger.debug("Current practitioner identity '{}', dsf-roles {}, practitioner-roles {}", practitioner.getName(),
+				practitioner.getDsfRoles(), practitioner.getPractionerRoles().stream()
+						.map(c -> c.getSystem() + "|" + c.getCode()).collect(Collectors.joining(", ", "[", "]")));
+	}
+
+	@Override
+	protected void before(Principal principal)
+	{
+		logger.debug("Current identity '{}'", principal.getName());
 	}
 }

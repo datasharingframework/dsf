@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.validation;
 
 import static org.junit.Assert.assertEquals;
@@ -6,7 +21,6 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -43,8 +57,7 @@ public class ValueSetExpanderTest
 		});
 
 		var validationSupport = new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirContext),
-				new ValidationSupportWithCustomResources(fhirContext, Collections.emptyList(), readCodeSystems(),
-						Collections.emptyList()),
+				new ValidationSupportWithCustomResources(fhirContext, List.of(), readCodeSystems(), List.of()),
 				new DefaultProfileValidationSupport(fhirContext));
 
 		valueSetExpander = new ValueSetExpanderImpl(fhirContext, validationSupport);
@@ -52,7 +65,7 @@ public class ValueSetExpanderTest
 
 	private List<CodeSystem> readCodeSystems()
 	{
-		return Stream.of("dsf-read-access-tag-1.0.0.xml", "dsf-bpmn-message-1.0.0.xml")
+		return Stream.of("dsf-read-access-tag-2.0.0.xml", "dsf-bpmn-message-2.0.0.xml")
 				.map(file -> "/fhir/CodeSystem/" + file).map(this::readCodeSystem).collect(Collectors.toList());
 	}
 
@@ -72,7 +85,7 @@ public class ValueSetExpanderTest
 	public void testExpandFeasibility() throws Exception
 	{
 		ValueSetExpansionOutcome out = valueSetExpander
-				.expand(readValueSet("/fhir/ValueSet/dsf-read-access-tag-1.0.0.xml"));
+				.expand(readValueSet("/fhir/ValueSet/dsf-read-access-tag-2.0.0.xml"));
 
 		assertNotNull(out);
 		assertNull(out.getError());

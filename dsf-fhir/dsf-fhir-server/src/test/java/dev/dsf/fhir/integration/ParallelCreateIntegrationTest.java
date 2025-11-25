@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
@@ -17,6 +32,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionKind;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
@@ -31,6 +47,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
@@ -56,6 +73,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.process.Recipient;
 import dev.dsf.fhir.authorization.process.Requester;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
@@ -516,7 +534,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				List.of("COS"));
 
 		return createBundle(bundleType, a1, a2,
-				(a, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
+				(_, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_PARENT
 						+ "&participating-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_MEMBER));
@@ -558,7 +576,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				List.of("DIC", "COS"));
 
 		return createBundle(bundleType, oA1, oA2,
-				(a, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
+				(_, r) -> r.setIfNoneExist("primary-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_PARENT
 						+ "&participating-organization:identifier=http://dsf.dev/sid/organization-identifier|"
 						+ ORGANIZATION_IDENTIFIER_VALUE_MEMBER));
@@ -652,7 +670,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 		activityDefinitionDao.create(createActivityDefinition());
 
 		Bundle bundle = createBundle(BundleType.TRANSACTION, createTask(),
-				(t, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
+				(_, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
 				2);
 
 		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.TRANSACTIONRESPONSE);
@@ -666,7 +684,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 		activityDefinitionDao.create(createActivityDefinition());
 
 		Bundle bundle = createBundle(BundleType.BATCH, createTask(),
-				(t, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
+				(_, r) -> r.setIfNoneExist("identifier=" + NAMING_SYSTEM_TASK_IDENTIFIER + "|" + TASK_IDENTIFIER_VALUE),
 				2);
 
 		testCreateDuplicatesViaBundleWithIfNoneExists(bundle, BundleType.BATCHRESPONSE);
@@ -1534,7 +1552,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	{
 		ActivityDefinition aD = new ActivityDefinition().setUrl(ACTIVITY_DEFINITION_URL)
 				.setVersion(ACTIVITY_DEFINITION_VERSION).setStatus(PublicationStatus.ACTIVE)
-				.setName("TestActivityDefinition");
+				.setName("TestActivityDefinition").setDate(new Date()).setKind(ActivityDefinitionKind.TASK);
 
 		getProcessAuthorizationHelper().add(aD, "test-message", "http://test.com/fhir/StructureDefinition/task-profile",
 				Requester.remoteAll(), Recipient.localAll());
@@ -1548,7 +1566,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	{
 		CodeSystem cS = new CodeSystem().setUrl(CODE_SYSTEM_URL).setVersion(CODE_SYSTEM_VERSION)
 				.setStatus(PublicationStatus.ACTIVE).setStatus(PublicationStatus.ACTIVE).setName("TestCodeSystem")
-				.setContent(CodeSystemContentMode.COMPLETE);
+				.setContent(CodeSystemContentMode.COMPLETE).setDate(new Date());
 
 		getReadAccessHelper().addAll(cS);
 
@@ -1562,16 +1580,22 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 
 	private Endpoint createEndpoint(String identifierValue, String address)
 	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		IdType orgId = organizationProvider.getLocalOrganization().map(Organization::getIdElement)
+				.map(IdType::toUnqualifiedVersionless).get();
+
 		Endpoint e = new Endpoint()
 				.addIdentifier(
 						new Identifier().setSystem("http://dsf.dev/sid/endpoint-identifier").setValue(identifierValue))
 				.setAddress(address)
 				.addPayloadType(new CodeableConcept()
 						.addCoding(new Coding().setSystem("http://hl7.org/fhir/resource-types").setCode("Task")))
+				.addPayloadMimeType("application/fhir+xml").addPayloadMimeType("application/fhir+json")
 				.setConnectionType(
 						new Coding().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
 								.setCode("hl7-fhir-rest"))
-				.setStatus(EndpointStatus.ACTIVE);
+				.setStatus(EndpointStatus.ACTIVE).setManagingOrganization(new Reference().setReferenceElement(orgId));
 
 		getReadAccessHelper().addAll(e);
 
@@ -1643,7 +1667,7 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 				.setName("TestStructureDefinition").setStatus(PublicationStatus.ACTIVE)
 				.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Patient")
 				.setKind(StructureDefinitionKind.RESOURCE).setAbstract(false).setType("Patient")
-				.setDerivation(TypeDerivationRule.CONSTRAINT);
+				.setDerivation(TypeDerivationRule.CONSTRAINT).setDate(new Date());
 
 		ElementDefinition e = sD.getDifferential().addElement();
 		e.setId("Patient.active");
@@ -1690,7 +1714,8 @@ public class ParallelCreateIntegrationTest extends AbstractIntegrationTest
 	private ValueSet createValueSet()
 	{
 		ValueSet vS = new ValueSet().setUrl(VALUE_SET_URL).setVersion(VALUE_SET_VERSION)
-				.setStatus(PublicationStatus.ACTIVE).setStatus(PublicationStatus.ACTIVE).setName("TestValueSet");
+				.setStatus(PublicationStatus.ACTIVE).setStatus(PublicationStatus.ACTIVE).setName("TestValueSet")
+				.setDate(new Date());
 
 		getReadAccessHelper().addAll(vS);
 

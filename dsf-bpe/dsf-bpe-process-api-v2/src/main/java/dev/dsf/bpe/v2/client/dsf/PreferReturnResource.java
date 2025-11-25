@@ -1,0 +1,55 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.v2.client.dsf;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
+
+import jakarta.ws.rs.core.MediaType;
+
+public interface PreferReturnResource
+{
+	<R extends Resource> R create(R resource);
+
+	<R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria);
+
+	Binary createBinary(InputStream in, MediaType mediaType, String securityContextReference);
+
+	<R extends Resource> R update(R resource);
+
+	<R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
+
+	Binary updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
+
+	Bundle postBundle(Bundle bundle);
+
+	<R extends Resource> R operation(String operationName, Parameters parameters, Class<R> returnType);
+
+	<R extends Resource, T extends Resource> R operation(Class<T> resourceType, String operationName,
+			Parameters parameters, Class<R> returnType);
+
+	<R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String operationName,
+			Parameters parameters, Class<R> returnType);
+
+	<R extends Resource, T extends Resource> R operation(Class<T> resourceType, String id, String version,
+			String operationName, Parameters parameters, Class<R> returnType);
+}

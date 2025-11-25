@@ -1,0 +1,101 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<CodeSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/code-system" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/CodeSystem/practitioner-role" />
+	<version value="2.0.0" />
+	<name value="DSF_Practitioner_Role" />
+	<title value="DSF Practitioner Role" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-10-27" />
+	<publisher value="DSF" />
+	<description value="CodeSystem with DSF practitioner roles" />
+	<caseSensitive value="true" />
+	<hierarchyMeaning value="grouped-by" />
+	<versionNeeded value="false" />
+	<content value="complete" />
+	<count value="15" />
+	<concept>
+		<code value="UAC_USER" />
+		<display value="Use-and-Access Committee User" />
+	</concept>
+	<concept>
+		<code value="COS_USER" />
+		<display value="Coordinating Site User" />
+	</concept>
+	<concept>
+		<code value="CRR_USER" />
+		<display value="Central Research Repository User" />
+	</concept>
+	<concept>
+		<code value="DIC_USER" />
+		<display value="Data Integration Center User" />
+	</concept>
+	<concept>
+		<code value="DMS_USER" />
+		<display value="Data Management Site User" />
+	</concept>
+	<concept>
+		<code value="DTS_USER" />
+		<display value="Data Transfer Site User" />
+	</concept>
+	<concept>
+		<code value="HRP_USER" />
+		<display value="Health Research Platform User" />
+	</concept>
+	<concept>
+		<code value="TTP_USER" />
+		<display value="Trusted Third Party User" />
+	</concept>
+	<concept>
+		<code value="AMS_USER" />
+		<display value="Allowlist Management Site User" />
+	</concept>
+	<concept>
+		<code value="ASP_USER" />
+		<display value="Analysis Service Provider User" />
+	</concept>
+	<concept>
+		<code value="SPR_USER" />
+		<display value="Service Provider Registry User" />
+	</concept>
+	<concept>
+		<code value="TSP_USER" />
+		<display value="Terminology Service Provider User" />
+	</concept>
+	<concept>
+		<code value="PPH_USER" />
+		<display value="Process Plugin Hub User" />
+	</concept>
+	<concept>
+		<code value="BIO_USER" />
+		<display value="Biobank User" />
+	</concept>
+	<concept>
+		<code value="DSF_ADMIN" />
+		<display value="DSF Administrator" />
+	</concept>
+</CodeSystem>

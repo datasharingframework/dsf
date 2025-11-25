@@ -1,0 +1,138 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.engine;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.operaton.bpm.engine.delegate.JavaDelegate;
+import org.operaton.bpm.engine.delegate.TaskListener;
+import org.operaton.bpm.engine.delegate.VariableScope;
+import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPlugin;
+
+public class DelegateProviderImpl implements DelegateProvider, InitializingBean
+{
+	private final ClassLoader defaultClassLoader;
+	private final ApplicationContext defaultApplicationContext;
+
+	private final Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion = new HashMap<>();
+
+	public DelegateProviderImpl(ClassLoader mainClassLoader, ApplicationContext mainApplicationContext)
+	{
+		this.defaultClassLoader = mainClassLoader;
+		this.defaultApplicationContext = mainApplicationContext;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(defaultClassLoader, "defaultClassLoader");
+		Objects.requireNonNull(defaultApplicationContext, "defaultApplicationContext");
+	}
+
+	@Override
+	public void setProcessPlugins(List<ProcessPlugin> plugins,
+			Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion)
+	{
+		this.processPluginsByProcessIdAndVersion.putAll(processPluginsByProcessIdAndVersion);
+	}
+
+	private ProcessPlugin getPlugin(ProcessIdAndVersion processIdAndVersion)
+	{
+		return processPluginsByProcessIdAndVersion.get(processIdAndVersion);
+	}
+
+	@Override
+	public Class<?> getDefaultUserTaskListenerClass(ProcessIdAndVersion processKeyAndVersion)
+	{
+		return getPlugin(processKeyAndVersion).getDefaultUserTaskListenerClass();
+	}
+
+	@Override
+	public boolean isDefaultUserTaskListenerOrSuperClassOf(ProcessIdAndVersion processKeyAndVersion, String className)
+	{
+		return getPlugin(processKeyAndVersion).isDefaultUserTaskListenerOrSuperClassOf(className);
+	}
+
+	@Override
+	public JavaDelegate getMessageSendTask(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageSendTask(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public JavaDelegate getServiceTask(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getServiceTask(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public JavaDelegate getMessageEndEvent(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageEndEvent(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public JavaDelegate getMessageIntermediateThrowEvent(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		JavaDelegate delegate = plugin.getMessageIntermediateThrowEvent(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution, delegate::execute);
+	}
+
+	@Override
+	public ExecutionListener getExecutionListener(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		ExecutionListener executionListener = plugin.getExecutionListener(className, fieldDeclarations, variableScope);
+
+		return delegateExecution -> plugin.getPluginMdc().executeWithProcessMdc(delegateExecution,
+				executionListener::notify);
+	}
+
+	@Override
+	public TaskListener getTaskListener(ProcessIdAndVersion processIdAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations, VariableScope variableScope)
+	{
+		ProcessPlugin plugin = getPlugin(processIdAndVersion);
+		TaskListener taskListener = plugin.getTaskListener(className, fieldDeclarations, variableScope);
+
+		return delegateTask -> plugin.getPluginMdc().executeWithProcessMdc(delegateTask, taskListener::notify);
+	}
+}

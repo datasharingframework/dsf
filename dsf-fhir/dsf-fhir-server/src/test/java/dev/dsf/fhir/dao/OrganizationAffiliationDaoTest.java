@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
@@ -14,6 +29,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.Test;
@@ -25,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 
@@ -33,12 +52,16 @@ public class OrganizationAffiliationDaoTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationAffiliationDaoTest.class);
 
-	private static final String identifierSystem = "http://dsf.dev/sid/organization-identifier";
-	private static final String identifierValue = "identifier.test";
+	private static final String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
+	private static final String ORGANIZATION_IDENTIFIER_VALUE = "identifier.test";
+	private static final String ENDPOINT_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/endpoint-identifier";
+
 	private static final boolean active = true;
 
 	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource,
 			permanentDeleteDataSource, fhirContext);
+	private final EndpointDao endpointDao = new EndpointDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+			fhirContext);
 
 	public OrganizationAffiliationDaoTest()
 	{
@@ -49,7 +72,8 @@ public class OrganizationAffiliationDaoTest
 	public OrganizationAffiliation createResource()
 	{
 		OrganizationAffiliation organizationAffiliation = new OrganizationAffiliation();
-		organizationAffiliation.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		organizationAffiliation.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue(ORGANIZATION_IDENTIFIER_VALUE);
 		return organizationAffiliation;
 	}
 
@@ -57,8 +81,8 @@ public class OrganizationAffiliationDaoTest
 	protected void checkCreated(OrganizationAffiliation resource)
 	{
 		assertTrue(resource.hasIdentifier());
-		assertEquals(identifierSystem, resource.getIdentifierFirstRep().getSystem());
-		assertEquals(identifierValue, resource.getIdentifierFirstRep().getValue());
+		assertEquals(ORGANIZATION_IDENTIFIER_SYSTEM, resource.getIdentifierFirstRep().getSystem());
+		assertEquals(ORGANIZATION_IDENTIFIER_VALUE, resource.getIdentifierFirstRep().getValue());
 	}
 
 	@Override
@@ -75,21 +99,22 @@ public class OrganizationAffiliationDaoTest
 	}
 
 	@Test
-	public void testReadActiveNotDeletedByMemberOrganizationIdentifier() throws Exception
+	public void testReadActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction()
+			throws Exception
 	{
 		final String parentIdentifier = "parent.org";
 
-		try (Connection connection = getDao().newReadWriteTransaction())
+		try (Connection connection = dao.newReadWriteTransaction())
 		{
-			Organization memberOrg = createAndStoreOrganizationInDb(identifierValue, connection);
+			Organization memberOrg = createAndStoreOrganizationInDb(ORGANIZATION_IDENTIFIER_VALUE, connection);
 			Organization parentOrg = createAndStoreOrganizationInDb(parentIdentifier, connection);
 
-			OrganizationAffiliation affiliation = createAndStoreOrganizationAffiliationInDb(parentOrg, memberOrg,
+			OrganizationAffiliation affiliation = createAndStoreOrganizationAffiliationInDb(parentOrg, memberOrg, null,
 					connection);
 
-			List<OrganizationAffiliation> affiliations = getDao()
+			List<OrganizationAffiliation> affiliations = dao
 					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-							connection, identifierValue);
+							connection, ORGANIZATION_IDENTIFIER_VALUE, null); // TODO new test with endpointIdentifier
 			assertNotNull(affiliations);
 			assertEquals(1, affiliations.size());
 			assertEquals(affiliation.getIdElement().getIdPart(), affiliations.get(0).getIdElement().getIdPart());
@@ -99,10 +124,10 @@ public class OrganizationAffiliationDaoTest
 					affiliations.get(0).getParticipatingOrganization().getReference());
 			assertTrue(affiliations.get(0).getParticipatingOrganization().hasIdentifier());
 			assertTrue(affiliations.get(0).getParticipatingOrganization().getIdentifier().hasSystem());
-			assertEquals(identifierSystem,
+			assertEquals(ORGANIZATION_IDENTIFIER_SYSTEM,
 					affiliations.get(0).getParticipatingOrganization().getIdentifier().getSystem());
 			assertTrue(affiliations.get(0).getParticipatingOrganization().getIdentifier().hasValue());
-			assertEquals(identifierValue,
+			assertEquals(ORGANIZATION_IDENTIFIER_VALUE,
 					affiliations.get(0).getParticipatingOrganization().getIdentifier().getValue());
 			assertTrue(affiliations.get(0).hasOrganization());
 			assertTrue(affiliations.get(0).getOrganization().hasReference());
@@ -110,36 +135,38 @@ public class OrganizationAffiliationDaoTest
 					affiliations.get(0).getOrganization().getReference());
 			assertTrue(affiliations.get(0).getOrganization().hasIdentifier());
 			assertTrue(affiliations.get(0).getOrganization().getIdentifier().hasSystem());
-			assertEquals(identifierSystem, affiliations.get(0).getOrganization().getIdentifier().getSystem());
+			assertEquals(ORGANIZATION_IDENTIFIER_SYSTEM,
+					affiliations.get(0).getOrganization().getIdentifier().getSystem());
 			assertTrue(affiliations.get(0).getOrganization().getIdentifier().hasValue());
 			assertEquals(parentIdentifier, affiliations.get(0).getOrganization().getIdentifier().getValue());
 		}
 	}
 
 	@Test
-	public void testSizeOfReadActiveNotDeletedByMemberOrganizationIdentifier() throws Exception
+	public void testReadActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransactionSize()
+			throws Exception
 	{
 		final String parentFooIdentifier = "parentFoo.org";
 		final String parentBarIdentifier = "parentBar.org";
 
-		try (Connection connection = getDao().newReadWriteTransaction())
+		try (Connection connection = dao.newReadWriteTransaction())
 		{
-			Organization memberOrg = createAndStoreOrganizationInDb(identifierValue, connection);
+			Organization memberOrg = createAndStoreOrganizationInDb(ORGANIZATION_IDENTIFIER_VALUE, connection);
 			Organization parentFooOrg = createAndStoreOrganizationInDb(parentFooIdentifier, connection);
 			Organization parentBarOrg = createAndStoreOrganizationInDb(parentBarIdentifier, connection);
 
-			createAndStoreOrganizationAffiliationInDb(parentFooOrg, memberOrg, connection);
-			createAndStoreOrganizationAffiliationInDb(parentBarOrg, memberOrg, connection);
+			createAndStoreOrganizationAffiliationInDb(parentFooOrg, memberOrg, null, connection);
+			createAndStoreOrganizationAffiliationInDb(parentBarOrg, memberOrg, null, connection);
 
-			List<OrganizationAffiliation> affiliations = getDao()
+			List<OrganizationAffiliation> affiliations = dao
 					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-							connection, identifierValue);
+							connection, ORGANIZATION_IDENTIFIER_VALUE, null); // TODO new test with endpointIdentifier
 			assertNotNull(affiliations);
 
 			assertEquals(2, affiliations.size());
-			assertEquals(identifierValue,
+			assertEquals(ORGANIZATION_IDENTIFIER_VALUE,
 					affiliations.get(0).getParticipatingOrganization().getIdentifier().getValue());
-			assertEquals(identifierValue,
+			assertEquals(ORGANIZATION_IDENTIFIER_VALUE,
 					affiliations.get(1).getParticipatingOrganization().getIdentifier().getValue());
 			assertNotEquals(affiliations.get(0).getOrganization().getIdentifier().getValue(),
 					affiliations.get(1).getOrganization().getIdentifier().getValue());
@@ -150,18 +177,75 @@ public class OrganizationAffiliationDaoTest
 		}
 	}
 
+	@Test
+	public void testReadActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransactionWithEndpointIdentifier()
+			throws Exception
+	{
+		final String parentIdentifier = "parent.org";
+		final String endpointIdentifier1 = "one.endpoint.test";
+		final String endpointIdentifier2 = "two.endpoint.test";
+
+		try (Connection connection = dao.newReadWriteTransaction())
+		{
+			Endpoint endpoint1 = createAndStoreEndpointInDb(endpointIdentifier1, connection);
+			Endpoint endpoint2 = createAndStoreEndpointInDb(endpointIdentifier2, connection);
+
+			Organization memberOrg = createAndStoreOrganizationInDb(ORGANIZATION_IDENTIFIER_VALUE, connection);
+			Organization parentOrg = createAndStoreOrganizationInDb(parentIdentifier, connection);
+
+			createAndStoreOrganizationAffiliationInDb(parentOrg, memberOrg, endpoint1, connection);
+			createAndStoreOrganizationAffiliationInDb(parentOrg, memberOrg, endpoint2, connection);
+
+			List<OrganizationAffiliation> affiliationsNoEndpointIdentifier = dao
+					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
+							connection, ORGANIZATION_IDENTIFIER_VALUE, null);
+			assertNotNull(affiliationsNoEndpointIdentifier);
+			assertEquals(2, affiliationsNoEndpointIdentifier.size());
+
+			logger.debug("Affiliation 1: {}",
+					fhirContext.newJsonParser().encodeResourceToString(affiliationsNoEndpointIdentifier.get(0)));
+			logger.debug("Affiliation 2: {}",
+					fhirContext.newJsonParser().encodeResourceToString(affiliationsNoEndpointIdentifier.get(1)));
+
+			List<OrganizationAffiliation> affiliationsEndpointIdentifier1 = dao
+					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
+							connection, ORGANIZATION_IDENTIFIER_VALUE, endpointIdentifier1);
+			assertNotNull(affiliationsEndpointIdentifier1);
+			assertEquals(1, affiliationsEndpointIdentifier1.size());
+			assertEquals(endpoint1.getIdElement().getIdPart(),
+					affiliationsEndpointIdentifier1.get(0).getEndpointFirstRep().getReferenceElement().getIdPart());
+
+			List<OrganizationAffiliation> affiliationsEndpointIdentifier2 = dao
+					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
+							connection, ORGANIZATION_IDENTIFIER_VALUE, endpointIdentifier2);
+			assertNotNull(affiliationsEndpointIdentifier2);
+			assertEquals(1, affiliationsEndpointIdentifier2.size());
+			assertEquals(endpoint2.getIdElement().getIdPart(),
+					affiliationsEndpointIdentifier2.get(0).getEndpointFirstRep().getReferenceElement().getIdPart());
+		}
+	}
+
 	private Organization createAndStoreOrganizationInDb(String identifierValue, Connection connection)
 			throws SQLException
 	{
-		Organization memberOrg = new Organization();
-		memberOrg.setActive(true);
-		memberOrg.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		Organization org = new Organization();
+		org.setActive(true);
+		org.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(identifierValue);
 
-		return organizationDao.createWithTransactionAndId(connection, memberOrg, UUID.randomUUID());
+		return organizationDao.createWithTransactionAndId(LargeObjectManager.NO_OP, connection, org, UUID.randomUUID());
+	}
+
+	private Endpoint createAndStoreEndpointInDb(String identifierValue, Connection connection) throws SQLException
+	{
+		Endpoint org = new Endpoint();
+		org.setStatus(EndpointStatus.ACTIVE);
+		org.addIdentifier().setSystem(ENDPOINT_IDENTIFIER_SYSTEM).setValue(identifierValue);
+
+		return endpointDao.createWithTransactionAndId(LargeObjectManager.NO_OP, connection, org, UUID.randomUUID());
 	}
 
 	private OrganizationAffiliation createAndStoreOrganizationAffiliationInDb(Organization parent, Organization member,
-			Connection connection) throws SQLException
+			Endpoint endpoint, Connection connection) throws SQLException
 	{
 		OrganizationAffiliation organizationAffiliation = new OrganizationAffiliation();
 		organizationAffiliation.setActive(true);
@@ -169,13 +253,18 @@ public class OrganizationAffiliationDaoTest
 				.setReference("Organization/" + member.getIdElement().getIdPart());
 		organizationAffiliation.getOrganization().setReference("Organization/" + parent.getIdElement().getIdPart());
 
-		return getDao().createWithTransactionAndId(connection, organizationAffiliation, UUID.randomUUID());
+		if (endpoint != null)
+			organizationAffiliation.addEndpoint().setReference("Endpoint/" + endpoint.getIdElement().getIdPart());
+
+		return dao.createWithTransactionAndId(LargeObjectManager.NO_OP, connection, organizationAffiliation,
+				UUID.randomUUID());
 	}
 
 	@Test
 	public void testUpdateWithExistingBinary() throws Exception
 	{
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization memberOrg = new Organization();
@@ -214,7 +303,8 @@ public class OrganizationAffiliationDaoTest
 	@Test
 	public void testUpdateWithExistingBinaryUpdateMemberOrg() throws Exception
 	{
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization memberOrg = new Organization();
@@ -253,7 +343,8 @@ public class OrganizationAffiliationDaoTest
 	@Test
 	public void testUpdateWithExistingBinaryUpdateParentOrg() throws Exception
 	{
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization memberOrg = new Organization();

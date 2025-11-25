@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.authentication;
 
 import static org.junit.Assert.assertEquals;
@@ -10,18 +25,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.EnumSet;
+import java.time.Period;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,19 +37,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import de.rwh.utils.crypto.CertificateAuthority;
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.CertificationRequestBuilder;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificateAuthority;
+import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest;
 import dev.dsf.common.auth.DsfOpenIdCredentials;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
@@ -49,6 +54,7 @@ import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.RoleConfig.Mapping;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl.Operation;
 
 public class IdentityProviderTest
 {
@@ -81,47 +87,38 @@ public class IdentityProviderTest
 	private static final Organization REMOTE_ORGANIZATION = new Organization();
 	private static final X509Certificate REMOTE_ORGANIZATION_CERTIFICATE;
 
+	private static final Endpoint LOCAL_ENDPOINT = new Endpoint();
+	private static final Endpoint REMOTE_ENDPOINT = new Endpoint();
+
 	private static final X509Certificate LOCAL_PRACTITIONER_CERTIFICATE;
 	private static final String LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT;
 
 	static
 	{
-		CertificateAuthority.registerBouncyCastleProvider();
-
 		try
 		{
-			CA = new CertificateAuthority("DE", null, null, null, null, "CA");
-			CA.initialize(LocalDateTime.now(), LocalDateTime.now().plusDays(1), 1024,
-					CertificateHelper.DEFAULT_SIGNATURE_ALGORITHM);
+			CA = CertificateAuthority.builderSha384EcdsaSecp384r1("DE", null, null, null, null, "CA")
+					.setValidityPeriod(Period.ofDays(1)).build();
 
-			X500Name localOrgSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-					LOCAL_ORGANIZATION_COMMON_NAME);
-			KeyPair localOrgKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM, 1024);
-			JcaPKCS10CertificationRequest localOrgReq = CertificationRequestBuilder
-					.createClientCertificationRequest(localOrgSubject, localOrgKeyPair, "email@local.org");
-			LOCAL_ORGANIZATION_CERTIFICATE = CA.signWebClientCertificate(localOrgReq);
+			CertificationRequest localOrgReq = CertificationRequest
+					.builder(CA, "DE", null, null, null, null, LOCAL_ORGANIZATION_COMMON_NAME).generateKeyPair()
+					.setEmail("email@local.org").build();
+			LOCAL_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(localOrgReq);
 
-			X500Name remoteOrgSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-					REMOTE_ORGANIZATION_COMMON_NAME);
-			KeyPair remoteOrgKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM, 1024);
-			JcaPKCS10CertificationRequest remoteOrgReq = CertificationRequestBuilder
-					.createClientCertificationRequest(remoteOrgSubject, remoteOrgKeyPair, "email@remote.org");
-			REMOTE_ORGANIZATION_CERTIFICATE = CA.signWebClientCertificate(remoteOrgReq);
+			CertificationRequest remoteOrgReq = CertificationRequest
+					.builder(CA, "DE", null, null, null, null, REMOTE_ORGANIZATION_COMMON_NAME).generateKeyPair()
+					.setEmail("email@remote.org").build();
+			REMOTE_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(remoteOrgReq);
 
-			X500Name localPractitionerSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
-					LOCAL_PRACTITIONER_COMMON_NAME);
-			KeyPair localPractitionerKeyPair = CertificateHelper.createKeyPair(CertificateHelper.DEFAULT_KEY_ALGORITHM,
-					1024);
-			JcaPKCS10CertificationRequest localPractitionerReq = CertificationRequestBuilder
-					.createClientCertificationRequest(localPractitionerSubject, localPractitionerKeyPair,
-							LOCAL_PRACTITIONER_MAIL);
-			LOCAL_PRACTITIONER_CERTIFICATE = CA.signWebClientCertificate(localPractitionerReq);
+			CertificationRequest localPractitionerReq = CertificationRequest
+					.builder(CA, "DE", null, null, null, null, LOCAL_PRACTITIONER_COMMON_NAME).generateKeyPair()
+					.setEmail(LOCAL_PRACTITIONER_MAIL).build();
+			LOCAL_PRACTITIONER_CERTIFICATE = CA.signClientCertificate(localPractitionerReq);
+
 			LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT = Hex.encodeHexString(
 					MessageDigest.getInstance("SHA-512").digest(LOCAL_PRACTITIONER_CERTIFICATE.getEncoded()));
-
 		}
-		catch (InvalidKeyException | NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException
-				| OperatorCreationException | IllegalStateException | InvalidKeySpecException e)
+		catch (NoSuchAlgorithmException | CertificateException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -133,16 +130,16 @@ public class IdentityProviderTest
 				.setValue(REMOTE_ORGANIZATION_IDENTIFIER_VALUE);
 	}
 
-
 	private OrganizationProvider organizationProvider;
-	private RoleConfig roleConfig;
+	private EndpointProvider endpointProvider;
+	private RoleConfig<FhirServerRole> roleConfig;
 	private DsfOpenIdCredentials credentials;
 
-	private IdentityProvider createIdentityProvider(List<Mapping> mappings)
+	private IdentityProvider createIdentityProvider(List<Mapping<FhirServerRole>> mappings)
 	{
 		when(roleConfig.getEntries()).thenReturn(mappings);
 
-		IdentityProvider provider = new IdentityProviderImpl(roleConfig, organizationProvider,
+		IdentityProvider provider = new IdentityProviderImpl(roleConfig, organizationProvider, endpointProvider,
 				LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
 
 		verify(roleConfig).getEntries();
@@ -150,20 +147,24 @@ public class IdentityProviderTest
 		return provider;
 	}
 
-	private Mapping createMappingWithThumbprint(String thumbprint)
+	private Mapping<FhirServerRole> createMappingWithThumbprint(String thumbprint)
 	{
-		return new Mapping("test-mapping", List.of(thumbprint), List.of(), List.of(), List.of(), List.of(), List.of());
+		return new Mapping<FhirServerRole>("test-mapping", List.of(thumbprint), List.of(), List.of(), List.of(),
+				List.of(), List.of());
 	}
 
-	private Mapping createMappingWithEmail(String email)
+	private Mapping<FhirServerRole> createMappingWithEmail(String email)
 	{
-		return new Mapping("test-mapping", List.of(), List.of(email), List.of(), List.of(), List.of(), List.of());
+		return new Mapping<FhirServerRole>("test-mapping", List.of(), List.of(email), List.of(), List.of(), List.of(),
+				List.of());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void before() throws Exception
 	{
 		organizationProvider = mock(OrganizationProvider.class);
+		endpointProvider = mock(EndpointProvider.class);
 		roleConfig = mock(RoleConfig.class);
 		credentials = mock(DsfOpenIdCredentials.class);
 	}
@@ -172,6 +173,7 @@ public class IdentityProviderTest
 	public void after() throws Exception
 	{
 		verifyNoMoreInteractions(organizationProvider);
+		verifyNoMoreInteractions(endpointProvider);
 	}
 
 	@Test
@@ -199,6 +201,7 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE))
 				.thenReturn(Optional.of(LOCAL_ORGANIZATION));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { LOCAL_ORGANIZATION_CERTIFICATE });
 		assertNotNull(i);
@@ -209,13 +212,14 @@ public class IdentityProviderTest
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
-		assertEquals(FhirServerRole.LOCAL_ORGANIZATION, orgI.getDsfRoles());
+		assertEquals(FhirServerRoleImpl.LOCAL_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(LOCAL_ORGANIZATION, orgI.getOrganization());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
+		verify(endpointProvider).getLocalEndpoint();
 
 		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, cArg1.getValue());
 	}
@@ -227,6 +231,8 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(REMOTE_ORGANIZATION_CERTIFICATE))
 				.thenReturn(Optional.of(REMOTE_ORGANIZATION));
+		when(endpointProvider.getEndpoint(REMOTE_ORGANIZATION, REMOTE_ORGANIZATION_CERTIFICATE))
+				.thenReturn(Optional.of(REMOTE_ENDPOINT));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { REMOTE_ORGANIZATION_CERTIFICATE });
 		assertNotNull(i);
@@ -237,15 +243,22 @@ public class IdentityProviderTest
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
-		assertEquals(FhirServerRole.REMOTE_ORGANIZATION, orgI.getDsfRoles());
+		assertEquals(FhirServerRoleImpl.REMOTE_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(REMOTE_ORGANIZATION, orgI.getOrganization());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
-		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
-		verify(organizationProvider).getOrganization(cArg1.capture());
+		ArgumentCaptor<X509Certificate> getOrgArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		verify(organizationProvider).getOrganization(getOrgArg1.capture());
 
-		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, cArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getOrgArg1.getValue());
+
+		ArgumentCaptor<Organization> getEndpArg1 = ArgumentCaptor.forClass(Organization.class);
+		ArgumentCaptor<X509Certificate> getEndpArg2 = ArgumentCaptor.forClass(X509Certificate.class);
+		verify(endpointProvider).getEndpoint(getEndpArg1.capture(), getEndpArg2.capture());
+
+		assertEquals(REMOTE_ORGANIZATION, getEndpArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getEndpArg2.getValue());
 	}
 
 	@Test
@@ -274,14 +287,14 @@ public class IdentityProviderTest
 
 		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE)).thenReturn(Optional.empty());
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(FhirServerRole.CREATE));
+				.thenReturn(List.of(Operation.CREATE.toFhirServerRoleAllResources()));
 		when(roleConfig.getDsfRolesForThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT))
-				.thenReturn(Collections.singletonList(FhirServerRole.DELETE));
-		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE1));
+				.thenReturn(List.of(Operation.DELETE.toFhirServerRoleAllResources()));
+		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(PRACTIONER_ROLE1));
 		when(roleConfig.getPractitionerRolesForThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE2));
+				.thenReturn(List.of(PRACTIONER_ROLE2));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { LOCAL_PRACTITIONER_CERTIFICATE });
 		assertNotNull(i);
@@ -295,7 +308,8 @@ public class IdentityProviderTest
 		assertTrue(practitionerI.getCredentials().isEmpty());
 		assertEquals(LOCAL_PRACTITIONER_NAME_GIVEN + " " + LOCAL_PRACTITIONER_NAME_FAMILY,
 				practitionerI.getDisplayName());
-		assertEquals(EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE), practitionerI.getDsfRoles());
+		assertEquals(Set.of(Operation.CREATE.toFhirServerRoleAllResources(),
+				Operation.DELETE.toFhirServerRoleAllResources()), practitionerI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE + "/" + LOCAL_PRACTITIONER_MAIL, practitionerI.getName());
 		assertEquals(LOCAL_ORGANIZATION, practitionerI.getOrganization());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue().get());
@@ -305,6 +319,7 @@ public class IdentityProviderTest
 		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 
 		ArgumentCaptor<String> mArg1 = ArgumentCaptor.forClass(String.class);
 		verify(roleConfig).getDsfRolesForEmail(mArg1.capture());
@@ -355,11 +370,14 @@ public class IdentityProviderTest
 	{
 		IdentityProvider provider = createIdentityProvider(List.of(createMappingWithEmail(LOCAL_PRACTITIONER_MAIL)));
 
-		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
-
+		when(credentials.getStringClaimOrDefault("iss", "")).thenReturn("https://iss");
+		when(credentials.getStringClaimOrDefault("sub", "")).thenReturn("sub");
+		when(credentials.getStringClaimOrDefault("email", "sub.iss@oidc.invalid")).thenReturn(LOCAL_PRACTITIONER_MAIL);
 		when(credentials.getStringClaimOrDefault("family_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_FAMILY);
 		when(credentials.getStringClaimOrDefault("given_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_GIVEN);
-		when(credentials.getStringClaimOrDefault("email", "")).thenReturn(LOCAL_PRACTITIONER_MAIL);
+
+		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
+
 		when(credentials.getIdToken())
 				.thenReturn(Map.of("realm_access", Map.of("roles", new String[] { TOKEN_ROLE1 })));
 		when(credentials.getAccessToken()).thenReturn(
@@ -367,22 +385,21 @@ public class IdentityProviderTest
 						"groups", new String[] { TOKEN_GROUP }));
 
 		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(FhirServerRole.CREATE));
+				.thenReturn(List.of(Operation.CREATE.toFhirServerRoleAllResources()));
 		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE1))
-				.thenReturn(Collections.singletonList(FhirServerRole.DELETE));
+				.thenReturn(List.of(Operation.DELETE.toFhirServerRoleAllResources()));
 		when(roleConfig.getDsfRolesForTokenRole(TOKEN_ROLE2_CLIENT + "." + TOKEN_ROLE2))
-				.thenReturn(Collections.singletonList(FhirServerRole.HISTORY));
+				.thenReturn(List.of(Operation.HISTORY.toFhirServerRoleAllResources()));
 		when(roleConfig.getDsfRolesForTokenGroup(TOKEN_GROUP))
-				.thenReturn(Collections.singletonList(FhirServerRole.PERMANENT_DELETE));
+				.thenReturn(List.of(Operation.PERMANENT_DELETE.toFhirServerRoleAllResources()));
 
-		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE1));
-		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE1))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE2));
+		when(roleConfig.getPractitionerRolesForEmail(LOCAL_PRACTITIONER_MAIL)).thenReturn(List.of(PRACTIONER_ROLE1));
+		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE1)).thenReturn(List.of(PRACTIONER_ROLE2));
 		when(roleConfig.getPractitionerRolesForTokenRole(TOKEN_ROLE2_CLIENT + "." + TOKEN_ROLE2))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE3));
-		when(roleConfig.getPractitionerRolesForTokenGroup(TOKEN_GROUP))
-				.thenReturn(Collections.singletonList(PRACTIONER_ROLE4));
+				.thenReturn(List.of(PRACTIONER_ROLE3));
+		when(roleConfig.getPractitionerRolesForTokenGroup(TOKEN_GROUP)).thenReturn(List.of(PRACTIONER_ROLE4));
+
+		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
 		Identity i = provider.getIdentity(credentials);
 		assertNotNull(i);
@@ -396,8 +413,10 @@ public class IdentityProviderTest
 		assertEquals(credentials, practitionerI.getCredentials().get());
 		assertEquals(LOCAL_PRACTITIONER_NAME_GIVEN + " " + LOCAL_PRACTITIONER_NAME_FAMILY,
 				practitionerI.getDisplayName());
-		assertEquals(EnumSet.of(FhirServerRole.CREATE, FhirServerRole.DELETE, FhirServerRole.HISTORY,
-				FhirServerRole.PERMANENT_DELETE), practitionerI.getDsfRoles());
+		assertEquals(Set.of(new FhirServerRoleImpl(Operation.CREATE, List.of()),
+				new FhirServerRoleImpl(Operation.DELETE, List.of()),
+				new FhirServerRoleImpl(Operation.HISTORY, List.of()),
+				new FhirServerRoleImpl(Operation.PERMANENT_DELETE, List.of())), practitionerI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE + "/" + LOCAL_PRACTITIONER_MAIL, practitionerI.getName());
 		assertEquals(LOCAL_ORGANIZATION, practitionerI.getOrganization());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, practitionerI.getOrganizationIdentifierValue().get());
@@ -415,6 +434,7 @@ public class IdentityProviderTest
 		assertNotNull(practitionerI.getPractitioner());
 
 		verify(organizationProvider).getLocalOrganization();
+		verify(endpointProvider).getLocalEndpoint();
 
 		verify(credentials).getIdToken();
 		verify(credentials).getAccessToken();
@@ -448,7 +468,7 @@ public class IdentityProviderTest
 
 		when(credentials.getStringClaimOrDefault("iss", "")).thenReturn("https://iss");
 		when(credentials.getStringClaimOrDefault("sub", "")).thenReturn("sub");
-		when(credentials.getStringClaimOrDefault("email", "")).thenReturn(LOCAL_PRACTITIONER_MAIL);
+		when(credentials.getStringClaimOrDefault("email", "sub.iss@oidc.invalid")).thenReturn(LOCAL_PRACTITIONER_MAIL);
 		when(credentials.getStringClaimOrDefault("family_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_FAMILY);
 		when(credentials.getStringClaimOrDefault("given_name", "")).thenReturn(LOCAL_PRACTITIONER_NAME_GIVEN);
 		when(credentials.getIdToken())
@@ -457,6 +477,7 @@ public class IdentityProviderTest
 				Map.of("resource_access", Map.of(TOKEN_ROLE2_CLIENT, Map.of("roles", new String[] { TOKEN_ROLE2 })),
 						"groups", new String[] { TOKEN_GROUP }));
 		when(credentials.getUserId()).thenReturn("user-id");
+
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
 
 		Identity i = provider.getIdentity(credentials);
@@ -464,7 +485,7 @@ public class IdentityProviderTest
 
 		verify(credentials).getStringClaimOrDefault("iss", "");
 		verify(credentials).getStringClaimOrDefault("sub", "");
-		verify(credentials).getStringClaimOrDefault("email", "");
+		verify(credentials).getStringClaimOrDefault("email", "sub.iss@oidc.invalid");
 		verify(credentials).getStringClaimOrDefault("family_name", "");
 		verify(credentials).getStringClaimOrDefault("given_name", "");
 		verify(credentials).getIdToken();

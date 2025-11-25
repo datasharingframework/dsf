@@ -1,0 +1,123 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<Questionnaire xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/questionnaire" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/Questionnaire/test" />
+	<!-- version managed by bpe -->
+	<version value="#{version}" />
+	<!-- date managed by bpe -->
+	<date value="#{date}" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<item>
+		<linkId value="business-key" />
+		<type value="string" />
+		<text value="The business-key of the process execution" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="user-task-id" />
+		<type value="string" />
+		<text value="The user-task-id of the process execution" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="display-example" />
+		<type value="display" />
+		<text
+			value="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet." />
+	</item>
+	<item>
+		<linkId value="string-example" />
+		<type value="string" />
+		<text value="Add a string to test the string type" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="text-example" />
+		<type value="text" />
+		<text value="Add a text to test the text type" />
+		<required value="true" />
+	</item>
+	<item>
+		<linkId value="integer-example" />
+		<type value="integer" />
+		<text value="Add an integer number to test the integer type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="decimal-example" />
+		<type value="decimal" />
+		<text value="Add a decimal number to test the decimal type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="date-example" />
+		<type value="date" />
+		<text value="Add a date to test the date type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="time-example" />
+		<type value="time" />
+		<text value="Add a time to test the time type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="date-time-example" />
+		<type value="dateTime" />
+		<text value="Add a date-time to test the dateTime type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="url-example" />
+		<type value="url" />
+		<text value="Add the location of the pdf contract" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="reference-example" />
+		<type value="reference" />
+		<text value="Add the location (url) of the data-set that should be approved" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="boolean-example" />
+		<type value="boolean" />
+		<text value="Do you approve the release of the data-set?" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="choice-example" />
+		<type value="choice" />
+		<text value="Add a coding to test the choice type" />
+		<required value="false" />
+	</item>
+	<item>
+		<linkId value="quantity-example" />
+		<type value="quantity" />
+		<text value="Add a quantity to test the quantity type" />
+		<required value="false" />
+	</item>
+</Questionnaire>

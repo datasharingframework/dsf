@@ -1,0 +1,34 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="resource-data" th:fragment="resource-data">
+			<th:block th:insert="~{resourceElements::systemAndValue}" th:with="label='Master Identifier',systemAndValue=${documentReference.masterIdentifier}" th:if="${documentReference.masterIdentifier}"></th:block>
+			<th:block th:insert="~{resourceElements::identifier}" th:with="identifier=${documentReference.identifier}" th:if="${documentReference.identifier}"></th:block>
+			<th:block th:insert="~{resourceElements::status}" th:if="${resource.status}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Document Status',string=${documentReference.docStatus}" th:if="${documentReference.docStatus}"></th:block>
+			<th:block th:insert="~{resourceElements::systemsAndValues}" th:with="label='Author',systemsAndValues=${documentReference.author}" th:if="${documentReference.author}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Date',string=${documentReference.date}" th:if="${documentReference.date}"></th:block>
+			<th:block th:insert="~{resourceElements::attachments}" th:with="attachments=${documentReference.attachment}" th:if="${documentReference.attachment}"></th:block>
+			<th:block th:insert="~{resourceElements::additionalValuesComment}"></th:block>
+		</div>
+	</div>
+</body>
+</html>

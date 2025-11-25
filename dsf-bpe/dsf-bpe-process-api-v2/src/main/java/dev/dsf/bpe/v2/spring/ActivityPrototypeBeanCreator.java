@@ -1,0 +1,94 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.v2.spring;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import dev.dsf.bpe.v2.activity.Activity;
+
+/**
+ * Helper class to register {@link Activity}s as prototype beans. Must be configured as a <code>static</code>
+ * {@link Bean} inside a {@link Configuration} class. Autowiring via constructor arguments is enabled.
+ * <p>
+ * Usage:
+ * <p>
+ *
+ * {@snippet id = "usage" lang = "java" :
+ * &#64;Configuration
+ * public class Config
+ * {
+ * 	&#64;Bean
+ * 	public static ActivityPrototypeBeanCreator activityPrototypeBeanCreator()
+ * 	{
+ * 		return new ActivityPrototypeBeanCreator(SomeServiceTask.class, AnExecutionListener.class,
+ * 				MyMessageIntermediateThrowEvent.class);
+ * 	}
+ * }
+ * }
+ */
+public class ActivityPrototypeBeanCreator implements BeanDefinitionRegistryPostProcessor
+{
+	private final List<Class<? extends Activity>> activities = new ArrayList<>();
+
+	@SafeVarargs
+	public ActivityPrototypeBeanCreator(Class<? extends Activity>... activities)
+	{
+		this(Arrays.asList(activities));
+	}
+
+	public ActivityPrototypeBeanCreator(Collection<Class<? extends Activity>> activities)
+	{
+		if (activities != null)
+			this.activities.addAll(activities);
+	}
+
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException
+	{
+		activities.stream().forEach(a ->
+		{
+			BeanDefinition definition = createBeanDefinition(a);
+			String beanName = toBeanName(a);
+			registry.registerBeanDefinition(beanName, definition);
+		});
+	}
+
+	private String toBeanName(Class<? extends Activity> a)
+	{
+		String simpleName = a.getSimpleName();
+		return Character.toLowerCase(simpleName.charAt(0)) + (simpleName.length() > 1 ? simpleName.substring(1) : "");
+	}
+
+	private BeanDefinition createBeanDefinition(Class<? extends Activity> activity)
+	{
+		GenericBeanDefinition definition = new GenericBeanDefinition();
+		definition.setBeanClass(activity);
+		definition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		definition.setAutowireMode(GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		return definition;
+	}
+}

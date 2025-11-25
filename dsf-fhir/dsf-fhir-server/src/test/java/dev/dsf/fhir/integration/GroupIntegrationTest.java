@@ -1,11 +1,25 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,8 +62,7 @@ public class GroupIntegrationTest extends AbstractIntegrationTest
 		assertTrue(created.hasIdentifier());
 		assertEquals(identifier, created.getIdentifierFirstRep().getValue());
 
-		Bundle bundle = getWebserviceClient().search(Group.class,
-				Map.of("identifier", Collections.singletonList(identifier)));
+		Bundle bundle = getWebserviceClient().search(Group.class, Map.of("identifier", List.of(identifier)));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertTrue(bundle.hasEntry());
@@ -80,7 +93,7 @@ public class GroupIntegrationTest extends AbstractIntegrationTest
 		assertTrue(created2.hasIdElement());
 
 		Bundle bundle = getWebserviceClient().search(Group.class,
-				Map.of("identifier", Arrays.asList(identifier1, identifier2)));
+				Map.of("identifier", List.of(identifier1, identifier2)));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertTrue(bundle.hasEntry());

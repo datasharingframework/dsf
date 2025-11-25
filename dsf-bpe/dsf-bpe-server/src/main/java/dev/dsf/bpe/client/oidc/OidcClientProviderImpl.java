@@ -1,0 +1,136 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.client.oidc;
+
+import java.security.KeyStore;
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.bpe.api.client.oidc.OidcClient;
+import dev.dsf.bpe.api.config.FhirClientConfig.OidcAuthentication;
+import dev.dsf.bpe.api.service.BpeOidcClientProvider;
+import dev.dsf.common.config.ProxyConfig;
+
+public class OidcClientProviderImpl implements BpeOidcClientProvider, InitializingBean
+{
+	private final ProxyConfig proxyConfig;
+	private final String defaultDiscoveryPath;
+	private final Duration defaultConnectTimeout;
+	private final Duration defaultReadTimeout;
+	private final KeyStore defaultTrustedStore;
+	private final boolean defaultEnableDebugLogging;
+	private final String userAgent;
+	private final boolean cacheEnabled;
+	private final Duration cacheTimeoutConfigurationResource;
+	private final Duration cacheTimeoutJwksResource;
+	private final Duration cacheTimeoutAccessTokenBeforeExpiration;
+	private final Duration notBeforeIssuedAtExpiresAtLeeway;
+	private final boolean defaultVerifyAuthorizedParty;
+
+	public OidcClientProviderImpl(ProxyConfig proxyConfig, String defaultDiscoveryPath, Duration defaultConnectTimeout,
+			Duration defaultReadTimeout, KeyStore defaultTrustedStore, boolean defaultEnableDebugLogging,
+			String userAgent, boolean cacheEnabled, Duration cacheTimeoutConfigurationResource,
+			Duration cacheTimeoutJwksResource, Duration cacheTimeoutAccessTokenBeforeExpiration,
+			Duration notBeforeIssuedAtExpiresAtLeeway, boolean defaultVerifyAuthorizedParty)
+	{
+		this.proxyConfig = proxyConfig;
+		this.defaultDiscoveryPath = defaultDiscoveryPath;
+		this.defaultConnectTimeout = defaultConnectTimeout;
+		this.defaultReadTimeout = defaultReadTimeout;
+		this.defaultTrustedStore = defaultTrustedStore;
+		this.defaultEnableDebugLogging = defaultEnableDebugLogging;
+		this.userAgent = userAgent;
+		this.cacheEnabled = cacheEnabled;
+		this.cacheTimeoutConfigurationResource = cacheTimeoutConfigurationResource;
+		this.cacheTimeoutJwksResource = cacheTimeoutJwksResource;
+		this.cacheTimeoutAccessTokenBeforeExpiration = cacheTimeoutAccessTokenBeforeExpiration;
+		this.notBeforeIssuedAtExpiresAtLeeway = notBeforeIssuedAtExpiresAtLeeway;
+		this.defaultVerifyAuthorizedParty = defaultVerifyAuthorizedParty;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(proxyConfig, "proxyConfig");
+		Objects.requireNonNull(defaultConnectTimeout, "defaultConnectTimeout");
+		Objects.requireNonNull(defaultReadTimeout, "defaultReadTimeout");
+		Objects.requireNonNull(defaultTrustedStore, "defaultTrustedStore");
+		Objects.requireNonNull(userAgent, "userAgent");
+
+		Objects.requireNonNull(cacheTimeoutConfigurationResource, "cacheTimeoutConfigurationResource");
+		if (cacheTimeoutConfigurationResource.isNegative())
+			throw new IllegalArgumentException("cacheTimeoutConfigurationResource negative");
+
+		Objects.requireNonNull(cacheTimeoutJwksResource, "cacheTimeoutJwksResource");
+		if (cacheTimeoutJwksResource.isNegative())
+			throw new IllegalArgumentException("cacheTimeoutJwksResource negative");
+
+		Objects.requireNonNull(cacheTimeoutAccessTokenBeforeExpiration, "cacheTimeoutAccessTokenBeforeExpiration");
+		if (cacheTimeoutAccessTokenBeforeExpiration.isNegative())
+			throw new IllegalArgumentException("cacheTimeoutAccessTokenBeforeExpiration negative");
+
+		Objects.requireNonNull(notBeforeIssuedAtExpiresAtLeeway, "notBeforeIssuedAtExpiresAtLeeway");
+		if (notBeforeIssuedAtExpiresAtLeeway.isNegative())
+			throw new IllegalArgumentException("notBeforeIssuedAtExpiresAtLeeway negative");
+	}
+
+	@Override
+	public OidcClient getOidcClient(String baseUrl, String clientId, char[] clientSecret, String discoveryPath,
+			Duration connectTimeout, Duration readTimeout, KeyStore trustStore, Boolean enableDebugLogging,
+			List<String> requiredAudiences, Boolean verifyAuthorizedParty)
+	{
+		Objects.requireNonNull(baseUrl, "baseUrl");
+		Objects.requireNonNull(clientId, "clientId");
+		Objects.requireNonNull(clientSecret, "clientSecret");
+
+		String proxyHost = null, proxyUsername = null;
+		char[] proxyPassword = null;
+		if (proxyConfig.isEnabled(baseUrl))
+		{
+			proxyHost = proxyConfig.getUrl();
+			proxyUsername = proxyConfig.getUsername();
+			proxyPassword = proxyConfig.getPassword();
+		}
+
+		OidcClientWithDecodedJwt client = new OidcClientJersey(baseUrl,
+				discoveryPath != null ? discoveryPath : defaultDiscoveryPath, clientId, clientSecret,
+				trustStore != null ? trustStore : defaultTrustedStore, null, null, proxyHost, proxyUsername,
+				proxyPassword, userAgent, readTimeout != null ? readTimeout : defaultReadTimeout,
+				connectTimeout != null ? connectTimeout : defaultConnectTimeout,
+				enableDebugLogging != null ? enableDebugLogging : defaultEnableDebugLogging,
+				notBeforeIssuedAtExpiresAtLeeway, requiredAudiences,
+				verifyAuthorizedParty != null ? verifyAuthorizedParty : defaultVerifyAuthorizedParty)
+				.asOidcClientWithDecodedJwt();
+
+		return cacheEnabled
+				? new OidcClientWithCache(cacheTimeoutConfigurationResource, cacheTimeoutJwksResource,
+						cacheTimeoutAccessTokenBeforeExpiration, client)
+				: client;
+	}
+
+	@Override
+	public OidcClient getOidcClient(OidcAuthentication config)
+	{
+		Objects.requireNonNull(config, "config");
+
+		return getOidcClient(config.baseUrl(), config.clientId(), config.clientSecret(), config.discoveryPath(),
+				config.connectTimeout(), config.readTimeout(), config.trustStore(), config.debugLoggingEnabled(),
+				config.requiredAudiences(), config.verifyAuthorizedParty());
+	}
+}

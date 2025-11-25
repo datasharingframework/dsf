@@ -1,0 +1,105 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/task-test" />
+	<version value="2.0" />
+	<name value="testProcess" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-02-04" />
+	<fhirVersion value="4.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="Task" />
+	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Task.instantiatesUri">
+			<path value="Task.instantiatesUri" />
+			<fixedUri value="http://dsf.dev/bpe/Process/test/2.0" />
+		</element>
+		<element id="Task.input">
+			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+				<valueString value="Parameter" />
+			</extension>
+			<path value="Task.input" />
+		</element>
+		<element id="Task.input:message-name">
+			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+				<valueString value="Parameter" />
+			</extension>
+			<path value="Task.input" />
+			<sliceName value="message-name" />
+		</element>
+		<element id="Task.input:message-name.value[x]">
+			<path value="Task.input.value[x]" />
+			<fixedString value="test_v2" />
+		</element>
+		<element id="Task.input:correlation-key">
+			<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+				<valueString value="Parameter" />
+			</extension>
+			<path value="Task.input" />
+			<sliceName value="correlation-key" />
+			<max value="0" />
+		</element>
+		<element id="Task.input:integer-example">
+			<path value="Task.input" />
+			<sliceName value="integer-example" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="Task.input:integer-example.type">
+			<path value="Task.input.type" />
+			<binding>
+				<strength value="required" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/test|2.0" />
+			</binding>
+		</element>
+		<element id="Task.input:string-example.type.coding">
+			<path value="Task.input.type.coding" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="Task.input:string-example.system">
+			<path value="Task.input.type.coding.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/test|2.0" />
+		</element>
+		<element id="Task.input:string-example.type.coding.code">
+			<path value="Task.input.type.coding.code" />
+			<min value="1" />
+			<fixedCode value="integer-example" />
+		</element>
+		<element id="Task.input:string-example.value[x]">
+			<path value="Task.input.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="integer" />
+			</type>
+		</element>
+	</differential>
+</StructureDefinition>

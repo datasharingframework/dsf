@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
@@ -5,12 +20,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +39,7 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -58,8 +76,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
+		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList,
+				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(updatedBundle);
 	}
@@ -72,8 +90,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
+		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList,
+				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(id);
 	}
@@ -87,8 +105,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(allowList,
-				Map.of("identifier",
-						Collections.singletonList("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
+				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(outcome);
 	}
@@ -109,8 +126,9 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		newS.setKind(StructureDefinitionKind.RESOURCE);
 		newS.setAbstract(false);
 		newS.setType("Task");
-		newS.setBaseDefinition("http://dsf.dev/fhir/StructureDefinition/task-base");
+		newS.setBaseDefinition("http://dsf.dev/fhir/StructureDefinition/task");
 		newS.setDerivation(TypeDerivationRule.CONSTRAINT);
+		newS.setDate(new Date());
 		ElementDefinition diff = newS.getDifferential().addElement();
 		diff.setId("Task.instantiatesUri");
 		diff.setPath("Task.instantiatesUri");
@@ -182,8 +200,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		Bundle rBundle = getWebserviceClient().postBundle(bundle);
 
-		checkReturnBundle(BundleType.TRANSACTIONRESPONSE, rBundle, bundle.getEntry().size(), Arrays.asList("200 OK",
-				"201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
+		checkReturnBundle(BundleType.TRANSACTIONRESPONSE, rBundle, bundle.getEntry().size(),
+				List.of("200 OK", "201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
 
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 		try (Connection connection = dataSource.getConnection();
@@ -206,8 +224,8 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		Bundle rBundle = getWebserviceClient().postBundle(bundle);
 
-		checkReturnBundle(BundleType.BATCHRESPONSE, rBundle, bundle.getEntry().size(), Arrays.asList("200 OK",
-				"201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
+		checkReturnBundle(BundleType.BATCHRESPONSE, rBundle, bundle.getEntry().size(),
+				List.of("200 OK", "201 Created", "200 OK", "200 OK", "200 OK", "200 OK", "200 OK", "404 Not Found"));
 
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 		try (Connection connection = dataSource.getConnection();
@@ -277,8 +295,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 	private void checkReturnBundle(BundleType type, Bundle rBundle, int expectedEntrySize, List<String> expectedStatus)
 	{
-		logger.debug("Return Bundle:\n{}",
-				fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(rBundle));
+		logger.debug("Return Bundle:\n{}", newJsonParser().setPrettyPrint(true).encodeResourceToString(rBundle));
 
 		assertNotNull(rBundle);
 		assertEquals(type, rBundle.getType());
@@ -316,7 +333,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		Bundle rBundle = getWebserviceClient().postBundle(bundle);
 
 		checkReturnBundle(BundleType.BATCHRESPONSE, rBundle, bundle.getEntry().size(),
-				Arrays.asList("200 OK", "405 Method Not Allowed"));
+				List.of("200 OK", "405 Method Not Allowed"));
 
 		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
 		try (Connection connection = dataSource.getConnection();
@@ -355,5 +372,55 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		update.setResource(updatePatient);
 
 		return bundle;
+	}
+
+	@Test
+	public void createBundleInBundle1() throws Exception
+	{
+		StructureDefinition sd = readTestBundleProfile("test-bundle-profile1.xml");
+		getWebserviceClient().create(sd);
+
+		Bundle b = new Bundle().setType(BundleType.BATCH);
+		b.getMeta().addProfile(sd.getUrl() + "|" + sd.getVersion());
+
+		b.addEntry().setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.GET).setUrl("Conset"));
+		b.addEntry().setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.GET).setUrl("Condition"));
+
+		getReadAccessHelper().addAll(b);
+		Bundle created = getWebserviceClient().create(b);
+
+		assertNotNull(created);
+		assertNotNull(created.getIdElement());
+		assertNotNull(created.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void createBundleInBundle2() throws Exception
+	{
+		StructureDefinition sd = readTestBundleProfile("test-bundle-profile2.xml");
+		getWebserviceClient().create(sd);
+
+		Bundle b = new Bundle().setType(BundleType.BATCHRESPONSE);
+		b.getMeta().addProfile(sd.getUrl() + "|" + sd.getVersion());
+
+		BundleEntryComponent e = b.addEntry();
+		e.setResource(new Bundle().setType(BundleType.SEARCHSET).setTotal(0)
+				.addLink(new BundleLinkComponent().setRelation("self").setUrl("Medication")));
+		e.getResponse().setStatus("200");
+
+		getReadAccessHelper().addAll(b);
+		Bundle created = getWebserviceClient().create(b);
+
+		assertNotNull(created);
+		assertNotNull(created.getIdElement());
+		assertNotNull(created.getIdElement().getIdPart());
+	}
+
+	private StructureDefinition readTestBundleProfile(String bundleFile) throws IOException
+	{
+		try (InputStream in = Files.newInputStream(Paths.get("src/test/resources/integration/bundle", bundleFile)))
+		{
+			return fhirContext.newXmlParser().parseResource(StructureDefinition.class, in);
+		}
 	}
 }

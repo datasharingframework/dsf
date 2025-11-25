@@ -1,9 +1,24 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -37,7 +52,7 @@ public class HistoryDaoTest extends AbstractDbTest
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
-			DockerImageName.parse("postgres:15"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
+			DockerImageName.parse("postgres:18"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
 			CHANGE_LOG_PARAMETERS, true);
 
 	@Rule
@@ -66,7 +81,7 @@ public class HistoryDaoTest extends AbstractDbTest
 	private final OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
 			fhirContext);
 	private final HistoryDao dao = new HistroyDaoJdbc(defaultDataSource, fhirContext,
-			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext));
+			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext, DATABASE_USERS_GROUP));
 	private final HistoryIdentityFilterFactory filterFactory = new HistoryIdentityFilterFactoryImpl();
 
 	@Test
@@ -80,7 +95,7 @@ public class HistoryDaoTest extends AbstractDbTest
 
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilters(TestOrganizationIdentity.local(createdOrganization)),
-				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter());
+				PageAndCount.from(1, 1000), List.of(new AtParameter()), new SinceParameter());
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -99,8 +114,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
-				Organization.class);
+				PageAndCount.from(1, 1000), List.of(new AtParameter()), new SinceParameter(), Organization.class);
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -119,8 +133,8 @@ public class HistoryDaoTest extends AbstractDbTest
 		History history = dao.readHistory(
 				filterFactory.getIdentityFilter(TestOrganizationIdentity.local(createdOrganization),
 						Organization.class),
-				PageAndCount.from(1, 1000), Collections.singletonList(new AtParameter()), new SinceParameter(),
-				Organization.class, UUID.fromString(createdOrganization.getIdElement().getIdPart()));
+				PageAndCount.from(1, 1000), List.of(new AtParameter()), new SinceParameter(), Organization.class,
+				UUID.fromString(createdOrganization.getIdElement().getIdPart()));
 
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());

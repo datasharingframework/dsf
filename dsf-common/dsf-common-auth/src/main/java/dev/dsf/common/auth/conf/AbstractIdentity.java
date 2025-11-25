@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth.conf;
 
 import java.security.cert.X509Certificate;
@@ -10,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 
@@ -17,6 +33,7 @@ public abstract class AbstractIdentity implements Identity
 {
 	private final boolean localIdentity;
 	private final Organization organization;
+	private final Endpoint endpoint;
 	private final Set<DsfRole> dsfRoles = new HashSet<>();
 	private final X509Certificate certificate;
 
@@ -25,16 +42,19 @@ public abstract class AbstractIdentity implements Identity
 	 *            <code>true</code> if this is a local identity
 	 * @param organization
 	 *            not <code>null</code>
+	 * @param endpoint
+	 *            may be <code>null</code>
 	 * @param dsfRoles
 	 *            may be <code>null</code>
 	 * @param certificate
 	 *            may be <code>null</code>
 	 */
-	public AbstractIdentity(boolean localIdentity, Organization organization, Collection<? extends DsfRole> dsfRoles,
-			X509Certificate certificate)
+	public AbstractIdentity(boolean localIdentity, Organization organization, Endpoint endpoint,
+			Collection<? extends DsfRole> dsfRoles, X509Certificate certificate)
 	{
 		this.localIdentity = localIdentity;
 		this.organization = Objects.requireNonNull(organization, "organization");
+		this.endpoint = endpoint;
 
 		if (dsfRoles != null)
 			this.dsfRoles.addAll(dsfRoles);
@@ -82,7 +102,7 @@ public abstract class AbstractIdentity implements Identity
 	@Override
 	public boolean hasDsfRole(DsfRole dsfRole)
 	{
-		return dsfRoles.contains(dsfRole);
+		return dsfRoles.stream().anyMatch(r -> r.matches(dsfRole));
 	}
 
 	@Override
@@ -90,5 +110,17 @@ public abstract class AbstractIdentity implements Identity
 	{
 		// null if login via OIDC
 		return Optional.ofNullable(certificate);
+	}
+
+	@Override
+	public Optional<Endpoint> getEndpoint()
+	{
+		return Optional.ofNullable(endpoint);
+	}
+
+	@Override
+	public Optional<String> getEndpointIdentifierValue()
+	{
+		return getEndpoint().flatMap(e -> getIdentifierValue(e::getIdentifier, ENDPOINT_IDENTIFIER_SYSTEM));
 	}
 }

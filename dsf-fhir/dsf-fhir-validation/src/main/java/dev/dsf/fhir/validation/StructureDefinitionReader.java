@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.validation;
 
 import java.io.IOException;
@@ -7,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -15,12 +29,16 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class StructureDefinitionReader
 {
+	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionReader.class);
+
 	private static final String VERSION_PATTERN_STRING1 = "#{version}";
 	private static final Pattern VERSION_PATTERN1 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING1));
 	// ${...} pattern to be backwards compatible
@@ -57,12 +75,12 @@ public class StructureDefinitionReader
 
 	public List<StructureDefinition> readXml(Path... xmlPaths)
 	{
-		return readXml(Arrays.asList(xmlPaths));
+		return readXml(List.of(xmlPaths));
 	}
 
 	public List<StructureDefinition> readXml(String... xmlOnClassPaths)
 	{
-		return readXmlFromClassPath(Arrays.asList(xmlOnClassPaths));
+		return readXmlFromClassPath(List.of(xmlOnClassPaths));
 	}
 
 	public List<StructureDefinition> readXml(List<Path> xmlPaths)
@@ -94,6 +112,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = Files.newInputStream(xmlPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlPath);
+
 			return context.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
 		catch (DataFormatException | IOException e)
@@ -106,6 +127,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = Files.newInputStream(xmlPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlPath);
+
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
 			read = replaceVersionAndDate(read, version, date);
 
@@ -140,6 +164,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = StructureDefinitionReader.class.getResourceAsStream(xmlOnClassPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlOnClassPath);
+
 			return context.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
 		catch (DataFormatException | IOException e)
@@ -152,6 +179,9 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = StructureDefinitionReader.class.getResourceAsStream(xmlOnClassPath))
 		{
+			if (in == null)
+				logger.warn("File {} not found", xmlOnClassPath);
+
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
 			read = replaceVersionAndDate(read, version, date);
 

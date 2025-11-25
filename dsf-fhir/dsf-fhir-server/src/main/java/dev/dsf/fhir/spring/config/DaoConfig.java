@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.spring.config;
 
 import javax.sql.DataSource;
@@ -8,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import dev.dsf.common.db.DataSourceWithLogger;
+import dev.dsf.common.db.logging.DataSourceWithLogger;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.BundleDao;
@@ -33,6 +48,7 @@ import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
 import dev.dsf.fhir.dao.ReadAccessDao;
 import dev.dsf.fhir.dao.ResearchStudyDao;
+import dev.dsf.fhir.dao.StatisticsDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.SubscriptionDao;
 import dev.dsf.fhir.dao.TaskDao;
@@ -61,6 +77,7 @@ import dev.dsf.fhir.dao.jdbc.QuestionnaireDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.QuestionnaireResponseDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ReadAccessDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.StatisticsDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.SubscriptionDaoJdbc;
@@ -121,10 +138,11 @@ public class DaoConfig
 		return new ActivityDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(destroyMethod = "stopLargeObjectUnlinker")
 	public BinaryDao binaryDao()
 	{
-		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				propertiesConfig.getDbUsersGroup());
 	}
 
 	@Bean
@@ -299,5 +317,11 @@ public class DaoConfig
 	public ReadAccessDao readAccessDao()
 	{
 		return new ReadAccessDaoJdbc(dataSource());
+	}
+
+	@Bean
+	public StatisticsDao statisticsDao()
+	{
+		return new StatisticsDaoJdbc(dataSource());
 	}
 }

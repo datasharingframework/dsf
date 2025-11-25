@@ -1,0 +1,253 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class PluginTestExecutor
+{
+	private static final Logger logger = LoggerFactory.getLogger(PluginTestExecutor.class);
+
+	private static final class TestAssertException extends RuntimeException
+	{
+		private static final long serialVersionUID = 1L;
+
+		public TestAssertException(String message)
+		{
+			super(message);
+		}
+	}
+
+	@FunctionalInterface
+	public interface RunnableWithException
+	{
+		void run() throws Exception;
+	}
+
+	public static final void execute(Object testClass, Consumer<String> addTestSucceededToStartTask,
+			Consumer<String> addTestFailedToStartTask, Runnable updateStartTask, Function<Exception, Exception> onError,
+			Object testMethodArg0, Object testMethodArg1, Object... testMethodArgs) throws Exception
+	{
+		List<Exception> errorsToThrow = Arrays.stream(testClass.getClass().getDeclaredMethods())
+				.filter(m -> m.getAnnotationsByType(PluginTest.class).length == 1)
+				.filter(m -> m.getParameterCount() <= testMethodArgs.length + 2).map(m ->
+				{
+					try
+					{
+						logger.info("Executing test method {}.{} ...", testClass.getClass().getName(), m.getName());
+
+						Class<?>[] parameterTypes = m.getParameterTypes();
+						Object[] values = Arrays.stream(m.getParameterTypes()).flatMap(parameterType -> Stream
+								.concat(Stream.of(testMethodArg0, testMethodArg1), Arrays.stream(testMethodArgs))
+								.filter(value -> parameterType.isAssignableFrom(value.getClass())).findFirst().stream())
+								.toArray();
+
+						if (values.length != parameterTypes.length)
+							throw new IllegalArgumentException(
+									"One or more parameters of test method '" + m.getName() + "' not supported");
+
+						m.invoke(testClass, values);
+
+						logger.info("Executing test method {}.{} [succeeded]", testClass.getClass().getName(),
+								m.getName());
+
+						addTestSucceededToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
+
+						return null;
+					}
+					catch (InvocationTargetException e)
+					{
+						if (e.getCause() instanceof TestAssertException t)
+						{
+							String location = t.getStackTrace() != null && t.getStackTrace().length > 1
+									? (t.getStackTrace()[1].getClassName() + ":" + t.getStackTrace()[1].getLineNumber())
+									: "?";
+							logger.warn("Executing test method {}.{} [failed] - {} at {}",
+									testClass.getClass().getName(), m.getName(), t.getMessage(), location);
+						}
+						else
+							logger.error("Executing test method {}.{} [error] - {}: {}", testClass.getClass().getName(),
+									m.getName(), e.getClass().getName(), e.getMessage(), e);
+
+						addTestFailedToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
+
+						return onError.apply(e);
+					}
+					catch (Exception e)
+					{
+						logger.error("Executing test method {}.{} [error] - {}: {}", testClass.getClass().getName(),
+								m.getName(), e.getClass().getName(), e.getMessage(), e);
+
+						addTestFailedToStartTask.accept(testClass.getClass().getName() + "." + m.getName());
+
+						return onError.apply(e);
+					}
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+
+		try
+		{
+			updateStartTask.run();
+		}
+		finally
+		{
+			if (!errorsToThrow.isEmpty())
+			{
+				Exception error = errorsToThrow.get(0);
+
+				for (int i = 1; i < errorsToThrow.size(); i++)
+					error.addSuppressed(errorsToThrow.get(i));
+
+				throw error;
+			}
+		}
+	}
+
+	public static void expectNotNull(Object actual)
+	{
+		if (actual == null)
+			throw new TestAssertException("Object is null, expected not null");
+	}
+
+	public static void expectNull(Object actual)
+	{
+		if (actual != null)
+			throw new TestAssertException(actual.getClass().getSimpleName() + " is not null, expected null");
+	}
+
+	public static void expectTrue(boolean actual)
+	{
+		if (!actual)
+			throw new TestAssertException("Boolean value is false, expected true");
+	}
+
+	public static void expectFalse(boolean actual)
+	{
+		if (actual)
+			throw new TestAssertException("Boolean value is true, expected false");
+	}
+
+	public static void expectSame(Object expected, Object actual)
+	{
+		if (!Objects.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("Object", Objects.toString(expected), Objects.toString(actual));
+	}
+
+	public static void expectSame(byte expected, byte actual)
+	{
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("byte", Objects.toString(expected), Objects.toString(actual));
+	}
+
+	public static void expectSame(int expected, int actual)
+	{
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("int", Objects.toString(expected), Objects.toString(actual));
+	}
+
+	public static void expectSame(long expected, long actual)
+	{
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("long", Objects.toString(expected), Objects.toString(actual));
+	}
+
+	public static void expectSame(float expected, float actual)
+	{
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("float", Objects.toString(expected), Objects.toString(actual));
+	}
+
+	public static void expectSame(double expected, double actual)
+	{
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("double", Objects.toString(expected), Objects.toString(actual));
+	}
+
+	public static void expectSame(char expected, char actual)
+	{
+		if (expected != actual)
+			throw createTestAssertExceptionNotSame("char", Objects.toString(expected), Objects.toString(actual));
+	}
+
+	public static void expectSame(byte[] expected, byte[] actual)
+	{
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("byte[]", Arrays.toString(expected), Arrays.toString(actual));
+	}
+
+	public static void expectSame(int[] expected, int[] actual)
+	{
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("int[]", Arrays.toString(expected), Arrays.toString(actual));
+	}
+
+	public static void expectSame(long[] expected, long[] actual)
+	{
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("long[]", Arrays.toString(expected), Arrays.toString(actual));
+	}
+
+	public static void expectSame(float[] expected, float[] actual)
+	{
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("float[]", Arrays.toString(expected), Arrays.toString(actual));
+	}
+
+	public static void expectSame(double[] expected, double[] actual)
+	{
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("double[]", Arrays.toString(expected), Arrays.toString(actual));
+	}
+
+	public static void expectSame(char[] expected, char[] actual)
+	{
+		if (!Arrays.equals(expected, actual))
+			throw createTestAssertExceptionNotSame("char[]", Arrays.toString(expected), Arrays.toString(actual));
+	}
+
+	private static TestAssertException createTestAssertExceptionNotSame(String type, String expected, String actual)
+	{
+		throw new TestAssertException(
+				"Tested " + type + " is not same as expected [expected: " + expected + ", actual: " + actual + "]");
+	}
+
+	public static void expectException(Class<?> expectedException, RunnableWithException run)
+	{
+		Objects.requireNonNull(expectedException, "expectedException");
+		Objects.requireNonNull(run, "run");
+
+		try
+		{
+			run.run();
+		}
+		catch (Exception e)
+		{
+			if (!expectedException.isInstance(e))
+				throw new TestAssertException("Expected " + expectedException.getName() + " but caught "
+						+ e.getClass().getName()
+						+ (e.getMessage() != null && !e.getMessage().isBlank() ? " (" + e.getMessage() + ")" : ""));
+		}
+	}
+}

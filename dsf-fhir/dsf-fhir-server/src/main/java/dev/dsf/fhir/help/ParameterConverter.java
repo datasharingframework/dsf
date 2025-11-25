@@ -1,8 +1,22 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.help;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
-import dev.dsf.fhir.adapter.AbstractAdapter;
+import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import jakarta.ws.rs.WebApplicationException;
@@ -145,9 +159,9 @@ public class ParameterConverter
 	{
 		Map<String, String> parameters = new HashMap<>();
 		if (pretty)
-			parameters.put(AbstractAdapter.PRETTY, "true");
+			parameters.put(FhirAdapter.PRETTY, "true");
 		if (summaryMode != null)
-			parameters.put(AbstractAdapter.SUMMARY, summaryMode.toString());
+			parameters.put(FhirAdapter.SUMMARY, summaryMode.toString());
 
 		return new MediaType(type, subtype, parameters);
 	}
@@ -176,7 +190,7 @@ public class ParameterConverter
 
 	public Integer getFirstInt(Map<String, List<String>> queryParameters, String key)
 	{
-		List<String> listForKey = queryParameters.getOrDefault(key, Collections.emptyList());
+		List<String> listForKey = queryParameters.getOrDefault(key, List.of());
 		if (listForKey.isEmpty())
 			return null;
 		else

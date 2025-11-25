@@ -1,13 +1,27 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth.conf;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,6 +44,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
@@ -41,21 +56,37 @@ import org.springframework.beans.factory.InitializingBean;
 import dev.dsf.common.auth.DsfOpenIdCredentials;
 import dev.dsf.common.auth.conf.RoleConfig.Mapping;
 
-public abstract class AbstractIdentityProvider implements IdentityProvider, InitializingBean
+public abstract class AbstractIdentityProvider<R extends DsfRole> implements IdentityProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIdentityProvider.class);
 
 	private static final String PRACTITIONER_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/practitioner-identifier";
 
-	private final RoleConfig roleConfig;
+	private final RoleConfig<R> roleConfig;
 	private final Set<String> thumbprints;
 
-	public AbstractIdentityProvider(RoleConfig roleConfig)
+	/**
+	 * @param roleConfig
+	 *            not <code>null</code>
+	 */
+	public AbstractIdentityProvider(RoleConfig<R> roleConfig)
 	{
 		this.roleConfig = roleConfig;
 
 		thumbprints = roleConfig.getEntries().stream().map(Mapping::getThumbprints).flatMap(List::stream).distinct()
 				.collect(Collectors.toUnmodifiableSet());
+	}
+
+	private String getHost(String serverBaseUrl)
+	{
+		try
+		{
+			return new URI(serverBaseUrl).getHost();
+		}
+		catch (URISyntaxException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -81,7 +112,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 			List<String> rolesFromTokens = getRolesFromTokens(parsedIdToken, parsedAccessToken);
 			List<String> groupsFromTokens = getGroupsFromTokens(parsedIdToken, parsedAccessToken);
 
-			Set<DsfRole> dsfRoles = getDsfRolesFor(practitioner.get(), null, rolesFromTokens, groupsFromTokens);
+			Set<R> dsfRoles = getDsfRolesFor(practitioner.get(), null, rolesFromTokens, groupsFromTokens);
 			Set<Coding> practitionerRoles = getPractitionerRolesFor(practitioner.get(), null, rolesFromTokens,
 					groupsFromTokens);
 
@@ -92,8 +123,10 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 				return null;
 			}
 
-			return new PractitionerIdentityImpl(localOrganization.get(), dsfRoles, null, practitioner.get(),
-					practitionerRoles, credentials);
+			Optional<Endpoint> localEndpoint = getLocalEndpoint();
+
+			return new PractitionerIdentityImpl(localOrganization.get(), localEndpoint.orElse(null), dsfRoles, null,
+					practitioner.get(), practitionerRoles, credentials);
 		}
 		else
 		{
@@ -105,6 +138,8 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 	}
 
 	protected abstract Optional<Organization> getLocalOrganization();
+
+	protected abstract Optional<Endpoint> getLocalEndpoint();
 
 	protected final String getThumbprint(X509Certificate certificate)
 	{
@@ -170,7 +205,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		if (propertyValue != null && propertyValue instanceof Map m)
 			return m;
 		else
-			return Collections.emptyMap();
+			return Map.of();
 	}
 
 	private List<String> getPropertyArray(Map<String, Object> map, String property)
@@ -179,23 +214,22 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		if (propertyValue != null && propertyValue instanceof Object[] o)
 			return Arrays.stream(o).filter(v -> v instanceof String).map(v -> (String) v).toList();
 		else
-			return Collections.emptyList();
+			return List.of();
 	}
 
 	// thumbprint from certificate, token roles and groups from jwt
-	protected final Set<DsfRole> getDsfRolesFor(Practitioner practitioner, String thumbprint, List<String> tokenRoles,
+	protected final Set<R> getDsfRolesFor(Practitioner practitioner, String thumbprint, List<String> tokenRoles,
 			List<String> tokenGroups)
 	{
 		List<String> emailAddresses = practitioner.getIdentifier().stream()
 				.filter(i -> PRACTITIONER_IDENTIFIER_SYSTEM.equals(i.getSystem()) && i.hasValue())
 				.map(Identifier::getValue).toList();
 
-		Stream<DsfRole> r1 = emailAddresses.stream().map(roleConfig::getDsfRolesForEmail).flatMap(List::stream);
-		Stream<DsfRole> r2 = thumbprint == null ? Stream.empty()
-				: roleConfig.getDsfRolesForThumbprint(thumbprint).stream();
-		Stream<DsfRole> r3 = tokenRoles == null ? Stream.empty()
+		Stream<R> r1 = emailAddresses.stream().map(roleConfig::getDsfRolesForEmail).flatMap(List::stream);
+		Stream<R> r2 = thumbprint == null ? Stream.empty() : roleConfig.getDsfRolesForThumbprint(thumbprint).stream();
+		Stream<R> r3 = tokenRoles == null ? Stream.empty()
 				: tokenRoles.stream().map(roleConfig::getDsfRolesForTokenRole).flatMap(List::stream);
-		Stream<DsfRole> r4 = tokenGroups == null ? Stream.empty()
+		Stream<R> r4 = tokenGroups == null ? Stream.empty()
 				: tokenGroups.stream().map(roleConfig::getDsfRolesForTokenGroup).flatMap(List::stream);
 
 		return Stream.of(r1, r2, r3, r4).flatMap(Function.identity()).distinct().collect(Collectors.toSet());
@@ -228,23 +262,22 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		String iss = credentials.getStringClaimOrDefault("iss", "");
 		String sub = credentials.getStringClaimOrDefault("sub", "");
 
-		Set<String> emails = Stream.of(credentials.getStringClaimOrDefault("email", ""), toEmail(iss, sub))
-				.filter(m -> m != null).distinct().collect(Collectors.toSet());
+		String email = credentials.getStringClaimOrDefault("email", toEmail(iss, sub));
 
 		Stream<String> surname = Stream.of(credentials.getStringClaimOrDefault("family_name", ""));
 		Stream<String> givenNames = Stream.of(credentials.getStringClaimOrDefault("given_name", ""));
 
-		return toPractitioner(surname, givenNames, emails.stream());
+		return toPractitioner(surname, givenNames, email);
 	}
 
-	private Optional<Practitioner> toPractitioner(Stream<String> surname, Stream<String> givenNames,
-			Stream<String> emails)
+	private Optional<Practitioner> toPractitioner(Stream<String> surname, Stream<String> givenNames, String email)
 	{
 		Practitioner practitioner = new Practitioner();
 
-		emails.filter(e -> e != null).filter(e -> e.contains("@"))
-				.map(e -> new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(e))
-				.forEach(practitioner::addIdentifier);
+		if (email != null)
+			practitioner.addIdentifier(new Identifier().setSystem(PRACTITIONER_IDENTIFIER_SYSTEM).setValue(email));
+		else
+			return Optional.empty();
 
 		HumanName name = new HumanName();
 		name.setFamily(surname.collect(Collectors.joining(" ")));
@@ -259,14 +292,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		if (iss == null || sub == null || iss.isBlank() || sub.isBlank())
 			return null;
 
-		try
-		{
-			return sub + "@" + new URL(iss).getHost();
-		}
-		catch (MalformedURLException e)
-		{
-			return null;
-		}
+		return sub + "." + getHost(iss) + "@oidc.invalid";
 	}
 
 	protected final Optional<Practitioner> toPractitioner(X509Certificate certificate)
@@ -278,7 +304,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		if (!thumbprints.contains(thumbprint))
 			return Optional.empty();
 
-		return toJcaX509CertificateHolder(certificate).flatMap(this::toPractitioner);
+		return toJcaX509CertificateHolder(certificate).flatMap(ch -> toPractitioner(ch, thumbprint));
 	}
 
 	private Optional<JcaX509CertificateHolder> toJcaX509CertificateHolder(X509Certificate certificate)
@@ -296,7 +322,7 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		}
 	}
 
-	private Optional<Practitioner> toPractitioner(JcaX509CertificateHolder certificate)
+	private Optional<Practitioner> toPractitioner(JcaX509CertificateHolder certificate, String thumbprint)
 	{
 		X500Name subject = certificate.getSubject();
 		List<String> givennames = getValues(subject, BCStyle.GIVENNAME);
@@ -306,15 +332,16 @@ public abstract class AbstractIdentityProvider implements IdentityProvider, Init
 		List<String> email2 = getValues(subject, BCStyle.EmailAddress);
 
 		Extension subjectAlternativeNames = certificate.getExtension(Extension.subjectAlternativeName);
-		List<String> rfc822Names = subjectAlternativeNames == null ? Collections.emptyList()
+		List<String> rfc822Names = subjectAlternativeNames == null ? List.of()
 				: Stream.of(GeneralNames.getInstance(subjectAlternativeNames.getParsedValue()).getNames())
 						.filter(n -> n.getTagNo() == GeneralName.rfc822Name).map(GeneralName::getName)
 						.map(IETFUtils::valueToString).toList();
 
-		Stream<String> emails = Stream.concat(Stream.concat(email1.stream(), email2.stream()), rfc822Names.stream());
+		String email = Stream.of(email1.stream(), email2.stream(), rfc822Names.stream()).flatMap(Function.identity())
+				.findFirst().orElse(thumbprint + "@certificate.invalid");
 
 		return toPractitioner(!surnames.isEmpty() ? surnames.stream() : commonName.stream(), givennames.stream(),
-				emails);
+				email);
 	}
 
 	private List<String> getValues(X500Name name, ASN1ObjectIdentifier attribute)

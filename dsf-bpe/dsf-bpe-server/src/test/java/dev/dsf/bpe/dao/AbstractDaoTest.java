@@ -1,4 +1,21 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.dao;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.AfterClass;
@@ -14,13 +31,13 @@ public class AbstractDaoTest extends AbstractDbTest
 {
 	public static final String DAO_DB_TEMPLATE_NAME = "dao_template";
 
-	protected static BasicDataSource defaultDataSource;
-	protected static BasicDataSource camundaDataSource;
+	protected static DataSource defaultDataSource;
+	protected static DataSource camundaDataSource;
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
-			DockerImageName.parse("postgres:15"), ROOT_USER, "bpe", "bpe_template", CHANGE_LOG_FILE,
-			CHANGE_LOG_PARAMETERS, true);
+			DockerImageName.parse("postgres:18"), ROOT_USER, "bpe", "bpe_template", BPE_CHANGE_LOG_FILE,
+			BPE_CHANGE_LOG_PARAMETERS, true);
 
 	@Rule
 	public final PostgresTemplateRule templateRule = new PostgresTemplateRule(liquibaseRule);
@@ -28,22 +45,22 @@ public class AbstractDaoTest extends AbstractDbTest
 	@BeforeClass
 	public static void beforeClass() throws Exception
 	{
-		defaultDataSource = createDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
+		defaultDataSource = createBpeDefaultDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
 				liquibaseRule.getDatabaseName());
-		defaultDataSource.start();
+		defaultDataSource.unwrap(BasicDataSource.class).start();
 
-		camundaDataSource = createCamundaDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
+		camundaDataSource = createBpeCamundaDataSource(liquibaseRule.getHost(), liquibaseRule.getMappedPort(5432),
 				liquibaseRule.getDatabaseName());
-		camundaDataSource.start();
+		camundaDataSource.unwrap(BasicDataSource.class).start();
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
 		if (defaultDataSource != null)
-			defaultDataSource.close();
+			defaultDataSource.unwrap(BasicDataSource.class).close();
 
 		if (camundaDataSource != null)
-			camundaDataSource.close();
+			camundaDataSource.unwrap(BasicDataSource.class).close();
 	}
 }

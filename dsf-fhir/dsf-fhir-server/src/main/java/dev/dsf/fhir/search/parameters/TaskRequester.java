@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.search.parameters;
 
 import java.sql.Array;
@@ -70,9 +85,16 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 				"task->'requester'->>'reference' = ?";
 			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
-				case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
-						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+				case CODE ->
+					"(" + IDENTIFIERS_SUBQUERY + " @> ?::jsonb OR task->'requester'->'identifier'->>'value' = ?)";
+				case CODE_AND_SYSTEM -> "(" + IDENTIFIERS_SUBQUERY
+						+ " @> ?::jsonb OR (task->'requester'->'identifier'->>'system' = ? AND task->'requester'->'identifier'->>'value' = ?))";
+				case SYSTEM ->
+					"(" + IDENTIFIERS_SUBQUERY + " @> ?::jsonb OR task->'requester'->'identifier'->>'system' = ?)";
+				case CODE_AND_NO_SYSTEM_PROPERTY -> "((SELECT count(*) FROM jsonb_array_elements("
+						+ IDENTIFIERS_SUBQUERY
+						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0"
+						+ " OR (task->'requester'->'identifier'->>'system' = NULL AND task->'requester'->'identifier'->>'value' = ?))";
 			};
 		};
 	}
@@ -80,7 +102,15 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	@Override
 	public int getSqlParameterCount()
 	{
-		return 1;
+		return switch (valueAndType.type)
+		{
+			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID -> 1;
+			case IDENTIFIER -> switch (valueAndType.identifier.type)
+			{
+				case CODE, SYSTEM, CODE_AND_NO_SYSTEM_PROPERTY -> 2;
+				case CODE_AND_SYSTEM -> 3;
+			};
+		};
 	}
 
 	@Override
@@ -89,38 +119,52 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	{
 		switch (valueAndType.type)
 		{
-			case ID:
+			case ID -> {
 				Array array = arrayCreator.apply("TEXT",
 						Arrays.stream(TARGET_RESOURCE_TYPE_NAMES).map(n -> n + "/" + valueAndType.id).toArray());
 				statement.setArray(parameterIndex, array);
-				break;
-			case RESOURCE_NAME_AND_ID:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
+			}
+
+			case RESOURCE_NAME_AND_ID, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
-				break;
-			case URL:
-				statement.setString(parameterIndex, valueAndType.url);
-				break;
-			case IDENTIFIER:
-			{
+
+			case URL -> statement.setString(parameterIndex, valueAndType.url);
+
+			case IDENTIFIER -> {
 				switch (valueAndType.identifier.type)
 				{
-					case CODE:
-						statement.setString(parameterIndex,
-								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
-						break;
-					case CODE_AND_SYSTEM:
-						statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.identifier.codeValue
-								+ "\", \"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
-					case CODE_AND_NO_SYSTEM_PROPERTY:
-						statement.setString(parameterIndex, valueAndType.identifier.codeValue);
-						break;
-					case SYSTEM:
-						statement.setString(parameterIndex,
-								"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
+					case CODE -> {
+						if (subqueryParameterIndex == 1)
+							statement.setString(parameterIndex,
+									"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+						else if (subqueryParameterIndex == 2)
+							statement.setString(parameterIndex, valueAndType.identifier.codeValue);
+					}
+
+					case CODE_AND_SYSTEM -> {
+						if (subqueryParameterIndex == 1)
+							statement.setString(parameterIndex, "[{\"system\": \"" + valueAndType.identifier.systemValue
+									+ "\", \"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+						else if (subqueryParameterIndex == 2)
+							statement.setString(parameterIndex, valueAndType.identifier.systemValue);
+						else if (subqueryParameterIndex == 3)
+							statement.setString(parameterIndex, valueAndType.identifier.codeValue);
+					}
+
+					case SYSTEM -> {
+						if (subqueryParameterIndex == 1)
+							statement.setString(parameterIndex,
+									"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
+						else if (subqueryParameterIndex == 2)
+							statement.setString(parameterIndex, valueAndType.identifier.systemValue);
+					}
+
+					case CODE_AND_NO_SYSTEM_PROPERTY -> {
+						if (subqueryParameterIndex == 1)
+							statement.setString(parameterIndex, valueAndType.identifier.codeValue);
+						else if (subqueryParameterIndex == 2)
+							statement.setString(parameterIndex, valueAndType.identifier.codeValue);
+					}
 				}
 			}
 		}
@@ -166,24 +210,19 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	{
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (resource.getRequester().getResource() instanceof Practitioner p)
-				return p.getIdentifier().stream()
+			return switch (resource.getRequester().getResource())
+			{
+				case Practitioner p -> p.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else if (resource.getRequester().getResource() instanceof Organization o)
-				return o.getIdentifier().stream()
+				case Organization o -> o.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else if (resource.getRequester().getResource() instanceof Patient p)
-				return p.getIdentifier().stream()
+				case Patient p -> p.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else if (resource.getRequester().getResource() instanceof PractitionerRole p)
-				return p.getIdentifier().stream()
+				case PractitionerRole r -> r.getIdentifier().stream()
 						.anyMatch(AbstractIdentifierParameter.identifierMatches(valueAndType.identifier));
-
-			else
-				return false;
+				default -> false;
+			} || AbstractIdentifierParameter.identifierMatches(valueAndType.identifier,
+					resource.getRequester().getIdentifier());
 		}
 		else
 		{

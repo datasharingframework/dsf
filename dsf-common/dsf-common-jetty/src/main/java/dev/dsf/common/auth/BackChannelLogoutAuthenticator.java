@@ -1,31 +1,48 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.security.AuthenticationState;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ServerAuthException;
 import org.eclipse.jetty.security.openid.OpenIdAuthenticator;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.Authentication.User;
+import org.eclipse.jetty.server.FormFields;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.Fields;
+import org.eclipse.jetty.util.Fields.Field;
+import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.JWTVerifier;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import dev.dsf.common.oidc.JwtVerifier;
+import dev.dsf.common.oidc.OidcClientException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionAttributeListener;
 import jakarta.servlet.http.HttpSessionBindingEvent;
@@ -36,16 +53,15 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 {
 	private static final Logger logger = LoggerFactory.getLogger(BackChannelLogoutAuthenticator.class);
 
-	private final DsfOpenIdConfiguration openIdConfiguration;
+	private final JwtVerifier jwtVerifier;
 	private final String ssoLogoutPath;
 
 	private final ConcurrentMap<String, HttpSession> sessionsBySub = new ConcurrentHashMap<>();
 	private final ConcurrentMap<String, HttpSession> sessionsBySid = new ConcurrentHashMap<>();
 
-	public BackChannelLogoutAuthenticator(DsfOpenIdConfiguration openIdConfiguration, String ssoLogoutPath)
+	public BackChannelLogoutAuthenticator(JwtVerifier jwtVerifier, String ssoLogoutPath)
 	{
-		Objects.requireNonNull(openIdConfiguration, "openIdConfiguration");
-		this.openIdConfiguration = openIdConfiguration;
+		this.jwtVerifier = Objects.requireNonNull(jwtVerifier, "jwtVerifier");
 
 		Objects.requireNonNull(ssoLogoutPath, "ssoLogoutPath");
 		if (!ssoLogoutPath.startsWith("/"))
@@ -55,145 +71,136 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 	}
 
 	@Override
-	public void setConfiguration(AuthConfiguration configuration)
+	public void setConfiguration(Configuration configuration)
 	{
 	}
 
 	@Override
-	public String getAuthMethod()
+	public String getAuthenticationType()
 	{
 		return "BACK_CHANNEL_LOGOUT";
 	}
 
-	public boolean isBackChannelLogoutRequest(ServletRequest request)
+	public boolean isBackChannelLogoutRequest(Request request)
 	{
-		final HttpServletRequest servletRequest = (HttpServletRequest) request;
+		return HttpMethod.POST.is(request.getMethod()) && ssoLogoutPath.equals(Request.getPathInContext(request))
+				&& isContentTypeFormEncoded(request);
+	}
 
-		return HttpMethod.POST.is(servletRequest.getMethod()) && ssoLogoutPath.equals(servletRequest.getPathInfo())
-				&& MimeTypes.Type.FORM_ENCODED.is(servletRequest.getContentType());
+	private boolean isContentTypeFormEncoded(Request request)
+	{
+		String contentType = request.getHeaders().get(HttpHeader.CONTENT_TYPE);
+		if (request.getLength() == 0 || StringUtil.isBlank(contentType))
+			return false;
+
+		String contentTypeWithoutCharset = MimeTypes.getContentTypeWithoutCharset(contentType);
+		MimeTypes.Type type = MimeTypes.CACHE.get(contentTypeWithoutCharset);
+
+		return type == MimeTypes.Type.FORM_ENCODED;
 	}
 
 	@Override
-	public void prepareRequest(ServletRequest request)
-	{
-		// nothing to do
-	}
-
-	@Override
-	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
+	public AuthenticationState validateRequest(Request request, Response response, Callback callback)
 			throws ServerAuthException
 	{
-		final HttpServletResponse servletResponse = (HttpServletResponse) response;
+		Fields formFields = FormFields.getFields(request);
+		Field logoutTokenField = formFields.get("logout_token");
+
+		if (logoutTokenField == null || logoutTokenField.getValues().size() != 1)
+		{
+			Response.writeError(request, response, callback, HttpStatus.FORBIDDEN_403);
+			return AuthenticationState.SEND_FAILURE;
+		}
 
 		try
 		{
-			String[] logoutTokens = request.getParameterValues("logout_token");
-			if (logoutTokens == null || logoutTokens.length != 1)
+			DecodedJWT jwt = jwtVerifier.verifyBackchannelLogout(logoutTokenField.getValue());
+
+			if (!jwt.getClaims().containsKey("sub") && !jwt.getClaims().containsKey("sid"))
 			{
-				servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
-				return Authentication.SEND_FAILURE;
+				logger.warn("Logout Token has no sub and no sid claim");
+				Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
+				return AuthenticationState.SEND_FAILURE;
 			}
 
-			Algorithm algorithm = Algorithm.RSA256(openIdConfiguration.getRsaKeyProvider());
-			JWTVerifier verifier = JWT.require(algorithm).withIssuer(openIdConfiguration.getIssuer())
-					.withAudience(openIdConfiguration.getClientId()).acceptLeeway(1).withClaim("events", (claim,
-							jwt) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
-					.build();
+			logger.debug("logout token claims: {}", jwt.getClaims());
 
-			try
-			{
-				DecodedJWT jwt = verifier.verify(logoutTokens[0]);
-				if (!jwt.getClaims().containsKey("sub") && !jwt.getClaims().containsKey("sid"))
-				{
-					logger.warn("Logout Token has no sub and no sid claim");
-					servletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
-					return Authentication.SEND_FAILURE;
-				}
+			String sub = jwt.getClaim("sub").asString();
+			String sid = jwt.getClaim("sid").asString();
 
-				logger.debug("logout token claims: {}", jwt.getClaims());
+			logger.debug("Invalidating session for sub/sid {}/{}", sub, sid);
 
-				String sub = jwt.getClaim("sub").asString();
-				String sid = jwt.getClaim("sid").asString();
+			HttpSession sessionBySub = sessionsBySub.get(sub);
+			if (sessionBySub != null)
+				sessionBySub.invalidate();
 
-				logger.debug("Invalidating session for sub/sid {}/{}", sub, sid);
+			// session will have been removed if found by sub and invalidated
+			HttpSession sessionBySid = sessionsBySid.get(sid);
+			if (sessionBySid != null)
+				sessionBySid.invalidate();
 
-				HttpSession sessionBySub = sessionsBySub.get(sub);
-				if (sessionBySub != null)
-					sessionBySub.invalidate();
-
-				// session will have been removed if found by sub and invalidated
-				HttpSession sessionBySid = sessionsBySid.get(sid);
-				if (sessionBySid != null)
-					sessionBySid.invalidate();
-
-				return Authentication.SEND_SUCCESS;
-			}
-			catch (JWTVerificationException e)
-			{
-				servletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return Authentication.SEND_FAILURE;
-			}
+			response.setStatus(HttpStatus.OK_200);
+			response.write(true, null, callback);
+			return AuthenticationState.SEND_SUCCESS;
 		}
-		catch (IOException e)
+		catch (JWTVerificationException | OidcClientException e)
 		{
-			throw new ServerAuthException(e);
+			logger.debug("Backchannel logout failed, sending 400", e);
+			logger.warn("Backchannel logout failed, sending 400: {} - {}", e.getClass().getName(), e.getMessage());
+
+			Response.writeError(request, response, callback, HttpStatus.BAD_REQUEST_400);
+			return AuthenticationState.SEND_FAILURE;
 		}
 	}
 
 	@Override
 	public void sessionCreated(HttpSessionEvent event)
 	{
-		if (openIdConfiguration.isBackChannelLogoutEnabled())
+		logger.debug("Session created, id: {}", event.getSession().getId());
+		logger.debug("Session created, claims: {}", event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS));
+
+		Object claimsAttribute = event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS);
+		if (claimsAttribute != null)
 		{
-			logger.debug("Session created, id: {}", event.getSession().getId());
-			logger.debug("Session created, claims: {}", event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS));
+			@SuppressWarnings("unchecked")
+			Map<String, Object> claims = (Map<String, Object>) claimsAttribute;
 
-			Object claimsAttribute = event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS);
-			if (claimsAttribute != null)
-			{
-				@SuppressWarnings("unchecked")
-				Map<String, Object> claims = (Map<String, Object>) claimsAttribute;
+			String sub = (String) claims.get("sub");
+			if (sub != null)
+				sessionsBySub.put(sub, event.getSession());
 
-				String sub = (String) claims.get("sub");
-				if (sub != null)
-					sessionsBySub.put(sub, event.getSession());
-
-				String sid = (String) claims.get("sid");
-				if (sid != null)
-					sessionsBySid.put(sid, event.getSession());
-			}
+			String sid = (String) claims.get("sid");
+			if (sid != null)
+				sessionsBySid.put(sid, event.getSession());
 		}
 	}
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent event)
 	{
-		if (openIdConfiguration.isBackChannelLogoutEnabled())
+		logger.debug("Session destroyed, id: {}", event.getSession().getId());
+		logger.debug("Session destroyed, claims: {}", event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS));
+
+		Object claimsAttribute = event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS);
+		if (claimsAttribute != null)
 		{
-			logger.debug("Session destroyed, id: {}", event.getSession().getId());
-			logger.debug("Session destroyed, claims: {}", event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS));
+			@SuppressWarnings("unchecked")
+			Map<String, Object> claims = (Map<String, Object>) claimsAttribute;
 
-			Object claimsAttribute = event.getSession().getAttribute(OpenIdAuthenticator.CLAIMS);
-			if (claimsAttribute != null)
-			{
-				@SuppressWarnings("unchecked")
-				Map<String, Object> claims = (Map<String, Object>) claimsAttribute;
+			String sub = (String) claims.get("sub");
+			if (sub != null)
+				sessionsBySub.remove(sub, event.getSession());
 
-				String sub = (String) claims.get("sub");
-				if (sub != null)
-					sessionsBySub.remove(sub, event.getSession());
-
-				String sid = (String) claims.get("sid");
-				if (sid != null)
-					sessionsBySid.remove(sid, event.getSession());
-			}
+			String sid = (String) claims.get("sid");
+			if (sid != null)
+				sessionsBySid.remove(sid, event.getSession());
 		}
 	}
 
 	@Override
 	public void attributeAdded(HttpSessionBindingEvent event)
 	{
-		if (openIdConfiguration.isBackChannelLogoutEnabled() && OpenIdAuthenticator.CLAIMS.equals(event.getName()))
+		if (OpenIdAuthenticator.CLAIMS.equals(event.getName()))
 		{
 			logger.debug("Attribute added, Session id: {}", event.getSession().getId());
 			logger.debug("Attribute added, claims: {}", event.getValue());
@@ -214,7 +221,7 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 	@Override
 	public void attributeRemoved(HttpSessionBindingEvent event)
 	{
-		if (openIdConfiguration.isBackChannelLogoutEnabled() && OpenIdAuthenticator.CLAIMS.equals(event.getName()))
+		if (OpenIdAuthenticator.CLAIMS.equals(event.getName()))
 		{
 			logger.debug("Attribute removed, Session id: {}", event.getSession().getId());
 			logger.debug("Attribute removed, claims: {}", event.getValue());
@@ -235,7 +242,7 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 	@Override
 	public void attributeReplaced(HttpSessionBindingEvent event)
 	{
-		if (openIdConfiguration.isBackChannelLogoutEnabled() && OpenIdAuthenticator.CLAIMS.equals(event.getName()))
+		if (OpenIdAuthenticator.CLAIMS.equals(event.getName()))
 		{
 			logger.debug("Attribute replaced, Session id: {}", event.getSession().getId());
 			logger.debug("Attribute replaced, claims: {}", event.getValue());
@@ -251,12 +258,5 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 			if (sid != null)
 				sessionsBySid.put(sid, event.getSession());
 		}
-	}
-
-	@Override
-	public boolean secureResponse(ServletRequest request, ServletResponse response, boolean mandatory,
-			User validatedUser) throws ServerAuthException
-	{
-		return request.isSecure();
 	}
 }

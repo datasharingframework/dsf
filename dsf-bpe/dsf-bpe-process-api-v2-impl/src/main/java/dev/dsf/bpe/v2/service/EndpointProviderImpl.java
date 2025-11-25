@@ -1,0 +1,176 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.v2.service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
+
+public class EndpointProviderImpl extends AbstractResourceProvider implements EndpointProvider
+{
+	private static final Logger logger = LoggerFactory.getLogger(EndpointProviderImpl.class);
+
+	public EndpointProviderImpl(Supplier<DsfClient> localDsfClient, String localEndpointAddress)
+	{
+		super(localDsfClient, localEndpointAddress);
+	}
+
+	@Override
+	public Optional<Endpoint> getLocalEndpoint()
+	{
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(Endpoint.class,
+				Map.of("status", List.of("active"), "address", List.of(localEndpointAddress)));
+
+		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getEntry().size() != 1
+				|| resultBundle.getEntryFirstRep().getResource() == null
+				|| !(resultBundle.getEntryFirstRep().getResource() instanceof Endpoint))
+		{
+			logger.warn("No active (or more than one) Endpoint found with address '{}'", localEndpointAddress);
+			return Optional.empty();
+		}
+
+		return Optional.of((Endpoint) resultBundle.getEntryFirstRep().getResource());
+	}
+
+	@Override
+	public String getLocalEndpointAddress()
+	{
+		return localEndpointAddress;
+	}
+
+	@Override
+	public Optional<Endpoint> getEndpoint(Identifier endpointIdentifier)
+	{
+		if (endpointIdentifier == null)
+		{
+			logger.debug("Endpoint identifier is null");
+			return Optional.empty();
+		}
+
+		String endpointIdSp = toSearchParameter(endpointIdentifier);
+
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(Endpoint.class,
+				Map.of("status", List.of("active"), "identifier", List.of(endpointIdSp)));
+
+		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1
+				|| resultBundle.getEntryFirstRep().getResource() == null
+				|| !(resultBundle.getEntryFirstRep().getResource() instanceof Endpoint))
+		{
+			logger.warn("No active (or more than one) Endpoint found with identifier '{}'", endpointIdSp);
+			return Optional.empty();
+		}
+
+		return Optional.of((Endpoint) resultBundle.getEntryFirstRep().getResource());
+	}
+
+	@Override
+	public Optional<Endpoint> getEndpoint(Identifier parentOrganizationIdentifier,
+			Identifier memberOrganizationIdentifier, Coding memberOrganizationRole)
+	{
+		if (parentOrganizationIdentifier == null)
+		{
+			logger.debug("Parent organization identifier is null");
+			return Optional.empty();
+		}
+		else if (memberOrganizationIdentifier == null)
+		{
+			logger.debug("Member organization identifier is null");
+			return Optional.empty();
+		}
+		else if (memberOrganizationRole == null)
+		{
+			logger.debug("Member organization role is null");
+			return Optional.empty();
+		}
+
+		String parentOrganizationIdSp = toSearchParameter(parentOrganizationIdentifier);
+		String memberOrganizationIdSp = toSearchParameter(memberOrganizationIdentifier);
+		String memberOrganizationRoleSp = toSearchParameter(memberOrganizationRole);
+
+		Bundle resultBundle = localDsfClient.get().searchWithStrictHandling(OrganizationAffiliation.class,
+				Map.of("active", List.of("true"), "primary-organization:identifier", List.of(parentOrganizationIdSp),
+						"participating-organization:identifier", List.of(memberOrganizationIdSp), "role",
+						List.of(memberOrganizationRoleSp), "_include", List.of("OrganizationAffiliation:endpoint")));
+
+		if (resultBundle == null || resultBundle.getEntry() == null || resultBundle.getTotal() != 1
+				|| resultBundle.getEntryFirstRep().getResource() == null
+				|| !(resultBundle.getEntryFirstRep().getResource() instanceof OrganizationAffiliation))
+		{
+			logger.warn(
+					"No active (or more than one) OrganizationAffiliation found with primary-organization identifier '{}', participating-organization identifier '{}' and role '{}'",
+					parentOrganizationIdSp, memberOrganizationIdSp, memberOrganizationRoleSp);
+			return Optional.empty();
+		}
+		else if (getActiveEndpointFromInclude(resultBundle).count() != 1)
+		{
+			logger.warn(
+					"No active Endpoint found for active OrganizationAffiliation with primary-organization identifier '{}', participating-organization identifier '{}' and role '{}'",
+					parentOrganizationIdSp, memberOrganizationIdSp, memberOrganizationRoleSp);
+			return Optional.empty();
+		}
+
+		return getActiveEndpointFromInclude(resultBundle).findFirst();
+	}
+
+	private Stream<Endpoint> getActiveEndpointFromInclude(Bundle resultBundle)
+	{
+		return resultBundle.getEntry().stream().filter(BundleEntryComponent::hasSearch)
+				.filter(e -> SearchEntryMode.INCLUDE.equals(e.getSearch().getMode()))
+				.filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.filter(r -> r instanceof Endpoint).map(r -> (Endpoint) r)
+				.filter(e -> EndpointStatus.ACTIVE.equals(e.getStatus()));
+	}
+
+	@Override
+	public List<Endpoint> getEndpoints(Identifier parentOrganizationIdentifier, Coding memberOrganizationRole)
+	{
+		if (parentOrganizationIdentifier == null)
+		{
+			logger.debug("Parent organization identifier is null");
+			return List.of();
+		}
+		else if (memberOrganizationRole == null)
+		{
+			logger.debug("Member organization role is null");
+			return List.of();
+		}
+
+		String parentOrganizationIdSp = toSearchParameter(parentOrganizationIdentifier);
+		String memberOrganizationRoleSp = toSearchParameter(memberOrganizationRole);
+
+		Map<String, List<String>> parameters = Map.of("active", List.of("true"), "primary-organization:identifier",
+				List.of(parentOrganizationIdSp), "role", List.of(memberOrganizationRoleSp), "_include",
+				List.of("OrganizationAffiliation:endpoint"));
+
+		return search(OrganizationAffiliation.class, parameters, SearchEntryMode.INCLUDE, Endpoint.class,
+				e -> EndpointStatus.ACTIVE.equals(e.getStatus()));
+	}
+}

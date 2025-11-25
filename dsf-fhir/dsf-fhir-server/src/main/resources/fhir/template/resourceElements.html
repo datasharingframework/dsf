@@ -1,0 +1,137 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource-data">
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="systemsAndValues" th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<ul th:if="${systemsAndValues}">
+				<li th:each="sv : ${systemsAndValues}">
+					<th:block th:if="${sv.system != null and sv.value != null}">[[${sv.system}]] | <b>[[${sv.value}]]</b></th:block>
+					<th:block th:if="${sv.system == null and sv.value != null}"><b>[[${sv.value}]]</b></th:block>
+					<th:block th:if="${sv.system != null and sv.value == null}">[[${sv.system}]] |</th:block>
+				</li>
+			</ul>
+		</div>
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="systemAndValue" th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<span th:if="${systemAndValue}">
+				<th:block th:if="${systemAndValue.system != null and systemAndValue.value != null}">[[${systemAndValue.system}]] | <b>[[${systemAndValue.value}]]</b></th:block>
+				<th:block th:if="${systemAndValue.system == null and systemAndValue.value != null}"><b>[[${systemAndValue.value}]]</b></th:block>
+				<th:block th:if="${systemAndValue.system != null and systemAndValue.value == null}">[[${systemAndValue.system}]] |</th:block>
+			</span>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="identifier">
+			<label>Identifier</label>
+			<ul>
+				<li th:each="i : ${identifier}">
+					<th:block th:if="${i.system != null and i.value != null}">[[${i.system}]] | <b>[[${i.value}]]</b></th:block>
+					<th:block th:if="${i.system == null and i.value != null}"><b>[[${i.value}]]</b></th:block>
+					<th:block th:if="${i.system != null and i.value == null}">[[${i.system}]] |</th:block>
+				</li>
+			</ul>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="quantity"  th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<span th:if="${quantity}">
+				<th:block th:if="${quantity.value != null and quantity.system != null and quantity.code != null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]] ([[${quantity.system}]] | [[${quantity.code}]])</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system != null and quantity.code != null and quantity.unit == null}">[[${quantity.value}]] [[${quantity.code}]] ([[${quantity.system}]])</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system != null and quantity.code == null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]] ([[${quantity.system}]])</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code != null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]]</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code != null and quantity.unit == null}">[[${quantity.value}]] [[${quantity.code}]]</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code == null and quantity.unit != null}">[[${quantity.value}]] [[${quantity.unit}]]</th:block>
+				<th:block th:if="${quantity.value != null and quantity.system == null and quantity.code == null and quantity.unit == null}">[[${quantity.value}]]</th:block>
+			</span>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="id" th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<a href="#" title="Open" th:href="${id.href}" th:title="'Open ' + ${id.resourceType}" th:text="${id.value}" th:if="${id}">id</a>
+		</div>
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="ids" th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<ul>
+				<li th:each="id : ${ids}">
+					<a href="#" title="Open" th:href="${id.href}" th:title="'Open ' + ${id.resourceType}" th:text="${id.value}">id</a>
+				</li>
+			</ul>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="string" th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<span th:if="${string}" th:text="${string}">string</span>
+		</div>
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="strings" th:assert="${label}">
+			<label th:text="${label}">label</label>
+			<ul th:if="${strings}">
+				<li th:each="s : ${strings}" th:text="${s}">string</li>
+			</ul>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="status">
+			<label>Status</label>
+			<span th:if="${resource.status}" th:text="${resource.status}">status</span>
+		</div>
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="active">
+			<label>Active</label>
+			<span th:if="${resource.active}" th:text="${resource.active}">active</span>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="addresses">
+			<label>Address</label>
+			<ul th:if="${addresses}" th:each="a : ${addresses}">
+				<li class="address">
+					<p th:each="l : ${a.line}" th:if="${l}" th:text="${l}">line</p>
+					<p th:if="${a.postalCodeAndCity}" th:text="${a.postalCodeAndCity}">postalCode city</p>
+					<p th:if="${a.country}" th:text="${a.country}">country</p>
+				</li>
+			</ul>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100'" th:fragment="attachments">
+			<label>Attachments</label>
+			<ul th:if="${attachments}" th:each="a : ${attachments}">
+				<li class="attachments">
+					<th:block th:if="${a.url != null and a.contentType != null}">
+						<a href="#" title="Open" th:href="${a.url}" th:title="'Open ' + ${a.url}" th:text="${a.url} + ' (' + ${a.contentType} + ')'">url</a>
+					</th:block>
+					<th:block th:if="${a.url != null and a.contentType == null}">
+						<a href="#" title="Open" th:href="${a.url}" th:title="'Open ' + ${a.url}" th:text="${a.url}">url</a>
+					</th:block>
+				</li>
+			</ul>
+		</div>
+
+		<div th:class="${class} ? ${class} : 'element element-100 collapsable collapsed'" th:fragment="contents" th:each="c : ${contents}">
+			<div class="content-header">
+				<label th:text="'Content ' + ${c.contentType}">contentType</label>
+				<svg width="24" height="24" viewBox="0 0 24 24" class="collapse-button">
+					<path d="M6 9l6 6 6-6"></path>
+				</svg>
+			</div>
+
+			<pre class="content-pre" th:text="${c.data}">data</pre>
+		</div>
+
+		<i th:fragment="additionalValuesComment">See json or xml for additional values.</i>
+	</div>
+</body>
+</html>

@@ -1,8 +1,27 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -40,6 +59,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 	}
 
 	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
+	private final String readByBaseDefinition;
 
 	protected AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
 			FhirContext fhirContext, String resourceTable, String resourceColumn, String resourceIdColumn,
@@ -61,6 +81,9 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 				List.of());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, resourceTable, resourceColumn);
+
+		readByBaseDefinition = "SELECT " + resourceColumn + " FROM current_" + resourceTable + " WHERE "
+				+ resourceColumn + "->>'baseDefinition' = ?";
 	}
 
 	@Override
@@ -87,5 +110,28 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 			String version) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersionWithTransaction(connection, url, version);
+	}
+
+	@Override
+	public List<StructureDefinition> readAllByBaseDefinitionWithTransaction(Connection connection,
+			String baseDefinition) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(baseDefinition, "baseDefinition");
+
+		try (PreparedStatement statement = connection.prepareStatement(readByBaseDefinition))
+		{
+			statement.setString(1, baseDefinition);
+
+			try (ResultSet result = statement.executeQuery())
+			{
+				List<StructureDefinition> byBaseDefinition = new ArrayList<>();
+
+				while (result.next())
+					byBaseDefinition.add(getResource(result, 1));
+
+				return byBaseDefinition;
+			}
+		}
 	}
 }

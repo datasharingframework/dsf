@@ -1,1 +1,0 @@
-Empty `config` directory, will contain properties files after maven build

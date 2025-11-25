@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+	logicalFilePath="db/db.camunda_engine.changelog-1.0.0.xml">
+
+	<changeSet author="camunda.org" id="db.camunda_engine.changelog-1.0.0">
+		<validCheckSum>9:bf9fe960d3004f50a7248a45e07d8fb8</validCheckSum>
+		<sqlFile dbms="postgresql" encoding="utf8" path="bpe/db/camunda/postgres_engine_7.19.0.sql" />
+	</changeSet>
+			
+	<changeSet author="hhund" id="db.camunda_engine.changelog-1.0.0-grant" runOnChange="true">
+		<sql dbms="postgresql">
+			GRANT ALL ON TABLE ACT_GE_SCHEMA_LOG TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_GE_SCHEMA_LOG TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_GE_PROPERTY TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_GE_PROPERTY TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_GE_BYTEARRAY TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_GE_BYTEARRAY TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RE_DEPLOYMENT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_DEPLOYMENT TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_EXECUTION TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_EXECUTION TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_JOB TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_JOB TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_JOBDEF TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_JOBDEF TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RE_PROCDEF TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_PROCDEF TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_TASK TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_TASK TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_IDENTITYLINK TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_IDENTITYLINK TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_VARIABLE TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_VARIABLE TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_EVENT_SUBSCR TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_EVENT_SUBSCR TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_INCIDENT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_INCIDENT TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_AUTHORIZATION TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_AUTHORIZATION TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_FILTER TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_FILTER TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_METER_LOG TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_METER_LOG TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_EXT_TASK TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_EXT_TASK TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_BATCH TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_BATCH TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RE_CASE_DEF TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_CASE_DEF TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_CASE_EXECUTION TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_CASE_EXECUTION TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RU_CASE_SENTRY_PART TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_CASE_SENTRY_PART TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RE_DECISION_DEF TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_DECISION_DEF TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_RE_DECISION_REQ_DEF TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_DECISION_REQ_DEF TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_PROCINST TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_PROCINST TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_ACTINST TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_ACTINST TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_TASKINST TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_TASKINST TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_VARINST TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_VARINST TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_DETAIL TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DETAIL TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_IDENTITYLINK TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_IDENTITYLINK TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_COMMENT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_COMMENT TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_ATTACHMENT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_ATTACHMENT TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_OP_LOG TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_OP_LOG TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_INCIDENT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_INCIDENT TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_JOB_LOG TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_JOB_LOG TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_BATCH TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_BATCH TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_EXT_TASK_LOG TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_EXT_TASK_LOG TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_CASEINST TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_CASEINST TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_CASEACTINST TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_CASEACTINST TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_DECINST TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DECINST TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_DEC_IN TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DEC_IN TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_HI_DEC_OUT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DEC_OUT TO ${db.engine_users_group};
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

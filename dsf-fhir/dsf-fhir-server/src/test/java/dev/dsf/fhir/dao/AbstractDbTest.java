@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao;
 
 import java.util.Map;
@@ -8,9 +23,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.postgresql.Driver;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import com.fasterxml.jackson.core.StreamReadConstraints;
-
-import dev.dsf.common.db.DataSourceWithLogger;
+import dev.dsf.common.db.logging.DataSourceWithLogger;
 
 public abstract class AbstractDbTest
 {
@@ -18,15 +31,11 @@ public abstract class AbstractDbTest
 	{
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
-
-		// TODO remove workaround after upgrading to HAPI 6.8+, see https://github.com/hapifhir/hapi-fhir/issues/5205
-		StreamReadConstraints.overrideDefaultStreamReadConstraints(
-				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
 	}
 
 	protected static final boolean LOG_DB_STATEMENTS = true;
 
-	protected static final String CHANGE_LOG_FILE = "db/db.changelog.xml";
+	protected static final String CHANGE_LOG_FILE = "fhir/db/db.changelog.xml";
 
 	protected static final String DATABASE_USERS_GROUP = "server_users_group";
 	protected static final String DATABASE_USER = "server_user";

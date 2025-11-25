@@ -1,0 +1,92 @@
+2025-10-20 12:26:51,778 Delete of CodeSystem for identity 'initial.data.loader' via bundle at index 0 successful, status: 204 No Content
+2025-10-20 12:26:51,779 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 1 successful, status: 204 No Content
+2025-10-20 12:26:51,779 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 2 successful, status: 204 No Content
+2025-10-20 12:26:51,779 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 3 successful, status: 204 No Content
+2025-10-20 12:26:51,779 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 4 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 5 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 6 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 7 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 8 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 9 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 10 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 11 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 12 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 13 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 14 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 15 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 16 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 17 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 18 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 19 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 20 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 21 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 22 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Delete of StructureDefinition for identity 'initial.data.loader' via bundle at index 23 successful, status: 204 No Content
+2025-10-20 12:26:51,781 Create of NamingSystem for identity 'initial.data.loader' via bundle at index 24 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 25 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 26 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of Subscription for identity 'initial.data.loader' via bundle at index 27 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of CodeSystem for identity 'initial.data.loader' via bundle at index 28 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 29 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 30 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 31 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of CodeSystem for identity 'initial.data.loader' via bundle at index 32 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 33 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 34 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 35 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of Subscription for identity 'initial.data.loader' via bundle at index 36 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 37 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 38 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 39 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 40 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of CodeSystem for identity 'initial.data.loader' via bundle at index 41 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of NamingSystem for identity 'initial.data.loader' via bundle at index 42 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 43 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 44 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 45 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of CodeSystem for identity 'initial.data.loader' via bundle at index 46 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of CodeSystem for identity 'initial.data.loader' via bundle at index 47 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of CodeSystem for identity 'initial.data.loader' via bundle at index 48 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 49 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 50 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 51 successful, status: 200 OK
+2025-10-20 12:26:51,781 Create of ValueSet for identity 'initial.data.loader' via bundle at index 52 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 53 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 54 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 55 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of ValueSet for identity 'initial.data.loader' via bundle at index 56 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 57 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 58 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of ValueSet for identity 'initial.data.loader' via bundle at index 59 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of NamingSystem for identity 'initial.data.loader' via bundle at index 60 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 61 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of ValueSet for identity 'initial.data.loader' via bundle at index 62 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of ValueSet for identity 'initial.data.loader' via bundle at index 63 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of NamingSystem for identity 'initial.data.loader' via bundle at index 64 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 65 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of ValueSet for identity 'initial.data.loader' via bundle at index 66 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of ValueSet for identity 'initial.data.loader' via bundle at index 67 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 68 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 69 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 70 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 71 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 72 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 73 successful, status: 200 OK
+2025-10-20 12:26:51,782 Create of StructureDefinition for identity 'initial.data.loader' via bundle at index 74 successful, status: 200 OK
+2025-10-20 12:26:53,826 Update of Organization/2d461322-c1c8-4238-8c74-5a988f917ff7/_history/136 allowed for identity 'initial.data.loader' via bundle at index 0, reason: Identity is local identity and has role UPDATE [Organization]
+2025-10-20 12:26:53,863 Create of Endpoint for identity 'initial.data.loader' via bundle at index 1 successful, status: 200 OK
+2025-10-20 12:26:53,863 Create of Organization for identity 'initial.data.loader' via bundle at index 2 successful, status: 200 OK
+2025-10-20 12:26:53,863 Create of OrganizationAffiliation for identity 'initial.data.loader' via bundle at index 3 successful, status: 200 OK
+2025-10-20 12:26:53,863 Update of Organization for identity 'initial.data.loader' via bundle at index 0 successful, status: 200 OK
+2025-10-20 12:27:07,370 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Endpoint allowed for identity 'Test_Organization', reason: Identity has role SEARCH [Endpoint]
+2025-10-20 12:27:07,388 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Endpoint for identity 'Test_Organization successful, status: 200 OK'
+2025-10-20 12:27:08,413 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Subscription allowed for identity 'Test_Organization', reason: Identity has role SEARCH [Subscription]
+2025-10-20 12:27:08,418 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Subscription for identity 'Test_Organization successful, status: 200 OK'
+2025-10-20 12:27:08,431 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Subscription allowed for identity 'Test_Organization', reason: Identity has role SEARCH [Subscription]
+2025-10-20 12:27:08,448 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Subscription for identity 'Test_Organization successful, status: 200 OK'
+2025-10-20 12:27:08,460 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Task allowed for identity 'Test_Organization', reason: Identity has role SEARCH [Task]
+2025-10-20 12:27:08,472 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of QuestionnaireResponse allowed for identity 'Test_Organization', reason: Identity has role SEARCH [QuestionnaireResponse]
+2025-10-20 12:27:08,475 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of Task for identity 'Test_Organization successful, status: 200 OK'
+2025-10-20 12:27:08,481 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization, dsf.user.organization.dn=CN=bpe,O=DSF,C=DE, dsf.user.organization.identifier=Test_Organization, dsf.user.organization.thumbprint=0ebf53377cc416bd9c0bf7f125f061c3cf5dce335f9756d7a9e2953f7113509b84d1ad1a08472f40b2ed616dfca915f0f5377c3225f0ff7632ff94e1c676d37e, dsf.user.roles=[WEBSOCKET, UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, DELETE, READ]} Search of QuestionnaireResponse for identity 'Test_Organization successful, status: 200 OK'
+2025-10-20 12:27:30,569 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization/webbrowser.test.user@invalid, dsf.user.organization.identifier=Test_Organization, dsf.user.practitioner.dn=CN=Webbrowser Test User,O=DSF,C=DE, dsf.user.practitioner.identifier=webbrowser.test.user@invalid, dsf.user.practitioner.roles=[http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN], dsf.user.practitioner.thumbprint=a8874b56a7442fae17f27acc8f91a6b8f531c1855c9c7070ce04baf3a3ba17cc5cc337ba7cbd9cbb1a24d331ce99d2eb71c1368de1ae4b142084c696991214e7, dsf.user.roles=[UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, READ, DELETE]} Search of Organization allowed for identity 'Test_Organization/webbrowser.test.user@invalid', reason: Identity has role SEARCH [Organization]
+2025-10-20 12:27:30,575 {dsf.user.endpoint.identifier=localhost, dsf.user.name=Test_Organization/webbrowser.test.user@invalid, dsf.user.organization.identifier=Test_Organization, dsf.user.practitioner.dn=CN=Webbrowser Test User,O=DSF,C=DE, dsf.user.practitioner.identifier=webbrowser.test.user@invalid, dsf.user.practitioner.roles=[http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN], dsf.user.practitioner.thumbprint=a8874b56a7442fae17f27acc8f91a6b8f531c1855c9c7070ce04baf3a3ba17cc5cc337ba7cbd9cbb1a24d331ce99d2eb71c1368de1ae4b142084c696991214e7, dsf.user.roles=[UPDATE, PERMANENT_DELETE, SEARCH, HISTORY, CREATE, READ, DELETE]} Search of Organization for identity 'Test_Organization/webbrowser.test.user@invalid successful, status: 200 OK'

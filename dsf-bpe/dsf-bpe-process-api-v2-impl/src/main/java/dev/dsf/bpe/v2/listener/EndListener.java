@@ -1,0 +1,134 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.v2.listener;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dev.dsf.bpe.v2.client.dsf.DsfClient;
+import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
+
+public class EndListener extends AbstractListener implements ExecutionListener
+{
+	private static final Logger logger = LoggerFactory.getLogger(EndListener.class);
+
+	private final DsfClient webserviceClient;
+
+	public EndListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory,
+			DsfClient fhirWebserviceClient)
+	{
+		super(serverBaseUrl, variablesFactory);
+
+		this.webserviceClient = fhirWebserviceClient;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+
+		Objects.requireNonNull(webserviceClient, "webserviceClient");
+	}
+
+	@Override
+	public void doNotify(DelegateExecution execution, ListenerVariables variables) throws Exception
+	{
+		List<Task> tasks = variables.getCurrentTasks();
+
+		for (int i = tasks.size() - 1; i >= 0; i--)
+		{
+			Task task = tasks.get(i);
+			updateIfInprogress(task);
+			boolean subProcess = execution.getParentId() != null
+					&& !execution.getParentId().equals(execution.getProcessInstanceId());
+			logEnd(subProcess, task, subProcess ? variables.getStartTask() : null);
+		}
+
+		variables.onEnd();
+	}
+
+	private void updateIfInprogress(Task task)
+	{
+		if (TaskStatus.INPROGRESS.equals(task.getStatus()))
+		{
+			task.setStatus(TaskStatus.COMPLETED);
+			updateAndHandleException(task);
+		}
+		else
+		{
+			logger.debug("Not updating Task {} with status: {}", getLocalVersionlessAbsoluteUrl(task),
+					task.getStatus());
+		}
+	}
+
+	private void updateAndHandleException(Task task)
+	{
+		try
+		{
+			logger.debug("Updating Task {}, new status: {}", getLocalVersionlessAbsoluteUrl(task),
+					task.getStatus().toCode());
+
+			webserviceClient.withMinimalReturn().update(task);
+		}
+		catch (Exception e)
+		{
+			logger.debug("Unable to update Task {}", getLocalVersionlessAbsoluteUrl(task), e);
+			logger.error("Unable to update Task {}: {} - {}", getLocalVersionlessAbsoluteUrl(task),
+					e.getClass().getName(), e.getMessage());
+		}
+	}
+
+	private void logEnd(boolean subProcess, Task endTask, Task mainTask)
+	{
+		String processUrl = endTask.getInstantiatesCanonical();
+		String businessKey = getFirstInputParameter(endTask, BpmnMessage.businessKey());
+		String correlationKey = getFirstInputParameter(endTask, BpmnMessage.correlationKey());
+		String endTaskUrl = getLocalVersionlessAbsoluteUrl(endTask);
+		String requester = getRequesterIdentifierValue(endTask);
+
+		String mainTaskUrl = getLocalVersionlessAbsoluteUrl(mainTask);
+
+		if (subProcess)
+		{
+			if (correlationKey != null)
+				logger.info(
+						"Subprocess of {} finished at {} [task: {}, requester: {}, business-key: {}, correlation-key: {}, main-task: {}]",
+						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey, mainTaskUrl);
+			else
+				logger.info(
+						"Subprocess of {} finished at {} [task: {}, requester: {}, business-key: {}, main-task: {}]",
+						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, mainTaskUrl);
+		}
+		else
+		{
+			if (correlationKey != null)
+				logger.info(
+						"Process {} finished at {} [task: {}, requester: {}, business-key: {}, correlation-key: {}]",
+						processUrl, getCurrentTime(), endTaskUrl, requester, businessKey, correlationKey);
+			else
+				logger.info("Process {} finished at {} [task: {}, requester: {}, business-key: {}]", processUrl,
+						getCurrentTime(), endTaskUrl, requester, businessKey);
+		}
+	}
+}

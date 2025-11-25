@@ -1,6 +1,23 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.plugin;
 
-import java.util.Arrays;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -25,35 +42,46 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
+import dev.dsf.bpe.api.Constants;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 
 public final class ProcessesResource
 {
+	public static ProcessesResource from(FhirContext fhirContext, byte[] encodedResource)
+	{
+		try (InputStream in = new ByteArrayInputStream(encodedResource))
+		{
+			Resource resource = (Resource) fhirContext.newJsonParser().parseResource(in);
+			return from(resource);
+		}
+		catch (ConfigurationException | DataFormatException | IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static ProcessesResource from(Resource resource)
 	{
 		Objects.requireNonNull(resource, "resource");
 
-		if (resource instanceof ActivityDefinition a)
-			return fromMetadataResource(a);
-		else if (resource instanceof CodeSystem c)
-			return fromMetadataResource(c);
-		else if (resource instanceof Library l)
-			return fromMetadataResource(l);
-		else if (resource instanceof Measure m)
-			return fromMetadataResource(m);
-		else if (resource instanceof NamingSystem n)
-			return fromNamingSystem(n);
-		else if (resource instanceof Questionnaire q)
-			return fromMetadataResource(q);
-		else if (resource instanceof StructureDefinition s)
-			return fromMetadataResource(s);
-		else if (resource instanceof Task t)
-			return fromTask(t);
-		else if (resource instanceof ValueSet v)
-			return fromMetadataResource(v);
-		else
-			throw new IllegalArgumentException(
+		return switch (resource)
+		{
+			case ActivityDefinition a -> fromMetadataResource(a);
+			case CodeSystem c -> fromMetadataResource(c);
+			case Library l -> fromMetadataResource(l);
+			case Measure m -> fromMetadataResource(m);
+			case NamingSystem n -> fromNamingSystem(n);
+			case Questionnaire q -> fromMetadataResource(q);
+			case StructureDefinition s -> fromMetadataResource(s);
+			case Task t -> fromTask(t);
+			case ValueSet v -> fromMetadataResource(v);
+
+			default -> throw new IllegalArgumentException(
 					"MetadataResource of type " + resource.getClass().getName() + " not supported");
+		};
 	}
 
 	public static ProcessesResource fromMetadataResource(MetadataResource resource)
@@ -77,7 +105,11 @@ public final class ProcessesResource
 
 	private static String getIdentifier(Task resource)
 	{
-		return TaskIdentifier.findFirst(resource).map(Identifier::getValue).get();
+		return resource.getIdentifier().stream()
+				.filter(i -> i.hasSystemElement() && i.getSystemElement().hasValue()
+						&& Constants.TASK_IDENTIFIER_SID.equals(i.getSystemElement().getValue()))
+				.findFirst().filter(i -> i.hasValueElement() && i.getValueElement().hasValue())
+				.map(Identifier::getValue).get();
 	}
 
 	public static ProcessesResource from(ResourceInfo resourceInfo)
@@ -351,9 +383,9 @@ public final class ProcessesResource
 			case MISSING -> switch (getNewProcessState())
 			{
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case ACTIVE -> Arrays.asList("200", "201");
+				case ACTIVE -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case RETIRED -> Arrays.asList("200", "201");
+				case RETIRED -> List.of("200", "201");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -361,11 +393,11 @@ public final class ProcessesResource
 			case NEW -> switch (getNewProcessState())
 			{
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case ACTIVE -> Arrays.asList("200", "201");
+				case ACTIVE -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case DRAFT -> Arrays.asList("200", "201");
+				case DRAFT -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case RETIRED -> Arrays.asList("200", "201");
+				case RETIRED -> List.of("200", "201");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -373,11 +405,11 @@ public final class ProcessesResource
 			case ACTIVE -> switch (getNewProcessState())
 			{
 				// standard update with resource id
-				case DRAFT -> Collections.singletonList("200");
+				case DRAFT -> List.of("200");
 				// standard update with resource id
-				case RETIRED -> Collections.singletonList("200");
+				case RETIRED -> List.of("200");
 				// standard delete with resource id
-				case EXCLUDED -> Arrays.asList("200", "204");
+				case EXCLUDED -> List.of("200", "204");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -385,13 +417,13 @@ public final class ProcessesResource
 			case DRAFT -> switch (getNewProcessState())
 			{
 				// standard update with resource id
-				case ACTIVE -> Collections.singletonList("200");
+				case ACTIVE -> List.of("200");
 				// standard update with resource id
-				case DRAFT -> Collections.singletonList("200");
+				case DRAFT -> List.of("200");
 				// standard update with resource id
-				case RETIRED -> Collections.singletonList("200");
+				case RETIRED -> List.of("200");
 				// standard delete with resource id
-				case EXCLUDED -> Arrays.asList("200", "204");
+				case EXCLUDED -> List.of("200", "204");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -399,11 +431,11 @@ public final class ProcessesResource
 			case RETIRED -> switch (getNewProcessState())
 			{
 				// standard update with resource id
-				case ACTIVE -> Collections.singletonList("200");
+				case ACTIVE -> List.of("200");
 				// standard update with resource id
-				case DRAFT -> Collections.singletonList("200");
+				case DRAFT -> List.of("200");
 				// standard delete with resource id
-				case EXCLUDED -> Arrays.asList("200", "204");
+				case EXCLUDED -> List.of("200", "204");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");
@@ -411,11 +443,11 @@ public final class ProcessesResource
 			case EXCLUDED -> switch (getNewProcessState())
 			{
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case ACTIVE -> Arrays.asList("200", "201");
+				case ACTIVE -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case DRAFT -> Arrays.asList("200", "201");
+				case DRAFT -> List.of("200", "201");
 				// conditional create NamingSystem: name=..., Task: identifier=..., others: url=...&version=...
-				case RETIRED -> Arrays.asList("200", "201");
+				case RETIRED -> List.of("200", "201");
 
 				default -> throw new RuntimeException(
 						"State change " + getOldProcessState() + " -> " + getNewProcessState() + " not supported");

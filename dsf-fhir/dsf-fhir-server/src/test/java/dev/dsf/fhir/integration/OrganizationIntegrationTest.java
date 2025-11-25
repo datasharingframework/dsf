@@ -1,10 +1,24 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +37,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchAll() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient().search(Organization.class, Collections.emptyMap());
+		Bundle searchBundle = getWebserviceClient().search(Organization.class, Map.of());
 		assertNotNull(searchBundle);
 		assertEquals(3, searchBundle.getTotal());
 		assertTrue(searchBundle.getEntryFirstRep().getResource() instanceof Organization);
@@ -33,7 +47,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	public void testSearchOrganizationIncludeEndpoint() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Organization.class,
-				Map.of("_include", Collections.singletonList("Organization:endpoint")));
+				Map.of("_include", List.of("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(3, searchBundle.getTotal());
 		assertEquals(5, searchBundle.getEntry().size());
@@ -73,7 +87,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	public void testSearchOrganizationRevIncludeEndpoint() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Organization.class,
-				Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
+				Map.of("_revinclude", List.of("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(3, searchBundle.getTotal());
 		assertEquals(5, searchBundle.getEntry().size());
@@ -112,8 +126,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationWithNewThumbprint() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class,
+				Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -138,8 +152,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationWithExistingThumbprint() throws Exception
 	{
-		Bundle bundle1 = getWebserviceClient().search(Organization.class, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
+		Bundle bundle1 = getWebserviceClient().search(Organization.class,
+				Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		assertNotNull(bundle1);
 		assertEquals(1, bundle1.getTotal());
 		assertNotNull(bundle1.getEntry());
@@ -158,8 +172,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		String existingThumbprint = ((StringType) thumbprints1.get(0).getValue()).getValue();
 
-		Bundle bundle2 = getWebserviceClient().search(Organization.class, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle2 = getWebserviceClient().search(Organization.class,
+				Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle2);
 		assertEquals(1, bundle2.getTotal());
 		assertNotNull(bundle2.getEntry());
@@ -184,8 +198,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationWithExistingIdentifier() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class,
+				Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -205,8 +219,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationAddNewThumbprint() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier",
-				Collections.singletonList("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class,
+				Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -232,14 +246,14 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		getWebserviceClient().update(org);
 
 		// test if authentication still works
-		getExternalWebserviceClient().search(Organization.class, Collections.emptyMap());
+		getExternalWebserviceClient().search(Organization.class, Map.of());
 	}
 
 	@Test
 	public void testSearchWithUnsupportedRevIncludeParameter() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Organization.class,
-				Map.of("_revinclude", Collections.singletonList("Endpoint:foo")));
+				Map.of("_revinclude", List.of("Endpoint:foo")));
 		assertNotNull(searchBundle);
 		assertEquals(3, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -255,6 +269,6 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	public void testStrictSearchWithUnsupportedRevIncludeParameter() throws Exception
 	{
 		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Organization.class,
-				Map.of("_revinclude", Collections.singletonList("Endpoint:foo"))));
+				Map.of("_revinclude", List.of("Endpoint:foo"))));
 	}
 }

@@ -1,9 +1,23 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.subscription;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.LastEventTimeDao;
-import dev.dsf.fhir.client.FhirWebserviceClient;
 import jakarta.ws.rs.core.UriBuilder;
 
 public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingResourceLoader<R>
@@ -32,13 +46,13 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 	private static final int RESULT_PAGE_COUNT = 20;
 
 	private final LastEventTimeDao lastEventTimeDao;
-	private final FhirWebserviceClient webserviceClient;
+	private final WebserviceClient webserviceClient;
 	private final ResourceHandler<R> handler;
 	private final String resourceName;
 	private final Class<R> resourceClass;
 
 	public ExistingResourceLoaderImpl(LastEventTimeDao lastEventTimeDao, ResourceHandler<R> handler,
-			FhirWebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
+			WebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
 	{
 		this.lastEventTimeDao = lastEventTimeDao;
 		this.handler = handler;
@@ -61,11 +75,11 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 		Optional<LocalDateTime> readLastEventTime = readLastEventTime();
 
 		readLastEventTime.ifPresent(lastEventTime -> queryParams.put(PARAM_LAST_UPDATED,
-				Collections.singletonList("gt" + lastEventTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
+				List.of("gt" + lastEventTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
 
-		queryParams.put(PARAM_COUNT, Collections.singletonList(String.valueOf(RESULT_PAGE_COUNT)));
-		queryParams.put(PARAM_PAGE, Collections.singletonList("1"));
-		queryParams.put(PARAM_SORT, Collections.singletonList(PARAM_LAST_UPDATED));
+		queryParams.put(PARAM_COUNT, List.of(String.valueOf(RESULT_PAGE_COUNT)));
+		queryParams.put(PARAM_PAGE, List.of("1"));
+		queryParams.put(PARAM_SORT, List.of(PARAM_LAST_UPDATED));
 
 		UriBuilder builder = UriBuilder.fromPath(resourceName);
 		queryParams.forEach((k, v) -> builder.replaceQueryParam(k, v.toArray()));

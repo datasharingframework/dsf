@@ -1,9 +1,24 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.client;
 
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -11,6 +26,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,6 +52,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.adapter.FhirAdapter;
+import dev.dsf.fhir.client.BinaryInputStream.Range;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import dev.dsf.fhir.service.ReferenceCleaner;
@@ -58,6 +76,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	private static final Map<String, Class<?>> RESOURCE_TYPES_BY_NAME = Stream.of(ResourceType.values())
 			.filter(type -> !ResourceType.List.equals(type))
 			.collect(Collectors.toMap(ResourceType::name, FhirWebserviceClientJersey::getFhirClass));
+	private static final String CONTENT_RANGE_PATTERN_TEXT = "bytes (?<start>\\d+)-(?<end>\\d+)\\/(?<size>\\d+)";
+	private static final Pattern CONTENT_RANGE_PATTERN = Pattern.compile(CONTENT_RANGE_PATTERN_TEXT);
 
 	private static Class<?> getFhirClass(ResourceType type)
 	{
@@ -71,21 +91,17 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		}
 	}
 
-	private final ReferenceCleaner referenceCleaner;
-
 	private final PreferReturnMinimalWithRetry preferReturnMinimal;
 	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
 
 	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			ObjectMapper objectMapper, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
-			int connectTimeout, int readTimeout, boolean logRequests, String userAgentValue, FhirContext fhirContext,
-			ReferenceCleaner referenceCleaner)
+			Duration connectTimeout, Duration readTimeout, boolean logRequests, String userAgentValue,
+			FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, objectMapper,
-				Collections.singleton(new FhirAdapter(fhirContext)), proxySchemeHostPort, proxyUserName, proxyPassword,
-				connectTimeout, readTimeout, logRequests, userAgentValue);
-
-		this.referenceCleaner = referenceCleaner;
+				List.of(new FhirAdapter(fhirContext, referenceCleaner)), proxySchemeHostPort, proxyUserName,
+				proxyPassword, connectTimeout, readTimeout, logRequests, userAgentValue);
 
 		preferReturnMinimal = new PreferReturnMinimalWithRetryImpl(this);
 		preferReturnOutcome = new PreferReturnOutcomeWithRetryImpl(this);
@@ -134,11 +150,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	{
 		return switch (returnType)
 		{
-			case REPRESENTATION -> {
-				// TODO remove workaround if HAPI bug fixed
-				Resource resource = referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
-				yield PreferReturn.resource(resource);
-			}
+			case REPRESENTATION -> PreferReturn.resource(response.readEntity(resourceType));
 			case MINIMAL -> PreferReturn.minimal(response.getLocation());
 			case OPERATION_OUTCOME -> PreferReturn.outcome(response.readEntity(OperationOutcome.class));
 			default ->
@@ -300,8 +312,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logStatusAndHeaders(response);
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
+			return response.readEntity(Bundle.class);
 		else
 			throw handleError(response);
 	}
@@ -427,9 +438,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(
-					(Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName)));
+			return (Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName));
 		else
 			throw handleError(response);
 	}
@@ -468,7 +477,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			{
 				String dateValue = formatRfc7231(oldValue.getMeta().getLastUpdated());
 				request.header(HttpHeaders.IF_MODIFIED_SINCE, dateValue);
-				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_MODIFIED_SINCE, dateValue.toString());
+				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_MODIFIED_SINCE, dateValue);
 			}
 		}
 
@@ -477,8 +486,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
+			return response.readEntity(resourceType);
 		else if (oldValue != null && oldValue.hasMeta()
 				&& (oldValue.getMeta().hasVersionId() || oldValue.getMeta().hasLastUpdated())
 				&& Status.NOT_MODIFIED.getStatusCode() == response.getStatus())
@@ -519,7 +527,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public InputStream readBinary(String id, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, MediaType mediaType)
 	{
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(mediaType, "mediaType");
@@ -529,9 +537,106 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(InputStream.class);
+			return toBinaryInputStream(response);
 		else
 			throw handleError(response);
+	}
+
+	@Override
+	public BinaryInputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive,
+			Map<String, String> additionalHeaders)
+	{
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(mediaType, "mediaType");
+
+		Builder builder = getResource().path("Binary").path(id).request().accept(mediaType);
+
+		String range = getRangeHeader(rangeStart, rangeEndInclusive);
+		if (range != null)
+			builder = builder.header("Range", range);
+
+		if (additionalHeaders != null)
+		{
+			for (Entry<String, String> e : additionalHeaders.entrySet())
+				builder = builder.header(e.getKey(), e.getValue());
+		}
+
+		Response response = builder.get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus()
+				|| Status.PARTIAL_CONTENT.getStatusCode() == response.getStatus())
+			return toBinaryInputStream(response);
+		else
+			throw handleError(response);
+	}
+
+	private String getRangeHeader(Long rangeStart, Long rangeEndInclusive)
+	{
+		// from given start to end of file
+		if (rangeStart != null && rangeStart >= 0 && rangeEndInclusive == null)
+		{
+			return "bytes=" + rangeStart + "-";
+		}
+		// from given start to given end (inclusive)
+		else if (rangeStart != null && rangeStart >= 0 && rangeEndInclusive != null && rangeEndInclusive > rangeStart)
+		{
+			return "bytes=" + rangeStart + "-" + rangeEndInclusive;
+		}
+		// from length + end to end of file
+		else if (rangeStart == null && rangeEndInclusive != null && rangeEndInclusive < 0)
+		{
+			return "bytes=" + rangeEndInclusive;
+		}
+		else
+			return null;
+	}
+
+	private BinaryInputStream toBinaryInputStream(Response response)
+	{
+		long contentLength = getContentLength(response);
+		Range range = getRange(response);
+		InputStream input = response.readEntity(InputStream.class);
+
+		return new BinaryInputStream(input, contentLength, range);
+	}
+
+	private long getContentLength(Response response)
+	{
+		try
+		{
+			return Long.parseLong(response.getHeaderString("Content-Length"));
+		}
+		catch (NumberFormatException e)
+		{
+			return Long.MIN_VALUE;
+		}
+	}
+
+	private Range getRange(Response response)
+	{
+		String contentRange = response.getHeaderString("Content-Range");
+		if (contentRange == null)
+			return null;
+
+		Matcher matcher = CONTENT_RANGE_PATTERN.matcher(contentRange);
+		if (matcher.matches())
+		{
+			try
+			{
+				long start = Long.parseLong(matcher.group("start"));
+				long end = Long.parseLong(matcher.group("end"));
+				long size = Long.parseLong(matcher.group("size"));
+
+				return new Range(size, start, end);
+			}
+			catch (NumberFormatException e)
+			{
+			}
+		}
+
+		return null;
 	}
 
 	@Override
@@ -549,9 +654,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(
-					(Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName)));
+			return (Resource) response.readEntity(RESOURCE_TYPES_BY_NAME.get(resourceTypeName));
 		else
 			throw handleError(response);
 	}
@@ -569,8 +672,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
+			return response.readEntity(resourceType);
 		else
 			throw handleError(response);
 	}
@@ -596,7 +698,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public InputStream readBinary(String id, String version, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType)
 	{
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(version, "version");
@@ -608,7 +710,39 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(InputStream.class);
+			return toBinaryInputStream(response);
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive, Map<String, String> additionalHeaders)
+	{
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+		Objects.requireNonNull(mediaType, "mediaType");
+
+		Builder builder = getResource().path("Binary").path(id).path("_history").path(version).request()
+				.accept(mediaType);
+
+		String range = getRangeHeader(rangeStart, rangeEndInclusive);
+		if (range != null)
+			builder = builder.header("Range", range);
+
+		if (additionalHeaders != null)
+		{
+			for (Entry<String, String> e : additionalHeaders.entrySet())
+				builder = builder.header(e.getKey(), e.getValue());
+		}
+
+		Response response = builder.get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus()
+				|| Status.PARTIAL_CONTENT.getStatusCode() == response.getStatus())
+			return toBinaryInputStream(response);
 		else
 			throw handleError(response);
 	}
@@ -656,8 +790,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
+			return response.readEntity(Bundle.class);
 		else
 			throw handleError(response);
 	}
@@ -680,8 +813,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
+			return response.readEntity(Bundle.class);
 		else
 			throw handleError(response);
 	}
@@ -742,23 +874,23 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public BasicFhirWebserviceClient withRetry(int nTimes, long delayMillis)
+	public BasicFhirWebserviceClient withRetry(int nTimes, Duration delay)
 	{
 		if (nTimes < 0)
 			throw new IllegalArgumentException("nTimes < 0");
-		if (delayMillis < 0)
-			throw new IllegalArgumentException("delayMillis < 0");
+		if (delay == null || delay.isNegative())
+			throw new IllegalArgumentException("delay null or negative");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delayMillis);
+		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delay);
 	}
 
 	@Override
-	public BasicFhirWebserviceClient withRetryForever(long delayMillis)
+	public BasicFhirWebserviceClient withRetryForever(Duration delay)
 	{
-		if (delayMillis < 0)
-			throw new IllegalArgumentException("delayMillis < 0");
+		if (delay == null || delay.isNegative())
+			throw new IllegalArgumentException("delay null or negative");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, delayMillis);
+		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, delay);
 	}
 
 	@Override

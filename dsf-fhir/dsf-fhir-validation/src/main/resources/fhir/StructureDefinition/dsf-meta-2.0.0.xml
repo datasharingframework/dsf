@@ -1,0 +1,183 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/meta" />
+	<version value="2.0.0" />
+	<name value="Meta" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-10-27" />
+	<fhirVersion value="4.0.1" />
+	<kind value="complex-type" />
+	<abstract value="false" />
+	<type value="Meta" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Meta" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Meta">
+			<path value="Meta" />
+			<constraint>
+				<key value="at-least-on-read-access-tag" />
+				<severity value="error" />
+				<human value="At least one meta.tag from system 'http://dsf.dev/fhir/CodeSystem/read-access-tag' required" />
+				<expression value="tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag').exists()" />
+			</constraint>
+			<constraint>
+				<key value="organization-implies-local" />
+				<severity value="error" />
+				<human value="ORGANIZATION tag requires LOCAL" />
+				<expression
+					value="tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'ORGANIZATION').exists() implies tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'LOCAL').exists()" />
+			</constraint>
+			<constraint>
+				<key value="role-implies-local" />
+				<severity value="error" />
+				<human value="ROLE tag requires LOCAL" />
+				<expression
+					value="tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'ROLE').exists() implies tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'LOCAL').exists()" />
+			</constraint>
+			<constraint>
+				<key value="all-implies-no-local" />
+				<severity value="error" />
+				<human value="ALL tag can not be used with LOCAL" />
+				<expression
+					value="tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'ALL').exists() implies tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'LOCAL').exists().not()" />
+			</constraint>
+			<constraint>
+				<key value="all-implies-no-organization" />
+				<severity value="error" />
+				<human value="ALL tag can not be used with ORGANIZATION" />
+				<expression
+					value="tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'ALL').exists() implies tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'ORGANIZATION').exists().not()" />
+			</constraint>
+			<constraint>
+				<key value="all-implies-no-role" />
+				<severity value="error" />
+				<human value="ALL tag can not be used with ROLE" />
+				<expression
+					value="tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'ALL').exists() implies tag.where(system = 'http://dsf.dev/fhir/CodeSystem/read-access-tag' and code = 'ROLE').exists().not()" />
+			</constraint>
+		</element>
+		<element id="Meta.tag">
+			<path value="Meta.tag" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="system" />
+				</discriminator>
+				<discriminator>
+					<type value="value" />
+					<path value="code" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+		</element>
+		<element id="Meta.tag:all">
+			<path value="Meta.tag" />
+			<sliceName value="all" />
+			<min value="0" />
+			<max value="1" />
+		</element>
+		<element id="Meta.tag:all.system">
+			<path value="Meta.tag.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+		</element>
+		<element id="Meta.tag:all.code">
+			<path value="Meta.tag.code" />
+			<min value="1" />
+			<fixedCode value="ALL" />
+		</element>
+		<element id="Meta.tag:local">
+			<path value="Meta.tag" />
+			<sliceName value="local" />
+			<min value="0" />
+			<max value="1" />
+		</element>
+		<element id="Meta.tag:local.system">
+			<path value="Meta.tag.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+		</element>
+		<element id="Meta.tag:local.code">
+			<path value="Meta.tag.code" />
+			<min value="1" />
+			<fixedCode value="LOCAL" />
+		</element>
+		<element id="Meta.tag:organization">
+			<path value="Meta.tag" />
+			<sliceName value="organization" />
+			<min value="0" />
+			<max value="*" />
+		</element>
+		<element id="Meta.tag:organization.extension:organization-extension">
+			<path value="Meta.tag.extension" />
+			<sliceName value="organization-extension" />
+			<min value="1" />
+			<max value="1" />
+			<type>
+				<code value="Extension" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/extension-read-access-organization|2.0.0" />
+			</type>
+		</element>
+		<element id="Meta.tag:organization.system">
+			<path value="Meta.tag.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+		</element>
+		<element id="Meta.tag:organization.code">
+			<path value="Meta.tag.code" />
+			<min value="1" />
+			<fixedCode value="ORGANIZATION" />
+		</element>
+		<element id="Meta.tag:read-access-parent-organization-role">
+			<path value="Meta.tag" />
+			<sliceName value="read-access-parent-organization-role" />
+			<min value="0" />
+			<max value="*" />
+		</element>
+		<element id="Meta.tag:read-access-parent-organization-role:role-extension">
+			<path value="Meta.tag.extension" />
+			<sliceName value="role-extension" />
+			<min value="1" />
+			<max value="1" />
+			<type>
+				<code value="Extension" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/extension-read-access-parent-organization-role|2.0.0" />
+			</type>
+		</element>
+		<element id="Meta.tag:read-access-parent-organization-role.system">
+			<path value="Meta.tag.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+		</element>
+		<element id="Meta.tag:read-access-parent-organization-role.code">
+			<path value="Meta.tag.code" />
+			<min value="1" />
+			<fixedCode value="ROLE" />
+		</element>
+	</differential>
+</StructureDefinition>

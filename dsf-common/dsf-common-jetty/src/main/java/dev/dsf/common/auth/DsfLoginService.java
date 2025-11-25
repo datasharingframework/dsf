@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth;
 
 import java.security.Principal;
@@ -6,21 +21,23 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.security.auth.Subject;
 
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.openid.OpenIdCredentials;
-import org.eclipse.jetty.server.UserIdentity;
-import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Session;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
-import jakarta.servlet.ServletRequest;
 
 public class DsfLoginService implements LoginService
 {
@@ -50,7 +67,7 @@ public class DsfLoginService implements LoginService
 		}
 
 		@Override
-		public boolean isUserInRole(String role, Scope scope)
+		public boolean isUserInRole(String role)
 		{
 			return roles.contains(role);
 		}
@@ -58,11 +75,11 @@ public class DsfLoginService implements LoginService
 
 	private final AtomicReference<IdentityProvider> identityProvider = new AtomicReference<>(null);
 
-	private final ContextHandler contextHandler;
+	private final WebAppContext webAppContext;
 
-	public DsfLoginService(ContextHandler contextHandler)
+	public DsfLoginService(WebAppContext webAppContext)
 	{
-		this.contextHandler = Objects.requireNonNull(contextHandler, "contextHandler");
+		this.webAppContext = Objects.requireNonNull(webAppContext, "webAppContext");
 	}
 
 	@Override
@@ -72,7 +89,8 @@ public class DsfLoginService implements LoginService
 	}
 
 	@Override
-	public UserIdentity login(String username, Object credentials, ServletRequest request)
+	public UserIdentity login(String username, Object credentials, Request request,
+			Function<Boolean, Session> getOrCreateSession)
 	{
 		if (credentials == null)
 			return null;
@@ -105,7 +123,7 @@ public class DsfLoginService implements LoginService
 		IdentityProvider ip = identityProvider.get();
 		if (ip == null)
 		{
-			ip = WebApplicationContextUtils.getWebApplicationContext(contextHandler.getServletContext())
+			ip = WebApplicationContextUtils.getWebApplicationContext(webAppContext.getServletContext())
 					.getBean(IdentityProvider.class);
 			if (identityProvider.compareAndSet(null, ip))
 				return ip;

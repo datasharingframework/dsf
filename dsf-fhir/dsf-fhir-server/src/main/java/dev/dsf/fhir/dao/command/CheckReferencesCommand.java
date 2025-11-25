@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
@@ -12,6 +27,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -19,7 +35,6 @@ import dev.dsf.fhir.prefer.PreferReturnType;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
-import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.ValidationRules;
 import jakarta.ws.rs.WebApplicationException;
 
@@ -43,9 +58,8 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		referencesHelper.checkReferences(idTranslationTable, connection, this::checkReferenceAfterUpdate);
 	}

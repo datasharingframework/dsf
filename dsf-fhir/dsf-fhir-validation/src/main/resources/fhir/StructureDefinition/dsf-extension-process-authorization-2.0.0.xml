@@ -1,0 +1,155 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization" />
+	<version value="2.0.0" />
+	<name value="ProcessAuthorization" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-10-27" />
+	<fhirVersion value="4.0.1" />
+	<kind value="complex-type" />
+	<abstract value="false" />
+	<context>
+		<type value="element" />
+		<expression value="ActivityDefinition" />
+	</context>
+	<type value="Extension" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Extension">
+			<path value="Extension" />
+			<min value="1" />
+		</element>
+		<element id="Extension.extension">
+			<path value="Extension.extension" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="url" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+			<min value="4" />
+		</element>
+		<element id="Extension.extension:message-name">
+			<path value="Extension.extension" />
+			<sliceName value="message-name" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="Extension.extension:message-name.url">
+			<path value="Extension.extension.url" />
+			<fixedUri value="message-name" />
+		</element>
+		<element id="Extension.extension:message-name.value[x]">
+			<path value="Extension.extension.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+		<element id="Extension.extension:task-profile">
+			<path value="Extension.extension" />
+			<sliceName value="task-profile" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="Extension.extension:task-profile.url">
+			<path value="Extension.extension.url" />
+			<fixedUri value="task-profile" />
+		</element>
+		<element id="Extension.extension:task-profile.value[x]">
+			<path value="Extension.extension.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="canonical" />
+			</type>
+		</element>
+		<element id="Extension.extension:requester">
+			<path value="Extension.extension" />
+			<sliceName value="requester" />
+			<min value="1" />
+		</element>
+		<element id="Extension.extension:requester.url">
+			<path value="Extension.extension.url" />
+			<fixedUri value="requester" />
+		</element>
+		<element id="Extension.extension:requester.value[x]">
+			<path value="Extension.extension.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="Coding" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-all|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-all-practitioner|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization-practitioner|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role|2.0.0" />
+				<profile
+					value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role-practitioner|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-all|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-organization|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-remote-parent-organization-role|2.0.0" />
+			</type>
+			<binding>
+				<strength value="required" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/process-authorization-requester|2.0.0" />
+			</binding>
+		</element>
+		<element id="Extension.extension:recipient">
+			<path value="Extension.extension" />
+			<sliceName value="recipient" />
+			<min value="1" />
+		</element>
+		<element id="Extension.extension:recipient.url">
+			<path value="Extension.extension.url" />
+			<fixedUri value="recipient" />
+		</element>
+		<element id="Extension.extension:recipient.value[x]">
+			<path value="Extension.extension.value[x]" />
+			<min value="1" />
+			<type>
+				<code value="Coding" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-all|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-organization|2.0.0" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/coding-process-authorization-local-parent-organization-role|2.0.0" />
+			</type>
+			<binding>
+				<strength value="required" />
+				<valueSet value="http://dsf.dev/fhir/ValueSet/process-authorization-recipient|2.0.0" />
+			</binding>
+		</element>
+		<element id="Extension.url">
+			<path value="Extension.url" />
+			<fixedUri value="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization" />
+		</element>
+		<element id="Extension.value[x]">
+			<path value="Extension.value[x]" />
+			<max value="0" />
+		</element>
+	</differential>
+</StructureDefinition>

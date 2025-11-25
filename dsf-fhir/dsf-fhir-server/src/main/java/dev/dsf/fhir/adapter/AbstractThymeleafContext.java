@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.adapter;
 
 import java.math.BigDecimal;
@@ -7,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -18,61 +32,20 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
 
-abstract class AbstractThymeleafContext<R extends Resource> implements ThymeleafContext
+public abstract class AbstractThymeleafContext implements ThymeleafContext
 {
 	private static final DateTimeFormatter DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	private static final DateTimeFormatter DATE_TIME_DISPLAY_FORMAT = DateTimeFormatter
 			.ofPattern("dd.MM.yyyy HH:mm:ss");
-
-	private final Class<R> resourceType;
-	private final String htmlFragment;
-
-	protected AbstractThymeleafContext(Class<R> resourceType, String htmlFragment)
-	{
-		this.resourceType = Objects.requireNonNull(resourceType, "resourceType");
-		this.htmlFragment = Objects.requireNonNull(htmlFragment, "htmlFragment");
-	}
-
-	@Override
-	public Class<R> getResourceType()
-	{
-		return resourceType;
-	}
-
-	@Override
-	public String getHtmlFragment()
-	{
-		return htmlFragment;
-	}
-
-	@Override
-	public final void setVariables(BiConsumer<String, Object> variables, Resource resource)
-	{
-		if (resourceType.isInstance(resource))
-			doSetVariables(variables, resourceType.cast(resource));
-		else
-			throw new IllegalStateException("Unsupported resource of type " + resource.getClass().getName()
-					+ ", expected " + resourceType.getName());
-	}
-
-	protected abstract void doSetVariables(BiConsumer<String, Object> variables, R resource);
-
-	protected final String formatDate(Date date)
-	{
-		return format(date, DATE_DISPLAY_FORMAT);
-	}
-
-	protected final String formatDateTime(Date date)
-	{
-		return format(date, DATE_TIME_DISPLAY_FORMAT);
-	}
 
 	protected final String format(Date date, DateTimeFormatter formatter)
 	{
@@ -82,6 +55,17 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 			return null;
 		else
 			return formatter.format(LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()));
+	}
+
+
+	protected final String formatDate(Date date)
+	{
+		return format(date, DATE_DISPLAY_FORMAT);
+	}
+
+	protected final String formatDateTime(Date date)
+	{
+		return format(date, DATE_TIME_DISPLAY_FORMAT);
 	}
 
 	protected final String formatLastUpdated(Resource resource)
@@ -134,6 +118,12 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 		return formatDateTime(getValue(resource, hasDateTime, getDateTime));
 	}
 
+	protected final <E extends Base> String getInstant(E resource, Predicate<E> hasInstant,
+			Function<E, InstantType> getInstant)
+	{
+		return formatDateTime(getValue(resource, hasInstant, getInstant));
+	}
+
 	protected final <E extends Base> Boolean getBoolean(E resource, Predicate<E> hasBoolean,
 			Function<E, BooleanType> getBoolean)
 	{
@@ -175,6 +165,19 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 		return e != null && e.hasCode() ? e.getCode() : null;
 	}
 
+	protected final <E extends Base> ElementSystemValue getIdentifier(E resource, Predicate<E> hasIdentifier,
+			Function<E, Identifier> getIdentifier)
+	{
+		Objects.requireNonNull(hasIdentifier, "hasIdentifier");
+		Objects.requireNonNull(getIdentifier, "getIdentifier");
+
+		if (resource == null || !hasIdentifier.test(resource))
+			return null;
+
+		Identifier identifier = getIdentifier.apply(resource);
+		return identifier != null ? ElementSystemValue.from(identifier) : null;
+	}
+
 	protected final <E extends Base> List<ElementSystemValue> getIdentifiers(E resource, Predicate<E> hasIdentifier,
 			Function<E, List<Identifier>> getIdentifier)
 	{
@@ -186,5 +189,21 @@ abstract class AbstractThymeleafContext<R extends Resource> implements Thymeleaf
 
 		List<Identifier> identifier = getIdentifier.apply(resource);
 		return identifier != null ? identifier.stream().map(ElementSystemValue::from).toList() : null;
+	}
+
+	protected final <E extends Base> List<ElementSystemValue> getReferenceIdentifiers(E resource,
+			Predicate<E> hasReference, Function<E, List<Reference>> getReference)
+	{
+		Objects.requireNonNull(hasReference, "hasReference");
+		Objects.requireNonNull(getReference, "getReference");
+
+		if (resource == null || !hasReference.test(resource))
+			return null;
+
+		List<Reference> references = getReference.apply(resource);
+		return references != null
+				? references.stream().filter(Reference::hasIdentifier).map(Reference::getIdentifier)
+						.map(ElementSystemValue::from).toList()
+				: null;
 	}
 }

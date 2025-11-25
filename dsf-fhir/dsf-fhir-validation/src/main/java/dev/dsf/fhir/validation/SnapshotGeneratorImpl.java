@@ -1,11 +1,30 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.validation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -20,18 +39,21 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(SnapshotGeneratorImpl.class);
 
-	private final IWorkerContext worker;
+	private Supplier<IWorkerContext> workerFactory;
 
 	public SnapshotGeneratorImpl(FhirContext fhirContext, IValidationSupport validationSupport)
 	{
-		worker = createWorker(fhirContext, validationSupport);
+		workerFactory = createWorker(fhirContext, validationSupport);
 	}
 
-	protected IWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
+	private Supplier<IWorkerContext> createWorker(FhirContext context, IValidationSupport validationSupport)
 	{
-		HapiWorkerContext workerContext = new HapiWorkerContext(context, validationSupport);
-		workerContext.setLocale(context.getLocalizer().getLocale());
-		return workerContext;
+		return () ->
+		{
+			HapiWorkerContext workerContext = new HapiWorkerContext(context, validationSupport);
+			workerContext.setLocale(context.getLocalizer().getLocale());
+			return workerContext;
+		};
 	}
 
 	@Override
@@ -55,10 +77,14 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 				differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion(),
 				differential.getBaseDefinition());
 
+		// can't reuse worker, worker contains cache
+		IWorkerContext worker = workerFactory.get();
 		StructureDefinition base = worker.fetchResource(StructureDefinition.class, differential.getBaseDefinition());
 
 		if (base == null)
 			logger.warn("Base definition with url {} not found", differential.getBaseDefinition());
+		else if (!base.hasSnapshot())
+			logger.warn("Base definition with url {} has no snapshot", differential.getBaseDefinition());
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();
@@ -75,6 +101,25 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 					differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion());
 			messages.forEach(m -> logger.warn("Issue while generating snapshot: {} - {} - {}", m.getDisplay(),
 					m.getLine(), m.getMessage()));
+		}
+
+		// FIXME workaround HAPI ProfileUtilities bug
+		if ("http://dsf.dev/fhir/StructureDefinition/task-base".equals(differential.getBaseDefinition())
+				|| "http://dsf.dev/fhir/StructureDefinition/task".equals(differential.getBaseDefinition()))
+		{
+			Optional<ElementDefinition> taskInputValueX = differential.getSnapshot().getElement().stream()
+					.filter(e -> "Task.input.value[x]".equals(e.getId()) && e.getFixed() instanceof StringType s
+							&& s.getValue() != null)
+					.findFirst();
+
+			taskInputValueX.ifPresent(e ->
+			{
+				logger.debug("Removing fixedString value '{}' from StructureDefinition '{}|{}' snapshot element '{}'",
+						((StringType) e.getFixed()).getValue(), differential.getUrl(), differential.getVersion(),
+						e.getId());
+
+				e.setFixed(null);
+			});
 		}
 
 		return new SnapshotWithValidationMessages(differential, messages);

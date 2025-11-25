@@ -1,0 +1,62 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/task-test" />
+	<!-- version managed by bpe -->
+	<version value="2.0.0" />
+	<name value="TaskTest" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-09-08" />
+	<fhirVersion value="4.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="Task" />
+	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Task.instantiatesUri">
+			<path value="Task.instantiatesUri" />
+			<fixedUri value="http://dsf.dev/bpe/Process/test/#{version}" />
+		</element>
+		<element id="Task.input">
+			<path value="Task.input" />
+			<min value="2" />
+			<max value="3" />
+		</element>
+		<element id="Task.input:message-name">
+			<path value="Task.input" />
+			<sliceName value="message-name" />
+		</element>
+		<element id="Task.input:message-name.value[x]">
+			<path value="Task.input.value[x]" />
+			<fixedString value="start" />
+		</element>
+		<element id="Task.input:correlation-key">
+			<path value="Task.input" />
+			<sliceName value="correlation-key" />
+			<max value="0" />
+		</element>
+	</differential>
+</StructureDefinition>

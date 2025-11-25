@@ -1,15 +1,33 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth;
 
+import java.util.function.Function;
+
 import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.security.openid.OpenIdCredentials;
 import org.eclipse.jetty.security.openid.OpenIdLoginService;
-import org.eclipse.jetty.server.UserIdentity;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.common.auth.conf.PractitionerIdentity;
-import jakarta.servlet.ServletRequest;
 
 public class DsfOpenIdLoginService extends OpenIdLoginService
 {
@@ -27,7 +45,8 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 	}
 
 	@Override
-	public UserIdentity login(String identifier, Object credentials, ServletRequest req)
+	public UserIdentity login(String identifier, Object credentials, Request request,
+			Function<Boolean, Session> getOrCreateSession)
 	{
 		OpenIdCredentials openIdCredentials = (OpenIdCredentials) credentials;
 		try
@@ -42,7 +61,7 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			return null;
 		}
 
-		return loginService.login(openIdCredentials.getUserId(), credentials, req);
+		return loginService.login(openIdCredentials.getUserId(), credentials, request, getOrCreateSession);
 	}
 
 	@Override

@@ -1,14 +1,27 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Coding;
 import org.junit.Test;
@@ -19,18 +32,35 @@ import org.yaml.snakeyaml.Yaml;
 import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.RoleConfig.Mapping;
+import dev.dsf.common.auth.conf.RoleConfig.RoleKeyAndValues;
 
 public class RoleConfigTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(RoleConfigTest.class);
 
-	private static enum TestRole implements DsfRole
+	private static interface TestRole extends DsfRole
 	{
-		foo, bar, baz;
+		List<String> resourceTypes();
+	}
 
-		public static boolean isValid(String s)
+	private static record TestRoleImpl(String name, List<String> resourceTypes) implements TestRole
+	{
+		private static final Set<String> VALID_ROLES = Set.of("foo", "bar", "baz");
+		private static final Set<String> VALID_RESOURCES = Set.of("Task", "QuestionnaireResponse");
+
+		public static TestRoleImpl create(RoleKeyAndValues keyAndValues)
 		{
-			return Stream.of(values()).map(Enum::name).anyMatch(n -> n.equals(s));
+			if (VALID_ROLES.contains(keyAndValues.key())
+					&& keyAndValues.values().stream().allMatch(VALID_RESOURCES::contains))
+				return new TestRoleImpl(keyAndValues.key(), keyAndValues.values());
+			else
+				return null;
+		}
+
+		@Override
+		public boolean matches(DsfRole role)
+		{
+			return false;
 		}
 	}
 
@@ -60,7 +90,7 @@ public class RoleConfigTest
 				    email: someone@test.com
 				    dsf-role:
 				      - foo
-				      - bar
+				      - bar: [Task, QuestionnaireResponse]
 				      - invalid
 				    practitioner-role: http://test.org/fhir/CodeSystem/foo|bar
 				- test2:
@@ -90,44 +120,45 @@ public class RoleConfigTest
 			return null;
 		};
 
-		RoleConfig roles = new RoleConfig(new Yaml().load(document),
-				s -> TestRole.isValid(s) ? TestRole.valueOf(s) : null, practitionerRoleFactory);
+		RoleConfig<TestRoleImpl> roles = new RoleConfig<TestRoleImpl>(new Yaml().load(document), TestRoleImpl::create,
+				practitionerRoleFactory);
 		roles.getEntries().forEach(e -> logger.debug(e.toString()));
 
 		assertNotNull(roles.getEntries());
 		assertEquals(5, roles.getEntries().size());
 
-		assertMapping("foo", Arrays.asList(
+		assertMapping("foo", List.of(
 				"f7f9ef095c5c246d3e8149729221e668b6ffd9a117fe23e2687658f6a203d31a0e769fb20dc2af6361306717116c700c5905a895a7311057af461c5d78a257b5"),
-				Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
-				Arrays.asList(TestRole.foo, TestRole.bar, TestRole.baz), Collections.emptyList(),
-				roles.getEntries().get(0));
+				List.of(), List.of(), List.of(), List.of(new TestRoleImpl("foo", List.of()),
+						new TestRoleImpl("bar", List.of()), new TestRoleImpl("baz", List.of())),
+				List.of(), roles.getEntries().get(0));
 
-		assertMapping("bar", Arrays.asList(
+		assertMapping("bar", List.of(
 				"2d259cc15ee2fe57bc11e1322040ee9e045dd3efb83ed1cb0f393c3bdfecaf3f6506e5573fbc213a1025a7c3dfef101fc8d85ab069e5662d666ea970c7e0cbb6",
 				"b52a8b63b030181b8b6bc9ca1e47279da4842ef7ab46c08de6c5713a4e8ecc2c1d7f8cd5c17fe4eb0fe43838ee4b020a88634ea47c520dcc7f5f966b66e69190"),
-				Arrays.asList("one@test.com", "two@test.com"), Collections.emptyList(), Collections.emptyList(),
-				Arrays.asList(TestRole.foo, TestRole.baz), Collections.emptyList(), roles.getEntries().get(1));
+				List.of("one@test.com", "two@test.com"), List.of(), List.of(),
+				List.of(new TestRoleImpl("foo", List.of()), new TestRoleImpl("baz", List.of())), List.of(),
+				roles.getEntries().get(1));
 
-		assertMapping("test1", Collections.emptyList(), Arrays.asList("someone@test.com"), Collections.emptyList(),
-				Collections.emptyList(), Arrays.asList(TestRole.foo, TestRole.bar),
-				Collections.singletonList(new Coding().setSystem("http://test.org/fhir/CodeSystem/foo").setCode("bar")),
+		assertMapping("test1", List.of(), List.of("someone@test.com"), List.of(), List.of(),
+				List.of(new TestRoleImpl("foo", List.of()),
+						new TestRoleImpl("bar", List.of("Task", "QuestionnaireResponse"))),
+				List.of(new Coding().setSystem("http://test.org/fhir/CodeSystem/foo").setCode("bar")),
 				roles.getEntries().get(2));
 
-		assertMapping("test2", Collections.emptyList(), Collections.emptyList(), Arrays.asList("claim_a", "claim_b"),
-				Collections.emptyList(), Arrays.asList(TestRole.foo), Collections.emptyList(),
-				roles.getEntries().get(3));
+		assertMapping("test2", List.of(), List.of(), List.of("claim_a", "claim_b"), List.of(),
+				List.of(new TestRoleImpl("foo", List.of())), List.of(), roles.getEntries().get(3));
 
-		assertMapping("test3", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
-				Collections.singletonList("group1"), Arrays.asList(TestRole.foo),
-				Arrays.asList(new Coding().setSystem("http://test.org/fhir/CodeSystem/foo").setCode("bar"),
+		assertMapping("test3", List.of(), List.of(), List.of(), List.of("group1"),
+				List.of(new TestRoleImpl("foo", List.of())),
+				List.of(new Coding().setSystem("http://test.org/fhir/CodeSystem/foo").setCode("bar"),
 						new Coding().setSystem("http://test.org/fhir/CodeSystem/foo").setCode("baz")),
 				roles.getEntries().get(4));
 	}
 
 	private void assertMapping(String expectedName, List<String> expectedThumbprints, List<String> expectedEmails,
 			List<String> expectedTokenRoles, List<String> expectedTokenGroups, List<DsfRole> expectedDsfRoles,
-			List<Coding> expectedPractionerRole, Mapping actual)
+			List<Coding> expectedPractionerRole, Mapping<TestRoleImpl> actual)
 	{
 		assertNotNull(actual);
 		assertEquals(expectedName, actual.getName());

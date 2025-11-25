@@ -1,6 +1,22 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.hapi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
@@ -36,8 +52,13 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(mode, parameters.getParameter("mode"));
-		assertEquals(uri, parameters.getParameter("uri"));
+		ParametersParameterComponent modeParam = parameters.getParameter("mode");
+		assertNotNull(modeParam);
+		assertEquals(mode, modeParam.getValue());
+
+		ParametersParameterComponent uriParam = parameters.getParameter("uri");
+		assertNotNull(modeParam);
+		assertEquals(uri, uriParam.getValue());
 	}
 
 	@Test
@@ -56,8 +77,12 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(mode, parameters.getParameter("mode"));
-		assertEquals(uri, parameters.getParameter("uri"));
+		ParametersParameterComponent modeParam = parameters.getParameter("mode");
+		assertNotNull(modeParam);
+		assertEquals(mode, modeParam.getValue());
+		ParametersParameterComponent uriParam = parameters.getParameter("uri");
+		assertNotNull(uriParam);
+		assertEquals(uri, uriParam.getValue());
 
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
 				.filter(p -> "resource".equals(p.getName())).findFirst();
@@ -95,6 +120,8 @@ public class ParametersTest
 		FhirContext context = FhirContext.forR4();
 		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
 
-		assertEquals(uri, parameters.getParameter("url"));
+		ParametersParameterComponent urlParam = parameters.getParameter("url");
+		assertNotNull(urlParam);
+		assertEquals(uri, urlParam.getValue());
 	}
 }

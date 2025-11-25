@@ -1,3 +1,20 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -9,16 +26,16 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<main.basedir>${project.parent.parent.basedir}</main.basedir>
+	</properties>
+
 	<name>DSF FHIR Server Jetty</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-fhir-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>dev.dsf</groupId>
-			<artifactId>dsf-tools-db-migration</artifactId>
+			<artifactId>dsf-common-db</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>dev.dsf</groupId>
@@ -29,8 +46,13 @@
 			<artifactId>dsf-common-jetty</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-jakarta-server</artifactId>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-server</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty.ee10.websocket</groupId>
+			<artifactId>jetty-ee10-websocket-jakarta-server</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.eclipse.jetty.toolchain</groupId>
@@ -75,6 +97,15 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<compilerArgs>
+						<arg>-proc:none</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
@@ -99,7 +130,6 @@
 						<configuration>
 							<outputDirectory>docker/lib</outputDirectory>
 							<includeScope>compile</includeScope>
-							<excludeArtifactIds>camunda-bpmn-model,camunda-xml-model</excludeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
@@ -135,24 +165,82 @@
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+						<fileset>
+							<directory>docker/ca/client_ca_chains</directory>
+							<includes>
+								<include>*.crt</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>docker/ca/server_root_cas</directory>
+							<includes>
+								<include>*.crt</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker/fhir_proxy/ca/client_ca_chains</directory>
+							<includes>
+								<include>*.crt</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../../dsf-docker/fhir_proxy/ca/client_issuing_cas</directory>
+							<includes>
+								<include>*.crt</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
 					</filesets>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<artifactId>dsf-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>config-doc</id>
 						<goals>
-							<goal>generate</goal>
+							<goal>generate-config-doc</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-ca-files</id>
+						<goals>
+							<goal>generate-default-ca-files</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<workingPackages>
-						<workingPackage>dev.dsf.common</workingPackage>
-						<workingPackage>dev.dsf.fhir</workingPackage>
-					</workingPackages>
+					<configDocPackages>dev.dsf.common,dev.dsf.fhir</configDocPackages>
+					<clientIssuingCas>
+						../../dsf-docker/fhir_proxy/ca/client_issuing_cas
+					</clientIssuingCas>
+					<clientCaChains>
+						../../dsf-docker/fhir_proxy/ca/client_ca_chains,docker/ca/client_ca_chains
+					</clientCaChains>
+					<serverRootCas>
+						docker/ca/server_root_cas
+					</serverRootCas>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+  				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<licenseSets>
+						<licenseSet>
+							<excludes>
+								<exclude>cert/*</exclude>
+								<exclude>conf/bundle.xml</exclude>
+								<exclude>conf/config.properties</exclude>
+								<exclude>docker/ca/**/*.crt</exclude>
+								<exclude>docker/.dockerignore</exclude>
+							</excludes>
+						</licenseSet>
+					</licenseSets>
 				</configuration>
 			</plugin>
 		</plugins>

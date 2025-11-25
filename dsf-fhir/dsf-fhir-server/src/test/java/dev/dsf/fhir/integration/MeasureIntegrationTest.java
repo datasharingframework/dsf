@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
@@ -5,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +78,7 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		Measure measure = measureDao.create(createMeasure());
 
 		Bundle searchBundle = getWebserviceClient().search(Measure.class,
-				Map.of("_id", Collections.singletonList(measure.getIdElement().getIdPart()), "_include",
-						Collections.singletonList("Measure:depends-on")));
+				Map.of("_id", List.of(measure.getIdElement().getIdPart()), "_include", List.of("Measure:depends-on")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -99,8 +112,8 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
 		String measureId = measureDao.create(createMeasure()).getIdElement().getIdPart();
 
-		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class, Map.of("depends-on",
-				Collections.singletonList("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
+		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class,
+				Map.of("depends-on", List.of("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
 
 		assertNotNull(resultBundle);
 		assertEquals(1, resultBundle.getTotal());
@@ -116,7 +129,7 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		measureDao.create(createMeasure()).getIdElement().getIdPart();
 
 		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Measure.class,
-				Map.of("depends-on", Collections.singletonList("0a887526-2b9f-413a-8842-5e9252e2d7f7"))));
+				Map.of("depends-on", List.of("0a887526-2b9f-413a-8842-5e9252e2d7f7"))));
 	}
 
 	@Test
@@ -132,8 +145,8 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
 		String measureId = measureDao.create(measure).getIdElement().getIdPart();
 
-		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class, Map.of("depends-on",
-				Collections.singletonList("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
+		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class,
+				Map.of("depends-on", List.of("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
 
 		assertNotNull(resultBundle);
 		assertEquals(1, resultBundle.getTotal());

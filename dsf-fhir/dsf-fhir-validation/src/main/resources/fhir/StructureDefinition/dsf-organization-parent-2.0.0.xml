@@ -1,0 +1,82 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/organization-parent" />
+	<version value="2.0.0" />
+	<name value="OrganizationParent" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-10-27" />
+	<fhirVersion value="4.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="Organization" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Organization" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Organization.meta">
+			<path value="Organization.meta" />
+			<type>
+				<code value="Meta" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/meta|2.0.0" />
+			</type>
+		</element>
+		<element id="Organization.identifier">
+			<path value="Organization.identifier" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="system" />
+				</discriminator>
+				<discriminator>
+					<type value="value" />
+					<path value="value" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+			<min value="1" />
+		</element>
+		<element id="Organization.identifier:dsfIdentifier">
+			<path value="Organization.identifier" />
+			<sliceName value="dsfIdentifier" />
+			<min value="1" />
+			<max value="1" />
+		</element>
+		<element id="Organization.identifier:dsfIdentifier.system">
+			<path value="Organization.identifier.system" />
+			<min value="1" />
+			<fixedUri value="http://dsf.dev/sid/organization-identifier" />
+		</element>
+		<element id="Organization.identifier:dsfIdentifier.value">
+			<path value="Organization.identifier.value" />
+			<min value="1" />
+		</element>
+		<element id="Organization.active">
+			<path value="Organization.active" />
+			<min value="1" />
+		</element>
+	</differential>
+</StructureDefinition>
