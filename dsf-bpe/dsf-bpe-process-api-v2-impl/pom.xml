@@ -197,7 +197,7 @@
 								<artifactItem>
 									<groupId>com.nimbusds</groupId>
 									<artifactId>nimbus-jose-jwt</artifactId>
-									<version>9.37.3</version>
+									<version>9.37.4</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.github.stephenc.jcip</groupId>
