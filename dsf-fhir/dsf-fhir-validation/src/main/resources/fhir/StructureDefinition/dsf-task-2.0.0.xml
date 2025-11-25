@@ -72,6 +72,7 @@
 			<type>
 				<code value="Reference" />
 				<targetProfile value="http://dsf.dev/fhir/StructureDefinition/organization|2.0.0" />
+				<targetProfile value="http://hl7.org/fhir/StructureDefinition/Practitioner" />
 			</type>
 			<constraint>
 				<key value="requester-identifier-type-organization" />
