@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.mail;
 
 import java.io.IOException;
@@ -67,10 +82,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import de.rwh.utils.crypto.context.SSLContextFactory;
-import dev.dsf.bpe.v1.service.MailService;
+import de.hsheilbronn.mi.utils.crypto.context.SSLContextFactory;
+import dev.dsf.bpe.api.service.BpeMailService;
 
-public class SmtpMailService implements MailService, InitializingBean
+public class SmtpMailService implements BpeMailService, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SmtpMailService.class);
 
@@ -156,8 +171,8 @@ public class SmtpMailService implements MailService, InitializingBean
 			MailManagerFactory factory = (name, data) -> new SmtpManager(name, session, message, data)
 			{
 			};
-			FactoryData data = new FactoryData(null, null, null, null, null, null, event -> subject, null, null, 0,
-					null, null, false, messageBufferSize, null, null);
+			FactoryData data = new FactoryData(null, null, null, null, null, null, _ -> subject, null, null, 0, null,
+					null, false, messageBufferSize, null, null);
 			manager = AbstractManager.getManager("SmtpMailService.Log4jAppender.Manager", factory, data);
 		}
 
@@ -341,7 +356,7 @@ public class SmtpMailService implements MailService, InitializingBean
 		try
 		{
 			// uses default jvm trust / keys if not configured (respective trustStore/keyStore fields null)
-			return new SSLContextFactory().createSSLContext(trustStore, keyStore, keyStorePassword).getSocketFactory();
+			return SSLContextFactory.createSSLContext(trustStore, keyStore, keyStorePassword).getSocketFactory();
 		}
 		catch (UnrecoverableKeyException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException e)
 		{

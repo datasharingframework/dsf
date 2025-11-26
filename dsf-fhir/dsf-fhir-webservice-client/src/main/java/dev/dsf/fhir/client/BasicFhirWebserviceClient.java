@@ -1,6 +1,20 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.client;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -50,9 +64,44 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	 *            not <code>null</code>
 	 * @param mediaType
 	 *            not <code>null</code>
-	 * @return {@link InputStream} needs to be closed
+	 * @return {@link BinaryInputStream} needs to be closed
 	 */
-	InputStream readBinary(String id, MediaType mediaType);
+	BinaryInputStream readBinary(String id, MediaType mediaType);
+
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @param rangeStart
+	 *            <code>null</code> if suffix range (<b>rangeEndInclusive</b> <code>&lt;0</code>), else <code>>=0</code>
+	 * @param rangeEndInclusive
+	 *            <code>null</code> if range from <b>rangeStart</b> to end of file, <code>&lt;0</code> if suffix range
+	 *            (<b>rangeStart</b> <code>null</code>), <code>>=rangeStart</code> for range end
+	 * @return {@link BinaryInputStream} needs to be closed
+	 */
+	default BinaryInputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive)
+	{
+		return readBinary(id, mediaType, rangeStart, rangeEndInclusive, null);
+	}
+
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @param rangeStart
+	 *            <code>null</code> if suffix range (<b>rangeEndInclusive</b> <code>&lt;0</code>), else <code>>=0</code>
+	 * @param rangeEndInclusive
+	 *            <code>null</code> if range from <b>rangeStart</b> to end of file, <code>&lt;0</code> if suffix range
+	 *            (<b>rangeStart</b> <code>null</code>), <code>>=rangeStart</code> for range end
+	 * @param additionalHeaders
+	 *            may be <code>null</code>, use to set values of headers like "If-Unmodified-Since", "If-Match" and
+	 *            "If-Range"
+	 * @return {@link BinaryInputStream} needs to be closed
+	 */
+	BinaryInputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive,
+			Map<String, String> additionalHeaders);
 
 	/**
 	 * @param resourceTypeName
@@ -76,9 +125,49 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	 *            not <code>null</code>
 	 * @param mediaType
 	 *            not <code>null</code>
-	 * @return {@link InputStream} needs to be closed
+	 * @return {@link BinaryInputStream} needs to be closed
 	 */
-	InputStream readBinary(String id, String version, MediaType mediaType);
+	BinaryInputStream readBinary(String id, String version, MediaType mediaType);
+
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param version
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @param rangeStart
+	 *            <code>null</code> if suffix range (<b>rangeEndInclusive</b> <code>&lt;0</code>), else <code>>=0</code>
+	 * @param rangeEndInclusive
+	 *            <code>null</code> if range from <b>rangeStart</b> to end of file, <code>&lt;0</code> if suffix range
+	 *            (<b>rangeStart</b> <code>null</code>), <code>>=rangeStart</code> for range end
+	 * @return {@link BinaryInputStream} needs to be closed
+	 */
+	default BinaryInputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive)
+	{
+		return readBinary(id, version, mediaType, rangeStart, rangeEndInclusive, null);
+	}
+
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param version
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @param rangeStart
+	 *            <code>null</code> if suffix range (<b>rangeEndInclusive</b> <code>&lt;0</code>), else <code>>=0</code>
+	 * @param rangeEndInclusive
+	 *            <code>null</code> if range from <b>rangeStart</b> to end of file, <code>&lt;0</code> if suffix range
+	 *            (<b>rangeStart</b> <code>null</code>), <code>>=rangeStart</code> for range end
+	 * @param additionalHeaders
+	 *            may be <code>null</code>, use to set values of headers like "If-Unmodified-Since", "If-Match" and
+	 *            "If-Range"
+	 * @return {@link BinaryInputStream} needs to be closed
+	 */
+	BinaryInputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive, Map<String, String> additionalHeaders);
 
 	boolean exists(IdType resourceTypeIdVersion);
 

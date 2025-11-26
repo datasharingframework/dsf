@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.config;
 
 import static org.junit.Assert.assertEquals;
@@ -39,6 +54,7 @@ public class ProxyConfigTest
 	{
 		String url = "http://proxy", username = "username";
 		char[] password = "password".toCharArray();
+		// Arrays.asList as we need a null element, not allowed in List.of
 		List<String> noProxy = Arrays.asList(null, " ", "no-proxy");
 
 		ProxyConfigImpl c = new ProxyConfigImpl(url, username, password, noProxy);
@@ -54,16 +70,16 @@ public class ProxyConfigTest
 	public void testIsEnabled() throws Exception
 	{
 		assertTrue(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled());
-		assertTrue(new ProxyConfigImpl("http://proxy", null, null, Arrays.asList("foo")).isEnabled());
+		assertTrue(new ProxyConfigImpl("http://proxy", null, null, List.of("foo")).isEnabled());
 		assertFalse(new ProxyConfigImpl(null, null, null, null).isEnabled());
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, Arrays.asList("*")).isEnabled());
+		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled());
 	}
 
 	@Test
 	public void testIsEndabled() throws Exception
 	{
 		ProxyConfig proxyConfig = new ProxyConfigImpl("http://proxy", null, null,
-				Arrays.asList("foo.bar", "foo.bar.baz:8080", "test:1234"));
+				List.of("foo.bar", "foo.bar.baz:8080", "test:1234"));
 
 		assertFalse(proxyConfig.isEnabled("http://foo.bar"));
 		assertFalse(proxyConfig.isEnabled("http://foo.bar:8080"));
@@ -85,7 +101,7 @@ public class ProxyConfigTest
 	@Test
 	public void testIsEnabledAllNoProxy() throws Exception
 	{
-		ProxyConfig proxyConfig = new ProxyConfigImpl(null, null, null, Arrays.asList("*"));
+		ProxyConfig proxyConfig = new ProxyConfigImpl(null, null, null, List.of("*"));
 
 		assertFalse(proxyConfig.isEnabled("http://foo.bar"));
 		assertFalse(proxyConfig.isEnabled("http://foo.bar:8080"));
@@ -106,15 +122,15 @@ public class ProxyConfigTest
 	public void testIsEnabledNull() throws Exception
 	{
 		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(null));
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, Arrays.asList("*")).isEnabled(null));
+		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled(null));
 		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(null));
 	}
 
 	@Test
 	public void testIsEnabledBlank() throws Exception
 	{
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, Arrays.asList("*")).isEnabled(""));
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, Arrays.asList("*")).isEnabled(" "));
+		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled(""));
+		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled(" "));
 		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(""));
 		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(" "));
 	}
@@ -122,7 +138,7 @@ public class ProxyConfigTest
 	@Test
 	public void testIsEnabledMalformedUrl() throws Exception
 	{
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, Arrays.asList("*")).isEnabled("malformed"));
+		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled("malformed"));
 		assertTrue(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(":malformed"));
 		assertTrue(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled("malformed"));
 	}

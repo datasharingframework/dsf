@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.spring.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,6 +173,9 @@ public class WebserviceConfig
 	@Autowired
 	private HistoryConfig historyConfig;
 
+	@Autowired
+	private AdapterConfig adapterConfig;
+
 	@Bean
 	public BrowserPolicyHeaderResponseFilter browserPolicyHeaderResponseFilter()
 	{
@@ -178,18 +196,19 @@ public class WebserviceConfig
 
 	private ActivityDefinitionServiceSecure activityDefinitionServiceSecure()
 	{
-		return new ActivityDefinitionServiceSecure(activityDefinitionServiceImpl(), propertiesConfig.getServerBaseUrl(),
-				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(),
-				daoConfig.activityDefinitionDao(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+		return new ActivityDefinitionServiceSecure(activityDefinitionServiceImpl(),
+				propertiesConfig.getDsfServerBaseUrl(), helperConfig.responseGenerator(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				referenceConfig.referenceExtractor(), daoConfig.activityDefinitionDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.activityDefinitionAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ActivityDefinitionServiceImpl activityDefinitionServiceImpl()
 	{
 		return new ActivityDefinitionServiceImpl(ActivityDefinitionServiceJaxrs.PATH,
-				propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				daoConfig.activityDefinitionDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
@@ -201,22 +220,23 @@ public class WebserviceConfig
 	@Bean
 	public BinaryService binaryService()
 	{
-		return new BinaryServiceJaxrs(binaryServiceSecure(), helperConfig.parameterConverter());
+		return new BinaryServiceJaxrs(binaryServiceSecure(), helperConfig.parameterConverter(),
+				adapterConfig.fhirAdapter());
 	}
 
 	private BinaryServiceSecure binaryServiceSecure()
 	{
-		return new BinaryServiceSecure(binaryServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new BinaryServiceSecure(binaryServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.binaryDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.binaryAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private BinaryService binaryServiceImpl()
 	{
-		return new BinaryServiceImpl(BinaryServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new BinaryServiceImpl(BinaryServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.binaryDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -233,17 +253,17 @@ public class WebserviceConfig
 
 	private BundleServiceSecure bundleServiceSecure()
 	{
-		return new BundleServiceSecure(bundleServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new BundleServiceSecure(bundleServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.bundleDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.bundleAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private BundleService bundleServiceImpl()
 	{
-		return new BundleServiceImpl(BundleServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new BundleServiceImpl(BundleServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.bundleDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -260,17 +280,17 @@ public class WebserviceConfig
 
 	private CodeSystemServiceSecure codeSystemServiceSecure()
 	{
-		return new CodeSystemServiceSecure(codeSystemServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new CodeSystemServiceSecure(codeSystemServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.codeSystemDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.codeSystemAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private CodeSystemServiceImpl codeSystemServiceImpl()
 	{
-		return new CodeSystemServiceImpl(CodeSystemServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new CodeSystemServiceImpl(CodeSystemServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.codeSystemDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -287,23 +307,25 @@ public class WebserviceConfig
 
 	private DocumentReferenceServiceSecure documentReferenceServiceSecure()
 	{
-		return new DocumentReferenceServiceSecure(documentReferenceServiceImpl(), propertiesConfig.getServerBaseUrl(),
-				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(),
-				daoConfig.documentReferenceDao(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
-				authorizationConfig.documentReferenceAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+		return new DocumentReferenceServiceSecure(documentReferenceServiceImpl(),
+				propertiesConfig.getDsfServerBaseUrl(), helperConfig.responseGenerator(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				referenceConfig.referenceExtractor(), daoConfig.documentReferenceDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter(), authorizationConfig.documentReferenceAuthorizationRule(),
+				validationConfig.resourceValidator(), validationConfig.validationRules(),
+				validationConfig.defaultProfileProvider());
 	}
 
 	private DocumentReferenceServiceImpl documentReferenceServiceImpl()
 	{
-		return new DocumentReferenceServiceImpl(DocumentReferenceServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
-				propertiesConfig.getDefaultPageCount(), daoConfig.documentReferenceDao(),
-				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
-				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
-				historyConfig.historyService(), validationConfig.validationRules());
+		return new DocumentReferenceServiceImpl(DocumentReferenceServiceJaxrs.PATH,
+				propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				daoConfig.documentReferenceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService(),
+				validationConfig.validationRules());
 	}
 
 	@Bean
@@ -314,17 +336,17 @@ public class WebserviceConfig
 
 	private EndpointServiceSecure endpointServiceSecure()
 	{
-		return new EndpointServiceSecure(endpointServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new EndpointServiceSecure(endpointServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.endpointDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.endpointAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private EndpointServiceImpl endpointServiceImpl()
 	{
-		return new EndpointServiceImpl(EndpointServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new EndpointServiceImpl(EndpointServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.endpointDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -341,17 +363,17 @@ public class WebserviceConfig
 
 	private GroupServiceSecure groupServiceSecure()
 	{
-		return new GroupServiceSecure(groupServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new GroupServiceSecure(groupServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.groupDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.groupAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private GroupServiceImpl groupServiceImpl()
 	{
-		return new GroupServiceImpl(GroupServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new GroupServiceImpl(GroupServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.groupDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -368,23 +390,25 @@ public class WebserviceConfig
 
 	private HealthcareServiceServiceSecure healthcareServiceServiceSecure()
 	{
-		return new HealthcareServiceServiceSecure(healthcareServiceServiceImpl(), propertiesConfig.getServerBaseUrl(),
-				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(),
-				daoConfig.healthcareServiceDao(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
-				authorizationConfig.healthcareServiceAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+		return new HealthcareServiceServiceSecure(healthcareServiceServiceImpl(),
+				propertiesConfig.getDsfServerBaseUrl(), helperConfig.responseGenerator(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				referenceConfig.referenceExtractor(), daoConfig.healthcareServiceDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter(), authorizationConfig.healthcareServiceAuthorizationRule(),
+				validationConfig.resourceValidator(), validationConfig.validationRules(),
+				validationConfig.defaultProfileProvider());
 	}
 
 	private HealthcareServiceServiceImpl healthcareServiceServiceImpl()
 	{
-		return new HealthcareServiceServiceImpl(HealthcareServiceServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
-				propertiesConfig.getDefaultPageCount(), daoConfig.healthcareServiceDao(),
-				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
-				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
-				historyConfig.historyService(), validationConfig.validationRules());
+		return new HealthcareServiceServiceImpl(HealthcareServiceServiceJaxrs.PATH,
+				propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				daoConfig.healthcareServiceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService(),
+				validationConfig.validationRules());
 	}
 
 	@Bean
@@ -395,17 +419,17 @@ public class WebserviceConfig
 
 	private LibraryServiceSecure libraryServiceSecure()
 	{
-		return new LibraryServiceSecure(libraryServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new LibraryServiceSecure(libraryServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.libraryDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.libraryAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private LibraryServiceImpl libraryServiceImpl()
 	{
-		return new LibraryServiceImpl(LibraryServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new LibraryServiceImpl(LibraryServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.libraryDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -422,17 +446,17 @@ public class WebserviceConfig
 
 	private LocationServiceSecure locationServiceSecure()
 	{
-		return new LocationServiceSecure(locationServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new LocationServiceSecure(locationServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.locationDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.locationAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private LocationServiceImpl locationServiceImpl()
 	{
-		return new LocationServiceImpl(LocationServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new LocationServiceImpl(LocationServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.locationDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -455,17 +479,17 @@ public class WebserviceConfig
 
 	private MeasureServiceSecure measureServiceSecure()
 	{
-		return new MeasureServiceSecure(measureServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new MeasureServiceSecure(measureServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.measureDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.measureAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private MeasureServiceImpl measureServiceImpl()
 	{
-		return new MeasureServiceImpl(MeasureServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new MeasureServiceImpl(MeasureServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.measureDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -482,17 +506,17 @@ public class WebserviceConfig
 
 	private MeasureReportServiceSecure measureReportServiceSecure()
 	{
-		return new MeasureReportServiceSecure(measureReportServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new MeasureReportServiceSecure(measureReportServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.measureReportDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.measureReportAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private MeasureReportServiceImpl measureReportServiceImpl()
 	{
-		return new MeasureReportServiceImpl(MeasureReportServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new MeasureReportServiceImpl(MeasureReportServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.measureReportDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -509,17 +533,17 @@ public class WebserviceConfig
 
 	private NamingSystemServiceSecure namingSystemServiceSecure()
 	{
-		return new NamingSystemServiceSecure(namingSystemServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new NamingSystemServiceSecure(namingSystemServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.namingSystemDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.namingSystemAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private NamingSystemService namingSystemServiceImpl()
 	{
-		return new NamingSystemServiceImpl(NamingSystemServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new NamingSystemServiceImpl(NamingSystemServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.namingSystemDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -536,17 +560,17 @@ public class WebserviceConfig
 
 	private OrganizationServiceSecure organizationServiceSecure()
 	{
-		return new OrganizationServiceSecure(organizationServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new OrganizationServiceSecure(organizationServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.organizationDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.organizationAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private OrganizationServiceImpl organizationServiceImpl()
 	{
-		return new OrganizationServiceImpl(OrganizationServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new OrganizationServiceImpl(OrganizationServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.organizationDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -564,18 +588,18 @@ public class WebserviceConfig
 	private OrganizationAffiliationServiceSecure organizationAffiliationServiceSecure()
 	{
 		return new OrganizationAffiliationServiceSecure(organizationAffiliationServiceImpl(),
-				propertiesConfig.getServerBaseUrl(), helperConfig.responseGenerator(),
+				propertiesConfig.getDsfServerBaseUrl(), helperConfig.responseGenerator(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				referenceConfig.referenceExtractor(), daoConfig.organizationAffiliationDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.organizationAffiliationAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private OrganizationAffiliationServiceImpl organizationAffiliationServiceImpl()
 	{
 		return new OrganizationAffiliationServiceImpl(OrganizationAffiliationServiceJaxrs.PATH,
-				propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				daoConfig.organizationAffiliationDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -592,17 +616,17 @@ public class WebserviceConfig
 
 	private PatientServiceSecure patientServiceSecure()
 	{
-		return new PatientServiceSecure(patientServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new PatientServiceSecure(patientServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.patientDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.patientAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private PatientServiceImpl patientServiceImpl()
 	{
-		return new PatientServiceImpl(PatientServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new PatientServiceImpl(PatientServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.patientDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -619,23 +643,24 @@ public class WebserviceConfig
 
 	private PractitionerRoleServiceSecure practitionerRoleServiceSecure()
 	{
-		return new PractitionerRoleServiceSecure(practitionerRoleServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new PractitionerRoleServiceSecure(practitionerRoleServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(),
 				daoConfig.practitionerRoleDao(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.practitionerRoleAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private PractitionerRoleServiceImpl practitionerRoleServiceImpl()
 	{
-		return new PractitionerRoleServiceImpl(PractitionerRoleServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
-				propertiesConfig.getDefaultPageCount(), daoConfig.practitionerRoleDao(),
-				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
-				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
-				historyConfig.historyService(), validationConfig.validationRules());
+		return new PractitionerRoleServiceImpl(PractitionerRoleServiceJaxrs.PATH,
+				propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				daoConfig.practitionerRoleDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService(),
+				validationConfig.validationRules());
 	}
 
 	@Bean
@@ -646,17 +671,17 @@ public class WebserviceConfig
 
 	private PractitionerServiceSecure practitionerServiceSecure()
 	{
-		return new PractitionerServiceSecure(practitionerServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new PractitionerServiceSecure(practitionerServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.practitionerDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.practitionerAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private PractitionerServiceImpl practitionerServiceImpl()
 	{
-		return new PractitionerServiceImpl(PractitionerServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new PractitionerServiceImpl(PractitionerServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.practitionerDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -673,17 +698,17 @@ public class WebserviceConfig
 
 	private ProvenanceServiceSecure provenanceServiceSecure()
 	{
-		return new ProvenanceServiceSecure(provenanceServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new ProvenanceServiceSecure(provenanceServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.provenanceDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.provenanceAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ProvenanceServiceImpl provenanceServiceImpl()
 	{
-		return new ProvenanceServiceImpl(ProvenanceServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new ProvenanceServiceImpl(ProvenanceServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.provenanceDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -700,17 +725,17 @@ public class WebserviceConfig
 
 	private QuestionnaireServiceSecure questionnaireServiceSecure()
 	{
-		return new QuestionnaireServiceSecure(questionnaireServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new QuestionnaireServiceSecure(questionnaireServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.questionnaireDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.questionnaireAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private QuestionnaireServiceImpl questionnaireServiceImpl()
 	{
-		return new QuestionnaireServiceImpl(QuestionnaireServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new QuestionnaireServiceImpl(QuestionnaireServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.questionnaireDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -728,18 +753,18 @@ public class WebserviceConfig
 	private QuestionnaireResponseServiceSecure questionnaireResponseServiceSecure()
 	{
 		return new QuestionnaireResponseServiceSecure(questionnaireResponseServiceImpl(),
-				propertiesConfig.getServerBaseUrl(), helperConfig.responseGenerator(),
+				propertiesConfig.getDsfServerBaseUrl(), helperConfig.responseGenerator(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				referenceConfig.referenceExtractor(), daoConfig.questionnaireResponseDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.questionnaireResponseAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private QuestionnaireResponseServiceImpl questionnaireResponseServiceImpl()
 	{
 		return new QuestionnaireResponseServiceImpl(QuestionnaireResponseServiceJaxrs.PATH,
-				propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				daoConfig.questionnaireResponseDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
@@ -756,17 +781,17 @@ public class WebserviceConfig
 
 	private ResearchStudyServiceSecure researchStudyServiceSecure()
 	{
-		return new ResearchStudyServiceSecure(researchStudyServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new ResearchStudyServiceSecure(researchStudyServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.researchStudyDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.researchStudyAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ResearchStudyServiceImpl researchStudyServiceImpl()
 	{
-		return new ResearchStudyServiceImpl(ResearchStudyServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new ResearchStudyServiceImpl(ResearchStudyServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.researchStudyDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -784,18 +809,18 @@ public class WebserviceConfig
 	private StructureDefinitionServiceSecure structureDefinitionServiceSecure()
 	{
 		return new StructureDefinitionServiceSecure(structureDefinitionServiceImpl(),
-				propertiesConfig.getServerBaseUrl(), helperConfig.responseGenerator(),
+				propertiesConfig.getDsfServerBaseUrl(), helperConfig.responseGenerator(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				referenceConfig.referenceExtractor(), daoConfig.structureDefinitionDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.structureDefinitionAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private StructureDefinitionServiceImpl structureDefinitionServiceImpl()
 	{
 		return new StructureDefinitionServiceImpl(StructureDefinitionServiceJaxrs.PATH,
-				propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				daoConfig.structureDefinitionDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
@@ -812,17 +837,17 @@ public class WebserviceConfig
 
 	private SubscriptionServiceSecure subscriptionServiceSecure()
 	{
-		return new SubscriptionServiceSecure(subscriptionServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new SubscriptionServiceSecure(subscriptionServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.subscriptionDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.subscriptionAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private SubscriptionServiceImpl subscriptionServiceImpl()
 	{
-		return new SubscriptionServiceImpl(SubscriptionServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new SubscriptionServiceImpl(SubscriptionServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.subscriptionDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -839,17 +864,17 @@ public class WebserviceConfig
 
 	private TaskServiceSecure taskServiceSecure()
 	{
-		return new TaskServiceSecure(taskServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new TaskServiceSecure(taskServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.taskDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.taskAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private TaskServiceImpl taskServiceImpl()
 	{
-		return new TaskServiceImpl(TaskServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new TaskServiceImpl(TaskServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.taskDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -866,17 +891,17 @@ public class WebserviceConfig
 
 	private ValueSetServiceSecure valueSetServiceSecure()
 	{
-		return new ValueSetServiceSecure(valueSetServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new ValueSetServiceSecure(valueSetServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.valueSetDao(),
 				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
 				authorizationConfig.valueSetAuthorizationRule(), validationConfig.resourceValidator(),
-				validationConfig.validationRules());
+				validationConfig.validationRules(), validationConfig.defaultProfileProvider());
 	}
 
 	private ValueSetServiceImpl valueSetServiceImpl()
 	{
-		return new ValueSetServiceImpl(ValueSetServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new ValueSetServiceImpl(ValueSetServiceJaxrs.PATH, propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.valueSetDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -893,7 +918,7 @@ public class WebserviceConfig
 
 	private RootServiceSecure rootServiceSecure()
 	{
-		return new RootServiceSecure(rootServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new RootServiceSecure(rootServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
 				authorizationConfig.rootAuthorizationRule());
 	}
@@ -913,22 +938,23 @@ public class WebserviceConfig
 
 	private ConformanceServiceSecure conformanceServiceSecure()
 	{
-		return new ConformanceServiceSecure(conformanceServiceImpl(), propertiesConfig.getServerBaseUrl(),
+		return new ConformanceServiceSecure(conformanceServiceImpl(), propertiesConfig.getDsfServerBaseUrl(),
 				helperConfig.responseGenerator(), referenceConfig.referenceResolver());
 	}
 
 	private ConformanceServiceImpl conformanceServiceImpl()
 	{
-		return new ConformanceServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
-				buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter(),
-				validationConfig.validationSupport(),
+		return new ConformanceServiceImpl(propertiesConfig.getDsfServerBaseUrl(),
+				propertiesConfig.getDefaultPageCount(), buildInfoReaderConfig.buildInfoReader(),
+				helperConfig.parameterConverter(), validationConfig.validationSupport(),
+				validationConfig.defaultProfileProvider(),
 				propertiesConfig.getOidcAuthorizationCodeFlowEnabled() || propertiesConfig.getOidcBearerTokenEnabled());
 	}
 
 	@Bean
 	public StaticResourcesService staticResourcesService()
 	{
-		return new StaticResourcesService(propertiesConfig.getStaticResourceCacheEnabled());
+		return new StaticResourcesService("/fhir", propertiesConfig.getStaticResourceCacheEnabled());
 	}
 
 	@Bean

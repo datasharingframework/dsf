@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
@@ -22,6 +37,8 @@ import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManagerJdbc;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
@@ -36,11 +53,11 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 	private final Function<Connection, TransactionResources> transactionResourceFactory;
 	private final ResponseGenerator responseGenerator;
 
-	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler,
-			List<? extends Command> commands, Function<Connection, TransactionResources> transactionResourceFactory,
-			ResponseGenerator responseGenerator)
+	public TransactionCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
+			ExceptionHandler exceptionHandler, List<? extends Command> commands,
+			Function<Connection, TransactionResources> transactionResourceFactory, ResponseGenerator responseGenerator)
 	{
-		super(dataSource, exceptionHandler, commands);
+		super(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler, commands);
 
 		this.transactionResourceFactory = transactionResourceFactory;
 		this.responseGenerator = responseGenerator;
@@ -69,6 +86,10 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 				transactionEventHandler = transactionResources.getTransactionEventHandler();
 				ValidationHelper validationHelper = transactionResources.getValidationHelper();
 				SnapshotGenerator snapshotGenerator = transactionResources.getSnapshotGenerator();
+
+				LargeObjectManager largeObjectManager = hasBinaryModifyingCommands
+						? new LargeObjectManagerJdbc(permanentDeleteDataSource, dbUsersGroup, connection)
+						: LargeObjectManager.NO_OP;
 
 				Map<String, IdType> idTranslationTable = new HashMap<>();
 				for (Command c : commands)
@@ -110,7 +131,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					{
 						logger.debug("Running execute of command {} for entry at index {}", c.getClass().getName(),
 								c.getIndex());
-						c.execute(idTranslationTable, connection, validationHelper, snapshotGenerator);
+						c.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
 					}
 					catch (Exception e)
 					{
@@ -123,7 +144,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						if (hasModifyingCommands)
 						{
 							logger.debug("Rolling back DB transaction");
-							connection.rollback();
+							tryRollback(connection, largeObjectManager, e);
 						}
 
 						if (e instanceof PSQLException s
@@ -167,7 +188,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						if (hasModifyingCommands)
 						{
 							logger.debug("Rolling back DB transaction");
-							connection.rollback();
+							tryRollback(connection, largeObjectManager, e);
 						}
 
 						try
@@ -195,10 +216,14 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 					}
 					catch (SQLException e)
 					{
-						connection.rollback();
+						logger.debug("Rolling back DB transaction");
+						tryRollback(connection, largeObjectManager, e);
 
 						if (PSQLState.UNIQUE_VIOLATION.getState().equals(e.getSQLState()))
-							throw new WebApplicationException(responseGenerator.duplicateResourceExists());
+						{
+							Response response = responseGenerator.duplicateResourceExists();
+							throw new WebApplicationException(response);
+						}
 						else
 							throw e;
 					}
@@ -243,12 +268,33 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			if (e.getResponse() != null && Status.FORBIDDEN.getStatusCode() == e.getResponse().getStatus())
 				throw e;
 
-			throw new WebApplicationException(
-					Response.status(Status.BAD_REQUEST).entity(e.getResponse().getEntity()).build());
+			Response response = Response.status(Status.BAD_REQUEST).entity(e.getResponse().getEntity()).build();
+			throw new WebApplicationException(response);
 		}
 		catch (Exception e)
 		{
 			throw exceptionHandler.internalServerErrorBundleTransaction(e);
+		}
+	}
+
+	private void tryRollback(Connection connection, LargeObjectManager largeObjectManager, Exception e)
+	{
+		try
+		{
+			connection.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
+		}
+
+		try
+		{
+			largeObjectManager.rollback();
+		}
+		catch (SQLException suppressed)
+		{
+			e.addSuppressed(suppressed);
 		}
 	}
 

@@ -1,0 +1,34 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<table>
+		<tr th:fragment="header"><th>ID</th><th>Status</th><th>Process</th><th>Message-Name</th><th>Requester</th><th>Business-Key / Identifier</th><th>Last Updated</th></tr>
+		<tr th:fragment="row" title="Open" th:title="'Open ' + ${element.id.resourceType}" th:attr="resource-type=${element.id.resourceType}">
+			<td class="id-value" status="draft" th:attr="status=${element.status}"><a href="#" title="Open" th:href="${element.id.href}" th:title="'Open ' + ${element.id.resourceType}" th:text="${element.id.value}">id</a></td>
+			<td th:text="${element.status}">draft</td>
+			<td>[[${element.processDomain}]] | [[${element.processName}]] | [[${element.processVersion}]]</td>
+			<td th:text="${element.messageName}">messageName</td>
+			<td th:text="${element.requester}">requester</td>
+			<td th:text="${element.businessKeyOrIdentifier}" th:class="${element.status} != 'draft' ? 'id-value'">businessKeyOrIdentifier</td>
+			<td th:text=${element.lastUpdated}>lastUpdated</td>
+		</tr>
+	</table>
+</body>
+</html>

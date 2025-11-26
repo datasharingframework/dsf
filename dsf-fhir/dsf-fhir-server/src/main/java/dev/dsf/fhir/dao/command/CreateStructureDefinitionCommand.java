@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
@@ -15,17 +30,21 @@ import org.slf4j.LoggerFactory;
 
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
+import dev.dsf.fhir.event.ResourceCreatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 public class CreateStructureDefinitionCommand extends CreateCommand<StructureDefinition, StructureDefinitionDao>
 {
@@ -33,6 +52,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 
 	private final StructureDefinitionDao snapshotDao;
 
+	private boolean requestResourceHasSnapshot;
 	private StructureDefinition resourceWithSnapshot;
 
 	public CreateStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
@@ -40,11 +60,12 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
-			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator, StructureDefinitionDao snapshotDao)
+			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
+			DefaultProfileProvider defaultProfileProvider, boolean enableValidation, StructureDefinitionDao snapshotDao)
 	{
 		super(index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-				referenceCleaner, eventGenerator);
+				referenceCleaner, eventGenerator, defaultProfileProvider, enableValidation);
 
 		this.snapshotDao = snapshotDao;
 	}
@@ -53,6 +74,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
+		requestResourceHasSnapshot = resource.hasSnapshot();
 		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy()
 				: generateSnapshot(snapshotGenerator, resource.copy());
 		resource.setSnapshot(null);
@@ -68,24 +90,24 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 		if (s.getMessages().stream()
 				.anyMatch(m -> IssueSeverity.FATAL.equals(m.getLevel()) || IssueSeverity.ERROR.equals(m.getLevel())))
 		{
-			throw new WebApplicationException(
-					responseGenerator.unableToGenerateSnapshot(resource, index, s.getMessages()));
+			Response response = responseGenerator.unableToGenerateSnapshot(resource, index, s.getMessages());
+			throw new WebApplicationException(response);
 		}
 
 		return s.getSnapshot();
 	}
 
 	@Override
-	protected StructureDefinition createWithTransactionAndId(Connection connection, StructureDefinition resource,
-			UUID uuid) throws SQLException
+	protected StructureDefinition createWithTransactionAndId(LargeObjectManager largeObjectManager,
+			Connection connection, StructureDefinition resource, UUID uuid) throws SQLException
 	{
-		StructureDefinition created = super.createWithTransactionAndId(connection, resource, uuid);
+		StructureDefinition created = super.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 
 		if (resourceWithSnapshot != null)
 		{
 			try
 			{
-				snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
+				snapshotDao.createWithTransactionAndId(largeObjectManager, connection, resourceWithSnapshot, uuid);
 			}
 			catch (SQLException e)
 			{
@@ -98,5 +120,24 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 		}
 
 		return created;
+	}
+
+	@Override
+	protected ResourceCreatedEvent createEvent(StructureDefinition eventResource)
+	{
+		if (resourceWithSnapshot != null)
+		{
+			resourceWithSnapshot.setIdElement(eventResource.getIdElement().copy());
+			return super.createEvent(resourceWithSnapshot);
+		}
+		else
+			return super.createEvent(eventResource);
+	}
+
+	@Override
+	protected void modifyResponseResource(StructureDefinition responseResource)
+	{
+		if (requestResourceHasSnapshot)
+			responseResource.setSnapshot(resourceWithSnapshot.getSnapshot());
 	}
 }

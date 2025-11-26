@@ -1,0 +1,60 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<StructureDefinition xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://dsf.dev/fhir/StructureDefinition/structure-definition" />
+	<version value="2.0.0" />
+	<name value="StructureDefinition" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2025-11-26" />
+	<fhirVersion value="4.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="StructureDefinition" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/StructureDefinition" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="StructureDefinition.meta">
+			<path value="StructureDefinition.meta" />
+			<type>
+				<code value="Meta" />
+				<profile value="http://dsf.dev/fhir/StructureDefinition/meta|2.0.0" />
+			</type>
+		</element>
+		<element id="StructureDefinition.url">
+			<path value="StructureDefinition.url" />
+			<min value="1" />
+		</element>
+		<element id="StructureDefinition.version">
+			<path value="StructureDefinition.version" />
+			<min value="1" />
+		</element>
+		<element id="StructureDefinition.date">
+			<path value="StructureDefinition.date" />
+			<min value="1" />
+		</element>
+	</differential>
+</StructureDefinition>

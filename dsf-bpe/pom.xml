@@ -1,3 +1,20 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -7,33 +24,29 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>1.9.0</version>
+		<version>2.0.0</version>
 	</parent>
 
 	<modules>
+		<module>dsf-bpe-process-api</module>
 		<module>dsf-bpe-process-api-v1</module>
+		<module>dsf-bpe-process-api-v1-base</module>
+		<module>dsf-bpe-process-api-v1-impl</module>
+		<module>dsf-bpe-process-api-v1-operaton</module>
+		<module>dsf-bpe-process-api-v2</module>
+		<module>dsf-bpe-process-api-v2-impl</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
+		<module>dsf-bpe-test-plugin</module>
+		<module>dsf-bpe-test-plugin-v1</module>
+		<module>dsf-bpe-test-plugin-v2</module>
 	</modules>
-	
+
 	<properties>
-		<main.basedir>${project.basedir}/../..</main.basedir>
+		<main.basedir>${project.parent.basedir}</main.basedir>
 	</properties>
 
 	<name>DSF BPE Parent POM</name>
-
-	<repositories>
-		<repository>
-			<id>camunda-bpm</id>
-			<url>https://app.camunda.com/nexus/content/repositories/camunda-bpm/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<!-- Logging -->
@@ -54,12 +67,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-jetty</artifactId>
+				<artifactId>dsf-bpe-process-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -69,61 +77,58 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-websocket-client</artifactId>
+				<artifactId>dsf-bpe-process-api-v1-base</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-webservice-client</artifactId>
+				<artifactId>dsf-bpe-process-api-v1-impl</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-server</artifactId>
+				<artifactId>dsf-bpe-process-api-v1-operaton</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-validation</artifactId>
+				<artifactId>dsf-bpe-process-api-v2</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-validation</artifactId>
-				<classifier>tests</classifier>
-				<type>test-jar</type>
+				<artifactId>dsf-bpe-process-api-v2-impl</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-fhir-auth</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-db-migration</artifactId>
+				<artifactId>dsf-bpe-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-build-info-reader</artifactId>
+				<artifactId>dsf-bpe-test-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
+				<artifactId>dsf-bpe-test-plugin-v1</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<artifactId>dsf-bpe-test-plugin-v2</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
+			
 			<dependency>
 				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-build-info-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -133,12 +138,22 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-db</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-common-docker-secrets-reader</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
 				<artifactId>dsf-common-documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-common-db</artifactId>
+				<artifactId>dsf-common-oidc</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -159,10 +174,13 @@
 
 			<dependency>
 				<groupId>dev.dsf</groupId>
-				<artifactId>dsf-bpe-process-base</artifactId>
+				<artifactId>dsf-fhir-server</artifactId>
 				<version>${project.version}</version>
-				<scope>test</scope>
-				<type>test-jar</type>
+			</dependency>
+			<dependency>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-fhir-websocket-client</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

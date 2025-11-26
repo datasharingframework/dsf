@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.search;
 
 import java.sql.Array;
@@ -6,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,13 +100,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			return this;
 		}
 
-		public SearchQueryBuilder<R> with(
-				@SuppressWarnings("unchecked") SearchQueryParameterFactory<R>... searchParameters)
-		{
-			return with(Arrays.asList(searchParameters));
-		}
-
-		public SearchQueryBuilder<R> with(List<? extends SearchQueryParameterFactory<R>> searchParameters)
+		public SearchQueryBuilder<R> with(List<SearchQueryParameterFactory<R>> searchParameters)
 		{
 			this.searchParameters.addAll(searchParameters);
 			return this;
@@ -106,7 +114,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		public SearchQueryBuilder<R> withRevInclude(SearchQueryRevIncludeParameterFactory... revIncludeParameters)
 		{
-			return withRevInclude(Arrays.asList(revIncludeParameters));
+			return withRevInclude(List.of(revIncludeParameters));
 		}
 
 		public SearchQueryBuilder<R> withRevInclude(List<SearchQueryRevIncludeParameterFactory> revIncludeParameters)
@@ -220,11 +228,10 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		filterQuery = createFilterQuery(queryParameters);
 
-		includeSql = createIncludeSql(queryParameters.getOrDefault(PARAMETER_INCLUDE, Collections.emptyList()));
-		revIncludeSql = createRevIncludeSql(
-				queryParameters.getOrDefault(PARAMETER_REVINCLUDE, Collections.emptyList()));
+		includeSql = createIncludeSql(queryParameters.getOrDefault(PARAMETER_INCLUDE, List.of()));
+		revIncludeSql = createRevIncludeSql(queryParameters.getOrDefault(PARAMETER_REVINCLUDE, List.of()));
 
-		sortSql = createSortSql(queryParameters.getOrDefault(PARAMETER_SORT, Collections.emptyList()));
+		sortSql = createSortSql(queryParameters.getOrDefault(PARAMETER_SORT, List.of()));
 
 		return this;
 	}
@@ -373,8 +380,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 					if (!supportedRevIncludeValues.contains(value))
 					{
 						supportedRevIncludeValues.add(value);
-						revIncludeParameters.add(revIncludeParameterFactory.createQueryRevIncludeParameter()
-								.configureRevInclude(errors, value));
+						revIncludeParameters.add(
+								revIncludeParameterFactory.createQueryRevIncludeParameter().configureRevInclude(value));
 					}
 					else
 					{
@@ -457,7 +464,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		searchParameters.stream().filter(SearchQueryParameter::isDefined)
 				.collect(Collectors.toMap(SearchQueryParameter::getBundleUriQueryParameterName,
-						p -> Collections.singletonList(p.getBundleUriQueryParameterValue()), (v1, v2) ->
+						p -> List.of(p.getBundleUriQueryParameterValue()), (v1, v2) ->
 						{
 							List<String> list = new ArrayList<>(v1);
 							list.addAll(v2);
@@ -528,8 +535,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		if (resource == null || !getResourceType().isInstance(resource))
 			return false;
 
-		return searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p -> p.matches(resource))
-				.allMatch(b -> b);
+		// returns true if no search parameters configured
+		return searchParameters.stream().filter(SearchQueryParameter::isDefined).allMatch(p -> p.matches(resource));
 	}
 
 	@Override

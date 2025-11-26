@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
@@ -16,7 +31,6 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 
-import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -29,19 +43,16 @@ import jakarta.ws.rs.core.Response.Status;
 public final class ReferencesHelperImpl<R extends Resource> implements ReferencesHelper<R>
 {
 	private final int index;
-	private final Identity identity;
 	private final R resource;
 	private final String serverBase;
 	private final ReferenceExtractor referenceExtractor;
 	private final ReferenceResolver referenceResolver;
 	private final ResponseGenerator responseGenerator;
 
-	public ReferencesHelperImpl(int index, Identity identity, R resource, String serverBase,
-			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
-			ResponseGenerator responseGenerator)
+	public ReferencesHelperImpl(int index, R resource, String serverBase, ReferenceExtractor referenceExtractor,
+			ReferenceResolver referenceResolver, ResponseGenerator responseGenerator)
 	{
 		this.index = index;
-		this.identity = identity;
 		this.resource = resource;
 		this.serverBase = serverBase;
 		this.referenceExtractor = referenceExtractor;
@@ -136,7 +147,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	private Optional<OperationOutcome> resolveConditional(ResourceReference reference, Connection connection,
 			Consumer<Resource> targetConsumer)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(identity, reference, connection);
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
@@ -181,7 +192,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 
 	private Optional<OperationOutcome> resolveLogicalReference(ResourceReference reference, Connection connection)
 	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(identity, reference, connection);
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
@@ -222,10 +233,9 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				referenceResolver.checkLiteralExternalReference(resource, reference, index);
 
-			case LOGICAL -> referenceResolver.checkLogicalReference(identity, resource, reference, connection, index);
+			case LOGICAL -> referenceResolver.checkLogicalReference(resource, reference, connection, index);
 
-			case CANONICAL ->
-				referenceResolver.checkCanonicalReference(identity, resource, reference, connection, index);
+			case CANONICAL -> referenceResolver.checkCanonicalReference(resource, reference, connection, index);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
 			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();

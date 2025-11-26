@@ -1,19 +1,36 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.profiles;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
@@ -36,188 +53,262 @@ public class QuestionnaireResponseProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("dsf-questionnaire-response-1.0.0.xml"), Collections.emptyList(), Collections.emptyList());
+			List.of("dsf-questionnaire-response-2.0.0.xml", "dsf-extension-questionnaire-authorization-2.0.0.xml"),
+			List.of("dsf-practitioner-role-2.0.0.xml"), List.of("dsf-practitioner-role-2.0.0.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
 	@Test
-	public void testQuestionnaireResponseValidTypeString()
+	public void testQuestionnaireResponseInProgressValidTypeString()
 	{
-		testQuestionnaireResponseValidType(new StringType("foo"));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new StringType("foo"));
+		testQuestionnaireResponse(r);
+
+		Extension auth = r.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		auth.addExtension("practitioner", new Identifier().setSystem("http://dsf.dev/sid/practitioner-identifier")
+				.setValue("practitioner1@organization.com"));
+		auth.addExtension("practitioner", new Identifier().setSystem("http://dsf.dev/sid/practitioner-identifier")
+				.setValue("practitioner2@organization.com"));
+		auth.addExtension("practitioner-role",
+				new Coding().setSystem("http://dsf.dev/fhir/CodeSystem/practitioner-role").setCode("DIC_USER"));
+		auth.addExtension("practitioner-role",
+				new Coding().setSystem("http://organization.com/fhir/CodeSystem/my-role").setCode("SOMETHING"));
+		testQuestionnaireResponse(r);
+
+		r.getAuthor().setType("Practitioner").getIdentifier().setSystem("http://dsf.dev/sid/practitioner-identifier")
+				.setValue("practitioner@organization.com");
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeInteger()
+	public void testQuestionnaireResponseCompletedValidTypeString()
 	{
-		testQuestionnaireResponseValidType(new IntegerType(-1));
+		testQuestionnaireResponse(createQuestionnaireResponseCompleted(new StringType("foo"), null), 2);
+
+		QuestionnaireResponse r = createQuestionnaireResponseCompleted(new StringType("foo"),
+				"practitioner@organization.com");
+		testQuestionnaireResponse(r);
+
+		Extension auth = r.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		auth.addExtension("practitioner", new Identifier().setSystem("http://dsf.dev/sid/practitioner-identifier")
+				.setValue("practitioner@organization.com"));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeDecimal()
+	public void testQuestionnaireResponseInProgressValidTypeInteger()
 	{
-		testQuestionnaireResponseValidType(new DecimalType(-1));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new IntegerType(-1));
+
+		r.getAuthor().setType("Practitioner").getIdentifier().setSystem("http://dsf.dev/sid/practitioner-identifier")
+				.setValue("practitioner@organization.com");
+
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeBoolean()
+	public void testQuestionnaireResponseInProgressValidTypeDecimal()
 	{
-		testQuestionnaireResponseValidType(new BooleanType(false));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new DecimalType(-1));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeDate()
+	public void testQuestionnaireResponseInProgressValidTypeBoolean()
 	{
-		testQuestionnaireResponseValidType(new DateType("1900-01-01"));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new BooleanType(false));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeTime()
+	public void testQuestionnaireResponseInProgressValidTypeDate()
 	{
-		testQuestionnaireResponseValidType(new TimeType("00:00:00"));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new DateType("1900-01-01"));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeDateTime()
+	public void testQuestionnaireResponseInProgressValidTypeTime()
 	{
-		testQuestionnaireResponseValidType(new DateTimeType("1900-01-01T00:00:00.000Z"));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new TimeType("00:00:00"));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeUri()
+	public void testQuestionnaireResponseInProgressValidTypeDateTime()
 	{
-		testQuestionnaireResponseValidType(new UriType("http://example.de/foo"));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new DateTimeType("1900-01-01T00:00:00.000Z"));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeReference()
+	public void testQuestionnaireResponseInProgressValidTypeUri()
 	{
-		testQuestionnaireResponseValidType(new Reference("Observation/foo"));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new UriType("http://example.de/foo"));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseValidTypeReferenceWithBusinessKey()
+	public void testQuestionnaireResponseInProgressValidTypeReference()
 	{
-		testQuestionnaireResponseValidTypeWithBusinessKey(new Reference("Observation/foo"));
-	}
-
-	private void testQuestionnaireResponseValidTypeWithBusinessKey(Type type)
-	{
-		QuestionnaireResponse res = createQuestionnaireResponseWithBusinessKey(type);
-		testQuestionnaireResponse(res);
-	}
-
-	private void testQuestionnaireResponseValidType(Type type)
-	{
-		QuestionnaireResponse res = createQuestionnaireResponse(type);
-		testQuestionnaireResponse(res);
-	}
-
-	private void testQuestionnaireResponse(QuestionnaireResponse res)
-	{
-		ValidationResult result = resourceValidator.validate(res);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
-
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new Reference("Observation/foo"));
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
-	public void testQuestionnaireResponseInvalidType()
+	public void testQuestionnaireResponseInProgressValidTypeReferenceWithBusinessKey()
 	{
-		// TODO: activate after HAPI validator is fixed: https://github.com/hapifhir/org.hl7.fhir.core/issues/193
-
-		// QuestionnaireResponse res = createValidQuestionnaireResponse(new
-		// Coding().setSystem("http://system.foo").setCode("code"));
-		//
-		// ValidationResult result = resourceValidator.validate(res);
-		// result.getMessages().stream()
-		// .map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - "
-		// + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
-		//
-		// assertEquals(1, result.getMessages().stream()
-		// .filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL.equals(
-		// m.getSeverity())).count());
+		QuestionnaireResponse r = createQuestionnaireInProgressResponseWithBusinessKey(
+				new Reference("Observation/foo"));
+		testQuestionnaireResponse(r);
 	}
 
-	@Test
-	public void testQuestionnaireResponseValidCompleted()
+	private void testQuestionnaireResponse(QuestionnaireResponse r)
 	{
-		QuestionnaireResponse res = createQuestionnaireResponse(new StringType("foo"));
-		res.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
-		res.setAuthored(new Date());
-		res.setAuthor(new Reference().setIdentifier(
+		testQuestionnaireResponse(r, 0);
+	}
+
+	private void testQuestionnaireResponse(QuestionnaireResponse r, int numberOfExpectedErrors)
+	{
+		ValidationResult result = resourceValidator.validate(r);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
+
+		assertEquals(numberOfExpectedErrors,
+				result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+						|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	// TODO: activate after HAPI validator is fixed: https://github.com/hapifhir/org.hl7.fhir.core/issues/193
+	// @Test
+	// public void testQuestionnaireResponseInvalidType()
+	// {
+	// QuestionnaireResponse res = createValidQuestionnaireResponse(new
+	// Coding().setSystem("http://system.foo").setCode("code"));
+	//
+	// ValidationResult result = resourceValidator.validate(res);
+	// ValidationSupportRule.logValidationMessages(logger::debug, result);
+	//
+	// assertEquals(1, result.getMessages().stream()
+	// .filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL.equals(
+	// m.getSeverity())).count());
+	// }
+
+	@Test
+	public void testQuestionnaireResponseValidCompletedAuthorOrganization()
+	{
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new StringType("foo"));
+		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		r.setAuthored(new Date());
+		r.setAuthor(new Reference().setType("Organization").setIdentifier(
 				new Identifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("foo.de")));
 
-		ValidationResult result = resourceValidator.validate(res);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		testQuestionnaireResponse(r);
+	}
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	@Test
+	public void testQuestionnaireResponseValidCompletedAuthorPractitioner()
+	{
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new StringType("foo"));
+		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		r.setAuthored(new Date());
+		r.setAuthor(new Reference().setType("Practitioner").setIdentifier(new Identifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue("practitioner@foo.de")));
+
+		testQuestionnaireResponse(r);
 	}
 
 	@Test
 	public void testQuestionnaireResponseInvalidCompletedNoAuthorAndNoAuthored()
 	{
-		QuestionnaireResponse res = createQuestionnaireResponse(new StringType("foo"));
-		res.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new StringType("foo"));
+		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
 
-		ValidationResult result = resourceValidator.validate(res);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationResult result = resourceValidator.validate(r);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
-		assertEquals(2,
-				result.getMessages().stream()
-						.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-								|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
-						.filter(m -> m.getMessage() != null)
-						.filter(m -> m.getMessage().startsWith("authored-if-completed")
-								|| m.getMessage().startsWith("author-if-completed"))
-						.count());
+		assertEquals(2, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+						|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
+				.filter(m -> m.getMessage() != null)
+				.filter(m -> m.getMessage().startsWith("Constraint failed: authored-if-completed-or-amended")
+						|| m.getMessage().startsWith("Constraint failed: author-if-completed-or-amended"))
+				.count());
+	}
+
+	@Test
+	public void testQuestionnaireResponseInvalidAmendedNoAuthorAndNoAuthored()
+	{
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new StringType("foo"));
+		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.AMENDED);
+
+		ValidationResult result = resourceValidator.validate(r);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
+
+		assertEquals(2, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+						|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
+				.filter(m -> m.getMessage() != null)
+				.filter(m -> m.getMessage().startsWith("Constraint failed: authored-if-completed-or-amended")
+						|| m.getMessage().startsWith("Constraint failed: author-if-completed-or-amended"))
+				.count());
 	}
 
 	@Test
 	public void testQuestionnaireResponseInvalidCompletedWithAuthorReferenceAndAuthored()
 	{
-		QuestionnaireResponse res = createQuestionnaireResponse(new StringType("foo"));
-		res.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
-		res.setAuthored(new Date());
-		res.setAuthor(new Reference("Organization/" + UUID.randomUUID().toString()));
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(new StringType("foo"));
+		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		r.setAuthored(new Date());
+		r.setAuthor(new Reference("Organization/" + UUID.randomUUID().toString()));
 
-		ValidationResult result = resourceValidator.validate(res);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationResult result = resourceValidator.validate(r);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
-		assertEquals(1,
-				result.getMessages().stream()
-						.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-								|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
-						.filter(m -> m.getMessage() != null)
-						.filter(m -> m.getMessage().startsWith("author-if-completed")).count());
+		assertEquals(1, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+						|| ResultSeverityEnum.FATAL.equals(m.getSeverity()))
+				.filter(m -> m.getMessage() != null)
+				.filter(m -> m.getMessage().startsWith("Constraint failed: author-if-completed-or-amended")).count());
 	}
 
-	private QuestionnaireResponse createQuestionnaireResponseWithBusinessKey(Type type)
+	private QuestionnaireResponse createQuestionnaireInProgressResponseWithBusinessKey(Type type)
 	{
-		QuestionnaireResponse res = createQuestionnaireResponse(type);
-		res.addItem().setLinkId("business-key").setText("The business-key of the process execution").addAnswer()
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(type);
+		r.addItem().setLinkId("business-key").setText("The business-key of the process execution").addAnswer()
 				.setValue(new StringType(UUID.randomUUID().toString()));
 
-		return res;
+		return r;
 	}
 
-	private QuestionnaireResponse createQuestionnaireResponse(Type type)
+	private QuestionnaireResponse createQuestionnaireResponseCompleted(Type type, String practitionerIdentifierValue)
 	{
-		QuestionnaireResponse res = new QuestionnaireResponse();
-		res.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire-response");
-		res.setQuestionnaire("http://dsf.dev/fhir/Questionnaire/hello-world|0.1.0");
-		res.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
-		res.addItem().setLinkId("user-task-id").setText("The user-task-id of the process execution").addAnswer()
-				.setValue(new StringType("1"));
-		res.addItem().setLinkId("valid-display").setText("valid-display");
-		res.addItem().setLinkId("valid-answer").setText("valid answer").addAnswer().setValue(type);
+		QuestionnaireResponse r = createQuestionnaireResponseInProgress(type);
+		r.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
-		return res;
+		if (practitionerIdentifierValue != null)
+		{
+			r.setAuthored(new Date());
+			r.getAuthor().setType("Practitioner").getIdentifier()
+					.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(practitionerIdentifierValue);
+		}
+
+		return r;
+	}
+
+	private QuestionnaireResponse createQuestionnaireResponseInProgress(Type type)
+	{
+		QuestionnaireResponse r = new QuestionnaireResponse();
+		r.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire-response");
+		r.setQuestionnaire("http://dsf.dev/fhir/Questionnaire/hello-world|0.1.0");
+		r.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
+		r.addItem().setLinkId("user-task-id").setText("The user-task-id of the process execution").addAnswer()
+				.setValue(new StringType("1"));
+		r.addItem().setLinkId("valid-display").setText("valid-display");
+		r.addItem().setLinkId("valid-answer").setText("valid answer").addAnswer().setValue(type);
+
+		return r;
 	}
 }

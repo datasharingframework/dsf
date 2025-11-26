@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth.conf;
 
 import java.security.cert.X509Certificate;
@@ -9,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 
@@ -25,6 +41,8 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	/**
 	 * @param organization
 	 *            not <code>null</code>
+	 * @param endpoint
+	 *            may be <code>null</code>
 	 * @param dsfRoles
 	 *            may be <code>null</code>
 	 * @param certificate
@@ -36,11 +54,11 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	 * @param credentials
 	 *            may be <code>null</code>
 	 */
-	public PractitionerIdentityImpl(Organization organization, Collection<? extends DsfRole> dsfRoles,
-			X509Certificate certificate, Practitioner practitioner, Collection<? extends Coding> practitionerRoles,
-			DsfOpenIdCredentials credentials)
+	public PractitionerIdentityImpl(Organization organization, Endpoint endpoint,
+			Collection<? extends DsfRole> dsfRoles, X509Certificate certificate, Practitioner practitioner,
+			Collection<? extends Coding> practitionerRoles, DsfOpenIdCredentials credentials)
 	{
-		super(true, organization, dsfRoles, certificate);
+		super(true, organization, endpoint, dsfRoles, certificate);
 
 		this.practitioner = Objects.requireNonNull(practitioner, "practitioner");
 
@@ -54,8 +72,7 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	@Override
 	public String getName()
 	{
-		return getOrganizationIdentifierValue().orElse("?") + "/"
-				+ getIdentifierValue(practitioner::getIdentifier, PRACTITIONER_IDENTIFIER_SYSTEM).orElse("?");
+		return getOrganizationIdentifierValue().orElse("?") + "/" + getPractitionerIdentifierValue().orElse("?");
 	}
 
 	@Override
@@ -68,6 +85,12 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	public Practitioner getPractitioner()
 	{
 		return practitioner;
+	}
+
+	@Override
+	public Optional<String> getPractitionerIdentifierValue()
+	{
+		return getIdentifierValue(practitioner::getIdentifier, PRACTITIONER_IDENTIFIER_SYSTEM);
 	}
 
 	@Override

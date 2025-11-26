@@ -1,7 +1,21 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.history;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -28,6 +42,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
@@ -94,7 +109,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 
 		List<SearchQueryParameterError> errors = new ArrayList<>();
 
-		List<String> atValues = queryParameters.getOrDefault(AtParameter.PARAMETER_NAME, Collections.emptyList());
+		List<String> atValues = queryParameters.getOrDefault(AtParameter.PARAMETER_NAME, List.of());
 		atValues.stream().filter(v -> v != null && !v.isBlank()).forEach(atValue ->
 		{
 			AtParameter atParameter = new AtParameter();
@@ -129,9 +144,13 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 			throw new WebApplicationException();
 
 		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(parameterConverter.getPreferHandling(headers)))
-			throw new WebApplicationException(
-					responseGenerator.response(Status.BAD_REQUEST, responseGenerator.toOperationOutcomeError(errors),
-							parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build());
+		{
+			Response response = responseGenerator
+					.response(Status.BAD_REQUEST, responseGenerator.toOperationOutcomeError(errors),
+							parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
+					.build();
+			throw new WebApplicationException(response);
+		}
 
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);

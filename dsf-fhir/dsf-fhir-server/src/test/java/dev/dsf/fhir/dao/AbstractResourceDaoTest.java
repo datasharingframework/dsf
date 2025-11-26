@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
@@ -5,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +63,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 	@ClassRule
 	public static final PostgreSqlContainerLiquibaseTemplateClassRule liquibaseRule = new PostgreSqlContainerLiquibaseTemplateClassRule(
-			DockerImageName.parse("postgres:15"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
+			DockerImageName.parse("postgres:18"), ROOT_USER, "fhir", "fhir_template", CHANGE_LOG_FILE,
 			CHANGE_LOG_PARAMETERS, true);
 
 	@Rule
@@ -86,6 +102,11 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	{
 		this.resouceClass = resouceClass;
 		this.daoCreator = daoCreator;
+	}
+
+	protected boolean isSame(D d1, D d2)
+	{
+		return d1.equalsDeep(d2);
 	}
 
 	@Before
@@ -137,7 +158,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
@@ -170,7 +191,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		D updatedResource = dao.update(updateResource(createdResource), (long) ResourceDao.FIRST_VERSION);
 		assertNotNull(updatedResource);
@@ -211,7 +232,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		dao.update(updateResource(createdResource), 0L);
 	}
@@ -231,7 +252,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		D updatedResource = dao.update(updateResource(createdResource), 1L);
 		assertNotNull(updatedResource);
@@ -256,7 +277,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		boolean deleted = dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(deleted);
@@ -291,7 +312,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
@@ -356,7 +377,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
@@ -383,13 +404,13 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		Optional<D> read = dao.readVersion(UUID.fromString(createdResource.getIdElement().getIdPart()),
 				createdResource.getIdElement().getVersionIdPartAsLong());
 		assertTrue(read.isPresent());
 
-		assertTrue(newResource.equalsDeep(read.get()));
+		assertTrue(isSame(newResource, read.get()));
 	}
 
 	@Test
@@ -407,14 +428,17 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
 
-		String s1 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(newResource);
-		String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
-		assertTrue(s1 + "\nvs\n" + s2, newResource.equalsDeep(read.get()));
+		if (!isSame(newResource, read.get()))
+		{
+			String s1 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(newResource);
+			String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
+			fail(s1 + "\nvs\n" + s2);
+		}
 	}
 
 	@Test
@@ -436,7 +460,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
-		assertTrue(newResource.equalsDeep(createdResource));
+		assertTrue(isSame(newResource, createdResource));
 
 		D updatedResource = dao.update(updateResource(createdResource), (long) ResourceDao.FIRST_VERSION);
 		assertNotNull(updatedResource);
@@ -491,14 +515,17 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		newResource.setIdElement(updatedResource2.getIdElement().copy());
 		newResource.setMeta(updatedResource2.getMeta().copy());
 
-		assertTrue(newResource.equalsDeep(updatedResource2));
+		assertTrue(isSame(newResource, updatedResource2));
 
 		Optional<D> read = dao.read(UUID.fromString(updatedResource2.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
 
-		String s1 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(updatedResource2);
-		String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
-		assertTrue(s1 + "\nvs\n" + s2, updatedResource2.equalsDeep(read.get()));
+		if (!isSame(updatedResource2, read.get()))
+		{
+			String s1 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(updatedResource2);
+			String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
+			fail(s1 + "\nvs\n" + s2);
+		}
 		assertEquals("3", read.get().getIdElement().getVersionIdPart());
 	}
 

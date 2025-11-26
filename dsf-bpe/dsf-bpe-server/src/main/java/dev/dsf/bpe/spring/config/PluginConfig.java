@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.spring.config;
 
 import java.nio.file.Files;
@@ -7,51 +22,21 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.plugin.BpmnProcessStateChangeService;
 import dev.dsf.bpe.plugin.BpmnProcessStateChangeServiceImpl;
 import dev.dsf.bpe.plugin.FhirResourceHandler;
 import dev.dsf.bpe.plugin.FhirResourceHandlerImpl;
-import dev.dsf.bpe.plugin.ProcessIdAndVersion;
-import dev.dsf.bpe.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.plugin.ProcessPluginLoader;
 import dev.dsf.bpe.plugin.ProcessPluginLoaderImpl;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 import dev.dsf.bpe.plugin.ProcessPluginManagerImpl;
-import dev.dsf.bpe.v1.ProcessPluginApi;
-import dev.dsf.bpe.v1.ProcessPluginApiImpl;
-import dev.dsf.bpe.v1.ProcessPluginDefinition;
-import dev.dsf.bpe.v1.config.ProxyConfig;
-import dev.dsf.bpe.v1.config.ProxyConfigDelegate;
-import dev.dsf.bpe.v1.plugin.ProcessPluginFactoryImpl;
-import dev.dsf.bpe.v1.service.EndpointProvider;
-import dev.dsf.bpe.v1.service.EndpointProviderImpl;
-import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
-import dev.dsf.bpe.v1.service.FhirWebserviceClientProviderImpl;
-import dev.dsf.bpe.v1.service.MailService;
-import dev.dsf.bpe.v1.service.MailServiceImpl;
-import dev.dsf.bpe.v1.service.OrganizationProvider;
-import dev.dsf.bpe.v1.service.OrganizationProviderImpl;
-import dev.dsf.bpe.v1.service.QuestionnaireResponseHelper;
-import dev.dsf.bpe.v1.service.QuestionnaireResponseHelperImpl;
-import dev.dsf.bpe.v1.service.TaskHelper;
-import dev.dsf.bpe.v1.service.TaskHelperImpl;
-import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
-import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
-import dev.dsf.fhir.authorization.read.ReadAccessHelper;
-import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 
 @Configuration
 public class PluginConfig
 {
-	@Autowired
-	private Environment environment;
-
 	@Autowired
 	private PropertiesConfig propertiesConfig;
 
@@ -59,69 +44,41 @@ public class PluginConfig
 	private FhirConfig fhirConfig;
 
 	@Autowired
-	private FhirClientConfig fhirClientConfig;
+	private DsfClientConfig dsfClientConfig;
 
 	@Autowired
 	private DaoConfig daoConfig;
 
 	@Autowired
-	private MailConfig mailConfig;
+	private OperatonConfig operatonConfig;
 
 	@Autowired
-	private SerializerConfig serializerConfig;
-
-	@Autowired
-	private CamundaConfig camundaConfig;
-
-	@Bean
-	public ProcessPluginApi processPluginApiV1()
-	{
-		ProxyConfig proxyConfig = new ProxyConfigDelegate(propertiesConfig.proxyConfig());
-
-		FhirWebserviceClientProvider clientProvider = new FhirWebserviceClientProviderImpl(
-				fhirClientConfig.clientProvider());
-		EndpointProvider endpointProvider = new EndpointProviderImpl(clientProvider,
-				propertiesConfig.getFhirServerBaseUrl());
-		FhirContext fhirContext = fhirConfig.fhirContext();
-		MailService mailService = new MailServiceImpl(mailConfig.mailService());
-		ObjectMapper objectMapper = serializerConfig.objectMapper();
-		OrganizationProvider organizationProvider = new OrganizationProviderImpl(clientProvider,
-				propertiesConfig.getFhirServerBaseUrl());
-
-		ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
-		QuestionnaireResponseHelper questionnaireResponseHelper = new QuestionnaireResponseHelperImpl(
-				propertiesConfig.getFhirServerBaseUrl());
-		ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
-		TaskHelper taskHelper = new TaskHelperImpl(propertiesConfig.getFhirServerBaseUrl());
-
-		return new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext, clientProvider, mailService,
-				objectMapper, organizationProvider, processAuthorizationHelper, questionnaireResponseHelper,
-				readAccessHelper, taskHelper);
-	}
-
-	@Bean
-	public ProcessPluginFactory<ProcessPluginDefinition> processPluginFactoryV1()
-	{
-		return new ProcessPluginFactoryImpl(processPluginApiV1());
-	}
+	private List<ProcessPluginFactory> processPluginFactories;
 
 	@Bean
 	public ProcessPluginLoader processPluginLoader()
 	{
 		Path processPluginDirectoryPath = propertiesConfig.getProcessPluginDirectory();
+		List<Path> explodedPluginDirectories = propertiesConfig.getExplodedPluginDirectories();
 
 		if (!Files.isDirectory(processPluginDirectoryPath))
 			throw new RuntimeException(
-					"Process plug in directory '" + processPluginDirectoryPath.toString() + "' not readable");
+					"Process plugin directory '" + processPluginDirectoryPath.toString() + "' not readable");
 
-		return new ProcessPluginLoaderImpl(List.of(processPluginFactoryV1()), processPluginDirectoryPath,
-				fhirConfig.fhirContext(), (ConfigurableEnvironment) environment);
+		explodedPluginDirectories.stream().forEach(p ->
+		{
+			if (!Files.isDirectory(p))
+				throw new RuntimeException("Exploded process plugin directory '" + p.toString() + "' not readable");
+		});
+
+		return new ProcessPluginLoaderImpl(processPluginFactories, processPluginDirectoryPath,
+				explodedPluginDirectories);
 	}
 
 	@Bean
 	public BpmnProcessStateChangeService bpmnProcessStateChangeService()
 	{
-		return new BpmnProcessStateChangeServiceImpl(camundaConfig.processEngine().getRepositoryService(),
+		return new BpmnProcessStateChangeServiceImpl(operatonConfig.processEngine().getRepositoryService(),
 				daoConfig.processStateDao(), ProcessIdAndVersion.fromStrings(propertiesConfig.getProcessExcluded()),
 				ProcessIdAndVersion.fromStrings(propertiesConfig.getProcessRetired()));
 	}
@@ -129,18 +86,19 @@ public class PluginConfig
 	@Bean
 	public FhirResourceHandler fhirResourceHandler()
 	{
-		return new FhirResourceHandlerImpl(fhirClientConfig.clientProvider().getLocalWebserviceClient(),
+		return new FhirResourceHandlerImpl(dsfClientConfig.clientProvider().getWebserviceClient(),
 				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
-				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());
 	}
 
 	@Bean
 	public ProcessPluginManager processPluginManager()
 	{
 		return new ProcessPluginManagerImpl(
-				List.of(camundaConfig.delegateProvider(), camundaConfig.fallbackSerializerFactory()),
+				List.of(operatonConfig.delegateProvider(), operatonConfig.fallbackSerializerFactory(),
+						operatonConfig.defaultBpmnParseListener()),
 				processPluginLoader(), bpmnProcessStateChangeService(), fhirResourceHandler(),
-				propertiesConfig.getFhirServerBaseUrl(), fhirClientConfig.clientProvider().getLocalWebserviceClient(),
-				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis());
+				propertiesConfig.getDsfServerBaseUrl(), dsfClientConfig.clientProvider().getWebserviceClient(),
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelay());
 	}
 }

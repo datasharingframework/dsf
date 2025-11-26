@@ -1,0 +1,33 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="resource-data" th:fragment="resource-data">
+			<th:block th:insert="~{resourceElements::identifier}" th:with="identifier=${measureReport.identifier}" th:if="${measureReport.identifier}"></th:block>
+			<th:block th:insert="~{resourceElements::status}" th:with="class='element element-50'"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Type',string=${measureReport.type},class='element element-50'"></th:block>
+			<th:block th:insert="~{resourceElements::id}" th:with="label='Measure',id=${measureReport.measure}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Date',string=${measureReport.date}" th:if="${measureReport.date}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Group Population Count',string=${measureReport.groupPopulationCount}" th:if="${measureReport.groupPopulationCount}"></th:block>
+			<th:block th:insert="~{resourceElements::additionalValuesComment}"></th:block>
+		</div>
+	</div>
+</body>
+</html>

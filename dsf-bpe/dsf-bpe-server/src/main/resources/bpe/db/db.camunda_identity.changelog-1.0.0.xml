@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+	logicalFilePath="db/db.camunda_identity.changelog-1.0.0.xml">
+
+	<changeSet author="camunda.org" id="db.camunda_identity.changelog-1.0.0">
+		<validCheckSum>9:09445d67a79866964af3de295fa58b94</validCheckSum>
+		<sqlFile dbms="postgresql" encoding="utf8" path="bpe/db/camunda/postgres_identity_7.19.0.sql" />
+	</changeSet>
+			
+	<changeSet author="hhund" id="db.camunda_identity.changelog-1.0.0-grant" runOnChange="true">
+		<sql dbms="postgresql">
+			GRANT ALL ON TABLE ACT_ID_GROUP TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_GROUP TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_ID_MEMBERSHIP TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_MEMBERSHIP TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_ID_USER TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_USER TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_ID_INFO TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_INFO TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_ID_TENANT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT TO ${db.engine_users_group};
+			GRANT ALL ON TABLE ACT_ID_TENANT_MEMBER TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT_MEMBER TO ${db.engine_users_group};
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

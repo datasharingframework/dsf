@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
@@ -12,8 +27,6 @@ public interface AuthorizationRule<R extends Resource>
 	Class<R> getResourceType();
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param identity
 	 *            not <code>null</code>
 	 * @param newResource
@@ -23,8 +36,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonCreateAllowed(Identity identity, R newResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param identity
@@ -36,8 +47,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonCreateAllowed(Connection connection, Identity identity, R newResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param identity
 	 *            not <code>null</code>
 	 * @param existingResource
@@ -47,8 +56,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonReadAllowed(Identity identity, R existingResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param identity
@@ -60,8 +67,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonReadAllowed(Connection connection, Identity identity, R existingResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
@@ -73,8 +78,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonUpdateAllowed(Identity identity, R oldResource, R newResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param identity
@@ -88,8 +91,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonUpdateAllowed(Connection connection, Identity identity, R oldResource, R newResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
@@ -99,8 +100,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonDeleteAllowed(Identity identity, R oldResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param identity
@@ -112,8 +111,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonDeleteAllowed(Connection connection, Identity identity, R oldResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param identity
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
@@ -121,8 +118,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonSearchAllowed(Identity identity);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param identity
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
@@ -130,8 +125,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonHistoryAllowed(Identity identity);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param identity
 	 *            not <code>null</code>
 	 * @param oldResource
@@ -141,8 +134,6 @@ public interface AuthorizationRule<R extends Resource>
 	Optional<String> reasonPermanentDeleteAllowed(Identity identity, R oldResource);
 
 	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param identity
@@ -152,4 +143,13 @@ public interface AuthorizationRule<R extends Resource>
 	 * @return Reason as String in {@link Optional#of(Object)} if permanent delete allowed
 	 */
 	Optional<String> reasonPermanentDeleteAllowed(Connection connection, Identity identity, R oldResource);
+
+	/**
+	 * @param identity
+	 *            not <code>null</code>
+	 * @param existingResource
+	 *            not <code>null</code>
+	 * @return Reason as String in {@link Optional#of(Object)} if websocket access to resource allowed
+	 */
+	Optional<String> reasonWebsocketAllowed(Identity identity, R existingResource);
 }

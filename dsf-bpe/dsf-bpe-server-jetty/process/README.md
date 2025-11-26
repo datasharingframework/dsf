@@ -1,1 +1,1 @@
-Empty process directory for jar-files with process definition
+Empty process directory for jar-files used in dev setup

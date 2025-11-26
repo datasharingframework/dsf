@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
@@ -27,8 +42,10 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
+import dev.dsf.fhir.event.ResourceCreatedEvent;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -37,6 +54,7 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -55,6 +73,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected final ResponseGenerator responseGenerator;
 	protected final ReferenceCleaner referenceCleaner;
 	protected final EventGenerator eventGenerator;
+	protected final DefaultProfileProvider defaultProfileProvider;
+	protected final boolean enableValidation;
 
 	protected R createdResource;
 	protected Response responseResult;
@@ -64,7 +84,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
+			DefaultProfileProvider defaultProfileProvider, boolean enableValidation)
 	{
 		super(2, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
@@ -73,6 +94,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		this.referenceCleaner = referenceCleaner;
 
 		this.eventGenerator = eventGenerator;
+		this.defaultProfileProvider = defaultProfileProvider;
+		this.enableValidation = enableValidation;
+
+		if (PreferReturnType.OPERATION_OUTCOME.equals(returnType) && !enableValidation)
+			throw new IllegalArgumentException("Return type 'operation outcome' not allowed if validation disabled");
 	}
 
 	@Override
@@ -85,14 +111,22 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
 		{
 			if (!entry.hasFullUrl() || !entry.getFullUrl().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(
-						responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
+			{
+				Response response = responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl());
+				throw new WebApplicationException(response);
+			}
 			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
-				throw new WebApplicationException(
-						responseGenerator.bundleEntryBadResourceId(index, getResourceTypeName(), URL_UUID_PREFIX));
+			{
+				Response response = responseGenerator.bundleEntryBadResourceId(index, getResourceTypeName(),
+						URL_UUID_PREFIX);
+				throw new WebApplicationException(response);
+			}
 			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
-				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
-						entry.getFullUrl(), resource.getIdElement().getValue()));
+			{
+				Response response = responseGenerator.badBundleEntryFullUrlVsResourceId(index, entry.getFullUrl(),
+						resource.getIdElement().getValue());
+				throw new WebApplicationException(response);
+			}
 
 			// add new or existing id to the id translation table
 			addToIdTranslationTable(idTranslationTable, connection);
@@ -100,8 +134,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		// all other request urls
 		else
-			throw new WebApplicationException(
-					responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
+		{
+			Response response = responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl());
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private void addToIdTranslationTable(Map<String, IdType> idTranslationTable, Connection connection)
@@ -123,9 +159,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		// always resolve temp and conditional references, necessary if conditional create and resource exists
 		referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
@@ -138,13 +173,18 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		{
 			responseResult = null;
 
-			validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			if (enableValidation)
+			{
+				defaultProfileProvider.setDefaultProfile(resource);
+				validationResult = validationHelper.checkResourceValidForCreate(identity, resource);
+			}
 
 			referencesHelper.resolveLogicalReferences(connection);
 
 			authorizationHelper.checkCreateAllowed(index, connection, identity, resource);
 
-			createdResource = createWithTransactionAndId(connection, resource, getId(idTranslationTable));
+			createdResource = createWithTransactionAndId(largeObjectManager, connection, resource,
+					getId(idTranslationTable));
 		}
 		else if (responseResult == null)
 		{
@@ -152,9 +192,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 	}
 
-	protected R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	protected R createWithTransactionAndId(LargeObjectManager largeObjectManager, Connection connection, R resource,
+			UUID uuid) throws SQLException
 	{
-		return dao.createWithTransactionAndId(connection, resource, uuid);
+		return dao.createWithTransactionAndId(largeObjectManager, connection, resource, uuid);
 	}
 
 	private UUID getId(Map<String, IdType> idTranslationTable)
@@ -177,7 +218,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			return Optional.empty();
 
 		if (ifNoneExist.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExist));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue("blank", ifNoneExist);
+			throw new WebApplicationException(response);
+		}
 
 		if (!ifNoneExist.contains("?"))
 			ifNoneExist = '?' + ifNoneExist;
@@ -185,7 +229,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExist).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExist));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExist);
+			throw new WebApplicationException(response);
+		}
 
 		Map<String, List<String>> queryParameters = parameterConverter
 				.urlDecodeQueryParameters(componentes.getQueryParams());
@@ -205,15 +252,20 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
-			throw new WebApplicationException(
-					responseGenerator.badIfNoneExistHeaderValue(ifNoneExist, unsupportedQueryParameters));
+		{
+			Response response = responseGenerator.badIfNoneExistHeaderValue(ifNoneExist, unsupportedQueryParameters);
+			throw new WebApplicationException(response);
+		}
 
 		PartialResult<R> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
 		if (result.getTotal() == 1)
 			return Optional.of(result.getPartialResult().get(0));
 		else if (result.getTotal() > 1)
-			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, ifNoneExist));
+		{
+			Response response = responseGenerator.multipleExists(resourceTypeName, ifNoneExist);
+			throw new WebApplicationException(response);
+		}
 
 		return Optional.empty();
 	}
@@ -224,12 +276,13 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (responseResult == null)
 		{
 			// retrieving the latest resource from db to include updated references
-			Resource createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
-					createdResource);
+			R createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection, createdResource);
+
+			referenceCleaner.cleanLiteralReferences(createdResourceWithResolvedReferences);
+
 			try
 			{
-				referenceCleaner.cleanLiteralReferences(createdResourceWithResolvedReferences);
-				eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResourceWithResolvedReferences));
+				eventHandler.handleEvent(createEvent(createdResourceWithResolvedReferences));
 			}
 			catch (Exception e)
 			{
@@ -237,6 +290,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				logger.warn("Error while handling resource created event: {} - {}", e.getClass().getName(),
 						e.getMessage());
 			}
+
+			modifyResponseResource(createdResourceWithResolvedReferences);
 
 			IdType location = createdResourceWithResolvedReferences.getIdElement().withServerBase(serverBase,
 					createdResourceWithResolvedReferences.getResourceType().name());
@@ -250,7 +305,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			{
 				OperationOutcome outcome = responseGenerator.created(location.toString(),
 						createdResourceWithResolvedReferences);
-				validationResult.populateOperationOutcome(outcome);
+
+				if (validationResult != null)
+					validationResult.populateOperationOutcome(outcome);
+
 				resultEntry.getResponse().setOutcome(outcome);
 			}
 
@@ -281,6 +339,15 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 	}
 
+	protected ResourceCreatedEvent createEvent(R eventResource)
+	{
+		return eventGenerator.newResourceCreatedEvent(eventResource);
+	}
+
+	protected void modifyResponseResource(R responseResource)
+	{
+	}
+
 	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource)
 	{
 		try
@@ -298,5 +365,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public LargeObjectManager createLargeObjectManager(Connection connection)
+	{
+		return dao.createLargeObjectManager(connection);
 	}
 }

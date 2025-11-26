@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.authorization;
 
 import java.sql.Connection;
@@ -10,10 +25,8 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.dao.ReadAccessDao;
@@ -23,7 +36,7 @@ import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.service.ReferenceResolver;
 
 public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D extends ResourceDao<R>>
-		extends AbstractAuthorizationRule<R, D> implements AuthorizationRule<R>, InitializingBean
+		extends AbstractAuthorizationRule<R, D>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMetaTagAuthorizationRule.class);
 
@@ -49,7 +62,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	@Override
 	public final Optional<String> reasonCreateAllowed(Connection connection, Identity identity, R newResource)
 	{
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.CREATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(createRole))
 		{
 			Optional<String> errors = newResourceOkForCreate(connection, identity, newResource);
 			if (errors.isEmpty())
@@ -58,7 +71,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				{
 					logger.info("Create of {} authorized for identity '{}'", getResourceTypeName(), identity.getName());
 
-					return Optional.of("Identity is local identity and has role " + FhirServerRole.CREATE);
+					return Optional.of("Identity is local identity and has role " + createRole);
 				}
 				else
 				{
@@ -77,7 +90,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		else
 		{
 			logger.warn("Create of {} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), identity.getName(), FhirServerRole.CREATE);
+					getResourceTypeName(), identity.getName(), createRole);
 
 			return Optional.empty();
 		}
@@ -94,7 +107,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				existingResource.getIdElement().getIdPart());
 		final long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.hasDsfRole(FhirServerRole.READ))
+		if (identity.hasDsfRole(readRole))
 		{
 			try
 			{
@@ -119,7 +132,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 							getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
 							accessTypes.size() == 1 ? "tag" : "tags", tags);
 
-					return Optional.of("Identity has role " + FhirServerRole.READ + ", matching access "
+					return Optional.of("Identity has role " + readRole + ", matching access "
 							+ (accessTypes.size() == 1 ? "tag" : "tags") + " " + tags);
 				}
 			}
@@ -134,7 +147,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		else
 		{
 			logger.warn("Read of {}/{}/_history/{} unauthorized for identity '{}', no role {}", getResourceTypeName(),
-					resourceId.toString(), resourceVersion, identity.getName(), FhirServerRole.READ);
+					resourceId.toString(), resourceVersion, identity.getName(), readRole);
 
 			return Optional.empty();
 		}
@@ -149,7 +162,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.UPDATE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(updateRole))
 		{
 			Optional<String> errors = newResourceOkForUpdate(connection, identity, newResource);
 			if (errors.isEmpty())
@@ -157,22 +170,22 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 				if (modificationsOk(connection, oldResource, newResource))
 				{
 					logger.info("Update of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(),
-							resourceId.toString(), resourceVersion, identity.getName());
+							resourceId, resourceVersion, identity.getName());
 
-					return Optional.of("Identity is local identity and has role " + FhirServerRole.UPDATE);
+					return Optional.of("Identity is local identity and has role " + updateRole);
 				}
 				else
 				{
 					logger.warn("Update of {}/{}/_history/{} unauthorized, modification not allowed",
-							getResourceTypeName(), resourceId.toString(), resourceVersion);
+							getResourceTypeName(), resourceId, resourceVersion);
 
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Update of {}/{}/_history/{} unauthorized, {}", getResourceTypeName(),
-						resourceId.toString(), resourceVersion, errors.get());
+				logger.warn("Update of {}/{}/_history/{} unauthorized, {}", getResourceTypeName(), resourceId,
+						resourceVersion, errors.get());
 
 				return Optional.empty();
 			}
@@ -181,8 +194,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		{
 			logger.warn(
 					"Update of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), resourceId.toString(), resourceVersion, identity.getName(),
-					FhirServerRole.UPDATE);
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), updateRole);
 
 			return Optional.empty();
 		}
@@ -208,18 +220,18 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
 
-		if (identity.isLocalIdentity() && identity.hasDsfRole(FhirServerRole.DELETE))
+		if (identity.isLocalIdentity() && identity.hasDsfRole(deleteRole))
 		{
 			logger.info("Delete of {}/{}/_history/{} authorized for identity '{}'", getResourceTypeName(), resourceId,
 					resourceVersion, identity.getName());
 
-			return Optional.of("Identity is local identity and has role " + FhirServerRole.DELETE);
+			return Optional.of("Identity is local identity and has role " + deleteRole);
 		}
 		else
 		{
 			logger.warn(
 					"Delete of {}/{}/_history/{} unauthorized for identity '{}', not a local identity or no role {}",
-					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), FhirServerRole.DELETE);
+					getResourceTypeName(), resourceId, resourceVersion, identity.getName(), deleteRole);
 
 			return Optional.empty();
 		}

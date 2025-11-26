@@ -1,0 +1,212 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.v1.spring;
+
+import java.util.Locale;
+
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.HapiLocalizer;
+import dev.dsf.bpe.api.config.BpeProxyConfig;
+import dev.dsf.bpe.api.config.DsfClientConfig;
+import dev.dsf.bpe.api.listener.ListenerFactory;
+import dev.dsf.bpe.api.listener.ListenerFactoryImpl;
+import dev.dsf.bpe.api.service.BpeMailService;
+import dev.dsf.bpe.api.service.BuildInfoProvider;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.ProcessPluginApiImpl;
+import dev.dsf.bpe.v1.config.ProxyConfig;
+import dev.dsf.bpe.v1.config.ProxyConfigDelegate;
+import dev.dsf.bpe.v1.listener.ContinueListener;
+import dev.dsf.bpe.v1.listener.EndListener;
+import dev.dsf.bpe.v1.listener.StartListener;
+import dev.dsf.bpe.v1.plugin.ProcessPluginFactoryImpl;
+import dev.dsf.bpe.v1.service.EndpointProvider;
+import dev.dsf.bpe.v1.service.EndpointProviderImpl;
+import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
+import dev.dsf.bpe.v1.service.FhirWebserviceClientProviderImpl;
+import dev.dsf.bpe.v1.service.MailService;
+import dev.dsf.bpe.v1.service.MailServiceImpl;
+import dev.dsf.bpe.v1.service.OrganizationProvider;
+import dev.dsf.bpe.v1.service.OrganizationProviderImpl;
+import dev.dsf.bpe.v1.service.QuestionnaireResponseHelper;
+import dev.dsf.bpe.v1.service.QuestionnaireResponseHelperImpl;
+import dev.dsf.bpe.v1.service.TaskHelper;
+import dev.dsf.bpe.v1.service.TaskHelperImpl;
+import dev.dsf.bpe.v1.variables.FhirResourceSerializer;
+import dev.dsf.bpe.v1.variables.FhirResourcesListSerializer;
+import dev.dsf.bpe.v1.variables.ObjectMapperFactory;
+import dev.dsf.bpe.v1.variables.TargetSerializer;
+import dev.dsf.bpe.v1.variables.TargetsSerializer;
+import dev.dsf.bpe.v1.variables.VariablesImpl;
+import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
+import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
+import dev.dsf.fhir.authorization.read.ReadAccessHelper;
+import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceCleanerImpl;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceExtractorImpl;
+
+@Configuration
+public class ApiServiceConfig
+{
+	@Autowired
+	private DsfClientConfig dsfClientConfig;
+
+	@Autowired
+	private BpeProxyConfig proxyConfig;
+
+	@Autowired
+	private BuildInfoProvider buildInfoProvider;
+
+	@Autowired
+	private BpeMailService bpeMailService;
+
+	@Bean
+	public ProcessPluginApi processPluginApiV1()
+	{
+		ProxyConfig proxyConfig = new ProxyConfigDelegate(this.proxyConfig);
+
+		FhirWebserviceClientProvider clientProvider = clientProvider();
+		EndpointProvider endpointProvider = new EndpointProviderImpl(clientProvider,
+				dsfClientConfig.getLocalConfig().getBaseUrl());
+		FhirContext fhirContext = fhirContext();
+		MailService mailService = new MailServiceImpl(bpeMailService);
+		ObjectMapper objectMapper = objectMapper();
+		OrganizationProvider organizationProvider = new OrganizationProviderImpl(clientProvider,
+				dsfClientConfig.getLocalConfig().getBaseUrl());
+
+		ProcessAuthorizationHelper processAuthorizationHelper = new ProcessAuthorizationHelperImpl();
+		QuestionnaireResponseHelper questionnaireResponseHelper = new QuestionnaireResponseHelperImpl(
+				dsfClientConfig.getLocalConfig().getBaseUrl());
+		ReadAccessHelper readAccessHelper = new ReadAccessHelperImpl();
+		TaskHelper taskHelper = new TaskHelperImpl(dsfClientConfig.getLocalConfig().getBaseUrl());
+
+		return new ProcessPluginApiImpl(proxyConfig, endpointProvider, fhirContext, clientProvider, mailService,
+				objectMapper, organizationProvider, processAuthorizationHelper, questionnaireResponseHelper,
+				readAccessHelper, taskHelper);
+	}
+
+	@Bean
+	public FhirWebserviceClientProvider clientProvider()
+	{
+		return new FhirWebserviceClientProviderImpl(fhirContext(), referenceCleaner(),
+				dsfClientConfig.getLocalConfig().getBaseUrl(), dsfClientConfig.getLocalConfig().getReadTimeout(),
+				dsfClientConfig.getLocalConfig().getConnectTimeout(),
+				dsfClientConfig.getLocalConfig().isDebugLoggingEnabled(), dsfClientConfig.getTrustStore(),
+				dsfClientConfig.getKeyStore(), dsfClientConfig.getKeyStorePassword(),
+				dsfClientConfig.getRemoteConfig().getReadTimeout(),
+				dsfClientConfig.getRemoteConfig().getConnectTimeout(),
+				dsfClientConfig.getRemoteConfig().isDebugLoggingEnabled(), proxyConfig, buildInfoProvider);
+	}
+
+	@Bean
+	public ReferenceCleaner referenceCleaner()
+	{
+		return new ReferenceCleanerImpl(referenceExtractor());
+	}
+
+	@Bean
+	public ReferenceExtractor referenceExtractor()
+	{
+		return new ReferenceExtractorImpl();
+	}
+
+	@Bean
+	public FhirContext fhirContext()
+	{
+		// workaround for https://github.com/hapifhir/hapi-fhir/issues/5205
+		// Do not remove as HAPI dependency of v1 will not be upgraded to a fixed version
+		StreamReadConstraints.overrideDefaultStreamReadConstraints(
+				StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build());
+
+		FhirContext context = FhirContext.forR4();
+		HapiLocalizer localizer = new HapiLocalizer()
+		{
+			@Override
+			public Locale getLocale()
+			{
+				return Locale.ROOT;
+			}
+		};
+		context.setLocalizer(localizer);
+		return context;
+	}
+
+	@Bean
+	public ObjectMapper objectMapper()
+	{
+		return ObjectMapperFactory.createObjectMapper(fhirContext());
+	}
+
+	@Bean
+	public FhirResourceSerializer fhirResourceSerializer()
+	{
+		return new FhirResourceSerializer(fhirContext());
+	}
+
+	@Bean
+	public FhirResourcesListSerializer fhirResourcesListSerializer()
+	{
+		return new FhirResourcesListSerializer(objectMapper());
+	}
+
+	@Bean
+	public TargetSerializer targetSerializer()
+	{
+		return new TargetSerializer(objectMapper());
+	}
+
+	@Bean
+	public TargetsSerializer targetsSerializer()
+	{
+		return new TargetsSerializer(objectMapper());
+	}
+
+	@Bean
+	public ExecutionListener startListener()
+	{
+		return new StartListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
+	}
+
+	@Bean
+	public ExecutionListener endListener()
+	{
+		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new,
+				clientProvider().getLocalWebserviceClient());
+	}
+
+	@Bean
+	public ExecutionListener continueListener()
+	{
+		return new ContinueListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new);
+	}
+
+	@Bean
+	public ListenerFactory listenerFactory()
+	{
+		return new ListenerFactoryImpl(ProcessPluginFactoryImpl.API_VERSION, startListener(), endListener(),
+				continueListener());
+	}
+}

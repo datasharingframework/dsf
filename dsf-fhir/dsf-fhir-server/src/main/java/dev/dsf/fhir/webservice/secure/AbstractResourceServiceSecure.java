@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.webservice.secure;
 
 import java.util.Arrays;
@@ -33,6 +48,7 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
+import dev.dsf.fhir.service.DefaultProfileProvider;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -64,18 +80,21 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final AuthorizationRule<R> authorizationRule;
 	protected final ResourceValidator resourceValidator;
 	protected final ValidationRules validationRules;
+	protected final DefaultProfileProvider defaultProfileProvider;
 
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, AuthorizationRule<R> authorizationRule,
-			ResourceValidator resourceValidator, ValidationRules validationRules)
+			ResourceValidator resourceValidator, ValidationRules validationRules,
+			DefaultProfileProvider defaultProfileProvider)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
 		this.referenceCleaner = referenceCleaner;
 		this.referenceExtractor = referenceExtractor;
 		this.resourceType = resourceType;
+		this.defaultProfileProvider = defaultProfileProvider;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
@@ -100,6 +119,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Objects.requireNonNull(authorizationRule, "authorizationRule");
 		Objects.requireNonNull(resourceValidator, "resourceValidator");
 		Objects.requireNonNull(validationRules, "validationRules");
+		Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
 	}
 
 	private String toValidationLogMessage(ValidationResult validationResult)
@@ -113,8 +133,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	private Response withResourceValidation(R resource, Predicate<R> failValidationOnErrorOrFatal, UriInfo uri,
 			HttpHeaders headers, String method, Supplier<Response> delegate)
 	{
-		// FIXME hapi parser bug workaround
-		referenceCleaner.cleanReferenceResourcesIfBundle(resource);
+		defaultProfileProvider.setDefaultProfile(resource);
 
 		ValidationResult validationResult = resourceValidator.validate(resource);
 
@@ -133,7 +152,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		else
 		{
 			if (!validationResult.getMessages().isEmpty())
-				logger.warn("Resource {} validated with messages: {}{}", resource.fhirType(),
+				logger.debug("Resource {} validated with messages: {}{}", resource.fhirType(),
 						toValidationLogMessage(validationResult),
 						(validationResult.getMessages().stream()
 								.anyMatch(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
@@ -165,10 +184,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 						audit.info("Create of resource {} allowed for user '{}', reason: {}", resourceTypeName,
 								getCurrentIdentity().getName(), reasonCreateAllowed.get());
 
-						Response created = logResultStatus(() -> delegate.create(resource, uri, headers),
-								status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
-										resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
-										status.getReasonPhrase()),
+						Response created = logResultStatus(() ->
+						{
+							Response response = delegate.create(resource, uri, headers);
+							return response;
+						}, status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
+								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
+								status.getReasonPhrase()),
 								status -> audit.info("Create of resource {} for user '{}' failed, status: {} {}",
 										resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
 										status.getReasonPhrase()));
@@ -217,6 +239,19 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		Response read = delegate.read(id, uri, headers);
 
+		return checkRead(read);
+	}
+
+	@Override
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
+	{
+		Response read = delegate.vread(id, version, uri, headers);
+
+		return checkRead(read);
+	}
+
+	protected final Response checkRead(Response read)
+	{
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
 		{
 			final R entity = resourceType.cast(read.getEntity());
@@ -241,14 +276,16 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
 						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
 								.build();
+					else if (Status.PRECONDITION_FAILED.getStatusCode() == read.getStatus())
+						return Response.status(Status.PRECONDITION_FAILED).build();
 					else
 						return read;
 				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
 						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
 								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
+								status.getStatusCode(), status.getReasonPhrase()));
 			}
 		}
 		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)
@@ -257,74 +294,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 
-			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-			return read;
-		}
-		else if (read.hasEntity())
-		{
-			audit.info("Read of {} denied for identity '{}', not a {}", resourceTypeName,
-					getCurrentIdentity().getName(), resourceTypeName);
-			return forbidden("read");
-		}
-		else
-		{
-			audit.info("Read of {} for identity '{}' returned without entity, status {} {}", resourceTypeName,
-					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-
-			logger.info("Returning with status {} {}, but no entity", read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-			return read;
-		}
-	}
-
-	@Override
-	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
-	{
-		Response read = delegate.vread(id, version, uri, headers);
-
-		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
-		{
-			final R entity = resourceType.cast(read.getEntity());
-			final String entityId = entity.getIdElement().getIdPart();
-			final long entityVersion = entity.getIdElement().getVersionIdPartAsLong();
-			final Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentIdentity(),
-					entity);
-
-			if (reasonReadAllowed.isEmpty())
-			{
-				audit.info("Read of {}/{}/_history/{} denied for identity '{}'", resourceTypeName, entityId,
-						entityVersion, getCurrentIdentity().getName());
-				return forbidden("read");
-			}
-			else
-			{
-				audit.info("Read of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
-						entityId, entityVersion, getCurrentIdentity().getName(), reasonReadAllowed.get());
-				return logResultStatus(() ->
-				{
-					// if not modified remove entity
-					if (Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
-						return Response.notModified(read.getEntityTag()).lastModified(entity.getMeta().getLastUpdated())
-								.build();
-					else
-						return read;
-				}, status -> audit.info("Read of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-						resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-						read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()),
-						status -> audit.info("Read of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
-								resourceTypeName, entityId, entityVersion, getCurrentIdentity().getName(),
-								read.getStatusInfo().getStatusCode(), read.getStatusInfo().getReasonPhrase()));
-			}
-		}
-		else if (read.hasEntity() && read.getEntity() instanceof OperationOutcome)
-		{
-			audit.info("Read of {} for identity '{}' returned with OperationOutcome, status: {} {}", resourceTypeName,
-					getCurrentIdentity().getName(), read.getStatusInfo().getStatusCode(),
-					read.getStatusInfo().getReasonPhrase());
-
-			logger.info("Returning with OperationOutcome, status {} {}", read.getStatusInfo().getStatusCode(),
+			logger.info("Returning with OperationOutcome, status: {} {}", read.getStatusInfo().getStatusCode(),
 					read.getStatusInfo().getReasonPhrase());
 			return read;
 		}
@@ -359,9 +329,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
-			return logResultStatus(() -> delegate.history(uri, headers),
-					status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
-							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+			return logResultStatus(() ->
+			{
+				Response response = delegate.history(uri, headers);
+				return response;
+			}, status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("History of {} for identity '{}' failed: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
@@ -380,9 +353,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("History of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonHistoryAllowed.get());
-			return logResultStatus(() -> delegate.history(id, uri, headers),
-					status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
-							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+			return logResultStatus(() ->
+			{
+				Response response = delegate.history(id, uri, headers);
+				return response;
+			}, status -> audit.info("History of {} for identity '{}' successful: {} {}", resourceTypeName,
+					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("History of {} for identity '{}' failed: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
@@ -430,11 +406,14 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 						audit.info("Update of {}/{}/_history/{} allowed for identity '{}', reason: {}",
 								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
 								reasonUpdateAllowed.get());
-						Response updated = logResultStatus(() -> delegate.update(id, newResource, uri, headers),
-								status -> audit.info(
-										"Update of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-										resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-										status.getStatusCode(), status.getReasonPhrase()),
+						Response updated = logResultStatus(() ->
+						{
+							Response response = delegate.update(id, newResource, uri, headers);
+							return response;
+						}, status -> audit.info(
+								"Update of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+								status.getStatusCode(), status.getReasonPhrase()),
 								status -> audit.info(
 										"Update of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
 										resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
@@ -534,9 +513,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
-					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					"Query contains parameter not applicable in this conditional update context: standard parameters {} will be ignored",
 					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
 			queryParameters = queryParameters.entrySet().stream()
@@ -553,10 +530,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			audit.info(
 					"Update of resource {} denied for identity '{}', conditional update criteria contains unsupported parameters",
 					resourceTypeName, getCurrentIdentity().getName());
-			throw new WebApplicationException(responseGenerator.badRequest(
+
+			Response response = responseGenerator.badRequest(
 					UriComponentsBuilder.newInstance()
 							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-					unsupportedQueryParameters));
+					unsupportedQueryParameters);
+			throw new WebApplicationException(response);
 		}
 
 		return exceptionHandler.handleSqlException(() -> dao.search(query));
@@ -587,10 +566,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				audit.info("Delete of {}/{}/_history/{} allowed for identity '{}', reason: {}", resourceTypeName,
 						resourceId, resourceVersion, getCurrentIdentity().getName(), reasonDeleteAllowed.get());
-				return logResultStatus(() -> delegate.delete(id, uri, headers),
-						status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
-								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-								status.getStatusCode(), status.getReasonPhrase()),
+				return logResultStatus(() ->
+				{
+					Response response = delegate.delete(id, uri, headers);
+					return response;
+				}, status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' successful, status: {} {}",
+						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info("Delete of {}/{}/_history/{} for identity '{}' failed, status: {} {}",
 								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
 								status.getStatusCode(), status.getReasonPhrase()));
@@ -679,9 +661,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("Search of {} allowed for identity '{}', reason: {}", resourceTypeName,
 					getCurrentIdentity().getName(), reasonSearchAllowed.get());
-			return logResultStatus(() -> delegate.search(uri, headers),
-					status -> audit.info("Search of {} for identity '{} successful, status: {} {}'", resourceTypeName,
-							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
+			return logResultStatus(() ->
+			{
+				Response response = delegate.search(uri, headers);
+				return response;
+			}, status -> audit.info("Search of {} for identity '{} successful, status: {} {}'", resourceTypeName,
+					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("Search of {} for identity '{}' failed, status: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
 		}
@@ -712,11 +697,14 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
 						reasonDeleteAllowed.get());
 
-				return logResultStatus(() -> delegate.deletePermanently(deletePath, id, uri, headers),
-						status -> audit.info(
-								"Permanent delete of {}/{}/_history/{} by identity '{}' successful, status: {} {}",
-								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
-								status.getStatusCode(), status.getReasonPhrase()),
+				return logResultStatus(() ->
+				{
+					Response response = delegate.deletePermanently(deletePath, id, uri, headers);
+					return response;
+				}, status -> audit.info(
+						"Permanent delete of {}/{}/_history/{} by identity '{}' successful, status: {} {}",
+						resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),
+						status.getStatusCode(), status.getReasonPhrase()),
 						status -> audit.info(
 								"Permanent delete of {}/{}/_history/{} by identity '{}' failed, status: {} {}",
 								resourceTypeName, resourceId, resourceVersion, getCurrentIdentity().getName(),

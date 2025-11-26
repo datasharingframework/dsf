@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.PreparedStatement;
@@ -19,8 +34,7 @@ class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPrepar
 		super(fhirContext, resourceType, createSql(resourceTable, resourceIdColumn, resourceColumn),
 				readByIdSql(resourceTable, resourceIdColumn, resourceColumn),
 				readByIdAndVersionSql(resourceTable, resourceIdColumn, resourceColumn),
-				updateNewRowSql(resourceTable, resourceIdColumn, resourceColumn),
-				updateSameRowSql(resourceTable, resourceIdColumn, resourceColumn));
+				updateSql(resourceTable, resourceIdColumn, resourceColumn));
 	}
 
 	private static String createSql(String resourceTable, String resourceIdColumn, String resourceColumn)
@@ -40,20 +54,15 @@ class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPrepar
 				+ " = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
 	}
 
-	private static String updateNewRowSql(String resourceTable, String resourceIdColumn, String resourceColumn)
+	private static String updateSql(String resourceTable, String resourceIdColumn, String resourceColumn)
 	{
 		return "INSERT INTO " + resourceTable + " (" + resourceIdColumn + ", version, " + resourceColumn
 				+ ") VALUES (?, ?, ?)";
 	}
 
-	private static String updateSameRowSql(String resourceTable, String resourceIdColumn, String resourceColumn)
-	{
-		return "UPDATE " + resourceTable + " SET " + resourceColumn + " = ? WHERE " + resourceIdColumn
-				+ " = ? AND version = ?";
-	}
-
 	@Override
-	public void configureCreateStatement(PreparedStatement statement, R resource, UUID uuid) throws SQLException
+	public void configureCreateStatement(LargeObjectManager largeObjectManager, PreparedStatement statement, R resource,
+			UUID uuid) throws SQLException
 	{
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setObject(2, resourceToPgObject(resource));
@@ -117,20 +126,11 @@ class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPrepar
 	}
 
 	@Override
-	public void configureUpdateNewRowSqlStatement(PreparedStatement statement, UUID uuid, long version, R resource)
-			throws SQLException
+	public void configureUpdateSqlStatement(LargeObjectManager largeObjectManager, PreparedStatement statement,
+			UUID uuid, long version, R resource) throws SQLException
 	{
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setLong(2, version);
 		statement.setObject(3, resourceToPgObject(resource));
-	}
-
-	@Override
-	public void configureUpdateSameRowSqlStatement(PreparedStatement statement, UUID uuid, long version, R resource)
-			throws SQLException
-	{
-		statement.setObject(1, resourceToPgObject(resource));
-		statement.setObject(2, uuidToPgObject(uuid));
-		statement.setLong(3, version);
 	}
 }

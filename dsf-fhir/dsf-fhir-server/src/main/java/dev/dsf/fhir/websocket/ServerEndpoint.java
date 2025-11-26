@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.websocket;
 
 import java.io.IOException;
@@ -17,8 +32,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
-import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.CloseReason.CloseCodes;
@@ -37,7 +53,8 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	private static final String PINGER_PROPERTY = ServerEndpoint.class.getName() + ".pinger";
 	private static final String BIND_MESSAGE_START = "bind ";
 
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2,
+			r -> new Thread(r, "websocket-server-endpoint-scheduler"));
 
 	private final WebSocketSubscriptionManager subscriptionManager;
 
@@ -56,11 +73,11 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	public void onOpen(Session session, EndpointConfig config)
 	{
 		Principal principal = session.getUserPrincipal();
-		if (principal == null || !(principal instanceof Identity)
-				|| !((Identity) principal).hasDsfRole(FhirServerRole.WEBSOCKET))
+		if (principal == null || !(principal instanceof Identity) || !((Identity) principal).getDsfRoles().stream()
+				.map(DsfRole::name).anyMatch(FhirServerRoleImpl.Operation.WEBSOCKET.name()::equals))
 		{
 			logger.warn("No user in session or user is missing role {}, closing websocket, session {}",
-					FhirServerRole.WEBSOCKET, session.getId());
+					FhirServerRoleImpl.Operation.WEBSOCKET, session.getId());
 			try
 			{
 				session.close(new CloseReason(CloseCodes.VIOLATED_POLICY, "Forbidden"));

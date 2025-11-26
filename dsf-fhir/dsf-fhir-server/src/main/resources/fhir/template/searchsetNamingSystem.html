@@ -1,0 +1,32 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<table>
+		<tr th:fragment="header"><th>ID</th><th>Status</th><th>Name</th><th>Unique ID</th><th>Last Updated</th></tr>
+		<tr th:fragment="row" title="Open" th:title="'Open ' + ${element.id.resourceType}" th:attr="resource-type=${element.id.resourceType}">
+			<td class="id-value" status="active" th:attr="status=${element.status}"><a href="#" title="Open" th:href="${element.id.href}" th:title="'Open ' + ${element.id.resourceType}" th:text="${element.id.value}">id</a></td>
+			<td th:text="${element.status}">active</td>
+			<td th:text="${element.name}">Name</td>
+			<td th:text="${element.uniqueId}">uniqueId</td>
+			<td th:text="${element.lastUpdated}">lastUpdated</td>
+		</tr>
+	</table>
+</body>
+</html>

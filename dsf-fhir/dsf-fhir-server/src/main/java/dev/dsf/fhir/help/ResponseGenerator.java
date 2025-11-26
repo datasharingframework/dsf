@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.help;
 
 import java.net.URI;
@@ -91,11 +106,28 @@ public class ResponseGenerator
 		return response(status, resource, mediaType, PreferReturnType.REPRESENTATION, null);
 	}
 
+	/**
+	 * @param status
+	 *            not <code>null</code>
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            may be <code>null</code>
+	 * @param prefer
+	 *            not <code>null</code>
+	 * @param operationOutcomeCreator
+	 *            not <code>null</code> if given <b>prefer</b> is {@link PreferReturnType#OPERATION_OUTCOME}
+	 * @return never <code>null</code>
+	 */
 	public ResponseBuilder response(Status status, Resource resource, MediaType mediaType, PreferReturnType prefer,
 			Supplier<OperationOutcome> operationOutcomeCreator)
 	{
 		Objects.requireNonNull(status, "status");
 		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(prefer, "prefer");
+
+		if (PreferReturnType.OPERATION_OUTCOME.equals(prefer))
+			Objects.requireNonNull(operationOutcomeCreator, "operationOutcomeCreator");
 
 		ResponseBuilder b = Response.status(status);
 
@@ -345,8 +377,8 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.warn("Bad request '{}', unsupported query parameter{} {}", queryParameters,
-				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+		logger.warn("Bad request, {} unsupported query parameter{}", unsupportedQueryParameters.size(),
+				unsupportedQueryParameters.size() != 1 ? "s" : "");
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad request '" + queryParameters + "', unsupported query parameter"

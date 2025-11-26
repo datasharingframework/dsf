@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+	logicalFilePath="db/db.create-db-users.changelog-1.0.0.xml">
+
+	<changeSet author="hhund" id="db.create-db-users.changelog-1.0.0" dbms="postgresql">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${db.server_user}'</sqlCheck>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${db.server_users_group}'</sqlCheck>
+
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${db.server_permanent_delete_user}'</sqlCheck>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${db.server_permanent_delete_users_group}'</sqlCheck>
+			</and>
+		</preConditions>
+		<sql>
+			CREATE ROLE ${db.server_users_group} NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			CREATE ROLE ${db.server_user} LOGIN PASSWORD '${db.server_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			GRANT ${db.server_users_group} TO ${db.server_user};
+
+			CREATE ROLE ${db.server_permanent_delete_users_group} NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			CREATE ROLE ${db.server_permanent_delete_user} LOGIN PASSWORD '${db.server_permanent_delete_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			GRANT ${db.server_permanent_delete_users_group} TO ${db.server_permanent_delete_user};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

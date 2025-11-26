@@ -1,60 +1,79 @@
-<ValueSet xmlns="http://hl7.org/fhir">
-  <meta>
-    <tag>
-      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
-      <code value="ALL"/>
-    </tag>		
-  </meta>
-  <text>
-    <status value="generated"/>
-    <div xmlns="http://www.w3.org/1999/xhtml">
-      <h2>MimeType</h2>
-      <div>
-        <p>This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)</p>
+<!--
 
-      </div>
-      <p>This value set includes codes from the following code systems:</p>
-      <ul>
-        <li>Include all codes defined in 
-          <code>urn:ietf:bcp:13</code>
-        </li>
-      </ul>
-    </div>
-  </text>
-  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
-    <valueCode value="fhir"/>
-  </extension>
-  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status">
-    <valueCode value="normative"/>
-  </extension>
-  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version">
-    <valueCode value="4.0.0"/>
-  </extension>
-  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
-    <valueInteger value="5"/>
-  </extension>
-  <url value="http://hl7.org/fhir/ValueSet/mimetypes"/>
-  <identifier>
-    <system value="urn:ietf:rfc:3986"/>
-    <value value="urn:oid:2.16.840.1.113883.4.642.3.1024"/>
-  </identifier>
-  <version value="4.0.1"/>
-  <name value="Mime Types"/>
-  <title value="MimeType"/>
-  <status value="active"/>
-  <experimental value="false"/>
-  <date value="2021-07-28"/>
-  <publisher value="HL7 International - FHIR-Infrastructure"/>
-  <contact>
-    <telecom>
-      <system value="url"/>
-      <value value="http://hl7.org/fhir"/>
-    </telecom>
-  </contact>
-  <description value="This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)"/>
-  <compose>
-    <include>
-      <system value="urn:ietf:bcp:13"/>
-    </include>
-  </compose>
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<ValueSet xmlns="http://hl7.org/fhir"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://hl7.org/fhir/R4/fhir-single.xsd">
+	<meta>
+		<profile value="http://dsf.dev/fhir/StructureDefinition/value-set"/>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
+		</tag>
+	</meta>
+	<text>
+		<status value="generated"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">
+			<h2>MimeType</h2>
+			<div>
+				<p>This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)</p>
+			</div>
+			<p>This value set includes codes from the following code systems:</p>
+			<ul>
+				<li>Include all codes defined in <code>urn:ietf:bcp:13</code>
+				</li>
+			</ul>
+		</div>
+	</text>
+	<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+		<valueCode value="fhir"/>
+	</extension>
+	<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status">
+		<valueCode value="normative"/>
+	</extension>
+	<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version">
+		<valueCode value="4.0.0"/>
+	</extension>
+	<extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+		<valueInteger value="5"/>
+	</extension>
+	<url value="http://hl7.org/fhir/ValueSet/mimetypes"/>
+	<identifier>
+		<system value="urn:ietf:rfc:3986"/>
+		<value value="urn:oid:2.16.840.1.113883.4.642.3.1024"/>
+	</identifier>
+	<version value="4.0.1"/>
+	<name value="MimeTypes"/>
+	<title value="MimeType"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2025-10-17"/>
+	<publisher value="HL7 International / FHIR Infrastructure"/>
+	<contact>
+		<telecom>
+			<system value="url"/>
+			<value value="http://www.hl7.org/Special/committees/fiwg"/>
+		</telecom>
+	</contact>
+	<description value="This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)"/>
+	<compose>
+		<include>
+			<system value="urn:ietf:bcp:13"/>
+			<version value="4.0.1"/>
+		</include>
+	</compose>
 </ValueSet>

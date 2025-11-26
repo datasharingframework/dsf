@@ -1,6 +1,20 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.webservice.impl;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,83 +99,98 @@ public class StructureDefinitionServiceImpl extends
 	@Override
 	protected Consumer<StructureDefinition> preCreate(StructureDefinition resource) throws WebApplicationException
 	{
-		StructureDefinition forPost = resource.hasSnapshot() ? resource.copy() : null;
+		StructureDefinition requestResource = resource.hasSnapshot() ? resource.copy() : null;
 
 		resource.setSnapshot(null);
 
-		return postCreate(forPost);
+		return postCreate(requestResource);
 	}
 
-	@Override
-	protected Consumer<StructureDefinition> preUpdate(StructureDefinition resource)
+	private Consumer<StructureDefinition> postCreate(StructureDefinition requestResource)
 	{
-		StructureDefinition forPost = resource.hasSnapshot() ? resource.copy() : null;
-
-		resource.setSnapshot(null);
-
-		return postUpdate(forPost);
-	}
-
-	private Consumer<StructureDefinition> postCreate(StructureDefinition preResource)
-	{
-		return postResource ->
+		return responseResource ->
 		{
-			if (preResource != null && preResource.hasSnapshot())
+			if (requestResource != null && requestResource.hasSnapshot())
 			{
 				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-						() -> snapshotDao.createWithId(preResource,
-								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart())));
+						() -> snapshotDao.createWithId(requestResource, parameterConverter.toUuid(resourceTypeName,
+								responseResource.getIdElement().getIdPart())));
+
+				responseResource.setSnapshot(requestResource.getSnapshot());
+				eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(responseResource));
 			}
-			else if (postResource != null)
+			else
 			{
 				try
 				{
-					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
+					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(responseResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
+					{
 						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-								() -> snapshotDao.createWithId(postResource, parameterConverter.toUuid(resourceTypeName,
-										postResource.getIdElement().getIdPart())));
+								() -> snapshotDao.createWithId(s.getSnapshot(), parameterConverter
+										.toUuid(resourceTypeName, responseResource.getIdElement().getIdPart())));
+					}
+
+					eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(responseResource.copy()));
+
+					responseResource.setSnapshot(null);
 				}
 				catch (Exception e)
 				{
 					logger.debug("Error while generating snapshot for StructureDefinition with id {}",
-							postResource.getIdElement().getIdPart(), e);
+							responseResource.getIdElement().getIdPart(), e);
 					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
-							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
+							responseResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 				}
 			}
 		};
 	}
 
-	private Consumer<StructureDefinition> postUpdate(StructureDefinition preResource)
+	@Override
+	protected Consumer<StructureDefinition> preUpdate(StructureDefinition resource)
 	{
-		return postResource ->
-		{
-			if (preResource != null && preResource.hasSnapshot())
-			{
-				if (postResource != null)
-					preResource.setIdElement(postResource.getIdElement().copy());
+		StructureDefinition requestResource = resource.hasSnapshot() ? resource.copy() : null;
 
+		resource.setSnapshot(null);
+
+		return postUpdate(requestResource);
+	}
+
+	private Consumer<StructureDefinition> postUpdate(StructureDefinition requestResource)
+	{
+		return responseResource ->
+		{
+			if (requestResource != null && requestResource.hasSnapshot())
+			{
 				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-						() -> snapshotDao.update(preResource));
+						() -> snapshotDao.update(requestResource));
+
+				responseResource.setSnapshot(requestResource.getSnapshot());
+				eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(responseResource));
 			}
-			else if (postResource != null)
+			else
 			{
 				try
 				{
-					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
+					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(responseResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
+					{
 						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
 								() -> snapshotDao.update(s.getSnapshot()));
+					}
+
+					eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(responseResource.copy()));
+
+					responseResource.setSnapshot(null);
 				}
 				catch (Exception e)
 				{
 					logger.debug("Error while generating snapshot for StructureDefinition with id {}",
-							postResource.getIdElement().getIdPart(), e);
+							responseResource.getIdElement().getIdPart(), e);
 					logger.warn("Error while generating snapshot for StructureDefinition with id {}: {} - {}",
-							postResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
+							responseResource.getIdElement().getIdPart(), e.getClass().getName(), e.getMessage());
 				}
 			}
 		};
@@ -182,7 +211,8 @@ public class StructureDefinitionServiceImpl extends
 	@Override
 	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		Type urlType = parameters.getParameter("url");
+		ParametersParameterComponent param = parameters.getParameter("url");
+		Type urlType = param.getValue();
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
 				.filter(p -> "resource".equals(p.getName())).findFirst();
 
@@ -230,9 +260,8 @@ public class StructureDefinitionServiceImpl extends
 		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentIdentity(),
 				PageAndCount.single());
 		Map<String, List<String>> searchParameters = new HashMap<>();
-		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, Collections.singletonList(url));
-		searchParameters.put(SearchQuery.PARAMETER_SORT,
-				Collections.singletonList("-" + ResourceLastUpdated.PARAMETER_NAME));
+		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, List.of(url));
+		searchParameters.put(SearchQuery.PARAMETER_SORT, List.of("-" + ResourceLastUpdated.PARAMETER_NAME));
 		query.configureParameters(searchParameters);
 
 		PartialResult<StructureDefinition> result = exceptionHandler
@@ -293,7 +322,9 @@ public class StructureDefinitionServiceImpl extends
 							.setCode(IssueType.STRUCTURE).setDiagnostics(vm.getMessage()))
 					.collect(Collectors.toList());
 			outcome.setIssue(issues);
-			throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
+
+			Response response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build();
+			throw new WebApplicationException(response);
 		}
 	}
 }

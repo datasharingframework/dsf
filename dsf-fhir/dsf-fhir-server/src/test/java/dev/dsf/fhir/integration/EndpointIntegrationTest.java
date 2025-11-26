@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
@@ -5,7 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.authentication.OrganizationProvider;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.search.PageAndCount;
@@ -38,6 +54,10 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 	private Endpoint createEndpoint()
 	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		Organization localOrganization = organizationProvider.getLocalOrganization().get();
+
 		Endpoint endpoint = new Endpoint();
 		endpoint.addIdentifier().setSystem("http://dsf.dev/sid/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
@@ -50,13 +70,15 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		endpoint.addPayloadMimeType("application/fhir+json");
 		endpoint.addPayloadMimeType("application/fhir+xml");
 		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
+		endpoint.getManagingOrganization()
+				.setReferenceElement(localOrganization.getIdElement().toUnqualifiedVersionless());
 		return endpoint;
 	}
 
 	@Test
 	public void testSearchAll() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient().search(Endpoint.class, Collections.emptyMap());
+		Bundle searchBundle = getWebserviceClient().search(Endpoint.class, Map.of());
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 
@@ -79,14 +101,14 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	public void testSearchWithUnsupportedQueryParameterStrictHandling() throws Exception
 	{
 		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Endpoint.class,
-				Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value"))));
+				Map.of("not-supported-parameter", List.of("not-supported-parameter-value"))));
 	}
 
 	@Test
 	public void testSearchWithUnsupportedQueryParameterLenientHandling() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value")));
+				Map.of("not-supported-parameter", List.of("not-supported-parameter-value")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(3, searchBundle.getEntry().size());
@@ -113,7 +135,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	public void testSearchEndpointIncludeOrganization() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("_include", Collections.singletonList("Endpoint:organization")));
+				Map.of("_include", List.of("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -147,7 +169,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	public void testSearchEndpointRevIncludeOrganization() throws Exception
 	{
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("_revinclude", Collections.singletonList("Organization:endpoint")));
+				Map.of("_revinclude", List.of("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -194,21 +216,10 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	{
 		FhirContext context = FhirContext.forR4();
 
-		Organization organization = new Organization();
-		getReadAccessHelper().addAll(organization);
-		organization.addIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("bla-bla.de");
-		organization.addExtension("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint",
-				new StringType(
-						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
-
-		Organization createdOrg = getWebserviceClient().create(organization);
-		logger.debug("Organization: {}",
-				context.newXmlParser().setPrettyPrint(true).encodeResourceToString(createdOrg));
-
 		Endpoint endpoint = createEndpoint();
 		getReadAccessHelper().addAll(endpoint);
 		endpoint.getManagingOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("bla-bla.de");
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization");
 
 		logger.debug("endpoint: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(endpoint));
 
@@ -266,6 +277,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				new StringType(
 						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
 		organization.addEndpoint().setReference(endTempId);
+		organization.setActive(true);
 
 		Endpoint endpoint = createEndpoint();
 		getReadAccessHelper().addAll(endpoint);
@@ -330,8 +342,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
 		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-				.configureParameters(Map.of("identifier",
-						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
+				.configureParameters(
+						Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
 		assertEquals(1, organizationResult.getTotal());
@@ -358,8 +370,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
 
 		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
-				.configureParameters(Map.of("identifier",
-						Collections.singletonList("http://dsf.dev/sid/organization-identifier|Test_Organization")));
+				.configureParameters(
+						Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|Test_Organization")));
 		PartialResult<Organization> organizationResult = organizationDao.search(query);
 		assertNotNull(organizationResult);
 		assertEquals(1, organizationResult.getTotal());

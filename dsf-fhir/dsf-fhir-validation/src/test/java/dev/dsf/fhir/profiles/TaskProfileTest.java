@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.profiles;
 
 import static org.junit.Assert.assertEquals;
@@ -7,9 +22,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskIntent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,8 +46,9 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-task-base-1.0.0.xml"), List.of("dsf-bpmn-message-1.0.0.xml"),
-			List.of("dsf-bpmn-message-1.0.0.xml"));
+			List.of("dsf-task-2.0.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
+			List.of("dsf-bpmn-message-2.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"),
+			List.of("dsf-bpmn-message-2.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -37,7 +56,14 @@ public class TaskProfileTest
 	@Test
 	public void testTaskValidRequestedWithoutBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.REQUESTED);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.REQUESTED);
+		testTaskValid(task);
+	}
+
+	@Test
+	public void testTaskValidRequestedWithoutBusinessKeyForPractitioner()
+	{
+		Task task = createTaskForPractitionerRequester(Task.TaskStatus.REQUESTED);
 		testTaskValid(task);
 	}
 
@@ -58,7 +84,7 @@ public class TaskProfileTest
 	@Test
 	public void testTaskInvalidInProgressMissingBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.INPROGRESS);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.INPROGRESS);
 		testTaskInvalidMissingBusinessKey(task);
 	}
 
@@ -72,7 +98,7 @@ public class TaskProfileTest
 	@Test
 	public void testTaskInvalidCompletedMissingBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.COMPLETED);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.COMPLETED);
 		testTaskInvalidMissingBusinessKey(task);
 	}
 
@@ -86,15 +112,33 @@ public class TaskProfileTest
 	@Test
 	public void testTaskInvalidFailedMissingBusinessKey()
 	{
-		Task task = createTask(Task.TaskStatus.FAILED);
+		Task task = createTaskForOrganizationRequester(Task.TaskStatus.FAILED);
 		testTaskInvalidMissingBusinessKey(task);
 	}
 
 	private Task createTaskWithBusinessKey(Task.TaskStatus status)
 	{
-		Task task = createTask(status);
+		Task task = createTaskForOrganizationRequester(status);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("business-key");
+
+		return task;
+	}
+
+	private Task createTaskForOrganizationRequester(Task.TaskStatus status)
+	{
+		Task task = createTask(status);
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC");
+
+		return task;
+	}
+
+	private Task createTaskForPractitionerRequester(Task.TaskStatus status)
+	{
+		Task task = createTask(status);
+		task.getRequester().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue("foo@org.com");
 
 		return task;
 	}
@@ -102,13 +146,11 @@ public class TaskProfileTest
 	private Task createTask(Task.TaskStatus status)
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-base");
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task");
 		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/foo|0.1.0");
 		task.setStatus(status);
 		task.setIntent(Task.TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
 				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC");
 
@@ -141,9 +183,60 @@ public class TaskProfileTest
 	private ValidationResult validate(Task task)
 	{
 		ValidationResult result = resourceValidator.validate(task);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
 
 		return result;
+	}
+
+	@Test
+	public void testTaskValidationWithAdditionalInputNotInDsfBaseTaskVersion1_4()
+	{
+		Task task = new Task();
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-test|1.4");
+		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/test|1.4");
+		task.setStatus(TaskStatus.REQUESTED);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+
+		task.addInput().setValue(new StringType("test")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType("some-test-string")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/test|1.4").setCode("string-example");
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	@Test
+	public void testTaskValidationWithAdditionalInputNotInDsfBaseTaskVersion2_0()
+	{
+		Task task = new Task();
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-test|2.0");
+		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/test|2.0");
+		task.setStatus(TaskStatus.REQUESTED);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+
+		task.addInput().setValue(new StringType("test_v2")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new IntegerType(42)).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/test|2.0").setCode("integer-example");
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger::debug, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 }

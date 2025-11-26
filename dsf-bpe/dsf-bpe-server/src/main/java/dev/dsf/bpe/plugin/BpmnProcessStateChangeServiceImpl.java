@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.plugin;
 
 import java.sql.SQLException;
@@ -10,14 +25,16 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.repository.Deployment;
-import org.camunda.bpm.engine.repository.DeploymentBuilder;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.repository.Deployment;
+import org.operaton.bpm.engine.repository.DeploymentBuilder;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.dao.ProcessStateDao;
 
 public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChangeService, InitializingBean
@@ -79,10 +96,10 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 		logger.debug("Deploying process models ...");
 		models.forEach(this::deploy);
 
-		Set<ProcessIdAndVersion> loadedProcesses = models.stream().map(BpmnFileAndModel::getProcessIdAndVersion)
+		Set<ProcessIdAndVersion> loadedProcesses = models.stream().map(BpmnFileAndModel::toProcessIdAndVersion)
 				.collect(Collectors.toSet());
-		Set<ProcessIdAndVersion> draft = models.stream().filter(BpmnFileAndModel::isDraft)
-				.map(BpmnFileAndModel::getProcessIdAndVersion).collect(Collectors.toSet());
+		Set<ProcessIdAndVersion> draft = models.stream().filter(BpmnFileAndModel::draft)
+				.map(BpmnFileAndModel::toProcessIdAndVersion).collect(Collectors.toSet());
 
 		List<ProcessDefinition> definitions = repositoryService.createProcessDefinitionQuery().list();
 		for (ProcessDefinition definition : definitions)
@@ -195,18 +212,18 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 
 	private void deploy(BpmnFileAndModel fileAndModel)
 	{
-		ProcessIdAndVersion processKeyAndVersion = fileAndModel.getProcessIdAndVersion();
+		ProcessIdAndVersion processKeyAndVersion = fileAndModel.toProcessIdAndVersion();
 
 		DeploymentBuilder builder = repositoryService.createDeployment().name(processKeyAndVersion.toString())
-				.source(fileAndModel.getFile()).addModelInstance(fileAndModel.getFile(), fileAndModel.getModel())
-				.enableDuplicateFiltering(true);
+				.source(fileAndModel.file()).addModelInstance(fileAndModel.file(), fileAndModel.model())
+				.enableDuplicateFiltering(true).tenantId(String.valueOf(fileAndModel.processPluginApiVersion()));
 
 		Deployment deployment = builder.deploy();
 
 		logger.debug("Process {} from {}://{} deployed with id {}", processKeyAndVersion.toString(),
-				fileAndModel.getJar().toString(), fileAndModel.getFile(), deployment.getId());
+				fileAndModel.jar().toString(), fileAndModel.file(), deployment.getId());
 
-		if (fileAndModel.isDraft())
+		if (fileAndModel.draft())
 		{
 			List<ProcessDefinition> activeDraftDefinitions = repositoryService.createProcessDefinitionQuery()
 					.processDefinitionKey(processKeyAndVersion.getId()).versionTag(processKeyAndVersion.getVersion())

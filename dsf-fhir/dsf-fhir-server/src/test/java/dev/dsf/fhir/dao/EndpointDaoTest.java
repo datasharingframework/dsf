@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
@@ -5,10 +20,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
 import dev.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
@@ -94,5 +111,121 @@ public class EndpointDaoTest extends AbstractReadAccessDaoTest<Endpoint, Endpoin
 		dao.delete(UUID.fromString(created.getIdElement().getIdPart()));
 
 		assertFalse(dao.existsActiveNotDeletedByAddress(address));
+	}
+
+	@Test
+	public void testReadActiveNotDeletedByAddress() throws Exception
+	{
+		String address = "http://test/fhir";
+
+		Endpoint e = new Endpoint();
+		e.setStatus(EndpointStatus.ACTIVE);
+		e.setAddress(address);
+
+		Endpoint created = dao.create(e);
+		assertNotNull(created);
+
+		Optional<Endpoint> readE = dao.readActiveNotDeletedByAddress(address);
+		assertNotNull(readE);
+		assertTrue(readE.isPresent());
+		assertEquals(address, readE.map(Endpoint::getAddress).get());
+	}
+
+	@Test
+	public void testReadActiveNotDeletedByAddressNotActive() throws Exception
+	{
+		String address = "http://test/fhir";
+
+		Endpoint e = new Endpoint();
+		e.setStatus(EndpointStatus.OFF);
+		e.setAddress(address);
+
+		Endpoint created = dao.create(e);
+		assertNotNull(created);
+
+		Optional<Endpoint> readE = dao.readActiveNotDeletedByAddress(address);
+		assertNotNull(readE);
+		assertTrue(readE.isEmpty());
+	}
+
+	@Test
+	public void testReadActiveNotDeletedByAddressDeleted() throws Exception
+	{
+		String address = "http://test/fhir";
+
+		Endpoint e = new Endpoint();
+		e.setStatus(EndpointStatus.ACTIVE);
+		e.setAddress(address);
+
+		Endpoint created = dao.create(e);
+		assertNotNull(created);
+		dao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+
+		Optional<Endpoint> readE = dao.readActiveNotDeletedByAddress(address);
+		assertNotNull(readE);
+		assertTrue(readE.isEmpty());
+	}
+
+	@Test
+	public void testReadActiveNotDeletedByThumbprint() throws Exception
+	{
+		String thumbprint = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+		Endpoint e = new Endpoint();
+		e.setStatus(EndpointStatus.ACTIVE);
+		e.setAddress(address);
+		e.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(thumbprint));
+
+		Endpoint created = dao.create(e);
+		assertNotNull(created);
+
+		Optional<Endpoint> readE = dao.readActiveNotDeletedByAddress(address);
+		assertNotNull(readE);
+		assertTrue(readE.isPresent());
+		assertEquals(address, readE.map(Endpoint::getAddress).get());
+		assertEquals(thumbprint,
+				((StringType) readE.get()
+						.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+						.getValue()).getValue());
+	}
+
+	@Test
+	public void testReadActiveNotDeletedByThumbprintNotActive() throws Exception
+	{
+		String thumbprint = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+		Endpoint e = new Endpoint();
+		e.setStatus(EndpointStatus.OFF);
+		e.setAddress(address);
+		e.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(thumbprint));
+
+		Endpoint created = dao.create(e);
+		assertNotNull(created);
+
+		Optional<Endpoint> readE = dao.readActiveNotDeletedByAddress(address);
+		assertNotNull(readE);
+		assertTrue(readE.isEmpty());
+	}
+
+	@Test
+	public void testReadActiveNotDeletedByThumbprintDeleted() throws Exception
+	{
+		String thumbprint = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+		Endpoint e = new Endpoint();
+		e.setStatus(EndpointStatus.ACTIVE);
+		e.setAddress(address);
+		e.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(thumbprint));
+
+		Endpoint created = dao.create(e);
+		assertNotNull(created);
+		dao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+
+		Optional<Endpoint> readE = dao.readActiveNotDeletedByAddress(address);
+		assertNotNull(readE);
+		assertTrue(readE.isEmpty());
 	}
 }

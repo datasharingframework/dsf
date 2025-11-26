@@ -1,36 +1,59 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>dev.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>1.9.0</version>
+	<version>2.0.0</version>
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>dsf-bpe</module>
 		<module>dsf-common</module>
 		<module>dsf-fhir</module>
-		<module>dsf-tools</module>
+		<module>dsf-maven</module>
 	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.source>25</maven.compiler.source>
+		<maven.compiler.target>25</maven.compiler.target>
+		<maven.compiler.release>25</maven.compiler.release>
 
 		<main.basedir>${project.basedir}</main.basedir>
 
 		<slf4j.version>2.0.17</slf4j.version>
 		<log4j.version>2.25.2</log4j.version>
-		<jetty.version>11.0.26</jetty.version>
+		<jetty.version>12.1.4</jetty.version>
 		<jersey.version>3.1.11</jersey.version>
-		<tyrus.version>2.2.0</tyrus.version>
-		<spring.version>6.2.12</spring.version>
-		<jackson.version>2.20.0</jackson.version>
-		<camunda.version>7.24.0</camunda.version>
-		<hapi.fhir.version>5.1.0</hapi.fhir.version>
+		<tyrus.version>2.2.1</tyrus.version>
+		<spring.version>6.2.14</spring.version>
+		<jackson.version>2.20.1</jackson.version>
+		<operaton.version>1.0.0</operaton.version>
+		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
+		<hapi.fhir.version.v2>8.4.1</hapi.fhir.version.v2>
+		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
+		<hapi.fhir.version>8.4.1</hapi.fhir.version>
 		<bouncycastle.version>1.82</bouncycastle.version>
+		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
+		<crypto-utils.version.v2>5.2.0</crypto-utils.version.v2>
+		<crypto-utils.version>5.2.0</crypto-utils.version>
 	</properties>
 
 	<name>DSF Parent POM</name>
@@ -107,11 +130,10 @@
 				<artifactId>log4j-core</artifactId>
 				<version>${log4j.version}</version>
 			</dependency>
-			<!-- async logging -->
 			<dependency>
-				<groupId>com.lmax</groupId>
-				<artifactId>disruptor</artifactId>
-				<version>3.4.4</version>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-layout-template-json</artifactId>
+				<version>${log4j.version}</version>
 			</dependency>
 
 			<dependency>
@@ -167,12 +189,6 @@
 			<!-- hhn rwh -->
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
-				<artifactId>crypto-utils</artifactId>
-				<!-- Can't update to 4.0.0 as renamed packages in crypto-utils would break existing process plugins -->
-				<version>3.8.0</version>
-			</dependency>
-			<dependency>
-				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
 				<version>1.0.0</version>
 			</dependency>
@@ -189,13 +205,13 @@
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-webapp</artifactId>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-webapp</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-annotations</artifactId>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-annotations</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
@@ -204,8 +220,18 @@
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty.ee10.websocket</groupId>
+				<artifactId>jetty-ee10-websocket-jakarta-server</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-openid</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-security</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 
@@ -258,8 +284,9 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
+				<!-- TODO change back to ${jackson.version} when
+				jackson-annotations has same version as other jackson libs -->
 				<version>2.20</version>
-				<!-- TODO change back to ${jackson.version} once jackson-annotations has same version as other jackson libs -->
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -267,8 +294,18 @@
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-jsr310</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+	    		<groupId>com.fasterxml.jackson.dataformat</groupId>
+	    		<artifactId>jackson-dataformat-yaml</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
 
@@ -342,17 +379,17 @@
 			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>
-				<version>6.0.0</version>
+				<version>6.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.websocket</groupId>
 				<artifactId>jakarta.websocket-api</artifactId>
-				<version>2.1.1</version>
+				<version>2.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.websocket</groupId>
 				<artifactId>jakarta.websocket-client-api</artifactId>
-				<version>2.1.1</version>
+				<version>2.2.0</version>
 			</dependency>
 
 			<!-- Reflections -->
@@ -362,49 +399,18 @@
 				<version>0.10.2</version>
 			</dependency>
 
-			<!-- FHIR -->
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-jaxrsserver-base</artifactId>
-				<version>${hapi.fhir.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-client</artifactId>
-				<version>${hapi.fhir.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-structures-r4</artifactId>
-				<version>${hapi.fhir.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-structures-r5</artifactId>
-				<version>${hapi.fhir.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-validation</artifactId>
-				<version>${hapi.fhir.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-				<version>${hapi.fhir.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-validation-resources-r5</artifactId>
-				<version>${hapi.fhir.version}</version>
-			</dependency>
-
-			<!-- managing out-dated dependencies from hapi fhir -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>1.28.0</version>
 			</dependency>
+			<dependency>
+				<groupId>org.tukaani</groupId>
+				<artifactId>xz</artifactId>
+				<version>1.11</version>
+			</dependency>
+
+			<!-- managing out-dated dependencies from hapi fhir -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
@@ -413,7 +419,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.19.0</version>
+				<version>3.20.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -421,9 +427,14 @@
 				<version>4.5.14</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>4.4.16</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>32.1.3-jre</version>
+				<version>33.5.0-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -435,32 +446,37 @@
 				<artifactId>thymeleaf</artifactId>
 				<version>3.1.3.RELEASE</version>
 			</dependency>
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>9.37.4</version>
+			</dependency>
 
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.20.0</version>
+				<version>2.21.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.19.0</version>
+				<version>1.20.0</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.camunda.bpm</groupId>
-				<artifactId>camunda-engine</artifactId>
-				<version>${camunda.version}</version>
+				<groupId>org.operaton.bpm</groupId>
+				<artifactId>operaton-engine</artifactId>
+				<version>${operaton.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.camunda.bpm</groupId>
-				<artifactId>camunda-engine-spring</artifactId>
-				<version>${camunda.version}</version>
+				<groupId>org.operaton.bpm</groupId>
+				<artifactId>operaton-engine-spring</artifactId>
+				<version>${operaton.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.camunda.bpm.model</groupId>
-				<artifactId>camunda-bpmn-model</artifactId>
-				<version>${camunda.version}</version>
+				<groupId>org.operaton.bpm.model</groupId>
+				<artifactId>operaton-bpmn-model</artifactId>
+				<version>${operaton.version}</version>
 			</dependency>
 
 			<dependency>
@@ -473,6 +489,18 @@
 				<groupId>com.fasterxml.uuid</groupId>
 				<artifactId>java-uuid-generator</artifactId>
 				<version>4.3.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm</artifactId>
+				<version>9.9</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.tika</groupId>
+				<artifactId>tika-core</artifactId>
+				<version>3.2.3</version>
 			</dependency>
 
 			<!-- maven plugin -->
@@ -489,7 +517,7 @@
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
-				<version>3.15.1</version>
+				<version>3.15.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -505,6 +533,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
+					<!-- 4.0.0 not working with eclipse, see https://github.com/eclipse-m2e/m2e-core/issues/2084 -->
 					<version>3.4.2</version>
 					<configuration>
 						<archive>
@@ -541,11 +570,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.6.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<version>3.7.1</version>
 				</plugin>
@@ -558,12 +582,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
 					<version>3.2.8</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<!-- 3.3.0 not working, https://github.com/mojohaus/exec-maven-plugin/issues/247 -->
-					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -593,12 +611,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.15.1</version>
-				</plugin>
-				<plugin>
-					<groupId>dev.dsf</groupId>
-					<artifactId>dsf-tools-documentation-generator</artifactId>
-					<version>${project.version}</version>
+					<version>3.15.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -613,7 +626,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.9.6.0</version>
+					<version>4.9.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -630,10 +643,280 @@
 					<artifactId>central-publishing-maven-plugin</artifactId>
 					<version>0.9.0</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-report-plugin</artifactId>
+					<version>3.15.2</version>
+				</plugin>
+				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>5.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.6.1</version>
+				</plugin>
+				<plugin>
+					<groupId>dev.dsf</groupId>
+					<artifactId>dsf-maven-plugin</artifactId>
+					<version>${project.version}</version>
+					<executions>
+						<execution>
+							<id>default-cli</id>
+							<goals>
+								<goal>generate-dev-setup-cert-files</goal>
+							</goals>
+							<configuration>
+								<certs>
+									<cert>
+										<cn>Webbrowser Test User</cn>
+										<email>webbrowser.test.user@invalid</email>
+										<type>CLIENT</type>
+										<targets>
+											<target>cert/Webbrowser_Test_User.p12</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>localhost</cn>
+										<sans>
+											<san>dic1</san>
+											<san>dic2</san>
+											<san>dic3</san>
+											<san>ttp</san>
+										</sans>
+										<type>SERVER</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/localhost.chain.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/localhost.key.plain</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>keycloak</cn>
+										<sans>
+											<san>localhost</san>
+										</sans>
+										<type>SERVER</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.chain.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.key.plain</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>bpe</cn>
+										<sans>
+											<san>localhost</san>
+										</sans>
+										<type>CLIENT_SERVER</type>
+										<targets>
+											<target>dsf-bpe/dsf-bpe-server-jetty/cert/bpe.crt</target>
+											<target>dsf-bpe/dsf-bpe-server-jetty/cert/bpe.key</target>
+											<target>dsf-docker-dev-setup/bpe/secrets/bpe.crt</target>
+											<target>dsf-docker-dev-setup/bpe/secrets/bpe.key</target>
+											<target>dsf-docker-dev-setup/bpe/secrets/bpe.key.plain</target>
+											<target>dsf-docker-dev-setup/fhir/secrets/bpe.crt</target>
+											<target>dsf-docker-dev-setup/fhir/secrets/bpe.key</target>
+											<target>dsf-fhir/dsf-fhir-server-jetty/cert/bpe.crt</target>
+											<target>dsf-fhir/dsf-fhir-server-jetty/cert/bpe.key</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>fhir</cn>
+										<sans>
+											<san>localhost</san>
+										</sans>
+										<type>SERVER</type>
+										<targets>
+											<target>dsf-docker-dev-setup/fhir/secrets/fhir.crt</target>
+											<target>dsf-docker-dev-setup/fhir/secrets/fhir.key.plain</target>
+											<target>dsf-fhir/dsf-fhir-server-jetty/cert/fhir.crt</target>
+											<target>dsf-fhir/dsf-fhir-server-jetty/cert/fhir.key</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>dic1</cn>
+										<type>CLIENT</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic1.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic1.key</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>dic2</cn>
+										<type>CLIENT</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic2.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic2.key</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>dic3</cn>
+										<type>CLIENT</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic3.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/dic3.key</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>ttp</cn>
+										<type>CLIENT</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key.password</target>
+										</targets>
+									</cert>
+								</certs>
+								<rootCa>
+									<targets>
+										<target>dsf-bpe/dsf-bpe-server-jetty/cert/root_ca.crt</target>
+										<target>dsf-docker-dev-setup/bpe/secrets/root_ca.crt</target>
+										<target>dsf-docker-dev-setup/fhir/secrets/root_ca.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/root_ca.crt</target>
+										<target>dsf-fhir/dsf-fhir-server-jetty/cert/root_ca.crt</target>
+									</targets>
+								</rootCa>
+								<issuingCa>
+									<targets>
+										<target>dsf-bpe/dsf-bpe-server-jetty/cert/issuing_ca.crt</target>
+										<target>dsf-docker-dev-setup/bpe/secrets/issuing_ca.crt</target>
+										<target>dsf-docker-dev-setup/fhir/secrets/issuing_ca.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/issuing_ca.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak_trust_store.jks</target>
+										<target>dsf-fhir/dsf-fhir-server-jetty/cert/issuing_ca.crt</target>
+									</targets>
+								</issuingCa>
+								<caChain>
+									<targets>
+										<target>dsf-bpe/dsf-bpe-server-jetty/cert/ca_chain.crt</target>
+										<target>dsf-docker-dev-setup/bpe/secrets/ca_chain.crt</target>
+										<target>dsf-docker-dev-setup/fhir/secrets/ca_chain.crt</target>
+										<target>dsf-docker-dev-setup-3dic-ttp/secrets/ca_chain.crt</target>
+										<target>dsf-fhir/dsf-fhir-server-jetty/cert/ca_chain.crt</target>
+									</targets>
+								</caChain>
+								<templates>
+									<template>
+										<source>src/main/resources/templates/java-test-bpe-config.properties</source>
+										<target>dsf-bpe/dsf-bpe-server-jetty/conf/config.properties</target>
+									</template>
+									<template>
+										<source>src/main/resources/templates/dsf-docker-dev-setup-bpe.env</source>
+										<target>dsf-docker-dev-setup/bpe/.env</target>
+									</template>
+									<template>
+										<source>src/main/resources/templates/dsf-docker-dev-setup-fhir.env</source>
+										<target>dsf-docker-dev-setup/fhir/.env</target>
+									</template>
+									<template>
+										<source>src/main/resources/templates/dsf-docker-dev-setup-3dic-ttp.env</source>
+										<target>dsf-docker-dev-setup-3dic-ttp/.env</target>
+									</template>
+									<template>
+										<source>src/main/resources/templates/java-test-fhir-bundle.xml</source>
+										<target>dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml</target>
+									</template>
+									<template>
+										<source>src/main/resources/templates/java-test-fhir-config.properties</source>
+										<target>dsf-fhir/dsf-fhir-server-jetty/conf/config.properties</target>
+									</template>
+								</templates>
+							</configuration>
+							<inherited>false</inherited>
+						</execution>
+					</executions>
+					<configuration>
+						<certFolder>${main.basedir}/src/main/resources/cert</certFolder>
+						<clientOnlyCaCommonNames>
+							<clientOnlyCaCommonName>
+								D-TRUST Limited Basic CA 1-2 2019
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								D-TRUST Limited Basic CA 1-3 2019
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								Fraunhofer User CA - G02
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								GEANT eScience Personal CA 4
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								GEANT eScience Personal ECC CA 4
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								GEANT Personal CA 4
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								GEANT Personal ECC CA 4
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								GEANT S/MIME ECC 1
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								GEANT S/MIME RSA 1
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								HARICA Client Authentication ECC
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								HARICA Client Authentication RSA
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								HARICA S/MIME ECC
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								HARICA S/MIME RSA
+							</clientOnlyCaCommonName>
+						</clientOnlyCaCommonNames>
+						<serverOnlyCaCommonNames>
+							<serverOnlyCaCommonName>
+								D-TRUST BR Root CA 1 2020
+							</serverOnlyCaCommonName>
+							<serverOnlyCaCommonName>
+								D-TRUST BR Root CA 2 2023
+							</serverOnlyCaCommonName>
+						</serverOnlyCaCommonNames>
+					</configuration>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>dev.dsf</groupId>
+										<artifactId>dsf-maven-plugin</artifactId>
+										<versionRange>[${project.version},)</versionRange>
+										<goals>
+											<goal>generate-config-doc</goal>
+											<goal>generate-default-ca-files</goal>
+											<goal>generate-fhir-bundle</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<propertiesEncoding>UTF-8</propertiesEncoding>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
@@ -655,7 +938,7 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>dsf-docker-test-setup/bpe/log</directory>
+							<directory>dsf-docker-dev-setup/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -663,7 +946,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup/fhir/log</directory>
+							<directory>dsf-docker-dev-setup/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -671,7 +954,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic1/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic1/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -679,7 +962,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic1/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic1/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -687,7 +970,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic2/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic2/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -695,7 +978,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic2/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic2/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -703,7 +986,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic3/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic3/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -711,7 +994,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/dic3/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/dic3/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -719,7 +1002,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/ttp/bpe/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/ttp/bpe/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -727,7 +1010,7 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>dsf-docker-test-setup-3dic-ttp/ttp/fhir/log</directory>
+							<directory>dsf-docker-dev-setup-3dic-ttp/ttp/fhir/log</directory>
 							<includes>
 								<include>*.log</include>
 								<include>*.log.gz</include>
@@ -738,10 +1021,60 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>net.revelc.code.formatter</groupId>
-				<artifactId>formatter-maven-plugin</artifactId>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>check-license-headers</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-					<configFile>${main.basedir}/src/main/resources/eclipse-formatter-config.xml</configFile>
+					<licenseSets>
+						<licenseSet>
+							<header>${main.basedir}/src/main/resources/license/header.txt</header>
+							<!-- additional excludes configured in modules -->
+							<excludes>
+								<exclude>cert/*</exclude>
+								<exclude>dsf-docker/bpe_proxy/ca/**/*.crt</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/extra/host.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/extra/host-ssl.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/extra/httpd-ssl.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/conf/httpd.conf</exclude>
+								<exclude>dsf-docker/bpe_proxy/.dockerignore</exclude>
+								<exclude>dsf-docker/fhir_proxy/ca/**/*.crt</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/extra/host.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/extra/host-ssl.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/extra/httpd-ssl.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/conf/httpd.conf</exclude>
+								<exclude>dsf-docker/fhir_proxy/.dockerignore</exclude>
+								<exclude>dsf-docker-dev-setup/bpe/secrets/*</exclude>
+								<exclude>dsf-docker-dev-setup/bpe/.env</exclude>
+								<exclude>dsf-docker-dev-setup/fhir/secrets/*</exclude>
+								<exclude>dsf-docker-dev-setup/fhir/.env</exclude>
+								<exclude>dsf-docker-dev-setup-3dic-ttp/secrets/*</exclude>
+								<exclude>dsf-docker-dev-setup-3dic-ttp/.env</exclude>
+								<exclude>dsf-docker-dev-setup-3dic-ttp/docker-compose.override.yml</exclude>
+								<exclude>src/main/resources/cert/*.pem</exclude>
+								<exclude>src/main/resources/license/header.txt</exclude>
+								<exclude>CITATION.cff</exclude>
+								<exclude>SECURITY_CERTIFICATE.pem</exclude>
+							</excludes>
+							<includes>
+								<include>**/*.svg</include>
+							</includes>
+						</licenseSet>
+					</licenseSets>
+					<mapping>
+						<bpmn>XML_STYLE</bpmn>
+						<svg>XML_STYLE</svg>
+						<list>SCRIPT_STYLE</list>
+						<conf>SCRIPT_STYLE</conf>
+						<env>SCRIPT_STYLE</env>
+					</mapping>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -750,6 +1083,15 @@
 				<configuration>
 					<groups>java.,javax.,org.,com.</groups>
 					<staticGroups>java,*</staticGroups>
+					<!-- TODO remove config option when impsort-maven-plugin support Java 25 -->
+					<ignoreParseErrorsBelowImports>true</ignoreParseErrorsBelowImports>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>net.revelc.code.formatter</groupId>
+				<artifactId>formatter-maven-plugin</artifactId>
+				<configuration>
+					<configFile>${main.basedir}/src/main/resources/formatter/eclipse-formatter-config.xml</configFile>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -781,7 +1123,8 @@
 	</build>
 
 	<distributionManagement>
-		<!-- for deployment to GitHub Packages the id must be 'github', if not the deployment fails with a 401 error -->
+		<!-- for deployment to GitHub Packages the id must be 'github', if not
+		the deployment fails with a 401 error -->
 		<snapshotRepository>
 			<id>github</id>
 			<name>GitHub Packages</name>
@@ -800,6 +1143,19 @@
 
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>com.mycila</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>format-license-headers</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>format</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>net.revelc.code.formatter</groupId>
 						<artifactId>formatter-maven-plugin</artifactId>
@@ -941,7 +1297,35 @@
 						<extensions>true</extensions>
 						<configuration>
 							<publishingServerId>central</publishingServerId>
-							<deploymentName>DSF 1.x</deploymentName>
+							<deploymentName>DSF 2.x</deploymentName>
+							<excludeArtifacts>
+								<excludeArtifact>dsf-bpe-process-api</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v1-base</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v1-impl</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v1-operaton</excludeArtifact>
+								<excludeArtifact>dsf-bpe-process-api-v2-impl</excludeArtifact>
+								<excludeArtifact>dsf-bpe-server</excludeArtifact>
+								<excludeArtifact>dsf-bpe-server-jetty</excludeArtifact>
+								<excludeArtifact>dsf-bpe-test-plugin</excludeArtifact>
+								<excludeArtifact>dsf-bpe-test-plugin-v1</excludeArtifact>
+								<excludeArtifact>dsf-bpe-test-plugin-v2</excludeArtifact>
+								<excludeArtifact>dsf-common-pom</excludeArtifact>
+								<excludeArtifact>dsf-common-auth</excludeArtifact>
+								<excludeArtifact>dsf-common-build-info-reader</excludeArtifact>
+								<excludeArtifact>dsf-common-config</excludeArtifact>
+								<excludeArtifact>dsf-common-db</excludeArtifact>
+								<excludeArtifact>dsf-common-docker-secrets-reader</excludeArtifact>
+								<excludeArtifact>dsf-common-documentation</excludeArtifact>
+								<excludeArtifact>dsf-common-jetty</excludeArtifact>
+								<excludeArtifact>dsf-common-oidc</excludeArtifact>
+								<excludeArtifact>dsf-common-status</excludeArtifact>
+								<excludeArtifact>dsf-common-ui</excludeArtifact>
+								<excludeArtifact>dsf-fhir-rest-adapter</excludeArtifact>
+								<excludeArtifact>dsf-fhir-server</excludeArtifact>
+								<excludeArtifact>dsf-fhir-server-jetty</excludeArtifact>
+								<excludeArtifact>dsf-fhir-webservice-client</excludeArtifact>
+								<excludeArtifact>dsf-fhir-websocket-client</excludeArtifact>
+							</excludeArtifacts>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -963,7 +1347,7 @@
 						<plugin>
 							<groupId>jp.skypencil.findbugs.slf4j</groupId>
 							<artifactId>bug-pattern</artifactId>
-							<version>1.5.1-SNAPSHOT</version>
+							<version>1.5.0</version>
 						</plugin>
 					</plugins>
 				</configuration>

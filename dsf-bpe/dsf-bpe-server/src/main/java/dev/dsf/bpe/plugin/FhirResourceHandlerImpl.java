@@ -1,9 +1,24 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.plugin;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -18,36 +33,37 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
+import dev.dsf.bpe.client.dsf.BasicWebserviceClient;
+import dev.dsf.bpe.client.dsf.PreferReturnMinimal;
+import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
-import dev.dsf.fhir.client.BasicFhirWebserviceClient;
-import dev.dsf.fhir.client.FhirWebserviceClient;
-import dev.dsf.fhir.client.PreferReturnMinimal;
 
 public class FhirResourceHandlerImpl implements FhirResourceHandler, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirResourceHandlerImpl.class);
 
-	private final FhirWebserviceClient localWebserviceClient;
+	private final WebserviceClient localWebserviceClient;
 	private final ProcessPluginResourcesDao dao;
 	private final FhirContext fhirContext;
 	private final int fhirServerRequestMaxRetries;
-	private final long fhirServerRetryDelayMillis;
+	private final Duration fhirServerRetryDelay;
 
-	public FhirResourceHandlerImpl(FhirWebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
-			FhirContext fhirContext, int fhirServerRequestMaxRetries, long fhirServerRetryDelayMillis)
+	public FhirResourceHandlerImpl(WebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
+			FhirContext fhirContext, int fhirServerRequestMaxRetries, Duration fhirServerRetryDelay)
 	{
 		this.localWebserviceClient = localWebserviceClient;
 		this.dao = dao;
 		this.fhirContext = fhirContext;
 		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
-		this.fhirServerRetryDelayMillis = fhirServerRetryDelayMillis;
+		this.fhirServerRetryDelay = fhirServerRetryDelay;
 	}
 
 	@Override
@@ -58,29 +74,28 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		if (fhirServerRequestMaxRetries < -1)
 			throw new IllegalArgumentException("fhirServerRequestMaxRetries < -1");
-		if (fhirServerRetryDelayMillis < 0)
-			throw new IllegalArgumentException("fhirServerRetryDelayMillis < 0");
+		Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
 	}
 
 	private PreferReturnMinimal minimalReturnRetryClient()
 	{
-		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
-			return localWebserviceClient.withMinimalReturn().withRetryForever(fhirServerRetryDelayMillis);
+		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
+			return localWebserviceClient.withMinimalReturn().withRetryForever(fhirServerRetryDelay);
 		else
 			return localWebserviceClient.withMinimalReturn().withRetry(fhirServerRequestMaxRetries,
-					fhirServerRetryDelayMillis);
+					fhirServerRetryDelay);
 	}
 
-	private BasicFhirWebserviceClient retryClient()
+	private BasicWebserviceClient retryClient()
 	{
-		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
-			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
+		if (fhirServerRequestMaxRetries == WebserviceClient.RETRY_FOREVER)
+			return localWebserviceClient.withRetryForever(fhirServerRetryDelay);
 		else
-			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);
+			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelay);
 	}
 
 	@Override
-	public void applyStateChangesAndStoreNewResourcesInDb(Map<ProcessIdAndVersion, List<Resource>> pluginResources,
+	public void applyStateChangesAndStoreNewResourcesInDb(Map<ProcessIdAndVersion, List<byte[]>> pluginResources,
 			List<ProcessStateChangeOutcome> changes)
 	{
 		Objects.requireNonNull(pluginResources, "pluginResources");
@@ -96,7 +111,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 
 			currentOrOldProcessResources.forEach(res ->
 			{
-				resources.computeIfPresent(res.getResourceInfo(), (processInfo, processResource) ->
+				resources.computeIfPresent(res.getResourceInfo(), (_, processResource) ->
 				{
 					processResource.addAll(res.getProcesses());
 
@@ -152,7 +167,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			else
 			{
 				logger.debug("Executing process plugin resources bundle");
-				logger.trace("Bundle: {}", fhirContext.newJsonParser().encodeResourceToString(batchBundle));
+				logger.trace("Bundle: {}", newJsonParser().encodeResourceToString(batchBundle));
 
 				Bundle returnBundle = minimalReturnRetryClient().postBundle(batchBundle);
 
@@ -181,10 +196,18 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 					e.getMessage());
 			logger.warn(
 					"Resources in FHIR server may not be consistent, please check resources and execute the following bundle if necessary: {}",
-					fhirContext.newJsonParser().encodeResourceToString(batchBundle));
+					newJsonParser().encodeResourceToString(batchBundle));
 
 			throw e;
 		}
+	}
+
+	private IParser newJsonParser()
+	{
+		IParser p = fhirContext.newJsonParser();
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		return p;
 	}
 
 	private int getSortIndex(ProcessesResource resource)
@@ -218,7 +241,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 					&& ProcessState.DRAFT.equals(change.getNewProcessState()))
 			{
 				List<ResourceInfo> dbResources = dbResourcesByProcess.getOrDefault(change.getProcessKeyAndVersion(),
-						Collections.emptyList());
+						List.of());
 
 				dbResources.forEach(dbRes ->
 				{
@@ -333,16 +356,16 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	}
 
 	private Stream<ProcessesResource> getCurrentOrOldResources(
-			Map<ProcessIdAndVersion, List<Resource>> pluginResourcesByProcess,
+			Map<ProcessIdAndVersion, List<byte[]>> pluginResourcesByProcess,
 			Map<ProcessIdAndVersion, List<ResourceInfo>> dbResourcesByProcess, ProcessIdAndVersion process)
 	{
-		List<Resource> pluginResources = pluginResourcesByProcess.get(process);
+		List<byte[]> pluginResources = pluginResourcesByProcess.get(process);
 		if (pluginResources != null)
 		{
-			Stream<Resource> resources = getResources(process, pluginResourcesByProcess);
-			return resources.map(fhirResource ->
+			Stream<byte[]> resources = getResources(process, pluginResourcesByProcess);
+			return resources.map(r ->
 			{
-				ProcessesResource resource = ProcessesResource.from(fhirResource).add(process);
+				ProcessesResource resource = ProcessesResource.from(fhirContext, r).add(process);
 
 				Optional<UUID> resourceId = getResourceId(dbResourcesByProcess, process, resource.getResourceInfo());
 				resourceId.ifPresent(id -> resource.getResourceInfo().setResourceId(id));
@@ -357,17 +380,17 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			if (resources == null)
 			{
 				logger.debug("No resources found in BPE DB for process {}", process);
-				resources = Collections.emptyList();
+				resources = List.of();
 			}
 
 			return resources.stream().map(info -> ProcessesResource.from(info).add(process));
 		}
 	}
 
-	private Stream<Resource> getResources(ProcessIdAndVersion process,
-			Map<ProcessIdAndVersion, List<Resource>> pluginResources)
+	private Stream<byte[]> getResources(ProcessIdAndVersion process,
+			Map<ProcessIdAndVersion, List<byte[]>> pluginResources)
 	{
-		List<Resource> resources = pluginResources.get(process);
+		List<byte[]> resources = pluginResources.get(process);
 		if (resources.isEmpty())
 		{
 			logger.warn("No FHIR resources found for process {}", process.toString());
@@ -382,8 +405,8 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private Optional<UUID> getResourceId(Map<ProcessIdAndVersion, List<ResourceInfo>> dbResourcesByProcess,
 			ProcessIdAndVersion process, ResourceInfo resourceInfo)
 	{
-		return dbResourcesByProcess.getOrDefault(process, Collections.emptyList()).stream()
-				.filter(r -> r.equals(resourceInfo)).findFirst().map(ResourceInfo::getResourceId);
+		return dbResourcesByProcess.getOrDefault(process, List.of()).stream().filter(r -> r.equals(resourceInfo))
+				.findFirst().map(ResourceInfo::getResourceId);
 	}
 
 	private Map<ProcessIdAndVersion, List<ResourceInfo>> getResourceInfosFromDb()

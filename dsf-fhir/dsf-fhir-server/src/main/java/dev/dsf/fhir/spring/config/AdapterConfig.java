@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.spring.config;
 
 import java.nio.file.Files;
@@ -16,12 +31,15 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.adapter.ResourceActivityDefinition;
+import dev.dsf.fhir.adapter.ResourceBinary;
 import dev.dsf.fhir.adapter.ResourceCodeSystem;
+import dev.dsf.fhir.adapter.ResourceDocumentReference;
 import dev.dsf.fhir.adapter.ResourceEndpoint;
 import dev.dsf.fhir.adapter.ResourceLibrary;
 import dev.dsf.fhir.adapter.ResourceMeasure;
 import dev.dsf.fhir.adapter.ResourceMeasureReport;
 import dev.dsf.fhir.adapter.ResourceNamingSystem;
+import dev.dsf.fhir.adapter.ResourceOperationOutcome;
 import dev.dsf.fhir.adapter.ResourceOrganization;
 import dev.dsf.fhir.adapter.ResourceOrganizationAffiliation;
 import dev.dsf.fhir.adapter.ResourceQuestionnaire;
@@ -31,6 +49,8 @@ import dev.dsf.fhir.adapter.ResourceSubscription;
 import dev.dsf.fhir.adapter.ResourceTask;
 import dev.dsf.fhir.adapter.ResourceValueSet;
 import dev.dsf.fhir.adapter.SearchSetActivityDefinition;
+import dev.dsf.fhir.adapter.SearchSetBinary;
+import dev.dsf.fhir.adapter.SearchSetDocumentReference;
 import dev.dsf.fhir.adapter.SearchSetEndpoint;
 import dev.dsf.fhir.adapter.SearchSetMeasureReport;
 import dev.dsf.fhir.adapter.SearchSetMetadataResource;
@@ -54,23 +74,40 @@ public class AdapterConfig
 	@Autowired
 	private PropertiesConfig propertiesConfig;
 
+	@Autowired
+	private ReferenceConfig referenceConfig;
+
+	@Autowired
+	private BuildInfoReaderConfig buildInfoReaderConfig;
+
+	@Autowired
+	private DaoConfig daoConfig;
+
+	@Autowired
+	private HelperConfig helperConfig;
+
 	@Bean
 	public FhirAdapter fhirAdapter()
 	{
-		return new FhirAdapter(fhirConfig.fhirContext());
+		return new FhirAdapter(fhirConfig.fhirContext(), referenceConfig.referenceCleaner());
 	}
 
 	@Bean
 	public ThymeleafTemplateService thymeleafTemplateService()
 	{
-		List<ThymeleafContext> thymeleafContexts = List.of(new ResourceActivityDefinition(), new ResourceCodeSystem(),
-				new ResourceEndpoint(), new ResourceLibrary(), new ResourceMeasure(),
-				new ResourceMeasureReport(propertiesConfig.getServerBaseUrl()), new ResourceNamingSystem(),
+		List<ThymeleafContext> thymeleafContexts = List.of(new ResourceActivityDefinition(),
+				new ResourceBinary(propertiesConfig.getDsfServerBaseUrl()), new ResourceCodeSystem(),
+				new ResourceDocumentReference(), new ResourceEndpoint(), new ResourceLibrary(), new ResourceMeasure(),
+				new ResourceMeasureReport(propertiesConfig.getDsfServerBaseUrl()), new ResourceNamingSystem(),
+				new ResourceOperationOutcome(buildInfoReaderConfig.buildInfoReader(), daoConfig.statisticsDao(),
+						helperConfig.exceptionHandler()),
 				new ResourceOrganizationAffiliation(), new ResourceOrganization(), new ResourceQuestionnaire(),
 				new ResourceQuestionnaireResponse(), new ResourceStructureDefinition(), new ResourceSubscription(),
 				new ResourceTask(), new ResourceValueSet(),
 				new SearchSetActivityDefinition(propertiesConfig.getDefaultPageCount()),
+				new SearchSetBinary(propertiesConfig.getDefaultPageCount()),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), CodeSystem.class),
+				new SearchSetDocumentReference(propertiesConfig.getDefaultPageCount()),
 				new SearchSetEndpoint(propertiesConfig.getDefaultPageCount()),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), Library.class),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), Measure.class),
@@ -85,7 +122,7 @@ public class AdapterConfig
 				new SearchSetTask(propertiesConfig.getDefaultPageCount()),
 				new SearchSetMetadataResource<>(propertiesConfig.getDefaultPageCount(), ValueSet.class));
 
-		return new ThymeleafTemplateServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getUiTheme(),
+		return new ThymeleafTemplateServiceImpl(propertiesConfig.getDsfServerBaseUrl(), propertiesConfig.getUiTheme(),
 				fhirConfig.fhirContext(), thymeleafContexts, propertiesConfig.getStaticResourceCacheEnabled(),
 				modCssExists());
 	}

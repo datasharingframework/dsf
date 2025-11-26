@@ -1,17 +1,29 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth;
 
-import java.io.IOException;
 import java.util.Objects;
 
+import org.eclipse.jetty.ee10.servlet.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.Authenticator;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.Constraint;
 import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.security.LoginService;
-import org.eclipse.jetty.security.RoleInfo;
 import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Response;
-import org.eclipse.jetty.server.UserIdentity;
 
 public class DsfSecurityHandler extends ConstraintSecurityHandler
 {
@@ -30,35 +42,9 @@ public class DsfSecurityHandler extends ConstraintSecurityHandler
 			addBean(openIdConfiguration);
 	}
 
-	// 1.
 	@Override
-	protected RoleInfo prepareConstraintInfo(String pathInContext, Request request)
+	protected Constraint getConstraint(String pathInContext, Request request)
 	{
-		return null; // no constraints
-	}
-
-	// 2.
-	@Override
-	protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response,
-			RoleInfo constraintInfo) throws IOException
-	{
-		return true; // nothing to check
-	}
-
-	// 3.
-	@Override
-	protected boolean isAuthMandatory(Request baseRequest, Response baseResponse, Object constraintInfo)
-	{
-		return true; // authentication mandatory for all requests
-	}
-
-	// 4. authenticator.validateRequest
-
-	// 5.
-	@Override
-	protected boolean checkWebResourcePermissions(String pathInContext, Request request, Response response,
-			Object constraintInfo, UserIdentity userIdentity) throws IOException
-	{
-		return true; // nothing to check
+		return Constraint.ANY_USER;
 	}
 }

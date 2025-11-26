@@ -1,22 +1,27 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.authentication;
 
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.ResourceType;
 
 import dev.dsf.common.auth.conf.DsfRole;
 
-public enum FhirServerRole implements DsfRole
+public interface FhirServerRole extends DsfRole
 {
-	CREATE, READ, UPDATE, DELETE, SEARCH, HISTORY, PERMANENT_DELETE, WEBSOCKET;
-
-	public static final Set<FhirServerRole> LOCAL_ORGANIZATION = EnumSet.of(CREATE, READ, UPDATE, DELETE, SEARCH,
-			HISTORY, PERMANENT_DELETE, WEBSOCKET);
-	public static final Set<FhirServerRole> REMOTE_ORGANIZATION = EnumSet.of(CREATE, READ, UPDATE, DELETE, SEARCH,
-			HISTORY);
-
-	public static boolean isValid(String role)
-	{
-		return role != null && !role.isBlank() && Stream.of(values()).map(Enum::name).anyMatch(n -> n.equals(role));
-	}
+	List<ResourceType> resourceTypes();
 }

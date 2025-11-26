@@ -1,21 +1,42 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
@@ -28,7 +49,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testCreateValidByLocalUser() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -68,7 +89,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testUpdateAllowedByLocalUser() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -164,7 +185,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("authored", Collections.singletonList("le2022-02-01")));
+				Map.of("authored", List.of("le2022-02-01")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -187,7 +208,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
+				Map.of("identifier", List.of(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -211,7 +232,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getExternalWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("identifier", Collections.singletonList(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
+				Map.of("identifier", List.of(TEST_IDENTIFIER_SYSTEM + "|" + TEST_IDENTIFIER_VALUE)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(0, searchBundle.getEntry().size());
@@ -231,7 +252,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 
 	private void testSearchByQuestionnaire(String questionnaireUrl) throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire = createQuestionnaire();
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -240,9 +261,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("questionnaire", Collections.singletonList(questionnaireUrl), "_include",
-						Collections.singletonList("QuestionnaireResponse:questionnaire")));
+		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class, Map.of("questionnaire",
+				List.of(questionnaireUrl), "_include", List.of("QuestionnaireResponse:questionnaire")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -269,7 +289,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	@Test
 	public void testSearchByQuestionnaireNoVersion() throws Exception
 	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100().setVersion(null);
+		Questionnaire questionnaire = createQuestionnaire().setVersion(null);
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 		questionnaireDao.create(questionnaire);
 
@@ -278,9 +298,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("questionnaire", Collections.singletonList(QUESTIONNAIRE_URL), "_include",
-						Collections.singletonList("QuestionnaireResponse:questionnaire")));
+		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class, Map.of("questionnaire",
+				List.of(QUESTIONNAIRE_URL), "_include", List.of("QuestionnaireResponse:questionnaire")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -308,16 +327,16 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 	{
 		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
 
-		Questionnaire questionnaire1 = createQuestionnaireProfileVersion100().setVersion("0.1.0");
+		Questionnaire questionnaire1 = createQuestionnaire().setVersion("0.1.0");
 		questionnaireDao.create(questionnaire1);
 
-		Questionnaire questionnaire2 = createQuestionnaireProfileVersion100();
+		Questionnaire questionnaire2 = createQuestionnaire();
 		questionnaireDao.create(questionnaire2);
 
-		Questionnaire questionnaire3 = createQuestionnaireProfileVersion100().setVersion("0.2.0");
+		Questionnaire questionnaire3 = createQuestionnaire().setVersion("0.2.0");
 		questionnaireDao.create(questionnaire3);
 
-		Questionnaire questionnaire4 = createQuestionnaireProfileVersion100().setVersion(null);
+		Questionnaire questionnaire4 = createQuestionnaire().setVersion(null);
 		questionnaireDao.create(questionnaire4);
 
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
@@ -325,9 +344,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("questionnaire", Collections.singletonList(QUESTIONNAIRE_URL), "_include",
-						Collections.singletonList("QuestionnaireResponse:questionnaire")));
+		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class, Map.of("questionnaire",
+				List.of(QUESTIONNAIRE_URL), "_include", List.of("QuestionnaireResponse:questionnaire")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -362,7 +380,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("status", Collections.singletonList(QUESTIONNAIRE_RESPONSE_STATUS.toCode())));
+				Map.of("status", List.of(QuestionnaireResponseStatus.INPROGRESS.toCode())));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -373,25 +391,28 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasStatus());
-		assertEquals(QUESTIONNAIRE_RESPONSE_STATUS, searchQuestionnaireResponse.getStatus());
+		assertEquals(QuestionnaireResponseStatus.INPROGRESS, searchQuestionnaireResponse.getStatus());
 	}
 
 	@Test
 	public void testSearchBySubjectReference() throws Exception
 	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		Organization localOrganization = organizationProvider.getLocalOrganization().get();
+
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		questionnaireResponse.getSubject().setType(ResourceType.Organization.name())
+				.setReferenceElement(localOrganization.getIdElement().toVersionless()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization");
+
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
-				.getBean(OrganizationProvider.class);
-		Organization localOrganization = organizationProvider.getLocalOrganization().get();
-		String organizationReference = "Organization/" + localOrganization.getIdElement().getIdPart();
-
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("subject", Collections.singletonList(organizationReference), "_include",
-						Collections.singletonList("QuestionnaireResponse:subject:Organization")));
+				Map.of("subject", List.of(localOrganization.getIdElement().toUnqualifiedVersionless().toString()),
+						"_include", List.of("QuestionnaireResponse:subject:Organization")));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(2, searchBundle.getEntry().size());
@@ -402,7 +423,11 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasStatus());
-		assertEquals(organizationReference, searchQuestionnaireResponse.getSubject().getReference());
+		assertEquals(localOrganization.getIdentifierFirstRep().getSystem(),
+				searchQuestionnaireResponse.getSubject().getIdentifier().getSystem());
+		assertEquals(localOrganization.getIdentifierFirstRep().getValue(),
+				searchQuestionnaireResponse.getSubject().getIdentifier().getValue());
+		assertNull(searchQuestionnaireResponse.getSubject().getReference());
 
 		assertNotNull(searchBundle.getEntry().get(1));
 		assertNotNull(searchBundle.getEntry().get(1).getResource());
@@ -623,5 +648,429 @@ public class QuestionnaireResponseIntegrationTest extends AbstractQuestionnaireI
 
 		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(QuestionnaireResponse.class,
 				created.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testUpdateAllowedByMinimalUserWithRole() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner-role")
+				.setValue(new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getMinimalWebserviceClient().update(created);
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+	}
+
+	@Test
+	public void testUpdateNotAllowedByMinimalUserWithoutRole() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner-role")
+				.setValue(new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "UAC_USER", null));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+
+		expectForbidden(() -> getMinimalWebserviceClient().update(created));
+	}
+
+	@Test
+	public void testReadNotAllowedByPractitionerUserWithoutRole() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner-role")
+				.setValue(new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "UAC_USER", null));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		expectForbidden(() -> getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				created.getIdElement().getIdPart(), created.getIdElement().getVersionIdPart()));
+
+		Bundle searchResult1a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1a);
+		assertEquals(0, searchResult1a.getTotal());
+		assertEquals(0, searchResult1a.getEntry().size());
+
+		Bundle searchResult1b = getWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1b);
+		assertEquals(1, searchResult1b.getTotal());
+		assertEquals(1, searchResult1b.getEntry().size());
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.ADMIN_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getAdminWebserviceClient().update(created);
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		expectForbidden(() -> getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				updated.getIdElement().getIdPart(), updated.getIdElement().getVersionIdPart()));
+
+		Bundle searchResult2a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2a);
+		assertEquals(0, searchResult2a.getTotal());
+		assertEquals(0, searchResult2a.getEntry().size());
+
+		Bundle searchResult2b = getAdminWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2b);
+		assertEquals(1, searchResult2b.getTotal());
+		assertEquals(1, searchResult2b.getEntry().size());
+	}
+
+	@Test
+	public void testReadAllowedByPractitionerUserWithRole() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner-role")
+				.setValue(new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		QuestionnaireResponse read1 = getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				created.getIdElement().getIdPart(), created.getIdElement().getVersionIdPart());
+		assertNotNull(read1);
+		assertNotNull(read1.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), read1.getIdElement().getIdPart());
+		assertNotNull(read1.getIdElement().getVersionIdPart());
+		assertEquals("1", read1.getIdElement().getVersionIdPart());
+
+		Bundle searchResult1a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1a);
+		assertEquals(1, searchResult1a.getTotal());
+		assertEquals(1, searchResult1a.getEntry().size());
+
+		Bundle searchResult1b = getWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1b);
+		assertEquals(1, searchResult1b.getTotal());
+		assertEquals(1, searchResult1b.getEntry().size());
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getMinimalWebserviceClient().update(created);
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		QuestionnaireResponse read2 = getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				updated.getIdElement().getIdPart(), updated.getIdElement().getVersionIdPart());
+		assertNotNull(read2);
+		assertNotNull(read2.getIdElement().getIdPart());
+		assertEquals(updated.getIdElement().getIdPart(), read2.getIdElement().getIdPart());
+		assertNotNull(read2.getIdElement().getVersionIdPart());
+		assertEquals("2", read2.getIdElement().getVersionIdPart());
+
+		Bundle searchResult2a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2a);
+		assertEquals(1, searchResult2a.getTotal());
+		assertEquals(1, searchResult2a.getEntry().size());
+
+		Bundle searchResult2b = getAdminWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2b);
+		assertEquals(1, searchResult2b.getTotal());
+		assertEquals(1, searchResult2b.getEntry().size());
+	}
+
+	@Test
+	public void testReadNotAllowedByPractitionerUserWithoutIdentifier() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner")
+				.setValue(new Identifier().setSystem("http://dsf.dev/sid/practitioner-identifier")
+						.setValue(X509Certificates.PRACTITIONER_CLIENT_MAIL));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		expectForbidden(() -> getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				created.getIdElement().getIdPart(), created.getIdElement().getVersionIdPart()));
+
+		Bundle searchResult1a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1a);
+		assertEquals(0, searchResult1a.getTotal());
+		assertEquals(0, searchResult1a.getEntry().size());
+
+		Bundle searchResult1b = getWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1b);
+		assertEquals(1, searchResult1b.getTotal());
+		assertEquals(1, searchResult1b.getEntry().size());
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.ADMIN_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getAdminWebserviceClient().update(created);
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		expectForbidden(() -> getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				updated.getIdElement().getIdPart(), updated.getIdElement().getVersionIdPart()));
+
+		Bundle searchResult2a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2a);
+		assertEquals(0, searchResult2a.getTotal());
+		assertEquals(0, searchResult2a.getEntry().size());
+
+		Bundle searchResult2b = getAdminWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2b);
+		assertEquals(1, searchResult2b.getTotal());
+		assertEquals(1, searchResult2b.getEntry().size());
+	}
+
+	@Test
+	public void testReadAllowedByPractitionerUserWithIdentifier() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner")
+				.setValue(new Identifier().setSystem("http://dsf.dev/sid/practitioner-identifier")
+						.setValue(X509Certificates.MINIMAL_CLIENT_MAIL));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		QuestionnaireResponse read1 = getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				created.getIdElement().getIdPart(), created.getIdElement().getVersionIdPart());
+		assertNotNull(read1);
+		assertNotNull(read1.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), read1.getIdElement().getIdPart());
+		assertNotNull(read1.getIdElement().getVersionIdPart());
+		assertEquals("1", read1.getIdElement().getVersionIdPart());
+
+		Bundle searchResult1a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1a);
+		assertEquals(1, searchResult1a.getTotal());
+		assertEquals(1, searchResult1a.getEntry().size());
+
+		Bundle searchResult1b = getWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult1b);
+		assertEquals(1, searchResult1b.getTotal());
+		assertEquals(1, searchResult1b.getEntry().size());
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getMinimalWebserviceClient().update(created);
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		QuestionnaireResponse read2 = getMinimalWebserviceClient().read(QuestionnaireResponse.class,
+				updated.getIdElement().getIdPart(), updated.getIdElement().getVersionIdPart());
+		assertNotNull(read2);
+		assertNotNull(read2.getIdElement().getIdPart());
+		assertEquals(updated.getIdElement().getIdPart(), read2.getIdElement().getIdPart());
+		assertNotNull(read2.getIdElement().getVersionIdPart());
+		assertEquals("2", read2.getIdElement().getVersionIdPart());
+
+		Bundle searchResult2a = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2a);
+		assertEquals(1, searchResult2a.getTotal());
+		assertEquals(1, searchResult2a.getEntry().size());
+
+		Bundle searchResult2b = getAdminWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("_id", List.of(created.getIdElement().getIdPart())));
+		assertNotNull(searchResult2b);
+		assertEquals(1, searchResult2b.getTotal());
+		assertEquals(1, searchResult2b.getEntry().size());
+	}
+
+	@Test
+	public void testUpdateCompletedAmendedAllowedOrganizationUser() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse qr = createQuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.setAuthored(new Date());
+		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(qr);
+
+		created.setStatus(QuestionnaireResponseStatus.AMENDED);
+		QuestionnaireResponse updated = getWebserviceClient().update(created);
+		assertNotNull(updated);
+	}
+
+	@Test
+	public void testUpdateCompletedAmendedAllowedDsfAdmin() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse qr = createQuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.setAuthored(new Date());
+		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(qr);
+
+		created.setStatus(QuestionnaireResponseStatus.AMENDED);
+		QuestionnaireResponse updated = getAdminWebserviceClient().update(created);
+		assertNotNull(updated);
+	}
+
+	@Test
+	public void testUpdateCompletedAmendedNotAllowed() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse qr = createQuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.setAuthored(new Date());
+		qr.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(qr);
+
+		created.setStatus(QuestionnaireResponseStatus.AMENDED);
+		expectForbidden(() -> getMinimalWebserviceClient().update(created));
+		expectForbidden(() -> getPractitionerWebserviceClient().update(created));
+		expectForbidden(() -> getExternalWebserviceClient().update(created));
+	}
+
+	@Test
+	public void testSearchAllowedByMinimalUserWithRole() throws Exception
+	{
+		Questionnaire questionnaire = createQuestionnaire();
+		QuestionnaireDao questionnaireDao = getSpringWebApplicationContext().getBean(QuestionnaireDao.class);
+		questionnaireDao.create(questionnaire);
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		Extension authExtension = questionnaireResponse.addExtension()
+				.setUrl("http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization");
+		authExtension.addExtension().setUrl("practitioner-role")
+				.setValue(new Coding("http://dsf.dev/fhir/CodeSystem/practitioner-role", "DIC_USER", null));
+
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		created.setAuthored(new Date());
+		created.setAuthor(null).getAuthor().setType(ResourceType.Practitioner.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/practitioner-identifier").setValue(X509Certificates.MINIMAL_CLIENT_MAIL);
+
+		QuestionnaireResponse updated = getMinimalWebserviceClient().update(created);
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		Bundle searchResult = getMinimalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("author:identifier",
+						List.of("http://dsf.dev/sid/practitioner-identifier|" + X509Certificates.MINIMAL_CLIENT_MAIL)));
+		assertNotNull(searchResult);
+		assertEquals(1, searchResult.getTotal());
+		assertNotNull(searchResult.getEntry());
+		assertEquals(1, searchResult.getEntry().size());
+		BundleEntryComponent entry = searchResult.getEntry().get(0);
+		assertNotNull(entry);
+		assertNotNull(entry.getResource());
+		assertEquals(QuestionnaireResponse.class, entry.getResource().getClass());
+		assertEquals(updated.getIdElement().getIdPart(), entry.getResource().getIdElement().getIdPart());
 	}
 }

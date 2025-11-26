@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.spring.config;
 
 import java.io.IOException;
@@ -8,12 +23,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +37,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-import de.rwh.utils.crypto.io.PemIo;
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
+import de.hsheilbronn.mi.utils.crypto.io.PemReader;
+import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 import dev.dsf.fhir.client.ClientProvider;
 import dev.dsf.fhir.client.ClientProviderImpl;
 
@@ -32,8 +50,6 @@ import dev.dsf.fhir.client.ClientProviderImpl;
 public class ClientConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ClientConfig.class);
-
-	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
 	@Autowired
 	private PropertiesConfig propertiesConfig;
@@ -60,16 +76,14 @@ public class ClientConfig implements InitializingBean
 
 		try
 		{
-			KeyStore webserviceKeyStore = createKeyStore(propertiesConfig.getWebserviceClientCertificateFile(),
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(), keyStorePassword);
-			KeyStore webserviceTrustStore = createTrustStore(
-					propertiesConfig.getWebserviceClientCertificateTrustCertificatesFile());
+			KeyStore keyStore = createKeyStore(propertiesConfig.getDsfClientCertificateFile(),
+					propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
+					propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword(), keyStorePassword);
+			KeyStore trustStore = propertiesConfig.getDsfClientTrustedServerCas();
 
-			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, keyStorePassword,
-					propertiesConfig.getWebserviceClientReadTimeout(),
-					propertiesConfig.getWebserviceClientConnectTimeout(), propertiesConfig.proxyConfig(),
-					propertiesConfig.getWebserviceClientVerbose(), fhirConfig.fhirContext(),
+			return new ClientProviderImpl(trustStore, keyStore, keyStorePassword,
+					propertiesConfig.getDsfClientReadTimeout(), propertiesConfig.getDsfClientConnectTimeout(),
+					propertiesConfig.proxyConfig(), propertiesConfig.getDsfClientVerbose(), fhirConfig.fhirContext(),
 					referenceConfig.referenceCleaner(), daoConfig.endpointDao(), helperConfig.exceptionHandler(),
 					buildInfoReaderConfig.buildInfoReader());
 		}
@@ -77,17 +91,6 @@ public class ClientConfig implements InitializingBean
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	private KeyStore createTrustStore(String trustStoreFile)
-			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
-	{
-		Path trustStorePath = Paths.get(trustStoreFile);
-
-		if (!Files.isReadable(trustStorePath))
-			throw new IOException("Trust store file '" + trustStorePath.toString() + "' not readable");
-
-		return CertificateReader.allFromCer(trustStorePath);
 	}
 
 	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
@@ -98,29 +101,45 @@ public class ClientConfig implements InitializingBean
 		Path privateKeyPath = Paths.get(privateKeyFile);
 
 		if (!Files.isReadable(certificatePath))
-			throw new IOException("Certificate file '" + certificatePath.toString() + "' not readable");
-		if (!Files.isReadable(certificatePath))
-			throw new IOException("Private key file '" + privateKeyPath.toString() + "' not readable");
+			throw new IOException(
+					"Certificate '" + certificatePath.normalize().toAbsolutePath().toString() + "' not readable");
+		if (!Files.isReadable(privateKeyPath))
+			throw new IOException(
+					"Private key '" + privateKeyPath.normalize().toAbsolutePath().toString() + "' not readable");
 
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(provider, privateKeyPath, privateKeyPassword);
+		List<X509Certificate> certificates = PemReader.readCertificates(certificatePath);
+		PrivateKey privateKey = PemReader.readPrivateKey(privateKeyPath, privateKeyPassword);
 
-		String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
-		return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
-				keyStorePassword);
+		if (certificates.isEmpty())
+			throw new IOException(
+					"No certificates in '" + certificatePath.normalize().toAbsolutePath().toString() + "'");
+		else if (!CertificateValidator.isClientCertificate(certificates.get(0)))
+			throw new IOException("First certificate from '" + certificatePath.normalize().toAbsolutePath().toString()
+					+ "' not a client certificate");
+		else if (!KeyPairValidator.matches(privateKey, certificates.get(0).getPublicKey()))
+			throw new IOException("Private-key at '" + privateKeyPath.normalize().toAbsolutePath().toString()
+					+ "' not matching Public-key from " + (certificates.size() > 1 ? "first " : "") + "certificate at '"
+					+ certificatePath.normalize().toAbsolutePath().toString() + "'");
+
+		return KeyStoreCreator.jksForPrivateKeyAndCertificateChain(privateKey, keyStorePassword, certificates);
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		logger.info(
-				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+				"Remote DSF webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 						+ " proxy: {}, no_proxy: {}}",
-				propertiesConfig.getWebserviceClientCertificateTrustCertificatesFile(),
-				propertiesConfig.getWebserviceClientCertificateFile(),
-				propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
-				propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
+				propertiesConfig.getDsfClientCertificateFile(),
+				propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
+				propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 				propertiesConfig.proxyConfig().isEnabled() ? "enabled" : "disabled",
 				propertiesConfig.proxyConfig().getNoProxyUrls());
+		logger.info("Using trust-store with {} to validate remote DSF server certificates",
+				KeyStoreFormatter
+						.toSubjectsFromCertificates(propertiesConfig.getDsfClientTrustedServerCas(),
+								X500PrincipalFormat.RFC1779)
+						.values().stream().collect(Collectors.joining("; ", "[", "]")));
 	}
 }

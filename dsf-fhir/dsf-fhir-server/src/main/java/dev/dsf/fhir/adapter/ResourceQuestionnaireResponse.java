@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.adapter;
 
 import java.time.format.DateTimeFormatter;
@@ -10,6 +25,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
@@ -33,12 +49,13 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-	private record Element(String questionnaire, String businessKey, String userTaskId, List<Item> item)
+	private record Element(String questionnaire, String businessKey, String userTaskId, ElementSystemValue author,
+			String authored, List<Item> item)
 	{
 	}
 
 	private record Item(boolean show, String id, String type, String label, String fhirType, String stringValue,
-			ElementSystemValue systemValueValue, Boolean booleanValue)
+			ElementSystemValue systemValueValue, Boolean booleanValue, ElementQuantityValue quantityValue)
 	{
 	}
 
@@ -63,9 +80,16 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 		String businessKey = getStringValue(resource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_BUSINESS_KEY);
 		String userTaskId = getStringValue(resource, CODESYSTEM_DSF_BPMN_USER_TASK_VALUE_USER_TASK_ID);
 
+		ElementSystemValue author = resource.hasAuthor() && resource.getAuthor().hasIdentifier()
+				? ElementSystemValue.from(resource.getAuthor().getIdentifier())
+				: null;
+		String authored = resource.hasAuthoredElement() && resource.getAuthoredElement().hasValue()
+				? formatDateTime(resource.getAuthoredElement().getValue())
+				: null;
+
 		List<Item> item = resource.hasItem() ? resource.getItem().stream().map(this::toItem).toList() : null;
 
-		return new Element(questionnaire, businessKey, userTaskId, item);
+		return new Element(questionnaire, businessKey, userTaskId, author, authored, item);
 	}
 
 	private String getStringValue(QuestionnaireResponse resource, String linkId)
@@ -95,51 +119,57 @@ public class ResourceQuestionnaireResponse extends AbstractResource<Questionnair
 		if (i.hasAnswer() && i.getAnswer().size() == 1)
 			return toItem(show, linkId, text, i.getAnswerFirstRep().getValue());
 		else
-			return new Item(show, linkId, null, text, null, null, null, null);
+			return new Item(show, linkId, null, text, null, null, null, null, null);
 	}
 
 	private Item toItem(boolean show, String id, String label, Type typedValue)
 	{
 		String fhirType = typedValue.getClass().getAnnotation(DatatypeDef.class).name();
 
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof BooleanType b)
-			return new Item(show, id, "boolean", label, fhirType, null, null, b.hasValue() ? b.getValue() : null);
-		else if (typedValue instanceof DecimalType d)
-			return new Item(show, id, "number", label, fhirType, d.hasValue() ? String.valueOf(d.getValue()) : null,
-					null, null);
-		else if (typedValue instanceof IntegerType i)
-			return new Item(show, id, "number", label, fhirType, i.hasValue() ? String.valueOf(i.getValue()) : null,
-					null, null);
-		else if (typedValue instanceof DateType d)
-			return new Item(show, id, "date", label, fhirType, d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null,
-					null, null);
-		else if (typedValue instanceof DateTimeType dt)
-			return new Item(show, id, "datetime-local", label, fhirType,
-					dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null, null, null);
-		else if (typedValue instanceof TimeType t)
-			return new Item(show, id, "time", label, fhirType, t.hasValue() ? t.getValue() : null, null, null);
-		else if (typedValue instanceof StringType s)
-			return new Item(show, id, "text", label, fhirType, s.hasValue() ? s.getValue() : null, null, null);
-		else if (typedValue instanceof UriType u)
-			return new Item(show, id, "url", label, fhirType, u.hasValue() ? u.getValue() : null, null, null);
-		// else if (typedValue instanceof Attachment a)
-		// return TODO
-		else if (typedValue instanceof Coding c)
-			return new Item(show, id, "coding", label, fhirType, null, ElementSystemValue.from(c), null);
-		// else if(typedValue instanceof Quantity q)
-		// return TODO
-		else if (typedValue instanceof Reference r)
+		return switch (typedValue)
 		{
-			if (r.hasReferenceElement())
-				return new Item(show, id, "url", label, fhirType + ".reference",
-						r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null, null, null);
-			else if (r.hasIdentifier())
-				return new Item(show, id, "identifier", label, fhirType + ".identifier", null,
-						ElementSystemValue.from(r.getIdentifier()), null);
-		}
+			case BooleanType b ->
+				new Item(show, id, "boolean", label, fhirType, null, null, b.hasValue() ? b.getValue() : null, null);
 
-		logger.warn("Element of type {}, not supported", fhirType);
-		return null;
+			case DecimalType d -> new Item(show, id, "number", label, fhirType,
+					d.hasValue() ? String.valueOf(d.getValue()) : null, null, null, null);
+
+			case IntegerType i -> new Item(show, id, "number", label, fhirType,
+					i.hasValue() ? String.valueOf(i.getValue()) : null, null, null, null);
+
+			case DateType d -> new Item(show, id, "date", label, fhirType,
+					d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null, null, null, null);
+
+			case DateTimeType dt -> new Item(show, id, "datetime-local", label, fhirType,
+					dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null, null, null, null);
+
+			case TimeType t ->
+				new Item(show, id, "time", label, fhirType, t.hasValue() ? t.getValue() : null, null, null, null);
+
+			case StringType s ->
+				new Item(show, id, "text", label, fhirType, s.hasValue() ? s.getValue() : null, null, null, null);
+
+			case UriType u ->
+				new Item(show, id, "url", label, fhirType, u.hasValue() ? u.getValue() : null, null, null, null);
+
+			case Coding c ->
+				new Item(show, id, "coding", label, fhirType, null, ElementSystemValue.from(c), null, null);
+
+			case Reference r when r.hasReferenceElement() -> new Item(show, id, "url", label, fhirType + ".reference",
+					r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null, null, null, null);
+
+			case Reference r when r.hasIdentifier() -> new Item(show, id, "identifier", label, fhirType + ".identifier",
+					null, ElementSystemValue.from(r.getIdentifier()), null, null);
+
+			case Quantity q ->
+				new Item(show, id, "quantity", label, fhirType, null, null, null, ElementQuantityValue.from(q));
+
+			// TODO case Attachment a ->
+
+			default -> {
+				logger.warn("Element of type {}, not supported", fhirType);
+				yield null;
+			}
+		};
 	}
 }

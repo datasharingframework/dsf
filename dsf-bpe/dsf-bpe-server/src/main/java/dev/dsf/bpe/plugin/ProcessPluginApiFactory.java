@@ -1,0 +1,145 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.bpe.plugin;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
+import java.util.stream.IntStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+
+import dev.dsf.bpe.api.config.BpeProxyConfig;
+import dev.dsf.bpe.api.config.DsfClientConfig;
+import dev.dsf.bpe.api.config.FhirClientConfigs;
+import dev.dsf.bpe.api.config.FhirValidationConfig;
+import dev.dsf.bpe.api.plugin.ProcessPluginApiBuilder;
+import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
+import dev.dsf.bpe.api.service.BpeMailService;
+import dev.dsf.bpe.api.service.BpeOidcClientProvider;
+import dev.dsf.bpe.api.service.BuildInfoProvider;
+
+public class ProcessPluginApiFactory implements InitializingBean
+{
+	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginApiFactory.class);
+
+	public static final int API_V1 = 1;
+	public static final int API_V2 = 2;
+
+	public static final String API_V1_STRING = "1";
+
+	private final ConfigurableEnvironment environment;
+	private final DsfClientConfig dsfClientConfig;
+	private final FhirClientConfigs fhirClientConfigs;
+	private final BpeProxyConfig bpeProxyConfig;
+	private final FhirValidationConfig fhirValidationConfig;
+	private final BuildInfoProvider buildInfoProvider;
+	private final BpeMailService bpeMailService;
+	private final BpeOidcClientProvider bpeOidcClientProvider;
+	private final ProcessPluginApiClassLoaderFactory classLoaderFactory;
+	private final String serverBaseUrl;
+
+	public ProcessPluginApiFactory(ConfigurableEnvironment environment, DsfClientConfig dsfClientConfig,
+			FhirClientConfigs fhirClientConfigs, BpeProxyConfig bpeProxyConfig,
+			FhirValidationConfig fhirValidationConfig, BuildInfoProvider buildInfoProvider,
+			BpeMailService bpeMailService, BpeOidcClientProvider bpeOidcClientProvider,
+			ProcessPluginApiClassLoaderFactory classLoaderFactory, String serverBaseUrl)
+	{
+		this.environment = environment;
+		this.dsfClientConfig = dsfClientConfig;
+		this.fhirClientConfigs = fhirClientConfigs;
+		this.bpeProxyConfig = bpeProxyConfig;
+		this.fhirValidationConfig = fhirValidationConfig;
+		this.buildInfoProvider = buildInfoProvider;
+		this.bpeMailService = bpeMailService;
+		this.bpeOidcClientProvider = bpeOidcClientProvider;
+		this.classLoaderFactory = classLoaderFactory;
+		this.serverBaseUrl = serverBaseUrl;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(environment, "environment");
+		Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
+		Objects.requireNonNull(fhirClientConfigs, "fhirClientConfigs");
+		Objects.requireNonNull(bpeProxyConfig, "bpeProxyConfig");
+		Objects.requireNonNull(fhirValidationConfig, "fhirValidationConfig");
+		Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
+		Objects.requireNonNull(bpeMailService, "bpeMailService");
+		Objects.requireNonNull(bpeOidcClientProvider, "bpeOidcClientProvider");
+		Objects.requireNonNull(classLoaderFactory, "classLoaderFactory");
+		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
+	}
+
+	public List<ProcessPluginFactory> initialize()
+	{
+		return IntStream.of(API_V1, API_V2).mapToObj(this::init).toList();
+	}
+
+	private ProcessPluginFactory init(int apiVersion)
+	{
+		ClassLoader apiClassLoader = classLoaderFactory.createApiClassLoader(apiVersion);
+		ProcessPluginApiBuilder apiBuilder = loadProcessPluginApiBuilder(apiClassLoader);
+		ApplicationContext apiApplicationContext = createApiApplicationContext(apiVersion, apiClassLoader,
+				apiBuilder.getSpringServiceConfigClass());
+
+		return apiBuilder.build(apiClassLoader, apiApplicationContext, environment, serverBaseUrl);
+	}
+
+	private ProcessPluginApiBuilder loadProcessPluginApiBuilder(ClassLoader apiClassLoader)
+	{
+		return ServiceLoader.load(ProcessPluginApiBuilder.class, apiClassLoader).stream().map(Provider::get).findFirst()
+				.get();
+	}
+
+	private ApplicationContext createApiApplicationContext(int apiVersion, ClassLoader apiClassLoader,
+			Class<?> springServiceConfigClass)
+	{
+		try
+		{
+			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+			factory.registerSingleton("dsfClientConfig", dsfClientConfig);
+			factory.registerSingleton("fhirClientConfigs", fhirClientConfigs);
+			factory.registerSingleton("bpeProxyConfig", bpeProxyConfig);
+			factory.registerSingleton("fhirValidationConfig", fhirValidationConfig);
+			factory.registerSingleton("buildInfoReader", buildInfoProvider);
+			factory.registerSingleton("bpeMailService", bpeMailService);
+			factory.registerSingleton("bpeOidcClientProvider", bpeOidcClientProvider);
+
+			var context = new AnnotationConfigApplicationContext(factory);
+			context.setClassLoader(apiClassLoader);
+			context.setEnvironment(environment);
+			context.register(springServiceConfigClass);
+			context.refresh();
+
+			return context;
+		}
+		catch (BeansException | IllegalStateException e)
+		{
+			logger.error("Unable to create api v{} application context", apiVersion, e);
+			throw e;
+		}
+	}
+}

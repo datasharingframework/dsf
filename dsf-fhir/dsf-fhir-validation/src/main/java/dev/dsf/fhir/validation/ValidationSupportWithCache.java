@@ -1,0 +1,373 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.dsf.fhir.validation;
+
+import java.lang.ref.SoftReference;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+
+public class ValidationSupportWithCache implements IValidationSupport
+{
+	private static final class CacheEntry<R extends Resource>
+	{
+		final Supplier<R> resourceSupplier;
+		SoftReference<R> ref;
+
+		CacheEntry(R resource, Supplier<R> resourceSupplier)
+		{
+			this.ref = new SoftReference<>(resource);
+			this.resourceSupplier = resourceSupplier;
+		}
+
+		private SoftReference<R> read()
+		{
+			return new SoftReference<>(resourceSupplier.get());
+		}
+
+		public R get()
+		{
+			if (ref == null || ref.get() == null)
+				ref = read();
+
+			return ref.get();
+		}
+	}
+
+	private static final Pattern UUID_PATTERN = Pattern
+			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}");
+
+	private final FhirContext context;
+	private final IValidationSupport delegate;
+
+	private final AtomicBoolean fetchAllStructureDefinitionsDone = new AtomicBoolean();
+	private final AtomicBoolean fetchAllConformanceResourcesDone = new AtomicBoolean();
+
+	private final ConcurrentMap<String, CacheEntry<StructureDefinition>> structureDefinitions = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, CacheEntry<CodeSystem>> codeSystems = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, CacheEntry<ValueSet>> valueSets = new ConcurrentHashMap<>();
+
+	private final ConcurrentMap<String, String> urlAndVersionsById = new ConcurrentHashMap<>();
+
+	public ValidationSupportWithCache(FhirContext context, IValidationSupport delegate)
+	{
+		this.context = context;
+		this.delegate = delegate;
+	}
+
+	public ValidationSupportWithCache populateCache(List<IBaseResource> cacheValues)
+	{
+		cacheValues.stream().filter(r -> r instanceof Resource).map(r -> (Resource) r).forEach(this::add);
+
+		fetchAllConformanceResourcesDone.set(true);
+		fetchAllStructureDefinitionsDone.set(true);
+
+		return this;
+	}
+
+	@Override
+	public FhirContext getFhirContext()
+	{
+		return context;
+	}
+
+	protected boolean resourceSupported(Resource resource)
+	{
+		return resource != null && (resource instanceof CodeSystem || resource instanceof StructureDefinition
+				|| resource instanceof ValueSet);
+	}
+
+	protected boolean resourceSupported(Class<? extends Resource> type, String resourceId)
+	{
+		return urlAndVersionsById.containsKey(resourceId) && (CodeSystem.class.equals(type)
+				|| StructureDefinition.class.equals(type) || ValueSet.class.equals(type));
+	}
+
+	protected void add(Resource resource)
+	{
+		if (resource instanceof CodeSystem c)
+			doAdd(c, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion,
+					url -> (CodeSystem) delegate.fetchCodeSystem(url));
+		else if (resource instanceof StructureDefinition s)
+			doAdd(s, structureDefinitions, StructureDefinition::getUrl, StructureDefinition::getVersion,
+					url -> (StructureDefinition) delegate.fetchStructureDefinition(url));
+		else if (resource instanceof ValueSet v)
+			doAdd(v, valueSets, ValueSet::getUrl, ValueSet::getVersion, url -> (ValueSet) delegate.fetchValueSet(url));
+	}
+
+	private <R extends Resource> void doAdd(R resource, ConcurrentMap<String, CacheEntry<R>> cache,
+			Function<R, String> toUrl, Function<R, String> toVersion, Function<String, R> fetch)
+	{
+		String url = toUrl.apply(resource);
+		String version = toVersion.apply(resource);
+
+		cache.put(url, new CacheEntry<>(resource, () -> fetch.apply(url)));
+
+		if (version != null)
+		{
+			String urlAndVersion = url + "|" + version;
+			cache.put(urlAndVersion, new CacheEntry<>(resource, () -> fetch.apply(urlAndVersion)));
+		}
+
+		if (resource.hasIdElement() && resource.getIdElement().hasIdPart()
+				&& UUID_PATTERN.matcher(resource.getIdElement().getIdPart()).matches())
+			urlAndVersionsById.put(resource.getIdElement().getIdPart(), url + "|" + version);
+	}
+
+	protected void update(Resource resource)
+	{
+		remove(resource);
+		add(resource);
+	}
+
+	private void remove(Resource resource)
+	{
+		if (resource instanceof CodeSystem c)
+			doRemove(c, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion);
+		else if (resource instanceof StructureDefinition s)
+			doRemove(s, structureDefinitions, StructureDefinition::getUrl, StructureDefinition::getVersion);
+		else if (resource instanceof ValueSet v)
+			doRemove(v, valueSets, ValueSet::getUrl, ValueSet::getVersion);
+	}
+
+	private <R extends Resource> void doRemove(R resource, ConcurrentMap<String, CacheEntry<R>> cache,
+			Function<R, String> toUrl, Function<R, String> toVersion)
+	{
+		String url = toUrl.apply(resource);
+		String version = toVersion.apply(resource);
+
+		cache.remove(url);
+		cache.remove(url + "|" + version);
+	}
+
+	protected void remove(Class<? extends Resource> type, String id)
+	{
+		if (CodeSystem.class.equals(type))
+			doRemove(id, codeSystems);
+		else if (StructureDefinition.class.equals(type))
+			doRemove(id, structureDefinitions);
+		else if (ValueSet.class.equals(type))
+			doRemove(id, valueSets);
+	}
+
+	private <R extends Resource> void doRemove(String id, ConcurrentMap<String, CacheEntry<R>> cache)
+	{
+		String urlAndVersion = urlAndVersionsById.get(id);
+
+		if (urlAndVersion != null)
+		{
+			String[] split = urlAndVersion.split("\\|");
+			String url = split.length > 0 ? split[0] : "";
+			String version = split.length > 1 ? split[1] : "";
+
+			cache.remove(url);
+			cache.remove(url + "|" + version);
+		}
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources()
+	{
+		if (!fetchAllConformanceResourcesDone.get())
+		{
+			List<IBaseResource> allConformanceResources = delegate.fetchAllConformanceResources();
+
+			allConformanceResources.stream().filter(r -> r instanceof Resource).map(r -> (Resource) r)
+					.forEach(this::update);
+
+			fetchAllConformanceResourcesDone.set(true);
+			fetchAllStructureDefinitionsDone.set(true);
+
+			return allConformanceResources;
+		}
+		else
+		{
+			return Stream
+					.concat(codeSystems.values().stream(),
+							Stream.concat(structureDefinitions.values().stream(), valueSets.values().stream()))
+					.map(c -> (IBaseResource) c.get()).collect(Collectors.toList());
+		}
+	}
+
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions()
+	{
+		if (!fetchAllStructureDefinitionsDone.get())
+		{
+			List<T> allStructureDefinitions = delegate.fetchAllStructureDefinitions();
+
+			allStructureDefinitions.stream().filter(r -> r instanceof Resource).map(r -> (Resource) r)
+					.forEach(this::update);
+
+			fetchAllStructureDefinitionsDone.set(true);
+
+			return allStructureDefinitions;
+		}
+		else
+		{
+			@SuppressWarnings("unchecked")
+			List<T> all = (List<T>) structureDefinitions.values().stream().map(c -> (IBaseResource) c.get())
+					.collect(Collectors.toList());
+			return all;
+		}
+	}
+
+	@Override
+	public IBaseResource fetchStructureDefinition(String url)
+	{
+		if (url == null || url.isBlank())
+			return null;
+
+		return fetch(structureDefinitions, url, () -> (StructureDefinition) delegate.fetchStructureDefinition(url));
+	}
+
+	@Override
+	public boolean isCodeSystemSupported(ValidationSupportContext theRootValidationSupport, String url)
+	{
+		return fetchCodeSystem(url) != null;
+	}
+
+	@Override
+	public IBaseResource fetchCodeSystem(String url)
+	{
+		if (url == null || url.isBlank())
+			return null;
+
+		return fetch(codeSystems, url, () -> (CodeSystem) delegate.fetchCodeSystem(url));
+	}
+
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theRootValidationSupport, String url)
+	{
+		return fetchValueSet(url) != null;
+	}
+
+	@Override
+	public IBaseResource fetchValueSet(String url)
+	{
+		if (url == null || url.isBlank())
+			return null;
+
+		return fetch(valueSets, url, () -> (ValueSet) delegate.fetchValueSet(url));
+	}
+
+	private <R extends Resource> R fetch(ConcurrentMap<String, CacheEntry<R>> cache, String url, Supplier<R> fetch)
+	{
+		CacheEntry<R> cacheEntry = cache.get(url);
+		if (cacheEntry != null)
+			return cacheEntry.get();
+
+		R resource = fetch.get();
+		if (resource == null)
+			return null;
+
+		cache.put(url, new CacheEntry<>(resource, fetch));
+		return resource;
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theRootValidationSupport,
+			ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand)
+	{
+		return delegate.expandValueSet(theRootValidationSupport, theExpansionOptions, theValueSetToExpand);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri)
+	{
+		if (StructureDefinition.class.equals(theClass))
+			return (T) fetchStructureDefinition(theUri);
+		else if (CodeSystem.class.equals(theClass))
+			return (T) fetchCodeSystem(theUri);
+		else if (ValueSet.class.equals(theClass))
+			return (T) fetchValueSet(theUri);
+		else
+			return delegate.fetchResource(theClass, theUri);
+	}
+
+	@Override
+	public CodeValidationResult validateCode(ValidationSupportContext theRootValidationSupport,
+			ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay,
+			String theValueSetUrl)
+	{
+		return delegate.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay,
+				theValueSetUrl);
+	}
+
+	@Override
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theRootValidationSupport,
+			ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay,
+			IBaseResource theValueSet)
+	{
+		return delegate.validateCodeInValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay,
+				theValueSet);
+	}
+
+	@Deprecated
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theRootValidationSupport, String theSystem,
+			String theCode)
+	{
+		return delegate.lookupCode(theRootValidationSupport, theSystem, theCode);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext,
+			LookupCodeRequest theLookupCodeRequest)
+	{
+		return delegate.lookupCode(theValidationSupportContext, theLookupCodeRequest);
+	}
+
+	@Override
+	public IBaseResource generateSnapshot(ValidationSupportContext theRootValidationSupport, IBaseResource theInput,
+			String theUrl, String theWebUrl, String theProfileName)
+	{
+		return delegate.generateSnapshot(theRootValidationSupport, theInput, theUrl, theWebUrl, theProfileName);
+	}
+
+	@Override
+	public void invalidateCaches()
+	{
+		codeSystems.clear();
+		structureDefinitions.clear();
+		valueSets.clear();
+
+		fetchAllStructureDefinitionsDone.set(false);
+		fetchAllConformanceResourcesDone.set(false);
+
+		delegate.invalidateCaches();
+	}
+}

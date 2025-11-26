@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.jdbc;
 
 import java.sql.PreparedStatement;
@@ -21,7 +36,8 @@ interface PreparedStatementFactory<R extends Resource>
 
 	String getCreateSql();
 
-	void configureCreateStatement(PreparedStatement statement, R resource, UUID uuid) throws SQLException;
+	void configureCreateStatement(LargeObjectManager largeObjectManager, PreparedStatement statement, R resource,
+			UUID uuid) throws SQLException;
 
 	String getReadByIdSql();
 
@@ -43,13 +59,8 @@ interface PreparedStatementFactory<R extends Resource>
 
 	R getReadByIdAndVersionResource(ResultSet result) throws SQLException;
 
-	String getUpdateNewRowSql();
+	String getUpdateSql();
 
-	void configureUpdateNewRowSqlStatement(PreparedStatement statement, UUID uuid, long version, R resource)
-			throws SQLException;
-
-	String getUpdateSameRowSql();
-
-	void configureUpdateSameRowSqlStatement(PreparedStatement statement, UUID uuid, long version, R resource)
-			throws SQLException;
+	void configureUpdateSqlStatement(LargeObjectManager largeObjectManager, PreparedStatement statement, UUID uuid,
+			long version, R resource) throws SQLException;
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertNotNull;
@@ -7,16 +22,12 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -26,7 +37,7 @@ import dev.dsf.fhir.authentication.OrganizationProvider;
 public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTest
 {
 	protected static final String QUESTIONNAIRE_URL = "http://dsf.dev/fhir/Questionnaire/userTask/foo";
-	protected static final String QUESTIONNAIRE_VERSION = "1.0.0";
+	protected static final String QUESTIONNAIRE_VERSION = "2.0";
 	protected static final String QUESTIONNAIRE_URL_VERSION = QUESTIONNAIRE_URL + "|" + QUESTIONNAIRE_VERSION;
 	protected static final String TEST_IDENTIFIER_SYSTEM = "http://dsf.dev/fhir/CodeSystem/test";
 	protected static final String TEST_IDENTIFIER_VALUE = "foo";
@@ -38,14 +49,13 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 	protected static final String QUESTIONNAIRE_ITEM_BUSINESS_KEY_LINK = "business-key";
 	protected static final String QUESTIONNAIRE_ITEM_BUSINESS_KEY_TEXT = "The business-key of the process execution";
 
-	protected static final QuestionnaireResponse.QuestionnaireResponseStatus QUESTIONNAIRE_RESPONSE_STATUS = QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS;
 	protected static final Date QUESTIONNAIRE_RESPONSE_DATE = Date
 			.from(LocalDateTime.parse("2022-01-02T00:00:00").toInstant(ZoneOffset.UTC));
 
-	protected Questionnaire createQuestionnaireProfileVersion100()
+	protected Questionnaire createQuestionnaire()
 	{
 		Questionnaire questionnaire = new Questionnaire();
-		questionnaire.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire|1.0.0");
+		questionnaire.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire");
 		questionnaire.getMeta().addTag().setSystem("http://dsf.dev/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
 		questionnaire.setUrl(QUESTIONNAIRE_URL);
@@ -57,44 +67,13 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 		questionnaire.setDate(QUESTIONNAIRE_DATE);
 
 		questionnaire.addItem().setLinkId(QUESTIONNAIRE_ITEM_USER_TASK_ID_LINK)
-				.setText(QUESTIONNAIRE_ITEM_USER_TASK_ID_TEXT).setType(Questionnaire.QuestionnaireItemType.STRING);
+				.setText(QUESTIONNAIRE_ITEM_USER_TASK_ID_TEXT).setType(Questionnaire.QuestionnaireItemType.STRING)
+				.setRequired(true);
 		questionnaire.addItem().setLinkId(QUESTIONNAIRE_ITEM_BUSINESS_KEY_LINK)
-				.setText(QUESTIONNAIRE_ITEM_BUSINESS_KEY_TEXT).setType(Questionnaire.QuestionnaireItemType.STRING);
+				.setText(QUESTIONNAIRE_ITEM_BUSINESS_KEY_TEXT).setType(Questionnaire.QuestionnaireItemType.STRING)
+				.setRequired(true);
 
 		return questionnaire;
-	}
-
-	protected Questionnaire createQuestionnaireProfileVersion100(String questionnaireVersion)
-	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
-		return questionnaire.setVersion(questionnaireVersion);
-	}
-
-	protected Questionnaire createQuestionnaireProfileVersion150()
-	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion100();
-		Meta meta = questionnaire.getMeta();
-
-		String profile = meta.getProfile().get(0).getValue().replace("1.0.0", "1.5.0");
-		meta.setProfile(List.of(new CanonicalType(profile)));
-
-		questionnaire.getItem().forEach(i -> i.setRequired(true));
-
-		return questionnaire;
-	}
-
-	protected Questionnaire createQuestionnaireProfileVersion150(String questionnaireVersion)
-	{
-		Questionnaire questionnaire = createQuestionnaireProfileVersion150();
-		return questionnaire.setVersion(questionnaireVersion);
-	}
-
-	protected void addItem(Questionnaire questionnaire, String linkId, String text,
-			Questionnaire.QuestionnaireItemType type, Optional<Boolean> required)
-	{
-		Questionnaire.QuestionnaireItemComponent item = questionnaire.addItem().setLinkId(linkId).setText(text)
-				.setType(type);
-		required.ifPresent(item::setRequired);
 	}
 
 	protected QuestionnaireResponse createQuestionnaireResponse()
@@ -104,19 +83,17 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 		assertNotNull(organizationProvider);
 
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
-		questionnaireResponse.getMeta()
-				.addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire-response|1.0.0");
+		questionnaireResponse.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/questionnaire-response");
 
 		questionnaireResponse.getIdentifier().setSystem(TEST_IDENTIFIER_SYSTEM).setValue(TEST_IDENTIFIER_VALUE);
 		questionnaireResponse.setQuestionnaire(QUESTIONNAIRE_URL_VERSION);
 
-		questionnaireResponse.setStatus(QUESTIONNAIRE_RESPONSE_STATUS);
+		questionnaireResponse.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		questionnaireResponse.setAuthored(QUESTIONNAIRE_RESPONSE_DATE);
 
-		Organization localOrganization = organizationProvider.getLocalOrganization().get();
-		questionnaireResponse.setSubject(new Reference("Organization/" + localOrganization.getIdElement().getIdPart()));
-		questionnaireResponse.setAuthor(new Reference().setType(ResourceType.Organization.name())
-				.setIdentifier(localOrganization.getIdentifierFirstRep()));
+		questionnaireResponse.getAuthor().setType(ResourceType.Organization.name())
+				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless())
+				.getIdentifier().setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization");
 
 		addItem(questionnaireResponse, QUESTIONNAIRE_ITEM_USER_TASK_ID_LINK, QUESTIONNAIRE_ITEM_USER_TASK_ID_TEXT,
 				new StringType(UUID.randomUUID().toString()));
@@ -124,14 +101,6 @@ public class AbstractQuestionnaireIntegrationTest extends AbstractIntegrationTes
 				new StringType(UUID.randomUUID().toString()));
 
 		return questionnaireResponse;
-	}
-
-	protected QuestionnaireResponse createQuestionnaireResponse(String questionnaireVersion)
-	{
-		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		String urlVersion = questionnaireResponse.getQuestionnaire().replace(QUESTIONNAIRE_VERSION,
-				questionnaireVersion);
-		return questionnaireResponse.setQuestionnaire(urlVersion);
 	}
 
 	protected void addItem(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer)

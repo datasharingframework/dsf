@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
@@ -23,6 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
@@ -35,7 +51,6 @@ import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ReferenceCleaner;
-import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MediaType;
@@ -83,9 +98,8 @@ public class ReadCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		String requestUrl = entry.getRequest().getUrl();
 
@@ -108,7 +122,10 @@ public class ReadCommand extends AbstractCommand implements Command
 			readByCondition(connection, resourceTypeName,
 					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
-			throw new WebApplicationException(responseGenerator.badReadRequestUrl(index, requestUrl));
+		{
+			Response response = responseGenerator.badReadRequestUrl(index, requestUrl);
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private void readById(Connection connection, String resourceTypeName, String id)
@@ -194,8 +211,11 @@ public class ReadCommand extends AbstractCommand implements Command
 			List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters();
 
 			if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(handlingType))
-				throw new WebApplicationException(responseGenerator.response(Status.BAD_REQUEST,
-						responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build());
+			{
+				Response response = responseGenerator.response(Status.BAD_REQUEST,
+						responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build();
+				throw new WebApplicationException(response);
+			}
 
 			PartialResult<? extends Resource> result = exceptionHandler
 					.handleSqlException(() -> optDao.get().searchWithTransaction(connection, query));

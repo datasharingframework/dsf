@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao;
 
 import static dev.dsf.fhir.authorization.read.ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM;
@@ -13,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -412,7 +427,7 @@ public abstract class AbstractReadAccessDaoTest<D extends Resource, C extends Re
 
 		assertReadAccessEntryCount(1, 1, v1, accessType);
 
-		v1.getMeta().setTag(Collections.emptyList());
+		v1.getMeta().setTag(List.of());
 		D v2 = getDao().update(v1);
 		assertEquals(2L, (long) v2.getIdElement().getVersionIdPartAsLong());
 
@@ -1086,7 +1101,7 @@ public abstract class AbstractReadAccessDaoTest<D extends Resource, C extends Re
 		assertReadAccessEntryCount(1, 1, createdD, accessType);
 
 		SearchQuery<D> query = getDao().createSearchQuery(userCreator.apply(createdOrg), PageAndCount.from(1, 20))
-				.configureParameters(Map.of("id", Collections.singletonList(createdD.getIdElement().getIdPart())));
+				.configureParameters(Map.of("id", List.of(createdD.getIdElement().getIdPart())));
 		PartialResult<D> searchResult = getDao().search(query);
 		assertNotNull(searchResult);
 		assertEquals(expectedCount, searchResult.getTotal());

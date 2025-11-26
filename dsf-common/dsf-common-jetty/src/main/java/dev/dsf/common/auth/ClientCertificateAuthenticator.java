@@ -1,34 +1,45 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.common.auth;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import javax.security.auth.x500.X500Principal;
 
+import org.eclipse.jetty.security.AuthenticationState;
+import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ServerAuthException;
-import org.eclipse.jetty.security.UserAuthentication;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.authentication.LoginAuthenticator;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.Authentication.User;
-import org.eclipse.jetty.server.UserIdentity;
-import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter;
+import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
+import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
 
 public class ClientCertificateAuthenticator extends LoginAuthenticator
 {
@@ -42,24 +53,22 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 	}
 
 	@Override
-	public String getAuthMethod()
+	public String getAuthenticationType()
 	{
-		return Constraint.__CERT_AUTH;
+		return Authenticator.CERT_AUTH;
 	}
 
 	@Override
-	public Authentication validateRequest(ServletRequest request, ServletResponse response, boolean mandatory)
+	public AuthenticationState validateRequest(Request request, Response response, Callback callback)
 			throws ServerAuthException
 	{
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		X509Certificate[] certificates = (X509Certificate[]) httpRequest
+		X509Certificate[] certificates = (X509Certificate[]) request
 				.getAttribute("jakarta.servlet.request.X509Certificate");
 
 		if (certificates == null || certificates.length <= 0)
 		{
 			logger.warn("X509Certificate could not be retrieved, sending unauthorized");
-
-			return Authentication.UNAUTHENTICATED;
+			return null;
 		}
 
 		try
@@ -72,23 +81,25 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 			logger.warn("Unable to validate client certificates, sending unauthorized: {} - {}", e.getClass().getName(),
 					e.getMessage());
 
-			return Authentication.UNAUTHENTICATED;
+			return null;
 		}
 
-		UserIdentity user = login(null, certificates, httpRequest);
+		UserIdentity user = login(null, certificates, request, response);
 		if (user == null)
 		{
-			logger.warn("User '{}' not found, sending unauthorized", getSubjectDn(certificates));
-
-			return Authentication.UNAUTHENTICATED;
+			logger.warn("User '{}' not found, sending unauthorized",
+					CertificateFormatter.toSubjectName(certificates[0], X500PrincipalFormat.RFC1779));
+			return null;
 		}
 
-		return new UserAuthentication(getAuthMethod(), user);
+		return new UserAuthenticationSucceeded(getAuthenticationType(), user);
 	}
 
 	private X509TrustManager createX509TrustManager(KeyStore clientTrustStore)
 	{
-		logger.info("Using [{}] to validate client certificates", getSubjectDn(getCaCertificates(clientTrustStore)));
+		logger.info("Using trust-store with {} to validate client certificates",
+				KeyStoreFormatter.toSubjectsFromCertificates(clientTrustStore, X500PrincipalFormat.RFC1779).values()
+						.stream().collect(Collectors.joining("; ", "[", "]")));
 
 		try
 		{
@@ -104,39 +115,5 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 
 			throw new RuntimeException(e);
 		}
-	}
-
-	private X509Certificate[] getCaCertificates(KeyStore keyStore)
-	{
-		try
-		{
-			PKIXParameters params = new PKIXParameters(keyStore);
-			return params.getTrustAnchors().stream().map(TrustAnchor::getTrustedCert).toArray(X509Certificate[]::new);
-		}
-		catch (KeyStoreException | InvalidAlgorithmParameterException e)
-		{
-			logger.debug("Unable to extract trust anchors", e);
-			logger.warn("Unable to extract trust anchors: {} - {}", e.getClass().getName(), e.getMessage());
-
-			throw new RuntimeException(e);
-		}
-	}
-
-
-	private String getSubjectDn(X509Certificate[] certificates)
-	{
-		return Stream.of(certificates).map(this::getSubjectDn).collect(Collectors.joining(";"));
-	}
-
-	private String getSubjectDn(X509Certificate certificate)
-	{
-		return certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
-	}
-
-	@Override
-	public boolean secureResponse(ServletRequest request, ServletResponse response, boolean mandatory,
-			User validatedUser) throws ServerAuthException
-	{
-		return true; // nothing to do
 	}
 }

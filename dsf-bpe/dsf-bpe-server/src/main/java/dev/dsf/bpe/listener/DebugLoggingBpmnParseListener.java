@@ -1,18 +1,31 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.bpe.listener;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.impl.bpmn.parser.AbstractBpmnParseListener;
-import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
-import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
-import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
-import org.camunda.bpm.engine.impl.util.xml.Element;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.ExecutionListener;
+import org.operaton.bpm.engine.impl.bpmn.parser.BpmnParseListener;
+import org.operaton.bpm.engine.impl.pvm.process.ActivityImpl;
+import org.operaton.bpm.engine.impl.pvm.process.ScopeImpl;
+import org.operaton.bpm.engine.impl.util.xml.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
-		implements BpmnParseListener, InitializingBean
+public class DebugLoggingBpmnParseListener implements BpmnParseListener, InitializingBean
 {
 	private static final class ExecutionListenerLogger implements ExecutionListener
 	{
@@ -76,19 +89,28 @@ public class DebugLoggingBpmnParseListener extends AbstractBpmnParseListener
 	{
 		if (logActivityStart)
 			logger.warn(
-					"Process activity start debug logging enabled. This should only be activated during process plugin development");
+					"Process activity start debug logging enabled. This should only be activated during process plugin development!");
 
 		if (logActivityEnd)
 			logger.warn(
-					"Process activity end debug logging enabled. This should only be activated during process plugin development");
+					"Process activity end debug logging enabled. This should only be activated during process plugin development!");
 
-		if (logVariables)
-			logger.warn(
-					"Process variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+		if (logVariables || logVariablesLocal)
+		{
+			if (logActivityStart || logActivityEnd)
+			{
+				if (logVariables)
+					logger.warn(
+							"Process variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
 
-		if (logVariablesLocal)
-			logger.warn(
-					"Process local variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+				if (logVariablesLocal)
+					logger.warn(
+							"Process local variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+			}
+			else
+				logger.warn(
+						"Process activity start or end debug logging not enabled, but must be enabled to activate variable or local variable debug logging!");
+		}
 	}
 
 	private void addListeners(ActivityImpl activity)

@@ -1,0 +1,300 @@
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div id="resource">
+		<div id="base-data">
+			<div id="base-data-list">
+				<th:block th:fragment="base-data-list-entries">
+					<li><b>Status:</b> [[${resource.status}]]</li>
+					<li><b>Process:</b> [[${task.process}]]</li>
+					<li><b>Message-Name:</b> [[${task.messageName}]]</li>
+					<li th:if="${task.businessKey}"><b>Business-Key:</b> [[${task.businessKey}]]</li>
+					<li th:if="${task.correlationKey}"><b>Correlation-Key:</b> [[${task.correlationKey}]]</li>
+					<li><b>Requester:</b> [[${task.requester.system}]] | [[${task.requester.value}]]</li>
+					<li><b>Recipient:</b> [[${task.recipient.system}]] | [[${task.recipient.value}]]</li>
+					<li th:unless="${resource.status == 'draft'}"><b>Authored On:</b> [[${task.authoredOn}]]</li>
+				</th:block>
+			</div>
+		</div>
+		<th:block th:fragment="resource-data">
+			<div id="spinner" class="spinner spinner-disabled"></div>
+			<h3 th:if="${not #lists.isEmpty(task.input)}">Input</h3>
+			<form th:unless="${resource.status != 'draft' and #lists.isEmpty(task.input)}">
+				<fieldset id="form-fieldset" th:disabled="${resource.status != 'draft'}">
+					<div class="row" th:each="i : ${task.input}" th:if="${task.input}" th:classappend="${i.type == null ? 'row-display' : ''}" th:attr="for = ${i.id}">
+						<th:block th:if="${i.type == null}">
+							<p class="p-display" th:unless="${i.type}" th:text="${i.label}">label text</p>
+						</th:block>
+						<th:block th:if="${i.type == 'text' or i.type == 'number' or i.type == 'date' or i.type == 'time' or i.type == 'datetime-local' or i.type == 'url'}">
+							<label class="row-label" th:if="${i.label}" th:for="${i.id}" th:title="${i.labelTitle}">[[${i.label}]]<span class="cardinalities"></span></label>
+							<div class="input-group">
+								<input th:type="${i.type}" placeholder="string" th:id="${i.id}" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.stringValue} ?: ${i.type}, fhir-type = ${i.fhirType}">
+								<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.stringValue} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+								<a class="open" th:href="${i.stringValue}" th:if="${resource.status != 'draft' and i.type == 'url'}">
+									<svg height="22" width="22" viewBox="0 -960 960 960"><title>Open Resource</title><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H570v-60h210v-540H180v540h210v60H180Zm270 0v-284l-83 83-43-43 156-156 156 156-43 43-83-83v284h-60Z"/></svg>
+								</a>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>								
+						</th:block>
+						<th:block th:if="${i.type == 'boolean'}">
+							<label class="row-label" th:if="${i.label}" th:title="${i.labelTitle}">[[${i.label}]]<span class="cardinalities"></span></label>
+							<div class="input-group">
+								<div class="input-group-radio" th:id="${i.id}">
+									<label class="radio"><input type="radio" value="true" th:attr="${resource.status == 'draft' ? 'placeholder' : 'checked'} = ${i.booleanValue} ?: _, fhir-type = ${i.fhirType + '.true'}" th:id="${i.id + '-true'}" th:name="${i.id}">Yes</label>
+									<label class="radio"><input type="radio" value="false" th:attr="${resource.status == 'draft' ? 'placeholder' : 'checked'} = ${!i.booleanValue} ?: _, fhir-type = ${i.fhirType + '.false'}" th:id="${i.id + '-false'}" th:name="${i.id}">No</label>
+								</div>
+								<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.booleanValue} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+						</th:block>
+						<th:block th:if="${i.type == 'identifier'}">
+							<label class="row-label" th:if="${i.label}" th:for="${i.id + '-system'}" th:title="${i.labelTitle}">[[${i.label}]]<span class="cardinalities"></span></label>
+							<div class="input-group">
+								<input type="url" placeholder="identifier.system" th:id="${i.id} + '-system'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.systemValueValue.system} ?: _, fhir-type = ${i.fhirType + '.system'}">
+								<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.systemValueValue.system} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+							<div class="input-group">
+								<input type="text" placeholder="identifier.value" th:id="${i.id} + '-value'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.systemValueValue.value} ?: _, fhir-type = ${i.fhirType + '.value'}" class="identifier-coding-code">
+								<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.systemValueValue.value} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+						</th:block>
+						<th:block th:if="${i.type == 'coding'}">
+							<label class="row-label" th:if="${i.label}" th:for="${i.id + '-system'}" th:title="${i.labelTitle}">[[${i.label}]]<span class="cardinalities"></span></label>
+							<div class="input-group">
+								<input type="url" placeholder="coding.system" th:id="${i.id} + '-system'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.systemValueValue.system} ?: _, fhir-type = ${i.fhirType + '.system'}">
+								<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.systemValueValue.system} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+							<div class="input-group">
+								<input type="text" placeholder="coding.code" th:id="${i.id} + '-code'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.systemValueValue.value} ?: _, fhir-type = ${i.fhirType + '.code'}" class="identifier-coding-code">
+								<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.systemValueValue.value} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+							<div class="input-group-display" th:if="${i.systemValueValue.display}" th:text="${i.systemValueValue.display}"></div>
+						</th:block>
+						<th:block th:if="${i.type == 'quantity'}">
+							<label class="row-label" th:if="${i.label}" th:for="${i.id + '-value'}" th:title="${i.labelTitle}">[[${i.label}]]<span class="cardinalities"></span></label>
+							<div class="flex-container">
+								<div class="input-group flex-child-margin-right comparator" th:if="${resource.status == 'draft' or i.quantityValue.comparator != null}">
+									<input type="text" placeholder="quantity.comparator" th:id="${i.id} + '-comparator'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.comparator} ?: _, fhir-type = ${i.fhirType + '.comparator'}">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.comparator} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child flex-child-margin-right">
+									<input type="number" placeholder="quantity.value" th:id="${i.id} + '-value'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.value} ?: _, fhir-type = ${i.fhirType + '.value'}">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.value} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child">
+									<input type="text" placeholder="quantity.unit" th:id="${i.id} + '-unit'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.unit} ?: _, fhir-type = ${i.fhirType + '.unit'}">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.unit} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+							<div class="flex-container">
+								<div class="input-group flex-child flex-child-margin-right" th:if="${resource.status == 'draft' or i.quantityValue.system != null}">
+									<input type="url" placeholder="quantity.system" th:id="${i.id} + '-system'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.system} ?: _, fhir-type = ${i.fhirType + '.system'}" class="identifier-coding-code">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.system} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child" th:if="${resource.status == 'draft' or i.quantityValue.code != null}">
+									<input type="text" placeholder="quantity.code" th:id="${i.id} + '-code'" th:attr="${resource.status == 'draft' ? 'placeholder' : 'value'} = ${i.quantityValue.code} ?: _, fhir-type = ${i.fhirType + '.code'}" class="identifier-coding-code">
+									<svg class="insert" height="22" width="22" viewBox="0 -960 960 960" th:disabled="${i.quantityValue.code} == null" th:if="${resource.status == 'draft'}"><title>Insert Placeholder Value</title><path d="M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z"></path></svg>
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+						</th:block>
+						<ul class="error-list" th:for="${i.id}" th:if="${resource.status == 'draft'}"></ul>
+					</div>
+					<div class="row-submit" th:if="${resource.status == 'draft'}">
+						<input type="hidden" id="practitionerIdentifierValue" th:value="${practitionerIdentifierValue}" th:if="${practitionerIdentifierValue}" />
+						<button id="start-process" type="submit" name="submit" class="submit" formnovalidate>Start Process</button>
+					</div>
+				</fieldset>
+			</form>
+			<h3 th:if="${not #lists.isEmpty(task.output)}">Output</h3>
+			<form th:if="${(resource.status == 'in-progress' or resource.status == 'failed' or resource.status == 'completed') and not #lists.isEmpty(task.output)}">
+				<fieldset id="form-fieldset" disabled>
+					<div class="row" th:each="o : ${task.output}" th:if="${task.output}" th:classappend="${o.type == null ? 'row-display' : ''}" th:attr="for = ${o.id}">
+						<th:block th:if="${o.type == null}">
+							<p class="p-display" th:unless="${o.type}" th:text="${o.label}">label</p>
+						</th:block>
+						<th:block th:if="${o.type == 'text' or o.type == 'number' or o.type == 'date' or o.type == 'time' or o.type == 'datetime-local' or o.type == 'url'}">
+							<label class="row-label" th:if="${o.label}" th:for="${o.id}" th:title="${o.labelTitle}" th:text="${o.label}">label</label>
+							<div class="input-group">
+								<input th:type="${o.type}" th:id="${o.id}" th:value="${o.stringValue}">
+								<a class="open" th:href="${o.stringValue}" th:if="${resource.status != 'draft' and o.type == 'url'}">
+									<svg height="22" width="22" viewBox="0 -960 960 960"><title>Open Resource</title><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H570v-60h210v-540H180v540h210v60H180Zm270 0v-284l-83 83-43-43 156-156 156 156-43 43-83-83v284h-60Z"/></svg>
+								</a>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>								
+						</th:block>
+						<th:block th:if="${o.type == 'boolean'}">
+							<label class="row-label" th:if="${o.label}" th:title="${o.labelTitle}" th:text="${o.label}">label</label>
+							<div class="input-group">
+								<div class="input-group-radio" th:id="${o.id}">
+									<label class="radio"><input type="radio" value="true" th:checked="${o.booleanValue}" th:id="${o.id + '-true'}">Yes</label>
+									<label class="radio"><input type="radio" value="false" th:checked="${!o.booleanValue}" th:id="${o.id + '-false'}">No</label>
+								</div>
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+						</th:block>
+						<th:block th:if="${o.type == 'identifier'}">
+							<label class="row-label" th:if="${o.label}" th:for="${o.id + '-system'}" th:title="${o.labelTitle}" th:text="${o.label}">label</label>
+							<div class="input-group">
+								<input type="url" th:id="${o.id} + '-system'" th:value="${o.systemValueValue.system}">
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+							<div class="input-group">
+								<input type="text" th:id="${o.id} + '-value'" th:value="${o.systemValueValue.value}" class="identifier-coding-code">
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+						</th:block>
+						<th:block th:if="${o.type == 'coding'}">
+							<label class="row-label" th:if="${o.label}" th:for="${o.id + '-system'}" th:title="${o.labelTitle}" th:text="${o.label}">label</label>
+							<div class="input-group">
+								<input type="url" th:id="${o.id} + '-system'" th:value="${o.systemValueValue.system}">
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+							<div class="input-group">
+								<input type="text" th:id="${o.id} + '-code'" th:value="${o.systemValueValue.value}" class="identifier-coding-code">
+								<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+							</div>
+							<div class="input-group-display" th:if="${o.systemValueValue.display}" th:text="${o.systemValueValue.display}"></div>
+						</th:block>
+						<th:block th:if="${o.type == 'quantity'}">
+							<label class="row-label" th:if="${o.label}" th:for="${o.id + '-value'}" th:title="${o.labelTitle}" th:text="${o.label}">label</label>
+							<div class="flex-container">
+								<div class="input-group flex-child-margin-right comparator" th:if="${o.quantityValue.comparator != null}">
+									<input type="text" th:id="${o.id} + '-comparator'" th:value="${o.quantityValue.comparator}">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child flex-child-margin-right">
+									<input type="number" th:id="${o.id} + '-value'" th:value="${o.quantityValue.value}">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child">
+									<input type="text" th:id="${o.id} + '-unit'" th:value="${o.quantityValue.unit}">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+							<div class="flex-container">
+								<div class="input-group flex-child flex-child-margin-right" th:if="${o.quantityValue.system != null}">
+									<input type="url" th:id="${o.id} + '-system'" th:value="${o.quantityValue.system}" class="identifier-coding-code">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+								<div class="input-group flex-child" th:if="${o.quantityValue.code != null}">
+									<input type="text" th:id="${o.id} + '-code'" th:value="${o.quantityValue.code}" class="identifier-coding-code">
+									<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+								</div>
+							</div>
+						</th:block>
+						
+						<div class="extensions" th:if="${o.extension and not #lists.isEmpty(o.extension)}">
+							<div class="extension" th:each="e : ${o.extension}">
+								<th:block th:if="${e.type == 'text' or e.type == 'number' or e.type == 'date' or e.type == 'time' or e.type == 'datetime-local' or e.type == 'url'}">
+									<label class="extension-label" th:if="${e.url}" th:for="${e.id}" th:title="${e.url}" th:text="${e.url}">url</label>
+									<div class="input-group">
+										<input th:type="${e.type}" th:id="${e.id}" th:value="${e.stringValue}">
+										<a class="open" th:href="${e.stringValue}" th:if="${resource.status != 'draft' and e.type == 'url'}">
+											<svg height="22" width="22" viewBox="0 -960 960 960"><title>Open Resource</title><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H570v-60h210v-540H180v540h210v60H180Zm270 0v-284l-83 83-43-43 156-156 156 156-43 43-83-83v284h-60Z"/></svg>
+										</a>
+										<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+									</div>								
+								</th:block>
+								<th:block th:if="${e.type == 'boolean'}">
+									<label class="extension-label" th:if="${e.url}" th:title="${e.url}" th:text="${e.url}">url</label>
+									<div class="input-group">
+										<div class="input-group-radio">
+											<label class="radio"><input type="radio" value="true" th:checked="${e.booleanValue}" th:id="${e.id + '-true'}">Yes</label>
+											<label class="radio"><input type="radio" value="false" th:checked="${!e.booleanValue}" th:id="${e.id + '-false'}">No</label>
+										</div>
+										<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+									</div>
+								</th:block>
+								<th:block th:if="${e.type == 'identifier'}">
+									<label class="extension-label" th:if="${e.url}" th:for="${e.id + '-system'}" th:title="${e.url}" th:text="${e.url}">url</label>
+									<div class="input-group">
+										<input type="url" th:id="${e.id} + '-system'" th:value="${e.systemValueValue.system}">
+										<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+									</div>
+									<div class="input-group">
+										<input type="text" th:id="${e.id} + '-value'" th:value="${e.systemValueValue.value}" class="identifier-coding-code">
+										<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+									</div>
+								</th:block>
+								<th:block th:if="${e.type == 'coding'}">
+									<label class="extension-label" th:if="${e.url}" th:for="${e.id + '-system'}" th:title="${e.url}" th:text="${e.url}">url</label>
+									<div class="input-group">
+										<input type="url" th:id="${e.id} + '-system'" th:value="${e.systemValueValue.system}">
+										<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+									</div>
+									<div class="input-group">
+										<input type="text" th:id="${e.id} + '-code'" th:value="${e.systemValueValue.value}" class="identifier-coding-code">
+										<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+									</div>
+									<div class="input-group-display" th:if="${e.systemValueValue.display}" th:text="${e.systemValueValue.display}"></div>
+								</th:block>
+								<th:block th:if="${e.type == 'quantity'}">
+									<label class="extension-label" th:if="${e.url}" th:for="${e.id + '-value'}" th:title="${e.url}" th:text="${e.url}">url</label>
+									<div class="flex-container">
+										<div class="input-group flex-child-margin-right comparator" th:if="${e.quantityValue.comparator != null}">
+											<input type="text" th:id="${e.id} + '-comparator'" th:value="${e.quantityValue.comparator}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+										<div class="input-group flex-child flex-child-margin-right">
+											<input type="number" th:id="${e.id} + '-value'" th:value="${e.quantityValue.value}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+										<div class="input-group flex-child">
+											<input type="text" th:id="${e.id} + '-unit'" th:value="${e.quantityValue.unit}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+									</div>
+									<div class="flex-container identifier-coding-code">
+										<div class="input-group flex-child flex-child-margin-right" th:if="${e.quantityValue.system != null}">
+											<input type="url" th:id="${e.id} + '-system'" th:value="${e.quantityValue.system}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+										<div class="input-group flex-child" th:if="${e.quantityValue.code != null}">
+											<input type="text" th:id="${e.id} + '-code'" th:value="${e.quantityValue.code}">
+											<svg class="copy" height="22" width="22" viewBox="0 -960 960 960" th:if="${resource.status != 'draft'}"><title>Copy to Clipboard</title><path d="M362.308-260.001q-30.308 0-51.307-21-21-21-21-51.308v-455.382q0-30.308 21-51.308 20.999-21 51.307-21h335.383q30.307 0 51.307 21 21 21 21 51.308v455.382q0 30.308-21 51.308t-51.307 21H362.308Zm0-59.999h335.383q4.615 0 8.462-3.846 3.846-3.847 3.846-8.463v-455.382q0-4.616-3.846-8.463-3.847-3.846-8.462-3.846H362.308q-4.616 0-8.462 3.846-3.847 3.847-3.847 8.463v455.382q0 4.616 3.847 8.463 3.846 3.846 8.462 3.846ZM222.309-120.003q-30.307 0-51.307-21-21-21-21-51.307v-515.381h59.999v515.381q0 4.616 3.846 8.462 3.847 3.847 8.462 3.847h395.382v59.998H222.309ZM349.999-320V-800-320Z"/></svg>
+										</div>
+									</div>
+								</th:block>
+							</div>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+			<th:block th:if="${resource.status == 'requested' or resource.status == 'in-progress'}">
+				<div class="comment" th:if="${#lists.isEmpty(task.input)}"><i>No input parameters.</i></div>
+			</th:block>
+			<th:block th:if="${resource.status == 'completed' or resource.status == 'failed'}">
+				<div class="comment" th:if="${#lists.isEmpty(task.input) and #lists.isEmpty(task.output)}"><i>No input and no output parameters.</i></div>
+				<div class="comment" th:if="${#lists.isEmpty(task.input) and not #lists.isEmpty(task.output)}"><i>No input parameters.</i></div>
+				<div class="comment" th:if="${not #lists.isEmpty(task.input) and #lists.isEmpty(task.output)}"><i>No output parameters.</i></div>
+			</th:block>
+		</div>
+	</th:block>
+</body>
+</html>

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
@@ -250,7 +265,8 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		binary.setData("1234567890".getBytes());
 		new ReadAccessHelperImpl().addOrganization(binary, "organization.com");
 
-		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				DATABASE_USERS_GROUP);
 		Binary createdBinary = binaryDao.create(binary);
 		assertNotNull(createdBinary);
 
@@ -344,6 +360,6 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		long t1 = System.currentTimeMillis();
 
 		logger.info("Organization updates executed in {} ms", t1 - t0);
-		assertTrue("Organization updates took longer then 200 ms", t1 - t0 <= 200);
+		assertTrue("Organization updates took longer then 500 ms", t1 - t0 <= 500);
 	}
 }

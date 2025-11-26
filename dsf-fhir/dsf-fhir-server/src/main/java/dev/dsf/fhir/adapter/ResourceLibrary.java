@@ -1,14 +1,55 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.adapter;
 
+import java.nio.charset.Charset;
 import java.util.List;
+import java.util.function.Function;
 
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Library;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class ResourceLibrary extends AbstractMetdataResource<Library>
 {
-	private record Element(String subtitle, String description, List<String> type)
+	private static final Logger logger = LoggerFactory.getLogger(ResourceLibrary.class);
+
+	private static final String CONTENT_TYPE_CQL = "text/cql";
+	private static final String CONTENT_TYPE_STRUCTURED_QUERY = "application/json";
+	private static final List<String> CONTENT_TYPES_SUPPORTED = List.of(CONTENT_TYPE_CQL,
+			CONTENT_TYPE_STRUCTURED_QUERY);
+
+	private record Element(String subtitle, String description, List<String> type, List<ContentElement> content)
 	{
+	}
+
+	private record ContentElement(String data, String contentType)
+	{
+		static ContentElement from(Attachment attachment, Function<String, String> prettyPrint)
+		{
+			String data = new String(attachment.getData(), Charset.defaultCharset());
+			String pretty = prettyPrint.apply(data);
+			return new ContentElement(pretty, attachment.getContentType());
+		}
 	}
 
 	public ResourceLibrary()
@@ -28,6 +69,34 @@ public class ResourceLibrary extends AbstractMetdataResource<Library>
 						.map(c -> c.getSystemElement().getValue() + " | " + c.getCodeElement().getValue()).toList()
 				: null;
 
-		return new Element(subtitle, description, type);
+		List<ContentElement> contents = resource.getContent().stream().filter(Attachment::hasData)
+				.filter(a -> CONTENT_TYPES_SUPPORTED.contains(a.getContentType()))
+				.map(a -> ContentElement.from(a, getPrettyPrintFunction(a.getContentType()))).toList();
+
+		return new Element(subtitle, description, type, contents);
+	}
+
+	private Function<String, String> getPrettyPrintFunction(String contentType)
+	{
+		if (CONTENT_TYPE_STRUCTURED_QUERY.equals(contentType))
+			return this::prettyPrintJson;
+
+		return (input) -> input;
+	}
+
+	private String prettyPrintJson(String toFormat)
+	{
+		try
+		{
+			ObjectMapper mapper = new ObjectMapper();
+			Object json = mapper.readValue(toFormat, Object.class);
+			ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+			return writer.writeValueAsString(json);
+		}
+		catch (JsonProcessingException e)
+		{
+			logger.warn("Could not format JSON string, returning string unformatted");
+			return toFormat;
+		}
 	}
 }

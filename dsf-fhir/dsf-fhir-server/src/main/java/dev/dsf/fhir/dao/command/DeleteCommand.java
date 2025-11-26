@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
@@ -24,6 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
+import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
@@ -35,8 +51,8 @@ import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.PartialResult;
 import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
-import dev.dsf.fhir.validation.SnapshotGenerator;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 public class DeleteCommand extends AbstractCommand implements ModifyingCommand
@@ -69,9 +85,8 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
-			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
-			throws SQLException, WebApplicationException
+	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
+			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 		resourceTypeName = componentes.getPathSegments().get(0);
@@ -83,8 +98,10 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 			deleteByCondition(idTranslationTable, connection, componentes.getPathSegments().get(0),
 					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
-			throw new WebApplicationException(
-					responseGenerator.badDeleteRequestUrl(index, entry.getRequest().getUrl()));
+		{
+			Response response = responseGenerator.badDeleteRequestUrl(index, entry.getRequest().getUrl());
+			throw new WebApplicationException(response);
+		}
 	}
 
 	private void deleteById(Map<String, IdType> idTranslationTable, Connection connection, String resourceTypeName,
@@ -93,8 +110,10 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 		Optional<ResourceDao<?>> optDao = daoProvider.getDao(resourceTypeName);
 
 		if (optDao.isEmpty())
-			throw new WebApplicationException(
-					responseGenerator.resourceTypeNotSupportedByImplementation(index, resourceTypeName));
+		{
+			Response response = responseGenerator.resourceTypeNotSupportedByImplementation(index, resourceTypeName);
+			throw new WebApplicationException(response);
+		}
 		else
 		{
 			@SuppressWarnings("unchecked")
@@ -123,8 +142,10 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 		Optional<ResourceDao<?>> dao = daoProvider.getDao(resourceTypeName);
 
 		if (dao.isEmpty())
-			throw new WebApplicationException(
-					responseGenerator.resourceTypeNotSupportedByImplementation(index, resourceTypeName));
+		{
+			Response response = responseGenerator.resourceTypeNotSupportedByImplementation(index, resourceTypeName);
+			throw new WebApplicationException(response);
+		}
 		else
 		{
 			Optional<Resource> resourceToDelete = search(connection, dao.get(), queryParameters);
@@ -178,10 +199,13 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
 		if (!unsupportedQueryParameters.isEmpty())
-			throw new WebApplicationException(responseGenerator.badConditionalDeleteRequest(index,
+		{
+			Response response = responseGenerator.badConditionalDeleteRequest(index,
 					UriComponentsBuilder.newInstance()
 							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-					unsupportedQueryParameters));
+					unsupportedQueryParameters);
+			throw new WebApplicationException(response);
+		}
 
 		PartialResult<?> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
@@ -196,9 +220,10 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 		}
 		else // if (result.getOverallCount() > 1)
 		{
-			throw new WebApplicationException(responseGenerator.badConditionalDeleteRequestMultipleMatches(index,
-					resourceTypeName, UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
+			Response response = responseGenerator.badConditionalDeleteRequestMultipleMatches(index, resourceTypeName,
+					UriComponentsBuilder.newInstance()
+							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
+			throw new WebApplicationException(response);
 		}
 	}
 
@@ -233,5 +258,12 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 	public String getResourceTypeName()
 	{
 		return resourceTypeName;
+	}
+
+	@Override
+	public LargeObjectManager createLargeObjectManager(Connection connection)
+	{
+		// delete does not need LargeObjectManager
+		return LargeObjectManager.NO_OP;
 	}
 }

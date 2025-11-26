@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.adapter;
 
 import java.time.format.DateTimeFormatter;
@@ -21,6 +36,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -56,17 +72,19 @@ public class ResourceTask extends AbstractResource<Task>
 	}
 
 	private record InputItem(String id, String type, String label, String labelTitle, String fhirType,
-			String stringValue, ElementSystemValue systemValueValue, Boolean booleanValue)
+			String stringValue, ElementSystemValue systemValueValue, Boolean booleanValue,
+			ElementQuantityValue quantityValue)
 	{
 	}
 
 	private record OutputItem(String id, String type, String label, String labelTitle, String stringValue,
-			ElementSystemValue systemValueValue, Boolean booleanValue, List<ExtensionItem> extension)
+			ElementSystemValue systemValueValue, Boolean booleanValue, ElementQuantityValue quantityValue,
+			List<ExtensionItem> extension)
 	{
 	}
 
 	private record ExtensionItem(String id, String type, String url, String stringValue,
-			ElementSystemValue systemValueValue, Boolean booleanValue)
+			ElementSystemValue systemValueValue, Boolean booleanValue, ElementQuantityValue quantityValue)
 	{
 	}
 
@@ -177,11 +195,13 @@ public class ResourceTask extends AbstractResource<Task>
 		String stringValue = getStringValue(typedValue);
 		ElementSystemValue systemValueValue = getSystemValueValue(typedValue);
 		Boolean booleanValue = getBooleanValue(typedValue);
+		ElementQuantityValue quantityValue = getQuantityValue(typedValue);
 
-		if (stringValue == null && systemValueValue == null && booleanValue == null)
-			logger.warn("Output parameter with {} value, not supported", fhirType);
+		if (stringValue == null && systemValueValue == null && booleanValue == null && quantityValue == null)
+			logger.warn("Input parameter with {} value, not supported", fhirType);
 
-		return new InputItem(id, type, label, labelTitle, fhirType, stringValue, systemValueValue, booleanValue);
+		return new InputItem(id, type, label, labelTitle, fhirType, stringValue, systemValueValue, booleanValue,
+				quantityValue);
 	}
 
 	private OutputItem toOutputItem(TaskOutputComponent o)
@@ -208,104 +228,98 @@ public class ResourceTask extends AbstractResource<Task>
 		String stringValue = getStringValue(typedValue);
 		ElementSystemValue systemValueValue = getSystemValueValue(typedValue);
 		Boolean booleanValue = getBooleanValue(typedValue);
+		ElementQuantityValue quantityValue = getQuantityValue(typedValue);
 
-		if (stringValue == null && systemValueValue == null && booleanValue == null)
+		if (stringValue == null && systemValueValue == null && booleanValue == null && quantityValue == null)
 			logger.warn("Output parameter with {} value, not supported",
 					typedValue.getClass().getAnnotation(DatatypeDef.class).name());
 
 		return new OutputItem(UUID.randomUUID().toString(), type, label, labelTitle, stringValue, systemValueValue,
-				booleanValue, extension);
+				booleanValue, quantityValue, extension);
 	}
 
 	private String getHtmlInputType(Type typedValue)
 	{
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof BooleanType)
-			return "boolean";
-		else if (typedValue instanceof DecimalType)
-			return "number";
-		else if (typedValue instanceof IntegerType)
-			return "number";
-		else if (typedValue instanceof DateType)
-			return "date";
-		else if (typedValue instanceof DateTimeType)
-			return "datetime-local";
-		else if (typedValue instanceof TimeType)
-			return "time";
-		else if (typedValue instanceof InstantType)
-			return "datetime-local";
-		else if (typedValue instanceof StringType)
-			return "text";
-		else if (typedValue instanceof UriType)
-			return "url";
-		else if (typedValue instanceof Coding)
-			return "coding";
-		else if (typedValue instanceof Identifier)
-			return "identifier";
-		else if (typedValue instanceof Reference r && r.hasReferenceElement())
-			return "url";
-		else if (typedValue instanceof Reference r && r.hasIdentifier())
-			return "identifier";
-		else
-			return null;
+		return switch (typedValue)
+		{
+			case BooleanType _ -> "boolean";
+			case DecimalType _ -> "number";
+			case IntegerType _ -> "number";
+			case DateType _ -> "date";
+			case DateTimeType _ -> "datetime-local";
+			case TimeType _ -> "time";
+			case InstantType _ -> "datetime-local";
+			case StringType _ -> "text";
+			case UriType _ -> "url";
+			case Coding _ -> "coding";
+			case Identifier _ -> "identifier";
+			case Quantity _ -> "quantity";
+			case Reference r when r.hasReferenceElement() -> "url";
+			case Reference r when r.hasIdentifier() -> "identifier";
+
+			default -> null;
+		};
 	}
 
 	private String getFhirType(Type typedValue)
 	{
 		String type = typedValue.getClass().getAnnotation(DatatypeDef.class).name();
 
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof Reference r && r.hasReferenceElement())
-			return type + ".reference";
-		else if (typedValue instanceof Reference r && r.hasIdentifier())
-			return type + ".identifier";
-		else
-			return type;
+		return switch (typedValue)
+		{
+			case Reference r when r.hasReferenceElement() -> type + ".reference";
+			case Reference r when r.hasIdentifier() -> type + ".identifier";
+
+			default -> type;
+		};
 	}
 
 	private String getStringValue(Type typedValue)
 	{
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof DecimalType d)
-			return d.hasValue() ? String.valueOf(d.getValue()) : null;
-		else if (typedValue instanceof IntegerType i)
-			return i.hasValue() ? String.valueOf(i.getValue()) : null;
-		else if (typedValue instanceof DateType d)
-			return d.hasValue() ? format(d.getValue(), DATE_FORMAT) : null;
-		else if (typedValue instanceof DateTimeType dt)
+		return switch (typedValue)
+		{
+			case DecimalType d when d.hasValue() -> String.valueOf(d.getValue());
+			case IntegerType i when i.hasValue() -> String.valueOf(i.getValue());
+			case DateType d when d.hasValue() -> format(d.getValue(), DATE_FORMAT);
+
 			// TODO format datetime based on precision
-			return dt.hasValue() ? format(dt.getValue(), DATE_TIME_FORMAT) : null;
-		else if (typedValue instanceof TimeType t)
-			return t.hasValue() ? t.getValue() : null;
-		else if (typedValue instanceof InstantType i)
-			return i.hasValue() ? format(i.getValue(), DATE_TIME_FORMAT) : null;
-		else if (typedValue instanceof StringType s)
-			return s.hasValue() ? s.getValue() : null;
-		else if (typedValue instanceof UriType u)
-			return u.hasValue() ? u.getValue() : null;
-		else if (typedValue instanceof Reference r && r.hasReferenceElement())
-			return r.getReferenceElement().hasValue() ? r.getReferenceElement().getValue() : null;
-		else
-			return null;
+			case DateTimeType dt when dt.hasValue() -> format(dt.getValue(), DATE_TIME_FORMAT);
+
+			case TimeType t when t.hasValue() -> t.getValue();
+			case InstantType i when i.hasValue() -> format(i.getValue(), DATE_TIME_FORMAT);
+			case StringType s when s.hasValue() -> s.getValue();
+			case UriType u when u.hasValue() -> u.getValue();
+			case Reference r when r.hasReferenceElement() && r.getReferenceElement().hasValue() ->
+				r.getReferenceElement().getValue();
+
+			default -> null;
+		};
 	}
 
 	private ElementSystemValue getSystemValueValue(Type typedValue)
 	{
-		// TODO use switch expression with pattern matching after switching to java 21
-		if (typedValue instanceof Coding c)
-			return ElementSystemValue.from(c);
-		else if (typedValue instanceof Identifier i)
-			return ElementSystemValue.from(i);
-		else if (typedValue instanceof Reference r && r.hasIdentifier())
-			return ElementSystemValue.from(r.getIdentifier());
-		else
-			return null;
+		return switch (typedValue)
+		{
+			case Coding c -> ElementSystemValue.from(c);
+			case Identifier i -> ElementSystemValue.from(i);
+			case Reference r when r.hasIdentifier() -> ElementSystemValue.from(r.getIdentifier());
+
+			default -> null;
+		};
 	}
 
 	private Boolean getBooleanValue(Type typedValue)
 	{
-		if (typedValue instanceof BooleanType b)
-			return b.hasValue() ? b.getValue() : null;
+		if (typedValue instanceof BooleanType b && b.hasValue())
+			return b.getValue();
+		else
+			return null;
+	}
+
+	private ElementQuantityValue getQuantityValue(Type typedValue)
+	{
+		if (typedValue instanceof Quantity q)
+			return ElementQuantityValue.from(q);
 		else
 			return null;
 	}
@@ -326,10 +340,11 @@ public class ResourceTask extends AbstractResource<Task>
 		String stringValue = extension.hasValue() ? getStringValue(extension.getValue()) : null;
 		ElementSystemValue systemValueValue = extension.hasValue() ? getSystemValueValue(extension.getValue()) : null;
 		Boolean booleanValue = extension.hasValue() ? getBooleanValue(extension.getValue()) : null;
+		ElementQuantityValue quantityValue = extension.hasValue() ? getQuantityValue(extension.getValue()) : null;
 
-		if (stringValue != null || systemValueValue != null || booleanValue != null)
+		if (stringValue != null || systemValueValue != null || booleanValue != null || quantityValue != null)
 			items.add(new ExtensionItem(UUID.randomUUID().toString(), type, url, stringValue, systemValueValue,
-					booleanValue));
+					booleanValue, quantityValue));
 
 		if (extension.hasExtension())
 			extension.getExtension().forEach(e -> addExtensionItem(url, e, items));
