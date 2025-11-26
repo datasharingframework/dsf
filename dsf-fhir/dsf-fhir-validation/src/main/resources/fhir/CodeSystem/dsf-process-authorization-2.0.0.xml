@@ -30,7 +30,7 @@
 	<title value="DSF Process Authorization" />
 	<status value="active" />
 	<experimental value="false" />
-	<date value="2025-10-27" />
+	<date value="2025-11-26" />
 	<publisher value="DSF" />
 	<description value="CodeSystem with proces authorization codes" />
 	<caseSensitive value="true" />
