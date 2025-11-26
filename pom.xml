@@ -52,8 +52,8 @@
 		<hapi.fhir.version>8.4.1</hapi.fhir.version>
 		<bouncycastle.version>1.82</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
-		<crypto-utils.version.v2>5.2.0</crypto-utils.version.v2>
-		<crypto-utils.version>5.2.0</crypto-utils.version>
+		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
+		<crypto-utils.version>5.2.1</crypto-utils.version>
 	</properties>
 
 	<name>DSF Parent POM</name>
