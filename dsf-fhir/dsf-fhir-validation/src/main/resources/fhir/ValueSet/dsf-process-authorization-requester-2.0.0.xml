@@ -31,7 +31,7 @@
 	<title value="DSF Process Authorization Requester"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2025-10-27"/>
+	<date value="2025-11-26"/>
 	<publisher value="DSF"/>
 	<description
 			value="ValueSet with proces authorization codes for requesters"/>

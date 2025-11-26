@@ -355,13 +355,26 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 		}
 	}
 
+	private static final Comparator<ProcessDefinition> BY_TENANT_ID_ASC_NULL_FIRST = (p1, p2) ->
+	{
+		String t1 = p1.getTenantId(), t2 = p2.getTenantId();
+
+		if (t1 == null)
+			return -1;
+		if (t2 == null)
+			return 1;
+
+		return t1.compareTo(t2);
+	};
+
 	private ProcessDefinition getProcessDefinition(String processDomain, String processDefinitionKey,
 			String processVersion)
 	{
 		if (processVersion != null && !processVersion.isBlank())
 			return repositoryService.createProcessDefinitionQuery().active()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion).list()
-					.stream().max(Comparator.comparing(ProcessDefinition::getVersion)).orElse(null);
+					.stream().max(BY_TENANT_ID_ASC_NULL_FIRST.thenComparing(ProcessDefinition::getVersion))
+					.orElse(null);
 		else
 			return repositoryService.createProcessDefinitionQuery().active()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();

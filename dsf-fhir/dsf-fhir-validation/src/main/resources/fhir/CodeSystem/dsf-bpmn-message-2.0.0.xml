@@ -30,7 +30,7 @@
 	<title value="DSF BPMN message values" />
 	<status value="active" />
 	<experimental value="false" />
-	<date value="2025-10-27" />
+	<date value="2025-11-26" />
 	<publisher value="DSF" />
 	<description value="CodeSystem with standard BPMN message values for Task resources" />
 	<caseSensitive value="true" />
