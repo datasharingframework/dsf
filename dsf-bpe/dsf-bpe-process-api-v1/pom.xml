@@ -108,6 +108,14 @@
 								</includes>
 							</artifactSet>
 							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<filters>
+								<filter>
+									<artifact>dev.dsf:dsf-bpe-process-api-v1-base</artifact>
+									<excludes>
+										<exclude>META-INF/MANIFEST.MF</exclude>
+									</excludes>
+								</filter>
+							</filters>
 						</configuration>
 					</execution>
 				</executions>
