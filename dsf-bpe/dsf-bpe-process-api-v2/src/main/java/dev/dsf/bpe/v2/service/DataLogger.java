@@ -18,8 +18,10 @@ package dev.dsf.bpe.v2.service;
 import org.hl7.fhir.r4.model.Resource;
 
 /**
- * Logs data to the <code>log/bpe-data.log</code> file if enabled via environment variable
- * (<code>DEV_DSF_LOG_DATA: true</code>) or property (<code>dev.dsf.log.data=true</code>)
+ * Logs data to the <code>dsf-data-logger</code> if enabled via the environment variables
+ * <code>DEV_DSF_LOG_DATA_FILE_ENABLED: true</code>, <code>DEV_DSF_LOG_DATA_CONSOLE_OUT_ENABLED: true</code> or
+ * <code>DEV_DSF_LOG_DATA_CONSOLE_ERR_ENABLED: true</code> (properties: <code>dev.dsf.log.data.file.enabled=true</code>,
+ * <code>dev.dsf.log.data.console.out.enabled=true</code> or <code>dev.dsf.log.data.console.err.enabled=true</code>)
  */
 public interface DataLogger
 {

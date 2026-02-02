@@ -156,8 +156,8 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.enable.debug.logging:false}")
 	private boolean fhirClientConnectionsConfigDefaultEnableDebugLogging;
 
-	@Documentation(description = "FHIR server connections YAML: Default value for properties `oidc-auth.verify-authorized-party`", recommendation = "To disable verification of the authorized party (aud) claim by default set to `false`")
-	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.enable.debug.logging:true}")
+	@Documentation(description = "FHIR server connections YAML: Default value for property `oidc-auth.verify-authorized-party`", recommendation = "To disable verification of the authorized party (aud) claim by default set to `false`")
+	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.oidc.verify.authorized.party:true}")
 	private boolean fhirClientConnectionsConfigDefaultOidcVerifyAuthorizedParty;
 
 	@Documentation(description = "FHIR server connections YAML: Default value for properties `connect-timeout` and `oidc-auth.connect-timeout`")
