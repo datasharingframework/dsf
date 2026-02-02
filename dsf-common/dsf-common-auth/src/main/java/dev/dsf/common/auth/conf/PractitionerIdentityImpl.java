@@ -15,7 +15,6 @@
  */
 package dev.dsf.common.auth.conf;
 
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -55,7 +54,7 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	 *            may be <code>null</code>
 	 */
 	public PractitionerIdentityImpl(Organization organization, Endpoint endpoint,
-			Collection<? extends DsfRole> dsfRoles, X509Certificate certificate, Practitioner practitioner,
+			Collection<? extends DsfRole> dsfRoles, X509CertificateWrapper certificate, Practitioner practitioner,
 			Collection<? extends Coding> practitionerRoles, DsfOpenIdCredentials credentials)
 	{
 		super(true, organization, endpoint, dsfRoles, certificate);

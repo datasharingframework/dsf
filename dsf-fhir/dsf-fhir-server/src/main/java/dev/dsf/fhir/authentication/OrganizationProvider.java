@@ -15,7 +15,6 @@
  */
 package dev.dsf.fhir.authentication;
 
-import java.security.cert.X509Certificate;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.Organization;
@@ -27,12 +26,12 @@ public interface OrganizationProvider
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
 
 	/**
-	 * @param certificate
+	 * @param thumbprint
 	 *            may be <code>null</code>
-	 * @return {@link Optional#empty()} if no {@link Organization} is found, or the given {@link X509Certificate} is
+	 * @return {@link Optional#empty()} if no {@link Organization} is found, or the given <b>thumbprint</b> is
 	 *         <code>null</code>
 	 */
-	Optional<Organization> getOrganization(X509Certificate certificate);
+	Optional<Organization> getOrganization(String thumbprint);
 
 	Optional<Organization> getLocalOrganization();
 

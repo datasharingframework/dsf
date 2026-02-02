@@ -31,8 +31,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.security.auth.x500.X500Principal;
-
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
@@ -152,11 +150,6 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	protected final String getDn(X509Certificate certificate)
-	{
-		return certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
 	}
 
 	protected final List<String> getGroupsFromTokens(Map<String, Object> parsedIdToken,

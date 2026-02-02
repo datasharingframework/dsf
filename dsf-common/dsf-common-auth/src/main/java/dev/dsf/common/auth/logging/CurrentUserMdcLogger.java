@@ -15,16 +15,9 @@
  */
 package dev.dsf.common.auth.logging;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.MDC;
 
 import dev.dsf.common.auth.DsfOpenIdCredentials;
@@ -32,6 +25,7 @@ import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
+import dev.dsf.common.auth.conf.X509CertificateWrapper;
 
 public class CurrentUserMdcLogger extends AbstractUserLogger
 {
@@ -56,8 +50,9 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 	{
 		before((Identity) organization);
 
-		organization.getCertificate().map(this::getThumbprint).ifPresent(t -> MDC.put(DSF_ORGANIZATION_THUMBPRINT, t));
-		organization.getCertificate().map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName)
+		organization.getCertificate().map(X509CertificateWrapper::thumbprint)
+				.ifPresent(t -> MDC.put(DSF_ORGANIZATION_THUMBPRINT, t));
+		organization.getCertificate().map(X509CertificateWrapper::subjectDn)
 				.ifPresent(d -> MDC.put(DSF_ORGANIZATION_DN, d));
 
 		organization.getOrganizationIdentifierValue().ifPresent(i -> MDC.put(DSF_ORGANIZATION_IDENTIFIER, i));
@@ -69,8 +64,9 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 	{
 		before((Identity) practitioner);
 
-		practitioner.getCertificate().map(this::getThumbprint).ifPresent(t -> MDC.put(DSF_PRACTITIONER_THUMBPRINT, t));
-		practitioner.getCertificate().map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName)
+		practitioner.getCertificate().map(X509CertificateWrapper::thumbprint)
+				.ifPresent(t -> MDC.put(DSF_PRACTITIONER_THUMBPRINT, t));
+		practitioner.getCertificate().map(X509CertificateWrapper::subjectDn)
 				.ifPresent(d -> MDC.put(DSF_PRACTITIONER_DN, d));
 		practitioner.getCredentials().map(DsfOpenIdCredentials::getUserId)
 				.ifPresent(i -> MDC.put(DSF_PRACTITIONER_SUB, i));
@@ -91,18 +87,18 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 					identity.getDsfRoles().stream().map(DsfRole::name).collect(Collectors.joining(", ", "[", "]")));
 	}
 
-	private String getThumbprint(X509Certificate certificate)
-	{
-		try
-		{
-			byte[] digest = MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded());
-			return Hex.encodeHexString(digest);
-		}
-		catch (CertificateEncodingException | NoSuchAlgorithmException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
+	// private String getThumbprint(X509Certificate certificate)
+	// {
+	// try
+	// {
+	// byte[] digest = MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded());
+	// return Hex.encodeHexString(digest);
+	// }
+	// catch (CertificateEncodingException | NoSuchAlgorithmException e)
+	// {
+	// throw new RuntimeException(e);
+	// }
+	// }
 
 	@Override
 	protected void before(Principal principal)
