@@ -97,7 +97,7 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRol
 			return new OrganizationIdentityImpl(local, o, e.orElse(null), r, certWrapper);
 		}
 
-		Optional<Practitioner> practitioner = toPractitioner(certWrapper.certificate());
+		Optional<Practitioner> practitioner = toPractitioner(certWrapper);
 		Optional<Organization> localOrganization = getLocalOrganization();
 		if (practitioner.isPresent() && localOrganization.isPresent())
 		{

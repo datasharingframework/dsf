@@ -71,7 +71,7 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole
 
 		X509CertificateWrapper certWrapper = new X509CertificateWrapper(certificates[0]);
 
-		Optional<Practitioner> practitioner = toPractitioner(certWrapper.certificate());
+		Optional<Practitioner> practitioner = toPractitioner(certWrapper);
 		Optional<Organization> localOrganization = organizationAndEndpointProvider.getLocalOrganization();
 		Optional<Endpoint> localEndpoint = organizationAndEndpointProvider.getLocalEndpoint();
 		if (practitioner.isPresent() && localOrganization.isPresent() && localEndpoint.isPresent())
