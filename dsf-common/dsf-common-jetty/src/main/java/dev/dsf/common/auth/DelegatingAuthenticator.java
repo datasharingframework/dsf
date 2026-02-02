@@ -19,8 +19,8 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
-import org.eclipse.jetty.ee10.servlet.SessionHandler;
+import org.eclipse.jetty.ee11.servlet.ServletContextRequest;
+import org.eclipse.jetty.ee11.servlet.SessionHandler;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.security.AuthenticationState;
