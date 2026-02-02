@@ -87,19 +87,6 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 					identity.getDsfRoles().stream().map(DsfRole::name).collect(Collectors.joining(", ", "[", "]")));
 	}
 
-	// private String getThumbprint(X509Certificate certificate)
-	// {
-	// try
-	// {
-	// byte[] digest = MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded());
-	// return Hex.encodeHexString(digest);
-	// }
-	// catch (CertificateEncodingException | NoSuchAlgorithmException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	// }
-
 	@Override
 	protected void before(Principal principal)
 	{
