@@ -112,8 +112,8 @@
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.ee10.websocket</groupId>
-			<artifactId>jetty-ee10-websocket-jakarta-server</artifactId>
+			<groupId>org.eclipse.jetty.ee11.websocket</groupId>
+			<artifactId>jetty-ee11-websocket-jakarta-server</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.eclipse.jetty.toolchain</groupId>
