@@ -54,6 +54,9 @@ public class OperatonConfig
 	@Autowired
 	private List<ProcessPluginFactory> processPluginFactories;
 
+	@Autowired
+	private DsfClientConfig dsfClientConfig;
+
 	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
@@ -144,7 +147,8 @@ public class OperatonConfig
 	@Bean
 	public DelegateProvider delegateProvider()
 	{
-		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext);
+		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext,
+				dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
 	@Bean

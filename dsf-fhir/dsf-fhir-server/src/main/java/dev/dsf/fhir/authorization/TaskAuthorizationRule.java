@@ -996,26 +996,14 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					final Optional<String> notSame = reasonNotSame(oldResource, newResource);
 					if (notSame.isEmpty())
 					{
-						if (taskAllowedForRecipient(connection, newResource))
-						{
-							logger.info(
-									"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status in-progress, new Task.status failed, process allowed for current identity",
-									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
-									TaskStatus.FAILED.toCode(), identity.getName());
+						logger.info(
+								"Update of Task/{}/_history/{} ({} -> {}) authorized for local identity '{}', old Task.status in-progress, new Task.status failed",
+								oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
+								TaskStatus.FAILED.toCode(), identity.getName());
 
-							return Optional.of(
-									"Local identity, Task.status failed, Task.restriction.recipient local organization, process with instantiatesCanonical and message-name allowed for current identity"
-											+ ", Task defines needed profile, Task.instantiatesCanonical not modified, Task.requester not modified, Task.restriction not modified, Task.input not modified");
-						}
-						else
-						{
-							logger.warn(
-									"Update of Task/{}/_history/{} ({} -> {}) unauthorized for local identity '{}', process with instantiatesCanonical, message-name, requester or recipient not allowed",
-									oldResourceId, oldResourceVersion, TaskStatus.INPROGRESS.toCode(),
-									TaskStatus.FAILED.toCode(), identity.getName());
-
-							return Optional.empty();
-						}
+						return Optional
+								.of("Local identity, Task.status failed, Task.restriction.recipient local organization"
+										+ ", Task.instantiatesCanonical not modified, Task.requester not modified, Task.restriction not modified, Task.input not modified");
 					}
 					else
 					{
