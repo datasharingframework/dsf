@@ -33,6 +33,7 @@ import dev.dsf.common.auth.conf.IdentityProvider;
 import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.common.auth.conf.PractitionerIdentityImpl;
 import dev.dsf.common.auth.conf.RoleConfig;
+import dev.dsf.common.auth.conf.X509CertificateWrapper;
 
 public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRole>
 		implements IdentityProvider, InitializingBean
@@ -79,23 +80,24 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRol
 		if (certificates == null || certificates.length == 0)
 			return null;
 
-		String thumbprint = getThumbprint(certificates[0]);
+		X509CertificateWrapper certWrapper = new X509CertificateWrapper(certificates[0]);
 
-		Optional<Organization> organization = organizationProvider.getOrganization(certificates[0]);
+		Optional<Organization> organization = organizationProvider.getOrganization(certWrapper.thumbprint());
 		if (organization.isPresent())
 		{
 			Organization o = organization.get();
 
 			boolean local = isLocalOrganization(o);
 
-			Optional<Endpoint> e = local ? getLocalEndpoint() : endpointProvider.getEndpoint(o, certificates[0]);
+			Optional<Endpoint> e = local ? getLocalEndpoint()
+					: endpointProvider.getEndpoint(o, certWrapper.thumbprint());
 			Set<FhirServerRole> r = local ? FhirServerRoleImpl.LOCAL_ORGANIZATION
 					: FhirServerRoleImpl.REMOTE_ORGANIZATION;
 
-			return new OrganizationIdentityImpl(local, o, e.orElse(null), r, certificates[0]);
+			return new OrganizationIdentityImpl(local, o, e.orElse(null), r, certWrapper);
 		}
 
-		Optional<Practitioner> practitioner = toPractitioner(certificates[0]);
+		Optional<Practitioner> practitioner = toPractitioner(certWrapper);
 		Optional<Organization> localOrganization = getLocalOrganization();
 		if (practitioner.isPresent() && localOrganization.isPresent())
 		{
@@ -103,14 +105,14 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRol
 			Organization o = localOrganization.get();
 			Endpoint e = getLocalEndpoint().orElse(null);
 
-			return new PractitionerIdentityImpl(o, e, getDsfRolesFor(p, thumbprint, null, null), certificates[0], p,
-					getPractitionerRolesFor(p, thumbprint, null, null), null);
+			return new PractitionerIdentityImpl(o, e, getDsfRolesFor(p, certWrapper.thumbprint(), null, null),
+					certWrapper, p, getPractitionerRolesFor(p, certWrapper.thumbprint(), null, null), null);
 		}
 		else
 		{
 			logger.warn(
 					"Certificate with thumbprint '{}' for '{}' unknown, not part of allowlist and not configured as local user or local organization",
-					thumbprint, getDn(certificates[0]));
+					certWrapper.thumbprint(), certWrapper.subjectDn());
 			return null;
 		}
 	}

@@ -15,7 +15,6 @@
  */
 package dev.dsf.common.auth.conf;
 
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 
 import org.hl7.fhir.r4.model.Endpoint;
@@ -37,7 +36,7 @@ public class OrganizationIdentityImpl extends AbstractIdentity implements Organi
 	 *            may be <code>null</code>
 	 */
 	public OrganizationIdentityImpl(boolean localIdentity, Organization organization, Endpoint endpoint,
-			Collection<? extends DsfRole> dsfRoles, X509Certificate certificate)
+			Collection<? extends DsfRole> dsfRoles, X509CertificateWrapper certificate)
 	{
 		super(localIdentity, organization, endpoint, dsfRoles, certificate);
 	}

@@ -52,8 +52,9 @@ public class DataFormatExceptionHandler implements ExceptionMapper<DataFormatExc
 	@Override
 	public Response toResponse(DataFormatException exception)
 	{
-		logger.warn("Error while parsing resource: {}, returning OperationOutcome with status 403 Forbidden",
-				exception.getMessage());
+		logger.warn("Error while parsing resource: {} - {}, returning OperationOutcome with status 403 Forbidden",
+				exception.getClass().getName(), exception.getMessage());
+		logger.debug("Error while parsing resource, returning OperationOutcome with status 403 Forbidden", exception);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.STRUCTURE,
 				"Unable to parse resource");

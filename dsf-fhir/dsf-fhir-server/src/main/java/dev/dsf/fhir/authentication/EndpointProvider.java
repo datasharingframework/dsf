@@ -15,7 +15,6 @@
  */
 package dev.dsf.fhir.authentication;
 
-import java.security.cert.X509Certificate;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.Endpoint;
@@ -29,5 +28,5 @@ public interface EndpointProvider
 
 	Optional<String> getLocalEndpointIdentifierValue();
 
-	Optional<Endpoint> getEndpoint(Organization organization, X509Certificate x509Certificate);
+	Optional<Endpoint> getEndpoint(Organization organization, String thumbprint);
 }

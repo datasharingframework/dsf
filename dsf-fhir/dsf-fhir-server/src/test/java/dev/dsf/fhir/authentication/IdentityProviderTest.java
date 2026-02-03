@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.time.Period;
 import java.util.List;
@@ -54,6 +54,7 @@ import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.RoleConfig.Mapping;
+import dev.dsf.common.auth.conf.X509CertificateWrapper;
 import dev.dsf.fhir.authentication.FhirServerRoleImpl.Operation;
 
 public class IdentityProviderTest
@@ -84,8 +85,11 @@ public class IdentityProviderTest
 
 	private static final Organization LOCAL_ORGANIZATION = new Organization();
 	private static final X509Certificate LOCAL_ORGANIZATION_CERTIFICATE;
+	private static final String LOCAL_ORGANIZATION_CERTIFICATE_THUMBPRINT;
+
 	private static final Organization REMOTE_ORGANIZATION = new Organization();
 	private static final X509Certificate REMOTE_ORGANIZATION_CERTIFICATE;
+	private static final String REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT;
 
 	private static final Endpoint LOCAL_ENDPOINT = new Endpoint();
 	private static final Endpoint REMOTE_ENDPOINT = new Endpoint();
@@ -95,39 +99,42 @@ public class IdentityProviderTest
 
 	static
 	{
-		try
-		{
-			CA = CertificateAuthority.builderSha384EcdsaSecp384r1("DE", null, null, null, null, "CA")
-					.setValidityPeriod(Period.ofDays(1)).build();
+		CA = CertificateAuthority.builderSha384EcdsaSecp384r1("DE", null, null, null, null, "CA")
+				.setValidityPeriod(Period.ofDays(1)).build();
 
-			CertificationRequest localOrgReq = CertificationRequest
-					.builder(CA, "DE", null, null, null, null, LOCAL_ORGANIZATION_COMMON_NAME).generateKeyPair()
-					.setEmail("email@local.org").build();
-			LOCAL_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(localOrgReq);
-
-			CertificationRequest remoteOrgReq = CertificationRequest
-					.builder(CA, "DE", null, null, null, null, REMOTE_ORGANIZATION_COMMON_NAME).generateKeyPair()
-					.setEmail("email@remote.org").build();
-			REMOTE_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(remoteOrgReq);
-
-			CertificationRequest localPractitionerReq = CertificationRequest
-					.builder(CA, "DE", null, null, null, null, LOCAL_PRACTITIONER_COMMON_NAME).generateKeyPair()
-					.setEmail(LOCAL_PRACTITIONER_MAIL).build();
-			LOCAL_PRACTITIONER_CERTIFICATE = CA.signClientCertificate(localPractitionerReq);
-
-			LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT = Hex.encodeHexString(
-					MessageDigest.getInstance("SHA-512").digest(LOCAL_PRACTITIONER_CERTIFICATE.getEncoded()));
-		}
-		catch (NoSuchAlgorithmException | CertificateException e)
-		{
-			throw new RuntimeException(e);
-		}
-
+		CertificationRequest localOrgReq = CertificationRequest
+				.builder(CA, "DE", null, null, null, null, LOCAL_ORGANIZATION_COMMON_NAME).generateKeyPair()
+				.setEmail("email@local.org").build();
+		LOCAL_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(localOrgReq);
+		LOCAL_ORGANIZATION_CERTIFICATE_THUMBPRINT = toThumbprint(LOCAL_ORGANIZATION_CERTIFICATE);
 		LOCAL_ORGANIZATION.addIdentifier().setSystem(OrganizationProvider.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(LOCAL_ORGANIZATION_IDENTIFIER_VALUE);
 
+		CertificationRequest remoteOrgReq = CertificationRequest
+				.builder(CA, "DE", null, null, null, null, REMOTE_ORGANIZATION_COMMON_NAME).generateKeyPair()
+				.setEmail("email@remote.org").build();
+		REMOTE_ORGANIZATION_CERTIFICATE = CA.signClientCertificate(remoteOrgReq);
+		REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT = toThumbprint(REMOTE_ORGANIZATION_CERTIFICATE);
 		REMOTE_ORGANIZATION.addIdentifier().setSystem(OrganizationProvider.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(REMOTE_ORGANIZATION_IDENTIFIER_VALUE);
+
+		CertificationRequest localPractitionerReq = CertificationRequest
+				.builder(CA, "DE", null, null, null, null, LOCAL_PRACTITIONER_COMMON_NAME).generateKeyPair()
+				.setEmail(LOCAL_PRACTITIONER_MAIL).build();
+		LOCAL_PRACTITIONER_CERTIFICATE = CA.signClientCertificate(localPractitionerReq);
+		LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT = toThumbprint(LOCAL_PRACTITIONER_CERTIFICATE);
+	}
+
+	private static String toThumbprint(X509Certificate certificate)
+	{
+		try
+		{
+			return Hex.encodeHexString(MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded()));
+		}
+		catch (CertificateEncodingException | NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	private OrganizationProvider organizationProvider;
@@ -199,7 +206,7 @@ public class IdentityProviderTest
 	{
 		IdentityProvider provider = createIdentityProvider(List.of());
 
-		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE))
+		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE_THUMBPRINT))
 				.thenReturn(Optional.of(LOCAL_ORGANIZATION));
 		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 
@@ -210,18 +217,19 @@ public class IdentityProviderTest
 		OrganizationIdentity orgI = (OrganizationIdentity) i;
 		assertNotNull(orgI.getCertificate());
 		assertTrue(orgI.getCertificate().isPresent());
-		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
+		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE,
+				orgI.getCertificate().map(X509CertificateWrapper::certificate).get());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
 		assertEquals(FhirServerRoleImpl.LOCAL_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(LOCAL_ORGANIZATION, orgI.getOrganization());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
-		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		ArgumentCaptor<String> cArg1 = ArgumentCaptor.forClass(String.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
 		verify(endpointProvider).getLocalEndpoint();
 
-		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE, cArg1.getValue());
+		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE_THUMBPRINT, cArg1.getValue());
 	}
 
 	@Test
@@ -229,9 +237,9 @@ public class IdentityProviderTest
 	{
 		IdentityProvider provider = createIdentityProvider(List.of());
 
-		when(organizationProvider.getOrganization(REMOTE_ORGANIZATION_CERTIFICATE))
+		when(organizationProvider.getOrganization(REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT))
 				.thenReturn(Optional.of(REMOTE_ORGANIZATION));
-		when(endpointProvider.getEndpoint(REMOTE_ORGANIZATION, REMOTE_ORGANIZATION_CERTIFICATE))
+		when(endpointProvider.getEndpoint(REMOTE_ORGANIZATION, REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT))
 				.thenReturn(Optional.of(REMOTE_ENDPOINT));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { REMOTE_ORGANIZATION_CERTIFICATE });
@@ -241,24 +249,25 @@ public class IdentityProviderTest
 		OrganizationIdentity orgI = (OrganizationIdentity) i;
 		assertNotNull(orgI.getCertificate());
 		assertTrue(orgI.getCertificate().isPresent());
-		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, orgI.getCertificate().get());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE,
+				orgI.getCertificate().map(X509CertificateWrapper::certificate).get());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
 		assertEquals(FhirServerRoleImpl.REMOTE_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
 		assertEquals(REMOTE_ORGANIZATION, orgI.getOrganization());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getOrganizationIdentifierValue().get());
 
-		ArgumentCaptor<X509Certificate> getOrgArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		ArgumentCaptor<String> getOrgArg1 = ArgumentCaptor.forClass(String.class);
 		verify(organizationProvider).getOrganization(getOrgArg1.capture());
 
-		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getOrgArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT, getOrgArg1.getValue());
 
 		ArgumentCaptor<Organization> getEndpArg1 = ArgumentCaptor.forClass(Organization.class);
-		ArgumentCaptor<X509Certificate> getEndpArg2 = ArgumentCaptor.forClass(X509Certificate.class);
+		ArgumentCaptor<String> getEndpArg2 = ArgumentCaptor.forClass(String.class);
 		verify(endpointProvider).getEndpoint(getEndpArg1.capture(), getEndpArg2.capture());
 
 		assertEquals(REMOTE_ORGANIZATION, getEndpArg1.getValue());
-		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, getEndpArg2.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT, getEndpArg2.getValue());
 	}
 
 	@Test
@@ -266,17 +275,18 @@ public class IdentityProviderTest
 	{
 		IdentityProvider provider = createIdentityProvider(List.of());
 
-		when(organizationProvider.getOrganization(REMOTE_ORGANIZATION_CERTIFICATE)).thenReturn(Optional.empty());
+		when(organizationProvider.getOrganization(REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT))
+				.thenReturn(Optional.empty());
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
 
 		Identity i = provider.getIdentity(new X509Certificate[] { REMOTE_ORGANIZATION_CERTIFICATE });
 		assertNull(i);
 
-		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		ArgumentCaptor<String> cArg1 = ArgumentCaptor.forClass(String.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
 		verify(organizationProvider).getLocalOrganization();
 
-		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE, cArg1.getValue());
+		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE_THUMBPRINT, cArg1.getValue());
 	}
 
 	@Test
@@ -285,7 +295,8 @@ public class IdentityProviderTest
 		IdentityProvider provider = createIdentityProvider(
 				List.of(createMappingWithThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT)));
 
-		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE)).thenReturn(Optional.empty());
+		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE_THUMBPRINT))
+				.thenReturn(Optional.empty());
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.of(LOCAL_ORGANIZATION));
 		when(endpointProvider.getLocalEndpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
 		when(roleConfig.getDsfRolesForEmail(LOCAL_PRACTITIONER_MAIL))
@@ -303,7 +314,8 @@ public class IdentityProviderTest
 		PractitionerIdentity practitionerI = (PractitionerIdentity) i;
 		assertNotNull(practitionerI.getCertificate());
 		assertTrue(practitionerI.getCertificate().isPresent());
-		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE, practitionerI.getCertificate().get());
+		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE,
+				practitionerI.getCertificate().map(X509CertificateWrapper::certificate).get());
 		assertNotNull(practitionerI.getCredentials());
 		assertTrue(practitionerI.getCredentials().isEmpty());
 		assertEquals(LOCAL_PRACTITIONER_NAME_GIVEN + " " + LOCAL_PRACTITIONER_NAME_FAMILY,
@@ -316,7 +328,7 @@ public class IdentityProviderTest
 		assertEquals(Set.of(PRACTIONER_ROLE1, PRACTIONER_ROLE2), practitionerI.getPractionerRoles());
 		assertNotNull(practitionerI.getPractitioner());
 
-		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		ArgumentCaptor<String> cArg1 = ArgumentCaptor.forClass(String.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
 		verify(organizationProvider).getLocalOrganization();
 		verify(endpointProvider).getLocalEndpoint();
@@ -330,7 +342,7 @@ public class IdentityProviderTest
 		ArgumentCaptor<String> tArg2 = ArgumentCaptor.forClass(String.class);
 		verify(roleConfig).getPractitionerRolesForThumbprint(tArg2.capture());
 
-		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE, cArg1.getValue());
+		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT, cArg1.getValue());
 		assertEquals(LOCAL_PRACTITIONER_MAIL, mArg1.getValue());
 		assertEquals(LOCAL_PRACTITIONER_MAIL, mArg2.getValue());
 		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT, tArg1.getValue());
@@ -343,17 +355,18 @@ public class IdentityProviderTest
 		IdentityProvider provider = createIdentityProvider(
 				List.of(createMappingWithThumbprint(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT)));
 
-		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE)).thenReturn(Optional.empty());
+		when(organizationProvider.getOrganization(LOCAL_ORGANIZATION_CERTIFICATE_THUMBPRINT))
+				.thenReturn(Optional.empty());
 		when(organizationProvider.getLocalOrganization()).thenReturn(Optional.empty());
 
 		Identity i = provider.getIdentity(new X509Certificate[] { LOCAL_PRACTITIONER_CERTIFICATE });
 		assertNull(i);
 
-		ArgumentCaptor<X509Certificate> cArg1 = ArgumentCaptor.forClass(X509Certificate.class);
+		ArgumentCaptor<String> cArg1 = ArgumentCaptor.forClass(String.class);
 		verify(organizationProvider).getOrganization(cArg1.capture());
 		verify(organizationProvider).getLocalOrganization();
 
-		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE, cArg1.getValue());
+		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE_THUMBPRINT, cArg1.getValue());
 	}
 
 	@Test

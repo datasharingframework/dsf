@@ -32,6 +32,7 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.IdentityProvider;
 import dev.dsf.common.auth.conf.PractitionerIdentityImpl;
 import dev.dsf.common.auth.conf.RoleConfig;
+import dev.dsf.common.auth.conf.X509CertificateWrapper;
 
 public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole>
 		implements IdentityProvider, InitializingBean
@@ -68,9 +69,9 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole
 		if (certificates == null || certificates.length == 0)
 			return null;
 
-		String thumbprint = getThumbprint(certificates[0]);
+		X509CertificateWrapper certWrapper = new X509CertificateWrapper(certificates[0]);
 
-		Optional<Practitioner> practitioner = toPractitioner(certificates[0]);
+		Optional<Practitioner> practitioner = toPractitioner(certWrapper);
 		Optional<Organization> localOrganization = organizationAndEndpointProvider.getLocalOrganization();
 		Optional<Endpoint> localEndpoint = organizationAndEndpointProvider.getLocalEndpoint();
 		if (practitioner.isPresent() && localOrganization.isPresent() && localEndpoint.isPresent())
@@ -79,14 +80,14 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole
 			Organization o = localOrganization.get();
 			Endpoint e = localEndpoint.get();
 
-			return new PractitionerIdentityImpl(o, e, getDsfRolesFor(p, thumbprint, null, null), certificates[0], p,
-					getPractitionerRolesFor(p, thumbprint, null, null), null);
+			return new PractitionerIdentityImpl(o, e, getDsfRolesFor(p, certWrapper.thumbprint(), null, null),
+					certWrapper, p, getPractitionerRolesFor(p, certWrapper.thumbprint(), null, null), null);
 		}
 		else
 		{
 			logger.warn(
 					"Certificate with thumbprint '{}' for '{}' unknown, not configured as local user or local organization unknown",
-					thumbprint, getDn(certificates[0]));
+					certWrapper.thumbprint(), certWrapper.subjectDn());
 			return null;
 		}
 	}

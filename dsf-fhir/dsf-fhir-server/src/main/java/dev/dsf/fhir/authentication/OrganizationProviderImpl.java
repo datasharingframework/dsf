@@ -15,7 +15,6 @@
  */
 package dev.dsf.fhir.authentication;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,16 +27,16 @@ import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 
-public class OrganizationProviderImpl extends AbstractProvider implements OrganizationProvider, InitializingBean
+public class OrganizationProviderImpl implements OrganizationProvider, InitializingBean
 {
+	private final ExceptionHandler exceptionHandler;
 	private final OrganizationDao dao;
 	private final String localOrganizationIdentifierValue;
 
 	public OrganizationProviderImpl(ExceptionHandler exceptionHandler, OrganizationDao dao,
 			String localOrganizationIdentifierValue)
 	{
-		super(exceptionHandler);
-
+		this.exceptionHandler = exceptionHandler;
 		this.dao = dao;
 		this.localOrganizationIdentifierValue = localOrganizationIdentifierValue;
 	}
@@ -45,19 +44,15 @@ public class OrganizationProviderImpl extends AbstractProvider implements Organi
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(localOrganizationIdentifierValue, "localOrganizationIdentifierValue");
 	}
 
 	@Override
-	public Optional<Organization> getOrganization(X509Certificate certificate)
+	public Optional<Organization> getOrganization(String thumbprint)
 	{
-		if (certificate == null)
+		if (thumbprint == null)
 			return Optional.empty();
-
-		String thumbprint = getThumbprint(certificate);
 
 		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
 				() -> dao.readActiveNotDeletedByThumbprint(thumbprint), Optional::empty);

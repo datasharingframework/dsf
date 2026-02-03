@@ -13,44 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.fhir.authentication;
+package dev.dsf.common.auth.conf;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.codec.binary.Hex;
-import org.hl7.fhir.r4.model.Identifier;
-import org.springframework.beans.factory.InitializingBean;
 
-import dev.dsf.fhir.help.ExceptionHandler;
-
-public abstract class AbstractProvider implements InitializingBean
+public record X509CertificateWrapper(X509Certificate certificate, String thumbprint, String subjectDn)
 {
-	protected final ExceptionHandler exceptionHandler;
-
-	public AbstractProvider(ExceptionHandler exceptionHandler)
+	public X509CertificateWrapper(X509Certificate certificate)
 	{
-		this.exceptionHandler = exceptionHandler;
+		this(certificate, getThumbprint(certificate), getSubjectDn(certificate));
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-	}
-
-	protected final Optional<String> getIdentifierValue(List<Identifier> identifiers, String system)
-	{
-		return identifiers.stream().filter(Identifier::hasSystem).filter(Identifier::hasValue)
-				.filter(i -> system.equals(i.getSystem())).map(Identifier::getValue).findFirst();
-	}
-
-	protected final String getThumbprint(X509Certificate certificate)
+	private static String getThumbprint(X509Certificate certificate)
 	{
 		try
 		{
@@ -61,5 +42,10 @@ public abstract class AbstractProvider implements InitializingBean
 		{
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static String getSubjectDn(X509Certificate certificate)
+	{
+		return certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
 	}
 }
