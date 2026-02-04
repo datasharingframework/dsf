@@ -168,7 +168,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private char[] proxyPassword;
 
 	// documentation in dev.dsf.common.config.AbstractJettyConfig
-	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('[,\\s]+')}")
 	private List<String> proxyNoProxy;
 
 	// documentation in dev.dsf.common.config.AbstractJettyConfig
