@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.function.Function;
@@ -67,6 +68,8 @@ public abstract class Log4jInitializer
 	public static final String POSTFIX_ENABLED = ".enabled";
 	public static final String POSTFIX_STYLE = ".style";
 	public static final String POSTFIX_LEVEL = ".level";
+
+	public static final String MIN_LEVEL_LOGGERS = "min.level.loggers";
 
 	protected final Properties properties;
 
@@ -192,6 +195,16 @@ public abstract class Log4jInitializer
 		String value = getValue(parameter, defaultValue);
 
 		return Paths.get(value);
+	}
+
+	protected List<String> getMinLevelLoggers(List<String> defaultValue)
+	{
+		String value = getValue(PREFIX + MIN_LEVEL_LOGGERS, null);
+
+		if (value == null)
+			return defaultValue;
+		else
+			return List.of(value.split("[,\\s]+"));
 	}
 
 	protected String getValue(String parameter, String defaultValue)

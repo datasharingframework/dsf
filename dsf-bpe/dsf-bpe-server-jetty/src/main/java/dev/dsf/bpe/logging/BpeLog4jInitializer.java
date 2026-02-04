@@ -15,6 +15,7 @@
  */
 package dev.dsf.bpe.logging;
 
+import java.util.List;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.core.StringLayout;
@@ -32,20 +33,22 @@ public class BpeLog4jInitializer extends Log4jInitializer
 	private final Function<Configuration, StringLayout> specialFile;
 	private final Function<Configuration, StringLayout> specialConsoleOut;
 	private final Function<Configuration, StringLayout> specialConsoleErr;
+	private final List<String> minLevelLoggers;
 
 	public BpeLog4jInitializer()
 	{
 		specialFile = getSpecial(DATA_FILE, STYLE_TEXT, false);
 		specialConsoleOut = getSpecial(DATA_CONSOLE_OUT, STYLE_TEXT, false);
 		specialConsoleErr = getSpecial(DATA_CONSOLE_ERR, STYLE_TEXT, false);
+		minLevelLoggers = getMinLevelLoggers(List.of("dev.dsf", "de.medizininformatik_initiative.processes.common"));
 	}
 
 	@Override
 	protected Log4jConfigurationFactory createLog4jConfigurationFactory()
 	{
-		return new Log4jConfigurationFactory(
-				(loggerContext, name) -> new BpeLog4jConfiguration(loggerContext, name, "bpe", consoleOutEnabled,
-						consoleOutLayout, consoleOutLevel, consoleErrEnabled, consoleErrLayout, consoleErrLevel,
-						fileEnabled, fileLayout, fileLevel, specialFile, specialConsoleOut, specialConsoleErr));
+		return new Log4jConfigurationFactory((loggerContext, name) -> new BpeLog4jConfiguration(loggerContext, name,
+				"bpe", consoleOutEnabled, consoleOutLayout, consoleOutLevel, consoleErrEnabled, consoleErrLayout,
+				consoleErrLevel, fileEnabled, fileLayout, fileLevel, minLevelLoggers, specialFile, specialConsoleOut,
+				specialConsoleErr));
 	}
 }

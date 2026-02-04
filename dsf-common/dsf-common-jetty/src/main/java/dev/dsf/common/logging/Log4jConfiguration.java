@@ -16,6 +16,7 @@
 package dev.dsf.common.logging;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -145,14 +146,16 @@ public class Log4jConfiguration extends AbstractConfiguration
 	public Log4jConfiguration(LoggerContext loggerContext, String name, String fileNamePart, boolean consoleOutEnabled,
 			Log4jLayout consoleOutLayout, Level consoleOutLevel, boolean consoleErrEnabled,
 			Log4jLayout consoleErrLayout, Level consoleErrLevel, boolean fileEnabled, Log4jLayout fileLayout,
-			Level fileLevel)
+			Level fileLevel, List<String> minLevelLoggers)
 	{
 		super(loggerContext, ConfigurationSource.NULL_SOURCE);
 
 		if (name != null)
 			setName(name);
 
-		addLogger("dev.dsf", min(consoleOutLevel, consoleErrLevel, fileLevel));
+		Level minLevel = min(consoleOutLevel, consoleErrLevel, fileLevel);
+		minLevelLoggers.forEach(logger -> addLogger(logger, minLevel));
+
 		addLogger("org.eclipse.jetty", Level.INFO);
 		addLogger("ca.uhn.fhir.parser.LenientErrorHandler", Level.ERROR);
 
