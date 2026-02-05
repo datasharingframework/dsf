@@ -44,16 +44,30 @@
 
 ### SSL_CA_CERTIFICATE_FILE
 - **Required:** No
-- **Description:** Certificate chain file including all issuing, intermediate and root certificates used to validate client certificates, PEM encoded, sets the apache httpd parameter `SSLCACertificateFile`
+- **Description:** Certificate chain file including all issuing, intermediate and root certificates used to validate client certificates, PEM encoded, sets the apache httpd parameter `SSLCACertificateFile`; not used by default, overrides `SSL_CA_CERTIFICATE_PATH` if not empty
 - **Recommendation:** Use docker secret file to configure
 - **Default:** `ca/client_cert_ca_chains.pem`
 
 
+### SSL_CA_CERTIFICATE_PATH
+- **Required:** No
+- **Description:** Folder with trusted full CA chains for validating client certificates, all CAs as single .pem files, sets the apache httpd parameter `SSLCACertificatePath`
+- **Recommendation:** Use docker bind mount to add CAs or override all defaults
+- **Default:** `ca/client_ca_chains`
+
+
 ### SSL_CA_DN_REQUEST_FILE
 - **Required:** No
-- **Description:** File containing all signing certificates excepted, will be used to specify the `Acceptable client certificate CA names` send to the client, during TLS handshake, sets the apache httpd parameter `SSLCADNRequestFile`; if omitted all entries from `SSL_CA_CERTIFICATE_FILE` are used
+- **Description:** File containing all signing certificates excepted, will be used to specify the `Acceptable client certificate CA names` send to the client, during TLS handshake, sets the apache httpd parameter `SSLCADNRequestFile`; if omitted all entries from `SSL_CA_CERTIFICATE_FILE` or `SSL_CA_CERTIFICATE_PATH` are used; not used by default, overrides `SSL_CA_DN_REQUEST_PATH` if not empty
 - **Recommendation:** Use docker secret file to configure
 - **Default:** `ca/client_cert_issuing_cas.pem`
+
+
+### SSL_CA_DN_REQUEST_PATH
+- **Required:** No
+- **Description:** Folder with trusted client certificate issuing CAs, modifies the "Acceptable client certificate CA names" send to the client, uses all from `SSL_CA_CERTIFICATE_FILE` or `SSL_CA_CERTIFICATE_PATH` if not set or empty
+- **Recommendation:** Use docker bind mount to add CAs or override all defaults
+- **Default:** `ca/client_issuing_cas`
 
 
 ### SSL_CERTIFICATE_CHAIN_FILE
@@ -86,7 +100,7 @@
 ### SSL_EXPECTED_CLIENT_I_DN_CN_VALUES
 - **Required:** No
 - **Description:** Expected client certificate issuer DN common-name `CN` values, must be a comma-separated list of strings in single quotation marks. If a client certificate from a not configured issuing ca common-name is used, the server answers with a `403 Forbidden` status code
-- **Default:** `'GEANT TLS ECC 1', 'HARICA OV TLS ECC', 'GEANT TLS RSA 1', 'HARICA OV TLS RSA', 'GEANT S/MIME ECC 1', 'HARICA S/MIME ECC', 'GEANT S/MIME RSA 1', 'HARICA S/MIME RSA', 'DFN-Verein Global Issuing CA', 'Fraunhofer User CA - G02', 'D-TRUST SSL Class 3 CA 1 2009', 'Sectigo RSA Organization Validation Secure Server CA', 'GEANT OV RSA CA 4', 'GEANT Personal CA 4', 'GEANT eScience Personal CA 4', 'Sectigo ECC Organization Validation Secure Server CA', 'GEANT OV ECC CA 4', 'GEANT Personal ECC CA 4', 'GEANT eScience Personal ECC CA 4', 'D-TRUST Limited Basic CA 1-2 2019', 'D-TRUST Limited Basic CA 1-3 2019'`
+- **Default:** `'DFN-Verein Community Issuing CA 2022', 'DFN-Verein Global Issuing CA', 'D-TRUST Limited Basic CA 1-2 2019', 'D-TRUST Limited Basic CA 1-3 2019', 'D-TRUST SSL Class 3 CA 1 2009', 'Fraunhofer Service CA 2022', 'Fraunhofer User CA - G02', 'Fraunhofer User CA 2022', 'GEANT eScience Personal CA 4', 'GEANT eScience Personal ECC CA 4', 'GEANT OV ECC CA 4', 'GEANT OV RSA CA 4', 'GEANT Personal CA 4', 'GEANT Personal ECC CA 4', 'GEANT S/MIME ECC 1', 'GEANT S/MIME RSA 1', 'GEANT TLS ECC 1', 'GEANT TLS RSA 1', 'HARICA Client Authentication ECC', 'HARICA Client Authentication RSA', 'HARICA OV TLS ECC', 'HARICA OV TLS RSA', 'HARICA S/MIME ECC', 'HARICA S/MIME RSA', 'MPG Community CA', 'Sectigo ECC Organization Validation Secure Server CA', 'Sectigo RSA Organization Validation Secure Server CA'`
 
 
 ### SSL_VERIFY_CLIENT

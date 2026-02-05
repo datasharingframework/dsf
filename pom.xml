@@ -828,13 +828,25 @@
 						<certFolder>${main.basedir}/src/main/resources/cert</certFolder>
 						<clientOnlyCaCommonNames>
 							<clientOnlyCaCommonName>
+								DFN-Verein Community Issuing CA 2022
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								DFN-Verein Global Issuing CA
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
 								D-TRUST Limited Basic CA 1-2 2019
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
 								D-TRUST Limited Basic CA 1-3 2019
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
+								Fraunhofer Service CA 2022
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
 								Fraunhofer User CA - G02
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								Fraunhofer User CA 2022
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
 								GEANT eScience Personal CA 4
@@ -865,6 +877,9 @@
 							</clientOnlyCaCommonName>
 							<clientOnlyCaCommonName>
 								HARICA S/MIME RSA
+							</clientOnlyCaCommonName>
+							<clientOnlyCaCommonName>
+								MPG Community CA
 							</clientOnlyCaCommonName>
 						</clientOnlyCaCommonNames>
 						<serverOnlyCaCommonNames>
