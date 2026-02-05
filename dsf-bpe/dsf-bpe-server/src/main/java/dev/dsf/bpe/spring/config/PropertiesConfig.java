@@ -217,7 +217,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private String processPluginDirectory;
 
 	@Documentation(description = "Directories containing exploded DSF BPE process plugins for deployment on startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only for testing")
-	@Value("#{'${dev.dsf.bpe.process.plugin.exploded:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.bpe.process.plugin.exploded:}'.trim().split('[,\\s]+')}")
 	private List<String> explodedPluginDirectories;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugin api jar files", recommendation = "Change only during development")
@@ -240,11 +240,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private Map<String, String> apiAllowedBpeResources;
 
 	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List", example = "dsfdev_updateAllowList|1.0, another_process|x.y")
-	@Value("#{'${dev.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.bpe.process.excluded:}'.trim().split('[,\\s]+')}")
 	private List<String> processExcluded;
 
 	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available", example = "old_process|x.y")
-	@Value("#{'${dev.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.bpe.process.retired:}'.trim().split('[,\\s]+')}")
 	private List<String> processRetired;
 
 	@Documentation(description = "Number of parallel Task / QuestionnaireResponse threads to start new or continue existing processes, a value `<= 0` means number of cpu cores")
@@ -280,15 +280,15 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private String mailFromAddress;
 
 	@Documentation(description = "Mail service recipient addresses, configure at least one; comma or space separated list, YAML block scalars supported", example = "recipient@localhost")
-	@Value("#{'${dev.dsf.bpe.mail.toAddresses:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.bpe.mail.toAddresses:}'.trim().split('[,\\s]+')}")
 	private List<String> mailToAddresses;
 
 	@Documentation(description = "Mail service CC recipient addresses; comma or space separated list, YAML block scalars supported", example = "cc.recipient@localhost")
-	@Value("#{'${dev.dsf.bpe.mail.toAddressesCc:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.bpe.mail.toAddressesCc:}'.trim().split('[,\\s]+')}")
 	private List<String> mailToAddressesCc;
 
 	@Documentation(description = "Mail service reply to addresses; comma or space separated list, YAML block scalars supported", example = "reply.to@localhost")
-	@Value("#{'${dev.dsf.bpe.mail.replyToAddresses:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.bpe.mail.replyToAddresses:}'.trim().split('[,\\s]+')}")
 	private List<String> mailReplyToAddresses;
 
 	@Documentation(description = "To enable SMTP over TLS (smtps), set to `true`")
@@ -396,7 +396,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private char[] proxyPassword;
 
 	// documentation in dev.dsf.common.config.AbstractJettyConfig
-	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('[,\\s]+')}")
 	private List<String> proxyNoProxy;
 
 	// documentation in dev.dsf.common.config.AbstractJettyConfig

@@ -215,7 +215,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	private char[] proxyPassword;
 
 	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or against (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
-	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\\\n)')}")
+	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('[,\\s]+')}")
 	private List<String> proxyNoProxy;
 
 	protected abstract Function<Server, ServerConnector> apiConnector();
