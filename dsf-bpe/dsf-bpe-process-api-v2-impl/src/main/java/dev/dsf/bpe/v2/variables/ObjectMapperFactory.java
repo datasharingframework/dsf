@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -43,7 +44,8 @@ public class ObjectMapperFactory
 				.disable(MapperFeature.AUTO_DETECT_CREATORS).disable(MapperFeature.AUTO_DETECT_FIELDS)
 				.disable(MapperFeature.AUTO_DETECT_GETTERS).disable(MapperFeature.AUTO_DETECT_IS_GETTERS)
 				.disable(MapperFeature.AUTO_DETECT_SETTERS).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-				.build();
+				.enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
+				.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE).build();
 	}
 
 	public static SimpleModule fhirModule(FhirContext fhirContext)

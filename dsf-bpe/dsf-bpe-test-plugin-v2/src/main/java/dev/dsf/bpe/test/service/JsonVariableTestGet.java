@@ -42,6 +42,7 @@ public class JsonVariableTestGet extends AbstractTest implements ServiceTask
 		expectNotNull(variable);
 		expectSame(JsonVariableTestSet.TEST_VALUE_1, variable.value1());
 		expectSame(JsonVariableTestSet.TEST_VALUE_2, variable.value2());
+		expectSame(JsonVariableTestSet.TEST_ZONED_DATE_TIME_VALUE, variable.zonedDateTime());
 	}
 
 	@PluginTest
