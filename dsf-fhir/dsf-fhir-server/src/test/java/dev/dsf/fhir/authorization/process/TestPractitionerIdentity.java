@@ -15,7 +15,6 @@
  */
 package dev.dsf.fhir.authorization.process;
 
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +29,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import dev.dsf.common.auth.DsfOpenIdCredentials;
 import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
+import dev.dsf.common.auth.conf.X509CertificateWrapper;
 
 public class TestPractitionerIdentity implements PractitionerIdentity
 {
@@ -92,7 +92,7 @@ public class TestPractitionerIdentity implements PractitionerIdentity
 	}
 
 	@Override
-	public Optional<X509Certificate> getCertificate()
+	public Optional<X509CertificateWrapper> getCertificate()
 	{
 		throw new UnsupportedOperationException();
 

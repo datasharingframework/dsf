@@ -15,7 +15,6 @@
  */
 package dev.dsf.common.auth.conf;
 
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,7 +34,7 @@ public abstract class AbstractIdentity implements Identity
 	private final Organization organization;
 	private final Endpoint endpoint;
 	private final Set<DsfRole> dsfRoles = new HashSet<>();
-	private final X509Certificate certificate;
+	private final X509CertificateWrapper certificate;
 
 	/**
 	 * @param localIdentity
@@ -50,7 +49,7 @@ public abstract class AbstractIdentity implements Identity
 	 *            may be <code>null</code>
 	 */
 	public AbstractIdentity(boolean localIdentity, Organization organization, Endpoint endpoint,
-			Collection<? extends DsfRole> dsfRoles, X509Certificate certificate)
+			Collection<? extends DsfRole> dsfRoles, X509CertificateWrapper certificate)
 	{
 		this.localIdentity = localIdentity;
 		this.organization = Objects.requireNonNull(organization, "organization");
@@ -106,7 +105,7 @@ public abstract class AbstractIdentity implements Identity
 	}
 
 	@Override
-	public Optional<X509Certificate> getCertificate()
+	public Optional<X509CertificateWrapper> getCertificate()
 	{
 		// null if login via OIDC
 		return Optional.ofNullable(certificate);

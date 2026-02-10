@@ -16,7 +16,6 @@
 package dev.dsf.common.auth.conf;
 
 import java.security.Principal;
-import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,7 +43,7 @@ public interface Identity extends Principal
 	/**
 	 * @return {@link Optional#empty()} if login via OIDC
 	 */
-	Optional<X509Certificate> getCertificate();
+	Optional<X509CertificateWrapper> getCertificate();
 
 	String getDisplayName();
 

@@ -14,7 +14,7 @@ We kindly ask security researchers and the general public to follow the principl
 
 ### How to Report a Vulnerability
 
-If you believe you have found a security vulnerability in our system, please email us at **[dsf-security@hs-heilbronn.de](mailto:dsf-security@hs-heilbronn.de)**. If you want to use end-to-end-encryption, you can send us mails using s-mime with the certificate chain provided [here](https://github.com/datasharingframework/dsf/blob/main/SECURITY_CERTIFICATE.pem). We kindly request the following:
+If you believe you have found a security vulnerability in our system, please email us at **[dsf-security@hs-heilbronn.de](mailto:dsf-security@hs-heilbronn.de)**. You can send us encrypted S/MIME e-mails using this [certificate chain](SECURITY_CERTIFICATE.pem). We kindly request the following:
 
 * Provide a detailed description of the vulnerability, including if possible the potential impact and how it can be exploited.
 * Include steps to reproduce the vulnerability or proof-of-concept code, if possible.
@@ -37,4 +37,4 @@ We promise not to initiate legal action against individuals who report vulnerabi
 
 ### Questions?
 
-If you have any questions about this policy or security of the Data Sharing Framework, the services and tools we provide, please contact us at **[dsf-security@hs-heilbronn.de](mailto:dsf-security@hs-heilbronn.de)**. You can send us encrypted e-mails using s-mime. You can find the certificate chain [here](https://github.com/datasharingframework/dsf/blob/main/SECURITY_CERTIFICATE.pem).
+If you have any questions about this policy or security of the Data Sharing Framework, the services and tools we provide, please contact us at **[dsf-security@hs-heilbronn.de](mailto:dsf-security@hs-heilbronn.de)**. You can send us encrypted S/MIME e-mails using this [certificate chain](SECURITY_CERTIFICATE.pem).

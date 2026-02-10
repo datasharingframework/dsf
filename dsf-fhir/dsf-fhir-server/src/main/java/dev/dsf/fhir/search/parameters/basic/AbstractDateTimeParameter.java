@@ -16,10 +16,8 @@
 package dev.dsf.fhir.search.parameters.basic;
 
 import java.sql.Array;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -301,19 +299,17 @@ public abstract class AbstractDateTimeParameter<R extends Resource> extends Abst
 		switch (valueAndType.type)
 		{
 			case ZONED_DATE_TIME:
-				statement.setTimestamp(parameterIndex, Timestamp.valueOf(((ZonedDateTime) valueAndType.value)
-						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
+				statement.setObject(parameterIndex, ((ZonedDateTime) valueAndType.value).toOffsetDateTime());
 				break;
 			case LOCAL_DATE:
-				statement.setDate(parameterIndex, Date.valueOf((LocalDate) valueAndType.value));
+				statement.setObject(parameterIndex, valueAndType.value);
 				break;
 			case YEAR_MONTH_PERIOD:
 			case YEAR_PERIOD:
 				if (subqueryParameterIndex == 1)
-					statement.setDate(parameterIndex,
-							Date.valueOf(((LocalDatePair) valueAndType.value).startInclusive));
+					statement.setObject(parameterIndex, ((LocalDatePair) valueAndType.value).startInclusive);
 				if (subqueryParameterIndex == 2)
-					statement.setDate(parameterIndex, Date.valueOf(((LocalDatePair) valueAndType.value).endExclusive));
+					statement.setObject(parameterIndex, ((LocalDatePair) valueAndType.value).endExclusive);
 				break;
 			default:
 				throw new IllegalArgumentException(

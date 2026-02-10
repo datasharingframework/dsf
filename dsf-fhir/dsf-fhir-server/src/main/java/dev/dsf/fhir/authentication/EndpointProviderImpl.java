@@ -15,13 +15,13 @@
  */
 package dev.dsf.fhir.authentication;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,15 +29,15 @@ import org.springframework.beans.factory.InitializingBean;
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 
-public class EndpointProviderImpl extends AbstractProvider implements EndpointProvider, InitializingBean
+public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 {
+	private final ExceptionHandler exceptionHandler;
 	private final EndpointDao dao;
 	private final String serverBaseUrl;
 
 	public EndpointProviderImpl(ExceptionHandler exceptionHandler, EndpointDao dao, String serverBaseUrl)
 	{
-		super(exceptionHandler);
-
+		this.exceptionHandler = exceptionHandler;
 		this.dao = dao;
 		this.serverBaseUrl = serverBaseUrl;
 	}
@@ -45,8 +45,7 @@ public class EndpointProviderImpl extends AbstractProvider implements EndpointPr
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
+		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 	}
@@ -65,11 +64,15 @@ public class EndpointProviderImpl extends AbstractProvider implements EndpointPr
 				.flatMap(ids -> getIdentifierValue(ids, ENDPOINT_IDENTIFIER_SYSTEM));
 	}
 
-	@Override
-	public Optional<Endpoint> getEndpoint(Organization organization, X509Certificate x509Certificate)
+	private Optional<String> getIdentifierValue(List<Identifier> identifiers, String system)
 	{
-		String thumbprint = getThumbprint(x509Certificate);
+		return identifiers.stream().filter(Identifier::hasSystem).filter(Identifier::hasValue)
+				.filter(i -> system.equals(i.getSystem())).map(Identifier::getValue).findFirst();
+	}
 
+	@Override
+	public Optional<Endpoint> getEndpoint(Organization organization, String thumbprint)
+	{
 		Optional<Endpoint> endpoint = exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
 				() -> dao.readActiveNotDeletedByThumbprint(thumbprint), Optional::empty);
 

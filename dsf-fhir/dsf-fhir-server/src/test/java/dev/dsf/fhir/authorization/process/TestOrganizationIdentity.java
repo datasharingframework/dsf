@@ -15,7 +15,6 @@
  */
 package dev.dsf.fhir.authorization.process;
 
-import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,6 +23,7 @@ import org.hl7.fhir.r4.model.Organization;
 
 import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.OrganizationIdentity;
+import dev.dsf.common.auth.conf.X509CertificateWrapper;
 
 public class TestOrganizationIdentity implements OrganizationIdentity
 {
@@ -90,7 +90,7 @@ public class TestOrganizationIdentity implements OrganizationIdentity
 	}
 
 	@Override
-	public Optional<X509Certificate> getCertificate()
+	public Optional<X509CertificateWrapper> getCertificate()
 	{
 		throw new UnsupportedOperationException();
 	}

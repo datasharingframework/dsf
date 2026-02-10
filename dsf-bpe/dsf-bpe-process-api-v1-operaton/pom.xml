@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>2.0.1</version>
+		<version>2.0.2</version>
 	</parent>
 
 	<properties>
@@ -107,6 +107,14 @@
 								</includes>
 							</artifactSet>
 							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<filters>
+								<filter>
+									<artifact>dev.dsf:dsf-bpe-process-api-v1-base</artifact>
+									<excludes>
+										<exclude>META-INF/MANIFEST.MF</exclude>
+									</excludes>
+								</filter>
+							</filters>
 						</configuration>
 					</execution>
 				</executions>

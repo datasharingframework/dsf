@@ -314,7 +314,7 @@ public interface Variables
 	QuestionnaireResponse getLatestReceivedQuestionnaireResponse();
 
 	/**
-	 * Uses {@link ObjectMapper} to serialize the given <b>value</b> into json. Value class needs annotations like
+	 * Uses {@link ObjectMapper} to serialize the given <b>value</b> into json. Value class requires annotations like
 	 * {@link JsonCreator}, {@link JsonProperty} and {@link JsonGetter}
 	 *
 	 * @param variableName

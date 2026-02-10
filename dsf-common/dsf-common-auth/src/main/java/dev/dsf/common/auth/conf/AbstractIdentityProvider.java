@@ -17,8 +17,6 @@ package dev.dsf.common.auth.conf;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -31,9 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -140,24 +135,6 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 	protected abstract Optional<Organization> getLocalOrganization();
 
 	protected abstract Optional<Endpoint> getLocalEndpoint();
-
-	protected final String getThumbprint(X509Certificate certificate)
-	{
-		try
-		{
-			byte[] digest = MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded());
-			return Hex.encodeHexString(digest);
-		}
-		catch (CertificateEncodingException | NoSuchAlgorithmException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected final String getDn(X509Certificate certificate)
-	{
-		return certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
-	}
 
 	protected final List<String> getGroupsFromTokens(Map<String, Object> parsedIdToken,
 			Map<String, Object> parsedAccessToken)
@@ -295,16 +272,16 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		return sub + "." + getHost(iss) + "@oidc.invalid";
 	}
 
-	protected final Optional<Practitioner> toPractitioner(X509Certificate certificate)
+	protected final Optional<Practitioner> toPractitioner(X509CertificateWrapper certWrapper)
 	{
-		if (certificate == null)
+		if (certWrapper == null)
 			return Optional.empty();
 
-		String thumbprint = getThumbprint(certificate);
-		if (!thumbprints.contains(thumbprint))
+		if (!thumbprints.contains(certWrapper.thumbprint()))
 			return Optional.empty();
 
-		return toJcaX509CertificateHolder(certificate).flatMap(ch -> toPractitioner(ch, thumbprint));
+		return toJcaX509CertificateHolder(certWrapper.certificate())
+				.flatMap(ch -> toPractitioner(ch, certWrapper.thumbprint()));
 	}
 
 	private Optional<JcaX509CertificateHolder> toJcaX509CertificateHolder(X509Certificate certificate)
