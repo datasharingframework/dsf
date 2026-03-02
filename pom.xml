@@ -44,7 +44,7 @@
 		<jersey.version>3.1.11</jersey.version>
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>6.2.15</spring.version>
-		<jackson.version>2.21.0</jackson.version>
+		<jackson.version>2.21.1</jackson.version>
 		<operaton.version>1.0.3</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
