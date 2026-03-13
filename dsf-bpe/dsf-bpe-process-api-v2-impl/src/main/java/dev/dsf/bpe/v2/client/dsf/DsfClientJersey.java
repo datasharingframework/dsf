@@ -223,8 +223,6 @@ public class DsfClientJersey implements DsfClient
 
 		ClientBuilder builder = ClientBuilder.newBuilder();
 
-		authFeatures.forEach(builder::register);
-
 		if (sslContext != null)
 			builder.sslContext(sslContext);
 
@@ -234,6 +232,8 @@ public class DsfClientJersey implements DsfClient
 		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
 		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
 		builder.withConfig(config);
+
+		authFeatures.forEach(builder::register);
 
 		if (userAgentValue != null && !userAgentValue.isBlank())
 			builder.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
