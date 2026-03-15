@@ -303,7 +303,6 @@
 								<artifactItem>
 									<groupId>org.apache.tika</groupId>
 									<artifactId>tika-core</artifactId>
-									<version>${apache.tika.version}</version>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

@@ -1,0 +1,288 @@
+name: DSF 2.x Full Build
+
+on:
+  push:
+    branches: [ "release/*", "hotfix/*" ]
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+      - v[0-9]+.[0-9]+.[0-9]+-M[0-9]+
+      - v[0-9]+.[0-9]+.[0-9]+-RC[0-9]+
+  pull_request:
+    branches: [ "main", "develop" ]
+    types: [opened, synchronize, reopened, closed]
+  schedule:
+    - cron: '11 15 * * 0' # Sundays, 15:11
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java-kotlin', 'javascript-typescript' ]
+    name: ${{ matrix.language }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up JDK 25
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'zulu'
+          java-version: 25
+          cache: 'maven'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended, security-and-quality
+      - name: Minimal Maven Build
+        run: mvn package --batch-mode --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -DskipTests -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        with:
+          category: "/language:${{matrix.language}}"
+
+  maven-quick:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      main: ${{ steps.main.outputs.main }}
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up JDK 25
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'zulu'
+          java-version: 25
+          cache: 'maven'
+      - name: Minimal Maven Build
+        run: mvn install --batch-mode --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -DskipTests -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -DbuildNumber=${GITHUB_SHA} -DscmBranch=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
+      - name: Upload quick-build results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: quick_build
+          path: |
+            ./**/target
+            dsf-docker/bpe_proxy/ca/client_ca_chains/*.crt
+            dsf-docker/bpe_proxy/ca/client_issuing_cas/*.crt
+            dsf-docker/fhir_proxy/ca/client_ca_chains/*.crt
+            dsf-docker/fhir_proxy/ca/client_issuing_cas/*.crt
+            dsf-bpe/dsf-bpe-server-jetty/docker/api/v1/*.jar
+            dsf-bpe/dsf-bpe-server-jetty/docker/api/v2/*.jar
+            dsf-bpe/dsf-bpe-server-jetty/docker/ca/client_ca_chains/*.crt
+            dsf-bpe/dsf-bpe-server-jetty/docker/ca/server_root_cas/*.crt
+            dsf-bpe/dsf-bpe-server-jetty/docker/lib/*.jar
+            dsf-bpe/dsf-bpe-server-jetty/docker/dsf_bpe.jar
+            dsf-fhir/dsf-fhir-server-jetty/docker/ca/client_ca_chains/*.crt
+            dsf-fhir/dsf-fhir-server-jetty/docker/ca/server_root_cas/*.crt
+            dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
+            dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
+      - name: Get Maven project version
+        id: version
+        run: echo "version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:3.6.3:exec)" >> $GITHUB_OUTPUT
+      - name: Checkout main branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+      - name: Check if ref is main HEAD
+        id: main
+        run: echo "main=$( [ "$GITHUB_SHA" = "$(git rev-parse HEAD)" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+
+  maven-full:
+    runs-on: ubuntu-latest
+    needs: maven-quick
+    strategy:
+      fail-fast: false
+      matrix:
+        mvn:
+          - name: JavaDoc
+            cmd: mvn javadoc:javadoc -Dformatter.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
+          - name: Formatter, Impsort, Enforcer, License Check
+            cmd: mvn compile test-compile license:check -Dmaven.buildNumber.skip=true
+          - name: DAO Tests (not Binary)
+            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=**/*DaoTest -Dfailsafe.excludes=**/BinaryDaoTest -DforkCount=2
+          - name: DAO Tests (Binary only)
+            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=**/BinaryDaoTest
+          - name: Integration Tests (FHIR, not Binary)
+            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=dev/dsf/fhir/**/*IntegrationTest -Dfailsafe.excludes=**/BinaryIntegrationTest -DforkCount=2
+          - name: Integration Tests (FHIR, Binary only)
+            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=dev/dsf/fhir/**/BinaryIntegrationTest -DforkCount=2
+          - name: Integration Tests (BPE)
+            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=dev/dsf/bpe/**/*IntegrationTest -DforkCount=2
+          - name: Unit Tests
+            cmd: mvn dependency:properties surefire:test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
+    name: ${{ matrix.mvn.name }}
+    timeout-minutes: 8
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download quick-build results
+        uses: actions/download-artifact/@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: quick_build
+          path: ./
+      - name: Set up JDK 25
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'zulu'
+          java-version: 25
+          cache: 'maven'
+      - name: ${{ matrix.mvn.name }}
+        run: ${{ matrix.mvn.cmd }}
+
+  trivy:
+    runs-on: ubuntu-latest
+    needs: maven-quick
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - name: bpe_proxy
+            context: dsf-docker/bpe_proxy
+          - name: fhir_proxy
+            context: dsf-docker/fhir_proxy
+          - name: bpe
+            context: dsf-bpe/dsf-bpe-server-jetty/docker
+          - name: fhir
+            context: dsf-fhir/dsf-fhir-server-jetty/docker
+    name: ${{ matrix.image.name }}
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download quick-build results
+        uses: actions/download-artifact/@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: quick_build
+          path: ./
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+      - name: Build Docker image
+        run:  docker build -t ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ github.sha }} ${{ matrix.image.context }}
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  docker-deploy:
+    if: ${{ (!endsWith(needs.maven-quick.outputs.version, '-SNAPSHOT') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop') }}
+    runs-on: ubuntu-latest
+    needs: [codeql, maven-quick, maven-full, trivy]
+    permissions:
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - name: bpe
+            context: dsf-bpe/dsf-bpe-server-jetty/docker
+          - name: fhir
+            context: dsf-fhir/dsf-fhir-server-jetty/docker
+          - name: bpe_proxy
+            context: dsf-docker/bpe_proxy
+          - name: fhir_proxy
+            context: dsf-docker/fhir_proxy
+    name: ${{ matrix.image.name }}
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download quick-build results
+        uses: actions/download-artifact/@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: quick_build
+          path: ./
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker metadata
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-') && needs.maven-quick.outputs.main == 'true' }}
+            type=raw,value=develop,enable=${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'develop' }}
+          # full version (1.2.3, 1.2.3-RC1, etc)
+          # minor version (1.2)
+          # latest only for stable releases
+          # develop builds
+      - name: Build and Push
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        id: push
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          context: ${{ matrix.image.context }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha,scope=${{ matrix.image.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image.name }}
+      - name: Export digest
+        run: echo "DIGEST=${{ steps.push.outputs.digest }}" >> $GITHUB_ENV
+      - name: Set up syft
+        uses: anchore/sbom-action/download-syft@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1
+      - name: Generate SBOM
+        run: syft ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}@${DIGEST} -o cyclonedx-json > sbom.json
+      - name: Set up cosign
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
+      - name: Attach SBOM
+        run: cosign attest --yes --predicate sbom.json --type cyclonedx ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}@${DIGEST}
+      - name: Sign image
+        run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}@${DIGEST}
+
+  maven-deploy:
+    if: ${{ !endsWith(needs.maven-quick.outputs.version, '-SNAPSHOT') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-latest
+    needs: [codeql, maven-quick, maven-full, trivy]
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download quick-build results
+        uses: actions/download-artifact/@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: quick_build
+          path: ./
+      - name: Set up JDK 25
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'zulu'
+          java-version: 25
+          cache: 'maven'
+          server-id: central
+          server-username: MAVEN_CENTRAL_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Deploy to Maven Central
+        run: mvn deploy -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -DskipTests -Ppublish-to-maven-central -Dmaven.buildNumber.skip=true -DbuildNumber=${GITHUB_SHA} -DscmBranch=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
