@@ -200,12 +200,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("getStartTask - parentActivityInstanceId: {}, parentId: {}",
 				execution.getParentActivityInstanceId(), execution.getParentId());
 
-		Task resource = getResource(START_TASK);
+		Task task = getResource(START_TASK);
 
-		if (resource == null)
-			resource = getResource(START_TASK_DSF_1);
+		if (task == null)
+			task = getResource(START_TASK_DSF_1);
 
-		return resource;
+		return task;
 	}
 
 	@Override
