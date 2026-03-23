@@ -144,7 +144,12 @@ public class OidcClientJersey extends BaseOidcClientJersey
 					"OIDC provider does not support Client Credentials Grant, supported grant types: "
 							+ configuration.grantTypesSupported());
 
-		Response response = client.target(configuration.tokenEndpoint()).request(MediaType.APPLICATION_JSON_TYPE)
+		String tokenEndpoint = configuration.tokenEndpoint();
+		if (tokenEndpoint == null || !tokenEndpoint.startsWith("https://"))
+			throw new OidcClientException(
+					"Token endpoint URL from OIDC configuration resource is null or does not start with 'https://'");
+
+		Response response = client.target(tokenEndpoint).request(MediaType.APPLICATION_JSON_TYPE)
 				.header(HttpHeaders.AUTHORIZATION,
 						"Basic " + Base64.getEncoder()
 								.encodeToString(new StringBuilder().append(clientId).append(':').append(clientSecret)
