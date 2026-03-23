@@ -139,12 +139,6 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 	protected final List<String> getGroupsFromTokens(Map<String, Object> parsedIdToken,
 			Map<String, Object> parsedAccessToken)
 	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("id_token: groups: {}", getPropertyArray(parsedIdToken, "groups"));
-			logger.debug("access_token: groups: {}", getPropertyArray(parsedAccessToken, "groups"));
-		}
-
 		return Stream.concat(getPropertyArray(parsedIdToken, "groups").stream(),
 				getPropertyArray(parsedAccessToken, "groups").stream()).toList();
 	}
@@ -158,17 +152,6 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 	@SuppressWarnings("unchecked")
 	private Stream<String> getRolesFromToken(String tokenName, Map<String, Object> token)
 	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("{}: realm_access.roles: {}", tokenName,
-					getPropertyArray(getPropertyMap(token, "realm_access"), "roles"));
-			logger.debug("{}: resource_access.*.roles: {}", tokenName,
-					getPropertyMap(token, "resource_access").entrySet().stream()
-							.flatMap(e -> getPropertyArray((Map<String, Object>) e.getValue(), "roles").stream()
-									.map(r -> e.getKey() + "." + r))
-							.toList());
-		}
-
 		return Stream.concat(getPropertyArray(getPropertyMap(token, "realm_access"), "roles").stream(),
 				getPropertyMap(token, "resource_access").entrySet().stream()
 						.flatMap(e -> getPropertyArray((Map<String, Object>) e.getValue(), "roles").stream()
