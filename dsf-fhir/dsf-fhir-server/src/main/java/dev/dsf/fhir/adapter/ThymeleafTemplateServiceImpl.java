@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -100,6 +101,10 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 			.compile("\"id\": \"(" + UUID + ")\",\\n([ ]*)\"meta\": \\{\\n([ ]*)\"versionId\": \"([0-9]+)\",");
 
 	private static final String CODE_SYSTEM_PRACTITIONER_ROLE = "http://dsf.dev/fhir/CodeSystem/practitioner-role";
+
+	private static record Heading(String href, String title, String text)
+	{
+	}
 
 	private final String serverBaseUrl;
 	private final Theme theme;
@@ -248,37 +253,40 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 			return "DSF: " + HtmlUtils.htmlEscape(uriInfo.getPath());
 	}
 
-	private String getHeading(Resource resource, UriInfo uriInfo)
+	private List<Heading> getHeading(Resource resource, UriInfo uriInfo)
 	{
+		List<Heading> headings = new ArrayList<>();
+
 		URI uri = getResourceUri(resource, uriInfo);
 		String[] pathSegments = uri.getPath().split("/");
 
 		String u = serverBaseUrl;
-		StringBuilder heading = new StringBuilder("<a href=\"" + u + "/\" title=\"Open " + u + "\">" + u + "</a>");
+
+		headings.add(new Heading(u, "Open " + u, u));
 
 		String[] basePathSegments = getServerBaseUrlPathWithLeadingSlash().split("/");
 		for (int i = basePathSegments.length; i < pathSegments.length; i++)
 		{
-			String pathSegment = HtmlUtils.htmlEscape(pathSegments[i]);
+			String pathSegment = pathSegments[i];
 			u += "/" + pathSegment;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegment + "</a>");
+			headings.add(new Heading(u, "Open " + u, "/\u200B" + pathSegment));
 		}
 
 		if (uri.getQuery() != null)
 		{
-			String queryValue = HtmlUtils.htmlEscape(uri.getQuery());
+			String queryValue = uri.getQuery();
 			u += "?" + queryValue;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?"
-					+ queryValue.replace("&amp;", "<wbr>&amp;").replace("-", "&#8209;") + "</a>");
+			headings.add(
+					new Heading(u, "Open " + u, "\u200B?" + queryValue.replace("&", "\u200B&").replace("-", "\u2011")));
 		}
 		else if (uriInfo.getQueryParameters().containsKey("_summary"))
 		{
-			String summaryValue = HtmlUtils.htmlEscape(uriInfo.getQueryParameters().getFirst("_summary"));
+			String summaryValue = uriInfo.getQueryParameters().getFirst("_summary");
 			u += "?_summary=" + summaryValue;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?_summary=" + summaryValue + "</a>");
+			headings.add(new Heading(u, "Open " + u, "?_summary=" + summaryValue));
 		}
 
-		return heading.toString();
+		return headings;
 	}
 
 	private URI getResourceUri(Resource resource, UriInfo uriInfo)
