@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +33,7 @@ import org.postgresql.largeobject.LargeObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.fhir.webservice.RangeRequest;
 
 public class LargeObjectManagerJdbc implements LargeObjectManager
@@ -53,6 +54,10 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 		this.permanentDeleteDataSource = Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
 		this.dbUsersGroup = Objects.requireNonNull(dbUsersGroup, "dbUsersGroup");
 		this.connection = Objects.requireNonNull(connection, "connection");
+
+		if (!DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbUsersGroup).matches())
+			throw new RuntimeException(
+					"dbUsersGroup not matching " + DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER_STRING);
 	}
 
 	private static org.postgresql.largeobject.LargeObjectManager getLargeObjectManager(Connection connection)
@@ -90,10 +95,9 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 
 			long oid = getLargeObjectManager(connection).createLO();
 
-			try (PreparedStatement statement = connection
-					.prepareStatement("GRANT SELECT, UPDATE ON LARGE OBJECT " + oid + " TO " + dbUsersGroup))
+			try (Statement statement = connection.createStatement())
 			{
-				statement.execute();
+				statement.execute("GRANT SELECT, UPDATE ON LARGE OBJECT " + oid + " TO " + dbUsersGroup);
 			}
 
 			connection.commit();

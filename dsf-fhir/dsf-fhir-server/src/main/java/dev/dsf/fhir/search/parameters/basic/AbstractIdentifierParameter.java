@@ -27,6 +27,8 @@ import java.util.function.Predicate;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
 public abstract class AbstractIdentifierParameter<R extends Resource> extends AbstractTokenParameter<R>
@@ -87,7 +89,8 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 	{
 		return switch (valueAndType.type)
 		{
-			case CODE, CODE_AND_SYSTEM, SYSTEM -> resourceColumn + "->'identifier' @> ?::jsonb";
+			case CODE, CODE_AND_SYSTEM, SYSTEM -> resourceColumn + "->'identifier' @> ?";
+
 			case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
 					+ "->'identifier') identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 		};
@@ -98,7 +101,8 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 	{
 		return switch (valueAndType.type)
 		{
-			case CODE, CODE_AND_SYSTEM, SYSTEM -> "NOT (" + resourceColumn + "->'identifier' @> ?::jsonb)";
+			case CODE, CODE_AND_SYSTEM, SYSTEM -> "NOT (" + resourceColumn + "->'identifier' @> ?)";
+
 			case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
 					+ "->'identifier') identifier WHERE identifier->>'value' <> ? OR (identifier ?? 'system')) > 0";
 		};
@@ -112,23 +116,21 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
-			case CODE:
-				statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.codeValue + "\"}]");
-				return;
-			case CODE_AND_SYSTEM:
-				statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.codeValue + "\", \"system\": \""
-						+ valueAndType.systemValue + "\"}]");
-				return;
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				statement.setString(parameterIndex, valueAndType.codeValue);
-				return;
-			case SYSTEM:
-				statement.setString(parameterIndex, "[{\"system\": \"" + valueAndType.systemValue + "\"}]");
-				return;
+			case CODE -> statement.setObject(parameterIndex, pgObjectFactory
+					.jsonParameterToPgObjectAsArray(new IdentifierParameter(null, valueAndType.codeValue)));
+
+			case CODE_AND_SYSTEM -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+					new IdentifierParameter(valueAndType.systemValue, valueAndType.codeValue)));
+
+			case CODE_AND_NO_SYSTEM_PROPERTY -> statement.setString(parameterIndex, valueAndType.codeValue);
+
+			case SYSTEM -> statement.setObject(parameterIndex, pgObjectFactory
+					.jsonParameterToPgObjectAsArray(new IdentifierParameter(valueAndType.systemValue, null)));
 		}
 	}
 

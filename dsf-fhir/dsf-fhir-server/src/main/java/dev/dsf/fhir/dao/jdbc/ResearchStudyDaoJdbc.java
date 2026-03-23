@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.ResearchStudy;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.ResearchStudyDao;
 import dev.dsf.fhir.search.filter.ResearchStudyIdentityFilter;
@@ -30,9 +32,10 @@ import dev.dsf.fhir.search.parameters.ResearchStudyPrincipalInvestigator;
 
 public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy> implements ResearchStudyDao
 {
-	public ResearchStudyDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public ResearchStudyDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, ResearchStudy.class, "research_studies",
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, ResearchStudy.class, "research_studies",
 				"research_study", "research_study_id", ResearchStudyIdentityFilter::new,
 				List.of(factory(ResearchStudyEnrollment.PARAMETER_NAME, ResearchStudyEnrollment::new,
 						ResearchStudyEnrollment.getNameModifiers(), ResearchStudyEnrollment::new,

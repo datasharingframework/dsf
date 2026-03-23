@@ -28,8 +28,12 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.OrganizationAffiliationDao;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.CodingParameter;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.search.filter.OrganizationAffiliationIdentityFilter;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationActive;
 import dev.dsf.fhir.search.parameters.OrganizationAffiliationEndpoint;
@@ -42,9 +46,9 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 		implements OrganizationAffiliationDao
 {
 	public OrganizationAffiliationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext)
+			FhirContext fhirContext, ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, OrganizationAffiliation.class,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, OrganizationAffiliation.class,
 				"organization_affiliations", "organization_affiliation", "organization_affiliation_id",
 				OrganizationAffiliationIdentityFilter::new,
 				List.of(factory(OrganizationAffiliationActive.PARAMETER_NAME, OrganizationAffiliationActive::new),
@@ -92,21 +96,21 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 				+ "AND concat('Organization/', organization->>'id') = organization_affiliation->'organization'->>'reference' LIMIT 1) AS organization_identifier "
 				+ "FROM current_organization_affiliations WHERE organization_affiliation->>'active' = 'true' AND "
 				+ "(SELECT organization->'identifier' FROM current_organizations WHERE organization->>'active' = 'true' AND "
-				+ "concat('Organization/', organization->>'id') = organization_affiliation->'participatingOrganization'->>'reference') @> ?::jsonb";
+				+ "concat('Organization/', organization->>'id') = organization_affiliation->'participatingOrganization'->>'reference') @> ?";
 
 		if (endpointIdentifierValue != null && !endpointIdentifierValue.isBlank())
 			sql += " AND (SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
 					+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
-					+ " ) AS identifiers) @> ?::jsonb";
+					+ " ) AS identifiers) @> ?";
 
 		try (PreparedStatement statement = connection.prepareStatement(sql))
 		{
-			statement.setString(1, "[{\"system\": \"http://dsf.dev/sid/organization-identifier\", \"value\": \""
-					+ organizationIdentifierValue + "\"}]");
+			statement.setObject(1, getPreparedStatementFactory()
+					.jsonParameterToPgObjectAsArray(IdentifierParameter.organization(organizationIdentifierValue)));
 
 			if (endpointIdentifierValue != null && !endpointIdentifierValue.isBlank())
-				statement.setString(2, "[{\"system\": \"http://dsf.dev/sid/endpoint-identifier\", \"value\": \""
-						+ endpointIdentifierValue + "\"}]");
+				statement.setObject(2, getPreparedStatementFactory()
+						.jsonParameterToPgObjectAsArray(IdentifierParameter.endpoint(endpointIdentifierValue)));
 
 			try (ResultSet result = statement.executeQuery())
 			{
@@ -146,12 +150,13 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 				.prepareStatement("SELECT count(*) FROM current_organization_affiliations "
 						+ "WHERE organization_affiliation->'organization'->>'reference' = ? "
 						+ "AND organization_affiliation->'participatingOrganization'->>'reference' = ? "
-						+ "AND (SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization_affiliation->'code') AS code, jsonb_array_elements(code->'coding') AS coding) @> ?::jsonb "
+						+ "AND (SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization_affiliation->'code') AS code, jsonb_array_elements(code->'coding') AS coding) @> ? "
 						+ "AND ? NOT IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') AS reference)"))
 		{
 			statement.setString(1, "Organization/" + parentOrganization.toString());
 			statement.setString(2, "Organization/" + memberOrganization.toString());
-			statement.setString(3, "[{\"code\": \"" + roleCode + "\", \"system\": \"" + roleSystem + "\"}]");
+			statement.setObject(3, getPreparedStatementFactory()
+					.jsonParameterToPgObjectAsArray(new CodingParameter(roleSystem, roleCode)));
 			statement.setString(4, "Endpoint/" + endpoint.toString());
 
 			try (ResultSet result = statement.executeQuery())

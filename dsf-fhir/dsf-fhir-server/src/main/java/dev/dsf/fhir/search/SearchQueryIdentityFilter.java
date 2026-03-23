@@ -18,6 +18,8 @@ package dev.dsf.fhir.search;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+
 public interface SearchQueryIdentityFilter
 {
 	/**
@@ -37,9 +39,11 @@ public interface SearchQueryIdentityFilter
 	 *            [1 ... {@link #getSqlParameterCount()}]
 	 * @param statement
 	 *            not <code>null</code>
+	 * @param pgObjectFactory
+	 *            not <code>null</code>
 	 * @throws SQLException
 	 *             if errors occur during modification of the statement
 	 */
-	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException;
+	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			PgObjectFactory pgObjectFactory) throws SQLException;
 }

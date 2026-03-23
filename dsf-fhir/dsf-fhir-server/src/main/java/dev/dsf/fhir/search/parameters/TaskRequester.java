@@ -35,6 +35,8 @@ import org.hl7.fhir.r4.model.Task;
 
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -81,16 +83,19 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 		{
 			// testing all TargetResourceTypeName/ID combinations
 			case ID -> "task->'requester'->>'reference' = ANY (?)";
+
 			case RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				"task->'requester'->>'reference' = ?";
+
 			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				case CODE ->
-					"(" + IDENTIFIERS_SUBQUERY + " @> ?::jsonb OR task->'requester'->'identifier'->>'value' = ?)";
+				case CODE -> "(" + IDENTIFIERS_SUBQUERY + " @> ? OR task->'requester'->'identifier'->>'value' = ?)";
+
 				case CODE_AND_SYSTEM -> "(" + IDENTIFIERS_SUBQUERY
-						+ " @> ?::jsonb OR (task->'requester'->'identifier'->>'system' = ? AND task->'requester'->'identifier'->>'value' = ?))";
-				case SYSTEM ->
-					"(" + IDENTIFIERS_SUBQUERY + " @> ?::jsonb OR task->'requester'->'identifier'->>'system' = ?)";
+						+ " @> ? OR (task->'requester'->'identifier'->>'system' = ? AND task->'requester'->'identifier'->>'value' = ?))";
+
+				case SYSTEM -> "(" + IDENTIFIERS_SUBQUERY + " @> ? OR task->'requester'->'identifier'->>'system' = ?)";
+
 				case CODE_AND_NO_SYSTEM_PROPERTY -> "((SELECT count(*) FROM jsonb_array_elements("
 						+ IDENTIFIERS_SUBQUERY
 						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0"
@@ -105,6 +110,7 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 		return switch (valueAndType.type)
 		{
 			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID -> 1;
+
 			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
 				case CODE, SYSTEM, CODE_AND_NO_SYSTEM_PROPERTY -> 2;
@@ -115,7 +121,8 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
@@ -135,16 +142,17 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 				{
 					case CODE -> {
 						if (subqueryParameterIndex == 1)
-							statement.setString(parameterIndex,
-									"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+							statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+									new IdentifierParameter(null, valueAndType.identifier.codeValue)));
 						else if (subqueryParameterIndex == 2)
 							statement.setString(parameterIndex, valueAndType.identifier.codeValue);
 					}
 
 					case CODE_AND_SYSTEM -> {
 						if (subqueryParameterIndex == 1)
-							statement.setString(parameterIndex, "[{\"system\": \"" + valueAndType.identifier.systemValue
-									+ "\", \"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+							statement.setObject(parameterIndex,
+									pgObjectFactory.jsonParameterToPgObjectAsArray(new IdentifierParameter(
+											valueAndType.identifier.systemValue, valueAndType.identifier.codeValue)));
 						else if (subqueryParameterIndex == 2)
 							statement.setString(parameterIndex, valueAndType.identifier.systemValue);
 						else if (subqueryParameterIndex == 3)
@@ -153,8 +161,8 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 
 					case SYSTEM -> {
 						if (subqueryParameterIndex == 1)
-							statement.setString(parameterIndex,
-									"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
+							statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+									new IdentifierParameter(valueAndType.identifier.systemValue, null)));
 						else if (subqueryParameterIndex == 2)
 							statement.setString(parameterIndex, valueAndType.identifier.systemValue);
 					}

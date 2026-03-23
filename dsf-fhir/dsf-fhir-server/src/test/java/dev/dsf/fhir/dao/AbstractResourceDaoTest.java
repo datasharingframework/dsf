@@ -40,6 +40,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.utility.DockerImageName;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
@@ -53,9 +60,9 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceDaoTest.class);
 
 	@FunctionalInterface
-	public interface TriFunction<A, B, C, R>
+	public interface QuadFunction<A, B, C, D, R>
 	{
-		R apply(A a, B b, C c);
+		R apply(A a, B b, C c, D d);
 	}
 
 	protected static DataSource defaultDataSource;
@@ -92,13 +99,17 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	protected final Class<D> resouceClass;
-	protected final TriFunction<DataSource, DataSource, FhirContext, C> daoCreator;
+	protected final QuadFunction<DataSource, DataSource, FhirContext, ObjectMapper, C> daoCreator;
 
 	protected final FhirContext fhirContext = FhirContext.forR4();
+	protected final ObjectMapper objectMapper = JsonMapper.builder().disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+			.defaultPropertyInclusion(JsonInclude.Value.construct(Include.NON_NULL, Include.NON_NULL))
+			.defaultPropertyInclusion(JsonInclude.Value.construct(Include.NON_EMPTY, Include.NON_EMPTY))
+			.disable(Feature.AUTO_CLOSE_TARGET).build();
 	protected C dao;
 
 	protected AbstractResourceDaoTest(Class<D> resouceClass,
-			TriFunction<DataSource, DataSource, FhirContext, C> daoCreator)
+			QuadFunction<DataSource, DataSource, FhirContext, ObjectMapper, C> daoCreator)
 	{
 		this.resouceClass = resouceClass;
 		this.daoCreator = daoCreator;
@@ -112,7 +123,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	@Before
 	public void before() throws Exception
 	{
-		dao = daoCreator.apply(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		dao = daoCreator.apply(defaultDataSource, permanentDeleteDataSource, fhirContext, objectMapper);
 	}
 
 	public C getDao()

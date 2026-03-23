@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.CodeSystemDao;
 import dev.dsf.fhir.search.filter.CodeSystemIdentityFilter;
@@ -38,10 +40,11 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 {
 	private final ReadByUrlDaoJdbc<CodeSystem> readByUrl;
 
-	public CodeSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public CodeSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, CodeSystem.class, "code_systems", "code_system",
-				"code_system_id", CodeSystemIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, CodeSystem.class, "code_systems",
+				"code_system", "code_system_id", CodeSystemIdentityFilter::new,
 				List.of(factory(CodeSystemDate.PARAMETER_NAME, CodeSystemDate::new),
 						factory(CodeSystemIdentifier.PARAMETER_NAME, CodeSystemIdentifier::new,
 								CodeSystemIdentifier.getNameModifiers()),

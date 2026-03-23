@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Location;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.LocationDao;
 import dev.dsf.fhir.search.filter.LocationIdentityFilter;
@@ -29,9 +31,10 @@ import dev.dsf.fhir.search.parameters.LocationName;
 
 public class LocationDaoJdbc extends AbstractResourceDaoJdbc<Location> implements LocationDao
 {
-	public LocationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public LocationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Location.class, "locations", "location",
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Location.class, "locations", "location",
 				"location_id", LocationIdentityFilter::new,
 				List.of(factory(LocationIdentifier.PARAMETER_NAME, LocationIdentifier::new,
 						LocationIdentifier.getNameModifiers()),

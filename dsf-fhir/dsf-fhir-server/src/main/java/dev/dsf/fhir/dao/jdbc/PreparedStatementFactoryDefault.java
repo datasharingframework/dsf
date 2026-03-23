@@ -24,14 +24,16 @@ import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Resource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 
 class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPreparedStatementFactory<R>
 {
-	PreparedStatementFactoryDefault(FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceIdColumn, String resourceColumn)
+	PreparedStatementFactoryDefault(FhirContext fhirContext, ObjectMapper objectMapper, Class<R> resourceType,
+			String resourceTable, String resourceIdColumn, String resourceColumn)
 	{
-		super(fhirContext, resourceType, createSql(resourceTable, resourceIdColumn, resourceColumn),
+		super(fhirContext, objectMapper, resourceType, createSql(resourceTable, resourceIdColumn, resourceColumn),
 				readByIdSql(resourceTable, resourceIdColumn, resourceColumn),
 				readByIdAndVersionSql(resourceTable, resourceIdColumn, resourceColumn),
 				updateSql(resourceTable, resourceIdColumn, resourceColumn));

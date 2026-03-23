@@ -70,6 +70,7 @@ import dev.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.PatientDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactoryImpl;
 import dev.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.PractitionerRoleDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ProvenanceDaoJdbc;
@@ -94,6 +95,9 @@ public class DaoConfig
 
 	@Autowired
 	private FhirConfig fhirConfig;
+
+	@Autowired
+	private JsonConfig jsonConfig;
 
 	@Bean
 	public DataSource dataSource()
@@ -135,165 +139,190 @@ public class DaoConfig
 	@Bean
 	public ActivityDefinitionDao activityDefinitionDao()
 	{
-		return new ActivityDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new ActivityDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean(destroyMethod = "stopLargeObjectUnlinker")
 	public BinaryDao binaryDao()
 	{
 		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
-				propertiesConfig.getDbUsersGroup());
+				jsonConfig.objectMapper(), propertiesConfig.getDbUsersGroup());
 	}
 
 	@Bean
 	public BundleDao bundleDao()
 	{
-		return new BundleDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new BundleDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public CodeSystemDao codeSystemDao()
 	{
-		return new CodeSystemDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new CodeSystemDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public DocumentReferenceDao documentReferenceDao()
 	{
-		return new DocumentReferenceDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new DocumentReferenceDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public EndpointDao endpointDao()
 	{
-		return new EndpointDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new EndpointDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public GroupDao groupDao()
 	{
-		return new GroupDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new GroupDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public HealthcareServiceDao healthcareServiceDao()
 	{
-		return new HealthcareServiceDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new HealthcareServiceDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public LibraryDao libraryDao()
 	{
-		return new LibraryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new LibraryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public LocationDao locationDao()
 	{
-		return new LocationDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new LocationDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public MeasureDao measureDao()
 	{
-		return new MeasureDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new MeasureDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public MeasureReportDao measureReportDao()
 	{
-		return new MeasureReportDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new MeasureReportDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public NamingSystemDao namingSystemDao()
 	{
-		return new NamingSystemDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new NamingSystemDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public OrganizationDao organizationDao()
 	{
-		return new OrganizationDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new OrganizationDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public OrganizationAffiliationDao organizationAffiliationDao()
 	{
-		return new OrganizationAffiliationDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new OrganizationAffiliationDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public PatientDao patientDao()
 	{
-		return new PatientDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new PatientDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public PractitionerDao practitionerDao()
 	{
-		return new PractitionerDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new PractitionerDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public PractitionerRoleDao practitionerRoleDao()
 	{
-		return new PractitionerRoleDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new PractitionerRoleDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public ProvenanceDao provenanceDao()
 	{
-		return new ProvenanceDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new ProvenanceDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public QuestionnaireDao questionnaireDao()
 	{
-		return new QuestionnaireDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new QuestionnaireDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public QuestionnaireResponseDao questionnaireResponseDao()
 	{
-		return new QuestionnaireResponseDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new QuestionnaireResponseDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public ResearchStudyDao researchStudyDao()
 	{
-		return new ResearchStudyDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new ResearchStudyDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionDao()
 	{
-		return new StructureDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new StructureDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionSnapshotDao()
 	{
 		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), permanentDeleteDataSource(),
-				fhirConfig.fhirContext());
+				fhirConfig.fhirContext(), jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public SubscriptionDao subscriptionDao()
 	{
-		return new SubscriptionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new SubscriptionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public TaskDao taskDao()
 	{
-		return new TaskDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new TaskDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public ValueSetDao valueSetDao()
 	{
-		return new ValueSetDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new ValueSetDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				jsonConfig.objectMapper());
 	}
 
 	@Bean
@@ -310,7 +339,8 @@ public class DaoConfig
 	@Bean
 	public HistoryDao historyDao()
 	{
-		return new HistroyDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao());
+		return new HistroyDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao(),
+				new PgObjectFactoryImpl(fhirConfig.fhirContext(), jsonConfig.objectMapper()));
 	}
 
 	@Bean

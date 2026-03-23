@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Library;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.LibraryDao;
 import dev.dsf.fhir.search.filter.LibraryIdentityFilter;
@@ -39,10 +41,11 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 {
 	private final ReadByUrlDaoJdbc<Library> readByUrl;
 
-	public LibraryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public LibraryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
-				LibraryIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Library.class, "libraries", "library",
+				"library_id", LibraryIdentityFilter::new,
 				List.of(factory(LibraryDate.PARAMETER_NAME, LibraryDate::new),
 						factory(LibraryIdentifier.PARAMETER_NAME, LibraryIdentifier::new,
 								LocationIdentifier.getNameModifiers()),

@@ -59,9 +59,9 @@ public class OrganizationAffiliationDaoTest
 	private static final boolean active = true;
 
 	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource,
-			permanentDeleteDataSource, fhirContext);
+			permanentDeleteDataSource, fhirContext, objectMapper);
 	private final EndpointDao endpointDao = new EndpointDaoJdbc(defaultDataSource, permanentDeleteDataSource,
-			fhirContext);
+			fhirContext, objectMapper);
 
 	public OrganizationAffiliationDaoTest()
 	{
@@ -264,8 +264,9 @@ public class OrganizationAffiliationDaoTest
 	public void testUpdateWithExistingBinary() throws Exception
 	{
 		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
-				DATABASE_USERS_GROUP);
-		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+				objectMapper, DATABASE_USERS_GROUP);
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				objectMapper);
 
 		Organization memberOrg = new Organization();
 		memberOrg.setActive(true);
@@ -304,8 +305,9 @@ public class OrganizationAffiliationDaoTest
 	public void testUpdateWithExistingBinaryUpdateMemberOrg() throws Exception
 	{
 		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
-				DATABASE_USERS_GROUP);
-		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+				objectMapper, DATABASE_USERS_GROUP);
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				objectMapper);
 
 		Organization memberOrg = new Organization();
 		memberOrg.setActive(true);
@@ -344,8 +346,9 @@ public class OrganizationAffiliationDaoTest
 	public void testUpdateWithExistingBinaryUpdateParentOrg() throws Exception
 	{
 		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
-				DATABASE_USERS_GROUP);
-		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+				objectMapper, DATABASE_USERS_GROUP);
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				objectMapper);
 
 		Organization memberOrg = new Organization();
 		memberOrg.setActive(true);
@@ -469,7 +472,8 @@ public class OrganizationAffiliationDaoTest
 	@Test
 	public void testBigUpdate() throws Exception
 	{
-		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				objectMapper);
 
 		Organization memberOrg = new Organization();
 		memberOrg.setActive(true);

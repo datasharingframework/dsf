@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import org.hl7.fhir.r4.model.Resource;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
 public class AbstractActiveParameter<R extends Resource> extends AbstractBooleanParameter<R>
@@ -53,7 +54,8 @@ public class AbstractActiveParameter<R extends Resource> extends AbstractBoolean
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		statement.setBoolean(parameterIndex, value);
 	}

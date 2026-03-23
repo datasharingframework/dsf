@@ -33,6 +33,8 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -72,11 +74,14 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 		return switch (valueAndType.type)
 		{
 			case ID -> "research_study->'principalInvestigator'->>'reference' = ANY (?)";
+
 			case RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				"research_study->'principalInvestigator'->>'reference' = ?";
+
 			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> IDENTIFIERS_SUBQUERY + " @> ?";
+
 				case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
 						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 			};
@@ -91,42 +96,34 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
-			case ID:
-				Array array = arrayCreator.apply("TEXT",
-						Arrays.stream(TARGET_RESOURCE_TYPE_NAMES).map(n -> n + "/" + valueAndType.id).toArray());
-				statement.setArray(parameterIndex, array);
-				break;
-			case RESOURCE_NAME_AND_ID:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
+			case ID -> statement.setArray(parameterIndex, arrayCreator.apply("TEXT",
+					Arrays.stream(TARGET_RESOURCE_TYPE_NAMES).map(n -> n + "/" + valueAndType.id).toArray()));
+
+			case RESOURCE_NAME_AND_ID, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
-				break;
-			case URL:
-				statement.setString(parameterIndex, valueAndType.url);
-				break;
-			case IDENTIFIER:
-			{
+
+			case URL -> statement.setString(parameterIndex, valueAndType.url);
+
+			case IDENTIFIER -> {
 				switch (valueAndType.identifier.type)
 				{
-					case CODE:
-						statement.setString(parameterIndex,
-								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
-						break;
-					case CODE_AND_SYSTEM:
-						statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.identifier.codeValue
-								+ "\", \"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
-					case CODE_AND_NO_SYSTEM_PROPERTY:
+					case CODE -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+							new IdentifierParameter(null, valueAndType.identifier.codeValue)));
+
+					case CODE_AND_SYSTEM -> statement.setObject(parameterIndex,
+							pgObjectFactory.jsonParameterToPgObjectAsArray(new IdentifierParameter(
+									valueAndType.identifier.systemValue, valueAndType.identifier.codeValue)));
+
+					case SYSTEM -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+							new IdentifierParameter(valueAndType.identifier.systemValue, null)));
+
+					case CODE_AND_NO_SYSTEM_PROPERTY ->
 						statement.setString(parameterIndex, valueAndType.identifier.codeValue);
-						break;
-					case SYSTEM:
-						statement.setString(parameterIndex,
-								"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
 				}
 			}
 		}

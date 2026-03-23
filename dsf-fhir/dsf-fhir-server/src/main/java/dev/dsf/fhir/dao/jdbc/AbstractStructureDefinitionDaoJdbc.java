@@ -30,6 +30,8 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
@@ -62,11 +64,11 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 	private final String readByBaseDefinition;
 
 	protected AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext, String resourceTable, String resourceColumn, String resourceIdColumn,
-			Function<Identity, SearchQueryIdentityFilter> userFilter)
+			FhirContext fhirContext, ObjectMapper objectMapper, String resourceTable, String resourceColumn,
+			String resourceIdColumn, Function<Identity, SearchQueryIdentityFilter> userFilter)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, StructureDefinition.class, resourceTable,
-				resourceColumn, resourceIdColumn, userFilter,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, StructureDefinition.class,
+				resourceTable, resourceColumn, resourceIdColumn, userFilter,
 				List.of(factory(resourceColumn, StructureDefinitionDate.PARAMETER_NAME, StructureDefinitionDate::new),
 						factory(resourceColumn, StructureDefinitionIdentifier.PARAMETER_NAME,
 								StructureDefinitionIdentifier::new, StructureDefinitionIdentifier.getNameModifiers()),
