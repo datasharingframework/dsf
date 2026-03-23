@@ -181,9 +181,9 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		String usernameTitle = "";
 		if (securityContext.getUserPrincipal() instanceof PractitionerIdentity p)
 		{
-			if (p.getPractitionerIdentifierValue().isPresent())
-				usernameTitle += "Mail: " + p.getPractitionerIdentifierValue().get();
-			if (p.getPractitionerIdentifierValue().isPresent() && !p.getPractionerRoles().isEmpty())
+			if (p.getPractitionerIdentifierValue() != null)
+				usernameTitle += "Mail: " + p.getPractitionerIdentifierValue();
+			if (p.getPractitionerIdentifierValue() != null && !p.getPractionerRoles().isEmpty())
 				usernameTitle += " - ";
 			if (!p.getPractionerRoles().isEmpty())
 				usernameTitle += p.getPractionerRoles().stream()
@@ -195,7 +195,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 
 		context.setVariable("practitionerIdentifierValue",
 				securityContext.getUserPrincipal() instanceof PractitionerIdentity p
-						? p.getPractitionerIdentifierValue().orElse(null)
+						? p.getPractitionerIdentifierValue()
 						: null);
 
 		context.setVariable("openid", "OPENID".equals(securityContext.getAuthenticationScheme()));

@@ -60,7 +60,7 @@ public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 			if (identity instanceof OrganizationIdentity
 					|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN")))
 				return "";
-			else if (identity instanceof PractitionerIdentity p && p.getPractitionerIdentifierValue().isPresent())
+			else if (identity instanceof PractitionerIdentity p && p.getPractitionerIdentifierValue() != null)
 				return "EXISTS (SELECT 1 FROM jsonb_array_elements(" + resourceColumn + "->'extension') AS authExt "
 						+ "WHERE authExt->>'url' = 'http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization' "
 						+ "AND EXISTS (SELECT 1 FROM jsonb_array_elements(authExt->'extension') AS ext "
@@ -79,7 +79,7 @@ public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE)
 				&& identity instanceof PractitionerIdentity p && !p.hasPractionerRole("DSF_ADMIN")
-				&& p.getPractitionerIdentifierValue().isPresent())
+				&& p.getPractitionerIdentifierValue() != null)
 			return 2;
 		else
 			return 0;
@@ -91,10 +91,10 @@ public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE)
 				&& identity instanceof PractitionerIdentity p && !p.hasPractionerRole("DSF_ADMIN")
-				&& p.getPractitionerIdentifierValue().isPresent())
+				&& p.getPractitionerIdentifierValue() != null)
 		{
 			if (subqueryParameterIndex == 1)
-				statement.setString(parameterIndex, p.getPractitionerIdentifierValue().get());
+				statement.setString(parameterIndex, p.getPractitionerIdentifierValue());
 			else if (subqueryParameterIndex == 2)
 				statement.setString(parameterIndex, toJson(p.getPractionerRoles()));
 		}

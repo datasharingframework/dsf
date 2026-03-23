@@ -74,7 +74,7 @@ public class TestPractitionerIdentity implements PractitionerIdentity
 	}
 
 	@Override
-	public Optional<String> getOrganizationIdentifierValue()
+	public String getOrganizationIdentifierValue()
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -129,8 +129,8 @@ public class TestPractitionerIdentity implements PractitionerIdentity
 	}
 
 	@Override
-	public Optional<String> getPractitionerIdentifierValue()
+	public String getPractitionerIdentifierValue()
 	{
-		return Optional.empty();
+		throw new UnsupportedOperationException();
 	}
 }

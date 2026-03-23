@@ -65,7 +65,7 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 			{
 				if (p.hasPractionerRole("DSF_ADMIN"))
 					return resourceColumn + "->'restriction'->'recipient' @> ?::jsonb";
-				else if (p.getPractitionerIdentifierValue().isPresent())
+				else if (p.getPractitionerIdentifierValue() != null)
 				{
 					return "((" + resourceColumn + "->'requester'->'identifier'->>'system' = '"
 							+ PractitionerIdentity.PRACTITIONER_IDENTIFIER_SYSTEM + "' AND " + resourceColumn
@@ -93,7 +93,7 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 			{
 				if (p.hasPractionerRole("DSF_ADMIN"))
 					return 1;
-				else if (p.getPractitionerIdentifierValue().isPresent())
+				else if (p.getPractitionerIdentifierValue() != null)
 					return 2;
 				else
 					return 1;
@@ -129,10 +129,10 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 					statement.setString(parameterIndex, "[{\"reference\": \""
 							+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue() + "\"}]");
 				}
-				else if (p.getPractitionerIdentifierValue().isPresent())
+				else if (p.getPractitionerIdentifierValue() != null)
 				{
 					if (subqueryParameterIndex == 1)
-						statement.setString(parameterIndex, p.getPractitionerIdentifierValue().get());
+						statement.setString(parameterIndex, p.getPractitionerIdentifierValue());
 					else if (subqueryParameterIndex == 2)
 					{
 						statement.setString(parameterIndex, "[{\"reference\": \""

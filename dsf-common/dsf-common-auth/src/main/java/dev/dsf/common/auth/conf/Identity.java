@@ -34,7 +34,7 @@ public interface Identity extends Principal
 	 */
 	Organization getOrganization();
 
-	Optional<String> getOrganizationIdentifierValue();
+	String getOrganizationIdentifierValue();
 
 	Set<DsfRole> getDsfRoles();
 

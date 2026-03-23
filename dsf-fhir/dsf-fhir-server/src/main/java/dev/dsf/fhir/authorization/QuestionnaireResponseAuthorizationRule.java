@@ -151,14 +151,10 @@ public class QuestionnaireResponseAuthorizationRule
 								errors.add("QuestionnaireResponse.author.identifier.system not "
 										+ NAMING_SYSTEM_PRACTITIONER_IDENTIFIER);
 
-							Optional<String> practitionerIdentifierValue = p.getPractitionerIdentifierValue();
-							if (practitionerIdentifierValue.isPresent())
-							{
-								if (!practitionerIdentifierValue.get().equals(identifier.getValue()))
-									errors.add("QuestionnaireResponse.author not current practitioner identity");
-							}
-							else
-								throw new RuntimeException("Authenticated practitioner user has no identifier");
+							String practitionerIdentifierValue = p.getPractitionerIdentifierValue();
+							if (practitionerIdentifierValue == null
+									|| !practitionerIdentifierValue.equals(identifier.getValue()))
+								errors.add("QuestionnaireResponse.author not current practitioner identity");
 						}
 						else if (identity instanceof OrganizationIdentity)
 						{
@@ -322,7 +318,8 @@ public class QuestionnaireResponseAuthorizationRule
 					&& e.getValue() instanceof Identifier i && i.hasSystem() && i.hasValue())
 			{
 				return NAMING_SYSTEM_PRACTITIONER_IDENTIFIER.equals(i.getSystem())
-						&& identity.getPractitionerIdentifierValue().map(v -> v.equals(i.getValue())).orElse(false);
+						&& identity.getPractitionerIdentifierValue() != null
+						&& identity.getPractitionerIdentifierValue().equals(i.getValue());
 			}
 			else if (EXTENSION_QUESTIONNAIRE_AUTHORIZATION_PRACTITIONER_ROLE.equals(e.getUrl())
 					&& e.getValue() instanceof Coding c && c.hasSystem() && c.hasCode())

@@ -55,7 +55,7 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 		organization.getCertificate().map(X509CertificateWrapper::subjectDn)
 				.ifPresent(d -> MDC.put(DSF_ORGANIZATION_DN, d));
 
-		organization.getOrganizationIdentifierValue().ifPresent(i -> MDC.put(DSF_ORGANIZATION_IDENTIFIER, i));
+		MDC.put(DSF_ORGANIZATION_IDENTIFIER, organization.getOrganizationIdentifierValue());
 		organization.getEndpointIdentifierValue().ifPresent(i -> MDC.put(DSF_ENDPOINT_IDENTIFIER, i));
 	}
 
@@ -71,9 +71,9 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 		practitioner.getCredentials().map(DsfOpenIdCredentials::getUserId)
 				.ifPresent(i -> MDC.put(DSF_PRACTITIONER_SUB, i));
 
-		practitioner.getOrganizationIdentifierValue().ifPresent(i -> MDC.put(DSF_ORGANIZATION_IDENTIFIER, i));
+		MDC.put(DSF_ORGANIZATION_IDENTIFIER, practitioner.getOrganizationIdentifierValue());
 		practitioner.getEndpointIdentifierValue().ifPresent(i -> MDC.put(DSF_ENDPOINT_IDENTIFIER, i));
-		practitioner.getPractitionerIdentifierValue().ifPresent(i -> MDC.put(DSF_PRACTITIONER_IDENTIFIER, i));
+		MDC.put(DSF_PRACTITIONER_IDENTIFIER, practitioner.getPractitionerIdentifierValue());
 
 		if (!practitioner.getPractionerRoles().isEmpty())
 			MDC.put(DSF_PRACTITIONER_ROLES, practitioner.getPractionerRoles().stream()
