@@ -34,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -63,6 +64,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
+import net.sf.saxon.lib.FeatureKeys;
 
 public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, InitializingBean
 {
@@ -106,7 +108,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 
 	private final Map<Class<? extends Resource>, List<ThymeleafContext>> contextsByResourceType;
 
-	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private final TransformerFactory transformerFactory;
 	private final TemplateEngine templateEngine = new TemplateEngine();
 
 	/**
@@ -139,6 +141,20 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		resolver.setCacheable(cacheEnabled);
 
 		templateEngine.setTemplateResolver(resolver);
+
+		transformerFactory = TransformerFactory.newInstance();
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
+		try
+		{
+			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			transformerFactory.setFeature(FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, false);
+		}
+		catch (TransformerConfigurationException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

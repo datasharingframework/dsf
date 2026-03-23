@@ -36,8 +36,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
@@ -70,6 +72,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
+import net.sf.saxon.lib.FeatureKeys;
 
 public class BundleGenerator
 {
@@ -380,6 +383,19 @@ public class BundleGenerator
 		{
 			// minimized output: empty-element tags, no indentation, no line-breaks
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
+			try
+			{
+				transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+				transformerFactory.setFeature(FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, false);
+			}
+			catch (TransformerConfigurationException e)
+			{
+				throw new RuntimeException(e);
+			}
+
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
