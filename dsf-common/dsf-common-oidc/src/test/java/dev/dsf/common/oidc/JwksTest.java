@@ -16,14 +16,15 @@
 package dev.dsf.common.oidc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
 
 import org.junit.Test;
 
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.common.oidc.Jwks.JwksKey;
@@ -58,7 +59,21 @@ public class JwksTest
 			            ],
 			            "x5t": "dQL-LEROCVCUfvs0W_5ayioFWjA",
 			            "x5t#S256": "yi-b9TklWk5X5d_Pr_moQVmdkdVa4wZTuYnDxWXrXag"
-			        }
+			        },
+			        {
+			            "kid": "BMvf48wBJERBDMGInNfOsSiTWAnNiWGinVPnjSCeWcg",
+			            "kty": "EC",
+			            "alg": "ES384",
+			            "use": "sig",
+			            "x5c": [
+			                "MIIBTTCB1AIGAZ0bZiPeMAoGCCqGSM49BAMCMBIxEDAOBgNVBAMMB2VjX3Rlc3QwHhcNMjYwMzIzMTU1MTExWhcNMzYwMzIzMTU1MjUxWjASMRAwDgYDVQQDDAdlY190ZXN0MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE3Nb3kbLLkQ6y/E8yDKrB3LZVo1aXQV12OR3yWFl9D/Xc4RZ874NngV9FVccqVS41WZp5HbiH/OhIgvKvyRE97BRZu/i+UhZz59l74fogV4sNGLtbnbzA62eQbIAu/c/kMAoGCCqGSM49BAMCA2gAMGUCMFI+m0Z21NfMGjlPpr4v64DOEzjoP4Y9fS4SJK3YIEfHvkVidDgm2A1lZD0ZRKXb7AIxAPi1ScvwtrIl0oadty4Qjg1+lWFAp943fHdFEuNE6GeagkB/dm9Nuo1wqy6hKm5O9Q=="
+			            ],
+			            "x5t": "3luSUTuX5v_MVEGVP_WDwy1e9GI",
+			            "x5t#S256": "ra4lrnu_zhxYpamDEvtcxEvAFenH9CAuS5OvEiDtTho",
+			            "crv": "P-384",
+			            "x": "3Nb3kbLLkQ6y_E8yDKrB3LZVo1aXQV12OR3yWFl9D_Xc4RZ874NngV9FVccqVS41",
+			            "y": "WZp5HbiH_OhIgvKvyRE97BRZu_i-UhZz59l74fogV4sNGLtbnbzA62eQbIAu_c_k"
+			    }
 			    ]
 			}""";
 
@@ -70,27 +85,41 @@ public class JwksTest
 
 		assertNotNull(jwks);
 		assertNotNull(jwks.getKeys());
-		assertEquals(2, jwks.getKeys().size());
+		assertEquals(3, jwks.getKeys().size());
 
 		Optional<JwksKey> jwk0o = jwks.getKey("kncc6492FTtclCO8qJvhS2PvYap_VabfAPOLhK3mkfA");
 		Optional<JwksKey> jwk1o = jwks.getKey("Zp7ockRwsxqM6FrZlDJUOVwAxPICO2jBW0Rbk25oYGk");
+		Optional<JwksKey> jwk2o = jwks.getKey("BMvf48wBJERBDMGInNfOsSiTWAnNiWGinVPnjSCeWcg");
 
 		assertTrue(jwk0o.isPresent());
 		assertTrue(jwk1o.isPresent());
+		assertTrue(jwk2o.isPresent());
 		assertTrue(jwks.getKey(null).isEmpty());
 		assertTrue(jwks.getKey("not existing").isEmpty());
 
 		JwksKey jwk0 = jwk0o.get();
 		JwksKey jwk1 = jwk1o.get();
+		JwksKey jwk2 = jwk2o.get();
 
 		assertNotNull(jwk0.kid());
 		assertEquals("kncc6492FTtclCO8qJvhS2PvYap_VabfAPOLhK3mkfA", jwk0.kid());
 		assertNotNull(jwk1.kid());
 		assertEquals("Zp7ockRwsxqM6FrZlDJUOVwAxPICO2jBW0Rbk25oYGk", jwk1.kid());
+		assertNotNull(jwk2.kid());
+		assertEquals("BMvf48wBJERBDMGInNfOsSiTWAnNiWGinVPnjSCeWcg", jwk2.kid());
 
-		assertNotNull(jwk0.toAlgorithm());
-		assertEquals("RS256", jwk0.toAlgorithm().getName());
+		Optional<Algorithm> jwk0a = jwk0.toAlgorithm();
+		assertNotNull(jwk0a);
+		assertTrue(jwk0a.isPresent());
+		assertEquals("RS256", jwk0.toAlgorithm().get().getName());
 
-		assertThrows(JwksException.class, jwk1::toAlgorithm);
+		Optional<Algorithm> jwk1a = jwk1.toAlgorithm();
+		assertNotNull(jwk1a);
+		assertFalse(jwk1a.isPresent());
+
+		Optional<Algorithm> jwk2a = jwk2.toAlgorithm();
+		assertNotNull(jwk2a);
+		assertTrue(jwk2a.isPresent());
+		assertEquals("ES384", jwk2.toAlgorithm().get().getName());
 	}
 }

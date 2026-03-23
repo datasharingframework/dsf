@@ -162,6 +162,14 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.server.auth.oidc.provider.discovery.path:/.well-known/openid-configuration}")
 	private String oidcProviderDiscoveryPath;
 
+	@Documentation(description = "OIDC provider client cache timeout of the 'openid-configuration' discovery resource")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.cache.timeout.configuration.resource:PT1H}")
+	private String oidcProviderClientCacheConfigurationResourceTimeout;
+
+	@Documentation(description = "OIDC provider client cache timeout of the jwks resource")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.cache.timeout.jwks.resource:PT1H}")
+	private String oidcProviderClientCacheJwksResourceTimeout;
+
 	@Documentation(description = "OIDC provider client connect timeout")
 	@Value("${dev.dsf.server.auth.oidc.provider.client.timeout.connect:PT5S}")
 	private String oidcProviderClientTimeoutConnect;
@@ -407,24 +415,44 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
 		KeyStore keyStore = oidcProviderClientKeyStore(keyStorePassword);
 
-		return new BaseOidcClientWithCache(new BaseOidcClientJersey(oidcProviderRealmBaseUrl, oidcProviderDiscoveryPath,
-				trustStore, keyStore, keyStore == null ? null : keyStorePassword, proxyUrl, proxyUsername,
-				proxyPassword, buildInfoReader().getUserAgentValue(), oidcProviderClientTimeoutConnect(),
-				oidcProviderClientTimeoutRead(), false));
+		return new BaseOidcClientWithCache(getOidcProviderClientCacheConfigurationResourceTimeout(),
+				getOidcProviderClientCacheJwksResourceTimeout(),
+				new BaseOidcClientJersey(oidcProviderRealmBaseUrl, oidcProviderDiscoveryPath, trustStore, keyStore,
+						keyStore == null ? null : keyStorePassword, proxyUrl, proxyUsername, proxyPassword,
+						buildInfoReader().getUserAgentValue(), oidcProviderClientTimeoutConnect(),
+						oidcProviderClientTimeoutRead(), false));
+	}
+
+	private Duration getOidcProviderClientCacheConfigurationResourceTimeout()
+	{
+		return assertPositive(Duration.parse(oidcProviderClientCacheConfigurationResourceTimeout));
+	}
+
+	private Duration getOidcProviderClientCacheJwksResourceTimeout()
+	{
+		return assertPositive(Duration.parse(oidcProviderClientCacheJwksResourceTimeout));
 	}
 
 	@Bean
 	@Lazy
 	public Duration oidcProviderClientTimeoutRead()
 	{
-		return Duration.parse(oidcProviderClientTimeoutRead);
+		return assertPositive(Duration.parse(oidcProviderClientTimeoutRead));
 	}
 
 	@Bean
 	@Lazy
 	public Duration oidcProviderClientTimeoutConnect()
 	{
-		return Duration.parse(oidcProviderClientTimeoutConnect);
+		return assertPositive(Duration.parse(oidcProviderClientTimeoutConnect));
+	}
+
+	private Duration assertPositive(Duration duration)
+	{
+		if (duration != null && duration.isNegative())
+			throw new IllegalArgumentException("configured duration is negative");
+		else
+			return duration;
 	}
 
 	private Proxy oidcClientProxy()

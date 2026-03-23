@@ -32,7 +32,7 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 	{
 	}
 
-	private final Duration cacheTimeoutconfigurationResource;
+	private final Duration cacheTimeoutConfigurationResource;
 	private final Duration cacheTimeoutJwksResource;
 	private final Duration cacheTimeoutAccessTokenBeforeExpiration;
 	private final OidcClientWithDecodedJwt delegate;
@@ -42,7 +42,7 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 	private CacheEntry<DecodedJWT> accessTokenCache;
 
 	/**
-	 * @param cacheTimeoutconfigurationResource
+	 * @param cacheTimeoutConfigurationResource
 	 *            not <code>null</code>, not negative
 	 * @param cacheTimeoutJwksResource
 	 *            not <code>null</code>, not negative
@@ -51,13 +51,13 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 	 * @param delegate
 	 *            not <code>null</code>
 	 */
-	public OidcClientWithCache(Duration cacheTimeoutconfigurationResource, Duration cacheTimeoutJwksResource,
+	public OidcClientWithCache(Duration cacheTimeoutConfigurationResource, Duration cacheTimeoutJwksResource,
 			Duration cacheTimeoutAccessTokenBeforeExpiration, OidcClientWithDecodedJwt delegate)
 	{
-		this.cacheTimeoutconfigurationResource = Objects.requireNonNull(cacheTimeoutconfigurationResource,
-				"cacheTimeoutconfigurationResource");
-		if (cacheTimeoutconfigurationResource.isNegative())
-			throw new IllegalArgumentException("cacheTimeoutconfigurationResource negative");
+		this.cacheTimeoutConfigurationResource = Objects.requireNonNull(cacheTimeoutConfigurationResource,
+				"cacheTimeoutConfigurationResource");
+		if (cacheTimeoutConfigurationResource.isNegative())
+			throw new IllegalArgumentException("cacheTimeoutConfigurationResource negative");
 
 		this.cacheTimeoutJwksResource = Objects.requireNonNull(cacheTimeoutJwksResource, "cacheTimeoutJwksResource");
 		if (cacheTimeoutJwksResource.isNegative())
@@ -73,13 +73,13 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 	@Override
 	public Configuration getConfiguration() throws OidcClientException
 	{
-		if (configurationCache != null && configurationCache.timeout.isBefore(ZonedDateTime.now()))
+		if (configurationCache != null && configurationCache.timeout.isAfter(ZonedDateTime.now()))
 			return configurationCache.resource;
 		else
 		{
 			Configuration configuration = delegate.getConfiguration();
 			configurationCache = new CacheEntry<Configuration>(
-					ZonedDateTime.now().plus(cacheTimeoutconfigurationResource), configuration);
+					ZonedDateTime.now().plus(cacheTimeoutConfigurationResource), configuration);
 			return configuration;
 		}
 	}
@@ -89,7 +89,7 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 	{
 		Configuration configuration = getConfiguration();
 
-		if (jwksCache != null && jwksCache.timeout.isBefore(ZonedDateTime.now()))
+		if (jwksCache != null && jwksCache.timeout.isAfter(ZonedDateTime.now()))
 			return jwksCache.resource;
 		else
 		{

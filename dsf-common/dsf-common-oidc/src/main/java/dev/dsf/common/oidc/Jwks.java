@@ -39,6 +39,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
@@ -49,6 +52,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Jwks
 {
+	private static final Logger logger = LoggerFactory.getLogger(Jwks.class);
+
+	private static final int RSA_MIN_KEY_LENGTH = 2048;
+
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static record JwksKey(@JsonProperty("kid") String kid, @JsonProperty("kty") String kty,
 			@JsonProperty("alg") String alg, @JsonProperty("crv") String crv, @JsonProperty("use") String use,
@@ -77,20 +84,27 @@ public class Jwks
 		 * @throws JwksException
 		 *             if {@link Algorithm} can't be created or is not supported for the enclosed key material
 		 */
-		public Algorithm toAlgorithm() throws JwksException
+		public Optional<Algorithm> toAlgorithm() throws JwksException
 		{
-			return switch (kty)
+			return Optional.ofNullable(switch (kty)
 			{
 				case "RSA" -> toRsaAlgorithm();
 				case "EC" -> toEcdsaAlgorithm();
 
-				default -> throw new JwksException("JWKS kty property value '" + kty + "' not one of 'RSA' or 'EC'");
-			};
+				default -> {
+					logger.warn("JWKS kty property value '{}' not one of 'RSA' or 'EC'", kty);
+					yield null;
+				}
+			});
 		}
 
 		private Algorithm toRsaAlgorithm()
 		{
 			RSAPublicKey key = toRsaPublicKey(n, e);
+
+			if (key == null)
+				return null;
+
 			RSAKeyProvider keyProvider = toRsaKeyProvider(key, kid);
 
 			return switch (alg)
@@ -99,14 +113,20 @@ public class Jwks
 				case "RS384" -> Algorithm.RSA384(keyProvider);
 				case "RS512" -> Algorithm.RSA512(keyProvider);
 
-				default -> throw new JwksException(
-						"JWKS alg property value '" + alg + "' not one of 'RSA256', 'RSA384' or 'RSA512'");
+				default -> {
+					logger.warn("JWKS alg property value '{}' not one of 'RS256', 'RS384' or 'RS512'", alg);
+					yield null;
+				}
 			};
 		}
 
 		private Algorithm toEcdsaAlgorithm()
 		{
 			ECPublicKey key = toEcPublicKey(x, y, crv);
+
+			if (key == null)
+				return null;
+
 			ECDSAKeyProvider keyProvider = toEcKeyProvider(key, kid);
 
 			return switch (alg)
@@ -115,8 +135,10 @@ public class Jwks
 				case "ES384" -> Algorithm.ECDSA384(keyProvider);
 				case "ES512" -> Algorithm.ECDSA512(keyProvider);
 
-				default -> throw new JwksException(
-						"JWKS crv property value '" + alg + "' not one of 'ES256', 'ES384' or 'ES512'");
+				default -> {
+					logger.warn("JWKS crv property value '{}' not one of 'ES256', 'ES384' or 'ES512'", alg);
+					yield null;
+				}
 			};
 		}
 
@@ -152,6 +174,12 @@ public class Jwks
 			BigInteger modulus = new BigInteger(1, Base64.getUrlDecoder().decode(n));
 			BigInteger exponent = new BigInteger(1, Base64.getUrlDecoder().decode(e));
 
+			if (modulus.bitLength() < RSA_MIN_KEY_LENGTH)
+			{
+				logger.warn("JWKS RSA key (kid: '{}') length {} <{} bit", kid, modulus.bitLength(), RSA_MIN_KEY_LENGTH);
+				return null;
+			}
+
 			try
 			{
 				RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, exponent);
@@ -161,7 +189,10 @@ public class Jwks
 			}
 			catch (InvalidKeySpecException | NoSuchAlgorithmException ex)
 			{
-				throw new JwksException("Unable to create RSA public key", ex);
+				logger.debug("Unable to create RSA public key: {} - {}", ex.getClass().getName(), ex.getMessage());
+				logger.warn("Unable to create RSA public key", ex);
+
+				return null;
 			}
 		}
 
@@ -197,16 +228,21 @@ public class Jwks
 			BigInteger xCoordinate = new BigInteger(1, Base64.getUrlDecoder().decode(x));
 			BigInteger yCoordinate = new BigInteger(1, Base64.getUrlDecoder().decode(y));
 
-			ECGenParameterSpec curve = switch (crv)
+			return switch (crv)
 			{
-				case "P-256" -> new ECGenParameterSpec("secp256r1");
-				case "P-384" -> new ECGenParameterSpec("secp384r1");
-				case "P-521" -> new ECGenParameterSpec("secp521r1");
+				case "P-256" -> toEcPublicKey(xCoordinate, yCoordinate, new ECGenParameterSpec("secp256r1"));
+				case "P-384" -> toEcPublicKey(xCoordinate, yCoordinate, new ECGenParameterSpec("secp384r1"));
+				case "P-521" -> toEcPublicKey(xCoordinate, yCoordinate, new ECGenParameterSpec("secp521r1"));
 
-				default -> throw new JwksException(
-						"JWKS crv property value '" + crv + "' not one of 'P-256', 'P-384' or 'P-521'");
+				default -> {
+					logger.warn("JWKS crv property value '{}' not one of 'P-256', 'P-384' or 'P-521'", crv);
+					yield null;
+				}
 			};
+		}
 
+		private ECPublicKey toEcPublicKey(BigInteger xCoordinate, BigInteger yCoordinate, ECGenParameterSpec curve)
+		{
 			try
 			{
 				AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
@@ -219,7 +255,10 @@ public class Jwks
 			}
 			catch (NoSuchAlgorithmException | InvalidParameterSpecException | InvalidKeySpecException ex)
 			{
-				throw new JwksException("Unable to create EC public key", ex);
+				logger.debug("Unable to create EC public key", ex);
+				logger.warn("Unable to create EC public key: {} - {}", ex.getClass().getName(), ex.getMessage());
+
+				return null;
 			}
 		}
 	}
