@@ -42,6 +42,7 @@ import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.ee11.servlet.SessionHandler;
 import org.eclipse.jetty.ee11.webapp.WebAppContext;
+import org.eclipse.jetty.http.HttpCookie.SameSite;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.io.ClientConnector;
@@ -91,6 +92,7 @@ import dev.dsf.common.oidc.BaseOidcClientWithCache;
 import dev.dsf.common.oidc.JwtVerifier;
 import dev.dsf.common.oidc.JwtVerifierImpl;
 import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.SessionCookieConfig;
 
 @Configuration
 @PropertySource(value = "file:conf/jetty.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
@@ -315,6 +317,12 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	private void configureSecurityHandler(WebAppContext webAppContext, Supplier<Integer> statusPortSupplier)
 	{
 		SessionHandler sessionHandler = webAppContext.getSessionHandler();
+		sessionHandler.setSameSite(SameSite.LAX);
+
+		SessionCookieConfig sessionCookieConfig = sessionHandler.getSessionCookieConfig();
+		sessionCookieConfig.setSecure(true);
+		sessionCookieConfig.setHttpOnly(true);
+
 		DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
 
 		OpenIdConfiguration openIdConfiguration = null;
