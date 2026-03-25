@@ -107,6 +107,9 @@ window.addEventListener('DOMContentLoaded', () => {
 			completeQuestionnaireResponse()
 			event.preventDefault()
 		})
+
+		// pending QuestionnaireResponse
+		handlePendingQuestionnaireResponse()
 	}
 
 	if (resourceType != null && resourceType[1] === 'Task' && resourceType[2] && (resourceType[3] === undefined || resourceType[4])) {
@@ -145,31 +148,31 @@ window.addEventListener('DOMContentLoaded', () => {
 			startProcess()
 			event.preventDefault()
 		})
+
+		// pending Task
+		handlePendingTask()
 	}
 
 	document.querySelectorAll(".collapse-button").forEach(button => {
 		button.addEventListener("click", () => {
 			button.classList.toggle("collapse-button-rotated")
 
-			const parent = button.closest(".collapsable");
-			parent.classList.toggle("collapsed");
-			parent.classList.toggle("expanded");
+			const parent = button.closest(".collapsable")
+			parent.classList.toggle("collapsed")
+			parent.classList.toggle("expanded")
 		})
-	});
+	})
 
 	document.querySelectorAll(".collapsable").forEach(element => {
-		content = element.querySelector(".content-pre");
+		const content = element.querySelector(".content-pre")
+		if (!content)
+			return
 
-		function checkOverflow() {
-			if (content.scrollHeight > element.clientHeight) {
-				element.classList.add("overflow");
-			} else {
-				element.classList.add("no-overflow");
-			}
-		}
+		const hasOverflow = content.scrollHeight > element.clientHeight
 
-		checkOverflow();
-	});
+		element.classList.toggle("overflow", hasOverflow)
+		element.classList.toggle("no-overflow", !hasOverflow)
+	})
 })
 
 window.addEventListener("popstate", (event) => {

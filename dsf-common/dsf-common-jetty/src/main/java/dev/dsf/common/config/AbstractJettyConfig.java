@@ -212,6 +212,10 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.server.auth.oidc.back.channel.logout.path:/back-channel-logout}")
 	private String oidcBackChannelPath;
 
+	@Documentation(description = "Maximum inactivity period after which the server session for OIDC logins is invalidated; the access token may expire earlier, resulting in earlier session invalidation")
+	@Value("${dev.dsf.server.auth.oidc.session.timeout:PT30M}")
+	private String oidcSessionTimeout;
+
 	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
 	@Value("${dev.dsf.proxy.url:#{null}}")
 	private String proxyUrl;
@@ -318,6 +322,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	{
 		SessionHandler sessionHandler = webAppContext.getSessionHandler();
 		sessionHandler.setSameSite(SameSite.LAX);
+		sessionHandler.setMaxInactiveInterval(oidcSessionTimeout());
 
 		SessionCookieConfig sessionCookieConfig = sessionHandler.getSessionCookieConfig();
 		sessionCookieConfig.setSecure(true);
@@ -334,7 +339,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		if (oidcAuthorizationCodeFlowEnabled || oidcBearerTokenEnabled || oidcBackChannelLogoutEnabled)
 		{
 			openIdConfiguration = new OpenIdConfiguration.Builder(oidcProviderRealmBaseUrl, oidcClientId,
-					oidcClientSecret).httpClient(createOidcClient()).build();
+					oidcClientSecret).logoutWhenIdTokenIsExpired(true).httpClient(createOidcClient()).build();
 
 			if (oidcAuthorizationCodeFlowEnabled)
 			{
@@ -441,18 +446,24 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		return assertPositive(Duration.parse(oidcProviderClientCacheJwksResourceTimeout));
 	}
 
-	@Bean
-	@Lazy
-	public Duration oidcProviderClientTimeoutRead()
+	private Duration oidcProviderClientTimeoutRead()
 	{
 		return assertPositive(Duration.parse(oidcProviderClientTimeoutRead));
 	}
 
-	@Bean
-	@Lazy
-	public Duration oidcProviderClientTimeoutConnect()
+	private Duration oidcProviderClientTimeoutConnect()
 	{
 		return assertPositive(Duration.parse(oidcProviderClientTimeoutConnect));
+	}
+
+	private int oidcSessionTimeout()
+	{
+		long seconds = assertPositive(Duration.parse(oidcSessionTimeout)).getSeconds();
+
+		if (seconds >= Integer.MAX_VALUE)
+			seconds = Integer.MAX_VALUE;
+
+		return (int) seconds;
 	}
 
 	private Duration assertPositive(Duration duration)

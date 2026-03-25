@@ -255,13 +255,23 @@ input[type=number] {
 }
 
 button.submit {
-	background-color: #326F95;
-	color: #fff;
+	background-color: var(--color-prime);
+	color: var(--color-background);
 	padding: 12px 60px;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
 	float: left;
+}
+
+@keyframes button-blink-red {
+	0%  { background-color: var(--color-info-red); color: var(--color-info-background-red); }
+	33.3%  { background-color: var(--color-prime); color: var(--color-background); }
+	66.6%  { background-color: var(--color-info-red); color: var(--color-info-background-red); }
+}
+
+.button-blink {
+	animation: button-blink-red 0.7s steps(1);
 }
 
 .spinner-enabled {
