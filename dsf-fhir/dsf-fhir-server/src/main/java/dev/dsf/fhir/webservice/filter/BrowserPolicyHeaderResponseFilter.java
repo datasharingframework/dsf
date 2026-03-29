@@ -17,6 +17,7 @@ package dev.dsf.fhir.webservice.filter;
 
 import java.io.IOException;
 
+import dev.dsf.fhir.help.ParameterConverter;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -45,17 +46,29 @@ public class BrowserPolicyHeaderResponseFilter implements ContainerResponseFilte
 			headers.add("Cross-Origin-Resource-Policy", "same-site");
 			headers.add("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
 
-			// Don't send Content-Security-Policy header for non html content
+			// Don't send Content-Security-Policy header for non html, svg or pdf content
 			if (!requestContext.getUriInfo().getPath().startsWith("static/")
 					|| (requestContext.getUriInfo().getPath().startsWith("static/")
 							&& (requestContext.getUriInfo().getPath().endsWith(".html")
-									|| requestContext.getUriInfo().getPath().endsWith(".htm"))))
+									|| requestContext.getUriInfo().getPath().endsWith(".htm")
+									|| requestContext.getUriInfo().getPath().endsWith(".svg")
+									|| requestContext.getUriInfo().getPath().endsWith(".pdf"))))
 			{
 				if (requestContext.getUriInfo() != null && requestContext.getUriInfo().getPath() != null
 						&& requestContext.getUriInfo().getPath().startsWith("Binary/"))
-					headers.add("Content-Security-Policy",
-							"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
-									+ " script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
+				{
+					// Binary content
+					if (ParameterConverter.INLINE_FORMAT
+							.equals(requestContext.getUriInfo().getQueryParameters().getFirst("_format")))
+						headers.add("Content-Security-Policy",
+								"base-uri 'self'; frame-ancestors 'self'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
+										+ " script-src 'none'; style-src 'self' 'unsafe-inline'");
+					// DSF Binary UI
+					else
+						headers.add("Content-Security-Policy",
+								"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"
+										+ " script-src 'self'; style-src 'self'; frame-src 'self'");
+				}
 				else
 					headers.add("Content-Security-Policy",
 							"base-uri 'self'; frame-ancestors 'none'; form-action 'self'; default-src 'none'; connect-src 'self'; img-src 'self';"

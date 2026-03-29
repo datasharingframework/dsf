@@ -153,7 +153,8 @@ public class ResponseGenerator
 				&& resource.getMeta().getVersionId() != null)
 		{
 			b = b.lastModified(resource.getMeta().getLastUpdated());
-			b = b.tag(new EntityTag(resource.getMeta().getVersionId(), true));
+			b = b.tag(new EntityTag(mediaType.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "")
+					+ resource.getMeta().getVersionId(), true));
 		}
 
 		b = b.cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM);

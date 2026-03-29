@@ -135,7 +135,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		defaultProfileProvider.setDefaultProfile(resource);
 
+		Consumer<R> after = modifyBeforeValidation(resource);
+
 		ValidationResult validationResult = resourceValidator.validate(resource);
+
+		if (after != null)
+			after.accept(resource);
 
 		if (failValidationOnErrorOrFatal.test(resource) && validationResult.getMessages().stream()
 				.anyMatch(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
@@ -162,6 +167,16 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 			return delegate.get();
 		}
+	}
+
+	/**
+	 * @param resource
+	 *            never <code>null</code>
+	 * @return consumer to called applied after validation, or <code>null</code>
+	 */
+	protected Consumer<R> modifyBeforeValidation(R resource)
+	{
+		return null;
 	}
 
 	@Override

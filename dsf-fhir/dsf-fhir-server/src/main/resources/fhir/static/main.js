@@ -153,6 +153,33 @@ window.addEventListener('DOMContentLoaded', () => {
 		handlePendingTask()
 	}
 
+	if (resourceType != null && resourceType[1] === 'Binary' && resourceType[2]) {
+		const iframe = document.getElementById("binary-content")
+		if (iframe) {
+			iframe.onload = (event) => {
+				const doc = event.target.contentDocument?.documentElement
+				if (doc) {
+					doc.setAttribute('dsf-iframe', 'true')
+
+					const theme = document.documentElement.getAttribute('theme')
+					if (theme)
+						doc.setAttribute('dsf-theme', theme)
+
+					const mode = getUiMode();
+					if (mode)
+						doc.setAttribute('dsf-mode', mode)
+
+					const height = doc.offsetHeight > 0 ? doc.offsetHeight : doc.scrollHeight
+					iframe.style.height = height + 'px'
+					iframe.style.visibility = 'visible'
+				} else {
+					iframe.style.height = '30vh'
+					iframe.style.visibility = 'visible'
+				}
+			}
+		}
+	}
+
 	document.querySelectorAll(".collapse-button").forEach(button => {
 		button.addEventListener("click", () => {
 			button.classList.toggle("collapse-button-rotated")

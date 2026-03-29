@@ -93,12 +93,12 @@ function readAndValidateTaskInput(input, row) {
 			return newTaskInputBoolean(input.type, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
 	else if (htmlInputs?.length === 5) {
-    	const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
+		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
 
-    	if (input0FhirType.startsWith("Quantity")) {
-    		return new newTaskInputQuantity(input.type, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
-    	}
-    }
+		if (input0FhirType.startsWith("Quantity")) {
+			return new newTaskInputQuantity(input.type, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
+		}
+	}
 
 	return { input: null, valid: false }
 }
@@ -263,7 +263,7 @@ function readQuestionnaireResponseAnswersFromForm() {
 			}
 		}
 	})
-	
+
 	const practitionerIdentifierValue = document.querySelector('#practitionerIdentifierValue')?.value
 	if (practitionerIdentifierValue !== undefined) {
 		questionnaireResponse.author.type = "Practitioner"
@@ -436,8 +436,8 @@ function newQuestionnaireResponseItemQuantity(text, id, comparator, value, unit,
 					code: result.value.code
 				}
 			}]
-        }
-    	return { item: item, valid: true }
+		}
+		return { item: item, valid: true }
 	} else
 		return { input: null, valid: result.valid }
 }
@@ -583,7 +583,7 @@ function validateString(errorListElement, value, optional, valueName) {
 
 function validateStringInList(errorListElement, value, list, optional, valueName) {
 	const valueInList = s => list.includes(s)
-	return validateType(errorListElement, value, optional, valueName, valueInList, "not in [" + list.toString() + "]" , v => v)
+	return validateType(errorListElement, value, optional, valueName, valueInList, "not in [" + list.toString() + "]", v => v)
 }
 
 function validateInteger(errorListElement, value, optional, valueName) {
@@ -684,31 +684,31 @@ function updateQuestionnaireResponse(questionnaireResponse) {
 }
 
 function createTask(task) {
-    enableSpinner()
+	enableSpinner()
 
 	const fullUrl = window.location.origin + window.location.pathname
-    const requestUrl = fullUrl.slice(0, fullUrl.indexOf("/Task") + "/Task".length)
+	const requestUrl = fullUrl.slice(0, fullUrl.indexOf("/Task") + "/Task".length)
 	const taskString = JSON.stringify(task)
 
-    fetch(requestUrl, {
-        method: "POST",
-        redirect: "manual",
-        headers: {
-            "Content-type": "application/json",
-            "Accept": "application/json"
-        },
-        body: taskString
-    }).then(response => {
-        if (response.type === "basic")
-            parseResponse(response, requestUrl)
-        else if (response.type === "opaqueredirect") {
-            sessionStorage.setItem("Task.pending", taskString)
-            sessionStorage.setItem("Task.url", window.location.href)
+	fetch(requestUrl, {
+		method: "POST",
+		redirect: "manual",
+		headers: {
+			"Content-type": "application/json",
+			"Accept": "application/json"
+		},
+		body: taskString
+	}).then(response => {
+		if (response.type === "basic")
+			parseResponse(response, requestUrl)
+		else if (response.type === "opaqueredirect") {
+			sessionStorage.setItem("Task.pending", taskString)
+			sessionStorage.setItem("Task.url", window.location.href)
 
-            window.location.reload()
-        } else
-            console.warn("Unhandled response type", response.type)
-    })
+			window.location.reload()
+		} else
+			console.warn("Unhandled response type", response.type)
+	})
 }
 
 function parseResponse(response, resourceBaseUrlWithoutId) {
@@ -1058,7 +1058,7 @@ function handlePendingQuestionnaireResponse() {
 			})
 		}
 	})
-	
+
 	blinkButton("complete-questionnaire-response")
 }
 
@@ -1171,18 +1171,15 @@ function handlePendingTask() {
 			}
 		})
 	})
-	
+
 	blinkButton("start-process")
 }
 
 function blinkButton(id) {
-	window.addEventListener("load", function() {
-		const button = document.getElementById(id);
-
-		if (button) {
-			button.scrollIntoView({behavior: "instant", block: "center"})
-			button.classList.add("button-blink")
-			setTimeout(() => button.classList.remove("button-blink") , 2000)
-		}
-	});
+	const button = document.getElementById(id);
+	if (button) {
+		button.scrollIntoView({ behavior: "instant", block: "center" })
+		button.classList.add("button-blink")
+		setTimeout(() => button.classList.remove("button-blink"), 2000)
+	}
 }

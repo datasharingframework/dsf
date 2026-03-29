@@ -265,9 +265,9 @@ button.submit {
 }
 
 @keyframes button-blink-red {
-	0%  { background-color: var(--color-info-red); color: var(--color-info-background-red); }
+	0%  { background-color: #761137; color: #fff; }
 	33.3%  { background-color: var(--color-prime); color: var(--color-background); }
-	66.6%  { background-color: var(--color-info-red); color: var(--color-info-background-red); }
+	66.6%  { background-color: #761137; color: #fff; }
 }
 
 .button-blink {

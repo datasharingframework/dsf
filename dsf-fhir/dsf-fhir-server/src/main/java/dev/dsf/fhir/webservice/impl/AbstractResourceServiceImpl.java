@@ -440,7 +440,11 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		{
 			referenceCleaner.cleanLiteralReferences(resource);
 
-			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
+			MediaType mediaType = getMediaTypeForRead(uri, headers);
+			EntityTag resourceTag = new EntityTag(
+					mediaType.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "")
+							+ resource.getMeta().getVersionId(),
+					true);
 
 			// not conform to rfc9110 as we are evaluating against a weak ETag here
 			if (ifMatch.map(v -> !v.equals(resource.getIdElement().getVersionIdPartAsLong())).orElse(false))
@@ -472,7 +476,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			else if (isSpecialCase(uri, headers, resource))
 				return createSpecialCaseResponse(uri, headers, resource);
 			else
-				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
+				return responseGenerator.response(Status.OK, resource, mediaType).build();
 		}).orElseGet(() ->
 		{
 			// TODO return OperationOutcome
