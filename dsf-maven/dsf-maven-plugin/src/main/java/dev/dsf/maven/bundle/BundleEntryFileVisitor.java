@@ -21,6 +21,8 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -33,14 +35,17 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 	private final Path baseFolder;
 	private final BundleEntryPutReader putReader;
 	private final BundleEntryPostReader postReader;
+	private final BundleEntryIgnoreReader ignoreReader;
 
 	private Class<Resource> resource;
 
-	public BundleEntryFileVisitor(Path baseFolder, BundleEntryPutReader putReader, BundleEntryPostReader postReader)
+	public BundleEntryFileVisitor(Path baseFolder, BundleEntryPutReader putReader, BundleEntryPostReader postReader,
+			BundleEntryIgnoreReader ignoreReader)
 	{
-		this.baseFolder = baseFolder;
-		this.putReader = putReader;
-		this.postReader = postReader;
+		this.baseFolder = Objects.requireNonNull(baseFolder, "baseFolder");
+		this.putReader = Objects.requireNonNull(putReader, "putReader");
+		this.postReader = Objects.requireNonNull(postReader, "postReader");
+		this.ignoreReader = Objects.requireNonNull(ignoreReader, "ignoreReader");
 	}
 
 	@Override
@@ -84,28 +89,30 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 		{
 			Path putFile = file.resolveSibling(file.getFileName().toString() + ".put");
 			Path postFile = file.resolveSibling(file.getFileName().toString() + ".post");
-			if (!Files.isReadable(putFile) && !Files.isReadable(postFile))
+			Path ignoreFile = file.resolveSibling(file.getFileName().toString() + ".ignore");
+
+			if (!Files.isReadable(putFile) && !Files.isReadable(postFile) && !Files.isReadable(ignoreFile))
 			{
-				logger.error("put or post file for {} at {} not readable. Redable file {} or {} expected",
-						resource.getSimpleName(), file.toString(), putFile.toString(), postFile.toString());
-				throw new IOException(
-						"put file " + putFile.toString() + " or post file " + postFile.toString() + " not readable");
+				logger.error("put, post or ignore file for {} at {} not readable. Redable file {}, {} or {} expected",
+						resource.getSimpleName(), file.toString(), putFile.toString(), postFile.toString(),
+						ignoreFile.toString());
+				throw new IOException("put file " + putFile.toString() + ", post file " + postFile.toString()
+						+ " or ignore file " + postFile.toString() + " not readable");
 			}
-			else if (Files.isReadable(putFile) && Files.isReadable(postFile))
+			else if (Stream.of(Files.isReadable(putFile), Files.isReadable(postFile), Files.isReadable(ignoreFile))
+					.filter(b -> b).count() > 1)
 			{
-				logger.error("put and post file for {} at {} readable. One redable file {} or {} expected",
-						resource.getSimpleName(), file.toString(), putFile.toString(), postFile.toString());
-				throw new IOException(
-						"put file " + putFile.toString() + " and post file " + postFile.toString() + " readable");
+				logger.error("For {} at {} only one redable file {}, {} or {} expected", resource.getSimpleName(),
+						file.toString(), putFile.toString(), postFile.toString(), ignoreFile.toString());
+				throw new IOException("More then one of the put file " + putFile.toString() + ", post file "
+						+ postFile.toString() + " and ignore file " + ignoreFile.toString() + " readable");
 			}
 			else if (Files.isReadable(putFile))
-			{
 				putReader.read(resource, file, putFile);
-			}
 			else if (Files.isReadable(postFile))
-			{
 				postReader.read(resource, file, postFile);
-			}
+			else if (Files.isReadable(ignoreFile))
+				ignoreReader.read(resource, file, ignoreFile);
 		}
 		else
 			logger.debug("Ignoring {}", file.toString());

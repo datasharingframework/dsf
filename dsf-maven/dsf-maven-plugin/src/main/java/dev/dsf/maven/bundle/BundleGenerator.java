@@ -218,7 +218,13 @@ public class BundleGenerator
 			}
 		};
 
-		FileVisitor<Path> visitor = new BundleEntryFileVisitor(baseFolder, putReader, postReader);
+		BundleEntryIgnoreReader ignoreReader = (resource, resourceFile, postFile) ->
+		{
+			logger.info("Ignore file {} detected, not reading {} at {}", relativeToProjectDir(postFile).toString(),
+					resource.getSimpleName(), relativeToProjectDir(resourceFile).toString());
+		};
+
+		FileVisitor<Path> visitor = new BundleEntryFileVisitor(baseFolder, putReader, postReader, ignoreReader);
 		Files.walkFileTree(baseFolder, visitor);
 
 		sortBundleEntries(bundle);

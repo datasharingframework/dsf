@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -50,6 +51,8 @@ import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 
 public class ValidationSupportRule extends ExternalResource
 {
+	private static final Logger logger = LoggerFactory.getLogger(ValidationSupportRule.class);
+
 	private static final String VERSION_PATTERN_STRING1 = "#{version}";
 	private static final Pattern VERSION_PATTERN1 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING1));
 	// ${...} pattern to be backwards compatible
@@ -122,11 +125,36 @@ public class ValidationSupportRule extends ExternalResource
 						customValidationSupport, new DefaultProfileValidationSupport(context),
 						new CommonCodeSystemsTerminologyService(context)));
 
+		warnForDeprecatedResources("StructureDefinition", structureDefinitions);
+		warnForDeprecatedResources("CodeSystem", codeSystems);
+		warnForDeprecatedResources("ValueSet", valueSets);
+
 		readProfilesAndGenerateSnapshots(context, version, date, customValidationSupport,
 				new SnapshotGeneratorImpl(context, validationSupport), structureDefinitions.stream());
 
 		readCodeSystems(context, version, date, customValidationSupport, codeSystems.stream());
 		readValueSets(context, version, date, customValidationSupport, valueSets.stream());
+	}
+
+	private void warnForDeprecatedResources(String resource, List<String> file)
+	{
+		file.stream().forEach(f ->
+		{
+			try (InputStream in = ValidationSupportRule.class
+					.getResourceAsStream("/fhir/" + resource + "/" + f + ".ignore"))
+			{
+				if (in == null)
+					return;
+
+				logger.warn("FHIR {} resource {} is deprecated, use {}", resource, f,
+						new String(in.readAllBytes(), StandardCharsets.UTF_8));
+			}
+			catch (IOException e)
+			{
+				logger.warn("FHIR resource " + f + " is deprecated, unable to read replacement message: {}",
+						e.getMessage());
+			}
+		});
 	}
 
 	private static void readProfilesAndGenerateSnapshots(FhirContext context, String version, LocalDate date,
