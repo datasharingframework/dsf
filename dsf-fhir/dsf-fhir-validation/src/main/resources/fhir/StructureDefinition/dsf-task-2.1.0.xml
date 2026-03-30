@@ -44,20 +44,14 @@
 				<severity value="error" />
 				<human value="Business key must be set if Task.status = {in-progress, completed, failed}" />
 				<expression
-					value="((%resource.status = 'in-progress') or
-                            (%resource.status = 'completed') or
-                            (%resource.status = 'failed'))
-                              implies
-                            input.type.coding.where(
-                              system = 'http://dsf.dev/fhir/CodeSystem/bpmn-message' and
-                              code = 'business-key')
-                            .exists()" />
+					value="((%resource.status = 'in-progress') or (%resource.status = 'completed') or (%resource.status = 'failed')) implies input.type.coding.where(system = 'http://dsf.dev/fhir/CodeSystem/bpmn-message' and code = 'business-key').exists()" />
 			</constraint>
 			<constraint>
 				<key value="identifier-if-status-draft" />
 				<severity value="error" />
 				<human value="Identifier with system 'http://dsf.dev/sid/task-identifier' must be set if Task.status = draft" />
-				<expression value="%resource.status = 'draft' implies identifier.where(system = 'http://dsf.dev/sid/task-identifier' and value.exists()).exists()" />
+				<expression
+					value="%resource.status = 'draft' implies identifier.where(system = 'http://dsf.dev/sid/task-identifier' and value.exists()).exists()" />
 			</constraint>
 		</element>
 		<element id="Task.instantiatesCanonical">
