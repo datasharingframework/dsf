@@ -272,6 +272,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", FHIR_DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", FHIR_DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", FHIR_DATABASE_DELETE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", String.valueOf(LOG_DB_STATEMENTS));
 
 		initParameters.put("dev.dsf.fhir.server.base.url", baseUrl);
 		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
@@ -370,6 +371,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.db.user.password", BPE_DATABASE_USER_PASSWORD);
 		initParameters.put("dev.dsf.bpe.db.user.engine.username", BPE_DATABASE_ENGINE_USER);
 		initParameters.put("dev.dsf.bpe.db.user.engine.password", BPE_DATABASE_ENGINE_USER_PASSWORD);
+		initParameters.put("dev.dsf.bpe.debug.log.message.dbStatement", String.valueOf(LOG_DB_STATEMENTS));
 
 		initParameters.put("dev.dsf.bpe.fhir.client.certificate", certificates.getClientCertificateFile().toString());
 		initParameters.put("dev.dsf.bpe.fhir.client.certificate.private.key",

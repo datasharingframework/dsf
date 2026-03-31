@@ -108,7 +108,7 @@ public class DaoConfig
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 
-		return new DataSourceWithLogger(propertiesConfig.getDebugLogMessageDbStatement(), dataSource);
+		return propertiesConfig.getDebugLogMessageDbStatement() ? new DataSourceWithLogger(dataSource) : dataSource;
 	}
 
 	@Bean
@@ -124,7 +124,7 @@ public class DaoConfig
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 
-		return new DataSourceWithLogger(propertiesConfig.getDebugLogMessageDbStatement(), dataSource);
+		return propertiesConfig.getDebugLogMessageDbStatement() ? new DataSourceWithLogger(dataSource) : dataSource;
 	}
 
 	private String toString(char[] password)
