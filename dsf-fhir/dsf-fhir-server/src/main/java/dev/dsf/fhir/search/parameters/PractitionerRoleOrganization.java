@@ -54,7 +54,7 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 	}
 
 	private static final String PRACTITIONER_IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
-			+ " WHERE concat('Organization/', organization->>'id') = practitioner_role->'organization'->>'reference')";
+			+ " WHERE ('Organization/' || (organization->>'id')) = practitioner_role->'organization'->>'reference')";
 
 	public PractitionerRoleOrganization()
 	{
@@ -179,7 +179,7 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = practitioner_role->'organization'->>'reference') AS organizations";
+			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE ('Organization/' || (organization->>'id')) = practitioner_role->'organization'->>'reference') AS organizations";
 		else
 			return null;
 	}

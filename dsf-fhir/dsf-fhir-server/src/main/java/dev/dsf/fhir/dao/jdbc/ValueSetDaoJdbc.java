@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.dao.ValueSetDao;
 import dev.dsf.fhir.search.filter.ValueSetIdentityFilter;
 import dev.dsf.fhir.search.parameters.ValueSetDate;
@@ -36,9 +37,10 @@ import dev.dsf.fhir.search.parameters.ValueSetVersion;
 
 public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implements ValueSetDao
 {
-	private final ReadByUrlDaoJdbc<ValueSet> readByUrl;
+	private final ReadByUrlDao<ValueSet> readByUrl;
 
-	public ValueSetDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public ValueSetDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ReadByUrlDaoFactory<ValueSet> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, ValueSet.class, "value_sets", "value_set",
 				"value_set_id", ValueSetIdentityFilter::new,
@@ -52,7 +54,7 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 								ValueSetVersion.getNameModifiers())),
 				List.of());
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+		readByUrl = readByUrlDaoFactory.create(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
 	}
 
@@ -60,6 +62,12 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	protected ValueSet copy(ValueSet resource)
 	{
 		return resource.copy();
+	}
+
+	@Override
+	public void onResourceCreated(ValueSet resource)
+	{
+		readByUrl.onResourceCreated(resource);
 	}
 
 	@Override

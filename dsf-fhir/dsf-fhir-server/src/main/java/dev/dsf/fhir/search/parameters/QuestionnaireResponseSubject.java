@@ -60,11 +60,11 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
-			+ "WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'subject'->>'reference' "
+			+ "WHERE ('Practitioner/' || (practitioner->>'id')) = questionnaire_response->'subject'->>'reference' "
 			+ "UNION SELECT organization->'identifier' FROM current_organizations "
-			+ "WHERE concat('Organization/', organization->>'id') = questionnaire_response->'subject'->>'reference' "
+			+ "WHERE ('Organization/' || (organization->>'id')) = questionnaire_response->'subject'->>'reference' "
 			+ "UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles "
-			+ "WHERE concat('PractitionerRole/', practitioner_role->>'id') = questionnaire_response->'subject'->>'reference')";
+			+ "WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = questionnaire_response->'subject'->>'reference')";
 
 	public QuestionnaireResponseSubject()
 	{
@@ -219,12 +219,12 @@ public class QuestionnaireResponseSubject extends AbstractReferenceParameter<Que
 			return switch (includeParts.getTargetResourceTypeName())
 			{
 				case "Organization" -> "(SELECT jsonb_build_array(organization) FROM current_organizations"
-						+ " WHERE concat('Organization/', organization->>'id') = questionnaire_response->'subject'->>'reference') AS organizations";
+						+ " WHERE ('Organization/' || (organization->>'id')) = questionnaire_response->'subject'->>'reference') AS organizations";
 				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-						+ " WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'subject'->>'reference') AS practitioners";
+						+ " WHERE ('Practitioner/' || (practitioner->>'id')) = questionnaire_response->'subject'->>'reference') AS practitioners";
 				case "PractitionerRole" ->
 					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
-							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = questionnaire_response->'subject'->>'reference') AS practitioner_roles";
+							+ " WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = questionnaire_response->'subject'->>'reference') AS practitioner_roles";
 				default -> null;
 			};
 		else

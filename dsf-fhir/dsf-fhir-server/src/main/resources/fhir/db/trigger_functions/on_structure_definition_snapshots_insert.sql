@@ -14,10 +14,9 @@
 -- limitations under the License.
 --
 
-CREATE OR REPLACE FUNCTION on_locations_insert() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION on_structure_definition_snapshots_insert() RETURNS TRIGGER AS $$
 BEGIN
-	UPDATE locations SET current = false WHERE location_id = NEW.location_id AND current AND version <> NEW.version;
-	PERFORM on_resources_insert(NEW.location_id, NEW.version, NEW.location);
+	UPDATE structure_definition_snapshots SET current = false WHERE structure_definition_snapshot_id = NEW.structure_definition_snapshot_id AND current AND version <> NEW.version;
 	RETURN NEW;
 END;
 $$ LANGUAGE PLPGSQL

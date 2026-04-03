@@ -30,7 +30,9 @@ public class ActivityDefinitionDaoTest extends AbstractReadAccessDaoTest<Activit
 
 	public ActivityDefinitionDaoTest()
 	{
-		super(ActivityDefinition.class, ActivityDefinitionDaoJdbc::new);
+		super(ActivityDefinition.class,
+				(dataSource, permanentDeleteDataSource, fhirContext) -> new ActivityDefinitionDaoJdbc(dataSource,
+						permanentDeleteDataSource, fhirContext, ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override

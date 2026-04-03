@@ -18,6 +18,7 @@ package dev.dsf.fhir.spring.config;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -47,12 +48,14 @@ import dev.dsf.fhir.dao.ProvenanceDao;
 import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
 import dev.dsf.fhir.dao.ReadAccessDao;
+import dev.dsf.fhir.dao.ReadByUrlDao.ReadByUrlDaoFactory;
 import dev.dsf.fhir.dao.ResearchStudyDao;
 import dev.dsf.fhir.dao.StatisticsDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.SubscriptionDao;
 import dev.dsf.fhir.dao.TaskDao;
 import dev.dsf.fhir.dao.ValueSetDao;
+import dev.dsf.fhir.dao.cache.ReadByUrlDaoNotFoundCache;
 import dev.dsf.fhir.dao.jdbc.ActivityDefinitionDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.BundleDaoJdbc;
@@ -76,6 +79,7 @@ import dev.dsf.fhir.dao.jdbc.ProvenanceDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.QuestionnaireDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.QuestionnaireResponseDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ReadAccessDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.ReadByUrlDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.StatisticsDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
@@ -132,10 +136,22 @@ public class DaoConfig
 		return password == null ? null : String.valueOf(password);
 	}
 
+	private <R extends MetadataResource> ReadByUrlDaoFactory<R> readByUrlDaoFactory()
+	{
+		return (dataSourceSupplier, resourceExtractor, resourceTable, resourceColumn) ->
+		{
+			ReadByUrlDaoJdbc<R> delegate = new ReadByUrlDaoJdbc<>(dataSourceSupplier, resourceExtractor, resourceTable,
+					resourceColumn);
+
+			return new ReadByUrlDaoNotFoundCache<>(delegate);
+		};
+	}
+
 	@Bean
 	public ActivityDefinitionDao activityDefinitionDao()
 	{
-		return new ActivityDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new ActivityDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				readByUrlDaoFactory());
 	}
 
 	@Bean(destroyMethod = "stopLargeObjectUnlinker")
@@ -154,7 +170,10 @@ public class DaoConfig
 	@Bean
 	public CodeSystemDao codeSystemDao()
 	{
-		return new CodeSystemDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new CodeSystemDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				(dataSourceSupplier, resourceExtractor, resourceTable,
+						resourceColumn) -> new ReadByUrlDaoNotFoundCache<>(new ReadByUrlDaoJdbc<>(dataSourceSupplier,
+								resourceExtractor, resourceTable, resourceColumn)));
 	}
 
 	@Bean
@@ -184,7 +203,8 @@ public class DaoConfig
 	@Bean
 	public LibraryDao libraryDao()
 	{
-		return new LibraryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new LibraryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				readByUrlDaoFactory());
 	}
 
 	@Bean
@@ -196,7 +216,8 @@ public class DaoConfig
 	@Bean
 	public MeasureDao measureDao()
 	{
-		return new MeasureDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new MeasureDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				readByUrlDaoFactory());
 	}
 
 	@Bean
@@ -250,7 +271,8 @@ public class DaoConfig
 	@Bean
 	public QuestionnaireDao questionnaireDao()
 	{
-		return new QuestionnaireDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new QuestionnaireDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				readByUrlDaoFactory());
 	}
 
 	@Bean
@@ -268,14 +290,15 @@ public class DaoConfig
 	@Bean
 	public StructureDefinitionDao structureDefinitionDao()
 	{
-		return new StructureDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new StructureDefinitionDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				readByUrlDaoFactory());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionSnapshotDao()
 	{
 		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), permanentDeleteDataSource(),
-				fhirConfig.fhirContext());
+				fhirConfig.fhirContext(), readByUrlDaoFactory());
 	}
 
 	@Bean
@@ -293,7 +316,8 @@ public class DaoConfig
 	@Bean
 	public ValueSetDao valueSetDao()
 	{
-		return new ValueSetDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+		return new ValueSetDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
+				readByUrlDaoFactory());
 	}
 
 	@Bean

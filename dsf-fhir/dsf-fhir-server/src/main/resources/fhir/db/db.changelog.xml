@@ -62,4 +62,6 @@
 
 	<include file="fhir/db/db.binaries.changelog-2.0.0.xml" />
 	<include file="fhir/db/db.binaries_lo_unlink_queue.changelog-2.0.0.xml" />
+
+	<include file="fhir/db/db.add_current_column.changelog-2.1.0.xml" />
 </databaseChangeLog>

@@ -363,10 +363,16 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			statement.execute();
 		}
 
+		onResourceCreated(resource);
+
 		return resource;
 	}
 
 	protected abstract R copy(R resource);
+
+	protected void onResourceCreated(R resource)
+	{
+	}
 
 	protected R getResource(ResultSet result, int index) throws SQLException
 	{
@@ -582,14 +588,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		if (versionString == null || versionString.isBlank())
 		{
-			try (PreparedStatement statement = connection.prepareStatement("SELECT deleted IS NOT NULL FROM "
-					+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
+			try (PreparedStatement statement = connection.prepareStatement(
+					"SELECT deleted IS NULL FROM " + resourceTable + " WHERE " + resourceIdColumn + " = ? AND current"))
 			{
 				statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
 				try (ResultSet result = statement.executeQuery())
 				{
-					return result.next() && !result.getBoolean(1);
+					return result.next() && result.getBoolean(1);
 				}
 			}
 		}
@@ -599,7 +605,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			if (version == null || version < FIRST_VERSION)
 				return false;
 
-			try (PreparedStatement statement = connection.prepareStatement("SELECT deleted IS NOT NULL FROM "
+			try (PreparedStatement statement = connection.prepareStatement("SELECT deleted IS NULL FROM "
 					+ resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
 			{
 				statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
@@ -607,7 +613,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 				try (ResultSet result = statement.executeQuery())
 				{
-					return result.next() && !result.getBoolean(1);
+					return result.next() && result.getBoolean(1);
 				}
 			}
 		}
@@ -781,7 +787,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			return Optional.empty();
 
 		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted IS NOT NULL FROM "
-				+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
+				+ resourceTable + " WHERE " + resourceIdColumn + " = ? AND current"))
 		{
 			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 

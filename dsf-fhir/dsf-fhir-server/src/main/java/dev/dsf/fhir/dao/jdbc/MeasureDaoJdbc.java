@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Measure;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.MeasureDao;
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.search.filter.MeasureIdentityFilter;
 import dev.dsf.fhir.search.parameters.MeasureDate;
 import dev.dsf.fhir.search.parameters.MeasureDependsOn;
@@ -37,9 +38,10 @@ import dev.dsf.fhir.search.parameters.MeasureVersion;
 
 public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements MeasureDao
 {
-	private final ReadByUrlDaoJdbc<Measure> readByUrl;
+	private final ReadByUrlDao<Measure> readByUrl;
 
-	public MeasureDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public MeasureDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ReadByUrlDaoFactory<Measure> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Measure.class, "measures", "measure", "measure_id",
 				MeasureIdentityFilter::new,
@@ -55,8 +57,14 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 						factory(MeasureVersion.PARAMETER_NAME, MeasureVersion::new, MeasureVersion.getNameModifiers())),
 				List.of());
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+		readByUrl = readByUrlDaoFactory.create(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
+	}
+
+	@Override
+	public void onResourceCreated(Measure resource)
+	{
+		readByUrl.onResourceCreated(resource);
 	}
 
 	@Override

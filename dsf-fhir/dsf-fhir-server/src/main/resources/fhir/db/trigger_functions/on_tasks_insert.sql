@@ -14,10 +14,9 @@
 -- limitations under the License.
 --
 
-CREATE OR REPLACE FUNCTION on_locations_insert() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION on_tasks_insert() RETURNS TRIGGER AS $$
 BEGIN
-	UPDATE locations SET current = false WHERE location_id = NEW.location_id AND current AND version <> NEW.version;
-	PERFORM on_resources_insert(NEW.location_id, NEW.version, NEW.location);
+	UPDATE tasks SET current = false WHERE task_id = NEW.task_id AND current AND version <> NEW.version;
 	RETURN NEW;
 END;
 $$ LANGUAGE PLPGSQL

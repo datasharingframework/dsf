@@ -61,13 +61,13 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
-			+ "WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference' "
+			+ "WHERE ('Practitioner/' || (practitioner->>'id')) = task->'requester'->>'reference' "
 			+ "UNION SELECT organization->'identifier' FROM current_organizations "
-			+ "WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference' "
+			+ "WHERE ('Organization/' || (organization->>'id')) = task->'requester'->>'reference' "
 			+ "UNION SELECT patient->'identifier' FROM current_patients "
-			+ "WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference' "
+			+ "WHERE ('Patient/' || (patient->>'id')) = task->'requester'->>'reference' "
 			+ "UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles "
-			+ "WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference')";
+			+ "WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = task->'requester'->>'reference')";
 
 	public TaskRequester()
 	{
@@ -257,17 +257,17 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 			return switch (includeParts.getTargetResourceTypeName())
 			{
 				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-						+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference') AS practitioners";
+						+ " WHERE ('Practitioner/' || (practitioner->>'id')) = task->'requester'->>'reference') AS practitioners";
 
 				case "Organization" -> "(SELECT jsonb_build_array(organization) FROM current_organizations"
-						+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference') AS organizations";
+						+ " WHERE ('Organization/' || (organization->>'id')) = task->'requester'->>'reference') AS organizations";
 
 				case "Patient" -> "(SELECT jsonb_build_array(patient) FROM current_patients"
-						+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference') AS patients";
+						+ " WHERE ('Patient/' || (patient->>'id')) = task->'requester'->>'reference') AS patients";
 
 				case "PractitionerRole" ->
 					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
-							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference') AS practitioner_roles";
+							+ " WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = task->'requester'->>'reference') AS practitioner_roles";
 
 				default -> null;
 			};

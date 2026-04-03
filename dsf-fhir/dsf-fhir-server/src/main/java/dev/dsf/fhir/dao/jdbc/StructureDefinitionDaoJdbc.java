@@ -25,10 +25,10 @@ import dev.dsf.fhir.search.filter.StructureDefinitionIdentityFilter;
 public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
 	public StructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext)
+			FhirContext fhirContext, ReadByUrlDaoFactory<StructureDefinition> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, "structure_definitions", "structure_definition",
-				"structure_definition_id", StructureDefinitionIdentityFilter::new);
+				"structure_definition_id", StructureDefinitionIdentityFilter::new, readByUrlDaoFactory);
 	}
 
 	@Override

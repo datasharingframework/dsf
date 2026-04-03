@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Library;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.LibraryDao;
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.search.filter.LibraryIdentityFilter;
 import dev.dsf.fhir.search.parameters.LibraryDate;
 import dev.dsf.fhir.search.parameters.LibraryIdentifier;
@@ -37,9 +38,10 @@ import dev.dsf.fhir.search.parameters.LocationIdentifier;
 
 public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements LibraryDao
 {
-	private final ReadByUrlDaoJdbc<Library> readByUrl;
+	private final ReadByUrlDao<Library> readByUrl;
 
-	public LibraryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public LibraryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ReadByUrlDaoFactory<Library> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
 				LibraryIdentityFilter::new,
@@ -52,8 +54,14 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 						factory(LibraryVersion.PARAMETER_NAME, LibraryVersion::new, LibraryVersion.getNameModifiers())),
 				List.of());
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+		readByUrl = readByUrlDaoFactory.create(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
+	}
+
+	@Override
+	public void onResourceCreated(Library resource)
+	{
+		readByUrl.onResourceCreated(resource);
 	}
 
 	@Override

@@ -29,7 +29,8 @@ public class MeasureDaoTest extends AbstractReadAccessDaoTest<Measure, MeasureDa
 
 	public MeasureDaoTest()
 	{
-		super(Measure.class, MeasureDaoJdbc::new);
+		super(Measure.class, (dataSource, permanentDeleteDataSource, fhirContext) -> new MeasureDaoJdbc(dataSource,
+				permanentDeleteDataSource, fhirContext, ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override
