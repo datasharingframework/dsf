@@ -13,16 +13,21 @@ on:
   schedule:
     - cron: '11 15 * * 0' # Sundays, 15:11
 
-permissions: read-all
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+env:
+  MVN_BATCH_MODE_FAIL_AT_END: --batch-mode --fail-at-end
+  MVN_SKIP_MOST: -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
+
 jobs:
   codeql:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
     strategy:
       fail-fast: false
@@ -44,7 +49,7 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-extended, security-and-quality
       - name: Minimal Maven Build
-        run: mvn package --batch-mode --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -DskipTests -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
+        run: mvn package $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST -DskipTests
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
         with:
@@ -52,6 +57,8 @@ jobs:
 
   maven-quick:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       version: ${{ steps.version.outputs.version }}
       main: ${{ steps.main.outputs.main }}
@@ -65,7 +72,7 @@ jobs:
           java-version: 25
           cache: 'maven'
       - name: Minimal Maven Build
-        run: mvn install --batch-mode --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -DskipTests -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -DbuildNumber=${GITHUB_SHA} -DscmBranch=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
+        run: mvn install $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST -DskipTests -DbuildNumber=${GITHUB_SHA} -DscmBranch=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
       - name: Upload quick-build results
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
@@ -100,26 +107,28 @@ jobs:
   maven-full:
     runs-on: ubuntu-latest
     needs: maven-quick
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
         mvn:
           - name: JavaDoc
-            cmd: mvn javadoc:javadoc -Dformatter.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
+            cmd: mvn javadoc:javadoc $MVN_BATCH_MODE_FAIL_AT_END -Dformatter.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
           - name: Formatter, Impsort, Enforcer, License Check
-            cmd: mvn compile test-compile license:check -Dmaven.buildNumber.skip=true
+            cmd: mvn compile test-compile license:check $MVN_BATCH_MODE_FAIL_AT_END -Dmaven.buildNumber.skip=true
           - name: DAO Tests (not Binary)
-            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=**/*DaoTest -Dfailsafe.excludes=**/BinaryDaoTest -DforkCount=2
+            cmd: mvn failsafe:integration-test $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST -Dfailsafe.includes=**/*DaoTest -Dfailsafe.excludes=**/BinaryDaoTest -DforkCount=2
           - name: DAO Tests (Binary only)
-            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=**/BinaryDaoTest
+            cmd: mvn failsafe:integration-test $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST -Dfailsafe.includes=**/BinaryDaoTest
           - name: Integration Tests (FHIR, not Binary)
-            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=dev/dsf/fhir/**/*IntegrationTest -Dfailsafe.excludes=**/BinaryIntegrationTest -DforkCount=2
+            cmd: mvn failsafe:integration-test $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST -Dfailsafe.includes=dev/dsf/fhir/**/*IntegrationTest -Dfailsafe.excludes=**/BinaryIntegrationTest -DforkCount=2
           - name: Integration Tests (FHIR, Binary only)
-            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=dev/dsf/fhir/**/BinaryIntegrationTest -DforkCount=2
+            cmd: mvn failsafe:integration-test $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST -Dfailsafe.includes=dev/dsf/fhir/**/BinaryIntegrationTest -DforkCount=2
           - name: Integration Tests (BPE)
-            cmd: mvn failsafe:integration-test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true -Dfailsafe.includes=dev/dsf/bpe/**/*IntegrationTest -DforkCount=2
+            cmd: mvn failsafe:integration-test $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST -Dfailsafe.includes=dev/dsf/bpe/**/*IntegrationTest -DforkCount=2
           - name: Unit Tests
-            cmd: mvn dependency:properties surefire:test --fail-at-end -P!generate-source-and-javadoc-jars -Dimpsort.skip=true -Dformatter.skip=true -Dlicense.skip=true -Denforcer.skip -Dmaven.buildNumber.skip=true -DskipShadePlugin=true
+            cmd: mvn dependency:properties surefire:test $MVN_BATCH_MODE_FAIL_AT_END $MVN_SKIP_MOST
     name: ${{ matrix.mvn.name }}
     timeout-minutes: 8
     steps:
@@ -143,6 +152,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: maven-quick
     permissions:
+      contents: read
       security-events: write
     strategy:
       fail-fast: false
@@ -186,6 +196,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [codeql, maven-quick, maven-full, trivy]
     permissions:
+      contents: read
       packages: write
       id-token: write
     strategy:
@@ -261,6 +272,8 @@ jobs:
     if: ${{ !endsWith(needs.maven-quick.outputs.version, '-SNAPSHOT') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     needs: [codeql, maven-quick, maven-full, trivy]
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository 
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
