@@ -13,8 +13,6 @@ on:
   schedule:
     - cron: '11 15 * * 0' # Sundays, 15:11
 
-permissions: {}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
