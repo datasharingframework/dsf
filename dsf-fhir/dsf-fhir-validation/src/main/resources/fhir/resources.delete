@@ -36,6 +36,7 @@ StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization-aff
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization-parent&version=1.0.0
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/organization-reference&version=1.0.0
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/task-base&version=1.0.0
+StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/task&version=2.0.0
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/questionnaire&version=1.0.0
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/questionnaire&version=1.5.0
 StructureDefinition?url=http://dsf.dev/fhir/StructureDefinition/questionnaire-response&version=1.0.0

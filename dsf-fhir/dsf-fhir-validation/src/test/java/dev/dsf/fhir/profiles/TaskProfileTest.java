@@ -46,7 +46,7 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			List.of("dsf-task-2.0.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
+			List.of("dsf-task-2.1.0.xml", "dsf-task-test.xml", "dsf-task-test-v2.xml"),
 			List.of("dsf-bpmn-message-2.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"),
 			List.of("dsf-bpmn-message-2.0.0.xml", "dsf-test.xml", "dsf-test-v2.xml"));
 
@@ -238,5 +238,45 @@ public class TaskProfileTest
 
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	@Test
+	public void testTaskValidDraft()
+	{
+		Task task = createDraftTask();
+		task.addIdentifier().setSystem("http://dsf.dev/sid/task-identifier").setValue("Test");
+
+		testTaskValid(task);
+	}
+
+	@Test
+	public void testTaskValidDraftNoIdentifier()
+	{
+		Task task = createDraftTask();
+
+		ValidationResult result = validate(task);
+
+		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				&& m.getMessage().contains("identifier-if-status-draft")).count());
+	}
+
+	private Task createDraftTask()
+	{
+		Task task = new Task();
+		task.getMeta().addProfile("http://dsf.dev/fhir/StructureDefinition/task-test|2.0");
+		task.setInstantiatesCanonical("http://dsf.dev/bpe/Process/test|2.0");
+		task.setStatus(TaskStatus.DRAFT);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_DIC_1");
+
+		task.addInput().setValue(new StringType("test_v2")).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new IntegerType(42)).getType().getCodingFirstRep()
+				.setSystem("http://dsf.dev/fhir/CodeSystem/test|2.0").setCode("integer-example");
+		return task;
 	}
 }
