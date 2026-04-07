@@ -21,5 +21,5 @@ import org.hl7.fhir.r4.model.Resource;
 
 public interface BundleEntryIgnoreReader
 {
-	void read(Class<? extends Resource> resource, Path resourceFile, Path putFile);
+	void read(Class<? extends Resource> resource, Path resourceFile, Path ignoreFile);
 }

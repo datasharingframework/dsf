@@ -93,16 +93,16 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 
 			if (!Files.isReadable(putFile) && !Files.isReadable(postFile) && !Files.isReadable(ignoreFile))
 			{
-				logger.error("put, post or ignore file for {} at {} not readable. Redable file {}, {} or {} expected",
+				logger.error("put, post or ignore file for {} at {} not readable. Readable file {}, {} or {} expected",
 						resource.getSimpleName(), file.toString(), putFile.toString(), postFile.toString(),
 						ignoreFile.toString());
 				throw new IOException("put file " + putFile.toString() + ", post file " + postFile.toString()
-						+ " or ignore file " + postFile.toString() + " not readable");
+						+ " or ignore file " + ignoreFile.toString() + " not readable");
 			}
 			else if (Stream.of(Files.isReadable(putFile), Files.isReadable(postFile), Files.isReadable(ignoreFile))
 					.filter(b -> b).count() > 1)
 			{
-				logger.error("For {} at {} only one redable file {}, {} or {} expected", resource.getSimpleName(),
+				logger.error("For {} at {} only one readable file {}, {} or {} expected", resource.getSimpleName(),
 						file.toString(), putFile.toString(), postFile.toString(), ignoreFile.toString());
 				throw new IOException("More then one of the put file " + putFile.toString() + ", post file "
 						+ postFile.toString() + " and ignore file " + ignoreFile.toString() + " readable");
