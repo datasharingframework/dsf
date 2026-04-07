@@ -1,0 +1,92 @@
+version: 2
+updates:
+  # Java / Maven dependencies
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    open-pull-requests-limit: 15
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      spring-framework:
+        patterns:
+          - "org.springframework*"
+      jetty:
+        patterns:
+          - "org.eclipse.jetty*"
+      jersey:
+        patterns:
+          - "org.glassfish.jersey*"
+      jackson:
+        patterns:
+          - "com.fasterxml.jackson*"
+      tyrus:
+        patterns:
+          - "org.glassfish.tyrus*"
+      operaton:
+        patterns:
+          - "org.operaton*"
+      slf4j:
+        patterns:
+          - "org.slf4j*"
+      bouncycastle:
+        patterns:
+          - "org.bouncycastle*"
+      fhir:
+        patterns:
+          - "hapi-fhir*"
+          - "org.hl7.fhir*"
+      testing-tools:
+        patterns:
+          - "org.junit*"
+          - "org.mockito*"
+      safe-patch-updates:
+        update-types:
+          - "patch"
+      remaining-minor-updates:
+        update-types:
+          - "minor"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    open-pull-requests-limit: 10
+
+  # Dockerfile base image updates
+  - package-ecosystem: "docker"
+    directories:
+      - "/dsf-bpe/dsf-bpe-server-jetty/docker"
+      - "/dsf-docker/bpe_proxy"
+      - "/dsf-docker/fhir_proxy"
+      - "/dsf-fhir/dsf-fhir-server-jetty/docker"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    groups:
+      dockerfiles:
+        patterns:
+          - "*"
+
+  # docker-compose image updates
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/dsf-docker-dev-setup/bpe"
+      - "/dsf-docker-dev-setup/fhir"
+      - "/dsf-docker-dev-setup-3dic-ttp"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    groups:
+      docker-compose:
+        patterns:
+          - "*"
