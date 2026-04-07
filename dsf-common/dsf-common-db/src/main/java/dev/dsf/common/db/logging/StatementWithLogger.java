@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class StatementWithLogger implements Statement
 {
-	private static final Logger logger = LoggerFactory.getLogger(PreparedStatementWithLogger.class);
+	private static final Logger logger = LoggerFactory.getLogger(StatementWithLogger.class);
 
 	private final Statement delegate;
 
