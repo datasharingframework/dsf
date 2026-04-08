@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_practitioners_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE practitioners SET current = false WHERE practitioner_id = NEW.practitioner_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.practitioner_id, NEW.version, NEW.practitioner);
 	RETURN NEW;
 END;

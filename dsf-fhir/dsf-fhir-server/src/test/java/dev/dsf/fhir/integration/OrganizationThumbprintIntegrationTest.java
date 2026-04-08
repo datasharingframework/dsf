@@ -196,7 +196,7 @@ public class OrganizationThumbprintIntegrationTest extends AbstractDbTest
 						""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex(),
 						certificates.getAdminClientCertificate().certificateSha512ThumbprintHex(),
 						certificates.getMinimalClientCertificate().certificateSha512ThumbprintHex()));
-		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", "true");
+		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", String.valueOf(LOG_DB_STATEMENTS));
 
 		initParameters.put("dev.dsf.fhir.server.endpoint.address",
 				"https://localhost:" + apiConnectorChannel.socket().getLocalPort() + "/fhir");

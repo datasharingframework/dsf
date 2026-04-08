@@ -34,7 +34,7 @@ import dev.dsf.fhir.webservice.RangeRequest;
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
 	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?)";
-	private static final String readByIdSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
+	private static final String readByIdSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? AND current";
 	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
 	private static final String updateSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?, ?)";
 

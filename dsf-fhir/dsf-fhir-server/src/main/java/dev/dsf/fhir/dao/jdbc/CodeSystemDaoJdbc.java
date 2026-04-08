@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.CodeSystemDao;
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.search.filter.CodeSystemIdentityFilter;
 import dev.dsf.fhir.search.parameters.CodeSystemDate;
 import dev.dsf.fhir.search.parameters.CodeSystemIdentifier;
@@ -36,9 +37,10 @@ import dev.dsf.fhir.search.parameters.CodeSystemVersion;
 
 public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> implements CodeSystemDao
 {
-	private final ReadByUrlDaoJdbc<CodeSystem> readByUrl;
+	private final ReadByUrlDao<CodeSystem> readByUrl;
 
-	public CodeSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public CodeSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ReadByUrlDaoFactory<CodeSystem> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, CodeSystem.class, "code_systems", "code_system",
 				"code_system_id", CodeSystemIdentityFilter::new,
@@ -53,8 +55,14 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 								CodeSystemVersion.getNameModifiers())),
 				List.of());
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+		readByUrl = readByUrlDaoFactory.create(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
+	}
+
+	@Override
+	public void onResourceCreated(CodeSystem resource)
+	{
+		readByUrl.onResourceCreated(resource);
 	}
 
 	@Override

@@ -61,13 +61,13 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
-			+ "WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'author'->>'reference' "
+			+ "WHERE ('Practitioner/' || (practitioner->>'id')) = questionnaire_response->'author'->>'reference' "
 			+ "UNION SELECT organization->'identifier' FROM current_organizations "
-			+ "WHERE concat('Organization/', organization->>'id') = questionnaire_response->'author'->>'reference' "
+			+ "WHERE ('Organization/' || (organization->>'id')) = questionnaire_response->'author'->>'reference' "
 			+ "UNION SELECT patient->'identifier' FROM current_patients "
-			+ "WHERE concat('Patient/', patient->>'id') = questionnaire_response->'author'->>'reference' "
+			+ "WHERE ('Patient/' || (patient->>'id')) = questionnaire_response->'author'->>'reference' "
 			+ "UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles "
-			+ "WHERE concat('PractitionerRole/', practitioner_role->>'id') = questionnaire_response->'author'->>'reference')";
+			+ "WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = questionnaire_response->'author'->>'reference')";
 
 	public QuestionnaireResponseAuthor()
 	{
@@ -261,17 +261,17 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 			return switch (includeParts.getTargetResourceTypeName())
 			{
 				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-						+ " WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'author'->>'reference') AS practitioners";
+						+ " WHERE ('Practitioner/' || (practitioner->>'id')) = questionnaire_response->'author'->>'reference') AS practitioners";
 
 				case "Organization" -> "(SELECT jsonb_build_array(organization) FROM current_organizations"
-						+ " WHERE concat('Organization/', organization->>'id') = questionnaire_response->'author'->>'reference') AS organizations";
+						+ " WHERE ('Organization/' || (organization->>'id')) = questionnaire_response->'author'->>'reference') AS organizations";
 
 				case "Patient" -> "(SELECT jsonb_build_array(patient) FROM current_patients"
-						+ " WHERE concat('Patient/', patient->>'id') = questionnaire_response->'author'->>'reference') AS patients";
+						+ " WHERE ('Patient/' || (patient->>'id')) = questionnaire_response->'author'->>'reference') AS patients";
 
 				case "PractitionerRole" ->
 					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
-							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = questionnaire_response->'author'->>'reference') AS practitioner_roles";
+							+ " WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = questionnaire_response->'author'->>'reference') AS practitioner_roles";
 
 				default -> null;
 			};

@@ -33,7 +33,7 @@ public abstract class AbstractDbTest
 		SLF4JBridgeHandler.install();
 	}
 
-	protected static final boolean LOG_DB_STATEMENTS = true;
+	protected static final boolean LOG_DB_STATEMENTS = false; /* enable to see SQL statements in log output */
 
 	protected static final String CHANGE_LOG_FILE = "fhir/db/db.changelog.xml";
 
@@ -65,7 +65,7 @@ public abstract class AbstractDbTest
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 
-		return new DataSourceWithLogger(LOG_DB_STATEMENTS, dataSource);
+		return LOG_DB_STATEMENTS ? new DataSourceWithLogger(dataSource) : dataSource;
 	}
 
 	public static DataSource createPermanentDeleteDataSource(String host, int port, String databaseName)
@@ -80,6 +80,6 @@ public abstract class AbstractDbTest
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 
-		return new DataSourceWithLogger(LOG_DB_STATEMENTS, dataSource);
+		return LOG_DB_STATEMENTS ? new DataSourceWithLogger(dataSource) : dataSource;
 	}
 }

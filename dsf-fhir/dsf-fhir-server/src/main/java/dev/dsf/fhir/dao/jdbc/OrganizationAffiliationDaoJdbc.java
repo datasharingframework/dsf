@@ -89,14 +89,14 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 		String sql = "SELECT organization_affiliation"
 				+ ",(SELECT identifiers->>'value' FROM current_organizations, jsonb_array_elements(organization->'identifier') AS identifiers "
 				+ "WHERE identifiers->>'system' = 'http://dsf.dev/sid/organization-identifier' "
-				+ "AND concat('Organization/', organization->>'id') = organization_affiliation->'organization'->>'reference' LIMIT 1) AS organization_identifier "
+				+ "AND ('Organization/' || (organization->>'id')) = organization_affiliation->'organization'->>'reference' LIMIT 1) AS organization_identifier "
 				+ "FROM current_organization_affiliations WHERE organization_affiliation->>'active' = 'true' AND "
 				+ "(SELECT organization->'identifier' FROM current_organizations WHERE organization->>'active' = 'true' AND "
-				+ "concat('Organization/', organization->>'id') = organization_affiliation->'participatingOrganization'->>'reference') @> ?::jsonb";
+				+ "('Organization/' || (organization->>'id')) = organization_affiliation->'participatingOrganization'->>'reference') @> ?::jsonb";
 
 		if (endpointIdentifierValue != null && !endpointIdentifierValue.isBlank())
 			sql += " AND (SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
-					+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
+					+ " WHERE ('Endpoint/' || (endpoint->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
 					+ " ) AS identifiers) @> ?::jsonb";
 
 		try (PreparedStatement statement = connection.prepareStatement(sql))

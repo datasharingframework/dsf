@@ -54,7 +54,7 @@ public class OrganizationAffiliationPrimaryOrganization extends AbstractReferenc
 	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
-			+ " WHERE concat('Organization/', organization->>'id') = organization_affiliation->'organization'->>'reference')";
+			+ " WHERE ('Organization/' || (organization->>'id')) = organization_affiliation->'organization'->>'reference')";
 
 	public OrganizationAffiliationPrimaryOrganization()
 	{
@@ -178,7 +178,7 @@ public class OrganizationAffiliationPrimaryOrganization extends AbstractReferenc
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = organization_affiliation->'organization'->>'reference') AS organizations";
+			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE ('Organization/' || (organization->>'id')) = organization_affiliation->'organization'->>'reference') AS organizations";
 		else
 			return null;
 	}

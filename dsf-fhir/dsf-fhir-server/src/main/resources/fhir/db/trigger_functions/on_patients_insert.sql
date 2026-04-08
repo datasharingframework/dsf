@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_patients_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE patients SET current = false WHERE patient_id = NEW.patient_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.patient_id, NEW.version, NEW.patient);
 	RETURN NEW;
 END;
