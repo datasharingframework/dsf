@@ -30,7 +30,9 @@ public class ValueSetDaoTest extends AbstractReadAccessDaoTest<ValueSet, ValueSe
 
 	public ValueSetDaoTest()
 	{
-		super(ValueSet.class, ValueSetDaoJdbc::new);
+		super(ValueSet.class,
+				(dataSource, permanentDeleteDataSource, fhirContext, objectMapper) -> new ValueSetDaoJdbc(dataSource,
+						permanentDeleteDataSource, fhirContext, objectMapper, ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override

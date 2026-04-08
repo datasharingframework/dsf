@@ -56,7 +56,7 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
-			+ " WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference')";
+			+ " WHERE ('Organization/' || (organization->>'id')) = endpoint->'managingOrganization'->>'reference')";
 
 	public EndpointOrganization()
 	{
@@ -174,7 +174,7 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference') AS organizations";
+			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE ('Organization/' || (organization->>'id')) = endpoint->'managingOrganization'->>'reference') AS organizations";
 		else
 			return null;
 	}

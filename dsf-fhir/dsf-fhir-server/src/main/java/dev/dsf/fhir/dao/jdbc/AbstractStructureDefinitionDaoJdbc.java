@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.search.SearchQueryIdentityFilter;
 import dev.dsf.fhir.search.SearchQueryParameter;
@@ -60,12 +61,13 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 		return factory(parameterName, () -> supplier.apply(resourceColumn));
 	}
 
-	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
+	private final ReadByUrlDao<StructureDefinition> readByUrl;
 	private final String readByBaseDefinition;
 
 	protected AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
 			FhirContext fhirContext, ObjectMapper objectMapper, String resourceTable, String resourceColumn,
-			String resourceIdColumn, Function<Identity, SearchQueryIdentityFilter> userFilter)
+			String resourceIdColumn, Function<Identity, SearchQueryIdentityFilter> userFilter,
+			ReadByUrlDaoFactory<StructureDefinition> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, StructureDefinition.class,
 				resourceTable, resourceColumn, resourceIdColumn, userFilter,
@@ -82,10 +84,16 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 								StructureDefinitionVersion::new, StructureDefinitionVersion.getNameModifiers())),
 				List.of());
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, resourceTable, resourceColumn);
+		readByUrl = readByUrlDaoFactory.create(this::getDataSource, this::getResource, resourceTable, resourceColumn);
 
 		readByBaseDefinition = "SELECT " + resourceColumn + " FROM current_" + resourceTable + " WHERE "
 				+ resourceColumn + "->>'baseDefinition' = ?";
+	}
+
+	@Override
+	public void onResourceCreated(StructureDefinition resource)
+	{
+		readByUrl.onResourceCreated(resource);
 	}
 
 	@Override

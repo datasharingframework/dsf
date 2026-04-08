@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.search.filter.ActivityDefinitionIdentityFilter;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionDate;
 import dev.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
@@ -47,10 +48,11 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 {
 	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionDaoJdbc.class);
 
-	private final ReadByUrlDaoJdbc<ActivityDefinition> readByUrl;
+	private final ReadByUrlDao<ActivityDefinition> readByUrl;
 
 	public ActivityDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext, ObjectMapper objectMapper)
+			FhirContext fhirContext, ObjectMapper objectMapper,
+			ReadByUrlDaoFactory<ActivityDefinition> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, ActivityDefinition.class,
 				"activity_definitions", "activity_definition", "activity_definition_id",
@@ -67,8 +69,14 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 								ActivityDefinitionVersion.getNameModifiers())),
 				List.of());
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+		readByUrl = readByUrlDaoFactory.create(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
+	}
+
+	@Override
+	public void onResourceCreated(ActivityDefinition resource)
+	{
+		readByUrl.onResourceCreated(resource);
 	}
 
 	@Override

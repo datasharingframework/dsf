@@ -27,11 +27,12 @@ import dev.dsf.fhir.search.filter.StructureDefinitionSnapshotIdentityFilter;
 public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
 	public StructureDefinitionSnapshotDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext, ObjectMapper objectMapper)
+			FhirContext fhirContext, ObjectMapper objectMapper,
+			ReadByUrlDaoFactory<StructureDefinition> readByUrlDaoFactory)
 	{
 		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, "structure_definition_snapshots",
 				"structure_definition_snapshot", "structure_definition_snapshot_id",
-				StructureDefinitionSnapshotIdentityFilter::new);
+				StructureDefinitionSnapshotIdentityFilter::new, readByUrlDaoFactory);
 	}
 
 	@Override

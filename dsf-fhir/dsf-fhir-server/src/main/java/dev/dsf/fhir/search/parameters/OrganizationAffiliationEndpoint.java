@@ -72,12 +72,11 @@ public class OrganizationAffiliationEndpoint extends AbstractReferenceParameter<
 			{
 				case CODE, CODE_AND_SYSTEM, SYSTEM ->
 					"(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
-							+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
+							+ " WHERE ('Endpoint/' || (endpoint->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
 							+ " ) AS identifiers) @> ?";
-
 				case CODE_AND_NO_SYSTEM_PROPERTY ->
 					"(SELECT count(*) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
-							+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
+							+ " WHERE ('Endpoint/' || (endpoint->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') reference)"
 							+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 			};
 		};
@@ -179,7 +178,7 @@ public class OrganizationAffiliationEndpoint extends AbstractReferenceParameter<
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_agg(endpoint) FROM current_endpoints WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') AS reference)) AS endpoints";
+			return "(SELECT jsonb_agg(endpoint) FROM current_endpoints WHERE ('Endpoint/' || (endpoint->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization_affiliation->'endpoint') AS reference)) AS endpoints";
 		else
 			return null;
 	}

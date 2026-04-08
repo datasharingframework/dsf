@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2018-2025 Heilbronn University of Applied Sciences
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="hhund" id="db.add_current_column.changelog-2.1.0">
+		<dropIndex tableName="activity_definitions" indexName="activity_definition_index" />
+		<dropIndex tableName="binaries" indexName="binary_json_index" />
+		<dropIndex tableName="bundles" indexName="bundle_index" />
+		<dropIndex tableName="code_systems" indexName="code_system_index" />
+		<dropIndex tableName="document_references" indexName="document_reference_index" />
+		<dropIndex tableName="endpoints" indexName="endpoint_index" />
+		<dropIndex tableName="groups" indexName="group_index" />
+		<dropIndex tableName="healthcare_services" indexName="healthcare_service_index" />
+		<dropIndex tableName="libraries" indexName="library_index" />
+		<dropIndex tableName="locations" indexName="location_index" />
+		<dropIndex tableName="measure_reports" indexName="measure_report_index" />
+		<dropIndex tableName="measures" indexName="measure_index" />
+		<dropIndex tableName="naming_systems" indexName="naming_system_index" />
+		<dropIndex tableName="organization_affiliations" indexName="organization_affiliation_index" />
+		<dropIndex tableName="organizations" indexName="organization_index" />
+		<dropIndex tableName="patients" indexName="patient_index" />
+		<!-- subscription_index was defined on patients table by mistake: db.subscriptions.changelog-1.0.0.xml L49 -->
+		<dropIndex tableName="patients" indexName="subscription_index" />
+		<dropIndex tableName="practitioner_roles" indexName="practitioner_role_index" />
+		<dropIndex tableName="practitioners" indexName="practitioner_index" />
+		<dropIndex tableName="provenances" indexName="provenance_index" />
+		<dropIndex tableName="questionnaire_responses" indexName="questionnaire_response_index" />
+		<dropIndex tableName="questionnaires" indexName="questionnaire_index" />
+		<dropIndex tableName="research_studies" indexName="research_study_index" />
+		<dropIndex tableName="structure_definition_snapshots" indexName="structure_definition_snapshot_index" />
+		<dropIndex tableName="structure_definitions" indexName="structure_definition_index" />
+		<dropIndex tableName="tasks" indexName="task_index" />
+		<dropIndex tableName="value_sets" indexName="value_set_index" />
+
+		<dropIndex tableName="read_access" indexName="read_access_id_version_type_index" />
+		<dropIndex tableName="read_access" indexName="read_access_id_version_type_organization_index" />
+
+		<sql dbms="postgresql">
+			CREATE INDEX read_access_id_version_index ON read_access USING btree (resource_id, resource_version);
+			CREATE INDEX read_access_id_version_type_organization_index ON read_access USING btree (resource_id, resource_version, access_type, organization_id) WHERE organization_id IS NOT NULL;
+		</sql>
+
+		<addColumn tableName="activity_definitions">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE activity_definitions r SET current = FALSE WHERE (r.activity_definition_id, r.version) NOT IN (SELECT activity_definition_id, version FROM current_activity_definitions);
+			CREATE INDEX activity_definition_id_current_index ON activity_definitions (activity_definition_id, current DESC);
+		</sql>
+		<createView viewName="current_activity_definitions" replaceIfExists="true">
+			SELECT activity_definition_id, version, activity_definition FROM activity_definitions WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_activity_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_activity_definitions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_activity_definitions TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="binaries">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE binaries r SET current = FALSE WHERE (r.binary_id, r.version) NOT IN (SELECT binary_id, version FROM current_binaries);
+			CREATE INDEX binary_id_current_index ON binaries (binary_id, current DESC);
+		</sql>
+		<createView viewName="current_binaries" replaceIfExists="true">
+			SELECT binary_id, version, binary_json, binary_oid, binary_size FROM binaries WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_binaries OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_binaries TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_binaries TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="bundles">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE bundles r SET current = FALSE WHERE (r.bundle_id, r.version) NOT IN (SELECT bundle_id, version FROM current_bundles);
+			CREATE INDEX bundle_id_current_index ON bundles (bundle_id, current DESC);
+		</sql>
+		<createView viewName="current_bundles" replaceIfExists="true">
+			SELECT bundle_id, version, bundle FROM bundles WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_bundles OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_bundles TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_bundles TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="code_systems">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE code_systems r SET current = FALSE WHERE (r.code_system_id, r.version) NOT IN (SELECT code_system_id, version FROM current_code_systems);
+			CREATE INDEX code_system_id_current_index ON code_systems (code_system_id, current DESC);
+		</sql>
+		<createView viewName="current_code_systems" replaceIfExists="true">
+			SELECT code_system_id, version, code_system FROM code_systems WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_code_systems OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_code_systems TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_code_systems TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="document_references">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE document_references r SET current = FALSE WHERE (r.document_reference_id, r.version) NOT IN (SELECT document_reference_id, version FROM current_document_references);
+			CREATE INDEX document_reference_id_current_index ON document_references (document_reference_id, current DESC);
+		</sql>
+		<createView viewName="current_document_references" replaceIfExists="true">
+			SELECT document_reference_id, version, document_reference FROM document_references WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_document_references OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_document_references TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_document_references TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="endpoints">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE endpoints r SET current = FALSE WHERE (r.endpoint_id, r.version) NOT IN (SELECT endpoint_id, version FROM current_endpoints);
+			CREATE INDEX endpoint_id_current_index ON endpoints (endpoint_id, current DESC);
+			CREATE INDEX endpoint_full_id_index ON endpoints (('Endpoint/' || (endpoint->>'id'))) WHERE current AND deleted IS NULL;
+			CREATE INDEX endpoint_identifier_index ON endpoints USING GIN ((endpoint->'identifier') jsonb_path_ops) WHERE current AND deleted IS NULL;
+		</sql>
+		<createView viewName="current_endpoints" replaceIfExists="true">
+			SELECT endpoint_id, version, endpoint FROM endpoints WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_endpoints OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_endpoints TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_endpoints TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="groups">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE groups r SET current = FALSE WHERE (r.group_id, r.version) NOT IN (SELECT group_id, version FROM current_groups);
+			CREATE INDEX group_id_current_index ON groups (group_id, current DESC);
+		</sql>
+		<createView viewName="current_groups" replaceIfExists="true">
+			SELECT group_id, version, group_json FROM groups WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_groups OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_groups TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_groups TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="healthcare_services">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE healthcare_services r SET current = FALSE WHERE (r.healthcare_service_id, r.version) NOT IN (SELECT healthcare_service_id, version FROM current_healthcare_services);
+			CREATE INDEX healthcare_service_id_current_index ON healthcare_services (healthcare_service_id, current DESC);
+		</sql>
+		<createView viewName="current_healthcare_services" replaceIfExists="true">
+			SELECT healthcare_service_id, version, healthcare_service FROM healthcare_services WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_healthcare_services OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_healthcare_services TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_healthcare_services TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="libraries">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE libraries r SET current = FALSE WHERE (r.library_id, r.version) NOT IN (SELECT library_id, version FROM current_libraries);
+			CREATE INDEX library_id_current_index ON libraries (library_id, current DESC);
+		</sql>
+		<createView viewName="current_libraries" replaceIfExists="true">
+			SELECT library_id, version, library FROM libraries WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_libraries OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_libraries TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_libraries TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="locations">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE locations r SET current = FALSE WHERE (r.location_id, r.version) NOT IN (SELECT location_id, version FROM current_locations);
+			CREATE INDEX location_id_current_index ON locations (location_id, current DESC);
+		</sql>
+		<createView viewName="current_locations" replaceIfExists="true">
+			SELECT location_id, version, location FROM locations WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_locations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_locations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_locations TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="measure_reports">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE measure_reports r SET current = FALSE WHERE (r.measure_report_id, r.version) NOT IN (SELECT measure_report_id, version FROM current_measure_reports);
+			CREATE INDEX measure_report_id_current_index ON measure_reports (measure_report_id, current DESC);
+		</sql>
+		<createView viewName="current_measure_reports" replaceIfExists="true">
+			SELECT measure_report_id, version, measure_report FROM measure_reports WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_measure_reports OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_measure_reports TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_measure_reports TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="measures">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE measures r SET current = FALSE WHERE (r.measure_id, r.version) NOT IN (SELECT measure_id, version FROM current_measures);
+			CREATE INDEX measure_id_current_index ON measures (measure_id, current DESC);
+		</sql>
+		<createView viewName="current_measures" replaceIfExists="true">
+			SELECT measure_id, version, measure FROM measures WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_measures OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_measures TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_measures TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="naming_systems">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE naming_systems r SET current = FALSE WHERE (r.naming_system_id, r.version) NOT IN (SELECT naming_system_id, version FROM current_naming_systems);
+			CREATE INDEX naming_system_id_current_index ON naming_systems (naming_system_id, current DESC);
+		</sql>
+		<createView viewName="current_naming_systems" replaceIfExists="true">
+			SELECT naming_system_id, version, naming_system FROM naming_systems WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_naming_systems OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_naming_systems TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_naming_systems TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="organization_affiliations">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE organization_affiliations r SET current = FALSE WHERE (r.organization_affiliation_id, r.version) NOT IN (SELECT organization_affiliation_id, version FROM current_organization_affiliations);
+			CREATE INDEX organization_affiliation_id_current_index ON organization_affiliations (organization_affiliation_id, current DESC);
+			CREATE INDEX organization_affiliation_organization_ref_index ON organization_affiliations ((organization_affiliation->'organization'->>'reference')) WHERE current AND deleted IS NULL;
+			CREATE INDEX organization_affiliation_participating_organization_ref_index ON organization_affiliations ((organization_affiliation->'participatingOrganization'->>'reference')) WHERE current AND deleted IS NULL;
+			CREATE INDEX organization_affiliation_endpoint_ref_index ON organization_affiliations ((organization_affiliation->'endpoint'->>'reference')) WHERE current AND deleted IS NULL;
+		</sql>
+		<createView viewName="current_organization_affiliations" replaceIfExists="true">
+			SELECT organization_affiliation_id, version, organization_affiliation FROM organization_affiliations WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_organization_affiliations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_organization_affiliations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_organization_affiliations TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="organizations">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE organizations r SET current = FALSE WHERE (r.organization_id, r.version) NOT IN (SELECT organization_id, version FROM current_organizations);
+			CREATE INDEX organization_id_current_index ON organizations (organization_id, current DESC);
+			CREATE INDEX organization_full_id_index ON organizations (('Organization/' || (organization->>'id'))) WHERE current AND deleted IS NULL;
+			CREATE INDEX organization_identifier_index ON organizations USING GIN ((organization->'identifier') jsonb_path_ops) WHERE current AND deleted IS NULL;
+		</sql>
+		<createView viewName="current_organizations" replaceIfExists="true">
+			SELECT organization_id, version, organization FROM organizations WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_organizations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_organizations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_organizations TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="patients">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE patients r SET current = FALSE WHERE (r.patient_id, r.version) NOT IN (SELECT patient_id, version FROM current_patients);
+			CREATE INDEX patient_id_current_index ON patients (patient_id, current DESC);
+		</sql>
+		<createView viewName="current_patients" replaceIfExists="true">
+			SELECT patient_id, version, patient FROM patients WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_patients OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_patients TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_patients TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="practitioner_roles">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE practitioner_roles r SET current = FALSE WHERE (r.practitioner_role_id, r.version) NOT IN (SELECT practitioner_role_id, version FROM current_practitioner_roles);
+			CREATE INDEX practitioner_role_id_current_index ON practitioner_roles (practitioner_role_id, current DESC);
+		</sql>
+		<createView viewName="current_practitioner_roles" replaceIfExists="true">
+			SELECT practitioner_role_id, version, practitioner_role FROM practitioner_roles WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_practitioner_roles OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_practitioner_roles TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_practitioner_roles TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="practitioners">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE practitioners r SET current = FALSE WHERE (r.practitioner_id, r.version) NOT IN (SELECT practitioner_id, version FROM current_practitioners);
+			CREATE INDEX practitioner_id_current_index ON practitioners (practitioner_id, current DESC);
+		</sql>
+		<createView viewName="current_practitioners" replaceIfExists="true">
+			SELECT practitioner_id, version, practitioner FROM practitioners WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_practitioners OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_practitioners TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_practitioners TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="provenances">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE provenances r SET current = FALSE WHERE (r.provenance_id, r.version) NOT IN (SELECT provenance_id, version FROM current_provenances);
+			CREATE INDEX provenance_id_current_index ON provenances (provenance_id, current DESC);
+		</sql>
+		<createView viewName="current_provenances" replaceIfExists="true">
+			SELECT provenance_id, version, provenance FROM provenances WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_provenances OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_provenances TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_provenances TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="questionnaire_responses">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE questionnaire_responses r SET current = FALSE WHERE (r.questionnaire_response_id, r.version) NOT IN (SELECT questionnaire_response_id, version FROM current_questionnaire_responses);
+			CREATE INDEX questionnaire_response_id_current_index ON questionnaire_responses (questionnaire_response_id, current DESC);
+		</sql>
+		<createView viewName="current_questionnaire_responses" replaceIfExists="true">
+			SELECT questionnaire_response_id, version, questionnaire_response FROM questionnaire_responses WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_questionnaire_responses OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_questionnaire_responses TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_questionnaire_responses TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="questionnaires">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE questionnaires r SET current = FALSE WHERE (r.questionnaire_id, r.version) NOT IN (SELECT questionnaire_id, version FROM current_questionnaires);
+			CREATE INDEX questionnaire_id_current_index ON questionnaires (questionnaire_id, current DESC);
+		</sql>
+		<createView viewName="current_questionnaires" replaceIfExists="true">
+			SELECT questionnaire_id, version, questionnaire FROM questionnaires WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_questionnaires OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_questionnaires TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_questionnaires TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="research_studies">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE research_studies r SET current = FALSE WHERE (r.research_study_id, r.version) NOT IN (SELECT research_study_id, version FROM current_research_studies);
+			CREATE INDEX research_study_id_current_index ON research_studies (research_study_id, current DESC);
+		</sql>
+		<createView viewName="current_research_studies" replaceIfExists="true">
+			SELECT research_study_id, version, research_study FROM research_studies WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_research_studies OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_research_studies TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_research_studies TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="structure_definition_snapshots">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE structure_definition_snapshots r SET current = FALSE WHERE (r.structure_definition_snapshot_id, r.version) NOT IN (SELECT structure_definition_snapshot_id, version FROM current_structure_definition_snapshots);
+			CREATE INDEX structure_definition_snapshot_id_current_index ON structure_definition_snapshots (structure_definition_snapshot_id, current DESC);
+		</sql>
+		<createView viewName="current_structure_definition_snapshots" replaceIfExists="true">
+			SELECT structure_definition_snapshot_id, version, structure_definition_snapshot FROM structure_definition_snapshots WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_structure_definition_snapshots OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_structure_definition_snapshots TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_structure_definition_snapshots TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="structure_definitions">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE structure_definitions r SET current = FALSE WHERE (r.structure_definition_id, r.version) NOT IN (SELECT structure_definition_id, version FROM current_structure_definitions);
+			CREATE INDEX structure_definition_id_current_index ON structure_definitions (structure_definition_id, current DESC);
+		</sql>
+		<createView viewName="current_structure_definitions" replaceIfExists="true">
+			SELECT structure_definition_id, version, structure_definition FROM structure_definitions WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_structure_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_structure_definitions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_structure_definitions TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="subscriptions">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE subscriptions r SET current = FALSE WHERE (r.subscription_id, r.version) NOT IN (SELECT subscription_id, version FROM current_subscriptions);
+			CREATE INDEX subscription_id_current_index ON subscriptions (subscription_id, current DESC);
+		</sql>
+		<createView viewName="current_subscriptions" replaceIfExists="true">
+			SELECT subscription_id, version, subscription FROM subscriptions WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_subscriptions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_subscriptions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_subscriptions TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="tasks">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE tasks r SET current = FALSE WHERE (r.task_id, r.version) NOT IN (SELECT task_id, version FROM current_tasks);
+			CREATE INDEX task_id_current_index ON tasks (task_id, current DESC);
+			CREATE INDEX task_identifier_index ON tasks USING GIN ((task->'identifier') jsonb_path_ops) WHERE current AND deleted IS NULL;
+		</sql>
+		<createView viewName="current_tasks" replaceIfExists="true">
+			SELECT task_id, version, task FROM tasks WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_tasks OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_tasks TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_tasks TO ${db.server_users_group};
+		</sql>
+
+		<addColumn tableName="value_sets">
+			<column name="current" type="boolean" defaultValue="true" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE value_sets r SET current = FALSE WHERE (r.value_set_id, r.version) NOT IN (SELECT value_set_id, version FROM current_value_sets);
+			CREATE INDEX value_set_id_current_index ON value_sets (value_set_id, current DESC);
+		</sql>
+		<createView viewName="current_value_sets" replaceIfExists="true">
+			SELECT value_set_id, version, value_set FROM value_sets WHERE current AND deleted IS NULL;
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_value_sets OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_value_sets TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_value_sets TO ${db.server_users_group};
+		</sql>
+
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaire_responses_insert.sql" splitStatements="false" />
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_structure_definition_snapshots_insert.sql" splitStatements="false" />
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_tasks_insert.sql" splitStatements="false" />
+		<sql dbms="postgresql">
+			CREATE TRIGGER questionnaire_responses_insert AFTER INSERT ON questionnaire_responses FOR EACH ROW EXECUTE PROCEDURE on_questionnaire_responses_insert();
+			CREATE TRIGGER structure_definition_snapshots_insert AFTER INSERT ON structure_definition_snapshots FOR EACH ROW EXECUTE PROCEDURE on_structure_definition_snapshots_insert();
+			CREATE TRIGGER tasks_insert AFTER INSERT ON tasks FOR EACH ROW EXECUTE PROCEDURE on_tasks_insert();
+		</sql>
+
+		<createView viewName="all_resources" replaceIfExists="true">
+			SELECT id, version, type, resource
+			FROM (
+			SELECT activity_definition_id AS id, version, 'ActivityDefinition'::text AS type, activity_definition AS resource FROM current_activity_definitions
+			UNION
+			SELECT binary_id AS id, version, 'Binary'::text AS type, binary_json AS resource FROM current_binaries
+			UNION
+			SELECT bundle_id AS id, version, 'Bundle'::text AS type, bundle AS resource FROM current_bundles
+			UNION
+			SELECT code_system_id AS id, version, 'CodeSystem'::text AS type, code_system AS resource FROM current_code_systems
+			UNION
+			SELECT document_reference_id AS id, version, 'DocumentReference'::text AS type, document_reference AS resource FROM current_document_references
+			UNION
+			SELECT endpoint_id AS id, version, 'Endpoint'::text AS type, endpoint AS resource FROM current_endpoints
+			UNION
+			SELECT group_id AS id, version, 'Group'::text AS type, group_json AS resource FROM current_groups
+			UNION
+			SELECT healthcare_service_id AS id, version, 'HealthcareService'::text AS type, healthcare_service AS resource FROM current_healthcare_services
+			UNION
+			SELECT library_id AS id, version, 'Library'::text AS type, library AS resource FROM current_libraries
+			UNION
+			SELECT location_id AS id, version, 'Location'::text AS type, location AS resource FROM current_locations
+			UNION
+			SELECT measure_report_id AS id, version, 'MeasureReport'::text AS type, measure_report AS resource FROM current_measure_reports
+			UNION
+			SELECT measure_id AS id, version, 'Measure'::text AS type, measure AS resource FROM current_measures
+			UNION
+			SELECT naming_system_id AS id, version, 'NamingSystem'::text AS type, naming_system AS resource FROM current_naming_systems
+			UNION
+			SELECT organization_id AS id, version, 'Organization'::text AS type, organization AS resource FROM current_organizations
+			UNION
+			SELECT organization_affiliation_id AS id, version, 'OrganizationAffiliation'::text AS type, organization_affiliation AS resource FROM current_organization_affiliations
+			UNION
+			SELECT patient_id AS id, version, 'Patient'::text AS type, patient AS resource FROM current_patients
+			UNION
+			SELECT practitioner_role_id AS id, version, 'PractitionerRole'::text AS type, practitioner_role AS resource FROM current_practitioner_roles
+			UNION
+			SELECT practitioner_id AS id, version, 'Practitioner'::text AS type, practitioner AS resource FROM current_practitioners
+			UNION
+			SELECT provenance_id AS id, version, 'Provenance'::text AS type, provenance AS resource FROM current_provenances
+			UNION
+			SELECT questionnaire_id AS id, version, 'Questionnaire'::text AS type, questionnaire AS resource FROM current_questionnaires
+			UNION
+			SELECT questionnaire_response_id AS id, version, 'QuestionnaireResponse'::text AS type, questionnaire_response AS resource FROM current_questionnaire_responses
+			UNION
+			SELECT research_study_id AS id, version, 'ResearchStudy'::text AS type, research_study AS resource FROM current_research_studies
+			UNION
+			SELECT structure_definition_id AS id, version, 'StructureDefinition'::text AS type, structure_definition AS resource FROM current_structure_definitions
+			UNION
+			SELECT subscription_id AS id, version, 'Subscription'::text AS type, subscription AS resource FROM current_subscriptions
+			UNION
+			SELECT task_id AS id, version, 'Task'::text AS type, task AS resource FROM current_tasks
+			UNION
+			SELECT value_set_id AS id, version, 'ValueSet'::text AS type, value_set AS resource FROM current_value_sets
+			) AS current_all
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE all_resources OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE all_resources TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE all_resources TO ${db.server_users_group};
+		</sql>
+
+		<createView viewName="all_read_access_resources" replaceIfExists="true">
+			SELECT id, version, type, resource
+			FROM (
+			SELECT activity_definition_id AS id, version, 'ActivityDefinition'::text AS type, activity_definition AS resource FROM current_activity_definitions
+			UNION
+			SELECT binary_id AS id, version, 'Binary'::text AS type, binary_json AS resource FROM current_binaries
+			UNION
+			SELECT bundle_id AS id, version, 'Bundle'::text AS type, bundle AS resource FROM current_bundles
+			UNION
+			SELECT code_system_id AS id, version, 'CodeSystem'::text AS type, code_system AS resource FROM current_code_systems
+			UNION
+			SELECT document_reference_id AS id, version, 'DocumentReference'::text AS type, document_reference AS resource FROM current_document_references
+			UNION
+			SELECT endpoint_id AS id, version, 'Endpoint'::text AS type, endpoint AS resource FROM current_endpoints
+			UNION
+			SELECT group_id AS id, version, 'Group'::text AS type, group_json AS resource FROM current_groups
+			UNION
+			SELECT healthcare_service_id AS id, version, 'HealthcareService'::text AS type, healthcare_service AS resource FROM current_healthcare_services
+			UNION
+			SELECT library_id AS id, version, 'Library'::text AS type, library AS resource FROM current_libraries
+			UNION
+			SELECT location_id AS id, version, 'Location'::text AS type, location AS resource FROM current_locations
+			UNION
+			SELECT measure_report_id AS id, version, 'MeasureReport'::text AS type, measure_report AS resource FROM current_measure_reports
+			UNION
+			SELECT measure_id AS id, version, 'Measure'::text AS type, measure AS resource FROM current_measures
+			UNION
+			SELECT naming_system_id AS id, version, 'NamingSystem'::text AS type, naming_system AS resource FROM current_naming_systems
+			UNION
+			SELECT organization_id AS id, version, 'Organization'::text AS type, organization AS resource FROM current_organizations
+			UNION
+			SELECT organization_affiliation_id AS id, version, 'OrganizationAffiliation'::text AS type, organization_affiliation AS resource FROM current_organization_affiliations
+			UNION
+			SELECT patient_id AS id, version, 'Patient'::text AS type, patient AS resource FROM current_patients
+			UNION
+			SELECT practitioner_role_id AS id, version, 'PractitionerRole'::text AS type, practitioner_role AS resource FROM current_practitioner_roles
+			UNION
+			SELECT practitioner_id AS id, version, 'Practitioner'::text AS type, practitioner AS resource FROM current_practitioners
+			UNION
+			SELECT provenance_id AS id, version, 'Provenance'::text AS type, provenance AS resource FROM current_provenances
+			UNION
+			SELECT questionnaire_id AS id, version, 'Questionnaire'::text AS type, questionnaire AS resource FROM current_questionnaires
+			UNION
+			SELECT research_study_id AS id, version, 'ResearchStudy'::text AS type, research_study AS resource FROM current_research_studies
+			UNION
+			SELECT structure_definition_id AS id, version, 'StructureDefinition'::text AS type, structure_definition AS resource FROM current_structure_definitions
+			UNION
+			SELECT subscription_id AS id, version, 'Subscription'::text AS type, subscription AS resource FROM current_subscriptions
+			UNION
+			SELECT value_set_id AS id, version, 'ValueSet'::text AS type, value_set AS resource FROM current_value_sets
+			) AS current_all_read_access
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE all_read_access_resources OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE all_read_access_resources TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE all_read_access_resources TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

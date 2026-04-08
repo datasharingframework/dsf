@@ -420,7 +420,7 @@ public class OrganizationAffiliationDaoTest
 
 	private static class TaskAsCsvGeneratorReader extends Reader
 	{
-		public static final int TASK_ROW_LINE_LENGTH = 1615;
+		public static final int TASK_ROW_LINE_LENGTH = 1614;
 
 		private final int maxTasks;
 		private int currentTask;
@@ -463,7 +463,7 @@ public class OrganizationAffiliationDaoTest
 		private String generateLine()
 		{
 			String id = UUID.randomUUID().toString();
-			return "${id},3,,\"{\"\"resourceType\"\":\"\"Task\"\",\"\"id\"\":\"\"${id}\"\",\"\"meta\"\":{\"\"versionId\"\":\"\"3\"\",\"\"lastUpdated\"\":\"\"2024-10-01T18:22:06.765+02:00\"\",\"\"profile\"\":[\"\"http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-execute|1.0\"\"]},\"\"instantiatesCanonical\"\":\"\"http://medizininformatik-initiative.de/bpe/Process/feasibilityExecute|1.0\"\",\"\"status\"\":\"\"completed\"\",\"\"intent\"\":\"\"order\"\",\"\"authoredOn\"\":\"\"2024-10-01T18:22:07+02:00\"\",\"\"requester\"\":{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}},\"\"restriction\"\":{\"\"recipient\"\":[{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}}]},\"\"input\"\":[{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"message-name\"\"}]},\"\"valueString\"\":\"\"feasibilityExecuteMessage\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"business-key\"\"}]},\"\"valueString\"\":\"\"${business-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"correlation-key\"\"}]},\"\"valueString\"\":\"\"${correlation-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility\"\",\"\"code\"\":\"\"measure-reference\"\"}]},\"\"valueReference\"\":{\"\"reference\"\":\"\"https://dsf.fdpg.test.forschen-fuer-gesundheit.de/fhir/Measure/02bb7540-0d99-4c0e-8764-981e545cf646\"\"}}]}\"\n"
+			return "${id},3,\"{\"\"resourceType\"\":\"\"Task\"\",\"\"id\"\":\"\"${id}\"\",\"\"meta\"\":{\"\"versionId\"\":\"\"3\"\",\"\"lastUpdated\"\":\"\"2024-10-01T18:22:06.765+02:00\"\",\"\"profile\"\":[\"\"http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-execute|1.0\"\"]},\"\"instantiatesCanonical\"\":\"\"http://medizininformatik-initiative.de/bpe/Process/feasibilityExecute|1.0\"\",\"\"status\"\":\"\"completed\"\",\"\"intent\"\":\"\"order\"\",\"\"authoredOn\"\":\"\"2024-10-01T18:22:07+02:00\"\",\"\"requester\"\":{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}},\"\"restriction\"\":{\"\"recipient\"\":[{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}}]},\"\"input\"\":[{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"message-name\"\"}]},\"\"valueString\"\":\"\"feasibilityExecuteMessage\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"business-key\"\"}]},\"\"valueString\"\":\"\"${business-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"correlation-key\"\"}]},\"\"valueString\"\":\"\"${correlation-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility\"\",\"\"code\"\":\"\"measure-reference\"\"}]},\"\"valueReference\"\":{\"\"reference\"\":\"\"https://dsf.fdpg.test.forschen-fuer-gesundheit.de/fhir/Measure/02bb7540-0d99-4c0e-8764-981e545cf646\"\"}}]}\"\n"
 					.replace("${id}", id).replace("${business-key}", UUID.randomUUID().toString())
 					.replace("${correlation-key}", UUID.randomUUID().toString());
 		}
@@ -508,8 +508,8 @@ public class OrganizationAffiliationDaoTest
 		{
 			CopyManager copyManager = new CopyManager(connection.unwrap(BaseConnection.class));
 			TaskAsCsvGeneratorReader taskGenerator = new TaskAsCsvGeneratorReader(taskCount);
-			long insertedRows = copyManager.copyIn("COPY tasks FROM STDIN (FORMAT csv)", taskGenerator,
-					TaskAsCsvGeneratorReader.TASK_ROW_LINE_LENGTH);
+			long insertedRows = copyManager.copyIn("COPY tasks (task_id, version, task) FROM STDIN (FORMAT csv)",
+					taskGenerator, TaskAsCsvGeneratorReader.TASK_ROW_LINE_LENGTH);
 
 			assertEquals(taskCount, insertedRows);
 		}

@@ -72,12 +72,11 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 			{
 				case CODE, CODE_AND_SYSTEM, SYSTEM ->
 					"(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_groups, jsonb_array_elements(group_json->'identifier') identifier"
-							+ " WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
+							+ " WHERE ('Group/' || (group_json->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
 							+ " ) AS identifiers) @> ?";
-
 				case CODE_AND_NO_SYSTEM_PROPERTY ->
 					"(SELECT count(*) FROM (SELECT identifier FROM current_groups, jsonb_array_elements(group_json->'identifier') identifier"
-							+ " WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
+							+ " WHERE ('Group/' || (group_json->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') reference)"
 							+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 			};
 		};
@@ -178,7 +177,7 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_agg(group_json) FROM current_groups WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS reference)) AS groups";
+			return "(SELECT jsonb_agg(group_json) FROM current_groups WHERE ('Group/' || (group_json->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS reference)) AS groups";
 		else
 			return null;
 	}

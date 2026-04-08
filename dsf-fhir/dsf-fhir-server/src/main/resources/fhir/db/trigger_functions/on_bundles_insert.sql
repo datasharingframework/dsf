@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_bundles_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE bundles SET current = false WHERE bundle_id = NEW.bundle_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.bundle_id, NEW.version, NEW.bundle);
 	RETURN NEW;
 END;

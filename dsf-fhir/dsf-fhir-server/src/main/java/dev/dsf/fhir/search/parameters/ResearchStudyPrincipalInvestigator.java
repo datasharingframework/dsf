@@ -59,9 +59,9 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
-			+ "WHERE concat('Practitioner/', practitioner->>'id') = research_study->'principalInvestigator'->>'reference' "
+			+ "WHERE ('Practitioner/' || (practitioner->>'id')) = research_study->'principalInvestigator'->>'reference' "
 			+ "UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles "
-			+ "WHERE concat('PractitionerRole/', practitioner_role->>'id') = research_study->'principalInvestigator'->>'reference')";
+			+ "WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = research_study->'principalInvestigator'->>'reference')";
 
 	public ResearchStudyPrincipalInvestigator()
 	{
@@ -204,11 +204,11 @@ public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParamet
 			return switch (includeParts.getTargetResourceTypeName())
 			{
 				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-						+ " WHERE concat('Practitioner/', practitioner->>'id') = research_study->'principalInvestigator'->>'reference') AS practitioners";
+						+ " WHERE ('Practitioner/' || (practitioner->>'id')) = research_study->'principalInvestigator'->>'reference') AS practitioners";
 
 				case "PractitionerRole" ->
 					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
-							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = research_study->'principalInvestigator'->>'reference') AS practitioner_roles";
+							+ " WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = research_study->'principalInvestigator'->>'reference') AS practitioner_roles";
 
 				default -> null;
 			};

@@ -28,13 +28,10 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 public class DataSourceWithLogger implements DataSource
 {
-	private final boolean loggerEnabled;
-
 	private final BasicDataSource delegate;
 
-	public DataSourceWithLogger(boolean loggerEnabled, BasicDataSource delegate)
+	public DataSourceWithLogger(BasicDataSource delegate)
 	{
-		this.loggerEnabled = loggerEnabled;
 		this.delegate = delegate;
 	}
 
@@ -59,13 +56,13 @@ public class DataSourceWithLogger implements DataSource
 	@Override
 	public Connection getConnection() throws SQLException
 	{
-		return new ConnectionWithLogger(loggerEnabled, delegate.getConnection());
+		return new ConnectionWithLogger(delegate.getConnection());
 	}
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException
 	{
-		return new ConnectionWithLogger(loggerEnabled, delegate.getConnection(username, password));
+		return new ConnectionWithLogger(delegate.getConnection(username, password));
 	}
 
 	@Override
