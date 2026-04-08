@@ -123,13 +123,13 @@ public class ParameterConverter
 		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format) || MediaType.TEXT_HTML.equals(format))
 			return getMediaType(format, pretty, summaryMode);
 		else if (XML_FORMAT.equals(format))
-			return Optional.of(mediaType("application", "fhir+xml", "x", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "fhir+xml", "", pretty, summaryMode, false));
 		else if (JSON_FORMAT.equals(format))
-			return Optional.of(mediaType("application", "fhir+json", "j", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "fhir+json", "", pretty, summaryMode, false));
 		else if (HTML_FORMAT.equals(format))
 			return Optional.of(mediaType("text", "html", "h", pretty, summaryMode, false));
 		else if (INLINE_FORMAT.equals(format))
-			return Optional.of(mediaType("*", "*", "i", pretty, summaryMode, true));
+			return Optional.of(mediaType("*", "*", "", pretty, summaryMode, true));
 		else
 			return Optional.empty();
 	}
@@ -142,21 +142,21 @@ public class ParameterConverter
 		if (mediaType.contains(MediaType.TEXT_HTML))
 			return Optional.of(mediaType("text", "html", "h", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON_NEW))
-			return Optional.of(mediaType("application", "fhir+json", "j", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "fhir+json", "", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON))
-			return Optional.of(mediaType("application", "json+fhir", "j", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "json+fhir", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.APPLICATION_JSON))
-			return Optional.of(mediaType("application", "json", "j", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "json", "", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_XML_NEW))
-			return Optional.of(mediaType("application", "fhir+xml", "x", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "fhir+xml", "", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_XML))
-			return Optional.of(mediaType("application", "xml+fhir", "x", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "xml+fhir", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.APPLICATION_XML))
-			return Optional.of(mediaType("application", "xml", "x", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "xml", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.TEXT_XML))
-			return Optional.of(mediaType("text", "xml", "x", pretty, summaryMode, false));
+			return Optional.of(mediaType("text", "xml", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.WILDCARD))
-			return Optional.of(mediaType("application", "fhir+xml", "x", pretty, summaryMode, false));
+			return Optional.of(mediaType("application", "fhir+xml", "", pretty, summaryMode, false));
 		else
 			return Optional.empty();
 	}

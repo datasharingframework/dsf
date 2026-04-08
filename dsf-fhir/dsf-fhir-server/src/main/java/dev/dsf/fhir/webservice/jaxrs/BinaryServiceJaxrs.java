@@ -394,11 +394,13 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		ResponseBuilder b = Response.status(Status.OK);
 		b.type(binary.getContentType() != null ? binary.getContentType() : MediaType.APPLICATION_OCTET_STREAM);
 
-		if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
-				&& binary.getMeta().getVersionId() != null)
+		if (binary.hasMeta())
 		{
-			b.lastModified(binary.getMeta().getLastUpdated());
-			b.tag(new EntityTag((inline ? "i" : "b") + binary.getMeta().getVersionId(), true));
+			if (binary.getMeta().hasLastUpdated())
+				b.lastModified(binary.getMeta().getLastUpdated());
+
+			if (binary.getMeta().hasVersionId())
+				b.tag(new EntityTag(binary.getMeta().getVersionId(), true));
 		}
 
 		if (binary.hasSecurityContext() && binary.getSecurityContext().hasReference())
@@ -408,6 +410,7 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		}
 
 		b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
+		b.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
 		b.header(RangeRequest.ACCEPT_RANGES_HEADER, RangeRequest.ACCEPT_RANGES_HEADER_VALUE);
 
 		if (!inline)

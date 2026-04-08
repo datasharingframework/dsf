@@ -134,10 +134,10 @@ public class ResponseGenerator
 		switch (prefer)
 		{
 			case REPRESENTATION:
-				b = b.entity(resource);
+				b.entity(resource);
 				break;
 			case OPERATION_OUTCOME:
-				b = b.entity(operationOutcomeCreator.get());
+				b.entity(operationOutcomeCreator.get());
 				break;
 			case MINIMAL:
 				// do nothing, headers only
@@ -147,17 +147,20 @@ public class ResponseGenerator
 		}
 
 		if (mediaType != null)
-			b = b.type(mediaType.withCharset(StandardCharsets.UTF_8.displayName()));
+			b.type(mediaType.withCharset(StandardCharsets.UTF_8.displayName()));
 
-		if (resource.getMeta() != null && resource.getMeta().getLastUpdated() != null
-				&& resource.getMeta().getVersionId() != null)
+		if (resource.hasMeta())
 		{
-			b = b.lastModified(resource.getMeta().getLastUpdated());
-			b = b.tag(new EntityTag(mediaType.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "")
-					+ resource.getMeta().getVersionId(), true));
+			if (resource.getMeta().hasLastUpdated())
+				b.lastModified(resource.getMeta().getLastUpdated());
+
+			if (resource.getMeta().hasVersionId())
+				b.tag(new EntityTag(mediaType.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "")
+						+ resource.getMeta().getVersionId(), true));
 		}
 
-		b = b.cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM);
+		b.cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM);
+		b.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
 
 		return b;
 	}
