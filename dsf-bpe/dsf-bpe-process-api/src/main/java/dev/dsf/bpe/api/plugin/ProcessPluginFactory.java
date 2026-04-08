@@ -26,8 +26,7 @@ public interface ProcessPluginFactory
 {
 	int getApiVersion();
 
-	@SuppressWarnings("rawtypes")
-	Stream<TypedValueSerializer> getSerializer();
+	Stream<TypedValueSerializer<?>> getSerializer();
 
 	ListenerFactory getListenerFactory();
 
