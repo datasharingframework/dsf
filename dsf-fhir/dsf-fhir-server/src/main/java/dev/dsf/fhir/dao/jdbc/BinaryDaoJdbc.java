@@ -272,6 +272,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		catch (InterruptedException ex)
 		{
 			loUnlinker.shutdownNow();
+			Thread.currentThread().interrupt();
 		}
 	}
 }
