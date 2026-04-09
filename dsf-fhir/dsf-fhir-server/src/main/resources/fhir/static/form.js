@@ -33,12 +33,14 @@ function readTaskInputsFromForm() {
 
 			if (id !== "http://dsf.dev/fhir/CodeSystem/bpmn-message|message-name") {
 				document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).forEach(row => {
-					const result = readAndValidateTaskInput(input, row)
+					if (id === toIdWithoutIndex(row.getAttribute("for"))) {
+						const result = readAndValidateTaskInput(input, row)
 
-					if (result.input)
-						newInputs.push(result.input)
-					else if (!result.valid)
-						valid = false
+						if (result.input)
+							newInputs.push(result.input)
+						else if (!result.valid)
+							valid = false
+					}
 				})
 			} else {
 				newInputs.push(input)
@@ -851,7 +853,7 @@ function getValueOfDifferential(differentials, path, property) {
 }
 
 function modifyTaskInputRow(definition) {
-	const id = definition.typeSystem + "|" + definition.typeCode
+	const id = definition.typeSystem + "|" + definition.typeCode + "|0"
 	const row = document.querySelector(`div.row[for="${CSS.escape(id)}"]`)
 
 	if (row) {
@@ -895,14 +897,20 @@ function modifyQuestionnaireInputRow(item) {
 	}
 }
 
+function toIdWithoutIndex(id) {
+	return id.slice(0, id.lastIndexOf('|'))
+}
+
 function appendInputRowAfter(id) {
-	const rows = document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`)
+	id = toIdWithoutIndex(id);
+
+	const rows = document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).values().filter(e => id === toIdWithoutIndex(e.getAttribute("for"))).toArray()
 
 	if (rows.length <= 0)
 		return
 
-	const idParts = rows[rows.length - 1].getAttribute("for")?.split("|")
-	const index = idParts && idParts.length === 3 ? parseInt(idParts[2]) + 1 : 1
+	const forAttr = rows[rows.length - 1].getAttribute("for")
+	const index = parseInt(forAttr.slice(forAttr.lastIndexOf("|") + 1)) + 1
 	const clone = rows[0].cloneNode(true)
 
 	clone.setAttribute("for", id + "|" + index)
