@@ -66,7 +66,7 @@ public class SearchSetBinary extends AbstractSearchSet<Binary>
 			unitIndex++;
 		}
 
-		if (value == (long) value)
+		if (Math.abs(value - (long) value) < .0000001)
 			return String.format("%d %s", (long) value, UNITS[unitIndex]);
 		else
 			return String.format("%.2f %s", value, UNITS[unitIndex]);
