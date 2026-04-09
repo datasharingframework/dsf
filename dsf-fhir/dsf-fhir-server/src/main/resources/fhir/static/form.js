@@ -35,12 +35,17 @@ function readTaskInputsFromForm() {
 
 			if (id !== "http://dsf.dev/fhir/CodeSystem/bpmn-message|message-name") {
 				document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).forEach(row => {
-					const result = readAndValidateTaskInput(input, row)
+					const idAttr = row.getAttribute("for")
+					const idx = idAttr.lastIndexOf("|")
+					const idNoIndex = idAttr.slice(0, idx)
+					if (id === idNoIndex) {
+						const result = readAndValidateTaskInput(input, row)
 
-					if (result.input)
-						newInputs.push(result.input)
-					else if (!result.valid)
-						valid = false
+						if (result.input)
+							newInputs.push(result.input)
+						else if (!result.valid)
+							valid = false
+					}
 				})
 			} else {
 				newInputs.push(input)
@@ -875,13 +880,21 @@ function modifyQuestionnaireInputRow(item) {
 }
 
 function appendInputRowAfter(id) {
-	const rows = document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`)
+	const rows = document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).values().filter(
+		(element) => {
+			const idAttr = element.getAttribute("for")
+			const idx = idAttr.lastIndexOf("|")
+			const idNoIndex = idAttr.slice(0, idx)
+			return id === idNoIndex
+		}
+	).toArray()
 
 	if (rows.length <= 0)
 		return
 
-	const idParts = rows[rows.length - 1].getAttribute("for")?.split("|")
-	const index = idParts && idParts.length === 3 ? parseInt(idParts[2]) + 1 : 1
+	const idAttr = rows[rows.length - 1].getAttribute("for")
+	const idx = idAttr.lastIndexOf("|")
+	const index = parseInt(idAttr.slice(idx + 1)) + 1
 	const clone = rows[0].cloneNode(true)
 
 	clone.setAttribute("for", id + "|" + index)
