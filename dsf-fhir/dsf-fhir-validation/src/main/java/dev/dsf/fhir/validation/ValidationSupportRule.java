@@ -151,7 +151,7 @@ public class ValidationSupportRule extends ExternalResource
 			}
 			catch (IOException e)
 			{
-				logger.warn("FHIR resource " + f + " is deprecated, unable to read replacement message: {}",
+				logger.warn("FHIR resource {} is deprecated, unable to read replacement message: {}", f,
 						e.getMessage());
 			}
 		});
