@@ -35,10 +35,7 @@ function readTaskInputsFromForm() {
 
 			if (id !== "http://dsf.dev/fhir/CodeSystem/bpmn-message|message-name") {
 				document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).forEach(row => {
-					const idAttr = row.getAttribute("for")
-					const idx = idAttr.lastIndexOf("|")
-					const idNoIndex = idAttr.slice(0, idx)
-					if (id === idNoIndex) {
+					if (id === toIdWithoutIndex(row.getAttribute("for"))) {
 						const result = readAndValidateTaskInput(input, row)
 
 						if (result.input)
@@ -100,12 +97,12 @@ function readAndValidateTaskInput(input, row) {
 			return newTaskInputBoolean(input.type, id, htmlInputs[0].checked, htmlInputs[1].checked, optional)
 	}
 	else if (htmlInputs?.length === 5) {
-    	const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
+		const input0FhirType = htmlInputs[0].getAttribute("fhir-type")
 
-    	if (input0FhirType.startsWith("Quantity")) {
-    		return new newTaskInputQuantity(input.type, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
-    	}
-    }
+		if (input0FhirType.startsWith("Quantity")) {
+			return new newTaskInputQuantity(input.type, id, htmlInputs[0].value, htmlInputs[1].value, htmlInputs[2].value, htmlInputs[3].value, htmlInputs[4].value, optional)
+		}
+	}
 
 	return { input: null, valid: false }
 }
@@ -272,7 +269,7 @@ function readQuestionnaireResponseAnswersFromForm() {
 			}
 		}
 	})
-	
+
 	const practitionerIdentifierValue = document.querySelector('#practitionerIdentifierValue')?.value
 	if (practitionerIdentifierValue !== undefined) {
 		questionnaireResponse.author.type = "Practitioner"
@@ -445,8 +442,8 @@ function newQuestionnaireResponseItemQuantity(text, id, comparator, value, unit,
 					code: result.value.code
 				}
 			}]
-        }
-    	return { item: item, valid: true }
+		}
+		return { item: item, valid: true }
 	} else
 		return { input: null, valid: result.valid }
 }
@@ -592,7 +589,7 @@ function validateString(errorListElement, value, optional, valueName) {
 
 function validateStringInList(errorListElement, value, list, optional, valueName) {
 	const valueInList = s => list.includes(s)
-	return validateType(errorListElement, value, optional, valueName, valueInList, "not in [" + list.toString() + "]" , v => v)
+	return validateType(errorListElement, value, optional, valueName, valueInList, "not in [" + list.toString() + "]", v => v)
 }
 
 function validateInteger(errorListElement, value, optional, valueName) {
@@ -835,7 +832,7 @@ function getValueOfDifferential(differentials, path, property) {
 }
 
 function modifyTaskInputRow(definition) {
-	const id = definition.typeSystem + "|" + definition.typeCode
+	const id = definition.typeSystem + "|" + definition.typeCode + "|0"
 	const row = document.querySelector(`div.row[for="${CSS.escape(id)}"]`)
 
 	if (row) {
@@ -879,22 +876,20 @@ function modifyQuestionnaireInputRow(item) {
 	}
 }
 
+function toIdWithoutIndex(id) {
+	return id.slice(0, id.lastIndexOf('|'))
+}
+
 function appendInputRowAfter(id) {
-	const rows = document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).values().filter(
-		(element) => {
-			const idAttr = element.getAttribute("for")
-			const idx = idAttr.lastIndexOf("|")
-			const idNoIndex = idAttr.slice(0, idx)
-			return id === idNoIndex
-		}
-	).toArray()
+	id = toIdWithoutIndex(id);
+
+	const rows = document.querySelectorAll(`div.row[for^="${CSS.escape(id)}"]`).values().filter(e => id === toIdWithoutIndex(e.getAttribute("for"))).toArray()
 
 	if (rows.length <= 0)
 		return
 
-	const idAttr = rows[rows.length - 1].getAttribute("for")
-	const idx = idAttr.lastIndexOf("|")
-	const index = parseInt(idAttr.slice(idx + 1)) + 1
+	const forAttr = rows[rows.length - 1].getAttribute("for")
+	const index = parseInt(forAttr.slice(forAttr.lastIndexOf("|") + 1)) + 1
 	const clone = rows[0].cloneNode(true)
 
 	clone.setAttribute("for", id + "|" + index)
