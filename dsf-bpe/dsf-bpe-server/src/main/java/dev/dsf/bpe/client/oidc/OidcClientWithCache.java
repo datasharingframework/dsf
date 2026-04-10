@@ -115,7 +115,7 @@ public class OidcClientWithCache implements OidcClientWithDecodedJwt
 	@Override
 	public DecodedJWT getAccessTokenDecoded(Configuration configuration, Jwks jwks) throws OidcClientException
 	{
-		if (accessTokenCache != null && accessTokenCache.timeout.isBefore(ZonedDateTime.now()))
+		if (accessTokenCache != null && accessTokenCache.timeout.isAfter(ZonedDateTime.now()))
 			return accessTokenCache.resource;
 		else
 		{
