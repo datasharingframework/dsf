@@ -27,6 +27,11 @@ public interface Identity extends Principal
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/organization-identifier";
 	String ENDPOINT_IDENTIFIER_SYSTEM = "http://dsf.dev/sid/endpoint-identifier";
 
+	/**
+	 * @return <code>true</code> if credentials are not expired
+	 */
+	boolean isNotExpired();
+
 	boolean isLocalIdentity();
 
 	/**
@@ -38,6 +43,10 @@ public interface Identity extends Principal
 
 	Set<DsfRole> getDsfRoles();
 
+	/**
+	 * @param role
+	 * @return <code>true</code> if Identity has the given role
+	 */
 	boolean hasDsfRole(DsfRole role);
 
 	/**

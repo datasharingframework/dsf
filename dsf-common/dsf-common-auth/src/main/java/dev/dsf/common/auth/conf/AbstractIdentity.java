@@ -86,6 +86,12 @@ public abstract class AbstractIdentity implements Identity
 	}
 
 	@Override
+	public boolean isNotExpired()
+	{
+		return certificate != null && certificate.isNotExpired();
+	}
+
+	@Override
 	public boolean isLocalIdentity()
 	{
 		return localIdentity;

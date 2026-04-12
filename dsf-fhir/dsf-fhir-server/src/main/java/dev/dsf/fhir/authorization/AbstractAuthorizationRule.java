@@ -324,7 +324,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	}
 
 	@Override
-	public Optional<String> reasonPermanentDeleteAllowed(Identity identity, R oldResource)
+	public final Optional<String> reasonPermanentDeleteAllowed(Identity identity, R oldResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
@@ -400,7 +400,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	}
 
 	@Override
-	public Optional<String> reasonWebsocketAllowed(Identity identity, R existingResource)
+	public final Optional<String> reasonWebsocketAllowed(Identity identity, R existingResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{

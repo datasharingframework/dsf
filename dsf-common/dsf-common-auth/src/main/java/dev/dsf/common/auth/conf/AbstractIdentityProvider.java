@@ -17,8 +17,6 @@ package dev.dsf.common.auth.conf;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -260,26 +258,10 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		if (certWrapper == null)
 			return Optional.empty();
 
-		if (!thumbprints.contains(certWrapper.thumbprint()))
+		if (!thumbprints.contains(certWrapper.getThumbprint()))
 			return Optional.empty();
 
-		return toJcaX509CertificateHolder(certWrapper.certificate())
-				.flatMap(ch -> toPractitioner(ch, certWrapper.thumbprint()));
-	}
-
-	private Optional<JcaX509CertificateHolder> toJcaX509CertificateHolder(X509Certificate certificate)
-	{
-		try
-		{
-			return Optional.of(new JcaX509CertificateHolder(certificate));
-		}
-		catch (CertificateEncodingException e)
-		{
-			logger.debug("Unable to decode certificate", e);
-			logger.warn("Unable to decode certificate: {} - {}", e.getClass().getName(), e.getMessage());
-
-			return Optional.empty();
-		}
+		return toPractitioner(certWrapper.toJcaX509CertificateHolder(), certWrapper.getThumbprint());
 	}
 
 	private Optional<Practitioner> toPractitioner(JcaX509CertificateHolder certificate, String thumbprint)

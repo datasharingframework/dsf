@@ -62,6 +62,12 @@ public class TestPractitionerIdentity implements PractitionerIdentity
 	}
 
 	@Override
+	public boolean isNotExpired()
+	{
+		return false;
+	}
+
+	@Override
 	public boolean isLocalIdentity()
 	{
 		return true;

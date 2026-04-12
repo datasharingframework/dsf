@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Hex;
+import org.eclipse.jetty.websocket.core.exception.CloseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -37,6 +38,7 @@ import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRoleImpl;
 import dev.dsf.fhir.subscription.WebSocketSubscriptionManager;
 import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCode;
 import jakarta.websocket.CloseReason.CloseCodes;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.EndpointConfig;
@@ -168,6 +170,15 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	{
 		if (throwable == null)
 			logger.info("Websocket closed with error, session {}: unknown error", session.getId());
+		else if (throwable instanceof CloseException close)
+		{
+			String status = String.valueOf(close.getStatusCode());
+			CloseCode c = CloseCodes.getCloseCode(close.getStatusCode());
+			if (c instanceof CloseCodes cc)
+				status += " - " + cc.name();
+
+			logger.info("Websocket closed with status {}, session {}", status, session.getId());
+		}
 		else
 		{
 			logger.debug("Websocket closed with error, session {}", session.getId(), throwable);

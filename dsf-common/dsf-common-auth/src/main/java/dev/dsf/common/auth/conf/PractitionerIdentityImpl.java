@@ -101,6 +101,15 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	}
 
 	@Override
+	public boolean isNotExpired()
+	{
+		if (credentials != null)
+			return credentials.isNotExpired();
+		else
+			return super.isNotExpired();
+	}
+
+	@Override
 	public String getName()
 	{
 		return getOrganizationIdentifierValue() + "/" + practitionerIdentifierValue;

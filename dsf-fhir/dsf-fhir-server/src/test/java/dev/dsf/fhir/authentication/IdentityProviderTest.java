@@ -218,7 +218,7 @@ public class IdentityProviderTest
 		assertNotNull(orgI.getCertificate());
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(LOCAL_ORGANIZATION_CERTIFICATE,
-				orgI.getCertificate().map(X509CertificateWrapper::certificate).get());
+				orgI.getCertificate().map(X509CertificateWrapper::getCertificate).get());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
 		assertEquals(FhirServerRoleImpl.LOCAL_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(LOCAL_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
@@ -250,7 +250,7 @@ public class IdentityProviderTest
 		assertNotNull(orgI.getCertificate());
 		assertTrue(orgI.getCertificate().isPresent());
 		assertEquals(REMOTE_ORGANIZATION_CERTIFICATE,
-				orgI.getCertificate().map(X509CertificateWrapper::certificate).get());
+				orgI.getCertificate().map(X509CertificateWrapper::getCertificate).get());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getDisplayName());
 		assertEquals(FhirServerRoleImpl.REMOTE_ORGANIZATION, orgI.getDsfRoles());
 		assertEquals(REMOTE_ORGANIZATION_IDENTIFIER_VALUE, orgI.getName());
@@ -315,7 +315,7 @@ public class IdentityProviderTest
 		assertNotNull(practitionerI.getCertificate());
 		assertTrue(practitionerI.getCertificate().isPresent());
 		assertEquals(LOCAL_PRACTITIONER_CERTIFICATE,
-				practitionerI.getCertificate().map(X509CertificateWrapper::certificate).get());
+				practitionerI.getCertificate().map(X509CertificateWrapper::getCertificate).get());
 		assertNotNull(practitionerI.getCredentials());
 		assertTrue(practitionerI.getCredentials().isEmpty());
 		assertEquals(LOCAL_PRACTITIONER_NAME_GIVEN + " " + LOCAL_PRACTITIONER_NAME_FAMILY,

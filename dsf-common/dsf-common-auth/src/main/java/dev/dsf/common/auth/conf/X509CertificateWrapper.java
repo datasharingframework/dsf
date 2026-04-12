@@ -19,19 +19,31 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 
-public record X509CertificateWrapper(X509Certificate certificate, String thumbprint, String subjectDn)
+public class X509CertificateWrapper
 {
+	private final X509Certificate certificate;
+	private final String thumbprint;
+	private final String subjectDn;
+
+	private final Instant expiration;
+
 	public X509CertificateWrapper(X509Certificate certificate)
 	{
-		this(certificate, getThumbprint(certificate), getSubjectDn(certificate));
+		this.certificate = certificate;
+		this.thumbprint = toThumbprint(certificate);
+		this.subjectDn = toSubjectDn(certificate);
+
+		this.expiration = certificate == null ? null : certificate.getNotAfter().toInstant();
 	}
 
-	private static String getThumbprint(X509Certificate certificate)
+	private static String toThumbprint(X509Certificate certificate)
 	{
 		try
 		{
@@ -44,8 +56,40 @@ public record X509CertificateWrapper(X509Certificate certificate, String thumbpr
 		}
 	}
 
-	private static String getSubjectDn(X509Certificate certificate)
+	private static String toSubjectDn(X509Certificate certificate)
 	{
 		return certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
+	}
+
+	public X509Certificate getCertificate()
+	{
+		return certificate;
+	}
+
+	public String getThumbprint()
+	{
+		return thumbprint;
+	}
+
+	public String getSubjectDn()
+	{
+		return subjectDn;
+	}
+
+	public JcaX509CertificateHolder toJcaX509CertificateHolder()
+	{
+		try
+		{
+			return new JcaX509CertificateHolder(certificate);
+		}
+		catch (CertificateEncodingException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	public boolean isNotExpired()
+	{
+		return expiration != null && Instant.now().isBefore(expiration);
 	}
 }

@@ -323,6 +323,8 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		SessionHandler sessionHandler = webAppContext.getSessionHandler();
 		sessionHandler.setSameSite(SameSite.LAX);
 		sessionHandler.setMaxInactiveInterval(oidcSessionTimeout());
+		sessionHandler.setSessionIdPathParameterName(null);
+		sessionHandler.setRefreshCookieAge(Math.min(oidcSessionTimeout() / 2, 600));
 
 		SessionCookieConfig sessionCookieConfig = sessionHandler.getSessionCookieConfig();
 		sessionCookieConfig.setSecure(true);
@@ -396,6 +398,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		SecurityHandler securityHandler = new DsfSecurityHandler(dsfLoginService, delegatingAuthenticator,
 				openIdConfiguration);
 		securityHandler.setSessionRenewedOnAuthentication(true);
+		securityHandler.setSessionMaxInactiveIntervalOnAuthentication(oidcSessionTimeout());
 
 		webAppContext.setSecurityHandler(securityHandler);
 
