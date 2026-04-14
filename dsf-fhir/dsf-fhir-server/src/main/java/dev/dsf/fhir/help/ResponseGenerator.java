@@ -155,8 +155,12 @@ public class ResponseGenerator
 				b.lastModified(resource.getMeta().getLastUpdated());
 
 			if (resource.getMeta().hasVersionId())
-				b.tag(new EntityTag(mediaType.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "")
-						+ resource.getMeta().getVersionId(), true));
+			{
+				b.tag(new EntityTag(mediaType == null ? ""
+						: mediaType.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "")
+								+ resource.getMeta().getVersionId(),
+						true));
+			}
 		}
 
 		b.cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM);
