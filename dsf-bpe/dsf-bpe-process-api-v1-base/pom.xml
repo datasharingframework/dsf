@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>dev.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>2.0.2</version>
+		<version>2.1.0</version>
 	</parent>
 
 	<properties>
@@ -92,4 +92,16 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

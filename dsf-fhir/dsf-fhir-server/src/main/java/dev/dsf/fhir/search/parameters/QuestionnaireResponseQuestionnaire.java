@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Resource;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -72,7 +73,8 @@ public class QuestionnaireResponseQuestionnaire extends AbstractCanonicalReferen
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		statement.setString(parameterIndex, valueAndType.url);
 	}

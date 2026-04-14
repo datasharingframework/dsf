@@ -28,8 +28,11 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Questionnaire;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.QuestionnaireDao;
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.search.filter.QuestionnaireIdentityFilter;
 import dev.dsf.fhir.search.parameters.QuestionnaireDate;
 import dev.dsf.fhir.search.parameters.QuestionnaireIdentifier;
@@ -40,11 +43,12 @@ import dev.dsf.fhir.search.parameters.QuestionnaireVersion;
 
 public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire> implements QuestionnaireDao
 {
-	private final ReadByUrlDaoJdbc<Questionnaire> readByUrl;
+	private final ReadByUrlDao<Questionnaire> readByUrl;
 
-	public QuestionnaireDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public QuestionnaireDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper, ReadByUrlDaoFactory<Questionnaire> readByUrlDaoFactory)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Questionnaire.class, "questionnaires",
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Questionnaire.class, "questionnaires",
 				"questionnaire", "questionnaire_id", QuestionnaireIdentityFilter::new,
 				List.of(factory(QuestionnaireDate.PARAMETER_NAME, QuestionnaireDate::new),
 						factory(QuestionnaireIdentifier.PARAMETER_NAME, QuestionnaireIdentifier::new,
@@ -59,8 +63,14 @@ public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire>
 								QuestionnaireVersion.getNameModifiers())),
 				List.of());
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+		readByUrl = readByUrlDaoFactory.create(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());
+	}
+
+	@Override
+	public void onResourceCreated(Questionnaire resource)
+	{
+		readByUrl.onResourceCreated(resource);
 	}
 
 	@Override

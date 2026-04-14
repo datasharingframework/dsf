@@ -200,6 +200,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", DATABASE_DELETE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", String.valueOf(LOG_DB_STATEMENTS));
 
 		initParameters.put("dev.dsf.fhir.server.base.url", baseUrl);
 		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
@@ -246,7 +247,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 						""", certificates.getPractitionerClientCertificate().certificateSha512ThumbprintHex(),
 						certificates.getAdminClientCertificate().certificateSha512ThumbprintHex(),
 						certificates.getMinimalClientCertificate().certificateSha512ThumbprintHex()));
-		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", "true");
 
 		initParameters.put("dev.dsf.fhir.server.organization.thumbprint",
 				certificates.getClientCertificate().certificateSha512ThumbprintHex());

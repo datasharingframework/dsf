@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
@@ -43,11 +45,14 @@ public class DocumentReferenceIdentifier extends AbstractTokenParameter<Document
 		return switch (valueAndType.type)
 		{
 			case CODE ->
-				"(document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'value' = ?)";
+				"(document_reference->'identifier' @> ? OR document_reference->'masterIdentifier'->>'value' = ?)";
+
 			case CODE_AND_SYSTEM ->
-				"(document_reference->'identifier' @> ?::jsonb OR (document_reference->'masterIdentifier'->>'value' = ? AND document_reference->'masterIdentifier'->>'system' = ?))";
+				"(document_reference->'identifier' @> ? OR (document_reference->'masterIdentifier'->>'value' = ? AND document_reference->'masterIdentifier'->>'system' = ?))";
+
 			case SYSTEM ->
-				"(document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'system' = ?)";
+				"(document_reference->'identifier' @> ? OR document_reference->'masterIdentifier'->>'system' = ?)";
+
 			case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM ("
 					+ "SELECT identifier FROM jsonb_array_elements(document_reference->'identifier') AS identifier "
 					+ "UNION SELECT document_reference->'masterIdentifier') AS document_reference_identifiers "
@@ -61,11 +66,14 @@ public class DocumentReferenceIdentifier extends AbstractTokenParameter<Document
 		return switch (valueAndType.type)
 		{
 			case CODE ->
-				"NOT (document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'value' = ?)";
+				"NOT (document_reference->'identifier' @> ? OR document_reference->'masterIdentifier'->>'value' = ?)";
+
 			case CODE_AND_SYSTEM ->
-				"NOT (document_reference->'identifier' @> ?::jsonb OR (document_reference->'masterIdentifier'->>'value' = ? AND document_reference->'masterIdentifier'->>'system' = ?))";
+				"NOT (document_reference->'identifier' @> ? OR (document_reference->'masterIdentifier'->>'value' = ? AND document_reference->'masterIdentifier'->>'system' = ?))";
+
 			case SYSTEM ->
-				"NOT (document_reference->'identifier' @> ?::jsonb OR document_reference->'masterIdentifier'->>'system' = ?)";
+				"NOT (document_reference->'identifier' @> ? OR document_reference->'masterIdentifier'->>'system' = ?)";
+
 			case CODE_AND_NO_SYSTEM_PROPERTY -> "(SELECT count(*) FROM ("
 					+ "SELECT identifier FROM jsonb_array_elements(document_reference->'identifier') AS identifier "
 					+ "UNION SELECT document_reference->'masterIdentifier') AS document_reference_identifiers "
@@ -87,37 +95,38 @@ public class DocumentReferenceIdentifier extends AbstractTokenParameter<Document
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
-			case CODE:
+			case CODE -> {
 				if (subqueryParameterIndex == 1)
-					statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.codeValue + "\"}]");
+					statement.setObject(parameterIndex, pgObjectFactory
+							.jsonParameterToPgObjectAsArray(new IdentifierParameter(null, valueAndType.codeValue)));
 				else if (subqueryParameterIndex == 2)
 					statement.setString(parameterIndex, valueAndType.codeValue);
-				return;
+			}
 
-			case CODE_AND_SYSTEM:
+			case CODE_AND_SYSTEM -> {
 				if (subqueryParameterIndex == 1)
-					statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.codeValue
-							+ "\", \"system\": \"" + valueAndType.systemValue + "\"}]");
+					statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+							new IdentifierParameter(valueAndType.systemValue, valueAndType.codeValue)));
 				else if (subqueryParameterIndex == 2)
 					statement.setString(parameterIndex, valueAndType.codeValue);
 				else if (subqueryParameterIndex == 3)
 					statement.setString(parameterIndex, valueAndType.systemValue);
-				return;
+			}
 
-			case SYSTEM:
+			case SYSTEM -> {
 				if (subqueryParameterIndex == 1)
-					statement.setString(parameterIndex, "[{\"system\": \"" + valueAndType.systemValue + "\"}]");
+					statement.setObject(parameterIndex, pgObjectFactory
+							.jsonParameterToPgObjectAsArray(new IdentifierParameter(valueAndType.systemValue, null)));
 				else if (subqueryParameterIndex == 2)
 					statement.setString(parameterIndex, valueAndType.systemValue);
-				return;
+			}
 
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				statement.setString(parameterIndex, valueAndType.codeValue);
-				return;
+			case CODE_AND_NO_SYSTEM_PROPERTY -> statement.setString(parameterIndex, valueAndType.codeValue);
 		}
 	}
 

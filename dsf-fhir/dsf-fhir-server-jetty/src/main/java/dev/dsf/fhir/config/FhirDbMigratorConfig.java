@@ -17,6 +17,7 @@ package dev.dsf.fhir.config;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +32,7 @@ import dev.dsf.common.documentation.Documentation;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class FhirDbMigratorConfig implements DbMigratorConfig
+public class FhirDbMigratorConfig implements DbMigratorConfig, InitializingBean
 {
 	private static final String DB_LIQUIBASE_USER = "db.liquibase_user";
 	private static final String DB_SERVER_USERS_GROUP = "db.server_users_group";
@@ -91,6 +92,26 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	{
 		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		if (!POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbLiquibaseUsername).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.liquibase.username' value not matching "
+					+ POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbUsersGroup).matches())
+			throw new RuntimeException(
+					"Property 'dev.dsf.fhir.db.user.group' value not matching " + POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbUsername).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.username' value not matching "
+					+ POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbPermanentDeleteUsersGroup).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.permanent.delete.group' value not matching "
+					+ POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbPermanentDeleteUsername).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.permanent.delete.username' value not matching "
+					+ POSTGRES_UNQUOTED_IDENTIFIER_STRING);
 	}
 
 	@Override

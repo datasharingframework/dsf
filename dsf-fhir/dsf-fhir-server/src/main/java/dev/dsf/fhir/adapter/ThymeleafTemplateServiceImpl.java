@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -63,6 +65,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
+import net.sf.saxon.lib.FeatureKeys;
 
 public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, InitializingBean
 {
@@ -99,6 +102,10 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 
 	private static final String CODE_SYSTEM_PRACTITIONER_ROLE = "http://dsf.dev/fhir/CodeSystem/practitioner-role";
 
+	private static record Heading(String href, String title, String text)
+	{
+	}
+
 	private final String serverBaseUrl;
 	private final Theme theme;
 	private final FhirContext fhirContext;
@@ -106,7 +113,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 
 	private final Map<Class<? extends Resource>, List<ThymeleafContext>> contextsByResourceType;
 
-	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private final TransformerFactory transformerFactory;
 	private final TemplateEngine templateEngine = new TemplateEngine();
 
 	/**
@@ -139,6 +146,20 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		resolver.setCacheable(cacheEnabled);
 
 		templateEngine.setTemplateResolver(resolver);
+
+		transformerFactory = TransformerFactory.newInstance();
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
+		try
+		{
+			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			transformerFactory.setFeature(FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, false);
+		}
+		catch (TransformerConfigurationException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -165,9 +186,9 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		String usernameTitle = "";
 		if (securityContext.getUserPrincipal() instanceof PractitionerIdentity p)
 		{
-			if (p.getPractitionerIdentifierValue().isPresent())
-				usernameTitle += "Mail: " + p.getPractitionerIdentifierValue().get();
-			if (p.getPractitionerIdentifierValue().isPresent() && !p.getPractionerRoles().isEmpty())
+			if (p.getPractitionerIdentifierValue() != null)
+				usernameTitle += "Mail: " + p.getPractitionerIdentifierValue();
+			if (p.getPractitionerIdentifierValue() != null && !p.getPractionerRoles().isEmpty())
 				usernameTitle += " - ";
 			if (!p.getPractionerRoles().isEmpty())
 				usernameTitle += p.getPractionerRoles().stream()
@@ -179,7 +200,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 
 		context.setVariable("practitionerIdentifierValue",
 				securityContext.getUserPrincipal() instanceof PractitionerIdentity p
-						? p.getPractitionerIdentifierValue().orElse(null)
+						? p.getPractitionerIdentifierValue()
 						: null);
 
 		context.setVariable("openid", "OPENID".equals(securityContext.getAuthenticationScheme()));
@@ -232,37 +253,40 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 			return "DSF: " + HtmlUtils.htmlEscape(uriInfo.getPath());
 	}
 
-	private String getHeading(Resource resource, UriInfo uriInfo)
+	private List<Heading> getHeading(Resource resource, UriInfo uriInfo)
 	{
+		List<Heading> headings = new ArrayList<>();
+
 		URI uri = getResourceUri(resource, uriInfo);
 		String[] pathSegments = uri.getPath().split("/");
 
 		String u = serverBaseUrl;
-		StringBuilder heading = new StringBuilder("<a href=\"" + u + "/\" title=\"Open " + u + "\">" + u + "</a>");
+
+		headings.add(new Heading(u, "Open " + u, u));
 
 		String[] basePathSegments = getServerBaseUrlPathWithLeadingSlash().split("/");
 		for (int i = basePathSegments.length; i < pathSegments.length; i++)
 		{
-			String pathSegment = HtmlUtils.htmlEscape(pathSegments[i]);
+			String pathSegment = pathSegments[i];
 			u += "/" + pathSegment;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegment + "</a>");
+			headings.add(new Heading(u, "Open " + u, "/\u200B" + pathSegment));
 		}
 
 		if (uri.getQuery() != null)
 		{
-			String queryValue = HtmlUtils.htmlEscape(uri.getQuery());
+			String queryValue = uri.getQuery();
 			u += "?" + queryValue;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?"
-					+ queryValue.replace("&amp;", "<wbr>&amp;").replace("-", "&#8209;") + "</a>");
+			headings.add(
+					new Heading(u, "Open " + u, "\u200B?" + queryValue.replace("&", "\u200B&").replace("-", "\u2011")));
 		}
 		else if (uriInfo.getQueryParameters().containsKey("_summary"))
 		{
-			String summaryValue = HtmlUtils.htmlEscape(uriInfo.getQueryParameters().getFirst("_summary"));
+			String summaryValue = uriInfo.getQueryParameters().getFirst("_summary");
 			u += "?_summary=" + summaryValue;
-			heading.append("<a href=\"" + u + "\" title=\"Open " + u + "\">?_summary=" + summaryValue + "</a>");
+			headings.add(new Heading(u, "Open " + u, "?_summary=" + summaryValue));
 		}
 
-		return heading.toString();
+		return headings;
 	}
 
 	private URI getResourceUri(Resource resource, UriInfo uriInfo)

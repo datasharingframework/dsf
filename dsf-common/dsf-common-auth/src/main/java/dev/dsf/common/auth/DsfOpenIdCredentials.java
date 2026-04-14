@@ -42,4 +42,9 @@ public interface DsfOpenIdCredentials
 	 * @return <b>defaultValue</b> if no {@link String} entry with the given <b>key</b> in id-token
 	 */
 	String getStringClaimOrDefault(String key, String defaultValue);
+
+	/**
+	 * @return <code>true</code> if token not expired
+	 */
+	boolean isNotExpired();
 }

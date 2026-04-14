@@ -17,8 +17,6 @@ package dev.dsf.common.auth.conf;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -139,12 +137,6 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 	protected final List<String> getGroupsFromTokens(Map<String, Object> parsedIdToken,
 			Map<String, Object> parsedAccessToken)
 	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("id_token: groups: {}", getPropertyArray(parsedIdToken, "groups"));
-			logger.debug("access_token: groups: {}", getPropertyArray(parsedAccessToken, "groups"));
-		}
-
 		return Stream.concat(getPropertyArray(parsedIdToken, "groups").stream(),
 				getPropertyArray(parsedAccessToken, "groups").stream()).toList();
 	}
@@ -158,17 +150,6 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 	@SuppressWarnings("unchecked")
 	private Stream<String> getRolesFromToken(String tokenName, Map<String, Object> token)
 	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("{}: realm_access.roles: {}", tokenName,
-					getPropertyArray(getPropertyMap(token, "realm_access"), "roles"));
-			logger.debug("{}: resource_access.*.roles: {}", tokenName,
-					getPropertyMap(token, "resource_access").entrySet().stream()
-							.flatMap(e -> getPropertyArray((Map<String, Object>) e.getValue(), "roles").stream()
-									.map(r -> e.getKey() + "." + r))
-							.toList());
-		}
-
 		return Stream.concat(getPropertyArray(getPropertyMap(token, "realm_access"), "roles").stream(),
 				getPropertyMap(token, "resource_access").entrySet().stream()
 						.flatMap(e -> getPropertyArray((Map<String, Object>) e.getValue(), "roles").stream()
@@ -277,26 +258,10 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		if (certWrapper == null)
 			return Optional.empty();
 
-		if (!thumbprints.contains(certWrapper.thumbprint()))
+		if (!thumbprints.contains(certWrapper.getThumbprint()))
 			return Optional.empty();
 
-		return toJcaX509CertificateHolder(certWrapper.certificate())
-				.flatMap(ch -> toPractitioner(ch, certWrapper.thumbprint()));
-	}
-
-	private Optional<JcaX509CertificateHolder> toJcaX509CertificateHolder(X509Certificate certificate)
-	{
-		try
-		{
-			return Optional.of(new JcaX509CertificateHolder(certificate));
-		}
-		catch (CertificateEncodingException e)
-		{
-			logger.debug("Unable to decode certificate", e);
-			logger.warn("Unable to decode certificate: {} - {}", e.getClass().getName(), e.getMessage());
-
-			return Optional.empty();
-		}
+		return toPractitioner(certWrapper.toJcaX509CertificateHolder(), certWrapper.getThumbprint());
 	}
 
 	private Optional<Practitioner> toPractitioner(JcaX509CertificateHolder certificate, String thumbprint)

@@ -17,10 +17,7 @@ package dev.dsf.fhir.search.filter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ResourceType;
 
 import dev.dsf.common.auth.conf.Identity;
@@ -28,6 +25,9 @@ import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.FhirServerRoleImpl;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.CodingParameter;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.JsonParameter;
 
 public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 {
@@ -60,13 +60,13 @@ public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 			if (identity instanceof OrganizationIdentity
 					|| (identity instanceof PractitionerIdentity p && p.hasPractionerRole("DSF_ADMIN")))
 				return "";
-			else if (identity instanceof PractitionerIdentity p && p.getPractitionerIdentifierValue().isPresent())
+			else if (identity instanceof PractitionerIdentity p && p.getPractitionerIdentifierValue() != null)
 				return "EXISTS (SELECT 1 FROM jsonb_array_elements(" + resourceColumn + "->'extension') AS authExt "
 						+ "WHERE authExt->>'url' = 'http://dsf.dev/fhir/StructureDefinition/extension-questionnaire-authorization' "
 						+ "AND EXISTS (SELECT 1 FROM jsonb_array_elements(authExt->'extension') AS ext "
 						+ "WHERE ((ext->>'url' = 'practitioner' AND ext->'valueIdentifier'->>'value' = ?) "
 						+ "OR (ext->>'url' = 'practitioner-role' AND ("
-						+ "SELECT COUNT(*) FROM jsonb_array_elements(?::jsonb) AS allowed_roles "
+						+ "SELECT COUNT(*) FROM jsonb_array_elements(?) AS allowed_roles "
 						+ "WHERE allowed_roles->>'system' = ext->'valueCoding'->>'system' AND allowed_roles->>'code' = ext->'valueCoding'->>'code'"
 						+ ") > 0))))";
 		}
@@ -79,30 +79,25 @@ public class QuestionnaireResponseIdentityFilter extends AbstractIdentityFilter
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE)
 				&& identity instanceof PractitionerIdentity p && !p.hasPractionerRole("DSF_ADMIN")
-				&& p.getPractitionerIdentifierValue().isPresent())
+				&& p.getPractitionerIdentifierValue() != null)
 			return 2;
 		else
 			return 0;
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			PgObjectFactory pgObjectFactory) throws SQLException
 	{
 		if (identity.isLocalIdentity() && identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE)
 				&& identity instanceof PractitionerIdentity p && !p.hasPractionerRole("DSF_ADMIN")
-				&& p.getPractitionerIdentifierValue().isPresent())
+				&& p.getPractitionerIdentifierValue() != null)
 		{
 			if (subqueryParameterIndex == 1)
-				statement.setString(parameterIndex, p.getPractitionerIdentifierValue().get());
+				statement.setString(parameterIndex, p.getPractitionerIdentifierValue());
 			else if (subqueryParameterIndex == 2)
-				statement.setString(parameterIndex, toJson(p.getPractionerRoles()));
+				statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+						p.getPractionerRoles().stream().map(CodingParameter::coding).toArray(JsonParameter[]::new)));
 		}
-	}
-
-	private String toJson(Set<Coding> roles)
-	{
-		return roles.stream().map(c -> "{\"system\":\"%s\",\"code\":\"%s\"}".formatted(c.getSystem(), c.getCode()))
-				.collect(Collectors.joining(",", "[", "]"));
 	}
 }

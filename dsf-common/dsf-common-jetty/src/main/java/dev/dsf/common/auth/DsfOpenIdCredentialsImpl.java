@@ -15,6 +15,7 @@
  */
 package dev.dsf.common.auth;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 
@@ -29,16 +30,26 @@ public class DsfOpenIdCredentialsImpl implements DsfOpenIdCredentials
 	private final Map<String, Object> idToken;
 	private final Map<String, Object> accessToken;
 
+	private final Instant expiration;
+
 	public DsfOpenIdCredentialsImpl(OpenIdCredentials credentials)
 	{
-		this.idToken = JwtDecoder.decode((String) credentials.getResponse().get(ID_TOKEN));
-		this.accessToken = JwtDecoder.decode((String) credentials.getResponse().get(ACCESS_TOKEN));
+		this(JwtDecoder.decode((String) credentials.getResponse().get(ID_TOKEN)),
+				JwtDecoder.decode((String) credentials.getResponse().get(ACCESS_TOKEN)));
 	}
 
 	public DsfOpenIdCredentialsImpl(String accessToken)
 	{
-		this.idToken = Map.of();
-		this.accessToken = JwtDecoder.decode(accessToken);
+		this(Map.of(), JwtDecoder.decode(accessToken));
+	}
+
+	private DsfOpenIdCredentialsImpl(Map<String, Object> idToken, Map<String, Object> accessToken)
+	{
+		this.idToken = idToken;
+		this.accessToken = accessToken;
+
+		Long exp = getLongClaim("exp");
+		expiration = exp == null ? null : Instant.ofEpochSecond(exp);
 	}
 
 	@Override
@@ -71,5 +82,11 @@ public class DsfOpenIdCredentialsImpl implements DsfOpenIdCredentials
 	{
 		Object o = getAccessToken().getOrDefault(key, defaultValue);
 		return o instanceof String s ? s : defaultValue;
+	}
+
+	@Override
+	public boolean isNotExpired()
+	{
+		return expiration != null && Instant.now().isBefore(expiration);
 	}
 }

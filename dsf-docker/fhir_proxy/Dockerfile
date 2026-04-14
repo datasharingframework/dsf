@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM httpd:2.4-alpine
+FROM httpd:2.4-alpine@sha256:8f26f33a7002658050e9ab2cd6b77502619dfc89d0a6ba2e9e4a202e0ef04596
 LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
 LABEL org.opencontainers.image.description="DSF FHIR Reverse Proxy"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"

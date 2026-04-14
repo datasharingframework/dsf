@@ -25,6 +25,7 @@ DECLARE
 	delete_count INT;
 	roles_delete_count INT;
 BEGIN
+	UPDATE organizations SET current = false WHERE organization_id = NEW.organization_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.organization_id, NEW.version, NEW.organization);
 
 	IF (NEW.organization->>'active' = 'false') AND organization_exists_active THEN

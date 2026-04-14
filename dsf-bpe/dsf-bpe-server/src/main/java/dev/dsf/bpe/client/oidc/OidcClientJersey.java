@@ -144,7 +144,12 @@ public class OidcClientJersey extends BaseOidcClientJersey
 					"OIDC provider does not support Client Credentials Grant, supported grant types: "
 							+ configuration.grantTypesSupported());
 
-		Response response = client.target(configuration.tokenEndpoint()).request(MediaType.APPLICATION_JSON_TYPE)
+		String tokenEndpoint = configuration.tokenEndpoint();
+		if (tokenEndpoint == null || !tokenEndpoint.startsWith("https://"))
+			throw new OidcClientException(
+					"Token endpoint URL from OIDC configuration resource is null or does not start with 'https://'");
+
+		Response response = client.target(tokenEndpoint).request(MediaType.APPLICATION_JSON_TYPE)
 				.header(HttpHeaders.AUTHORIZATION,
 						"Basic " + Base64.getEncoder()
 								.encodeToString(new StringBuilder().append(clientId).append(':').append(clientSecret)
@@ -164,22 +169,6 @@ public class OidcClientJersey extends BaseOidcClientJersey
 		}
 	}
 
-	/**
-	 * Does not verify if the access token is expired. Supported algorithms: RS256, RS384, RS512, ES256, ES384 and
-	 * ES512.
-	 *
-	 * @param accessToken
-	 *            not <code>null</code>
-	 * @param jwks
-	 *            not <code>null</code>
-	 * @return decoded access token
-	 * @throws OidcClientException
-	 *             if verification fails, the public key to verify is unknown or a unsupported signature algorithm was
-	 *             used.
-	 *
-	 * @see DecodedJWT#getExpiresAt()
-	 * @see DecodedJWT#getExpiresAtAsInstant()
-	 */
 	private DecodedJWT verifyAndDecodeAccessToken(String accessToken, Jwks jwks) throws OidcClientException
 	{
 		try
@@ -191,14 +180,15 @@ public class OidcClientJersey extends BaseOidcClientJersey
 				throw new OidcClientException("Access token has no kid property");
 
 			Optional<JwksKey> key = jwks.getKey(keyId);
-			if (key.isEmpty())
-				throw new OidcClientException("Access token key with kid '" + keyId + "' not in JWKS");
+			if (key.isEmpty() || !key.get().use().equals("sig"))
+				throw new OidcClientException("Access token key with kid '" + keyId + "'  and use 'sig' not in JWKS");
 
-			Optional<Algorithm> algorithm = key.map(JwksKey::toAlgorithm);
+			Optional<Algorithm> algorithm = key.flatMap(JwksKey::toAlgorithm);
 			if (key.isEmpty())
+			{
 				throw new OidcClientException("Access token key with kid '" + keyId
-						+ "' has unsupported type (kty) / algorithm (alg) in JWKS '" + key.get().kty() + "' / '"
-						+ key.get().alg() + "'");
+						+ "' has unsupported type (kty) / algorithm (alg) / key-size in JWKS");
+			}
 
 			try
 			{
@@ -226,7 +216,7 @@ public class OidcClientJersey extends BaseOidcClientJersey
 			}
 			catch (TokenExpiredException e)
 			{
-				throw new OidcClientException("JWT verification failed: claim missing", e);
+				throw new OidcClientException("JWT verification failed: token expired", e);
 			}
 			catch (IncorrectClaimException e)
 			{

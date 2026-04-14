@@ -45,7 +45,11 @@ public class ParameterConverter
 {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterConverter.class);
 
+	public static final String MEDIA_TYPE_PARAM_INLINE = "inline";
+	public static final String MEDIA_TYPE_PARAM_ETAG = "etag";
+
 	public static final String HTML_FORMAT = "html";
+	public static final String INLINE_FORMAT = "inline";
 	public static final String JSON_FORMAT = "json";
 	public static final List<String> JSON_FORMATS = List.of(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
 			MediaType.APPLICATION_JSON);
@@ -119,11 +123,13 @@ public class ParameterConverter
 		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format) || MediaType.TEXT_HTML.equals(format))
 			return getMediaType(format, pretty, summaryMode);
 		else if (XML_FORMAT.equals(format))
-			return Optional.of(mediaType("application", "fhir+xml", pretty, summaryMode));
+			return Optional.of(mediaType("application", "fhir+xml", "", pretty, summaryMode, false));
 		else if (JSON_FORMAT.equals(format))
-			return Optional.of(mediaType("application", "fhir+json", pretty, summaryMode));
+			return Optional.of(mediaType("application", "fhir+json", "", pretty, summaryMode, false));
 		else if (HTML_FORMAT.equals(format))
-			return Optional.of(mediaType("text", "html", pretty, summaryMode));
+			return Optional.of(mediaType("text", "html", "h", pretty, summaryMode, false));
+		else if (INLINE_FORMAT.equals(format))
+			return Optional.of(mediaType("*", "*", "", pretty, summaryMode, true));
 		else
 			return Optional.empty();
 	}
@@ -134,34 +140,39 @@ public class ParameterConverter
 			mediaType = MediaType.WILDCARD;
 
 		if (mediaType.contains(MediaType.TEXT_HTML))
-			return Optional.of(mediaType("text", "html", pretty, summaryMode));
+			return Optional.of(mediaType("text", "html", "h", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON_NEW))
-			return Optional.of(mediaType("application", "fhir+json", pretty, summaryMode));
+			return Optional.of(mediaType("application", "fhir+json", "", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON))
-			return Optional.of(mediaType("application", "json+fhir", pretty, summaryMode));
+			return Optional.of(mediaType("application", "json+fhir", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.APPLICATION_JSON))
-			return Optional.of(mediaType("application", "json", pretty, summaryMode));
+			return Optional.of(mediaType("application", "json", "", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_XML_NEW))
-			return Optional.of(mediaType("application", "fhir+xml", pretty, summaryMode));
+			return Optional.of(mediaType("application", "fhir+xml", "", pretty, summaryMode, false));
 		else if (mediaType.contains(Constants.CT_FHIR_XML))
-			return Optional.of(mediaType("application", "xml+fhir", pretty, summaryMode));
+			return Optional.of(mediaType("application", "xml+fhir", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.APPLICATION_XML))
-			return Optional.of(mediaType("application", "xml", pretty, summaryMode));
+			return Optional.of(mediaType("application", "xml", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.TEXT_XML))
-			return Optional.of(mediaType("text", "xml", pretty, summaryMode));
+			return Optional.of(mediaType("text", "xml", "", pretty, summaryMode, false));
 		else if (mediaType.contains(MediaType.WILDCARD))
-			return Optional.of(mediaType("application", "fhir+xml", pretty, summaryMode));
+			return Optional.of(mediaType("application", "fhir+xml", "", pretty, summaryMode, false));
 		else
 			return Optional.empty();
 	}
 
-	private MediaType mediaType(String type, String subtype, boolean pretty, SummaryMode summaryMode)
+	private MediaType mediaType(String type, String subtype, String etagPrefix, boolean pretty, SummaryMode summaryMode,
+			boolean inline)
 	{
 		Map<String, String> parameters = new HashMap<>();
+		parameters.put(MEDIA_TYPE_PARAM_ETAG, etagPrefix);
+
 		if (pretty)
 			parameters.put(FhirAdapter.PRETTY, "true");
 		if (summaryMode != null)
 			parameters.put(FhirAdapter.SUMMARY, summaryMode.toString());
+		if (inline)
+			parameters.put(MEDIA_TYPE_PARAM_INLINE, "true");
 
 		return new MediaType(type, subtype, parameters);
 	}

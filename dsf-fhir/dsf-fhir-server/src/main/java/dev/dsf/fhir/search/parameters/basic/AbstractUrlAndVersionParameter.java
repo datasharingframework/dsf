@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import org.hl7.fhir.r4.model.MetadataResource;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
 public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
@@ -58,7 +59,8 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		if (subqueryParameterIndex == 1)
 		{

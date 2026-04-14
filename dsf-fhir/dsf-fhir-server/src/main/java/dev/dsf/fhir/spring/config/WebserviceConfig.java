@@ -24,6 +24,7 @@ import dev.dsf.common.status.webservice.StatusService;
 import dev.dsf.common.ui.webservice.StaticResourcesService;
 import dev.dsf.fhir.exception.DataFormatExceptionHandler;
 import dev.dsf.fhir.webservice.filter.BrowserPolicyHeaderResponseFilter;
+import dev.dsf.fhir.webservice.filter.ContentTypeSanitizer;
 import dev.dsf.fhir.webservice.impl.ActivityDefinitionServiceImpl;
 import dev.dsf.fhir.webservice.impl.BinaryServiceImpl;
 import dev.dsf.fhir.webservice.impl.BundleServiceImpl;
@@ -183,6 +184,12 @@ public class WebserviceConfig
 	}
 
 	@Bean
+	public ContentTypeSanitizer contentTypeSanitizer()
+	{
+		return new ContentTypeSanitizer();
+	}
+
+	@Bean
 	public DataFormatExceptionHandler dataFormatExceptionHandler()
 	{
 		return new DataFormatExceptionHandler(helperConfig.responseGenerator());
@@ -221,7 +228,7 @@ public class WebserviceConfig
 	public BinaryService binaryService()
 	{
 		return new BinaryServiceJaxrs(binaryServiceSecure(), helperConfig.parameterConverter(),
-				adapterConfig.fhirAdapter());
+				adapterConfig.fhirAdapter(), authorizationConfig.inlineMediaTypePolicy());
 	}
 
 	private BinaryServiceSecure binaryServiceSecure()

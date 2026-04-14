@@ -167,7 +167,12 @@ public class BaseOidcClientJersey implements BaseOidcClient
 	{
 		Objects.requireNonNull(configuration, "configuration");
 
-		Response response = client.target(configuration.jwksUri()).request(MediaType.APPLICATION_JSON_TYPE).get();
+		String jwksUri = configuration.jwksUri();
+		if (jwksUri == null || !jwksUri.startsWith("https://"))
+			throw new OidcClientException(
+					"JWKS URL from OIDC configuration resource is null or does not start with 'https://'");
+
+		Response response = client.target(jwksUri).request(MediaType.APPLICATION_JSON_TYPE).get();
 
 		if (response.getStatus() == Status.OK.getStatusCode())
 		{

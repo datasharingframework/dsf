@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.adapter.DeferredBase64BinaryType;
 import dev.dsf.fhir.adapter.FhirAdapter;
+import dev.dsf.fhir.authorization.media.InlineMediaTypePolicy;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
@@ -93,13 +94,16 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	private final ParameterConverter parameterConverter;
 	private final FhirAdapter fhirAdapter;
+	private final InlineMediaTypePolicy inlineMediaTypePolicy;
 
-	public BinaryServiceJaxrs(BinaryService delegate, ParameterConverter parameterConverter, FhirAdapter fhirAdapter)
+	public BinaryServiceJaxrs(BinaryService delegate, ParameterConverter parameterConverter, FhirAdapter fhirAdapter,
+			InlineMediaTypePolicy inlineMediaTypePolicy)
 	{
 		super(delegate);
 
 		this.parameterConverter = parameterConverter;
 		this.fhirAdapter = fhirAdapter;
+		this.inlineMediaTypePolicy = inlineMediaTypePolicy;
 	}
 
 	@Override
@@ -109,6 +113,7 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(fhirAdapter, "fhirAdapter");
+		Objects.requireNonNull(inlineMediaTypePolicy, "inlineMediaTypePolicy");
 	}
 
 	@POST
@@ -256,71 +261,81 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	{
 		Optional<MediaType> fhirMediaType = getValidFhirMediaType(uri, headers);
 
-		if (read.getEntity() instanceof Binary binary && fhirMediaType.isEmpty())
-		{
-			if (mediaTypeMatches(headers, binary))
-			{
-				long dataSize = (long) binary.getUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE);
+		boolean notFhirMediaType = fhirMediaType.isEmpty();
 
-				if (head)
+		if (read.getEntity() instanceof Binary binary)
+		{
+			boolean inline = (inlineMediaTypePolicy.isInlineDisplayAllowed(binary.getContentType())
+					|| inlineMediaTypePolicy.isInlineOpenAllowed(binary.getContentType()))
+					&& fhirMediaType.map(m -> "true".equals(
+							m.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_INLINE, "false")))
+							.orElse(false);
+
+			if (notFhirMediaType || inline)
+			{
+				if (mediaTypeMatches(headers, binary))
 				{
-					return toStreamResponse(binary).header(HttpHeaders.CONTENT_LENGTH, dataSize).build();
+					long dataSize = (long) binary.getUserData(RangeRequest.USER_DATA_VALUE_DATA_SIZE);
+
+					if (head)
+						return toStreamResponse(binary, inline).header(HttpHeaders.CONTENT_LENGTH, dataSize).build();
+					else
+					{
+						RangeRequest rangeRequest = (RangeRequest) binary
+								.getUserData(RangeRequest.USER_DATA_VALUE_RANGE_REQUEST);
+
+						if (rangeRequest != null && !rangeRequest.isRangeSatisfiable(dataSize))
+						{
+							return Response.status(Status.REQUESTED_RANGE_NOT_SATISFIABLE)
+									.header(RangeRequest.CONTENT_RANGE_HEADER,
+											rangeRequest.createContentRangeHeaderValue(dataSize))
+									.entity("").build();
+							// empty string as content to not trigger default error handler and override header
+							// alternative: configure jersey.config.server.response.setStatusOverSendError = true
+							// via JettyServer webAppContext.getServletContext().setAttribute ...
+						}
+
+						ResponseBuilder response = toStreamResponse(binary, inline);
+
+						// if range request
+						if (rangeRequest != null && !rangeRequest.isRangeNotDefined())
+						{
+							response = response.status(Status.PARTIAL_CONTENT)
+									.header(RangeRequest.CONTENT_RANGE_HEADER,
+											rangeRequest.createRangeHeaderValue(dataSize))
+									.header(HttpHeaders.CONTENT_LENGTH, rangeRequest.getRequestedLength(dataSize));
+						}
+						else
+							response = response.header(HttpHeaders.CONTENT_LENGTH, dataSize);
+
+						return response.entity(new BinaryJaxrsOutputStream(binary)).build();
+					}
 				}
 				else
-				{
-					RangeRequest rangeRequest = (RangeRequest) binary
-							.getUserData(RangeRequest.USER_DATA_VALUE_RANGE_REQUEST);
-
-					if (rangeRequest != null && !rangeRequest.isRangeSatisfiable(dataSize))
-					{
-						return Response.status(Status.REQUESTED_RANGE_NOT_SATISFIABLE)
-								.header(RangeRequest.CONTENT_RANGE_HEADER,
-										rangeRequest.createContentRangeHeaderValue(dataSize))
-								.entity("").build();
-						// empty string as content to not trigger default error handler and override header
-						// alternative: configure jersey.config.server.response.setStatusOverSendError = true
-						// via JettyServer webAppContext.getServletContext().setAttribute ...
-					}
-
-					ResponseBuilder response = toStreamResponse(binary);
-
-					// if range request
-					if (rangeRequest != null && !rangeRequest.isRangeNotDefined())
-					{
-						response = response.status(Status.PARTIAL_CONTENT)
-								.header(RangeRequest.CONTENT_RANGE_HEADER,
-										rangeRequest.createRangeHeaderValue(dataSize))
-								.header(HttpHeaders.CONTENT_LENGTH, rangeRequest.getRequestedLength(dataSize));
-					}
-					else
-						response = response.header(HttpHeaders.CONTENT_LENGTH, dataSize);
-
-					return response.entity(new BinaryJaxrsOutputStream(binary)).build();
-				}
+					return Response.status(Status.NOT_ACCEPTABLE).build();
 			}
-			else
-				return Response.status(Status.NOT_ACCEPTABLE).build();
-		}
-		else if (read.getEntity() instanceof Binary binary && fhirMediaType.isPresent() && head)
-		{
-			ResponseBuilder b = Response.status(Status.OK);
-			b.type(fhirMediaType.get());
-
-			if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
-					&& binary.getMeta().getVersionId() != null)
+			else if (fhirMediaType.isPresent() && head)
 			{
-				b.lastModified(binary.getMeta().getLastUpdated());
-				b.tag(new EntityTag(binary.getMeta().getVersionId(), true));
+				ResponseBuilder b = Response.status(Status.OK);
+				b.type(fhirMediaType.get());
+
+				if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
+						&& binary.getMeta().getVersionId() != null)
+				{
+					b.lastModified(binary.getMeta().getLastUpdated());
+					b.tag(new EntityTag(fhirMediaType.get().getParameters().getOrDefault(
+							ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "") + binary.getMeta().getVersionId(), true));
+				}
+
+				b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
+
+				b.header(HttpHeaders.CONTENT_LENGTH, calculateFhirResponseSize(binary, fhirMediaType.get()));
+
+				return b.build();
 			}
-
-			b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
-
-			b.header(HttpHeaders.CONTENT_LENGTH, calculateFhirResponseSize(binary, fhirMediaType.get()));
-
-			return b.build();
 		}
-		else
-			return read;
+
+		return read;
 	}
 
 	private long calculateFhirResponseSize(Binary binary, MediaType mediaType)
@@ -374,16 +389,18 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 				.anyMatch(acceptType -> acceptType.isCompatible(binaryMediaType));
 	}
 
-	private ResponseBuilder toStreamResponse(Binary binary)
+	private ResponseBuilder toStreamResponse(Binary binary, boolean inline)
 	{
 		ResponseBuilder b = Response.status(Status.OK);
 		b.type(binary.getContentType() != null ? binary.getContentType() : MediaType.APPLICATION_OCTET_STREAM);
 
-		if (binary.getMeta() != null && binary.getMeta().getLastUpdated() != null
-				&& binary.getMeta().getVersionId() != null)
+		if (binary.hasMeta())
 		{
-			b.lastModified(binary.getMeta().getLastUpdated());
-			b.tag(new EntityTag(binary.getMeta().getVersionId(), true));
+			if (binary.getMeta().hasLastUpdated())
+				b.lastModified(binary.getMeta().getLastUpdated());
+
+			if (binary.getMeta().hasVersionId())
+				b.tag(new EntityTag(binary.getMeta().getVersionId(), true));
 		}
 
 		if (binary.hasSecurityContext() && binary.getSecurityContext().hasReference())
@@ -393,8 +410,11 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 		}
 
 		b.cacheControl(ResponseGenerator.PRIVATE_NO_CACHE_NO_TRANSFORM);
+		b.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
 		b.header(RangeRequest.ACCEPT_RANGES_HEADER, RangeRequest.ACCEPT_RANGES_HEADER_VALUE);
-		b.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + toFileName(binary));
+
+		if (!inline)
+			b.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + toFileName(binary));
 
 		return b;
 	}

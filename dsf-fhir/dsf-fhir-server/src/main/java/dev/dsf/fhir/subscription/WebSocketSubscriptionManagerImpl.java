@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -89,15 +91,29 @@ public class WebSocketSubscriptionManagerImpl
 
 	private static class SessionIdAndRemoteAsync
 	{
-		final Identity identity;
 		final String sessionId;
+
+		final Identity identity;
+		final Session session;
+
 		final Async remoteAsync;
 
-		SessionIdAndRemoteAsync(Identity identity, String sessionId, Async remoteAsync)
+		SessionIdAndRemoteAsync(String sessionId)
 		{
-			this.identity = identity;
 			this.sessionId = sessionId;
-			this.remoteAsync = remoteAsync;
+
+			identity = null;
+			session = null;
+			remoteAsync = null;
+		}
+
+		SessionIdAndRemoteAsync(Identity identity, Session session)
+		{
+			this.sessionId = session.getId();
+
+			this.identity = identity;
+			this.session = session;
+			this.remoteAsync = session.getAsyncRemote();
 		}
 
 		@Override
@@ -116,6 +132,21 @@ public class WebSocketSubscriptionManagerImpl
 			SessionIdAndRemoteAsync other = (SessionIdAndRemoteAsync) obj;
 			return Objects.equals(sessionId, other.sessionId);
 		}
+
+		void closeCredentialsExpired()
+		{
+			try
+			{
+				if (session != null)
+					session.close(new CloseReason(CloseCodes.VIOLATED_POLICY, "Credentials expired"));
+			}
+			catch (IOException e)
+			{
+				logger.warn("Error while closing websocket for user {}, session {}, {}", identity.getName(),
+						session.getId(), e.getMessage());
+				logger.debug("Error while closing websocket", e);
+			}
+		}
 	}
 
 	private final ExecutorService executor = Executors.newCachedThreadPool();
@@ -130,7 +161,7 @@ public class WebSocketSubscriptionManagerImpl
 	private final AtomicBoolean firstCall = new AtomicBoolean(true);
 	private final ReadWriteMap<String, Subscription> subscriptionsByIdPart = new ReadWriteMap<>();
 	private final ReadWriteMap<Class<? extends Resource>, List<SubscriptionAndMatcher>> matchersByResource = new ReadWriteMap<>();
-	private final ReadWriteMap<String, List<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
+	private final ReadWriteMap<String, Set<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
 
 	public WebSocketSubscriptionManagerImpl(DaoProvider daoProvider, ExceptionHandler exceptionHandler,
 			MatcherFactory matcherFactory, FhirContext fhirContext, AuthorizationRuleProvider authorizationRuleProvider)
@@ -271,7 +302,7 @@ public class WebSocketSubscriptionManagerImpl
 
 	private void doHandleEventWithSubscription(Subscription s, Event event)
 	{
-		Optional<List<SessionIdAndRemoteAsync>> optRemotes = asyncRemotesBySubscriptionIdPart
+		Optional<Set<SessionIdAndRemoteAsync>> optRemotes = asyncRemotesBySubscriptionIdPart
 				.get(s.getIdElement().getIdPart());
 
 		if (optRemotes.isEmpty())
@@ -315,27 +346,38 @@ public class WebSocketSubscriptionManagerImpl
 
 	private boolean userHasReadAndWebsocketAccess(SessionIdAndRemoteAsync sessionAndRemote, Event event)
 	{
-		Optional<AuthorizationRule<?>> optRule = authorizationRuleProvider
-				.getAuthorizationRule(event.getResourceType());
-		if (optRule.isPresent())
+		if (sessionAndRemote.identity.isNotExpired())
 		{
-			@SuppressWarnings("unchecked")
-			AuthorizationRule<Resource> rule = (AuthorizationRule<Resource>) optRule.get();
-			Optional<String> readAllowedReason = rule.reasonReadAllowed(sessionAndRemote.identity, event.getResource());
-			Optional<String> websocketAllowedReason = rule.reasonWebsocketAllowed(sessionAndRemote.identity,
-					event.getResource());
-
-			if (readAllowedReason.isPresent() && websocketAllowedReason.isPresent())
+			Optional<AuthorizationRule<?>> optRule = authorizationRuleProvider
+					.getAuthorizationRule(event.getResourceType());
+			if (optRule.isPresent())
 			{
-				logger.info("Sending event {} to user {}, websocket access and read of {} allowed {}, {}",
-						event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
-						event.getResourceType().getSimpleName(), websocketAllowedReason.get(),
-						readAllowedReason.isPresent());
-				return true;
+				@SuppressWarnings("unchecked")
+				AuthorizationRule<Resource> rule = (AuthorizationRule<Resource>) optRule.get();
+				Optional<String> readAllowedReason = rule.reasonReadAllowed(sessionAndRemote.identity,
+						event.getResource());
+				Optional<String> websocketAllowedReason = rule.reasonWebsocketAllowed(sessionAndRemote.identity,
+						event.getResource());
+
+				if (readAllowedReason.isPresent() && websocketAllowedReason.isPresent())
+				{
+					logger.info("Sending event {} to user {}, websocket access and read of {} allowed {}, {}",
+							event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
+							event.getResourceType().getSimpleName(), websocketAllowedReason.get(),
+							readAllowedReason.isPresent());
+					return true;
+				}
+				else
+				{
+					logger.warn("Skipping event {} for user {}, websocket access or read of {} not allowed",
+							event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
+							event.getResourceType().getSimpleName());
+					return false;
+				}
 			}
 			else
 			{
-				logger.warn("Skipping event {} for user {}, websocket access or read of {} not allowed",
+				logger.warn("Skipping event {} for user {}, no authorization rule for resource of type {} found",
 						event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
 						event.getResourceType().getSimpleName());
 				return false;
@@ -343,9 +385,11 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		else
 		{
-			logger.warn("Skipping event {} for user {}, no authorization rule for resource of type {} found",
-					event.getClass().getSimpleName(), sessionAndRemote.identity.getName(),
-					event.getResourceType().getSimpleName());
+			logger.warn("Closing session with id {} for user {}, credentials expired", sessionAndRemote.sessionId,
+					sessionAndRemote.identity.getName());
+
+			sessionAndRemote.closeCredentialsExpired();
+
 			return false;
 		}
 	}
@@ -373,18 +417,18 @@ public class WebSocketSubscriptionManagerImpl
 		if (subscriptionsByIdPart.containsKey(subscriptionIdPart))
 		{
 			logger.debug("Binding websocket session {} to subscription {}", session.getId(), subscriptionIdPart);
-			asyncRemotesBySubscriptionIdPart.replace(subscriptionIdPart, list ->
+			asyncRemotesBySubscriptionIdPart.replace(subscriptionIdPart, set ->
 			{
-				if (list == null)
+				if (set == null)
 				{
-					List<SessionIdAndRemoteAsync> newList = new ArrayList<>();
-					newList.add(new SessionIdAndRemoteAsync(identity, session.getId(), session.getAsyncRemote()));
-					return newList;
+					Set<SessionIdAndRemoteAsync> newSet = new HashSet<>();
+					newSet.add(new SessionIdAndRemoteAsync(identity, session));
+					return newSet;
 				}
 				else
 				{
-					list.add(new SessionIdAndRemoteAsync(identity, session.getId(), session.getAsyncRemote()));
-					return list;
+					set.add(new SessionIdAndRemoteAsync(identity, session));
+					return set;
 				}
 			});
 			session.getAsyncRemote().sendText("bound " + subscriptionIdPart);
@@ -407,7 +451,7 @@ public class WebSocketSubscriptionManagerImpl
 		}
 		catch (IOException e)
 		{
-			logger.warn("Error while closing websocket with user {}, session {}, {}", identity.getName(),
+			logger.warn("Error while closing websocket for user {}, session {}, {}", identity.getName(),
 					session.getId(), e.getMessage());
 			logger.debug("Error while closing websocket", e);
 		}
@@ -417,7 +461,7 @@ public class WebSocketSubscriptionManagerImpl
 	public void close(String sessionId)
 	{
 		logger.debug("Removing websocket session {}", sessionId);
-		asyncRemotesBySubscriptionIdPart.removeWhereValueMatches(List::isEmpty,
-				list -> list.remove(new SessionIdAndRemoteAsync(null, sessionId, null)));
+		asyncRemotesBySubscriptionIdPart.removeWhereValueMatches(Set::isEmpty,
+				s -> s.remove(new SessionIdAndRemoteAsync(sessionId)));
 	}
 }

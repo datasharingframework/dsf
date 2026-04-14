@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_activity_definitions_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE activity_definitions SET current = false WHERE activity_definition_id = NEW.activity_definition_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.activity_definition_id, NEW.version, NEW.activity_definition);
 	RETURN NEW;
 END;

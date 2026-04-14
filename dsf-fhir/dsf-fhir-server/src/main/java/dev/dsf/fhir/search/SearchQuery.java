@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
@@ -61,11 +62,13 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 	public static class SearchQueryBuilder<R extends Resource>
 	{
-		public static <R extends Resource> SearchQueryBuilder<R> create(Class<R> resourceType, String resourceTable,
-				String resourceColumn, PageAndCount pageAndCount)
+		public static <R extends Resource> SearchQueryBuilder<R> create(PgObjectFactory pgObjectFactory,
+				Class<R> resourceType, String resourceTable, String resourceColumn, PageAndCount pageAndCount)
 		{
-			return new SearchQueryBuilder<>(resourceType, resourceTable, resourceColumn, pageAndCount);
+			return new SearchQueryBuilder<>(pgObjectFactory, resourceType, resourceTable, resourceColumn, pageAndCount);
 		}
+
+		private final PgObjectFactory pgObjectFactory;
 
 		private final Class<R> resourceType;
 		private final String resourceTable;
@@ -78,9 +81,11 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		private SearchQueryIdentityFilter identityFilter; // may be null
 
-		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceColumn,
-				PageAndCount pageAndCount)
+		private SearchQueryBuilder(PgObjectFactory pgObjectFactory, Class<R> resourceType, String resourceTable,
+				String resourceColumn, PageAndCount pageAndCount)
 		{
+			this.pgObjectFactory = pgObjectFactory;
+
 			this.resourceType = resourceType;
 			this.resourceTable = resourceTable;
 			this.resourceColumn = resourceColumn;
@@ -125,12 +130,14 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		public SearchQuery<R> build()
 		{
-			return new SearchQuery<>(resourceType, resourceTable, resourceColumn, identityFilter, pageAndCount,
-					searchParameters, revIncludeParameters);
+			return new SearchQuery<>(pgObjectFactory, resourceType, resourceTable, resourceColumn, identityFilter,
+					pageAndCount, searchParameters, revIncludeParameters);
 		}
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(SearchQuery.class);
+
+	private final PgObjectFactory pgObjectFactory;
 
 	private final Class<R> resourceType;
 	private final String resourceColumn;
@@ -156,11 +163,13 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private String includeSql;
 	private String revIncludeSql;
 
-	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn,
+	SearchQuery(PgObjectFactory pgObjectFactory, Class<R> resourceType, String resourceTable, String resourceColumn,
 			SearchQueryIdentityFilter identityFilter, PageAndCount pageAndCount,
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,
 			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
+		this.pgObjectFactory = pgObjectFactory;
+
 		this.resourceType = resourceType;
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
@@ -437,13 +446,13 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 				while (index < identityFilter.getSqlParameterCount())
 				{
 					int i = ++index;
-					identityFilter.modifyStatement(i, i, statement);
+					identityFilter.modifyStatement(i, i, statement, pgObjectFactory);
 				}
 			}
 
 			for (SearchQueryParameter<?> q : filtered)
 				for (int i = 0; i < q.getSqlParameterCount(); i++)
-					q.modifyStatement(++index, i + 1, statement, arrayCreator);
+					q.modifyStatement(++index, i + 1, statement, arrayCreator, pgObjectFactory);
 		}
 		catch (SQLException e)
 		{

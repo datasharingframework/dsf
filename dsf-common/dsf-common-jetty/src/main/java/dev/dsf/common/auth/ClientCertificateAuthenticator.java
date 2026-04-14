@@ -20,6 +20,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -67,13 +69,21 @@ public class ClientCertificateAuthenticator extends LoginAuthenticator
 
 		if (certificates == null || certificates.length <= 0)
 		{
-			logger.warn("X509Certificate could not be retrieved, sending unauthorized");
+			logger.warn(
+					"Client certificate could not be retrieved from jakarta request attribute, sending unauthorized");
+			return null;
+		}
+
+		if (ZonedDateTime.now()
+				.isAfter(ZonedDateTime.ofInstant(certificates[0].getNotAfter().toInstant(), ZoneOffset.UTC)))
+		{
+			logger.warn("Client certificates expired, sending unauthorized");
 			return null;
 		}
 
 		try
 		{
-			x509TrustManager.checkClientTrusted(certificates, "RSA");
+			x509TrustManager.checkClientTrusted(certificates, "UNKNOWN");
 		}
 		catch (CertificateException e)
 		{

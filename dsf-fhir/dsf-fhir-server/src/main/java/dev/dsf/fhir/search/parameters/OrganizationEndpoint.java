@@ -31,6 +31,8 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -65,15 +67,16 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 		{
 			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				"? IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)";
+
 			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
 				case CODE, CODE_AND_SYSTEM, SYSTEM ->
 					"(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
-							+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') reference)"
-							+ " ) AS identifiers) @> ?::jsonb";
+							+ " WHERE ('Endpoint/' || (endpoint->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') reference)"
+							+ " ) AS identifiers) @> ?";
 				case CODE_AND_NO_SYSTEM_PROPERTY ->
 					"(SELECT count(*) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
-							+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') reference)"
+							+ " WHERE ('Endpoint/' || (endpoint->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') reference)"
 							+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 			};
 		};
@@ -87,38 +90,31 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
-			case ID:
-			case RESOURCE_NAME_AND_ID:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
+			case ID, RESOURCE_NAME_AND_ID, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				statement.setString(parameterIndex, TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-				break;
-			case URL:
-				statement.setString(parameterIndex, valueAndType.url);
-				break;
-			case IDENTIFIER:
-			{
+
+			case URL -> statement.setString(parameterIndex, valueAndType.url);
+
+			case IDENTIFIER -> {
 				switch (valueAndType.identifier.type)
 				{
-					case CODE:
-						statement.setString(parameterIndex,
-								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
-						break;
-					case CODE_AND_SYSTEM:
-						statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.identifier.codeValue
-								+ "\", \"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
-					case CODE_AND_NO_SYSTEM_PROPERTY:
+					case CODE -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+							new IdentifierParameter(null, valueAndType.identifier.codeValue)));
+
+					case CODE_AND_SYSTEM -> statement.setObject(parameterIndex,
+							pgObjectFactory.jsonParameterToPgObjectAsArray(new IdentifierParameter(
+									valueAndType.identifier.systemValue, valueAndType.identifier.codeValue)));
+
+					case SYSTEM -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+							new IdentifierParameter(valueAndType.identifier.systemValue, null)));
+
+					case CODE_AND_NO_SYSTEM_PROPERTY ->
 						statement.setString(parameterIndex, valueAndType.identifier.codeValue);
-						break;
-					case SYSTEM:
-						statement.setString(parameterIndex,
-								"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
 				}
 			}
 		}
@@ -181,7 +177,7 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_agg(endpoint) FROM current_endpoints WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)) AS endpoints";
+			return "(SELECT jsonb_agg(endpoint) FROM current_endpoints WHERE ('Endpoint/' || (endpoint->>'id')) IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)) AS endpoints";
 		else
 			return null;
 	}
