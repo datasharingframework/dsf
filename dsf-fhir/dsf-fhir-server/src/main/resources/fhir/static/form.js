@@ -16,10 +16,8 @@
 function startProcess() {
 	const task = readTaskInputsFromForm()
 
-	if (task) {
-		const taskString = JSON.stringify(task)
-		createTask(taskString)
-	}
+	if (task)
+		createTask(task)
 }
 
 function readTaskInputsFromForm() {
@@ -240,10 +238,8 @@ function newTaskInputQuantity(type, id, comparator, value, unit, system, code, o
 function completeQuestionnaireResponse() {
 	const questionnaireResponse = readQuestionnaireResponseAnswersFromForm()
 
-	if (questionnaireResponse) {
-		const questionnaireResponseString = JSON.stringify(questionnaireResponse)
-		updateQuestionnaireResponse(questionnaireResponseString)
-	}
+	if (questionnaireResponse)
+		updateQuestionnaireResponse(questionnaireResponse)
 }
 
 function readQuestionnaireResponseAnswersFromForm() {
@@ -661,36 +657,60 @@ function addError(errorListElement, message) {
 }
 
 function updateQuestionnaireResponse(questionnaireResponse) {
+	enableSpinner()
+
 	const fullUrl = window.location.origin + window.location.pathname
 	const requestUrl = fullUrl.indexOf("/_history") < 0 ? fullUrl : fullUrl.slice(0, fullUrl.indexOf("/_history"))
 	const resourceBaseUrlWithoutId = fullUrl.slice(0, fullUrl.indexOf("/QuestionnaireResponse") + "/QuestionnaireResponse".length)
-
-	enableSpinner()
+	const questionnaireResponseString = JSON.stringify(questionnaireResponse)
 
 	fetch(requestUrl, {
 		method: "PUT",
+		redirect: "manual",
 		headers: {
 			"Content-type": "application/json",
 			"Accept": "application/json"
 		},
-		body: questionnaireResponse
-	}).then(response => parseResponse(response, resourceBaseUrlWithoutId))
+		body: questionnaireResponseString
+	}).then(response => {
+		if (response.type === "basic")
+			parseResponse(response, resourceBaseUrlWithoutId)
+		else if (response.type === "opaqueredirect") {
+			sessionStorage.setItem("QuestionnaireResponse.pending", questionnaireResponseString)
+			sessionStorage.setItem("QuestionnaireResponse.url", window.location.href)
+
+			window.location.reload()
+		} else
+			console.warn("Unhandled response type", response.type)
+	})
 }
 
 function createTask(task) {
+	enableSpinner()
+
 	const fullUrl = window.location.origin + window.location.pathname
 	const requestUrl = fullUrl.slice(0, fullUrl.indexOf("/Task") + "/Task".length)
-
-	enableSpinner()
+	const taskString = JSON.stringify(task)
 
 	fetch(requestUrl, {
 		method: "POST",
+		redirect: "manual",
 		headers: {
 			"Content-type": "application/json",
 			"Accept": "application/json"
 		},
-		body: task
-	}).then(response => parseResponse(response, requestUrl))
+		body: taskString
+	}).then(response => {
+		if (response.type === "basic")
+			parseResponse(response, requestUrl)
+		else if (response.type === "opaqueredirect") {
+			sessionStorage.setItem("Task.pending", taskString)
+			sessionStorage.setItem("Task.url", window.location.href)
+
+			window.location.reload()
+		} else
+			console.warn("Unhandled response type", response.type)
+	})
 }
 
 function parseResponse(response, resourceBaseUrlWithoutId) {
@@ -752,13 +772,14 @@ function adaptQuestionnaireResponseInputsIfNotVersion1_0_0() {
 	}
 }
 
-function loadResource(url) {
-	return fetch(url, {
+async function loadResource(url) {
+	const response = await fetch(url, {
 		method: "GET",
 		headers: {
 			"Accept": "application/json"
 		}
-	}).then(response => response.json())
+	})
+	return await response.json()
 }
 
 function parseStructureDefinition(bundle) {
@@ -898,7 +919,7 @@ function appendInputRowAfter(id) {
 	clone.querySelectorAll("[for]").forEach(e => e.setAttribute("for", id + "|" + index))
 	clone.querySelectorAll("input[id]").forEach(e => e.setAttribute("id", id + "|" + index))
 
-	clone.querySelector("span[class='plus-minus-icon']").remove()
+	clone.querySelector("span[class='plus-minus-icon']")?.remove()
 	clone.querySelectorAll("input").forEach(input => {
 
 		input.value = ''
@@ -946,4 +967,227 @@ function htmlToElement(html, innerText) {
 function getResourceAsJson() {
 	const resource = document.getElementById("json").innerText
 	return JSON.parse(resource)
+}
+
+function normalizeUrl(url) {
+	return new URL(url).origin + new URL(url).pathname
+}
+
+function getInputById(id) {
+	return document.querySelector(`input[id="${CSS.escape(id)}"]`)
+}
+
+function toLocalDateTime(value) {
+	const date = new Date(value)
+	return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+}
+
+function handlePendingQuestionnaireResponse() {
+	const questionnaireResponseString = sessionStorage.getItem("QuestionnaireResponse.pending")
+	const url = sessionStorage.getItem("QuestionnaireResponse.url")
+
+	sessionStorage.removeItem("QuestionnaireResponse.pending")
+	sessionStorage.removeItem("QuestionnaireResponse.url")
+
+	if (!questionnaireResponseString || !url)
+		return
+	if (normalizeUrl(window.location.href) !== normalizeUrl(url))
+		return
+
+	const questionnaireResponse = JSON.parse(questionnaireResponseString)
+	questionnaireResponse.item.forEach(i => {
+		if (i.answer === undefined)
+			return;
+
+		const values = {
+			boolean: i.answer[0]?.valueBoolean,
+			string: i.answer[0]?.valueString,
+			integer: i.answer[0]?.valueInteger,
+			decimal: i.answer[0]?.valueDecimal,
+			date: i.answer[0]?.valueDate,
+			time: i.answer[0]?.valueTime,
+			dateTime: i.answer[0]?.valueDateTime,
+			uri: i.answer[0]?.valueUri,
+			reference: i.answer[0]?.valueReference,
+			coding: i.answer[0]?.valueCoding,
+			quantity: i.answer[0]?.valueQuantity
+		}
+
+		const primitiveValue =
+			values.boolean ?? values.string ?? values.integer ??
+			values.decimal ?? values.date ?? values.time ??
+			values.dateTime ?? values.uri
+
+		if (primitiveValue != null) {
+			const input = getInputById(i.linkId + (values.boolean !== undefined ? `-${values.boolean}` : ""))
+
+			if (input) {
+				if (values.boolean !== undefined) {
+					input.checked = true
+				} else if (values.dateTime) {
+					input.value = toLocalDateTime(values.dateTime)
+				} else {
+					input.value = primitiveValue
+				}
+			}
+		} else if (values.reference) {
+			const { reference, identifier } = values.reference
+
+			if (reference) {
+				const input = getInputById(i.linkId)
+				if (input) input.value = reference
+
+			} else if (identifier) {
+				const { system, value } = identifier
+
+				const inputSystem = getInputById(i.linkId + "-system")
+				const inputValue = getInputById(i.linkId + "-value")
+
+				if (inputSystem) inputSystem.value = system
+				if (inputValue) inputValue.value = value
+			}
+		} else if (values.coding) {
+			const { system, code } = values.coding
+
+			const inputSystem = getInputById(i.linkId + "-system")
+			const inputCode = getInputById(i.linkId + "-code")
+
+			if (inputSystem) inputSystem.value = system
+			if (inputCode) inputCode.value = code
+		} else if (values.quantity) {
+			const { comparator, value, unit, system, code } = values.quantity
+
+			const fields = { comparator, value, unit, system, code }
+
+			Object.entries(fields).forEach(([key, val]) => {
+				if (val == null) return
+				const input = getInputById(`${i.linkId}-${key}`)
+				if (input) input.value = val
+			})
+		}
+	})
+
+	blinkButton("complete-questionnaire-response")
+}
+
+function handlePendingTask() {
+	const taskString = sessionStorage.getItem("Task.pending")
+	const url = sessionStorage.getItem("Task.url")
+
+	sessionStorage.removeItem("Task.pending")
+	sessionStorage.removeItem("Task.url")
+
+	if (!taskString || !url)
+		return
+	if (normalizeUrl(window.location.href) !== normalizeUrl(url))
+		return
+
+	const baseIdCount = new Map()
+
+	const task = JSON.parse(taskString)
+	task.input.forEach(i => {
+		const values = {
+			boolean: i.valueBoolean,
+			string: i.valueString,
+			integer: i.valueInteger,
+			decimal: i.valueDecimal,
+			date: i.valueDate,
+			time: i.valueTime,
+			dateTime: i.valueDateTime,
+			instant: i.valueInstant,
+			uri: i.valueUri,
+			reference: i.valueReference,
+			identifier: i.valueIdentifier,
+			coding: i.valueCoding,
+			quantity: i.valueQuantity
+		}
+
+		i.type.coding.forEach(c => {
+			const baseId = `${c.system}|${c.code}`
+
+			const count = baseIdCount.get(baseId) || 0
+			baseIdCount.set(baseId, count + 1)
+
+			const suffix = count === 0 ? "" : `|${count}`
+
+			if (count > 0)
+				appendInputRowAfter(baseId)
+
+			const fullId = (id) => id + suffix
+
+			const primitiveValue =
+				values.boolean ?? values.string ?? values.integer ??
+				values.decimal ?? values.date ?? values.time ??
+				values.dateTime ?? values.instant ?? values.uri
+
+			if (primitiveValue != null) {
+				const id = fullId(baseId + (values.boolean !== undefined ? `-${values.boolean}` : ""))
+
+				const input = getInputById(id)
+
+				if (input) {
+					if (values.boolean !== undefined) {
+						input.checked = true
+					} else if (values.dateTime || values.instant) {
+						input.value = toLocalDateTime(values.dateTime || values.instant)
+					} else {
+						input.value = primitiveValue
+					}
+				}
+			} else if (values.reference) {
+				const { reference, identifier } = values.reference
+
+				if (reference) {
+					const input = getInputById(fullId(baseId))
+					if (input) input.value = reference
+
+				} else if (identifier) {
+					const { system, value } = identifier
+
+					const inputSystem = getInputById(fullId(baseId + "-system"))
+					const inputValue = getInputById(fullId(baseId + "-value"))
+
+					if (inputSystem) inputSystem.value = system
+					if (inputValue) inputValue.value = value
+				}
+			} else if (values.identifier) {
+				const { system, value } = values.identifier
+
+				const inputSystem = getInputById(fullId(baseId + "-system"))
+				const inputValue = getInputById(fullId(baseId + "-value"))
+
+				if (inputSystem) inputSystem.value = system
+				if (inputValue) inputValue.value = value
+			} else if (values.coding) {
+				const { system, code } = values.coding
+
+				const inputSystem = getInputById(fullId(baseId + "-system"))
+				const inputCode = getInputById(fullId(baseId + "-code"))
+
+				if (inputSystem) inputSystem.value = system
+				if (inputCode) inputCode.value = code
+			} else if (values.quantity) {
+				const { comparator, value, unit, system, code } = values.quantity
+
+				const fields = { comparator, value, unit, system, code }
+
+				Object.entries(fields).forEach(([key, val]) => {
+					if (val == null) return
+					const input = getInputById(fullId(`${baseId}-${key}`))
+					if (input) input.value = val
+				})
+			}
+		})
+	})
+
+	blinkButton("start-process")
+}
+
+function blinkButton(id) {
+	const button = document.getElementById(id);
+	if (button) {
+		button.scrollIntoView({ behavior: "instant", block: "center" })
+		button.classList.add("button-blink")
+		setTimeout(() => button.classList.remove("button-blink"), 2000)
+	}
 }

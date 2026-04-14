@@ -31,8 +31,8 @@ public class CodeSystemDaoTest extends AbstractReadAccessDaoTest<CodeSystem, Cod
 	public CodeSystemDaoTest()
 	{
 		super(CodeSystem.class,
-				(dataSource, permanentDeleteDataSource, fhirContext) -> new CodeSystemDaoJdbc(dataSource,
-						permanentDeleteDataSource, fhirContext, ReadByUrlDaoTest.createReadByUrlDao()));
+				(dataSource, permanentDeleteDataSource, fhirContext, objectMapper) -> new CodeSystemDaoJdbc(dataSource,
+						permanentDeleteDataSource, fhirContext, objectMapper, ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override

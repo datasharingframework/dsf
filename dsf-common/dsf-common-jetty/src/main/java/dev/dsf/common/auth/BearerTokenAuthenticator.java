@@ -80,7 +80,6 @@ public class BearerTokenAuthenticator extends LoginAuthenticator
 				return AuthenticationState.SEND_FAILURE;
 			}
 
-			logger.debug("Access token claims: {}", jwt.getClaims());
 			UserIdentity user = login(null, token, request, response);
 			if (user == null)
 			{

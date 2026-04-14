@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Measure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.MeasureDao;
 import dev.dsf.fhir.dao.ReadByUrlDao;
@@ -41,10 +43,10 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 	private final ReadByUrlDao<Measure> readByUrl;
 
 	public MeasureDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
-			ReadByUrlDaoFactory<Measure> readByUrlDaoFactory)
+			ObjectMapper objectMapper, ReadByUrlDaoFactory<Measure> readByUrlDaoFactory)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Measure.class, "measures", "measure", "measure_id",
-				MeasureIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Measure.class, "measures", "measure",
+				"measure_id", MeasureIdentityFilter::new,
 				List.of(factory(MeasureDate.PARAMETER_NAME, MeasureDate::new),
 						factory(MeasureDependsOn.PARAMETER_NAME, MeasureDependsOn::new,
 								MeasureDependsOn.getNameModifiers(), MeasureDependsOn::new,

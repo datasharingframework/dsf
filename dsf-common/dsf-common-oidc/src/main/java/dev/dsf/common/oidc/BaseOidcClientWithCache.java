@@ -15,51 +15,65 @@
  */
 package dev.dsf.common.oidc;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class BaseOidcClientWithCache implements BaseOidcClient
 {
+	private static final record CacheEntry<T>(ZonedDateTime timeout, T resource)
+	{
+	}
+
+	private final Duration cacheTimeoutConfigurationResource;
+	private final Duration cacheTimeoutJwksResource;
+
+	private final AtomicReference<CacheEntry<OidcConfiguration>> configurationCache = new AtomicReference<>();
+	private final AtomicReference<CacheEntry<Jwks>> jwksCache = new AtomicReference<>();
+
 	private final BaseOidcClient delegate;
 
-	private final AtomicReference<OidcConfiguration> oidcConfiguration = new AtomicReference<>();
-	private final AtomicReference<Jwks> jwks = new AtomicReference<>();
-
 	/**
+	 * @param cacheTimeoutconfigurationResource
+	 *            not <code>null</code>
+	 * @param cacheTimeoutJwksResource
+	 *            not <code>null</code>
 	 * @param delegate
 	 *            not <code>null</code>
 	 */
-	public BaseOidcClientWithCache(BaseOidcClient delegate)
+	public BaseOidcClientWithCache(Duration cacheTimeoutconfigurationResource, Duration cacheTimeoutJwksResource,
+			BaseOidcClient delegate)
 	{
+		this.cacheTimeoutConfigurationResource = Objects.requireNonNull(cacheTimeoutconfigurationResource,
+				"cacheTimeoutconfigurationResource");
+		this.cacheTimeoutJwksResource = Objects.requireNonNull(cacheTimeoutJwksResource, "cacheTimeoutJwksResource");
 		this.delegate = Objects.requireNonNull(delegate, "delegate");
 	}
 
 	@Override
 	public OidcConfiguration getConfiguration() throws OidcClientException
 	{
-		return getOrSet(oidcConfiguration, delegate::getConfiguration);
+		return getOrSet(configurationCache, cacheTimeoutConfigurationResource, delegate::getConfiguration);
 	}
 
-	private <T> T getOrSet(AtomicReference<T> cache, Supplier<T> supplier)
+	private <T> T getOrSet(AtomicReference<CacheEntry<T>> cache, Duration timeout, Supplier<T> supplier)
 	{
-		T cached = cache.get();
-		if (cached == null)
-		{
-			T value = supplier.get();
-			if (cache.compareAndSet(cached, value))
-				return value;
-			else
-				return cache.get();
-		}
+		CacheEntry<T> cached = cache.get();
+		if (cached != null && cached.timeout.isAfter(ZonedDateTime.now()))
+			return cached.resource;
 		else
-			return cached;
+		{
+			cache.compareAndSet(cached, new CacheEntry<>(ZonedDateTime.now().plus(timeout), supplier.get()));
+			return cache.get().resource;
+		}
 	}
 
 	@Override
 	public Jwks getJwks() throws OidcClientException
 	{
-		return getOrSet(jwks, () -> delegate.getJwks(getConfiguration()));
+		return getOrSet(jwksCache, cacheTimeoutJwksResource, () -> delegate.getJwks(getConfiguration()));
 	}
 
 	@Override

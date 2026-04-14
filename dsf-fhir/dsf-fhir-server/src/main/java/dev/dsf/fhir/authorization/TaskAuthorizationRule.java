@@ -251,14 +251,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 						if (!NAMING_SYSTEM_PRACTITIONER_IDENTIFIER.equals(identifier.getSystem()))
 							errors.add("Task.requester.identifier.system not " + NAMING_SYSTEM_PRACTITIONER_IDENTIFIER);
 
-						Optional<String> practitionerIdentifierValue = p.getPractitionerIdentifierValue();
-						if (practitionerIdentifierValue.isPresent())
-						{
-							if (!practitionerIdentifierValue.get().equals(identifier.getValue()))
-								errors.add("Task.requester not current practitioner identity");
-						}
-						else
-							throw new RuntimeException("Authenticated practitioner user has no identifier");
+						String practitionerIdentifierValue = p.getPractitionerIdentifierValue();
+						if (practitionerIdentifierValue == null
+								|| !practitionerIdentifierValue.equals(identifier.getValue()))
+							errors.add("Task.requester not current practitioner identity");
 					}
 					else if (identity instanceof OrganizationIdentity)
 					{
@@ -566,7 +562,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					boolean okForRequester = processAuthorizationHelper
 							.getRequesters(activityDefinition, processUrl, processVersion, messageName, taskProfiles)
 							.anyMatch(r -> r.isRequesterAuthorized(requester,
-									getAffiliations(connection, requester.getOrganizationIdentifierValue().orElse(null),
+									getAffiliations(connection, requester.getOrganizationIdentifierValue(),
 											requester.getEndpointIdentifierValue().orElse(null))));
 
 					if (!okForRecipient && !okForRequester)
@@ -733,12 +729,11 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					return Optional.of(
 							"Identity is local practitioner, has role DSF_ADMIN and organization referenced as recipient");
 				}
-				else if (p.getPractitionerIdentifierValue()
-						.map(v -> existingResource.getRequester().hasIdentifier()
-								&& NAMING_SYSTEM_PRACTITIONER_IDENTIFIER
-										.equals(existingResource.getRequester().getIdentifier().getSystem())
-								&& v.equals(existingResource.getRequester().getIdentifier().getValue()))
-						.orElse(false))
+				else if (existingResource.getRequester().hasIdentifier()
+						&& NAMING_SYSTEM_PRACTITIONER_IDENTIFIER
+								.equals(existingResource.getRequester().getIdentifier().getSystem())
+						&& p.getPractitionerIdentifierValue() != null && p.getPractitionerIdentifierValue()
+								.equals(existingResource.getRequester().getIdentifier().getValue()))
 				{
 					logger.info(
 							"Read of Task/{}/_history/{} authorized for identity '{}', identity is local practitioner and practitioner referenced as requester",

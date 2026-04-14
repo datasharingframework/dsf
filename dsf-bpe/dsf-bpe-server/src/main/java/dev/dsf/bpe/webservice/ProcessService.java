@@ -23,7 +23,9 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -46,6 +48,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.StreamingOutput;
+import net.sf.saxon.lib.FeatureKeys;
 
 @RolesAllowed("ADMIN")
 @Path(ProcessService.PATH)
@@ -61,7 +64,20 @@ public class ProcessService extends AbstractService implements InitializingBean
 		super(templateService, "Process");
 
 		this.repositoryService = repositoryService;
+
 		transformerFactory = TransformerFactory.newInstance();
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
+		try
+		{
+			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			transformerFactory.setFeature(FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, false);
+		}
+		catch (TransformerConfigurationException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.ValueSet;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.dao.ValueSetDao;
@@ -40,10 +42,10 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	private final ReadByUrlDao<ValueSet> readByUrl;
 
 	public ValueSetDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
-			ReadByUrlDaoFactory<ValueSet> readByUrlDaoFactory)
+			ObjectMapper objectMapper, ReadByUrlDaoFactory<ValueSet> readByUrlDaoFactory)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, ValueSet.class, "value_sets", "value_set",
-				"value_set_id", ValueSetIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, ValueSet.class, "value_sets",
+				"value_set", "value_set_id", ValueSetIdentityFilter::new,
 				List.of(factory(ValueSetDate.PARAMETER_NAME, ValueSetDate::new),
 						factory(ValueSetIdentifier.PARAMETER_NAME, ValueSetIdentifier::new,
 								ValueSetIdentifier.getNameModifiers()),

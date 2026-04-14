@@ -26,6 +26,8 @@ import java.util.UUID;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.Binary;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager.OidAndSize;
 import dev.dsf.fhir.model.StreamableBase64BinaryType;
@@ -38,9 +40,9 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json, binary_size FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
 	private static final String updateSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_oid, binary_size) VALUES (?, ?, ?, ?, ?)";
 
-	PreparedStatementFactoryBinary(FhirContext fhirContext)
+	PreparedStatementFactoryBinary(FhirContext fhirContext, ObjectMapper objectMapper)
 	{
-		super(fhirContext, Binary.class, createSql, readByIdSql, readByIdAndVersionSql, updateSql);
+		super(fhirContext, objectMapper, Binary.class, createSql, readByIdSql, readByIdAndVersionSql, updateSql);
 	}
 
 	@Override

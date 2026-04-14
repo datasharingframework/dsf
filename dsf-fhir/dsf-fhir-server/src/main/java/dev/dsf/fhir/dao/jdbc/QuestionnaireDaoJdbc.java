@@ -28,6 +28,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Questionnaire;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.dao.ReadByUrlDao;
@@ -44,9 +46,9 @@ public class QuestionnaireDaoJdbc extends AbstractResourceDaoJdbc<Questionnaire>
 	private final ReadByUrlDao<Questionnaire> readByUrl;
 
 	public QuestionnaireDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
-			ReadByUrlDaoFactory<Questionnaire> readByUrlDaoFactory)
+			ObjectMapper objectMapper, ReadByUrlDaoFactory<Questionnaire> readByUrlDaoFactory)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Questionnaire.class, "questionnaires",
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Questionnaire.class, "questionnaires",
 				"questionnaire", "questionnaire_id", QuestionnaireIdentityFilter::new,
 				List.of(factory(QuestionnaireDate.PARAMETER_NAME, QuestionnaireDate::new),
 						factory(QuestionnaireIdentifier.PARAMETER_NAME, QuestionnaireIdentifier::new,

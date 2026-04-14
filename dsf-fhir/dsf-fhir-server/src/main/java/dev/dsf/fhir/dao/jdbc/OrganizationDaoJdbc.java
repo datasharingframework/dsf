@@ -28,8 +28,12 @@ import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.OrganizationDao;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.ExtensionParameterValueString;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.search.filter.OrganizationIdentityFilter;
 import dev.dsf.fhir.search.parameters.OrganizationActive;
 import dev.dsf.fhir.search.parameters.OrganizationEndpoint;
@@ -44,10 +48,11 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationDaoJdbc.class);
 
-	public OrganizationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public OrganizationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Organization.class, "organizations", "organization",
-				"organization_id", OrganizationIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Organization.class, "organizations",
+				"organization", "organization_id", OrganizationIdentityFilter::new,
 				List.of(factory(OrganizationActive.PARAMETER_NAME, OrganizationActive::new),
 						factory(OrganizationEndpoint.PARAMETER_NAME, OrganizationEndpoint::new,
 								OrganizationEndpoint.getNameModifiers(), OrganizationEndpoint::new,
@@ -81,11 +86,10 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"SELECT organization FROM current_organizations WHERE organization->'extension' @> ?::jsonb AND organization->>'active' = 'true'"))
+						"SELECT organization FROM current_organizations WHERE organization->'extension' @> ? AND organization->>'active' = 'true'"))
 		{
-			String search = "[{\"url\": \"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
-					+ thumbprintHex + "\"}]";
-			statement.setString(1, search);
+			statement.setObject(1, getPreparedStatementFactory()
+					.jsonParameterToPgObjectAsArray(ExtensionParameterValueString.thumbprint(thumbprintHex)));
 
 			try (ResultSet result = statement.executeQuery())
 			{
@@ -122,11 +126,10 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"SELECT organization FROM current_organizations WHERE organization->'identifier' @> ?::jsonb AND organization->>'active' = 'true'"))
+						"SELECT organization FROM current_organizations WHERE organization->'identifier' @> ? AND organization->>'active' = 'true'"))
 		{
-			String search = "[{\"system\": \"http://dsf.dev/sid/organization-identifier\", \"value\": \""
-					+ identifierValue + "\"}]";
-			statement.setString(1, search);
+			statement.setObject(1, getPreparedStatementFactory()
+					.jsonParameterToPgObjectAsArray(IdentifierParameter.organization(identifierValue)));
 
 			try (ResultSet result = statement.executeQuery())
 			{
@@ -163,11 +166,10 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 			return false;
 
 		try (PreparedStatement statement = connection.prepareStatement(
-				"SELECT organization FROM current_organizations WHERE organization->'extension' @> ?::jsonb"))
+				"SELECT organization FROM current_organizations WHERE organization->'extension' @> ?"))
 		{
-			String search = "[{\"url\": \"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
-					+ thumbprintHex + "\"}]";
-			statement.setString(1, search);
+			statement.setObject(1, getPreparedStatementFactory()
+					.jsonParameterToPgObjectAsArray(ExtensionParameterValueString.thumbprint(thumbprintHex)));
 
 			try (ResultSet result = statement.executeQuery())
 			{

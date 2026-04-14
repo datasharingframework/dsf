@@ -76,6 +76,8 @@ import dev.dsf.fhir.authorization.StructureDefinitionAuthorizationRule;
 import dev.dsf.fhir.authorization.SubscriptionAuthorizationRule;
 import dev.dsf.fhir.authorization.TaskAuthorizationRule;
 import dev.dsf.fhir.authorization.ValueSetAuthorizationRule;
+import dev.dsf.fhir.authorization.media.InlineMediaTypePolicy;
+import dev.dsf.fhir.authorization.media.InlineMediaTypePolicyImpl;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -361,5 +363,11 @@ public class AuthorizationConfig
 	public AuthorizationRule<Resource> rootAuthorizationRule()
 	{
 		return new RootAuthorizationRule();
+	}
+
+	@Bean
+	public InlineMediaTypePolicy inlineMediaTypePolicy()
+	{
+		return new InlineMediaTypePolicyImpl();
 	}
 }

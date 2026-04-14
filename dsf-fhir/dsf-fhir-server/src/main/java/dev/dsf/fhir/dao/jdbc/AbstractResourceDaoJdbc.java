@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -168,14 +169,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
-			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
-			Function<Identity, SearchQueryIdentityFilter> userFilter,
+			ObjectMapper objectMapper, Class<R> resourceType, String resourceTable, String resourceColumn,
+			String resourceIdColumn, Function<Identity, SearchQueryIdentityFilter> userFilter,
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,
 			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
 		this(dataSource, permanentDeleteDataSource, resourceType, resourceTable, resourceColumn, resourceIdColumn,
-				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
-						resourceColumn),
+				new PreparedStatementFactoryDefault<>(fhirContext, objectMapper, resourceType, resourceTable,
+						resourceIdColumn, resourceColumn),
 				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
@@ -977,7 +978,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	{
 		Objects.requireNonNull(pageAndCount, "pageAndCount");
 
-		var builder = SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), pageAndCount);
+		var builder = SearchQueryBuilder.create(preparedStatementFactory, resourceType, getResourceTable(),
+				getResourceColumn(), pageAndCount);
 
 		if (identity != null)
 			builder = builder.with(identityFilter.apply(identity));

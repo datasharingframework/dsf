@@ -28,8 +28,11 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.EndpointDao;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.ExtensionParameterValueString;
 import dev.dsf.fhir.search.filter.EndpointIdentityFilter;
 import dev.dsf.fhir.search.parameters.EndpointAddress;
 import dev.dsf.fhir.search.parameters.EndpointIdentifier;
@@ -42,9 +45,10 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointDaoJdbc.class);
 
-	public EndpointDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public EndpointDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint",
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Endpoint.class, "endpoints", "endpoint",
 				"endpoint_id", EndpointIdentityFilter::new,
 				List.of(factory(EndpointAddress.PARAMETER_NAME, EndpointAddress::new,
 						EndpointAddress.getNameModifiers()),
@@ -131,11 +135,10 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"SELECT endpoint FROM current_endpoints WHERE endpoint->'extension' @> ?::jsonb AND endpoint->>'status' = 'active'"))
+						"SELECT endpoint FROM current_endpoints WHERE endpoint->'extension' @> ? AND endpoint->>'status' = 'active'"))
 		{
-			String search = "[{\"url\": \"http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
-					+ thumbprintHex + "\"}]";
-			statement.setString(1, search);
+			statement.setObject(1, getPreparedStatementFactory()
+					.jsonParameterToPgObjectAsArray(ExtensionParameterValueString.thumbprint(thumbprintHex)));
 
 			try (ResultSet result = statement.executeQuery())
 			{

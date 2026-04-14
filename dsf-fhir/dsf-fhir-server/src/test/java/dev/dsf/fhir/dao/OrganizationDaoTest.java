@@ -16,6 +16,7 @@
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -201,7 +202,7 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		CodeSystem c = new CodeSystem();
 		new ReadAccessHelperImpl().addOrganization(c, "organization.com");
 		CodeSystem createdC = new CodeSystemDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
-				ReadByUrlDaoTest.createReadByUrlDao()).create(c);
+				objectMapper, ReadByUrlDaoTest.createReadByUrlDao()).create(c);
 
 		try (Connection connection = defaultDataSource.getConnection();
 				PreparedStatement statement = connection
@@ -266,7 +267,7 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		new ReadAccessHelperImpl().addOrganization(binary, "organization.com");
 
 		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
-				DATABASE_USERS_GROUP);
+				objectMapper, DATABASE_USERS_GROUP);
 		Binary createdBinary = binaryDao.create(binary);
 		assertNotNull(createdBinary);
 
@@ -361,5 +362,105 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 
 		logger.info("Organization updates executed in {} ms", t1 - t0);
 		assertTrue("Organization updates took longer then 500 ms", t1 - t0 <= 500);
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransaction() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		Organization org = new Organization();
+		org.setActive(true);
+		org.setName("Test");
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(certHex));
+
+		Organization created = dao.create(org);
+		assertNotNull(created);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertTrue(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionNotActive() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		Organization org = new Organization();
+		org.setActive(false);
+		org.setName("Test");
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(certHex));
+
+		Organization created = dao.create(org);
+		assertNotNull(created);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertTrue(exists);
+		}
+
+		Optional<Organization> read2 = dao.read(UUID.fromString(created.getIdElement().getIdPart()));
+		assertNotNull(read2);
+		assertTrue(read2.isPresent());
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionDeleted() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		Organization org = new Organization();
+		org.setActive(false);
+		org.setName("Test");
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(certHex));
+
+		Organization created = dao.create(org);
+		assertNotNull(created);
+		dao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertFalse(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionNotExisting() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertFalse(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionNull() throws Exception
+	{
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, null);
+			assertFalse(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionBlank() throws Exception
+	{
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, "  ");
+			assertFalse(exists);
+		}
 	}
 }

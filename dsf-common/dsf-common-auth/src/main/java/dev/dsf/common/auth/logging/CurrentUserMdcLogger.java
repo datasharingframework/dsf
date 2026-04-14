@@ -50,12 +50,12 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 	{
 		before((Identity) organization);
 
-		organization.getCertificate().map(X509CertificateWrapper::thumbprint)
+		organization.getCertificate().map(X509CertificateWrapper::getThumbprint)
 				.ifPresent(t -> MDC.put(DSF_ORGANIZATION_THUMBPRINT, t));
-		organization.getCertificate().map(X509CertificateWrapper::subjectDn)
+		organization.getCertificate().map(X509CertificateWrapper::getSubjectDn)
 				.ifPresent(d -> MDC.put(DSF_ORGANIZATION_DN, d));
 
-		organization.getOrganizationIdentifierValue().ifPresent(i -> MDC.put(DSF_ORGANIZATION_IDENTIFIER, i));
+		MDC.put(DSF_ORGANIZATION_IDENTIFIER, organization.getOrganizationIdentifierValue());
 		organization.getEndpointIdentifierValue().ifPresent(i -> MDC.put(DSF_ENDPOINT_IDENTIFIER, i));
 	}
 
@@ -64,16 +64,16 @@ public class CurrentUserMdcLogger extends AbstractUserLogger
 	{
 		before((Identity) practitioner);
 
-		practitioner.getCertificate().map(X509CertificateWrapper::thumbprint)
+		practitioner.getCertificate().map(X509CertificateWrapper::getThumbprint)
 				.ifPresent(t -> MDC.put(DSF_PRACTITIONER_THUMBPRINT, t));
-		practitioner.getCertificate().map(X509CertificateWrapper::subjectDn)
+		practitioner.getCertificate().map(X509CertificateWrapper::getSubjectDn)
 				.ifPresent(d -> MDC.put(DSF_PRACTITIONER_DN, d));
 		practitioner.getCredentials().map(DsfOpenIdCredentials::getUserId)
 				.ifPresent(i -> MDC.put(DSF_PRACTITIONER_SUB, i));
 
-		practitioner.getOrganizationIdentifierValue().ifPresent(i -> MDC.put(DSF_ORGANIZATION_IDENTIFIER, i));
+		MDC.put(DSF_ORGANIZATION_IDENTIFIER, practitioner.getOrganizationIdentifierValue());
 		practitioner.getEndpointIdentifierValue().ifPresent(i -> MDC.put(DSF_ENDPOINT_IDENTIFIER, i));
-		practitioner.getPractitionerIdentifierValue().ifPresent(i -> MDC.put(DSF_PRACTITIONER_IDENTIFIER, i));
+		MDC.put(DSF_PRACTITIONER_IDENTIFIER, practitioner.getPractitionerIdentifierValue());
 
 		if (!practitioner.getPractionerRoles().isEmpty())
 			MDC.put(DSF_PRACTITIONER_ROLES, practitioner.getPractionerRoles().stream()

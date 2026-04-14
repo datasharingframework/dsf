@@ -13,28 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.common.jetty;
+package dev.dsf.fhir.authorization.media;
 
-import jakarta.servlet.ServletRequestEvent;
-import jakarta.servlet.ServletRequestListener;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
-public class SessionInvalidator implements ServletRequestListener
+public interface InlineMediaTypePolicy
 {
-	@Override
-	public void requestInitialized(ServletRequestEvent sre)
-	{
-		// nothing to do
-	}
+	boolean isInlineDisplayAllowed(String mediaType);
 
-	@Override
-	public void requestDestroyed(ServletRequestEvent sre)
-	{
-		HttpServletRequest servletRequest = (HttpServletRequest) sre.getServletRequest();
-		HttpSession session = servletRequest.getSession(false);
-
-		if (session != null)
-			session.invalidate();
-	}
+	boolean isInlineOpenAllowed(String mediaType);
 }

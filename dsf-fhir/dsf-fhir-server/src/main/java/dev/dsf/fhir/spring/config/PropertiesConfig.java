@@ -49,6 +49,7 @@ import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import dev.dsf.common.config.AbstractCertificateConfig;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
+import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.ui.theme.Theme;
@@ -245,6 +246,16 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		if (!DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbUsersGroup).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.group' value not matching "
+					+ DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbUsername).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.username' value not matching "
+					+ DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbPermanentDeleteUsername).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.permanent.delete.username' value not matching "
+					+ DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+
 		URL url = new URI(serverBaseUrl).toURL();
 		if (!List.of("http", "https").contains(url.getProtocol()))
 		{

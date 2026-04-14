@@ -31,13 +31,10 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
-import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
 import dev.dsf.fhir.dao.HistoryDao;
 import dev.dsf.fhir.history.AtParameter;
 import dev.dsf.fhir.history.History;
@@ -52,12 +49,15 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 	private final DataSource dataSource;
 	private final FhirContext fhirContext;
 	private final BinaryDaoJdbc binaryDao;
+	private final PgObjectFactory pgObjectFactory;
 
-	public HistroyDaoJdbc(DataSource dataSource, FhirContext fhirContext, BinaryDaoJdbc binaryDao)
+	public HistroyDaoJdbc(DataSource dataSource, FhirContext fhirContext, BinaryDaoJdbc binaryDao,
+			PgObjectFactory pgObjectFactory)
 	{
 		this.dataSource = dataSource;
 		this.fhirContext = fhirContext;
 		this.binaryDao = binaryDao;
+		this.pgObjectFactory = pgObjectFactory;
 	}
 
 	@Override
@@ -66,6 +66,7 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 		Objects.requireNonNull(dataSource, "dataSource");
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(binaryDao, "binaryDao");
+		Objects.requireNonNull(pgObjectFactory, "pgObjectFactory");
 	}
 
 	@Override
@@ -165,40 +166,15 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 			binaryDao.modifySearchResultResource(b, connection);
 	}
 
-	private PGobject uuidToPgObject(UUID uuid)
-	{
-		if (uuid == null)
-			return null;
-
-		try
-		{
-			PGobject o = new PGobject();
-			o.setType("UUID");
-			o.setValue(uuid.toString());
-			return o;
-		}
-		catch (DataFormatException | SQLException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	public IParser getJsonParser()
-	{
-		IParser p = fhirContext.newJsonParser();
-		p.setStripVersionsFromReferences(false);
-		return p;
-	}
-
 	private Resource jsonToResource(String json, Class<? extends Resource> resourceType)
 	{
 		if (json == null)
 			return null;
 
 		if (resourceType != null)
-			return getJsonParser().parseResource(resourceType, json);
+			return pgObjectFactory.getJsonParser().parseResource(resourceType, json);
 		else
-			return (Resource) getJsonParser().parseResource(json);
+			return (Resource) pgObjectFactory.getJsonParser().parseResource(json);
 	}
 
 	private String createCountSql(boolean forId, boolean forResource, List<HistoryIdentityFilter> filter,
@@ -239,7 +215,7 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 	{
 		int parameterIndex = 1;
 		if (id != null)
-			statement.setObject(parameterIndex++, uuidToPgObject(id));
+			statement.setObject(parameterIndex++, pgObjectFactory.uuidToPgObject(id));
 		if (resource != null)
 			statement.setString(parameterIndex++, resource.getAnnotation(ResourceDef.class).name());
 
@@ -248,7 +224,7 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 			if (f.isDefined())
 			{
 				for (int i = 1; i <= f.getSqlParameterCount(); i++)
-					f.modifyStatement(parameterIndex++, i, statement);
+					f.modifyStatement(parameterIndex++, i, statement, pgObjectFactory);
 			}
 		}
 
@@ -257,14 +233,14 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 			if (atParameter.isDefined())
 			{
 				for (int i = 1; i <= atParameter.getSqlParameterCount(); i++)
-					atParameter.modifyStatement(parameterIndex++, i, statement, null);
+					atParameter.modifyStatement(parameterIndex++, i, statement, null, pgObjectFactory);
 			}
 		}
 
 		if (sinceParameter.isDefined())
 		{
 			for (int i = 1; i <= sinceParameter.getSqlParameterCount(); i++)
-				sinceParameter.modifyStatement(parameterIndex++, i, statement, null);
+				sinceParameter.modifyStatement(parameterIndex++, i, statement, null, pgObjectFactory);
 		}
 	}
 }

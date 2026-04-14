@@ -32,8 +32,9 @@ public class StructureDefinitionSnapshotDaoTest
 	public StructureDefinitionSnapshotDaoTest()
 	{
 		super(StructureDefinition.class,
-				(dataSource, permanentDeleteDataSource, fhirContext) -> new StructureDefinitionSnapshotDaoJdbc(
-						dataSource, permanentDeleteDataSource, fhirContext, ReadByUrlDaoTest.createReadByUrlDao()));
+				(dataSource, permanentDeleteDataSource, fhirContext,
+						objectMapper) -> new StructureDefinitionSnapshotDaoJdbc(dataSource, permanentDeleteDataSource,
+								fhirContext, objectMapper, ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override

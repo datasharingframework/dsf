@@ -32,12 +32,20 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.utility.DockerImageName;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactoryImpl;
 import dev.dsf.fhir.history.AtParameter;
 import dev.dsf.fhir.history.History;
 import dev.dsf.fhir.history.SinceParameter;
@@ -78,10 +86,16 @@ public class HistoryDaoTest extends AbstractDbTest
 	}
 
 	private final FhirContext fhirContext = FhirContext.forR4();
+	private final ObjectMapper objectMapper = JsonMapper.builder().disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+			.defaultPropertyInclusion(JsonInclude.Value.construct(Include.NON_NULL, Include.NON_NULL))
+			.defaultPropertyInclusion(JsonInclude.Value.construct(Include.NON_EMPTY, Include.NON_EMPTY))
+			.disable(Feature.AUTO_CLOSE_TARGET).build();
 	private final OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
-			fhirContext);
+			fhirContext, objectMapper);
 	private final HistoryDao dao = new HistroyDaoJdbc(defaultDataSource, fhirContext,
-			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext, DATABASE_USERS_GROUP));
+			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext, objectMapper,
+					DATABASE_USERS_GROUP),
+			new PgObjectFactoryImpl(fhirContext, objectMapper));
 	private final HistoryIdentityFilterFactory filterFactory = new HistoryIdentityFilterFactoryImpl();
 
 	@Test

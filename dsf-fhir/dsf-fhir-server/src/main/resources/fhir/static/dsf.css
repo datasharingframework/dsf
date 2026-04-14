@@ -1298,7 +1298,7 @@ div.row-text {
 	font-size: 1em;
 }
 
-a#download {
+a#binary-download {
 	background-color: #326F95;
 	color: #fff;
 	padding: 12px 60px;
@@ -1309,6 +1309,27 @@ a#download {
     border: 1px outset buttonborder;
     border-radius: 4px;
     text-decoration: none;
+}
+
+a#binary-open {
+	background-color: #326F95;
+	color: #fff;
+	padding: 12px 60px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	float: left;
+    border: 1px outset buttonborder;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+iframe#binary-content {
+	width: 100%;
+	height: 4rem;
+	background-color: #fff;
+	border: none;
+	visibility: hidden;
 }
 
 .content-header {

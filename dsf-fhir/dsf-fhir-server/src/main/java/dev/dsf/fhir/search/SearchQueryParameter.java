@@ -28,6 +28,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.parameters.SearchQuerySortParameter;
 
@@ -66,7 +67,8 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 	int getSqlParameterCount();
 
 	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException;
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException;
 
 	/**
 	 * Only called if {@link #isDefined()} returns <code>true</code>

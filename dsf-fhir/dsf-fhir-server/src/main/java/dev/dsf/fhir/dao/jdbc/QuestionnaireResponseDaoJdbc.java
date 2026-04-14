@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.QuestionnaireResponseDao;
 import dev.dsf.fhir.search.filter.QuestionnaireResponseIdentityFilter;
@@ -35,9 +37,9 @@ public class QuestionnaireResponseDaoJdbc extends AbstractResourceDaoJdbc<Questi
 		implements QuestionnaireResponseDao
 {
 	public QuestionnaireResponseDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext)
+			FhirContext fhirContext, ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, QuestionnaireResponse.class,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, QuestionnaireResponse.class,
 				"questionnaire_responses", "questionnaire_response", "questionnaire_response_id",
 				QuestionnaireResponseIdentityFilter::new,
 				List.of(factory(QuestionnaireResponseAuthor.PARAMETER_NAME, QuestionnaireResponseAuthor::new,

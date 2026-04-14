@@ -29,8 +29,9 @@ public class LibraryDaoTest extends AbstractReadAccessDaoTest<Library, LibraryDa
 
 	public LibraryDaoTest()
 	{
-		super(Library.class, (dataSource, permanentDeleteDataSource, fhirContext) -> new LibraryDaoJdbc(dataSource,
-				permanentDeleteDataSource, fhirContext, ReadByUrlDaoTest.createReadByUrlDao()));
+		super(Library.class,
+				(dataSource, permanentDeleteDataSource, fhirContext, objectMapper) -> new LibraryDaoJdbc(dataSource,
+						permanentDeleteDataSource, fhirContext, objectMapper, ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override

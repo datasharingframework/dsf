@@ -33,14 +33,12 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 {
 	private static final Logger logger = LoggerFactory.getLogger(DsfOpenIdLoginService.class);
 
-	private final OpenIdConfiguration configuration;
 	private final LoginService loginService;
 
 	public DsfOpenIdLoginService(OpenIdConfiguration configuration, LoginService loginService)
 	{
 		super(configuration, loginService);
 
-		this.configuration = configuration;
 		this.loginService = loginService;
 	}
 
@@ -49,17 +47,6 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			Function<Boolean, Session> getOrCreateSession)
 	{
 		OpenIdCredentials openIdCredentials = (OpenIdCredentials) credentials;
-		try
-		{
-			openIdCredentials.redeemAuthCode(configuration);
-		}
-		catch (Exception e)
-		{
-			logger.debug("Unable to redeem auth code", e);
-			logger.warn("Unable to redeem auth code: {} - {}", e.getClass().getName(), e.getMessage());
-
-			return null;
-		}
 
 		return loginService.login(openIdCredentials.getUserId(), credentials, request, getOrCreateSession);
 	}
@@ -76,9 +63,7 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			return false;
 		}
 
-		long expiry = identity.getCredentials().get().getLongClaim("exp");
-		long currentTimeSeconds = (long) (System.currentTimeMillis() / 1000F);
-		if (currentTimeSeconds > expiry)
+		if (!identity.isNotExpired())
 		{
 			logger.debug("ID Token has expired");
 			return false;

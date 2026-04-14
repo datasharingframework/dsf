@@ -30,6 +30,8 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
 import dev.dsf.fhir.dao.ReadByUrlDao;
@@ -49,10 +51,12 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 	private final ReadByUrlDao<ActivityDefinition> readByUrl;
 
 	public ActivityDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext, ReadByUrlDaoFactory<ActivityDefinition> readByUrlDaoFactory)
+			FhirContext fhirContext, ObjectMapper objectMapper,
+			ReadByUrlDaoFactory<ActivityDefinition> readByUrlDaoFactory)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, ActivityDefinition.class, "activity_definitions",
-				"activity_definition", "activity_definition_id", ActivityDefinitionIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, ActivityDefinition.class,
+				"activity_definitions", "activity_definition", "activity_definition_id",
+				ActivityDefinitionIdentityFilter::new,
 				List.of(factory(ActivityDefinitionDate.PARAMETER_NAME, ActivityDefinitionDate::new),
 						factory(ActivityDefinitionIdentifier.PARAMETER_NAME, ActivityDefinitionIdentifier::new),
 						factory(ActivityDefinitionName.PARAMETER_NAME, ActivityDefinitionName::new,

@@ -31,8 +31,9 @@ public class StructureDefinitionDaoTest extends AbstractReadAccessDaoTest<Struct
 	public StructureDefinitionDaoTest()
 	{
 		super(StructureDefinition.class,
-				(dataSource, permanentDeleteDataSource, fhirContext) -> new StructureDefinitionDaoJdbc(dataSource,
-						permanentDeleteDataSource, fhirContext, ReadByUrlDaoTest.createReadByUrlDao()));
+				(dataSource, permanentDeleteDataSource, fhirContext, objectMapper) -> new StructureDefinitionDaoJdbc(
+						dataSource, permanentDeleteDataSource, fhirContext, objectMapper,
+						ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override
