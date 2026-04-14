@@ -258,7 +258,7 @@ jobs:
       - name: Export digest
         run: echo "DIGEST=${{ steps.push.outputs.digest }}" >> $GITHUB_ENV
       - name: Set up syft
-        uses: anchore/sbom-action/download-syft@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
       - name: Generate SBOM
         run: syft ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}@${DIGEST} -o cyclonedx-json > sbom.json
       - name: Set up cosign
