@@ -47,10 +47,10 @@
 		<jackson.version>2.21.2</jackson.version>
 		<operaton.version>1.1.1</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
-		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
+		<hapi.fhir.version.v2>8.8.1</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
-		<hapi.fhir.version>8.4.2</hapi.fhir.version>
-		<bouncycastle.version>1.83</bouncycastle.version>
+		<hapi.fhir.version>8.8.1</hapi.fhir.version>
+		<bouncycastle.version>1.84</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>5.2.1</crypto-utils.version>
@@ -188,12 +188,12 @@
 			<dependency>
 				<groupId>org.checkerframework</groupId>
 				<artifactId>checker-qual</artifactId>
-				<version>3.55.1</version>
+				<version>2.11.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.ben-manes.caffeine</groupId>
 				<artifactId>caffeine</artifactId>
-				<version>3.2.3</version>
+				<version>2.9.3</version>
 			</dependency>
 
 			<dependency>
