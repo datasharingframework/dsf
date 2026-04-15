@@ -59,6 +59,11 @@ jobs:
         uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
         with:
           category: "/language:${{matrix.language}}"
+      - name: Upload SARIF
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-results-${{ matrix.language }}
+          path: /home/runner/work/dsf/results/**/*.sarif
 
   maven-quick:
     runs-on: ubuntu-latest
@@ -190,12 +195,12 @@ jobs:
           image-ref: ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ github.sha }}
           format: 'sarif'
           output: 'trivy-results.sarif'
-#      - name: Upload Trivy scan results to GitHub Security tab
-#        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
-#        if: always()
-#        with:
-#          sarif_file: 'trivy-results.sarif'
-#          category: 'trivy'
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy'
 
   docker-deploy:
     if: ${{ (!endsWith(needs.maven-quick.outputs.version, '-SNAPSHOT') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop') }}
