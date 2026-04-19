@@ -230,7 +230,7 @@
 								<artifactItem>
 									<groupId>org.fhir</groupId>
 									<artifactId>ucum</artifactId>
-									<version>1.0.9</version>
+									<version>1.0.10</version>
 								</artifactItem>
 								<!--<artifactItem>
 									<groupId>com.google.code.gson</groupId>
