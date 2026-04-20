@@ -82,7 +82,7 @@ updates:
     ignore:
       - dependency-name: "azul/zulu-openjdk"
         versions:
-          - "26-jre-headless"
+          - ">= 26"
 
   # docker-compose image updates
   - package-ecosystem: "docker-compose"
