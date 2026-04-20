@@ -185,7 +185,6 @@
 								<artifactItem>
 									<groupId>org.fhir</groupId>
 									<artifactId>ucum</artifactId>
-									<version>1.0.2</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.github.ben-manes.caffeine</groupId>
