@@ -1,0 +1,35 @@
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: FHIR Validator HTTP service has SSRF via /loadIG Chains with startsWith() Credential Leak for Authentication Token Theft
+CVE-2026-34361
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: HAPI FHIR: hapifhir/org.hl7.fhir.core: HAPI FHIR: Information disclosure and potential impersonation via HTTP redirects sending sensitive headers
+CVE-2026-33180
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: MITM based Zip Slip in `ca.uhn.hapi.fhir:org.hl7.fhir.core`
+CVE-2023-24057
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: HL7 FHIR Partial Path Zip Slip due to bypass of CVE-2023-24057
+CVE-2023-28465
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: HAPI FHIR Core has Authentication Credential Leakage via Improper URL Prefix Matching on HTTP Redirect
+CVE-2026-34359
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: org.hl7.fhir.dstu2016may: org.hl7.fhir.dstu3: org.hl7.fhir.r4: org.hl7.fhir.r5: org.hl7.fhir.utilities: org.hl7.fhir.core: XXE vulnerability in XSLT parsing in `org.hl7.fhir.core`
+CVE-2024-52007
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: org.hl7.fhir.core: org.hl7.fhir.dstu3: org.hl7.fhir.r4: org.hl7.fhir.r4b: org.hl7.fhir.r5: org.hl7.fhir.utilities: XXE vulnerability in XSLT transforms in `org.hl7.fhir.core`
+CVE-2024-45294
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: org.hl7.fhir.convertors: org.hl7.fhir.dstu2: org.hl7.fhir.dstu2016may: org.hl7.fhir.dstu3: org.hl7.fhir.r4: org.hl7.fhir.r5: org.hl7.fhir.utilities: org.hl7.fhir.validation: org.hl7.fhir.core: FHIR arbitrary code execution via specially-crafted request
+CVE-2024-51132
+
+# Ignore reason: Vulnerable code not used in DSF
+# CVE title: ucum: Ucum-java has an XXE vulnerability in XML parsing 
+CVE-2024-55887

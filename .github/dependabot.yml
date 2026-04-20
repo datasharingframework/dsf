@@ -59,6 +59,10 @@ updates:
       interval: "weekly"
       day: "sunday"
     open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   # Dockerfile base image updates
   - package-ecosystem: "docker"
@@ -72,9 +76,13 @@ updates:
       interval: "weekly"
       day: "sunday"
     groups:
-      dockerfiles:
+      docker:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "azul/zulu-openjdk"
+        versions:
+          - "26-jre-headless"
 
   # docker-compose image updates
   - package-ecosystem: "docker-compose"
