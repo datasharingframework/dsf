@@ -45,7 +45,7 @@
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>6.2.18</spring.version>
 		<jackson.version>2.21.2</jackson.version>
-		<operaton.version>1.1.1</operaton.version>
+		<operaton.version>1.1.2</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
@@ -453,7 +453,7 @@
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
 				<artifactId>thymeleaf</artifactId>
-				<version>3.1.4.RELEASE</version>
+				<version>3.1.5.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
