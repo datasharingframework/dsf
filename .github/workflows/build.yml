@@ -189,7 +189,7 @@ jobs:
       - name: Build Docker image
         run:  docker build -t ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ github.sha }} ${{ matrix.image.context }}
       - name: Scan Docker image with Trivy
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ github.sha }}
           format: 'sarif'
