@@ -509,7 +509,7 @@
 
             <!-- dsf linter -->
             <dependency>
-                <groupId>dev.dsf.utils.linter</groupId>
+                <groupId>dev.dsf.linter</groupId>
                 <artifactId>linter-core</artifactId>
                 <version>0.1.3</version>
             </dependency>

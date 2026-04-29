@@ -53,7 +53,7 @@
 		</dependency>
 
         <dependency>
-            <groupId>dev.dsf.utils.linter</groupId>
+            <groupId>dev.dsf.linter</groupId>
             <artifactId>linter-core</artifactId>
         </dependency>
 
