@@ -54,7 +54,6 @@
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>5.2.1</crypto-utils.version>
-        <dsf-linter.version>0.1.2</dsf-linter.version>
     </properties>
 
 	<name>DSF Parent POM</name>
@@ -512,7 +511,7 @@
             <dependency>
                 <groupId>dev.dsf.utils.linter</groupId>
                 <artifactId>linter-core</artifactId>
-                <version>${dsf-linter.version}</version>
+                <version>0.1.3</version>
             </dependency>
 
 			<!-- maven plugin -->
