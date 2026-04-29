@@ -53,10 +53,10 @@ public class LintPluginMojo extends AbstractMojo
 	@Parameter(property = "dsf.lint.reportPath")
 	private File reportPath;
 
-	@Parameter(property = "dsf.lint.html", defaultValue = "true")
+	@Parameter(property = "dsf.lint.html", defaultValue = "false")
 	private boolean generateHtmlReport;
 
-	@Parameter(property = "dsf.lint.json", defaultValue = "true")
+	@Parameter(property = "dsf.lint.json", defaultValue = "false")
 	private boolean generateJsonReport;
 
 	@Parameter(property = "dsf.lint.failOnErrors", defaultValue = "true")
