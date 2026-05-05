@@ -31,6 +31,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import dev.dsf.linter.DsfLinter;
 import dev.dsf.linter.DsfLinter.OverallLinterResult;
+import dev.dsf.linter.exclusion.ExclusionConfig;
+import dev.dsf.linter.exclusion.ExclusionConfigLoader;
 import dev.dsf.linter.input.InputResolver;
 import dev.dsf.linter.input.InputResolver.ResolutionResult;
 import dev.dsf.linter.logger.Logger;
@@ -68,6 +70,16 @@ public class LintPluginMojo extends AbstractMojo
 	@Parameter(property = "dsf.lint.verbose", defaultValue = "false")
 	private boolean verbose;
 
+	/**
+	 * Path to a JSON file containing exclusion rules. Excluded items are hidden from HTML and JSON reports.
+	 * When omitted, the plugin also looks for {@code dsf-linter-exclusions.json} in the project build
+	 * directory automatically.
+	 *
+	 * <p>Example: {@code -Ddsf.lint.exclusionsFile=path/to/dsf-linter-exclusions.json}</p>
+	 */
+	@Parameter(property = "dsf.lint.exclusionsFile")
+	private File exclusionsFile;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
@@ -104,8 +116,11 @@ public class LintPluginMojo extends AbstractMojo
 
 			Files.createDirectories(lintReportPath);
 
+			ExclusionConfig exclusionConfig = loadExclusionConfig(resolution.resolvedPath().toAbsolutePath());
+
 			DsfLinter.Config config = new DsfLinter.Config(resolution.resolvedPath().toAbsolutePath(),
-					lintReportPath.toAbsolutePath(), generateHtmlReport, generateJsonReport, failOnErrors, logger);
+					lintReportPath.toAbsolutePath(), generateHtmlReport, generateJsonReport, failOnErrors,
+					exclusionConfig, logger);
 
 			OverallLinterResult result = new DsfLinter(config).lint();
 
@@ -136,6 +151,44 @@ public class LintPluginMojo extends AbstractMojo
 			{
 				resolver.cleanup(resolution);
 			}
+		}
+	}
+
+	/**
+	 * Loads the exclusion config from an explicit file ({@code dsf.lint.exclusionsFile}) or
+	 * auto-discovers {@code dsf-linter-exclusions.json} in the extracted project directory.
+	 * Returns {@code null} when no exclusion file is found or configured.
+	 */
+	private ExclusionConfig loadExclusionConfig(Path projectRoot) throws MojoExecutionException
+	{
+		ExclusionConfigLoader loader = new ExclusionConfigLoader();
+		try
+		{
+			if (exclusionsFile != null)
+			{
+				ExclusionConfig config = loader.load(exclusionsFile.toPath());
+				getLog().info("DSF Linter: loaded exclusion rules from " + exclusionsFile
+						+ " (" + config.getRules().size() + " rule(s), affectsExitStatus="
+						+ config.isAffectsExitStatus() + ")");
+				return config;
+			}
+
+			Optional<ExclusionConfig> auto = loader.loadFromProjectRoot(projectRoot);
+			if (auto.isPresent())
+			{
+				ExclusionConfig config = auto.get();
+				getLog().info("DSF Linter: auto-discovered exclusion rules from "
+						+ projectRoot.resolve(ExclusionConfigLoader.DEFAULT_FILENAME)
+						+ " (" + config.getRules().size() + " rule(s), affectsExitStatus="
+						+ config.isAffectsExitStatus() + ")");
+				return config;
+			}
+
+			return null;
+		}
+		catch (IOException e)
+		{
+			throw new MojoExecutionException("DSF Linter: failed to load exclusion config", e);
 		}
 	}
 }
