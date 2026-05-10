@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM debian:trixie-slim@sha256:4ffb3a1511099754cddc70eb1b12e50ffdb67619aa0ab6c13fcd800a78ef7c7a AS builder
+FROM debian:trixie-slim@sha256:109e2c65005bf160609e4ba6acf7783752f8502ad218e298253428690b9eaa4b AS builder
 WORKDIR /opt/bpe
 COPY --chown=root:2202 ./ ./
 RUN chown root:2202 ./ && \
@@ -23,7 +23,7 @@ RUN chown root:2202 ./ && \
     chmod 1775 ./log
 
 
-FROM azul/zulu-openjdk:25-jre-headless@sha256:0f843579efd505efb0a0eef1d5a816cc4523ffcad458a54a4e9e52e60c4c030a
+FROM azul/zulu-openjdk:25-jre-headless@sha256:0e674f7e11fe7ac1e5c83550690c486c323c301cc2a7b57c0dc76b39871fc8dc
 LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
 LABEL org.opencontainers.image.description="DSF BPE Server"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
