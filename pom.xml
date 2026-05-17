@@ -38,14 +38,14 @@
 
 		<main.basedir>${project.basedir}</main.basedir>
 
-		<slf4j.version>2.0.17</slf4j.version>
+		<slf4j.version>2.0.18</slf4j.version>
 		<log4j.version>2.25.4</log4j.version>
 		<jetty.version>12.1.8</jetty.version>
 		<jersey.version>3.1.11</jersey.version>
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>6.2.18</spring.version>
-		<jackson.version>2.21.2</jackson.version>
-		<operaton.version>1.1.1</operaton.version>
+		<jackson.version>2.21.3</jackson.version>
+		<operaton.version>1.1.2</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
@@ -183,7 +183,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.10</version>
+				<version>42.7.11</version>
 			</dependency>
 			<dependency>
 				<groupId>org.checkerframework</groupId>
@@ -205,7 +205,7 @@
 			<dependency>
 				<groupId>com.auth0</groupId>
 				<artifactId>java-jwt</artifactId>
-				<version>4.5.1</version>
+				<version>4.5.2</version>
 			</dependency>
 
 			<dependency>
@@ -334,7 +334,7 @@
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
-				<version>4.0.7</version>
+				<version>4.0.8</version>
 			</dependency>
 
 			<!-- spring -->
@@ -453,7 +453,7 @@
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
 				<artifactId>thymeleaf</artifactId>
-				<version>3.1.4.RELEASE</version>
+				<version>3.1.5.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
