@@ -16,7 +16,7 @@
 
 services:
   proxy:
-    image: nginx:1.29
+    image: nginx:1.31
     restart: "no"
     ports:
       - 127.0.0.1:443:443
