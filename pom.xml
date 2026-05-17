@@ -39,7 +39,7 @@
 		<main.basedir>${project.basedir}</main.basedir>
 
 		<slf4j.version>2.0.17</slf4j.version>
-		<log4j.version>2.25.4</log4j.version>
+		<log4j.version>2.26.0</log4j.version>
 		<jetty.version>12.1.8</jetty.version>
 		<jersey.version>3.1.11</jersey.version>
 		<tyrus.version>2.2.2</tyrus.version>
@@ -47,9 +47,9 @@
 		<jackson.version>2.21.2</jackson.version>
 		<operaton.version>1.1.1</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
-		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
+		<hapi.fhir.version.v2>8.8.1</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
-		<hapi.fhir.version>8.4.2</hapi.fhir.version>
+		<hapi.fhir.version>8.8.1</hapi.fhir.version>
 		<bouncycastle.version>1.84</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
@@ -188,12 +188,12 @@
 			<dependency>
 				<groupId>org.checkerframework</groupId>
 				<artifactId>checker-qual</artifactId>
-				<version>3.55.1</version>
+				<version>2.11.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.ben-manes.caffeine</groupId>
 				<artifactId>caffeine</artifactId>
-				<version>3.2.3</version>
+				<version>2.9.3</version>
 			</dependency>
 
 			<dependency>
@@ -448,7 +448,7 @@
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.13.2</version>
+				<version>2.14.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
@@ -469,12 +469,12 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.21.0</version>
+				<version>2.22.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.21.0</version>
+				<version>1.22.0</version>
 			</dependency>
 
 			<dependency>
@@ -508,7 +508,7 @@
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
 				<artifactId>asm</artifactId>
-				<version>9.9.1</version>
+				<version>9.10</version>
 			</dependency>
 
 			<dependency>
