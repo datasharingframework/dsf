@@ -113,14 +113,7 @@ services:
     networks:
       - internet
     command: >-
-      start
-      --db dev-file
-      --hostname keycloak
-      --import-realm
-      --https-certificate-file=/run/secrets/keycloak.chain.crt
-      --https-certificate-key-file=/run/secrets/keycloak.key.plain
-      --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
-      --spi-truststore-file-password=password
+      start --db dev-file --hostname keycloak --import-realm --https-certificate-file=/run/secrets/keycloak.chain.crt --https-certificate-key-file=/run/secrets/keycloak.key.plain --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks --spi-truststore-file-password=password
 
   forward-proxy:
     build: ./forward-proxy
@@ -132,11 +125,11 @@ services:
       internet:
 
   dic1-fhir:
-    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
+    build: ../../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
-     - 127.0.0.1:5001:5001
+      - 127.0.0.1:5001:5001
     secrets:
       - db_liquibase.password
       - db_dic1_fhir_user.password
@@ -218,11 +211,11 @@ services:
       - keycloak
 
   dic2-fhir:
-    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
+    build: ../../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
-     - 127.0.0.1:5002:5002
+      - 127.0.0.1:5002:5002
     secrets:
       - db_liquibase.password
       - db_dic2_fhir_user.password
@@ -299,11 +292,11 @@ services:
       - keycloak
 
   dic3-fhir:
-    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
+    build: ../../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
-     - 127.0.0.1:5003:5003
+      - 127.0.0.1:5003:5003
     secrets:
       - db_liquibase.password
       - db_dic3_fhir_user.password
@@ -378,11 +371,11 @@ services:
       - keycloak
 
   ttp-fhir:
-    build: ../dsf-fhir/dsf-fhir-server-jetty/docker
+    build: ../../dsf-fhir/dsf-fhir-server-jetty/docker
     image: datasharingframework/fhir
     restart: "no"
     ports:
-     - 127.0.0.1:5004:5004
+      - 127.0.0.1:5004:5004
     secrets:
       - db_liquibase.password
       - db_ttp_fhir_user.password
@@ -450,7 +443,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-fhir
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_fhir.secret
@@ -465,7 +458,7 @@ services:
       - keycloak
 
   dic1-bpe:
-    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
+    build: ../../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
@@ -585,7 +578,7 @@ services:
       - forward-proxy
 
   dic2-bpe:
-    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
+    build: ../../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
@@ -674,7 +667,7 @@ services:
       - keycloak
 
   dic3-bpe:
-    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
+    build: ../../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
@@ -763,7 +756,7 @@ services:
       - keycloak
 
   ttp-bpe:
-    build: ../dsf-bpe/dsf-bpe-server-jetty/docker
+    build: ../../dsf-bpe/dsf-bpe-server-jetty/docker
     image: datasharingframework/bpe
     restart: "no"
     ports:
@@ -837,7 +830,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
-      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp 
+      DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/ttp
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_bpe.secret
@@ -901,7 +894,7 @@ secrets:
 
   db_liquibase.password:
     file: ./secrets/db_liquibase.password
-    
+
   db_dic1_bpe_user.password:
     file: ./secrets/db_dic1_bpe_user.password
   db_dic1_bpe_user_engine.password:
@@ -910,7 +903,7 @@ secrets:
     file: ./secrets/db_dic1_fhir_user.password
   db_dic1_fhir_user_permanent_delete.password:
     file: ./secrets/db_dic1_fhir_user_permanent_delete.password
-    
+
   db_dic2_bpe_user.password:
     file: ./secrets/db_dic2_bpe_user.password
   db_dic2_bpe_user_engine.password:
@@ -919,7 +912,7 @@ secrets:
     file: ./secrets/db_dic2_fhir_user.password
   db_dic2_fhir_user_permanent_delete.password:
     file: ./secrets/db_dic2_fhir_user_permanent_delete.password
-    
+
   db_dic3_bpe_user.password:
     file: ./secrets/db_dic3_bpe_user.password
   db_dic3_bpe_user_engine.password:
@@ -928,7 +921,7 @@ secrets:
     file: ./secrets/db_dic3_fhir_user.password
   db_dic3_fhir_user_permanent_delete.password:
     file: ./secrets/db_dic3_fhir_user_permanent_delete.password
-    
+
   db_ttp_bpe_user.password:
     file: ./secrets/db_ttp_bpe_user.password
   db_ttp_bpe_user_engine.password:
@@ -955,63 +948,63 @@ secrets:
     file: ./secrets/oidc_client_dic3_bpe.secret
   oidc_client_ttp_bpe.secret:
     file: ./secrets/oidc_client_ttp_bpe.secret
-  
+
 networks:
   dic1-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.0/29
+        - subnet: 172.20.0.0/29
   dic1-fhir-backend:
   dic2-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.8/29
+        - subnet: 172.20.0.8/29
   dic2-fhir-backend:
   dic3-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.16/29
+        - subnet: 172.20.0.16/29
   dic3-fhir-backend:
   ttp-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.24/29
+        - subnet: 172.20.0.24/29
   ttp-fhir-backend:
   dic1-bpe-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.32/29
+        - subnet: 172.20.0.32/29
   dic1-bpe-backend:
   dic2-bpe-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.40/29
+        - subnet: 172.20.0.40/29
   dic2-bpe-backend:
   dic3-bpe-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.48/29
+        - subnet: 172.20.0.48/29
   dic3-bpe-backend:
   ttp-bpe-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.56/29
+        - subnet: 172.20.0.56/29
   ttp-bpe-backend:
   internet:
   forward-proxy:
