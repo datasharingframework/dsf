@@ -102,11 +102,6 @@ podman quadlet install ./dsf-fhir
 
 # Install systemd target
 install -m 640 ./dsf-fhir.target ~/.config/systemd/user/dsf-fhir.target
-
-# Create log directory with correct permissions
-mkdir -p ~/.local/state/dsf/fhir/log
-podman unshare chown root:2101 ~/.local/state/dsf/fhir/log
-podman unshare chmod 770 ~/.local/state/dsf/fhir/log
 ```
 
 ### Configuration
@@ -190,11 +185,6 @@ podman quadlet install ./dsf-bpe
 
 # Install systemd target
 install -m 640 ./dsf-bpe.target ~/.config/systemd/user/dsf-bpe.target
-
-# Create log directory with correct permissions
-mkdir -p ~/.local/state/dsf/bpe/log
-podman unshare chown root:2202 ~/.local/state/dsf/bpe/log
-podman unshare chmod 770 ~/.local/state/dsf/bpe/log
 
 # Create process plugin directory
 mkdir -p ~/.config/dsf-bpe/process
@@ -286,8 +276,6 @@ The Kubernetes YAML files under `dsf-fhir` and `dsf-bpe` can be used as a starti
 
 - Add `namespace` to each resource
 - Replace ConfigMap-based private keys with proper `kind: Secret` resources
-- Replace `hostPath` volumes with appropriate `PersistentVolumeClaim` resources
-  For this we need a different solution for managing logs then the log-directory.
 - Replace `hostPort` with a proper `Service` of type `LoadBalancer` or `NodePort`
 - Consider a sidecar or init container approach for process plugins
 - Instead of deploying plugins as jar files via bind-mount, publish them as OCI images and mount them into the container.

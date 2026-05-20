@@ -38,8 +38,6 @@ spec:
         - configMapRef:
             name: dsf-fhir-config
       volumeMounts:
-        - mountPath: /opt/fhir/log
-          name: fhir-log
         - name: db-passwords
           mountPath: /run/secrets/db
           readOnly: true
@@ -48,10 +46,6 @@ spec:
           readOnly: true
 
   volumes:
-    - name: fhir-log
-      hostPath:
-        path: /home/podman/.local/state/dsf/fhir/log
-        type: Directory
     - name: db-passwords
       secret:
         secretName: dsf-fhir-passwords

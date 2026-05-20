@@ -53,18 +53,12 @@ spec:
         - name: client-cert
           mountPath: /run/secrets/cert
           readOnly: true
-        - name: bpe-log
-          mountPath: /opt/bpe/log
         - name: bpe-process
           mountPath: /opt/bpe/process
           readOnly: true
         - name: bpe-cache
           mountPath: /opt/bpe/cache
   volumes:
-    - name: bpe-log
-      hostPath:
-        path: /home/podman/.local/state/dsf/bpe/log
-        type: Directory
     - name: bpe-process
       hostPath:
         path: /home/podman/.config/dsf-bpe/process
