@@ -1,0 +1,7 @@
+[Unit]
+Description=DSF FHIR Server
+Wants=dsf-proxy.service
+After=dsf-proxy.service
+
+[Install]
+WantedBy=default.target

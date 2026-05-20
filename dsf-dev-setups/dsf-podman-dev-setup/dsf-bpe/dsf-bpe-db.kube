@@ -1,0 +1,13 @@
+[Unit]
+Description=DSF BPE Database
+PartOf=dsf-bpe.target
+
+[Kube]
+Yaml=%h/.config/containers/systemd/dsf-bpe-db.yaml
+Network=dsf-backend.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=dsf-bpe.target

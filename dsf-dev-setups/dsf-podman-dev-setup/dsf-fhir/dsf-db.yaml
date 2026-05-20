@@ -1,0 +1,62 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dsf-db-data
+  annotations:
+    volume.podman.io/driver: local
+    volume.podman.io/gid: "70"
+    volume.podman.io/uid: "70"
+    volume.podman.io/mount-options: "uid=70,gid=70,mode=0770"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: dsf-db
+  name: dsf-db
+spec:
+  containers:
+  - image: docker.io/library/postgres:18.3-alpine3.23
+    name: dsf-db
+    livenessProbe:
+      exec:
+        command:
+          - pg_isready
+          - -U
+          - liquibase_user
+          - -d
+          - fhir
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+    env:
+    - name: POSTGRES_DB
+      value: fhir
+    - name: POSTGRES_PASSWORD_FILE
+      value: /run/secrets/db_liquibase.password
+    - name: POSTGRES_USER
+      value: liquibase_user
+    - name: TZ
+      value: Europe/Berlin
+    volumeMounts:
+    - mountPath: /var/lib/postgresql
+      name: postgres-data-pvc
+    - name: db-passwords
+      mountPath: /run/secrets/db_liquibase.password
+      subPath: db_liquibase.password
+      readOnly: true
+  volumes:
+  - name: postgres-data-pvc
+    persistentVolumeClaim:
+      claimName: dsf-db-data
+  - name: db-passwords
+    secret:
+      secretName: dsf-fhir-passwords

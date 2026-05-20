@@ -1,0 +1,7 @@
+[Unit]
+Description=DSF FHIR Server
+Wants=dsf-bpe-app.service
+After=dsf-bpe-app.service
+
+[Install]
+WantedBy=default.target
