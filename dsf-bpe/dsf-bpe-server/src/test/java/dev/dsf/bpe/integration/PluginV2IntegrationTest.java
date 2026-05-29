@@ -112,6 +112,12 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	}
 
 	@Test
+	public void startSendTaskErrorBoundaryEventTestThrow() throws Exception
+	{
+		executePluginTest(createTestTask("SendTaskErrorBoundaryEventTestThrow"));
+	}
+
+	@Test
 	public void startFieldInjectionTest() throws Exception
 	{
 		executePluginTest(createTestTask("FieldInjectionTest"));
