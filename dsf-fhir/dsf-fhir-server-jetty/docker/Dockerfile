@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM debian:trixie-slim@sha256:b6e2a152f22a40ff69d92cb397223c906017e1391a73c952b588e51af8883bf8 AS builder
+FROM docker.io/library/debian:trixie-slim@sha256:b6e2a152f22a40ff69d92cb397223c906017e1391a73c952b588e51af8883bf8 AS builder
 WORKDIR /opt/fhir
 COPY --chown=root:2101 ./ ./
 RUN chown root:2101 ./ && \
@@ -23,7 +23,7 @@ RUN chown root:2101 ./ && \
     chmod 1775 ./log
 
 
-FROM azul/zulu-openjdk:25-jre-headless@sha256:8cec35879adc3694e3cad2a499f9527c7c788278a923363b09b096a1b28f751c
+FROM docker.io/azul/zulu-openjdk:25-jre-headless@sha256:8cec35879adc3694e3cad2a499f9527c7c788278a923363b09b096a1b28f751c
 LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
 LABEL org.opencontainers.image.description="DSF FHIR Server"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
