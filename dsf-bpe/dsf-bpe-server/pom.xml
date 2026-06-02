@@ -217,6 +217,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail-junit4</artifactId>
 			<version>1.6.15</version>
