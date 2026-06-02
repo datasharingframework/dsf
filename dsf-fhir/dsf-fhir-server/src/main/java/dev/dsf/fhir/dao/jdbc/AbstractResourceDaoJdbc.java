@@ -523,7 +523,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				if (result.next())
 				{
 					if (preparedStatementFactory.getReadByIdDeleted(result) != null)
-						logger.warn("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
+						logger.debug("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
 					else
 						logger.debug("{} with IdPart {} found", resourceTypeName, uuid);
 
