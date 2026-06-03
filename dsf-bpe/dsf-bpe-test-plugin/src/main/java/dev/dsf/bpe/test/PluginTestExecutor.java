@@ -31,11 +31,11 @@ public final class PluginTestExecutor
 {
 	private static final Logger logger = LoggerFactory.getLogger(PluginTestExecutor.class);
 
-	private static final class TestAssertException extends RuntimeException
+	public static final class TestAssertException extends RuntimeException
 	{
 		private static final long serialVersionUID = 1L;
 
-		public TestAssertException(String message)
+		private TestAssertException(String message)
 		{
 			super(message);
 		}
