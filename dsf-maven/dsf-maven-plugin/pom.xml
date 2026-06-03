@@ -52,7 +52,12 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
+        <dependency>
+            <groupId>dev.dsf.linter</groupId>
+            <artifactId>linter-core</artifactId>
+        </dependency>
+
+        <dependency>
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-process-api-v1</artifactId>
 			<exclusions>
