@@ -65,7 +65,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
-import net.sf.saxon.lib.FeatureKeys;
 
 public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, InitializingBean
 {
@@ -154,7 +153,6 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		try
 		{
 			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			transformerFactory.setFeature(FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, false);
 		}
 		catch (TransformerConfigurationException e)
 		{

@@ -159,11 +159,6 @@
 									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>net.sf.saxon</groupId>
-									<artifactId>Saxon-HE</artifactId>
-									<version>9.5.1-5</version>
-								</artifactItem>
-								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.validation</artifactId>
 									<version>${hapi.fhir.version.v1}</version>
