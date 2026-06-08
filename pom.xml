@@ -1095,6 +1095,7 @@
 						<list>SCRIPT_STYLE</list>
 						<conf>SCRIPT_STYLE</conf>
 						<env>SCRIPT_STYLE</env>
+						<trivyignore>SCRIPT_STYLE</trivyignore>
 					</mapping>
 				</configuration>
 			</plugin>

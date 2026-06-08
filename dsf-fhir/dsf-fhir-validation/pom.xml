@@ -133,7 +133,9 @@
 					<licenseSets>
 						<licenseSet>
 							<excludes>
+								<exclude>src/main/resources/fhir/**/*.ignore</exclude>
 								<exclude>src/main/resources/fhir/**/*.post</exclude>
+								<exclude>src/main/resources/fhir/**/*.put</exclude>
 								<exclude>src/main/resources/fhir/bundle.xml</exclude>
 								<exclude>src/main/resources/fhir/resources.delete</exclude>
 							</excludes>
