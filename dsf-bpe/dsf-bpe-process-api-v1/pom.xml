@@ -68,6 +68,7 @@
 		<dependency>
 			<artifactId>jakarta.ws.rs-api</artifactId>
 			<groupId>jakarta.ws.rs</groupId>
+			<version>${jakarta.ws.rs.version.v1}</version>
 		</dependency>
 
 		<!-- optional dependencies provided by the DSF bpe -->
@@ -95,6 +96,14 @@
 				<exclusion>
 					<groupId>net.sf.saxon</groupId>
 					<artifactId>Saxon-HE</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3_xpath</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

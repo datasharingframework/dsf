@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.bpe.api.logging;
+package dev.dsf.bpe.api.context;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -23,7 +23,7 @@ import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.DelegateTask;
 import org.slf4j.MDC;
 
-public abstract class AbstractPluginMdc implements PluginMdc
+public abstract class AbstractPluginContext implements PluginContext
 {
 	public static final String DSF_PLUGIN_API = "dsf.plugin.api";
 	public static final String DSF_PLUGIN_JAR = "dsf.plugin.jar";
@@ -42,6 +42,7 @@ public abstract class AbstractPluginMdc implements PluginMdc
 	private final String jar;
 	private final String name;
 	private final String version;
+	private final ClassLoader pluginClassLoader;
 
 	/**
 	 * @param apiVersion
@@ -51,13 +52,16 @@ public abstract class AbstractPluginMdc implements PluginMdc
 	 *            not <code>null</code>
 	 * @param jar
 	 *            not <code>null</code>
+	 * @param pluginClassLoader
+	 *            not <code>null</code>
 	 */
-	public AbstractPluginMdc(int apiVersion, String name, String version, String jar)
+	public AbstractPluginContext(int apiVersion, String name, String version, String jar, ClassLoader pluginClassLoader)
 	{
 		this.apiVersion = apiVersion;
 		this.name = Objects.requireNonNull(name, "name");
 		this.version = Objects.requireNonNull(version, "version");
 		this.jar = Objects.requireNonNull(jar, "jar");
+		this.pluginClassLoader = Objects.requireNonNull(pluginClassLoader, "pluginClassLoader");
 	}
 
 	private void putPluginMdc()
@@ -115,44 +119,81 @@ public abstract class AbstractPluginMdc implements PluginMdc
 	protected abstract ProcessValues getProcessValues(DelegateExecution delegateExecution);
 
 	@Override
-	public void executeWithProcessMdc(DelegateTask delegateTask, Consumer<DelegateTask> executable)
+	public void executeWithProcessContext(DelegateTask delegateTask, Consumer<DelegateTask> executable)
 	{
-		putPluginMdc();
-		putProcessMdc(delegateTask.getExecution());
-
-		try
-		{
-			executable.accept(delegateTask);
-		}
-		finally
-		{
-			removePluginMdc();
-			removeProcessMdc();
-		}
+		withPluginClassLoader(withProcessMdc(delegateTask, executable));
 	}
 
 	@Override
-	public void executeWithProcessMdc(DelegateExecution delegateExecution,
+	public void executeWithProcessContext(DelegateExecution delegateExecution,
 			ConsumerWithException<DelegateExecution> executable) throws Exception
 	{
-		putPluginMdc();
-		putProcessMdc(delegateExecution);
-
-		try
-		{
-			executable.accept(delegateExecution);
-		}
-		finally
-		{
-			removePluginMdc();
-			removeProcessMdc();
-		}
+		withPluginClassLoader(withProcessMdc(delegateExecution, executable));
 	}
 
 	@Override
-	public void executeWithPluginMdc(Runnable runnable)
+	public void executeWithPluginContext(Runnable runnable)
 	{
-		putPluginMdc();
+		withPluginClassLoader(withPluginMdc(runnable));
+	}
+
+	@Override
+	public boolean executeWithPluginContext(Supplier<Boolean> supplier)
+	{
+		return withPluginClassLoader(withPluginMdc(supplier));
+	}
+
+	@FunctionalInterface
+	private interface RunnableWithException
+	{
+		void run() throws Exception;
+	}
+
+	private Supplier<Void> withProcessMdc(DelegateTask delegateTask, Consumer<DelegateTask> executable)
+	{
+		return () ->
+		{
+			putPluginMdc();
+			putProcessMdc(delegateTask.getExecution());
+
+			try
+			{
+				executable.accept(delegateTask);
+			}
+			finally
+			{
+				removeProcessMdc();
+				removePluginMdc();
+			}
+
+			return null;
+		};
+	}
+
+	private RunnableWithException withProcessMdc(DelegateExecution delegateExecution,
+			ConsumerWithException<DelegateExecution> executable) throws Exception
+	{
+		return () ->
+		{
+			putPluginMdc();
+			putProcessMdc(delegateExecution);
+
+			try
+			{
+				executable.accept(delegateExecution);
+			}
+			finally
+			{
+				removeProcessMdc();
+				removePluginMdc();
+			}
+		};
+	}
+
+	private void withPluginClassLoader(RunnableWithException runnable) throws Exception
+	{
+		ClassLoader old = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(pluginClassLoader);
 
 		try
 		{
@@ -160,14 +201,50 @@ public abstract class AbstractPluginMdc implements PluginMdc
 		}
 		finally
 		{
-			removePluginMdc();
+			Thread.currentThread().setContextClassLoader(old);
 		}
 	}
 
-	@Override
-	public boolean executeWithPluginMdc(Supplier<Boolean> supplier)
+	private Supplier<Void> withPluginMdc(Runnable runnable)
 	{
-		putPluginMdc();
+		return () ->
+		{
+			putPluginMdc();
+
+			try
+			{
+				runnable.run();
+
+				return null;
+			}
+			finally
+			{
+				removePluginMdc();
+			}
+		};
+	}
+
+	private <T> Supplier<T> withPluginMdc(Supplier<T> supplier)
+	{
+		return () ->
+		{
+			putPluginMdc();
+
+			try
+			{
+				return supplier.get();
+			}
+			finally
+			{
+				removePluginMdc();
+			}
+		};
+	}
+
+	private <T> T withPluginClassLoader(Supplier<T> supplier)
+	{
+		ClassLoader old = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(pluginClassLoader);
 
 		try
 		{
@@ -175,7 +252,7 @@ public abstract class AbstractPluginMdc implements PluginMdc
 		}
 		finally
 		{
-			removePluginMdc();
+			Thread.currentThread().setContextClassLoader(old);
 		}
 	}
 }

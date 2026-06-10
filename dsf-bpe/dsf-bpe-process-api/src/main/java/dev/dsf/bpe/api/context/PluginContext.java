@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.bpe.api.logging;
+package dev.dsf.bpe.api.context;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.DelegateTask;
 
-public interface PluginMdc
+public interface PluginContext
 {
 	@FunctionalInterface
 	public interface ConsumerWithException<T>
@@ -29,12 +29,12 @@ public interface PluginMdc
 		void accept(T t) throws Exception;
 	}
 
-	void executeWithProcessMdc(DelegateTask delegateTask, Consumer<DelegateTask> executable);
+	void executeWithProcessContext(DelegateTask delegateTask, Consumer<DelegateTask> executable);
 
-	void executeWithProcessMdc(DelegateExecution delegateExecution, ConsumerWithException<DelegateExecution> executable)
-			throws Exception;
+	void executeWithProcessContext(DelegateExecution delegateExecution,
+			ConsumerWithException<DelegateExecution> executable) throws Exception;
 
-	void executeWithPluginMdc(Runnable runnable);
+	void executeWithPluginContext(Runnable runnable);
 
-	boolean executeWithPluginMdc(Supplier<Boolean> supplier);
+	boolean executeWithPluginContext(Supplier<Boolean> supplier);
 }

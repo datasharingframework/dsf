@@ -40,10 +40,12 @@
 		<dependency>
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
+			<version>${jakarta.ws.rs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
+			<version>${jakarta.annotation.api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

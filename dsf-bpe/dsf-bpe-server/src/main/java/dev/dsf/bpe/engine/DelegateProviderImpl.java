@@ -155,7 +155,7 @@ public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 		return getPlugin(processIdAndVersion).map(plugin ->
 		{
 			JavaDelegate delegate = getDelegate.apply(plugin);
-			return (JavaDelegate) e -> plugin.getPluginMdc().executeWithProcessMdc(e, delegate::execute);
+			return (JavaDelegate) e -> plugin.getPluginContext().executeWithProcessContext(e, delegate::execute);
 
 		}).orElseGet(() -> e -> stopProcess(processIdAndVersion, e));
 	}
@@ -167,7 +167,7 @@ public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 		return getPlugin(processIdAndVersion).map(plugin ->
 		{
 			ExecutionListener delegate = plugin.getExecutionListener(className, fieldDeclarations, variableScope);
-			return (ExecutionListener) e -> plugin.getPluginMdc().executeWithProcessMdc(e, delegate::notify);
+			return (ExecutionListener) e -> plugin.getPluginContext().executeWithProcessContext(e, delegate::notify);
 
 		}).orElseGet(() -> e -> stopProcess(processIdAndVersion, e));
 	}
@@ -179,7 +179,7 @@ public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 		return getPlugin(processIdAndVersion).<TaskListener> map(plugin ->
 		{
 			TaskListener delegate = plugin.getTaskListener(className, fieldDeclarations, variableScope);
-			return (TaskListener) e -> plugin.getPluginMdc().executeWithProcessMdc(e, delegate::notify);
+			return (TaskListener) e -> plugin.getPluginContext().executeWithProcessContext(e, delegate::notify);
 
 		}).orElseGet(() -> e -> stopProcess(processIdAndVersion, e.getExecution()));
 	}

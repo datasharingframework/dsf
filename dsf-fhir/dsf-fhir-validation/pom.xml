@@ -84,6 +84,18 @@
 					<groupId>io.opentelemetry.instrumentation</groupId>
 					<artifactId>opentelemetry-instrumentation-annotations</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>net.sourceforge.plantuml</groupId>
+					<artifactId>plantuml-mit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.commonmark</groupId>
+					<artifactId>commonmark</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.commonmark</groupId>
+					<artifactId>commonmark-ext-gfm-tables</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

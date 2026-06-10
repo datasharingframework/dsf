@@ -41,7 +41,6 @@
 		<slf4j.version>2.0.18</slf4j.version>
 		<log4j.version>2.26.0</log4j.version>
 		<jetty.version>12.1.10</jetty.version>
-		<jersey.version>3.1.11</jersey.version>
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>7.0.7</spring.version>
 		<jackson.version>2.21.4</jackson.version>
@@ -54,6 +53,15 @@
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>6.0.0</crypto-utils.version>
+		<jersey.version.v1>3.1.11</jersey.version.v1>
+		<jersey.version.v2>4.0.2</jersey.version.v2>
+		<jersey.version>4.0.2</jersey.version>
+		<jakarta.ws.rs.version.v1>3.1.0</jakarta.ws.rs.version.v1>
+		<jakarta.ws.rs.version.v2>4.0.0</jakarta.ws.rs.version.v2>
+		<jakarta.ws.rs.version>4.0.0</jakarta.ws.rs.version>
+		<jakarta.annotation.api.version.v1>2.1.0</jakarta.annotation.api.version.v1>
+		<jakarta.annotation.api.version.v2>3.0.0</jakarta.annotation.api.version.v2>
+		<jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
 	</properties>
 
 	<name>DSF Parent POM</name>
@@ -244,47 +252,6 @@
 				<version>${jetty.version}</version>
 			</dependency>
 
-			<!-- jersey -->
-			<dependency>
-				<groupId>org.glassfish.jersey.core</groupId>
-				<artifactId>jersey-common</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.core</groupId>
-				<artifactId>jersey-server</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.core</groupId>
-				<artifactId>jersey-client</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.containers</groupId>
-				<artifactId>jersey-container-servlet</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.inject</groupId>
-				<artifactId>jersey-hk2</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.connectors</groupId>
-				<artifactId>jersey-apache-connector</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.media</groupId>
-				<artifactId>jersey-media-jaxb</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.media</groupId>
-				<artifactId>jersey-media-json-jackson</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
@@ -373,16 +340,6 @@
 			</dependency>
 
 			<!-- Jakarta APIs -->
-			<dependency>
-				<groupId>jakarta.ws.rs</groupId>
-				<artifactId>jakarta.ws.rs-api</artifactId>
-				<version>4.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>jakarta.annotation</groupId>
-				<artifactId>jakarta.annotation-api</artifactId>
-				<version>3.0.0</version>
-			</dependency>
 			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>
