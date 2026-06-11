@@ -1,0 +1,13 @@
+[Unit]
+Description=DSF FHIR DB
+PartOf=dsf-fhir.target
+
+[Kube]
+Yaml=%h/.config/containers/systemd/dsf-db.yaml
+Network=dsf-backend.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=dsf-fhir.target

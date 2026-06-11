@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dsf-proxy
+  labels:
+    app: dsf-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dsf-proxy
+  template:
+    metadata:
+      labels:
+        app: dsf-proxy
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        sysctls:
+          - name: net.ipv4.ip_unprivileged_port_start
+            value: "80"
+      containers:
+        - name: dsf-proxy
+          image: ghcr.io/datasharingframework/fhir_proxy:2.1.0
+          env:
+            - name: TZ
+              value: Europe/Berlin
+            - name: APP_SERVER_IP
+              value: dsf-app
+            - name: HTTPS_SERVER_NAME_PORT
+              value: "dsf.todo.organization.com:443"
+            - name: SSL_CERTIFICATE_FILE
+              value: /run/secrets/ssl_certificate_file.pem
+            - name: SSL_CERTIFICATE_KEY_FILE
+              value: /run/secrets/ssl_certificate_key_file.pem
+            - name: SSL_CERTIFICATE_CHAIN_FILE
+              value: /run/secrets/ssl_certificate_chain_file.pem
+          ports:
+            - containerPort: 443
+              hostPort: 443
+          volumeMounts:
+            - name: ssl-cert
+              mountPath: /run/secrets
+              readOnly: true
+      volumes:
+        - name: ssl-cert
+          configMap:
+            name: dsf-ssl-cert

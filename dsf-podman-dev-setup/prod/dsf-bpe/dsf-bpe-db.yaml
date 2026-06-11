@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dsf-bpe-db-data
+  annotations:
+    volume.podman.io/driver: local
+    volume.podman.io/uid: "70"
+    volume.podman.io/gid: "70"
+    volume.podman.io/mount-options: "uid=70,gid=70,mode=0770"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dsf-bpe-db
+  labels:
+    app: dsf-bpe-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dsf-bpe-db
+  template:
+    metadata:
+      labels:
+        app: dsf-bpe-db
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: dsf-bpe-db
+          image: docker.io/library/postgres:18.4-alpine3.23
+          env:
+            - name: TZ
+              value: Europe/Berlin
+            - name: POSTGRES_USER
+              value: liquibase_user
+            - name: POSTGRES_DB
+              value: bpe
+            - name: POSTGRES_PASSWORD_FILE
+              value: /run/secrets/db_liquibase.password
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - liquibase_user
+                - -d
+                - bpe
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql
+            - name: db-passwords
+              mountPath: /run/secrets/db_liquibase.password
+              subPath: db_liquibase.password
+              readOnly: true
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: dsf-bpe-db-data
+        - name: db-passwords
+          secret:
+            secretName: dsf-bpe-passwords

@@ -1,0 +1,16 @@
+[Unit]
+Description=DSF BPE Application
+PartOf=dsf-bpe.target
+After=dsf-bpe-db.service
+Wants=dsf-db.service
+
+[Kube]
+Yaml=%h/.config/containers/systemd/dsf-bpe-app.yaml
+ConfigMap=%h/.config/containers/systemd/dsf-client-cert.yaml
+Network=dsf-bpe-backend.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=dsf-bpe.target

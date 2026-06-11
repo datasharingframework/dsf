@@ -1,0 +1,16 @@
+[Unit]
+Description=DSF FHIR App
+After=dsf-db.service
+Wants=dsf-db.service
+PartOf=dsf-fhir.target
+
+[Kube]
+Yaml=%h/.config/containers/systemd/dsf-app.yaml
+ConfigMap=%h/.config/containers/systemd/dsf-client-cert.yaml
+Network=dsf-backend.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=dsf-fhir.target

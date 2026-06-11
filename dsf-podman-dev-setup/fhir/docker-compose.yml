@@ -1,0 +1,168 @@
+#
+# Copyright 2018-2025 Heilbronn University of Applied Sciences
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+services:
+  proxy:
+    build: ../../dsf-docker/fhir_proxy
+    image: datasharingframework/fhir_proxy
+    restart: "no"
+    ports:
+      - 127.0.0.1:80:80
+      - 127.0.0.1:443:443
+    secrets:
+      - fhir.crt
+      - fhir.key.plain
+      - issuing_ca.crt
+      - ca_chain.crt
+    environment:
+      TZ: Europe/Berlin
+      HTTPS_SERVER_NAME_PORT: localhost:443
+      APP_SERVER_IP: 172.28.1.11
+      SSL_CERTIFICATE_FILE: /run/secrets/fhir.crt
+      SSL_CERTIFICATE_KEY_FILE: /run/secrets/fhir.key.plain
+      SSL_CERTIFICATE_CHAIN_FILE: /run/secrets/issuing_ca.crt
+      SSL_CA_CERTIFICATE_FILE: /run/secrets/ca_chain.crt
+      SSL_CA_DN_REQUEST_FILE: /run/secrets/issuing_ca.crt
+      SSL_EXPECTED_CLIENT_I_DN_CN_VALUES: "'DSF Dev Issuing CA'"
+    networks:
+      frontend:
+        ipv4_address: 172.28.1.10
+      bpe:
+        ipv4_address: 172.28.1.2
+        aliases:
+          - fhir
+    depends_on:
+      - app
+
+  app:
+    build: ../../dsf-fhir/dsf-fhir-server-jetty/docker
+    image: datasharingframework/fhir
+    restart: "no"
+    ports:
+      - 127.0.0.1:5001:5001
+    secrets:
+      - db_liquibase.password
+      - db_user.password
+      - db_user_permanent_delete.password
+      - root_ca.crt
+      - bpe.crt
+      - bpe.key
+      - ca_chain.crt
+    volumes:
+      - type: bind
+        source: ./conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
+        read_only: true
+      - type: bind
+        source: ./log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
+      DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_user_permanent_delete.password
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/bpe.crt
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/bpe.key
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD: 'password'
+      DEV_DSF_FHIR_SERVER_UI_THEME: dev
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://fhir/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_Organization
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
+            dsf-role:
+              - CREATE: [Task]
+              - READ
+              - UPDATE: [QuestionnaireResponse]
+              - SEARCH
+              - HISTORY
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/ca_chain.crt
+    networks:
+      frontend:
+        ipv4_address: 172.28.1.11
+      backend:
+        ipv4_address: 172.28.1.18
+    depends_on:
+      - db
+
+  db:
+    image: postgres:18
+    restart: "no"
+#    ports:
+#      - 127.0.0.1:5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquibase_user -d fhir"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      TZ: Europe/Berlin
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      POSTGRES_USER: liquibase_user
+      POSTGRES_DB: fhir
+    networks:
+      backend:
+        ipv4_address: 172.28.1.19
+    secrets:
+      - db_liquibase.password
+
+secrets:
+  fhir.crt:
+    file: ./secrets/fhir.crt
+  fhir.key.plain:
+    file: ./secrets/fhir.key.plain
+  bpe.crt:
+    file: ./secrets/bpe.crt
+  bpe.key:
+    file: ./secrets/bpe.key
+  issuing_ca.crt:
+    file: ./secrets/issuing_ca.crt
+  root_ca.crt:
+    file: ./secrets/root_ca.crt
+  ca_chain.crt:
+    file: ./secrets/ca_chain.crt
+
+  db_liquibase.password:
+    file: ./secrets/db_liquibase.password
+  db_user.password:
+    file: ./secrets/db_user.password
+  db_user_permanent_delete.password:
+    file: ./secrets/db_user_permanent_delete.password
+
+networks:
+  frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.8/29
+  backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.16/29
+  bpe:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.0/29

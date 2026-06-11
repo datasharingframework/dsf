@@ -1,0 +1,16 @@
+[Unit]
+Description=DSF FHIR Proxy
+PartOf=dsf-fhir.target
+After=dsf-app.service
+
+[Kube]
+Yaml=%h/.config/containers/systemd/dsf-proxy.yaml
+ConfigMap=%h/.config/containers/systemd/dsf-ssl-cert.yaml
+Network=dsf-frontend.network
+Network=dsf-backend.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=dsf-fhir.target
