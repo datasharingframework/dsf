@@ -1,0 +1,302 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dsf-fhir-db-passwords
+type: Opaque
+stringData:
+  db_liquibase.password: "v4smzLRUKvQPHStp5WHMRhhdcV4GWkuPGvcq8unKa8CEhTmUTDyMWd62tHdHgwhf"
+  db_user.password: "xTZkzduUjYw3Bk7XQ4hYi2cRbunDAdNT"
+  db_user_permanent_delete.password: "aPBRCNJZkfbf46Fh9YE4MDG5X3vDBMca"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dsf-fhir-proxy
+  labels:
+    app: dsf-fhir-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dsf-fhir-proxy
+  template:
+    metadata:
+      labels:
+        app: dsf-fhir-proxy
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: proxy
+          image: datasharingframework/fhir_proxy
+          env:
+            - name: TZ
+              value: "Europe/Berlin"
+            - name: HTTPS_SERVER_NAME_PORT
+              value: "localhost:443"
+            - name: APP_SERVER_IP
+              value: "dsf-fhir-app"
+            - name: SSL_CERTIFICATE_FILE
+              value: "/run/secrets/fhir.crt"
+            - name: SSL_CERTIFICATE_KEY_FILE
+              value: "/run/secrets/fhir.key.plain"
+            - name: SSL_CERTIFICATE_CHAIN_FILE
+              value: "/run/secrets/issuing_ca.crt"
+            - name: SSL_CA_CERTIFICATE_FILE
+              value: "/run/secrets/ca_chain.crt"
+            - name: SSL_CA_DN_REQUEST_FILE
+              value: "/run/secrets/issuing_ca.crt"
+            - name: SSL_EXPECTED_CLIENT_I_DN_CN_VALUES
+              value: "'DSF Dev Issuing CA'"
+          ports:
+            - containerPort: 80
+              hostPort: 80
+              hostIP: 127.0.0.1
+            - containerPort: 443
+              hostPort: 443
+              hostIP: 127.0.0.1
+          volumeMounts:
+            - name: fhir-crt
+              mountPath: /run/secrets/fhir.crt
+              subPath: fhir.crt
+              readOnly: true
+            - name: fhir-key-plain
+              mountPath: /run/secrets/fhir.key.plain
+              subPath: fhir.key.plain
+              readOnly: true
+            - name: issuing-ca-crt
+              mountPath: /run/secrets/issuing_ca.crt
+              subPath: issuing_ca.crt
+              readOnly: true
+            - name: ca-chain-crt
+              mountPath: /run/secrets/ca_chain.crt
+              subPath: ca_chain.crt
+              readOnly: true
+      volumes:
+        - name: fhir-crt
+          hostPath:
+            path: ./secrets/fhir.crt
+            type: File
+        - name: fhir-key-plain
+          hostPath:
+            path: ./secrets/fhir.key.plain
+            type: File
+        - name: issuing-ca-crt
+          hostPath:
+            path: ./secrets/issuing_ca.crt
+            type: File
+        - name: ca-chain-crt
+          hostPath:
+            path: ./secrets/ca_chain.crt
+            type: File
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dsf-fhir-app-config
+data:
+  application.yml: |
+    dev:
+      dsf:
+        fhir:
+          db:
+            url: jdbc:postgresql://dsf-fhir-db/fhir
+            liquibase:
+              password:
+                file: /run/secrets/db_liquibase.password
+            user:
+              password:
+                file: /run/secrets/db_user.password
+              permanent:
+                delete:
+                  password:
+                    file: /run/secrets/db_user_permanent_delete.password
+          client:
+            trust:
+              server:
+                certificate:
+                  cas: /run/secrets/root_ca.crt
+          server:
+            ui:
+              theme: dev
+            base:
+              url: https://dsf-fhir-proxy/fhir
+            organization:
+              identifier:
+                value: Test_Organization
+            roleconfig: |
+              - webbrowser_test_user:
+                  thumbprint: ${WEBBROWSER_TEST_USER_THUMBPRINT}
+                  dsf-role:
+                    - CREATE: [Task]
+                    - READ
+                    - UPDATE: [QuestionnaireResponse]
+                    - SEARCH
+                    - HISTORY
+                  practitioner-role:
+                    - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
+        server:
+          auth:
+            trust:
+              client:
+                certificate:
+                  cas: /run/secrets/ca_chain.crt
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dsf-fhir-app
+  labels:
+    app: dsf-fhir-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dsf-fhir-app
+  template:
+    metadata:
+      labels:
+        app: dsf-fhir-app
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: app
+          image: datasharingframework/fhir
+          ports:
+            - containerPort: 5001
+              hostPort: 5001
+              hostIP: 127.0.0.1
+          env:
+            - name: TZ
+              value: "Europe/Berlin"
+            - name: EXTRA_JVM_ARGS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001"
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/config/application.yml"
+            # Diese drei stehen in Konflikt mit dev.dsf.fhir.client.certificate.private.*
+            # (Scalar vs. verschachtelter Key unter demselben Parent) und bleiben daher als ENV:
+            - name: DEV_DSF_FHIR_CLIENT_CERTIFICATE
+              value: "/run/secrets/bpe.crt"
+            - name: DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY
+              value: "/run/secrets/bpe.key"
+            - name: DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD
+              value: "password"
+          volumeMounts:
+            - name: spring-application-config
+              mountPath: /config
+              readOnly: true
+            - name: bundle-xml
+              mountPath: /opt/fhir/conf/bundle.xml
+              subPath: bundle.xml
+              readOnly: true
+            - name: fhir-log
+              mountPath: /opt/fhir/log
+            - name: db-passwords
+              mountPath: /run/secrets/db_liquibase.password
+              subPath: db_liquibase.password
+              readOnly: true
+            - name: db-passwords
+              mountPath: /run/secrets/db_user.password
+              subPath: db_user.password
+              readOnly: true
+            - name: db-passwords
+              mountPath: /run/secrets/db_user_permanent_delete.password
+              subPath: db_user_permanent_delete.password
+              readOnly: true
+            - name: root-ca-crt
+              mountPath: /run/secrets/root_ca.crt
+              subPath: root_ca.crt
+              readOnly: true
+            - name: bpe-crt
+              mountPath: /run/secrets/bpe.crt
+              subPath: bpe.crt
+              readOnly: true
+            - name: bpe-key
+              mountPath: /run/secrets/bpe.key
+              subPath: bpe.key
+              readOnly: true
+            - name: ca-chain-crt
+              mountPath: /run/secrets/ca_chain.crt
+              subPath: ca_chain.crt
+              readOnly: true
+      volumes:
+        - name: spring-application-config
+          configMap:
+            name: dsf-fhir-app-config
+        - name: bundle-xml
+          hostPath:
+            path: ./conf/bundle.xml
+            type: File
+        - name: fhir-log
+          hostPath:
+            path: ./log
+            type: Directory
+        - name: root-ca-crt
+          hostPath:
+            path: ./secrets/root_ca.crt
+            type: File
+        - name: bpe-crt
+          hostPath:
+            path: ./secrets/bpe.crt
+            type: File
+        - name: bpe-key
+          hostPath:
+            path: ./secrets/bpe.key
+            type: File
+        - name: ca-chain-crt
+          hostPath:
+            path: ./secrets/ca_chain.crt
+            type: File
+        - name: db-passwords
+          secret:
+            secretName: dsf-fhir-db-passwords
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dsf-fhir-db
+  labels:
+    app: dsf-fhir-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dsf-fhir-db
+  template:
+    metadata:
+      labels:
+        app: dsf-fhir-db
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: db
+          image: docker.io/library/postgres:18
+          env:
+            - name: TZ
+              value: "Europe/Berlin"
+            - name: POSTGRES_PASSWORD_FILE
+              value: "/run/secrets/db_liquibase.password"
+            - name: POSTGRES_USER
+              value: "liquibase_user"
+            - name: POSTGRES_DB
+              value: "fhir"
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - liquibase_user
+                - -d
+                - fhir
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          volumeMounts:
+            - name: db-passwords
+              mountPath: /run/secrets/db_liquibase.password
+              subPath: db_liquibase.password
+              readOnly: true
+      volumes:
+        - name: db-passwords
+          secret:
+            secretName: dsf-fhir-db-passwords

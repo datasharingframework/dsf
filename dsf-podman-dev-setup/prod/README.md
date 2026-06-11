@@ -1,5 +1,8 @@
 # DSF Kube
 
+> [!NOTE]
+> This is currently being refactored and not all changes are well tested together. This will be changed, when we have a development setup.
+
 A rootless Podman setup for the Data Sharing Framework (DSF), designed as an intermediate step towards Kubernetes. It uses native Quadlet integration into systemd and Kubernetes-compatible YAML manifests.
 
 ## Improvements over the original Docker Compose setup
@@ -252,25 +255,7 @@ systemctl --user restart dsf-bpe-app.service
 
 ---
 
-## Roadmap
-
-1. **Multiline config as mounted YAML** — Load Spring Boot configuration as a mounted `config.yaml` instead of environment variables for better readability of multiline values such as role configurations:
-   ```yaml
-   - name: spring-application-config
-     mountPath: /config
-   ```
-
-2. **Unified naming** — Avoid duplicate names between BPE and FHIR to support single-instance dev setups.
-
-3. **Migrate to Deployments** — Replace `kind: Pod` with `kind: Deployment` (replicas: 1) for a smoother migration path to Kubernetes.
-
-4. **One secret per password** — Currently all DB passwords are bundled in a single Kubernetes Secret. Splitting them improves least-privilege access.
-
-5. **Unprivileged proxy port** — Find a solution that avoids the `net.ipv4.ip_unprivileged_port_start=80` sysctl requirement, e.g. by using a higher container port with host port mapping or a setcap-based approach.
-
----
-
-### Kubernetes Migration Notes
+## Kubernetes Migration Notes
 
 The Kubernetes YAML files under `dsf-fhir` and `dsf-bpe` can be used as a starting point for a Kubernetes deployment with minor additions:
 
@@ -279,6 +264,7 @@ The Kubernetes YAML files under `dsf-fhir` and `dsf-bpe` can be used as a starti
 - Replace `hostPort` with a proper `Service` of type `LoadBalancer` or `NodePort`
 - Consider a sidecar or init container approach for process plugins
 - Instead of deploying plugins as jar files via bind-mount, publish them as OCI images and mount them into the container.
+- use one secret per password -> least privilege
 
 ### Notes on certificate handling
 

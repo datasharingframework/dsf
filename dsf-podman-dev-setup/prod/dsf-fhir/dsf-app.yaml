@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dsf-fhir-config
+data:
+  application.yml: |
+    dev:
+      dsf:
+        fhir:
+          db:
+            url: jdbc:postgresql://dsf-db/fhir
+            liquibase:
+              password:
+                file: /run/secrets/db/db_liquibase.password
+            user:
+              password:
+                file: /run/secrets/db/db_user.password
+              permanent:
+                delete:
+                  password:
+                    file: /run/secrets/db/db_user_permanent_delete.password
+          client:
+            certificate: /run/secrets/cert/client_certificate.pem
+              private:
+                key: /run/secrets/cert/client_certificate_private_key.pem
+                password:
+                  file: /run/secrets/cert/client_certificate_private_key.pem.password
+          server:
+            organization:
+              identifier:
+                value: "todo.organization.com"
+                # TODO specify the SHA-512 thumbprint of the Client-Certificate as lower case HEX (Regex: ^[a-f0-9]{128}$)
+                # certtool --fingerprint --hash=sha512 --infile=client_certificate.pem
+                # or simply get it from allowlist management tool
+              thumbprint: ""
+            base:
+              # TODO specify the base url of this DSF FHIR server
+              url: https://dsf.todo.organization.com/fhir
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dsf-app
+  labels:
+    app: dsf-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dsf-app
+  template:
+    metadata:
+      labels:
+        app: dsf-app
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: dsf-app
+          image: ghcr.io/datasharingframework/fhir:2.1.0
+          env:
+            - name: TZ
+              value: Europe/Berlin
+          volumeMounts:
+            - name: db-passwords
+              mountPath: /run/secrets/db
+              readOnly: true
+            - name: client-cert
+              mountPath: /run/secrets/cert
+              readOnly: true
+            - name: spring-application-config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: db-passwords
+          secret:
+            secretName: dsf-fhir-passwords
+        - name: client-cert
+          configMap:
+            name: dsf-client-cert
+        - name: spring-application-config
+          configMap:
+            name: dsf-fhir-config
