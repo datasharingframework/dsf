@@ -31,10 +31,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import dev.dsf.maven.exception.RuntimeIOException;
 
 /**
- * Generates certificates for a local DSF development setup.
+ * Generates certificates and other files for a local DSF development setup.
  * <p>
  * This goal creates all required certificate files (client, server, CA chain) and copies them to the configured target
  * directories.
+ * <p>
+ * Arbitrary files can be used as templates to fill in certificate thumbprints, private / public key pairs can be
+ * generated.
  */
 @Mojo(name = "generate-dev-setup-cert-files", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true, aggregator = true)
 public class GenerateDevSetupCertFilesMojo extends AbstractMojo
@@ -58,6 +61,12 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 	private File certDir;
 
 	/**
+	 * The directory to write the generated key files to.
+	 */
+	@Parameter(required = true, property = "dsf.keyDir", defaultValue = "key")
+	private File keyDir;
+
+	/**
 	 * The password to protect the private keys.
 	 */
 	@Parameter(required = true, property = "dsf.privateKeyPassword", defaultValue = "password")
@@ -68,6 +77,12 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 	 */
 	@Parameter
 	private List<Cert> certs;
+
+	/**
+	 * The key-pairs to generate. See <a href="index.html">usage</a> for details.
+	 */
+	@Parameter
+	private List<Key> keys;
 
 	/**
 	 * The root CA configuration.
@@ -99,9 +114,11 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 		getLog().debug("projectBasedir: " + projectBasedir);
 		getLog().debug("encoding: " + encoding);
 		getLog().debug("certDir: " + certDir);
+		getLog().debug("keyDir: " + keyDir);
 		getLog().debug("privateKeyPassword: "
 				+ (privateKeyPassword == null ? null : !privateKeyPassword.isEmpty() ? "***" : ""));
 		getLog().debug("certs: " + certs);
+		getLog().debug("keyss: " + keys);
 		getLog().debug("rootCa: " + rootCa);
 		getLog().debug("issuingCa: " + issuingCa);
 		getLog().debug("caChain: " + caChain);
@@ -121,8 +138,8 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 
 		CertificateGenerator certificateGenerator = new CertificateGenerator(certDir.toPath(),
 				privateKeyPassword.toCharArray(), certs.stream().map(Cert::toCertificationRequestConfig).toList());
-		CertificateWriter certificateWriter = new CertificateWriter(projectBasedir.toPath(), certificateGenerator,
-				privateKeyPassword.toCharArray());
+		CertificateWriter certificateWriter = new CertificateWriter(projectBasedir.toPath(),
+				privateKeyPassword.toCharArray(), certificateGenerator);
 		TemplateHandler templateHandler = new TemplateHandler(projectBasedir.toPath(), certificateGenerator, encoding);
 
 		certificateGenerator.initialize();
@@ -135,6 +152,20 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 			certificateWriter.write(caChain);
 
 			templateHandler.applyTemplates(templates);
+		}
+		catch (RuntimeIOException e)
+		{
+			throw new MojoFailureException(e);
+		}
+
+		KeyGenerator keyGenerator = new KeyGenerator(keyDir.toPath(), privateKeyPassword.toCharArray(), keys);
+		keyGenerator.initialize();
+
+		KeyWriter keyWriter = new KeyWriter(projectBasedir.toPath(), privateKeyPassword.toCharArray(), keyGenerator);
+
+		try
+		{
+			keyWriter.write(keys);
 		}
 		catch (RuntimeIOException e)
 		{

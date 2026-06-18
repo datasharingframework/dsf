@@ -53,7 +53,7 @@ import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import de.hsheilbronn.mi.utils.crypto.io.PemWriter;
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
 
-public class CertificateGenerator
+public class CertificateGenerator extends AbstractGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(CertificateGenerator.class);
 
@@ -109,7 +109,6 @@ public class CertificateGenerator
 		}
 	}
 
-	public static final String POSTFIX_PRIVATE_KEY = ".key";
 	public static final String POSTFIX_CERTIFICATE = ".crt";
 
 	private static final String SUBJECT_C = "DE";
@@ -121,8 +120,6 @@ public class CertificateGenerator
 	private static final CertificationRequestConfig CERTIFICATION_REQUEST_ISSUING_CA = new CertificationRequestConfig(
 			CertificateAuthority::signClientServerIssuingCaCertificate, SUBJECT_CN_ISSUING_CA, null);
 
-	private final Path certDir;
-	private final char[] privateKeyPassword;
 	private final List<CertificationRequestConfig> certificationRequestConfigs = new ArrayList<>();
 
 	private CertificateAuthority rootCa;
@@ -132,11 +129,7 @@ public class CertificateGenerator
 	public CertificateGenerator(Path certDir, char[] privateKeyPassword,
 			List<CertificationRequestConfig> certificationRequestConfigs)
 	{
-		Objects.requireNonNull(certDir, "certDir");
-		Objects.requireNonNull(privateKeyPassword, "privateKeyPassword");
-
-		this.certDir = certDir;
-		this.privateKeyPassword = privateKeyPassword;
+		super(certDir, privateKeyPassword);
 
 		if (certificationRequestConfigs != null)
 			this.certificationRequestConfigs.addAll(certificationRequestConfigs);
@@ -216,11 +209,6 @@ public class CertificateGenerator
 		}
 	}
 
-	private Path toPath(String commonName, String postFix)
-	{
-		return certDir.resolve(commonName.replaceAll(" ", "_") + postFix);
-	}
-
 	private Optional<X509Certificate> readCertificate(String commonName)
 	{
 		Path file = toPath(commonName, POSTFIX_CERTIFICATE);
@@ -235,26 +223,6 @@ public class CertificateGenerator
 		catch (IOException e)
 		{
 			logger.error("Unable to read certificate {}: {} - {}", file.toAbsolutePath().normalize(),
-					e.getClass().getName(), e.getMessage());
-
-			throw new RuntimeException(e);
-		}
-	}
-
-	private Optional<PrivateKey> readPrivateKey(String commonName)
-	{
-		Path file = toPath(commonName, POSTFIX_PRIVATE_KEY);
-
-		if (!Files.isReadable(file))
-			return Optional.empty();
-
-		try
-		{
-			return Optional.of(PemReader.readPrivateKey(file, privateKeyPassword));
-		}
-		catch (IOException e)
-		{
-			logger.error("Unable to read private-key {}: {} - {}", file.toAbsolutePath().normalize(),
 					e.getClass().getName(), e.getMessage());
 
 			throw new RuntimeException(e);
@@ -333,21 +301,6 @@ public class CertificateGenerator
 		}
 	}
 
-	private void writePrivateKey(String commonName, PrivateKey privateKey)
-	{
-		Path file = toPath(commonName, POSTFIX_PRIVATE_KEY);
-
-		try
-		{
-			PemWriter.writePrivateKey(privateKey).asPkcs8().encryptedAes128(privateKeyPassword).toFile(file);
-		}
-		catch (IOException e)
-		{
-			logger.error("Unable to write private-key {}: {} - {}", file.toAbsolutePath().normalize(),
-					e.getClass().getName(), e.getMessage());
-			throw new RuntimeException(e);
-		}
-	}
 
 	private void writeCertificateAndPrivateKey(String commonName, CertificateAndPrivateKey certificateAndPrivateKey)
 	{
