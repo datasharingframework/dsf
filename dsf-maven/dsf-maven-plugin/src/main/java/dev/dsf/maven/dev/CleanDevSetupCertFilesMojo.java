@@ -32,6 +32,9 @@ import dev.dsf.maven.exception.RuntimeIOException;
  * Cleans up certificate files for a local DSF development setup.
  * <p>
  * This goal deletes all generated certificate files (client, server, CA chain) from the configured target directories.
+ * <p>
+ * Use <code>-Ddsf.includeCertDir=true</code> and/or <code>-Ddsf.includeKeyDir=true</code> to also delete the plugin
+ * cache files.
  */
 @Mojo(name = "clean-dev-setup-cert-files", defaultPhase = LifecyclePhase.CLEAN, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true, aggregator = true)
 public class CleanDevSetupCertFilesMojo extends AbstractMojo
@@ -49,10 +52,22 @@ public class CleanDevSetupCertFilesMojo extends AbstractMojo
 	private File certDir;
 
 	/**
+	 * The directory to write the generated key files to.
+	 */
+	@Parameter(required = true, property = "dsf.keyDir", defaultValue = "key")
+	private File keyDir;
+
+	/**
 	 * The certificates to generate. See <a href="index.html">usage</a> for details.
 	 */
 	@Parameter
 	private List<Cert> certs;
+
+	/**
+	 * The key-pairs to generate. See <a href="index.html">usage</a> for details.
+	 */
+	@Parameter
+	private List<Key> keys;
 
 	/**
 	 * The root CA configuration.
@@ -84,19 +99,28 @@ public class CleanDevSetupCertFilesMojo extends AbstractMojo
 	@Parameter(required = true, property = "dsf.includeCertDir", defaultValue = "false")
 	private boolean includeCertDir;
 
+	/**
+	 * Whether to delete the key directory with its contents as well.
+	 */
+	@Parameter(required = true, property = "dsf.includeKeyDir", defaultValue = "false")
+	private boolean includeKeyDir;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
 		getLog().debug("projectBasedir: " + projectBasedir);
 		getLog().debug("certDir: " + certDir);
+		getLog().debug("keyDir: " + keyDir);
 		getLog().debug("certs: " + certs);
+		getLog().debug("keys: " + keys);
 		getLog().debug("rootCa: " + rootCa);
 		getLog().debug("issuingCa: " + issuingCa);
 		getLog().debug("caChain: " + caChain);
 		getLog().debug("templates: " + templates);
 		getLog().debug("includeCertDir: " + includeCertDir);
+		getLog().debug("includeKeyDir: " + includeKeyDir);
 
-		FileRemover fileRemover = new FileRemover(projectBasedir.toPath(), certDir.toPath());
+		FileRemover fileRemover = new FileRemover(projectBasedir.toPath(), certDir.toPath(), keyDir.toPath());
 
 		try
 		{
@@ -105,9 +129,12 @@ public class CleanDevSetupCertFilesMojo extends AbstractMojo
 			fileRemover.delete(issuingCa);
 			fileRemover.delete(caChain);
 			fileRemover.deleteTemplates(templates);
+			fileRemover.deleteKeys(keys);
 
 			if (includeCertDir)
 				fileRemover.deleteFilesInCertDir(certs);
+			if (includeKeyDir)
+				fileRemover.deleteFilesInKeyDir(keys);
 		}
 		catch (RuntimeIOException e)
 		{

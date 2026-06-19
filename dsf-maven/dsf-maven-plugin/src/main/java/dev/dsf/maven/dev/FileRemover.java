@@ -30,13 +30,15 @@ public class FileRemover extends AbstractIo
 {
 	private static final Logger logger = LoggerFactory.getLogger(FileRemover.class);
 
-	private final Path projectBasedir;
 	private final Path certDir;
+	private final Path keyDir;
 
-	public FileRemover(Path projectBasedir, Path certDir)
+	public FileRemover(Path projectBasedir, Path certDir, Path keyDir)
 	{
-		this.projectBasedir = Objects.requireNonNull(projectBasedir, "projectBasedir");
+		super(projectBasedir, null);
+
 		this.certDir = Objects.requireNonNull(certDir, "certDir");
+		this.keyDir = Objects.requireNonNull(keyDir, "keyDir");
 	}
 
 	public void deleteCerts(List<Cert> certs)
@@ -76,6 +78,8 @@ public class FileRemover extends AbstractIo
 				toRuntimeException(() -> delete(target));
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> delete(target));
+			else if (target.getFileName().toString().endsWith(".p12"))
+				toRuntimeException(() -> delete(target));
 			else
 				logger.warn("RootCa target filetype not supported: {}", target.getFileName());
 		});
@@ -92,6 +96,8 @@ public class FileRemover extends AbstractIo
 				toRuntimeException(() -> delete(target));
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> delete(target));
+			else if (target.getFileName().toString().endsWith(".p12"))
+				toRuntimeException(() -> delete(target));
 			else
 				logger.warn("IssuingCa target filetype not supported: {}", target.getFileName());
 		});
@@ -107,6 +113,8 @@ public class FileRemover extends AbstractIo
 			if (target.getFileName().toString().endsWith(".crt"))
 				toRuntimeException(() -> delete(target));
 			else if (target.getFileName().toString().endsWith(".jks"))
+				toRuntimeException(() -> delete(target));
+			else if (target.getFileName().toString().endsWith(".p12"))
 				toRuntimeException(() -> delete(target));
 			else
 				logger.warn("CaChain target filetype not supported: {}", target.getFileName());
@@ -134,7 +142,7 @@ public class FileRemover extends AbstractIo
 		}
 	}
 
-	private Path toPath(String commonName, String postFix)
+	private Path toCertPath(String commonName, String postFix)
 	{
 		return certDir.resolve(commonName.replaceAll(" ", "_") + postFix);
 	}
@@ -147,8 +155,49 @@ public class FileRemover extends AbstractIo
 
 		commonNamesToDelete.forEach(cn ->
 		{
-			toRuntimeException(() -> delete(toPath(cn, CertificateGenerator.POSTFIX_PRIVATE_KEY)));
-			toRuntimeException(() -> delete(toPath(cn, CertificateGenerator.POSTFIX_CERTIFICATE)));
+			toRuntimeException(() -> delete(toCertPath(cn, CertificateGenerator.POSTFIX_PRIVATE_KEY)));
+			toRuntimeException(() -> delete(toCertPath(cn, CertificateGenerator.POSTFIX_CERTIFICATE)));
+		});
+	}
+
+	private Path toKeyPath(String commonName, String postFix)
+	{
+		return keyDir.resolve(commonName.replaceAll(" ", "_") + postFix);
+	}
+
+	public void deleteFilesInKeyDir(List<Key> Keys)
+	{
+		Stream<String> idsToDelete = Keys == null ? Stream.empty()
+				: Keys.stream().map(Key::getId).filter(Objects::nonNull);
+
+		idsToDelete.forEach(id ->
+		{
+			toRuntimeException(() -> delete(toKeyPath(id, KeyGenerator.POSTFIX_PRIVATE_KEY)));
+			toRuntimeException(() -> delete(toKeyPath(id, KeyGenerator.POSTFIX_PUBLIC_KEY)));
+		});
+	}
+
+	public void deleteKeys(List<Key> keys)
+	{
+		if (keys != null)
+			keys.forEach(this::delete);
+	}
+
+	private void delete(Key key)
+	{
+		if (key == null)
+			return;
+
+		key.getTargets().stream().filter(Objects::nonNull).map(File::toPath).forEach(target ->
+		{
+			if (target.getFileName().toString().endsWith(".key"))
+				toRuntimeException(() -> delete(target));
+			else if (target.getFileName().toString().endsWith(".key.plain"))
+				toRuntimeException(() -> delete(target));
+			else if (target.getFileName().toString().endsWith(".pub"))
+				toRuntimeException(() -> delete(target));
+			else
+				logger.warn("Key (id: {}) target filetype not supported: {}", key.getId(), target.getFileName());
 		});
 	}
 }
