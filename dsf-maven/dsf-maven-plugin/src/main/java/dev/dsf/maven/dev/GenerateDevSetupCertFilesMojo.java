@@ -118,7 +118,7 @@ public class GenerateDevSetupCertFilesMojo extends AbstractMojo
 		getLog().debug("privateKeyPassword: "
 				+ (privateKeyPassword == null ? null : !privateKeyPassword.isEmpty() ? "***" : ""));
 		getLog().debug("certs: " + certs);
-		getLog().debug("keyss: " + keys);
+		getLog().debug("keys: " + keys);
 		getLog().debug("rootCa: " + rootCa);
 		getLog().debug("issuingCa: " + issuingCa);
 		getLog().debug("caChain: " + caChain);
