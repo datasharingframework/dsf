@@ -42,9 +42,10 @@
 		<log4j.version>2.26.0</log4j.version>
 		<jetty.version>12.1.10</jetty.version>
 		<tyrus.version>2.2.2</tyrus.version>
-		<spring.version>7.0.7</spring.version>
+		<spring.version>7.0.8</spring.version>
+		<!-- operaton 2.1.2 not compatible with jackson 2.22.0 -->
 		<jackson.version>2.21.4</jackson.version>
-		<operaton.version>2.1.1</operaton.version>
+		<operaton.version>2.1.2</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
@@ -53,7 +54,7 @@
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>6.1.0</crypto-utils.version>
-		<jersey.version.v1>3.1.11</jersey.version.v1>
+		<jersey.version.v1>3.1.12</jersey.version.v1>
 		<jersey.version.v2>4.0.2</jersey.version.v2>
 		<jersey.version>4.0.2</jersey.version>
 		<jakarta.ws.rs.version.v1>3.1.0</jakarta.ws.rs.version.v1>
@@ -589,7 +590,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.9.8.3</version>
+					<version>4.10.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -604,7 +605,7 @@
 				<plugin>
 					<groupId>org.sonatype.central</groupId>
 					<artifactId>central-publishing-maven-plugin</artifactId>
-					<version>0.10.0</version>
+					<version>0.11.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
