@@ -30,6 +30,7 @@ import dev.dsf.bpe.test.fhir.FhirResourceModifierImpl;
 import dev.dsf.bpe.test.listener.StartFieldInjectionTestListener;
 import dev.dsf.bpe.test.listener.StartSendTaskTestListener;
 import dev.dsf.bpe.test.message.ContinueSendTestSend;
+import dev.dsf.bpe.test.message.SendTaskErrorBoundaryEventTestThrow;
 import dev.dsf.bpe.test.message.SendTaskTest;
 import dev.dsf.bpe.test.service.ApiTest;
 import dev.dsf.bpe.test.service.AutowireTest;
@@ -90,13 +91,13 @@ public class Config implements InitializingBean
 		return new ActivityPrototypeBeanCreator(TestActivitySelector.class, ProxyTest.class, ApiTest.class,
 				OrganizationProviderTest.class, EndpointProviderTest.class, FhirClientProviderTest.class,
 				FhirClientConfigProviderTest.class, StartSendTaskTestListener.class, SendTaskTest.class,
-				StartFieldInjectionTestListener.class, FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class,
-				ErrorBoundaryEventTestVerify.class, ExceptionTest.class, CompressionServiceTest.class,
-				ContinueSendTest.class, ContinueSendTestSend.class, ContinueSendTestEvaluate.class,
-				JsonVariableTestSet.class, JsonVariableTestGet.class, CryptoServiceTest.class,
-				MimeTypeServiceTest.class, FhirBinaryVariableTestSet.class, FhirBinaryVariableTestGet.class,
-				DsfClientTest.class, TargetProviderTest.class, DataLoggerTest.class, AutowireTest.class,
-				QuestionnaireTestAnswer.class, QuestionnaireTestAnswerCheck.class,
+				SendTaskErrorBoundaryEventTestThrow.class, StartFieldInjectionTestListener.class,
+				FieldInjectionTest.class, ErrorBoundaryEventTestThrow.class, ErrorBoundaryEventTestVerify.class,
+				ExceptionTest.class, CompressionServiceTest.class, ContinueSendTest.class, ContinueSendTestSend.class,
+				ContinueSendTestEvaluate.class, JsonVariableTestSet.class, JsonVariableTestGet.class,
+				CryptoServiceTest.class, MimeTypeServiceTest.class, FhirBinaryVariableTestSet.class,
+				FhirBinaryVariableTestGet.class, DsfClientTest.class, TargetProviderTest.class, DataLoggerTest.class,
+				AutowireTest.class, QuestionnaireTestAnswer.class, QuestionnaireTestAnswerCheck.class,
 				QuestionnaireTestSetIdentifies.class);
 	}
 

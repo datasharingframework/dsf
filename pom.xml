@@ -52,7 +52,7 @@
 		<bouncycastle.version>1.84</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
-		<crypto-utils.version>6.0.0</crypto-utils.version>
+		<crypto-utils.version>6.1.0</crypto-utils.version>
 		<jersey.version.v1>3.1.11</jersey.version.v1>
 		<jersey.version.v2>4.0.2</jersey.version.v2>
 		<jersey.version>4.0.2</jersey.version>

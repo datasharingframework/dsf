@@ -63,6 +63,7 @@ Generates certificates and keys for local DSF development setups (e.g. FHIR, BPE
 
 * Creates Root, Issuing, and CA Chain certificates
 * Generates client/server certificates
+* Generate key pairs
 * Copies files to configured target locations
 * Create configuration files through templates
 * Supports optional cleanup via `clean-dev-setup-cert-files`
@@ -171,7 +172,7 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
 </plugin>
 ```
 
-### Example 2: Configuration for Dev Setup Certificates
+### Example 2: Configuration for Dev Setup Certificates and Related Files
 
 ```xml
 <plugin>
@@ -248,6 +249,10 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                         <target>dsf-docker-dev-setup/fhir/secrets/root_ca.crt</target>
                         <target>dsf-docker-dev-setup-3dic-ttp/secrets/root_ca.crt</target>
                         <target>dsf-fhir/dsf-fhir-server-jetty/cert/root_ca.crt</target>
+                        <!-- the root CA as a jks keystore -->
+                        <target>root_ca.jks</target>
+                        <!-- the root CA as a pkcs12 keystore -->
+                        <target>root_ca.p12</target>
                     </targets>
                 </rootCa>
                 <issuingCa>
@@ -257,19 +262,25 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                         <target>dsf-docker-dev-setup/bpe/secrets/issuing_ca.crt</target>
                         <target>dsf-docker-dev-setup/fhir/secrets/issuing_ca.crt</target>
                         <target>dsf-docker-dev-setup-3dic-ttp/secrets/issuing_ca.crt</target>
-                        <!-- additionally create a Java KeyStore for Keycloak truststore -->
-                        <target>dsf-docker-dev-setup-3dic-ttp/secrets/keycloak_trust_store.jks</target>
                         <target>dsf-fhir/dsf-fhir-server-jetty/cert/issuing_ca.crt</target>
+                        <!-- the issuing CA as a jks keystore -->
+                        <target>issuing_ca.jks</target>
+                        <!-- the issuing CA as a pkcs12 keystore -->
+                        <target>issuing_ca.p12</target>
                     </targets>
                 </issuingCa>
                 <caChain>
                     <targets>
-                        <!-- the CA chain files can be written to multiple places as well -->
+                        <!-- the CA chain files (root CA and issuing CA) can be written to multiple places as well -->
                         <target>dsf-bpe/dsf-bpe-server-jetty/cert/ca_chain.crt</target>
                         <target>dsf-docker-dev-setup/bpe/secrets/ca_chain.crt</target>
                         <target>dsf-docker-dev-setup/fhir/secrets/ca_chain.crt</target>
                         <target>dsf-docker-dev-setup-3dic-ttp/secrets/ca_chain.crt</target>
                         <target>dsf-fhir/dsf-fhir-server-jetty/cert/ca_chain.crt</target>
+                        <!-- the CA chain as a jks keystore -->
+                        <target>ca_chain.jks</target>
+                        <!-- the CA chain as a pkcs12 keystore -->
+                        <target>ca_chain.p12</target>
                     </targets>
                 </caChain>
                 <templates>
@@ -282,6 +293,26 @@ mvn dsf:help -Ddetail=true -Dgoal=generate-dev-setup-cert-files
                     </template>
                     <!-- you can add multiple templates as needed -->
                 </templates>
+                <keys>
+                    <key>
+                        <id>foo</id>
+                        <!-- supported types: RSA1024, RSA2048, RSA3072, RSA4096, SECP256R1, SECP384R1, SECP521R1, ED25519, ED448, X25519, X448 ->
+                        <type>RSA4096</type>
+                        <!-- the private- and public-keys can be written to multiple places -->
+                        <targets>
+                            <!-- output format for the private-key is a PKCS8 AES-128 encrypted PEM file -->
+                            <target>docker-dev-setup/secrets/foo.key</target>
+                            <!-- password for the protected key -->
+                            <target>docker-dev-setup/secrets/foo.key.password</target>
+                            <!-- output format for the private-key is a plain PEM file without password -->
+                            <target>docker-dev-setup/secrets/foo.key.plain</target>
+                            <!-- output format for the public-key is a plain PEM file -->
+                            <target>docker-dev-setup/secrets/foo.pub</target>
+                            <!-- output format for the public-key is a plain PEM file -->
+                            <target>second/location/foo.pub</target>
+                        </targets>
+                    </key>
+                </keys>
             </configuration>
             <inherited>false</inherited>
         </execution>
@@ -297,6 +328,9 @@ DIC1_THUMBPRINT=${dic1.thumbprint}
 DIC2_THUMBPRINT=${dic2.thumbprint}
 DIC3_THUMBPRINT=${dic3.thumbprint}
 ```
+
+Templates can be used to insert certificate SHA-512 thumbprints. Syntax: `${cn.thumbprint}` with `cn` as configured in the pom.
+
 ---
 
 ## Configuration
@@ -305,11 +339,12 @@ All goals support configuration through plugin parameters in the POM or system p
 
 Common parameters include:
 
-| Parameter           | Description                                                           | Default                                      |
-| ------------------- | --------------------------------------------------------------------- | -------------------------------------------- |
-| `certFolder`        | Root folder containing certificate resources                          | `${project.basedir}/src/main/resources/cert` |
-| `configDocPackages` | Package list to scan for annotated DSF configuration classes          | —                                            |
-| `includeCertDir`    | Whether to remove the original certificate directory when cleaning up | `false`                                      |
+| Parameter                  | Description                                                           | Default                                      |
+| -------------------------- | --------------------------------------------------------------------- | ---------------------------------------------|
+| `dsf.configDocPackages`    | Package list to scan for annotated DSF configuration classes          | —                                            |
+| `dsf.certFolder`           | Root folder containing certificate resources                          | `${project.basedir}/src/main/resources/cert` |
+| `dsf.includeCertDir`       | Whether to remove the original certificate directory when cleaning up | `false`                                      |
+| `dsf.includeKeyDir`        | Whether to remove the original key pair directory when cleaning up    | `false`                                      |
 
 Refer to [Plugin Details](plugin-info.html) for the complete parameter list.
 
@@ -324,7 +359,7 @@ This plugin is used by various DSF components, including:
 * **dsf-bpe-test-plugin-v1/v2**
 * **dsf-fhir-validation**
 
-It can be included your process plugins to build documentation and help using your dev setup.
+It can be included in process plugins repositories to build documentation and help create DSF dev setups.
 
 ---
 
