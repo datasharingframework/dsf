@@ -247,7 +247,13 @@ public class CertificateGenerator extends AbstractGenerator
 		Optional<PrivateKey> key = readPrivateKey(commonName);
 		if (key.isEmpty())
 		{
-			logger.debug("Private-Key for '{}' not found", commonName);
+			logger.debug("Private-key for '{}' not found", commonName);
+			return Optional.empty();
+		}
+
+		if (key.isPresent() && !KeyPairValidator.isSecp384r1(key.get()))
+		{
+			logger.debug("Private-key type for '{}' not Secp384r1", commonName);
 			return Optional.empty();
 		}
 

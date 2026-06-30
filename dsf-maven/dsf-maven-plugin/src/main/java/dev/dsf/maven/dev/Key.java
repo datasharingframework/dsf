@@ -16,43 +16,49 @@
 package dev.dsf.maven.dev;
 
 import java.io.File;
+import java.security.AsymmetricKey;
 import java.util.List;
+import java.util.function.Predicate;
 
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairGeneratorFactory;
+import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
 
 public class Key
 {
 	public static enum Type
 	{
-		RSA1024(KeyPairGeneratorFactory.rsa1024(), "RSA 1024"),
+		RSA1024(KeyPairGeneratorFactory.rsa1024(), "RSA 1024", KeyPairValidator::isRsa1024),
 
-		RSA2048(KeyPairGeneratorFactory.rsa2048(), "RSA 2048"),
+		RSA2048(KeyPairGeneratorFactory.rsa2048(), "RSA 2048", KeyPairValidator::isRsa2048),
 
-		RSA3072(KeyPairGeneratorFactory.rsa3072(), "RSA 3072"),
+		RSA3072(KeyPairGeneratorFactory.rsa3072(), "RSA 3072", KeyPairValidator::isRsa3072),
 
-		RSA4096(KeyPairGeneratorFactory.rsa4096(), "RSA 4096"),
+		RSA4096(KeyPairGeneratorFactory.rsa4096(), "RSA 4096", KeyPairValidator::isRsa4096),
 
-		SECP256R1(KeyPairGeneratorFactory.secp256r1(), "Secp256r1"),
+		SECP256R1(KeyPairGeneratorFactory.secp256r1(), "Secp256r1", KeyPairValidator::isSecp256r1),
 
-		SECP384R1(KeyPairGeneratorFactory.secp384r1(), "Secp384r1"),
+		SECP384R1(KeyPairGeneratorFactory.secp384r1(), "Secp384r1", KeyPairValidator::isSecp384r1),
 
-		SECP521R1(KeyPairGeneratorFactory.secp521r1(), "Secp521r1"),
+		SECP521R1(KeyPairGeneratorFactory.secp521r1(), "Secp521r1", KeyPairValidator::isSecp521r1),
 
-		ED25519(KeyPairGeneratorFactory.ed25519(), "ED25519"),
+		ED25519(KeyPairGeneratorFactory.ed25519(), "ED25519", KeyPairValidator::isEd25519),
 
-		ED448(KeyPairGeneratorFactory.ed448(), "ED448"),
+		ED448(KeyPairGeneratorFactory.ed448(), "ED448", KeyPairValidator::isEd448),
 
-		X25519(KeyPairGeneratorFactory.x25519(), "X25519"),
+		X25519(KeyPairGeneratorFactory.x25519(), "X25519", KeyPairValidator::isX25519),
 
-		X448(KeyPairGeneratorFactory.x448(), "X448");
+		X448(KeyPairGeneratorFactory.x448(), "X448", KeyPairValidator::isX448);
 
 		private final KeyPairGeneratorFactory keyPairGeneratorFactory;
 		private final String keyType;
+		private final Predicate<AsymmetricKey> isKeyType;
 
-		private Type(KeyPairGeneratorFactory keyPairGeneratorFactory, String keyType)
+		private Type(KeyPairGeneratorFactory keyPairGeneratorFactory, String keyType,
+				Predicate<AsymmetricKey> isKeyType)
 		{
 			this.keyPairGeneratorFactory = keyPairGeneratorFactory;
 			this.keyType = keyType;
+			this.isKeyType = isKeyType;
 		}
 
 		public KeyPairGeneratorFactory getKeyPairGeneratorFactory()
@@ -63,6 +69,11 @@ public class Key
 		public String getKeyType()
 		{
 			return keyType;
+		}
+
+		public boolean isKeyType(AsymmetricKey key)
+		{
+			return isKeyType.test(key);
 		}
 	}
 
