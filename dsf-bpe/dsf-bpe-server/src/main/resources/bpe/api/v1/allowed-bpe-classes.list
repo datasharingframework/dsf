@@ -16,6 +16,7 @@
 
 com.fasterxml.jackson
 com.google.common
+com.sun.mail
 dev.dsf.bpe.api
 jakarta.activation
 jakarta.inject
@@ -33,6 +34,7 @@ org.operaton.bpm.engine.impl.variable.serializer
 org.operaton.bpm.engine.ProcessEngine
 org.operaton.bpm.engine.RuntimeService
 org.operaton.bpm.engine.variable
+org.operaton.bpm.model.bpmn.impl
 org.operaton.bpm.model.bpmn.instance
 org.joda.time
 org.glassfish.jersey
