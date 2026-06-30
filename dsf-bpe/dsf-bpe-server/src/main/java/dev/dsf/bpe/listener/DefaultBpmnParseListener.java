@@ -150,7 +150,7 @@ public class DefaultBpmnParseListener implements BpmnParseListener, ProcessPlugi
 			ProcessIdAndVersion processKeyAndVersion = new ProcessIdAndVersion(e.getProcessDefinition().getKey(),
 					e.getProcessDefinition().getVersionTag());
 
-			getPlugin(processKeyAndVersion).getPluginMdc().executeWithProcessMdc(execution, delegate::notify);
+			getPlugin(processKeyAndVersion).getPluginContext().executeWithProcessContext(execution, delegate::notify);
 		};
 	}
 }

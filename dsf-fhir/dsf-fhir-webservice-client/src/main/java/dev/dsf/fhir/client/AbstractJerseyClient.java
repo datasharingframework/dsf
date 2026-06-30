@@ -24,7 +24,7 @@ import java.util.logging.Level;
 import javax.net.ssl.SSLContext;
 
 import org.glassfish.jersey.SslConfigurator;
-import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.apache5.connector.Apache5ConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
@@ -77,7 +77,7 @@ public class AbstractJerseyClient
 			builder = builder.sslContext(sslContext);
 
 		ClientConfig config = new ClientConfig();
-		config.connectorProvider(new ApacheConnectorProvider());
+		config.connectorProvider(new Apache5ConnectorProvider());
 		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
 		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
 		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));

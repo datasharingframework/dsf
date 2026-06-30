@@ -118,7 +118,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.forEach(name -> Configurator.setLevel(name, Level.DEBUG));
 
 		List<ProcessPlugin> plugins = removeDuplicates(
-				loadedPlugins.stream().filter(p -> p.getPluginMdc().executeWithPluginMdc(
+				loadedPlugins.stream().filter(p -> p.getPluginContext().executeWithPluginContext(
 						() -> p.initializeAndValidateResources(localOrganizationIdentifierValue.orElse(null)))));
 
 		if (plugins.isEmpty())
@@ -224,7 +224,7 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 				.filter(c -> EnumSet.of(ProcessState.ACTIVE, ProcessState.DRAFT).contains(c.getNewProcessState()))
 				.map(ProcessStateChangeOutcome::getProcessKeyAndVersion).collect(Collectors.toSet());
 
-		plugins.stream().forEach(p -> p.getPluginMdc().executeWithPluginMdc(
+		plugins.stream().forEach(p -> p.getPluginContext().executeWithPluginContext(
 				() -> p.getProcessPluginDeploymentListener().onProcessesDeployed(activeProcesses)));
 	}
 

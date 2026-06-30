@@ -48,7 +48,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.StreamingOutput;
-import net.sf.saxon.lib.FeatureKeys;
 
 @RolesAllowed("ADMIN")
 @Path(ProcessService.PATH)
@@ -72,7 +71,6 @@ public class ProcessService extends AbstractService implements InitializingBean
 		try
 		{
 			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			transformerFactory.setFeature(FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, false);
 		}
 		catch (TransformerConfigurationException e)
 		{

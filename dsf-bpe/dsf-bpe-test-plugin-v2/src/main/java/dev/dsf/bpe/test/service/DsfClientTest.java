@@ -172,7 +172,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 		Optional<DsfClient> client = api.getDsfClientProvider().getById("test-fhir-data-server");
 		expectTrue(client.isPresent());
 
-		CompletableFuture<Bundle> fBundle = client.get().searchAsync(client.get().getBaseUrl() + "/Patient");
+		CompletableFuture<Bundle> fBundle = client.get().searchAsync(client.get().getBaseUrl() + "Patient");
 		expectNotNull(fBundle);
 
 		Bundle bundle = fBundle.get();
@@ -201,7 +201,7 @@ public class DsfClientTest extends AbstractTest implements ServiceTask
 		expectTrue(client.isPresent());
 
 		CompletableFuture<Bundle> fBundle = client.get()
-				.searchAsyncWithStrictHandling(client.get().getBaseUrl() + "/Patient");
+				.searchAsyncWithStrictHandling(client.get().getBaseUrl() + "Patient");
 		expectNotNull(fBundle);
 
 		Bundle bundle = fBundle.get();

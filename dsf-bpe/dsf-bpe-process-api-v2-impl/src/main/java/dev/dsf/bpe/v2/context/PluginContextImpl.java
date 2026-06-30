@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.bpe.v1.logging;
+package dev.dsf.bpe.v2.context;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -26,11 +26,11 @@ import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 
 import dev.dsf.bpe.api.Constants;
-import dev.dsf.bpe.api.logging.AbstractPluginMdc;
-import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
-import dev.dsf.bpe.v1.variables.Variables;
+import dev.dsf.bpe.api.context.AbstractPluginContext;
+import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
+import dev.dsf.bpe.v2.variables.Variables;
 
-public class PluginMdcImpl extends AbstractPluginMdc
+public class PluginContextImpl extends AbstractPluginContext
 {
 	private final String serverBaseUrl;
 	private final Function<DelegateExecution, Variables> variablesFactory;
@@ -43,15 +43,17 @@ public class PluginMdcImpl extends AbstractPluginMdc
 	 *            not <code>null</code>
 	 * @param jar
 	 *            not <code>null</code>
+	 * @param pluginClassLoader
+	 *            not <code>null</code>
 	 * @param serverBaseUrl
 	 *            not <code>null</code>
 	 * @param variablesFactory
 	 *            not <code>null</code>
 	 */
-	public PluginMdcImpl(int apiVersion, String name, String version, String jar, String serverBaseUrl,
-			Function<DelegateExecution, Variables> variablesFactory)
+	public PluginContextImpl(int apiVersion, String name, String version, String jar, ClassLoader pluginClassLoader,
+			String serverBaseUrl, Function<DelegateExecution, Variables> variablesFactory)
 	{
-		super(apiVersion, name, version, jar);
+		super(apiVersion, name, version, jar, pluginClassLoader);
 
 		this.serverBaseUrl = Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 		this.variablesFactory = Objects.requireNonNull(variablesFactory, "variablesFactory");
@@ -64,7 +66,7 @@ public class PluginMdcImpl extends AbstractPluginMdc
 
 		Task startTask = variables.getStartTask();
 		if (startTask == null)
-			startTask = variables.getResource(Constants.TASK_VARIABLE);
+			startTask = variables.getFhirResource(Constants.TASK_VARIABLE);
 
 		Task latestTask = variables.getLatestTask();
 		if (startTask == latestTask)

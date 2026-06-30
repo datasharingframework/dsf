@@ -37,6 +37,16 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>${hapi.fhir.version.v2}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.opentelemetry</groupId>
+					<artifactId>opentelemetry-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry.instrumentation</groupId>
+					<artifactId>opentelemetry-instrumentation-annotations</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -47,16 +57,51 @@
 					<artifactId>commons-logging</artifactId>
 					<groupId>commons-logging</groupId>
 				</exclusion>
+				<exclusion>
+					<groupId>net.sf.saxon</groupId>
+					<artifactId>Saxon-HE</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.ogce</groupId>
+					<artifactId>xpp3</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry.instrumentation</groupId>
+					<artifactId>opentelemetry-instrumentation-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.xerial</groupId>
+					<artifactId>sqlite-jdbc</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.sourceforge.plantuml</groupId>
+					<artifactId>plantuml-mit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.commonmark</groupId>
+					<artifactId>commonmark</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.commonmark</groupId>
+					<artifactId>commonmark-ext-gfm-tables</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>${hapi.fhir.version.v2}</version>
+			<!-- needs io.opentelemetry dependencies -->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -69,6 +114,7 @@
 		<dependency>
 			<artifactId>jakarta.ws.rs-api</artifactId>
 			<groupId>jakarta.ws.rs</groupId>
+			<version>${jakarta.ws.rs.version.v2}</version>
 		</dependency>
 	</dependencies>
 </project>

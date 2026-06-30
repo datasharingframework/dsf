@@ -16,7 +16,7 @@
 
 services:
   proxy:
-    image: nginx:1.29
+    image: nginx:1.31
     restart: "no"
     ports:
       - 127.0.0.1:443:443
@@ -38,19 +38,19 @@ services:
       dic1-fhir-frontend:
         ipv4_address: 172.20.0.2
       dic2-fhir-frontend:
-        ipv4_address: 172.20.0.10
-      dic3-fhir-frontend:
         ipv4_address: 172.20.0.18
-      ttp-fhir-frontend:
-        ipv4_address: 172.20.0.26
-      dic1-bpe-frontend:
+      dic3-fhir-frontend:
         ipv4_address: 172.20.0.34
-      dic2-bpe-frontend:
-        ipv4_address: 172.20.0.42
-      dic3-bpe-frontend:
+      ttp-fhir-frontend:
         ipv4_address: 172.20.0.50
+      dic1-bpe-frontend:
+        ipv4_address: 172.20.0.66
+      dic2-bpe-frontend:
+        ipv4_address: 172.20.0.82
+      dic3-bpe-frontend:
+        ipv4_address: 172.20.0.98
       ttp-bpe-frontend:
-        ipv4_address: 172.20.0.58
+        ipv4_address: 172.20.0.114
       internet:
         aliases:
           - dic1
@@ -290,7 +290,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic2_fhir.secret
     networks:
       dic2-fhir-frontend:
-        ipv4_address: 172.20.0.11
+        ipv4_address: 172.20.0.19
       dic2-fhir-backend:
       internet:
     depends_on:
@@ -369,7 +369,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic3_fhir.secret
     networks:
       dic3-fhir-frontend:
-        ipv4_address: 172.20.0.19
+        ipv4_address: 172.20.0.35
       dic3-fhir-backend:
       internet:
     depends_on:
@@ -456,7 +456,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_fhir.secret
     networks:
       ttp-fhir-frontend:
-        ipv4_address: 172.20.0.27
+        ipv4_address: 172.20.0.51
       ttp-fhir-backend:
       internet:
     depends_on:
@@ -573,7 +573,7 @@ services:
       DEV_DSF_BPE_FHIR_CLIENT_CONNECTIONS_CONFIG_DEFAULT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
     networks:
       dic1-bpe-frontend:
-        ipv4_address: 172.20.0.35
+        ipv4_address: 172.20.0.67
       dic1-bpe-backend:
       internet:
       forward-proxy:
@@ -664,7 +664,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic2_bpe.secret
     networks:
       dic2-bpe-frontend:
-        ipv4_address: 172.20.0.43
+        ipv4_address: 172.20.0.83
       dic2-bpe-backend:
       internet:
     depends_on:
@@ -753,7 +753,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic3_bpe.secret
     networks:
       dic3-bpe-frontend:
-        ipv4_address: 172.20.0.51
+        ipv4_address: 172.20.0.99
       dic3-bpe-backend:
       internet:
     depends_on:
@@ -843,7 +843,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_bpe.secret
     networks:
       ttp-bpe-frontend:
-        ipv4_address: 172.20.0.59
+        ipv4_address: 172.20.0.115
       ttp-bpe-backend:
       internet:
     depends_on:
@@ -964,57 +964,107 @@ networks:
       config:
       - subnet: 172.20.0.0/29
   dic1-fhir-backend:
-  dic2-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.8/29
-  dic2-fhir-backend:
-  dic3-fhir-frontend:
+  dic2-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.16/29
-  dic3-fhir-backend:
-  ttp-fhir-frontend:
+  dic2-fhir-backend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.24/29
-  ttp-fhir-backend:
-  dic1-bpe-frontend:
+  dic3-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.32/29
-  dic1-bpe-backend:
-  dic2-bpe-frontend:
+  dic3-fhir-backend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.40/29
-  dic2-bpe-backend:
-  dic3-bpe-frontend:
+  ttp-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.48/29
-  dic3-bpe-backend:
-  ttp-bpe-frontend:
+  ttp-fhir-backend:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.20.0.56/29
+  dic1-bpe-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.64/29
+  dic1-bpe-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.72/29
+  dic2-bpe-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.80/29
+  dic2-bpe-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.88/29
+  dic3-bpe-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.96/29
+  dic3-bpe-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.104/29
+  ttp-bpe-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.112/29
   ttp-bpe-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.120/29
   internet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.128/28
   forward-proxy:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.144/29
 
 volumes:
   postgresql:

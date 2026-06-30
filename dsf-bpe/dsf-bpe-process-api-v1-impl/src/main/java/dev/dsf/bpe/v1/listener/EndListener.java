@@ -27,20 +27,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
-import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.bpe.v1.service.FhirWebserviceClientProvider;
 
 public class EndListener extends AbstractListener implements ExecutionListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndListener.class);
 
-	private final FhirWebserviceClient webserviceClient;
+	private final FhirWebserviceClientProvider fhirWebserviceClientProvider;
 
 	public EndListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory,
-			FhirWebserviceClient fhirWebserviceClient)
+			FhirWebserviceClientProvider fhirWebserviceClientProvider)
 	{
 		super(serverBaseUrl, variablesFactory);
 
-		this.webserviceClient = fhirWebserviceClient;
+		this.fhirWebserviceClientProvider = fhirWebserviceClientProvider;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		Objects.requireNonNull(fhirWebserviceClientProvider, "fhirWebserviceClientProvider");
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 			logger.debug("Updating Task {}, new status: {}", getLocalVersionlessAbsoluteUrl(task),
 					task.getStatus().toCode());
 
-			webserviceClient.withMinimalReturn().update(task);
+			fhirWebserviceClientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
 		}
 		catch (Exception e)
 		{

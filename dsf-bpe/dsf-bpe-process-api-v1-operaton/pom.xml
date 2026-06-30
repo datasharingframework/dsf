@@ -49,6 +49,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -61,6 +67,7 @@
 		<dependency>
 			<artifactId>jakarta.ws.rs-api</artifactId>
 			<groupId>jakarta.ws.rs</groupId>
+			<version>${jakarta.ws.rs.version.v1}</version>
 		</dependency>
 
 		<!-- optional dependencies provided by the DSF bpe -->

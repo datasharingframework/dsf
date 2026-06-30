@@ -27,18 +27,17 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 
-import dev.dsf.bpe.v2.client.dsf.DsfClient;
-
 public class StartTaskUpdaterImpl implements StartTaskUpdater
 {
-	private final DsfClient client;
+	private final DsfClientProvider dsfClientProvider;
 
 	private final Supplier<Task> getStartTask;
 	private final Consumer<Task> updateTask;
 
-	public StartTaskUpdaterImpl(DsfClient client, Supplier<Task> getStartTask, Consumer<Task> updateTask)
+	public StartTaskUpdaterImpl(DsfClientProvider dsfClientProvider, Supplier<Task> getStartTask,
+			Consumer<Task> updateTask)
 	{
-		this.client = Objects.requireNonNull(client, "client");
+		this.dsfClientProvider = Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
 
 		this.getStartTask = Objects.requireNonNull(getStartTask, "getStartTask");
 		this.updateTask = Objects.requireNonNull(updateTask, "updateTask");
@@ -50,7 +49,7 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 		Task task = getStartTask.get();
 		task.addOutput().setValue(outputValue).getType().addCoding(outputType);
 
-		Task updated = client.update(task);
+		Task updated = dsfClientProvider.getLocal().update(task);
 		updateTask.accept(updated);
 	}
 
@@ -90,7 +89,7 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 						+ (outputType.hasVersion() ? " (version: " + outputType.getVersion() + ") not found" : "")))
 				.setValue(outputValue);
 
-		Task updated = client.update(task);
+		Task updated = dsfClientProvider.getLocal().update(task);
 		updateTask.accept(updated);
 	}
 
@@ -110,7 +109,7 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 
 		task.setOutput(filtered);
 
-		Task updated = client.update(task);
+		Task updated = dsfClientProvider.getLocal().update(task);
 		updateTask.accept(updated);
 	}
 

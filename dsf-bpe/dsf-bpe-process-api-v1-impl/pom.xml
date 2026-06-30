@@ -45,18 +45,22 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
+			<version>${jersey.version.v1}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
+			<version>${jersey.version.v1}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>${jersey.version.v1}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.connectors</groupId>
 			<artifactId>jersey-apache-connector</artifactId>
+			<version>${jersey.version.v1}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
@@ -125,22 +129,7 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-structures-r4</artifactId>
-									<version>${hapi.fhir.version.v1}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>org.hl7.fhir.utilities</artifactId>
-									<version>${hapi.fhir.version.v1}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>org.hl7.fhir.r4</artifactId>
-									<version>${hapi.fhir.version.v1}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-validation</artifactId>
+									<artifactId>hapi-fhir-base</artifactId>
 									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
@@ -150,7 +139,27 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-structures-r4</artifactId>
+									<version>${hapi.fhir.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-validation</artifactId>
+									<version>${hapi.fhir.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-validation-resources-r4</artifactId>
+									<version>${hapi.fhir.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.convertors</artifactId>
+									<version>${hapi.fhir.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.r4</artifactId>
 									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
@@ -159,51 +168,14 @@
 									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>net.sf.saxon</groupId>
-									<artifactId>Saxon-HE</artifactId>
-									<version>9.5.1-5</version>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.utilities</artifactId>
+									<version>${hapi.fhir.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>org.hl7.fhir.validation</artifactId>
 									<version>${hapi.fhir.version.v1}</version>
-								</artifactItem>
-								<!--<artifactItem>
-									<groupId>xpp3</groupId>
-									<artifactId>xpp3</artifactId>
-									<version>1.1.4c</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>xpp3</groupId>
-									<artifactId>xpp3_xpath</artifactId>
-									<version>1.1.4c</version>
-								</artifactItem>-->
-								<!--<artifactItem>
-									<groupId>org.apache.commons</groupId>
-									<artifactId>commons-compress</artifactId>
-								</artifactItem>-->
-								<artifactItem>
-									<groupId>org.fhir</groupId>
-									<artifactId>ucum</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>com.github.ben-manes.caffeine</groupId>
-									<artifactId>caffeine</artifactId>
-									<version>2.7.0</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.checkerframework</groupId>
-									<artifactId>checker-qual</artifactId>
-									<version>2.6.0</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>com.google.errorprone</groupId>
-									<artifactId>error_prone_annotations</artifactId>
-									<version>2.3.3</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>com.google.code.gson</groupId>
-									<artifactId>gson</artifactId>
 								</artifactItem>
 								<artifactItem>
 									<groupId>de.hs-heilbronn.mi</groupId>
@@ -211,17 +183,93 @@
 									<version>${crypto-utils.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-validation-resources-r4</artifactId>
+									<groupId>jakarta.annotation</groupId>
+									<artifactId>jakarta.annotation-api</artifactId>
+									<version>${jakarta.annotation.api.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-base</artifactId>
-									<version>${hapi.fhir.version.v1}</version>
+									<groupId>jakarta.ws.rs</groupId>
+									<artifactId>jakarta.ws.rs-api</artifactId>
+									<version>${jakarta.ws.rs.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.commons</groupId>
+									<artifactId>commons-compress</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.httpcomponents</groupId>
+									<artifactId>httpclient</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.httpcomponents</groupId>
+									<artifactId>httpcore</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.fhir</groupId>
+									<artifactId>ucum</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.hk2.external</groupId>
+									<artifactId>aopalliance-repackaged</artifactId>
+									<version>3.0.6</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.hk2</groupId>
+									<artifactId>hk2-api</artifactId>
+									<version>3.0.6</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.hk2</groupId>
+									<artifactId>hk2-locator</artifactId>
+									<version>3.0.6</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.hk2</groupId>
+									<artifactId>hk2-utils</artifactId>
+									<version>3.0.6</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.hk2</groupId>
+									<artifactId>osgi-resource-locator</artifactId>
+									<version>1.0.3</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.jersey.connectors</groupId>
+									<artifactId>jersey-apache-connector</artifactId>
+									<version>${jersey.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.jersey.core</groupId>
+									<artifactId>jersey-client</artifactId>
+									<version>${jersey.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.jersey.core</groupId>
+									<artifactId>jersey-common</artifactId>
+									<version>${jersey.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.jersey.ext</groupId>
+									<artifactId>jersey-entity-filtering</artifactId>
+									<version>${jersey.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.jersey.inject</groupId>
+									<artifactId>jersey-hk2</artifactId>
+									<version>${jersey.version.v1}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.glassfish.jersey.media</groupId>
+									<artifactId>jersey-media-json-jackson</artifactId>
+									<version>${jersey.version.v1}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.ow2.asm</groupId>
 									<artifactId>asm</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.github.ben-manes.caffeine</groupId>
+									<artifactId>caffeine</artifactId>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

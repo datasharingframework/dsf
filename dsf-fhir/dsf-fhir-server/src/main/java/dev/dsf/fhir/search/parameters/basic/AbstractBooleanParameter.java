@@ -16,12 +16,11 @@
 package dev.dsf.fhir.search.parameters.basic;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.hl7.fhir.r4.model.Resource;
-
-import com.google.common.base.Objects;
 
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
@@ -86,6 +85,6 @@ public abstract class AbstractBooleanParameter<R extends Resource> extends Abstr
 	@Override
 	protected boolean resourceMatches(R resource)
 	{
-		return hasBoolean.test(resource) && Objects.equal(getBoolean.apply(resource), value);
+		return hasBoolean.test(resource) && Objects.equals(getBoolean.apply(resource), value);
 	}
 }

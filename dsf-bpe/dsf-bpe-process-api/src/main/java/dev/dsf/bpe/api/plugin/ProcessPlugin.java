@@ -29,7 +29,7 @@ import org.operaton.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.operaton.bpm.engine.variable.value.PrimitiveValue;
 import org.springframework.context.ApplicationContext;
 
-import dev.dsf.bpe.api.logging.PluginMdc;
+import dev.dsf.bpe.api.context.PluginContext;
 
 public interface ProcessPlugin
 {
@@ -47,7 +47,7 @@ public interface ProcessPlugin
 
 	ApplicationContext getApplicationContext();
 
-	PluginMdc getPluginMdc();
+	PluginContext getPluginContext();
 
 	@SuppressWarnings("rawtypes")
 	Stream<TypedValueSerializer> getTypedValueSerializers();

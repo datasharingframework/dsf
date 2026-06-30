@@ -193,8 +193,7 @@ public class ApiServiceConfig
 	@Bean
 	public ExecutionListener endListener()
 	{
-		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new,
-				clientProvider().getLocalWebserviceClient());
+		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), VariablesImpl::new, clientProvider());
 	}
 
 	@Bean
