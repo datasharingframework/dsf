@@ -231,7 +231,7 @@
 								<artifactItem>
 									<groupId>org.glassfish.hk2</groupId>
 									<artifactId>osgi-resource-locator</artifactId>
-									<version>1.0.3</version>
+									<version>1.0.4</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.glassfish.jersey.connectors</groupId>

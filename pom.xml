@@ -60,9 +60,9 @@
 		<jakarta.ws.rs.version.v1>3.1.0</jakarta.ws.rs.version.v1>
 		<jakarta.ws.rs.version.v2>4.0.0</jakarta.ws.rs.version.v2>
 		<jakarta.ws.rs.version>4.0.0</jakarta.ws.rs.version>
-		<jakarta.annotation.api.version.v1>2.1.0</jakarta.annotation.api.version.v1>
+		<jakarta.annotation.api.version.v1>2.1.1</jakarta.annotation.api.version.v1>
 		<jakarta.annotation.api.version.v2>3.0.0</jakarta.annotation.api.version.v2>
-		<jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
+		<jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
 	</properties>
 
 	<name>DSF Parent POM</name>
@@ -192,7 +192,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.11</version>
+				<version>42.7.12</version>
 			</dependency>
 			<dependency>
 				<groupId>org.checkerframework</groupId>
