@@ -54,7 +54,8 @@ public class KeyGenerator extends AbstractGenerator
 
 	public void initialize()
 	{
-		logger.info("Initializing key generator ...");
+		if (!keys.isEmpty())
+			logger.info("Initializing key generator ...");
 
 		keyPairsById = keys.stream().collect(Collectors.toMap(Key::getId, this::initKeyPair));
 	}
@@ -90,11 +91,23 @@ public class KeyGenerator extends AbstractGenerator
 			logger.debug("{} public-key for '{}' not found", key.getType().getKeyType(), key.getId());
 			return Optional.empty();
 		}
+		else if (!key.getType().isKeyType(publicKey.get()))
+		{
+			logger.debug("{} public-key type for '{}' not {}", key.getType().getKeyType(), key.getId(),
+					key.getType().getKeyType());
+			return Optional.empty();
+		}
 
 		Optional<PrivateKey> privateKey = readPrivateKey(key.getId());
 		if (privateKey.isEmpty())
 		{
 			logger.debug("{} private-key for '{}' not found", key.getType().getKeyType(), key.getId());
+			return Optional.empty();
+		}
+		else if (!key.getType().isKeyType(privateKey.get()))
+		{
+			logger.debug("{} private-key type for '{}' not {}", key.getType().getKeyType(), key.getId(),
+					key.getType().getKeyType());
 			return Optional.empty();
 		}
 
