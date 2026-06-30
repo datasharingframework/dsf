@@ -34,6 +34,10 @@ services:
         source: ./proxy/nginx.conf
         target: /etc/nginx/nginx.conf
         read_only: true
+      - type: bind
+        source: ./proxy/index.html
+        target: /usr/share/nginx/html/index.html
+        read_only: true
     networks:
       dic1-fhir-frontend:
         ipv4_address: 172.20.0.2
