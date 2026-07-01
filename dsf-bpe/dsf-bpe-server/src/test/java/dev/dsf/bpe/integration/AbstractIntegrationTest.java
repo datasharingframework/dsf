@@ -66,6 +66,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.testcontainers.utility.DockerImageName;
 
+import com.icegreen.greenmail.util.ServerSetupTest;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
@@ -451,6 +453,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config", fhirConnectionsYaml);
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
+
+		initParameters.put("dev.dsf.bpe.mail.host", "localhost");
+		initParameters.put("dev.dsf.bpe.mail.port", String.valueOf(ServerSetupTest.SMTP.getPort()));
+		initParameters.put("dev.dsf.bpe.mail.toAddresses", "to@localhost");
+		initParameters.put("dev.dsf.bpe.mail.fromAddress", "from@localhost");
 
 		initParameters.put("dev.dsf.bpe.test.env.mandatory", "test-value");
 

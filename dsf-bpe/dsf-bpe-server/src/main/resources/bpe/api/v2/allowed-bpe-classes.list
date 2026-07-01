@@ -17,6 +17,7 @@
 com.fasterxml.jackson
 com.google.common
 com.ctc.wstx.stax.WstxInputFactory
+com.sun.mail
 dev.dsf.bpe.api
 jakarta.activation
 jakarta.annotation.Nonnull
@@ -38,6 +39,7 @@ org.operaton.bpm.engine.impl.variable.serializer
 org.operaton.bpm.engine.ProcessEngine
 org.operaton.bpm.engine.RuntimeService
 org.operaton.bpm.engine.variable
+org.operaton.bpm.model.bpmn.impl
 org.operaton.bpm.model.bpmn.instance
 org.glassfish.jersey
 org.slf4j.Logger

@@ -27,9 +27,18 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Optional;
 
+import javax.mail.Address;
+import javax.mail.BodyPart;
+import javax.mail.Message.RecipientType;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
 import org.hl7.fhir.r4.model.Binary;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 import de.hsheilbronn.mi.utils.crypto.ca.CertificateAuthority;
 import de.hsheilbronn.mi.utils.crypto.ca.CertificationRequest;
@@ -322,5 +331,44 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 	public void startQuestionnaireTestIdentifierMulti() throws Exception
 	{
 		executePluginTest(createTestTask("QuestionnaireTestIdentifierMulti"));
+	}
+
+	@Test
+	public void startMailServiceTest() throws Exception
+	{
+		GreenMail greenMail = new GreenMail(ServerSetupTest.SMTP);
+		greenMail.start();
+
+		try
+		{
+			executePluginTest(createTestTask("MailServiceTest"));
+
+			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+
+			assertEquals(1, receivedMessages.length);
+
+			Address[] from = receivedMessages[0].getFrom();
+			assertNotNull(from);
+			assertEquals(1, from.length);
+			assertEquals("from@localhost", from[0].toString());
+
+			Address[] to = receivedMessages[0].getRecipients(RecipientType.TO);
+			assertNotNull(to);
+			assertEquals(1, to.length);
+			assertEquals("to@localhost", to[0].toString());
+
+			assertEquals("subject", receivedMessages[0].getSubject());
+
+			Object messagContent = receivedMessages[0].getContent();
+			assertTrue(messagContent instanceof MimeMultipart);
+			assertEquals(1, ((MimeMultipart) messagContent).getCount());
+			BodyPart bodyPart = ((MimeMultipart) messagContent).getBodyPart(0);
+			assertTrue(bodyPart.getContent() instanceof String);
+			assertEquals("message", bodyPart.getContent());
+		}
+		finally
+		{
+			greenMail.stop();
+		}
 	}
 }
