@@ -177,6 +177,11 @@
 				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${bouncycastle.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.icegreen</groupId>
+				<artifactId>greenmail-junit4</artifactId>
+				<version>1.6.15</version>
+			</dependency>
 
 			<!-- database -->
 			<dependency>
