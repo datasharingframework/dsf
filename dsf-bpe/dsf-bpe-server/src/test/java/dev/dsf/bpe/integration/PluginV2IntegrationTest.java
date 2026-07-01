@@ -368,8 +368,7 @@ public class PluginV2IntegrationTest extends AbstractPluginIntegrationTest
 		}
 		finally
 		{
-			if (greenMail != null)
-				greenMail.stop();
+			greenMail.stop();
 		}
 	}
 }
