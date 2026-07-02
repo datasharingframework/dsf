@@ -184,7 +184,7 @@ public class OidcClientJersey extends BaseOidcClientJersey
 				throw new OidcClientException("Access token key with kid '" + keyId + "'  and use 'sig' not in JWKS");
 
 			Optional<Algorithm> algorithm = key.flatMap(JwksKey::toAlgorithm);
-			if (key.isEmpty())
+			if (algorithm.isEmpty())
 			{
 				throw new OidcClientException("Access token key with kid '" + keyId
 						+ "' has unsupported type (kty) / algorithm (alg) / key-size in JWKS");
