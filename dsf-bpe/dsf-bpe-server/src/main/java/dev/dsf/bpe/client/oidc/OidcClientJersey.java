@@ -15,6 +15,7 @@
  */
 package dev.dsf.bpe.client.oidc;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.time.Duration;
@@ -151,9 +152,10 @@ public class OidcClientJersey extends BaseOidcClientJersey
 
 		Response response = client.target(tokenEndpoint).request(MediaType.APPLICATION_JSON_TYPE)
 				.header(HttpHeaders.AUTHORIZATION,
-						"Basic " + Base64.getEncoder()
-								.encodeToString(new StringBuilder().append(clientId).append(':').append(clientSecret)
-										.toString().getBytes(StandardCharsets.US_ASCII)))
+						"Basic " + Base64.getEncoder().encodeToString(new StringBuilder()
+								.append(URLEncoder.encode(clientId, StandardCharsets.US_ASCII)).append(':')
+								.append(URLEncoder.encode(String.valueOf(clientSecret), StandardCharsets.US_ASCII))
+								.toString().getBytes(StandardCharsets.US_ASCII)))
 				.post(Entity.form(new Form().param("grant_type", "client_credentials")));
 
 		if (response.getStatus() == Status.OK.getStatusCode())
