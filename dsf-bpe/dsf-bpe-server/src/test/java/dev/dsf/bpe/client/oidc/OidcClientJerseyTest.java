@@ -15,16 +15,13 @@
  */
 package dev.dsf.bpe.client.oidc;
 
-import static java.nio.charset.StandardCharsets.US_ASCII;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.time.Duration;
@@ -79,10 +76,11 @@ public class OidcClientJerseyTest
 	public void basicAuthorizationClientIdAndSecretShouldBeUrlEncoded() throws Exception
 	{
 		var clientId = "client/id:+";
-		var clientSecret = "client/secret:+";
-		var expectedAuthorizationHeaderValue = "Basic ".concat(clientId.transform(id -> URLEncoder.encode(id, US_ASCII))
-				.concat(":").concat(clientSecret.transform(secret -> URLEncoder.encode(secret, US_ASCII)))
-				.transform(s -> Base64.getEncoder().encodeToString(s.getBytes(US_ASCII))));
+		var clientSecret = "client/s€cr€t:+";
+		var expectedAuthorizationHeaderValue = "Basic "
+				.concat(clientId.transform(id -> URLEncoder.encode(id, StandardCharsets.UTF_8)).concat(":")
+						.concat(clientSecret.transform(secret -> URLEncoder.encode(secret, StandardCharsets.UTF_8)))
+						.transform(s -> Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8))));
 		var client = new OidcClientJersey("https://localhost:" + tokenEndpointServerResource.getPort(),
 				"/.well-known/openid-configuration", clientId, clientSecret.toCharArray(),
 				certificates.getFhirServerCertificate().trustStore(), null, null, null, null, null, "Test Client",
@@ -149,7 +147,7 @@ public class OidcClientJerseyTest
 			{
 				authorizationHeaderValue = exchange.getRequestHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-				byte[] response = "{\"access_token\":\"invalid\",\"expires_in\":300}".getBytes(US_ASCII);
+				byte[] response = "{\"access_token\":\"invalid\",\"expires_in\":300}".getBytes(StandardCharsets.UTF_8);
 				exchange.getResponseHeaders().set(HttpHeaders.CONTENT_TYPE, "application/json");
 				exchange.sendResponseHeaders(200, response.length);
 				try (OutputStream out = exchange.getResponseBody())
@@ -165,5 +163,34 @@ public class OidcClientJerseyTest
 
 			return newServer;
 		}
+	}
+
+	@Test
+	public void testEncoding() throws Exception
+	{
+		/*
+		 * RFC 6749, Appendix B - https://datatracker.ietf.org/doc/html/rfc6749#appendix-B
+		 *
+		 * [...]
+		 *
+		 * When parsing data from a payload using this media type, the names and values resulting from reversing the
+		 * name/value encoding consequently need to be treated as octet sequences, to be decoded using the UTF-8
+		 * character encoding scheme.
+		 *
+		 * For example, the value consisting of the six Unicode code points (1) U+0020 (SPACE), (2) U+0025 (PERCENT
+		 * SIGN), (3) U+0026 (AMPERSAND), (4) U+002B (PLUS SIGN), (5) U+00A3 (POUND SIGN), and (6) U+20AC (EURO SIGN)
+		 * would be encoded into the octet sequence below (using hexadecimal notation):
+		 *
+		 * 20 25 26 2B C2 A3 E2 82 AC
+		 *
+		 * and then represented in the payload as:
+		 *
+		 * +%25%26%2B%C2%A3%E2%82%AC
+		 */
+
+		String example = "\u0020\u0025\u0026\u002B\u00A3\u20AC";
+		String expected = "+%25%26%2B%C2%A3%E2%82%AC";
+
+		assertEquals(expected, URLEncoder.encode(example, StandardCharsets.UTF_8));
 	}
 }
