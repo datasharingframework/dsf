@@ -152,10 +152,11 @@ public class OidcClientJersey extends BaseOidcClientJersey
 
 		Response response = client.target(tokenEndpoint).request(MediaType.APPLICATION_JSON_TYPE)
 				.header(HttpHeaders.AUTHORIZATION,
-						"Basic " + Base64.getEncoder().encodeToString(new StringBuilder()
-								.append(URLEncoder.encode(clientId, StandardCharsets.US_ASCII)).append(':')
-								.append(URLEncoder.encode(String.valueOf(clientSecret), StandardCharsets.US_ASCII))
-								.toString().getBytes(StandardCharsets.US_ASCII)))
+						"Basic " + Base64.getEncoder()
+								.encodeToString(new StringBuilder()
+										.append(URLEncoder.encode(clientId, StandardCharsets.UTF_8)).append(':')
+										.append(URLEncoder.encode(String.valueOf(clientSecret), StandardCharsets.UTF_8))
+										.toString().getBytes(StandardCharsets.UTF_8)))
 				.post(Entity.form(new Form().param("grant_type", "client_credentials")));
 
 		if (response.getStatus() == Status.OK.getStatusCode())
