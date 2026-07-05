@@ -39,7 +39,7 @@
 		<main.basedir>${project.basedir}</main.basedir>
 
 		<slf4j.version>2.0.18</slf4j.version>
-		<log4j.version>2.26.0</log4j.version>
+		<log4j.version>2.26.1</log4j.version>
 		<jetty.version>12.1.10</jetty.version>
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>7.0.8</spring.version>
