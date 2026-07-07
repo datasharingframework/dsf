@@ -19,19 +19,33 @@ import java.util.Objects;
 
 public class JsonHolder
 {
-	private final String dataClassName;
-	private final byte[] data;
-
 	/**
 	 * @param dataClassName
 	 *            not <code>null</code>
 	 * @param data
 	 *            not <code>null</code>
+	 * @return
 	 */
-	public JsonHolder(String dataClassName, byte[] data)
+	public static JsonHolder of(String dataClassName, byte[] data)
 	{
-		this.dataClassName = Objects.requireNonNull(dataClassName, "dataClassName");
-		this.data = Objects.requireNonNull(data, "data");
+		Objects.requireNonNull(dataClassName, "dataClassName");
+		Objects.requireNonNull(data, "data");
+
+		return new JsonHolder(dataClassName, data);
+	}
+
+	public static JsonHolder empty()
+	{
+		return new JsonHolder(null, null);
+	}
+
+	private final String dataClassName;
+	private final byte[] data;
+
+	private JsonHolder(String dataClassName, byte[] data)
+	{
+		this.dataClassName = dataClassName;
+		this.data = data;
 	}
 
 	public String getDataClassName()
@@ -42,5 +56,10 @@ public class JsonHolder
 	public byte[] getData()
 	{
 		return data;
+	}
+
+	public boolean isEmpty()
+	{
+		return dataClassName == null || data == null;
 	}
 }
