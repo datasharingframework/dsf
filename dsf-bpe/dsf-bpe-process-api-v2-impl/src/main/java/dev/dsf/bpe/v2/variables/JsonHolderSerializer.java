@@ -52,7 +52,8 @@ public class JsonHolderSerializer extends PrimitiveValueSerializer<JsonHolderVal
 		String dataClassName = valueFields.getTextValue();
 		byte[] data = valueFields.getByteArrayValue();
 
-		return JsonHolderValues.create(new JsonHolder(dataClassName, data));
+		return JsonHolderValues.create(
+				dataClassName == null || data == null ? JsonHolder.empty() : JsonHolder.of(dataClassName, data));
 	}
 
 	@Override
