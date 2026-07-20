@@ -39,8 +39,8 @@
 		<main.basedir>${project.basedir}</main.basedir>
 
 		<slf4j.version>2.0.18</slf4j.version>
-		<log4j.version>2.26.0</log4j.version>
-		<jetty.version>12.1.10</jetty.version>
+		<log4j.version>2.26.1</log4j.version>
+		<jetty.version>12.1.11</jetty.version>
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>7.0.8</spring.version>
 		<!-- operaton 2.1.2 not compatible with jackson 2.22.0 -->
@@ -50,7 +50,7 @@
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>8.4.2</hapi.fhir.version>
-		<bouncycastle.version>1.84</bouncycastle.version>
+		<bouncycastle.version>1.85</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>6.2.0</crypto-utils.version>
@@ -197,7 +197,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.12</version>
+				<version>42.7.13</version>
 			</dependency>
 			<dependency>
 				<groupId>org.checkerframework</groupId>
@@ -219,7 +219,7 @@
 			<dependency>
 				<groupId>com.auth0</groupId>
 				<artifactId>java-jwt</artifactId>
-				<version>4.5.2</version>
+				<version>4.6.0</version>
 			</dependency>
 
 			<dependency>
@@ -595,7 +595,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.10.2.0</version>
+					<version>4.10.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
