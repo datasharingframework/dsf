@@ -107,12 +107,15 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 	private JsonHolder toJsonHolder(Object json)
 	{
+		if (json == null)
+			return JsonHolder.empty();
+
 		try
 		{
 			byte[] data = objectMapper.writeValueAsBytes(json);
 			String dataClassName = json.getClass().getName();
 
-			return new JsonHolder(dataClassName, data);
+			return JsonHolder.of(dataClassName, data);
 		}
 		catch (JsonProcessingException e)
 		{
@@ -123,11 +126,15 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@SuppressWarnings("unchecked")
 	private <T> T fromJsonHolder(JsonHolder holder)
 	{
+		if (holder.isEmpty())
+			return null;
+
 		try
 		{
 			byte[] data = holder.getData();
-			Class<?> dataClass = getClassLoader().loadClass(holder.getDataClassName());
+			String dataClassName = holder.getDataClassName();
 
+			Class<?> dataClass = getClassLoader().loadClass(dataClassName);
 			return (T) objectMapper.readValue(data, dataClass);
 		}
 		catch (ClassNotFoundException | IOException e)
