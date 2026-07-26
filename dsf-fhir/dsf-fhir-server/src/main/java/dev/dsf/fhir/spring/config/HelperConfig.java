@@ -22,12 +22,17 @@ import org.springframework.context.annotation.Configuration;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.help.ResponseGenerator;
+import dev.dsf.fhir.service.patch.FhirPathPatchService;
+import dev.dsf.fhir.service.patch.FhirPathPatchServiceImpl;
 
 @Configuration
 public class HelperConfig
 {
 	@Autowired
 	private PropertiesConfig propertiesConfig;
+
+	@Autowired
+	private FhirConfig fhirConfig;
 
 	@Bean
 	public ExceptionHandler exceptionHandler()
@@ -42,8 +47,14 @@ public class HelperConfig
 	}
 
 	@Bean
+	public FhirPathPatchService fhirPathPatchService()
+	{
+		return new FhirPathPatchServiceImpl(fhirConfig.fhirContext());
+	}
+
+	@Bean
 	public ParameterConverter parameterConverter()
 	{
-		return new ParameterConverter(exceptionHandler());
+		return new ParameterConverter(exceptionHandler(), fhirPathPatchService());
 	}
 }

@@ -957,6 +957,24 @@ public class ResponseGenerator
 		return Response.status(Status.NOT_FOUND).entity(outcome).build();
 	}
 
+	public Response badRequestPatch(String errorMessage)
+	{
+		logger.warn("Bad patch request: {}", errorMessage);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad patch request: " + errorMessage);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response patchTargetNotFound(String resourceTypeName, String queryParameters)
+	{
+		logger.warn("No {} matched conditional patch criteria '{}'", resourceTypeName, queryParameters);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.NOTFOUND,
+				"No " + resourceTypeName + " matched conditional patch criteria '" + queryParameters + "'");
+		return Response.status(Status.NOT_FOUND).entity(outcome).build();
+	}
+
 	public Response forbiddenNotValid(String operation, Identity identity, String resourceType,
 			ValidationResult validationResult)
 	{

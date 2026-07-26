@@ -15,6 +15,7 @@
  */
 package dev.dsf.fhir.webservice.specification;
 
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.webservice.base.BasicService;
@@ -101,6 +102,36 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	 *         <a href="https://www.hl7.org/fhir/http.html#update">https://www.hl7.org/fhir/http.html#update</a>
 	 */
 	Response update(R resource, UriInfo uri, HttpHeaders headers);
+
+	/**
+	 * standard patch (FHIRPath Patch)
+	 *
+	 * @param id
+	 *            not <code>null</code>
+	 * @param patch
+	 *            the FHIRPath Patch as a {@link Parameters} resource, not <code>null</code>
+	 * @param uri
+	 *            not <code>null</code>
+	 * @param headers
+	 *            not <code>null</code>
+	 * @return {@link Response} defined in
+	 *         <a href="https://www.hl7.org/fhir/http.html#patch">https://www.hl7.org/fhir/http.html#patch</a>
+	 */
+	Response patch(String id, Parameters patch, UriInfo uri, HttpHeaders headers);
+
+	/**
+	 * conditional patch (FHIRPath Patch)
+	 *
+	 * @param patch
+	 *            the FHIRPath Patch as a {@link Parameters} resource, not <code>null</code>
+	 * @param uri
+	 *            not <code>null</code>
+	 * @param headers
+	 *            not <code>null</code>
+	 * @return {@link Response} defined in
+	 *         <a href="https://www.hl7.org/fhir/http.html#patch">https://www.hl7.org/fhir/http.html#patch</a>
+	 */
+	Response patch(Parameters patch, UriInfo uri, HttpHeaders headers);
 
 	/**
 	 * standard delete

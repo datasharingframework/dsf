@@ -15,6 +15,7 @@
  */
 package dev.dsf.fhir.webservice.jaxrs;
 
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -115,6 +116,30 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	public Response update(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		return delegate.update(resource, uri, headers);
+	}
+
+	@PATCH
+	@Path("/{id}")
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
+	@Override
+	public Response patch(@PathParam("id") String id, Parameters patch, @Context UriInfo uri,
+			@Context HttpHeaders headers)
+	{
+		return delegate.patch(id, patch, uri, headers);
+	}
+
+	@PATCH
+	@Consumes({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON })
+	@Produces({ Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML, Constants.CT_FHIR_JSON,
+			Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
+	@Override
+	public Response patch(Parameters patch, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		return delegate.patch(patch, uri, headers);
 	}
 
 	@DELETE

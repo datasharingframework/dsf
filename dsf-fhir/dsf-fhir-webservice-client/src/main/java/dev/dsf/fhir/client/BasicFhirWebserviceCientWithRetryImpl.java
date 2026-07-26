@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
@@ -53,6 +54,19 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	public <R extends Resource> R update(R resource)
 	{
 		return retry(() -> delegate.update(resource));
+	}
+
+	@Override
+	public <R extends Resource> R patch(Class<R> resourceType, String id, Parameters patch)
+	{
+		return retry(() -> delegate.patch(resourceType, id, patch));
+	}
+
+	@Override
+	public <R extends Resource> R patchConditionaly(Class<R> resourceType, Parameters patch,
+			Map<String, List<String>> criteria)
+	{
+		return retry(() -> delegate.patchConditionaly(resourceType, patch, criteria));
 	}
 
 	@Override
