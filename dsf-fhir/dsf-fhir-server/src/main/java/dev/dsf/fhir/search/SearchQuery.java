@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -153,6 +154,13 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private final Map<String, SearchQueryRevIncludeParameterFactory> revIncludeParameterFactoriesByValue = new HashMap<>();
 
 	private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<>();
+
+	// FHIR search: comma separated values of a single parameter are combined with a logical OR, values of separately
+	// repeated parameters with a logical AND. Each element of this list is one such OR-group (in the same order as the
+	// flat searchParameters list above); the SQL filter and the in-memory matcher combine the members of a group with
+	// OR and the groups with AND. See https://www.hl7.org/fhir/search.html#combining
+	private final List<List<SearchQueryParameter<R>>> searchParameterOrGroups = new ArrayList<>();
+
 	private final List<SearchQuerySortParameterConfiguration> sortParameters = new ArrayList<>();
 	private final List<SearchQueryIncludeParameterConfiguration> includeParameters = new ArrayList<>();
 	private final List<SearchQueryIncludeParameterConfiguration> revIncludeParameters = new ArrayList<>();
@@ -267,9 +275,20 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 							.get(e.getKey());
 					if (queryParameterFactory != null)
 					{
-						e.getValue().stream().filter(v -> v != null && !v.isBlank())
-								.forEach(value -> searchParameters.add(queryParameterFactory.createQueryParameter()
-										.configure(errors, e.getKey(), value)));
+						e.getValue().stream().filter(v -> v != null && !v.isBlank()).forEach(value ->
+						{
+							// comma separated values within a single parameter are combined with a logical OR
+							List<SearchQueryParameter<R>> orGroup = splitValuesForOr(value).stream()
+									.filter(orValue -> !orValue.isBlank()).map(orValue -> queryParameterFactory
+											.createQueryParameter().configure(errors, e.getKey(), orValue))
+									.collect(Collectors.toList());
+
+							if (!orGroup.isEmpty())
+							{
+								searchParameters.addAll(orGroup);
+								searchParameterOrGroups.add(orGroup);
+							}
+						});
 					}
 					else
 					{
@@ -278,13 +297,60 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 					}
 				});
 
-		Stream<String> elements = searchParameters.stream().filter(SearchQueryParameter::isDefined)
-				.map(SearchQueryParameter::getFilterQuery);
+		Stream<String> elements = searchParameterOrGroups.stream().map(this::toOrFilterQuery).filter(s -> !s.isEmpty());
 
 		if (identityFilter != null && !identityFilter.getFilterQuery().isEmpty())
 			elements = Stream.concat(Stream.of(identityFilter.getFilterQuery()), elements);
 
 		return elements.collect(Collectors.joining(" AND "));
+	}
+
+	private String toOrFilterQuery(List<SearchQueryParameter<R>> orGroup)
+	{
+		List<String> filters = orGroup.stream().filter(SearchQueryParameter::isDefined)
+				.map(SearchQueryParameter::getFilterQuery).collect(Collectors.toList());
+
+		if (filters.isEmpty())
+			return "";
+		else if (filters.size() == 1)
+			return filters.get(0);
+		else
+			return filters.stream().collect(Collectors.joining(" OR ", "(", ")"));
+	}
+
+	/**
+	 * Splits a single FHIR search parameter value into its comma separated OR-parts. Commas escaped as <code>\,</code>
+	 * are treated as literal characters (and unescaped); other escape sequences are left untouched for the parameter
+	 * type specific parsing.
+	 *
+	 * @param value
+	 *            not <code>null</code>
+	 * @return the OR-parts, never empty
+	 */
+	static List<String> splitValuesForOr(String value)
+	{
+		List<String> values = new ArrayList<>();
+		StringBuilder current = new StringBuilder();
+
+		for (int i = 0; i < value.length(); i++)
+		{
+			char c = value.charAt(i);
+			if (c == '\\' && i + 1 < value.length() && value.charAt(i + 1) == ',')
+			{
+				current.append(',');
+				i++;
+			}
+			else if (c == ',')
+			{
+				values.add(current.toString());
+				current.setLength(0);
+			}
+			else
+				current.append(c);
+		}
+		values.add(current.toString());
+
+		return values;
 	}
 
 	public List<SearchQueryParameterError> getUnsupportedQueryParameters()
@@ -471,15 +537,23 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	{
 		Objects.requireNonNull(bundleUri, "bundleUri");
 
-		searchParameters.stream().filter(SearchQueryParameter::isDefined)
-				.collect(Collectors.toMap(SearchQueryParameter::getBundleUriQueryParameterName,
-						p -> List.of(p.getBundleUriQueryParameterValue()), (v1, v2) ->
-						{
-							List<String> list = new ArrayList<>(v1);
-							list.addAll(v2);
-							return list;
-						}))
-				.entrySet().stream().sorted(Comparator.comparing(Entry::getKey))
+		// within an OR-group the values belong to the same parameter and are re-joined with a comma (literal commas
+		// re-escaped); separately repeated (AND) parameters with the same name stay as separate query parameter values
+		Map<String, List<String>> valuesByName = new LinkedHashMap<>();
+		for (List<SearchQueryParameter<R>> group : searchParameterOrGroups)
+		{
+			List<SearchQueryParameter<R>> defined = group.stream().filter(SearchQueryParameter::isDefined)
+					.collect(Collectors.toList());
+			if (defined.isEmpty())
+				continue;
+
+			String name = defined.get(0).getBundleUriQueryParameterName();
+			String value = defined.stream().map(SearchQueryParameter::getBundleUriQueryParameterValue)
+					.map(v -> v.replace(",", "\\,")).collect(Collectors.joining(","));
+			valuesByName.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+		}
+
+		valuesByName.entrySet().stream().sorted(Comparator.comparing(Entry::getKey))
 				.forEach(e -> bundleUri.replaceQueryParam(e.getKey(), e.getValue().toArray()));
 
 		if (!sortParameters.isEmpty())
@@ -544,8 +618,11 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		if (resource == null || !getResourceType().isInstance(resource))
 			return false;
 
-		// returns true if no search parameters configured
-		return searchParameters.stream().filter(SearchQueryParameter::isDefined).allMatch(p -> p.matches(resource));
+		// returns true if no search parameters configured; within an OR-group any member matching is enough (OR),
+		// across groups all groups must match (AND)
+		return searchParameterOrGroups.stream()
+				.map(group -> group.stream().filter(SearchQueryParameter::isDefined).collect(Collectors.toList()))
+				.filter(group -> !group.isEmpty()).allMatch(group -> group.stream().anyMatch(p -> p.matches(resource)));
 	}
 
 	@Override
