@@ -26,6 +26,7 @@ import dev.dsf.bpe.v2.variables.Variables;
 public class JsonVariableTestSet implements ServiceTask
 {
 	public static final String JSON_VARIABLE = "json-variable";
+	public static final String JSON_NULL_VARIABLE = "json-null-variable";
 	public static final String STRING_VARIABLE = "string-variable";
 	public static final String INTEGER_VARIABLE = "integer-variable";
 
@@ -41,5 +42,6 @@ public class JsonVariableTestSet implements ServiceTask
 		variables.setJsonVariable(JSON_VARIABLE, new JsonPojo(TEST_VALUE_1, TEST_VALUE_2, TEST_ZONED_DATE_TIME_VALUE));
 		variables.setString(STRING_VARIABLE, TEST_STRING);
 		variables.setInteger(INTEGER_VARIABLE, TEST_INTEGER);
+		variables.setJsonVariable(JSON_NULL_VARIABLE, null);
 	}
 }
