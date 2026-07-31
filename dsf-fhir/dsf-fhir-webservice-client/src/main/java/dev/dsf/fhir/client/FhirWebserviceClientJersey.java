@@ -834,6 +834,22 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
+	public StructureDefinition getSnapshot(String id)
+	{
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
+				.path(id).path("$snapshot").request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(StructureDefinition.class);
+		else
+			throw handleError(response);
+	}
+
+	@Override
 	public StructureDefinition generateSnapshot(String url)
 	{
 		Objects.requireNonNull(url, "url");

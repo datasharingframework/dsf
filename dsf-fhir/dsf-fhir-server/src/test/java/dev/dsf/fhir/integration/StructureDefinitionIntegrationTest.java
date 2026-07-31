@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -49,13 +50,23 @@ public class StructureDefinitionIntegrationTest extends AbstractIntegrationTest
 {
 	private static final Path PROFILE_FOLDER = Paths.get("src/test/resources/integration/structuredefinition");
 
-	private void testCreateWithoutSnapshot(Function<StructureDefinition, StructureDefinition> createOp) throws Exception
+	private StructureDefinition testCreateWithoutSnapshot(Function<StructureDefinition, StructureDefinition> createOp)
+			throws Exception
+	{
+		return testCreateWithoutSnapshot(createOp, _ ->
+		{});
+	}
+
+	private StructureDefinition testCreateWithoutSnapshot(Function<StructureDefinition, StructureDefinition> createOp,
+			Consumer<StructureDefinition> profileModifier) throws Exception
 	{
 		EventManager eventManager = getSpringWebApplicationContext().getBean(EventManager.class);
 		List<Event> events = new ArrayList<>();
 		eventManager.addHandler(events::add);
 
 		StructureDefinition profile = readProfile(PROFILE_FOLDER.resolve("dsf-task-test.xml"));
+		profileModifier.accept(profile);
+
 		StructureDefinition created = createOp.apply(profile);
 		assertNotNull(created);
 		assertTrue(created.hasIdElement());
@@ -76,15 +87,27 @@ public class StructureDefinitionIntegrationTest extends AbstractIntegrationTest
 
 		testDbResources(UUID.fromString(created.getIdElement().getIdPart()),
 				created.getIdElement().getVersionIdPartAsLong());
+
+		return created;
 	}
 
-	private void testCreateWithSnapshot(Function<StructureDefinition, StructureDefinition> createOp) throws Exception
+	private StructureDefinition testCreateWithSnapshot(Function<StructureDefinition, StructureDefinition> createOp)
+			throws Exception
+	{
+		return testCreateWithSnapshot(createOp, _ ->
+		{});
+	}
+
+	private StructureDefinition testCreateWithSnapshot(Function<StructureDefinition, StructureDefinition> createOp,
+			Consumer<StructureDefinition> profileModifier) throws Exception
 	{
 		EventManager eventManager = getSpringWebApplicationContext().getBean(EventManager.class);
 		List<Event> events = new ArrayList<>();
 		eventManager.addHandler(events::add);
 
 		StructureDefinition profile = readProfile(PROFILE_FOLDER.resolve("dsf-task-test-snapshot.xml"));
+		profileModifier.accept(profile);
+
 		StructureDefinition created = createOp.apply(profile);
 		assertNotNull(created);
 		assertTrue(created.hasIdElement());
@@ -105,6 +128,8 @@ public class StructureDefinitionIntegrationTest extends AbstractIntegrationTest
 
 		testDbResources(UUID.fromString(created.getIdElement().getIdPart()),
 				created.getIdElement().getVersionIdPartAsLong());
+
+		return created;
 	}
 
 	private void testDbResources(UUID id, long version) throws SQLException, ResourceDeletedException
@@ -358,5 +383,90 @@ public class StructureDefinitionIntegrationTest extends AbstractIntegrationTest
 
 			return (StructureDefinition) returnBundle.getEntryFirstRep().getResource();
 		});
+	}
+
+	@Test
+	public void testGetSnapshotAllowedWithSnapshotInCreatedResource() throws Exception
+	{
+		StructureDefinition created = testCreateWithSnapshot(getWebserviceClient()::create,
+				getReadAccessHelper()::addLocal);
+		assertTrue(created.hasSnapshot());
+
+		StructureDefinition read = getWebserviceClient().read(StructureDefinition.class,
+				created.getIdElement().getIdPart());
+		assertNotNull(read);
+		assertFalse(read.hasSnapshot());
+
+		StructureDefinition snapshot1 = getWebserviceClient()
+				.generateSnapshot(created.getUrl() + "|" + created.getVersion());
+		assertNotNull(snapshot1);
+		assertTrue(snapshot1.hasSnapshot());
+
+		StructureDefinition snapshot2 = getWebserviceClient().getSnapshot(created.getIdElement().getIdPart());
+		assertNotNull(snapshot2);
+		assertTrue(snapshot2.hasSnapshot());
+	}
+
+	@Test
+	public void testGetSnapshotNotAllowedWithSnapshotInCreataedResource() throws Exception
+	{
+		StructureDefinition created = testCreateWithSnapshot(getWebserviceClient()::create,
+				getReadAccessHelper()::addLocal);
+
+		expectForbidden(() -> getExternalWebserviceClient().read(StructureDefinition.class,
+				created.getIdElement().getIdPart()));
+
+		expectForbidden(
+				() -> getExternalWebserviceClient().generateSnapshot(created.getUrl() + "|" + created.getVersion()));
+
+		expectForbidden(() -> getExternalWebserviceClient().getSnapshot(created.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testGetSnapshotAllowedWithoutSnapshotInCreatedResource() throws Exception
+	{
+		StructureDefinition created = testCreateWithoutSnapshot(getWebserviceClient()::create,
+				getReadAccessHelper()::addLocal);
+		assertFalse(created.hasSnapshot());
+
+		StructureDefinition read = getWebserviceClient().read(StructureDefinition.class,
+				created.getIdElement().getIdPart());
+		assertNotNull(read);
+		assertFalse(read.hasSnapshot());
+
+		StructureDefinition snapshot1 = getWebserviceClient()
+				.generateSnapshot(created.getUrl() + "|" + created.getVersion());
+		assertNotNull(snapshot1);
+		assertTrue(snapshot1.hasSnapshot());
+
+		StructureDefinition snapshot2 = getWebserviceClient().getSnapshot(created.getIdElement().getIdPart());
+		assertNotNull(snapshot2);
+		assertTrue(snapshot2.hasSnapshot());
+	}
+
+	@Test
+	public void testGenerateSnapshotForResource() throws Exception
+	{
+		StructureDefinition profile = readProfile(PROFILE_FOLDER.resolve("dsf-task-test.xml"));
+		profile.getMeta().setTag(null);
+
+		StructureDefinition snapshot1 = getWebserviceClient().generateSnapshot(profile);
+		assertNotNull(snapshot1);
+		assertTrue(snapshot1.hasSnapshot());
+
+		StructureDefinition snapshot2 = getExternalWebserviceClient().generateSnapshot(profile);
+		assertNotNull(snapshot2);
+		assertTrue(snapshot2.hasSnapshot());
+
+		StructureDefinition profileWithSnapshot = readProfile(PROFILE_FOLDER.resolve("dsf-task-test-snapshot.xml"));
+		profileWithSnapshot.getMeta().setTag(null);
+
+		StructureDefinition snapshot3 = getWebserviceClient().generateSnapshot(profileWithSnapshot);
+		assertNotNull(snapshot3);
+		assertTrue(snapshot3.hasSnapshot());
+
+		StructureDefinition snapshot4 = getExternalWebserviceClient().generateSnapshot(profileWithSnapshot);
+		assertNotNull(snapshot4);
+		assertTrue(snapshot4.hasSnapshot());
 	}
 }
