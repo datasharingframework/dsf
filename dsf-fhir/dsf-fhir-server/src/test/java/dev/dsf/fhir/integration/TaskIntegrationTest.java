@@ -2396,7 +2396,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertTrue(value instanceof Reference);
 		Reference reference = (Reference) value;
 		reference.setReference("https://localhost:60010/fhir/Binary/941683ea-7670-4d1a-8e0d-75698c433204");
-		
+
 		Task created = createTaskBinary(read, TaskStatus.REQUESTED, true);
 		created.setStatus(TaskStatus.INPROGRESS);
 		created.getRequester().getIdentifier().setValue("Foo");
