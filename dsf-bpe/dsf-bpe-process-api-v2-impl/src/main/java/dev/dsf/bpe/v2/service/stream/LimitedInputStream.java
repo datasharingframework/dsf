@@ -26,7 +26,7 @@ import java.util.Objects;
  * <p>
  * Unlike a regular end-of-stream condition, exhausting the configured limit is treated as a resource limit violation.
  * Once the configured limit has been exhausted, every subsequent call to {@link #read()} or {@link #skip(long)} throws
- * {@link LimitExceededException}, regardless of whether the underlying stream has reached end-of-stream.
+ * {@link IOException}, regardless of whether the underlying stream has reached end-of-stream.
  * </p>
  *
  * <p>
@@ -113,7 +113,7 @@ public final class LimitedInputStream extends FilterInputStream
 	 * Skipping bytes beyond the configured limit is treated as an attempt to consume data beyond the allowed resource
 	 * boundary.
 	 *
-	 * @throws LimitExceededException
+	 * @throws IOException
 	 *             if the limit has already been exhausted
 	 */
 	@Override
