@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Type;
@@ -211,12 +212,13 @@ public class StructureDefinitionServiceImpl extends
 	@Override
 	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		ParametersParameterComponent param = parameters.getParameter("url");
-		Type urlType = param.getValue();
-		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
-				.filter(p -> "resource".equals(p.getName())).findFirst();
+		ParametersParameterComponent urlParam = parameters.getParameter("url");
+		Type urlType = urlParam == null ? null : urlParam.getValue();
 
-		if (urlType != null && resource.isEmpty())
+		ParametersParameterComponent resourceParam = parameters.getParameter("resource");
+		Resource resource = resourceParam == null ? null : resourceParam.getResource();
+
+		if (urlType != null && resource == null)
 		{
 			if (!(urlType instanceof StringType || urlType instanceof UriType))
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
@@ -228,25 +230,24 @@ public class StructureDefinitionServiceImpl extends
 
 			return getSnapshot(url.getValue(), uri, headers);
 		}
-		else if (urlType == null && resource.isPresent() && resource.get().getResource() != null)
+		else if (urlType == null && resource != null)
 		{
-			if (!(resource.get().getResource() instanceof StructureDefinition))
+			if (!(resource instanceof StructureDefinition))
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 
-			StructureDefinition sd = (StructureDefinition) resource.get().getResource();
+			StructureDefinition sd = (StructureDefinition) resource;
 
-			logger.trace("Parameters with StructureDefinition resource url {}", sd.getUrl());
-
-			if (!sd.hasDifferential())
-				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
+			logger.trace("Parameters with StructureDefinition.url {}", sd.getUrl());
 
 			if (sd.hasSnapshot())
 				return responseGenerator
 						.response(Status.OK, sd, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
 						.build();
-			else
+			else if (sd.hasDifferential())
 				return responseGenerator.response(Status.OK, generateSnapshot(sd),
 						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+			else
+				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 		}
 		else
 		{
@@ -257,8 +258,7 @@ public class StructureDefinitionServiceImpl extends
 
 	private Response getSnapshot(String url, UriInfo uri, HttpHeaders headers)
 	{
-		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentIdentity(),
-				PageAndCount.single());
+		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQueryWithoutUserFilter(PageAndCount.single());
 		Map<String, List<String>> searchParameters = new HashMap<>();
 		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, List.of(url));
 		searchParameters.put(SearchQuery.PARAMETER_SORT, List.of("-" + ResourceLastUpdated.PARAMETER_NAME));
@@ -295,7 +295,7 @@ public class StructureDefinitionServiceImpl extends
 				() -> snapshotDao.read(parameterConverter.toUuid(resourceTypeName, id)), Optional::empty,
 				Optional::empty);
 
-		if (snapshot.isPresent())
+		if (snapshot.isPresent() && snapshot.get().hasSnapshot())
 			return snapshot.map(d -> responseGenerator.response(Status.OK, d,
 					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))).get().build();
 
