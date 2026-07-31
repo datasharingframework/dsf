@@ -47,11 +47,15 @@ import de.hsheilbronn.mi.utils.crypto.kem.RsaKemAesGcm;
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairGeneratorFactory;
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import dev.dsf.bpe.v2.service.stream.LimitedInputStream;
 
 public class CryptoServiceImpl implements CryptoService
 {
 	public static final class KemDelegate implements Kem
 	{
+		public static final long ENCRYPT_LIMIT = 250 * 1024 * 1024; // 250 MiB
+		public static final long DENCRYPT_LIMIT = (250 * 1024 * 1024) + 1024; // 250 MiB + 1024 Bytes
+
 		private final AbstractKemAesGcm delegate;
 
 		public KemDelegate(AbstractKemAesGcm delegate)
@@ -63,7 +67,7 @@ public class CryptoServiceImpl implements CryptoService
 		public InputStream encrypt(InputStream data, PublicKey publicKey) throws NoSuchAlgorithmException,
 				InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException
 		{
-			return delegate.encrypt(data, publicKey);
+			return delegate.encrypt(new LimitedInputStream(data, ENCRYPT_LIMIT), publicKey);
 		}
 
 		@Override
@@ -71,7 +75,7 @@ public class CryptoServiceImpl implements CryptoService
 				throws IOException, NoSuchAlgorithmException, InvalidKeyException, DecapsulateException,
 				NoSuchPaddingException, InvalidAlgorithmParameterException
 		{
-			return delegate.decrypt(encrypted, privateKey);
+			return delegate.decrypt(new LimitedInputStream(encrypted, DENCRYPT_LIMIT), privateKey);
 		}
 	}
 
