@@ -94,7 +94,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.referenceCleaner = referenceCleaner;
 		this.referenceExtractor = referenceExtractor;
 		this.resourceType = resourceType;
-		this.defaultProfileProvider = defaultProfileProvider;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
@@ -102,6 +101,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.authorizationRule = authorizationRule;
 		this.resourceValidator = resourceValidator;
 		this.validationRules = validationRules;
+		this.defaultProfileProvider = defaultProfileProvider;
 	}
 
 	@Override
@@ -460,20 +460,24 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Map<String, List<String>> queryParameters = uri.getQueryParameters();
 		PartialResult<R> result = getExisting(queryParameters);
 
-		// No matches, no id provided: The server creates the resource.
-		if (result.getTotal() <= 0 && !resource.hasId())
+		// No matches
+		if (result.getTotal() <= 0)
 		{
-			// more security checks and audit log in create method
-			return create(resource, uri, headers);
-		}
+			// no id provided: The server creates the resource.
+			if (!resource.hasId())
+			{
+				// more security checks and audit log in create method
+				return create(resource, uri, headers);
+			}
 
-		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
-		// if it does not support Update as Create) -> reject
-		else if (result.getTotal() <= 0 && resource.hasId())
-		{
-			audit.info("Create as update of non existing {} denied for identity '{}'", resourceTypeName,
-					getCurrentIdentity().getName());
-			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
+			// id provided: The server treats the interaction as an Update as Create interaction (or rejects it, if it
+			// does not support Update as Create) -> reject
+			else
+			{
+				audit.info("Create as update of non existing {} denied for identity '{}'", resourceTypeName,
+						getCurrentIdentity().getName());
+				return responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
+			}
 		}
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
@@ -519,7 +523,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
 		// not selective enough preferably with an OperationOutcome
-		else // if (result.getOverallCount() > 1)
+		else
 		{
 			audit.info(
 					"Update of {} denied for identity '{}', conditional update criteria not selective enough, multiple matches",
@@ -623,7 +627,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), PageAndCount.single());
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.single());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
