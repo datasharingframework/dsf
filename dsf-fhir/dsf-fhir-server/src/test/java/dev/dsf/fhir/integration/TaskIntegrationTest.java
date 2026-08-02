@@ -2478,4 +2478,48 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(resultBundle.getEntry().get(0).getResponse().getStatus());
 		assertTrue(resultBundle.getEntry().get(0).getResponse().getStatus().startsWith("403"));
 	}
+
+	@Test
+	public void testDeleteDraftTaskAllowedLocalOrganization() throws Exception
+	{
+		ActivityDefinition ad = readActivityDefinition("dsf-test-activity-definition14-1.0.xml");
+		getWebserviceClient().create(ad);
+
+		StructureDefinition profile = readTestTaskProfile();
+		getWebserviceClient().create(profile);
+
+		Task t = readTestTask("Test_Organization", null, "Test_Organization");
+		t.addIdentifier().setSystem("http://dsf.dev/sid/task-identifier").setValue("delete-allowed");
+		t.setStatus(TaskStatus.DRAFT);
+		Task createdT = getWebserviceClient().create(t);
+		assertNotNull(createdT);
+		String id = createdT.getIdElement().getIdPart();
+		assertNotNull(id);
+
+		getWebserviceClient().delete(Task.class, id);
+
+		Bundle searchResult = getWebserviceClient().search(Task.class, Map.of());
+		assertNotNull(searchResult);
+		assertEquals(0, searchResult.getTotal());
+	}
+
+	@Test
+	public void testDeleteDraftTaskForbiddenExternalOrganization() throws Exception
+	{
+		ActivityDefinition ad = readActivityDefinition("dsf-test-activity-definition14-1.0.xml");
+		getWebserviceClient().create(ad);
+
+		StructureDefinition profile = readTestTaskProfile();
+		getWebserviceClient().create(profile);
+
+		Task t = readTestTask("Test_Organization", null, "Test_Organization");
+		t.addIdentifier().setSystem("http://dsf.dev/sid/task-identifier").setValue("delete-forbidden");
+		t.setStatus(TaskStatus.DRAFT);
+		Task createdT = getWebserviceClient().create(t);
+		assertNotNull(createdT);
+		String id = createdT.getIdElement().getIdPart();
+		assertNotNull(id);
+
+		expectForbidden(() -> getExternalWebserviceClient().delete(Task.class, id));
+	}
 }
