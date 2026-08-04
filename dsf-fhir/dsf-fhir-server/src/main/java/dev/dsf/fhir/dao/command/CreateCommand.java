@@ -105,10 +105,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
-		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		UriComponents components = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
 		// check standard create request url: e.g. Patient
-		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
+		if (components.getPathSegments().size() == 1 && components.getQueryParams().isEmpty())
 		{
 			if (!entry.hasFullUrl() || !entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 			{
@@ -226,8 +226,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (!ifNoneExist.contains("?"))
 			ifNoneExist = '?' + ifNoneExist;
 
-		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExist).build();
-		String path = componentes.getPath();
+		UriComponents components = UriComponentsBuilder.fromUriString(ifNoneExist).build();
+		String path = components.getPath();
 		if (path != null && !path.isBlank())
 		{
 			Response response = responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExist);
@@ -235,7 +235,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 
 		Map<String, List<String>> queryParameters = parameterConverter
-				.urlDecodeQueryParameters(componentes.getQueryParams());
+				.urlDecodeQueryParameters(components.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(

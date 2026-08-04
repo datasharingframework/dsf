@@ -41,10 +41,10 @@ public class MatcherFactory
 
 	public Optional<Matcher> createMatcher(String uri)
 	{
-		UriComponents componentes = UriComponentsBuilder.fromUriString(uri).build();
-		String path = componentes.getPath();
+		UriComponents components = UriComponentsBuilder.fromUriString(uri).build();
+		String path = components.getPath();
 
-		MultiValueMap<String, String> queryParameters = componentes.getQueryParams();
+		MultiValueMap<String, String> queryParameters = components.getQueryParams();
 
 		if (daosByResourceName.containsKey(path))
 		{

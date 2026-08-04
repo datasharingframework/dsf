@@ -94,14 +94,14 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 
 		if (newResource.hasCriteria())
 		{
-			UriComponents cComponentes = UriComponentsBuilder.fromUriString(newResource.getCriteria()).build();
-			if (cComponentes.getPathSegments().size() == 1)
+			UriComponents components = UriComponentsBuilder.fromUriString(newResource.getCriteria()).build();
+			if (components.getPathSegments().size() == 1)
 			{
-				Optional<ResourceDao<?>> optDao = daoProvider.getDao(cComponentes.getPathSegments().get(0));
+				Optional<ResourceDao<?>> optDao = daoProvider.getDao(components.getPathSegments().get(0));
 				if (optDao.isPresent())
 				{
 					SearchQuery<?> searchQuery = optDao.get().createSearchQueryWithoutUserFilter(PageAndCount.exists())
-							.configureParameters(cComponentes.getQueryParams());
+							.configureParameters(components.getQueryParams());
 					List<SearchQueryParameterError> uQp = searchQuery.getUnsupportedQueryParameters();
 					if (!uQp.isEmpty())
 					{
@@ -112,13 +112,12 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 				}
 				else
 				{
-					errors.add(
-							"Subscription.criteria invalid (resource '" + cComponentes.getPath() + "' not supported)");
+					errors.add("Subscription.criteria invalid (resource '" + components.getPath() + "' not supported)");
 				}
 			}
 			else
 			{
-				errors.add("Subscription.criteria invalid ('" + cComponentes.getPath() + "')");
+				errors.add("Subscription.criteria invalid ('" + components.getPath() + "')");
 			}
 		}
 		else

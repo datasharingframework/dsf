@@ -336,8 +336,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (!ifNoneExistHeaderValue.contains("?"))
 			ifNoneExistHeaderValue = '?' + ifNoneExistHeaderValue;
 
-		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistHeaderValue).build();
-		String path = componentes.getPath();
+		UriComponents components = UriComponentsBuilder.fromUriString(ifNoneExistHeaderValue).build();
+		String path = components.getPath();
 		if (path != null && !path.isBlank())
 		{
 			Response response = responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExistHeader.get());
@@ -345,7 +345,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		}
 
 		Map<String, List<String>> queryParameters = parameterConverter
-				.urlDecodeQueryParameters(componentes.getQueryParams());
+				.urlDecodeQueryParameters(components.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(

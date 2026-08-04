@@ -81,10 +81,10 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		}
 		else
 		{
-			UriComponents componentes = UriComponentsBuilder
+			UriComponents components = UriComponentsBuilder
 					.fromUriString(queryParameters.startsWith("?") ? queryParameters : "?" + queryParameters).build();
 
-			return componentes.getQueryParams();
+			return components.getQueryParams();
 		}
 	}
 
