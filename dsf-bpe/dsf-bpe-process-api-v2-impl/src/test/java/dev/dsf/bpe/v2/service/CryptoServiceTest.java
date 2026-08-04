@@ -85,7 +85,7 @@ public class CryptoServiceTest
 	{
 		try
 		{
-			InputStream encrypted = noLimitKem.encrypt(new NullInputStream(KemDelegate.DENCRYPT_LIMIT + 1),
+			InputStream encrypted = noLimitKem.encrypt(new NullInputStream(KemDelegate.DECRYPT_LIMIT + 1),
 					keyPair.getPublic());
 
 			kem.decrypt(encrypted, keyPair.getPrivate()).transferTo(new NullOutputStream());
@@ -94,7 +94,7 @@ public class CryptoServiceTest
 		}
 		catch (IOException e)
 		{
-			assertEquals("Stream limit of " + KemDelegate.DENCRYPT_LIMIT + " bytes exceeded", e.getMessage());
+			assertEquals("Stream limit of " + KemDelegate.DECRYPT_LIMIT + " bytes exceeded", e.getMessage());
 		}
 	}
 }

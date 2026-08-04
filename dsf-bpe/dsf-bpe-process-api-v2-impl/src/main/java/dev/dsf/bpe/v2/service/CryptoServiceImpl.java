@@ -53,8 +53,8 @@ public class CryptoServiceImpl implements CryptoService
 {
 	public static final class KemDelegate implements Kem
 	{
-		public static final long ENCRYPT_LIMIT = 250 * 1024 * 1024; // 250 MiB
-		public static final long DENCRYPT_LIMIT = (250 * 1024 * 1024) + 1024; // 250 MiB + 1024 Bytes
+		protected static final long ENCRYPT_LIMIT = 250 * 1024 * 1024; // 250 MiB
+		protected static final long DECRYPT_LIMIT = (250 * 1024 * 1024) + 1024; // 250 MiB + 1024 Bytes
 
 		private final AbstractKemAesGcm delegate;
 
@@ -75,7 +75,7 @@ public class CryptoServiceImpl implements CryptoService
 				throws IOException, NoSuchAlgorithmException, InvalidKeyException, DecapsulateException,
 				NoSuchPaddingException, InvalidAlgorithmParameterException
 		{
-			return delegate.decrypt(new LimitedInputStream(encrypted, DENCRYPT_LIMIT), privateKey);
+			return delegate.decrypt(new LimitedInputStream(encrypted, DECRYPT_LIMIT), privateKey);
 		}
 	}
 
