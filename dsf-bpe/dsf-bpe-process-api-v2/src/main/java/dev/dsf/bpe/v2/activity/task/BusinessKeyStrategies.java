@@ -36,7 +36,7 @@ public enum BusinessKeyStrategies implements BusinessKeyStrategy
 		}
 	},
 	/**
-	 * Generates an alternative buisness-key for the current process instance and uses the alternative when sending Task
+	 * Generates an alternative business-key for the current process instance and uses the alternative when sending Task
 	 * resources.
 	 * <p>
 	 * This can be used to hide the current business-key from the target, but allows the target to reply using the send
