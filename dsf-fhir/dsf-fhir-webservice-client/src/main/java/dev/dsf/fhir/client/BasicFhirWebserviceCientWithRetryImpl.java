@@ -155,6 +155,12 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
+	public StructureDefinition getSnapshot(String id)
+	{
+		return retry(() -> delegate.getSnapshot(id));
+	}
+
+	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition differential)
 	{
 		return retry(() -> delegate.generateSnapshot(differential));

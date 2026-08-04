@@ -16,7 +16,10 @@
 package dev.dsf.fhir.webservice.secure;
 
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Type;
 
 import dev.dsf.fhir.authorization.AuthorizationRule;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
@@ -53,24 +56,41 @@ public class StructureDefinitionServiceSecure
 	@Override
 	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.postSnapshotNew(snapshotPath, parameters, uri, headers);
+		Response response = delegate.postSnapshotNew(snapshotPath, parameters, uri, headers);
+
+		ParametersParameterComponent urlParam = parameters.getParameter("url");
+		Type urlType = urlParam == null ? null : urlParam.getValue();
+
+		ParametersParameterComponent resourceParam = parameters.getParameter("resource");
+		Resource resource = resourceParam == null ? null : resourceParam.getResource();
+
+		if (urlType != null && resource == null)
+			return checkRead(response);
+		else
+			return response;
 	}
 
 	@Override
 	public Response getSnapshotNew(String snapshotPath, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.getSnapshotNew(snapshotPath, uri, headers);
+		Response response = delegate.getSnapshotNew(snapshotPath, uri, headers);
+
+		return checkRead(response);
 	}
 
 	@Override
 	public Response postSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.postSnapshotExisting(snapshotPath, id, uri, headers);
+		Response response = delegate.postSnapshotExisting(snapshotPath, id, uri, headers);
+
+		return checkRead(response);
 	}
 
 	@Override
 	public Response getSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.getSnapshotExisting(snapshotPath, id, uri, headers);
+		Response response = delegate.getSnapshotExisting(snapshotPath, id, uri, headers);
+
+		return checkRead(response);
 	}
 }
