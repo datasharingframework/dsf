@@ -165,10 +165,10 @@ public class FileRemover extends AbstractIo
 		return keyDir.resolve(commonName.replaceAll(" ", "_") + postFix);
 	}
 
-	public void deleteFilesInKeyDir(List<Key> Keys)
+	public void deleteFilesInKeyDir(List<Key> keys)
 	{
-		Stream<String> idsToDelete = Keys == null ? Stream.empty()
-				: Keys.stream().map(Key::getId).filter(Objects::nonNull);
+		Stream<String> idsToDelete = keys == null ? Stream.empty()
+				: keys.stream().map(Key::getId).filter(Objects::nonNull);
 
 		idsToDelete.forEach(id ->
 		{
