@@ -234,7 +234,8 @@ public class WebSocketSubscriptionManagerImpl
 			{
 				executor.shutdownNow();
 				if (!executor.awaitTermination(60, TimeUnit.SECONDS))
-					logger.warn("EventManager executor did not terminate");
+					logger.warn("{} executor did not terminate",
+							WebSocketSubscriptionManagerImpl.class.getSimpleName());
 			}
 		}
 		catch (InterruptedException ie)
