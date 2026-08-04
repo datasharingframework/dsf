@@ -778,10 +778,10 @@ public class ResponseGenerator
 
 	public Response badCreateRequestUrl(int bundleIndex, String url)
 	{
-		logger.warn("Bad crate request url {} at bundle index {}", url, bundleIndex);
+		logger.warn("Bad create request url {} at bundle index {}", url, bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Bad crete request url " + url + " at bundle index " + bundleIndex);
+				"Bad create request url " + url + " at bundle index " + bundleIndex);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
