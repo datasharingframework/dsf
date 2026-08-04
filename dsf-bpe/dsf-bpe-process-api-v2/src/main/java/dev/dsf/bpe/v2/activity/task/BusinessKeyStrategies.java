@@ -66,7 +66,6 @@ public enum BusinessKeyStrategies implements BusinessKeyStrategy
 		{
 			return createBusinessKey();
 		}
-
 	};
 
 	private static String createBusinessKey()
