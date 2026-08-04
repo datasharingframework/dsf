@@ -56,6 +56,7 @@ import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -2380,5 +2381,145 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(entry.getResource());
 		assertEquals(Task.class, entry.getResource().getClass());
 		assertEquals(createdTask.getIdElement().getIdPart(), entry.getResource().getIdElement().getIdPart());
+	}
+
+	private Task prepareForTestIllegalUpdate() throws SQLException, IOException
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		Organization o = new Organization();
+		o.getIdentifierFirstRep().setSystem("http://dsf.dev/sid/organization-identifier").setValue("Foo");
+		orgDao.create(o);
+
+		Task read = readTestTaskBinary("External_Test_Organization", "Test_Organization");
+		Type value = read.getInput().getLast().getValue();
+		assertNotNull(value);
+		assertTrue(value instanceof Reference);
+		Reference reference = (Reference) value;
+		reference.setReference("https://localhost:60010/fhir/Binary/941683ea-7670-4d1a-8e0d-75698c433204");
+
+		Task created = createTaskBinary(read, TaskStatus.REQUESTED, true);
+		created.setStatus(TaskStatus.INPROGRESS);
+		created.getRequester().getIdentifier().setValue("Foo");
+		return created;
+	}
+
+	@Test
+	public void testIllegalUpdate() throws Exception
+	{
+		Task created = prepareForTestIllegalUpdate();
+
+		expectForbidden(() -> getWebserviceClient().update(created));
+	}
+
+	@Test
+	public void testIllegalConditionalUpdateWithId() throws Exception
+	{
+		Task created = prepareForTestIllegalUpdate();
+
+		expectForbidden(() -> getWebserviceClient().updateConditionaly(created,
+				Map.of("_id", List.of(created.getIdElement().getIdPart()))));
+	}
+
+	@Test
+	public void testIllegalConditionalUpdateWithoutId() throws Exception
+	{
+		Task created = prepareForTestIllegalUpdate();
+		String id = created.getIdElement().getIdPart();
+		created.setIdElement(null);
+		created.getMeta().setVersionId(null);
+
+		expectForbidden(() -> getWebserviceClient().updateConditionaly(created, Map.of("_id", List.of(id))));
+	}
+
+	@Test
+	public void testIllegalUpdateViaBundle() throws Exception
+	{
+		Task created = prepareForTestIllegalUpdate();
+
+		Bundle b = new Bundle();
+		b.setType(BundleType.BATCH);
+
+		BundleEntryComponent entry = b.addEntry()
+				.setFullUrl(created.getIdElement().withServerBase(getBaseUrl(), "Task").toVersionless().getValue());
+		entry.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Task/" + created.getIdElement().getIdPart());
+
+		Bundle resultBundle = getWebserviceClient().postBundle(b);
+		assertNotNull(resultBundle);
+		assertNotNull(resultBundle.getEntry());
+		assertEquals(1, resultBundle.getEntry().size());
+		assertNotNull(resultBundle.getEntry().get(0));
+		assertNotNull(resultBundle.getEntry().get(0).getResponse());
+		assertNotNull(resultBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(resultBundle.getEntry().get(0).getResponse().getStatus().startsWith("403"));
+	}
+
+	@Test
+	public void testIllegalConditionalUpdateViaBundle() throws Exception
+	{
+		Task created = prepareForTestIllegalUpdate();
+
+		Bundle b = new Bundle();
+		b.setType(BundleType.BATCH);
+
+		BundleEntryComponent entry = b.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		entry.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Task?_id=" + created.getIdElement().getIdPart());
+
+		created.setIdElement(null);
+		created.getMeta().setVersionId(null);
+
+		Bundle resultBundle = getWebserviceClient().postBundle(b);
+		assertNotNull(resultBundle);
+		assertNotNull(resultBundle.getEntry());
+		assertEquals(1, resultBundle.getEntry().size());
+		assertNotNull(resultBundle.getEntry().get(0));
+		assertNotNull(resultBundle.getEntry().get(0).getResponse());
+		assertNotNull(resultBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(resultBundle.getEntry().get(0).getResponse().getStatus().startsWith("403"));
+	}
+
+	@Test
+	public void testDeleteDraftTaskAllowedLocalOrganization() throws Exception
+	{
+		ActivityDefinition ad = readActivityDefinition("dsf-test-activity-definition14-1.0.xml");
+		getWebserviceClient().create(ad);
+
+		StructureDefinition profile = readTestTaskProfile();
+		getWebserviceClient().create(profile);
+
+		Task t = readTestTask("Test_Organization", null, "Test_Organization");
+		t.addIdentifier().setSystem("http://dsf.dev/sid/task-identifier").setValue("delete-allowed");
+		t.setStatus(TaskStatus.DRAFT);
+		Task createdT = getWebserviceClient().create(t);
+		assertNotNull(createdT);
+		String id = createdT.getIdElement().getIdPart();
+		assertNotNull(id);
+
+		getWebserviceClient().delete(Task.class, id);
+
+		Bundle searchResult = getWebserviceClient().search(Task.class, Map.of());
+		assertNotNull(searchResult);
+		assertEquals(0, searchResult.getTotal());
+	}
+
+	@Test
+	public void testDeleteDraftTaskForbiddenExternalOrganization() throws Exception
+	{
+		ActivityDefinition ad = readActivityDefinition("dsf-test-activity-definition14-1.0.xml");
+		getWebserviceClient().create(ad);
+
+		StructureDefinition profile = readTestTaskProfile();
+		getWebserviceClient().create(profile);
+
+		Task t = readTestTask("Test_Organization", null, "Test_Organization");
+		t.addIdentifier().setSystem("http://dsf.dev/sid/task-identifier").setValue("delete-forbidden");
+		t.setStatus(TaskStatus.DRAFT);
+		Task createdT = getWebserviceClient().create(t);
+		assertNotNull(createdT);
+		String id = createdT.getIdElement().getIdPart();
+		assertNotNull(id);
+
+		expectForbidden(() -> getExternalWebserviceClient().delete(Task.class, id));
 	}
 }
