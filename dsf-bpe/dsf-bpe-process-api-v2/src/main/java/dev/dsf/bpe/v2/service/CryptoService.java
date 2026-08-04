@@ -63,7 +63,9 @@ import javax.net.ssl.TrustManager;
 public interface CryptoService
 {
 	/**
-	 * Key encapsulation mechanism with encrypt and decrypt methods.
+	 * Key encapsulation mechanism with encrypt and decrypt methods.<br>
+	 * <br>
+	 * <b>Starting with DSF 2.1.1 plain-texts are limited to 250 MiB</b>
 	 */
 	public interface Kem
 	{

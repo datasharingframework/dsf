@@ -17,6 +17,7 @@ package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -117,6 +118,12 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 	public void checkUpdateAllowed(int index, Connection connection, Identity identity, Resource oldResource,
 			Resource newResource) throws WebApplicationException
 	{
+		Objects.requireNonNull(newResource, "newResource");
+		Objects.requireNonNull(oldResource, "oldResource");
+		// intentionally guarding against object identity
+		if (newResource == oldResource)
+			throw new IllegalStateException("new resource same object as old resource");
+
 		final String resourceTypeName = getResourceTypeName(oldResource);
 		final String resourceId = oldResource.getIdElement().getIdPart();
 		final long resourceVersion = oldResource.getIdElement().getVersionIdPartAsLong();
