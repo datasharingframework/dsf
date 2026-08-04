@@ -230,7 +230,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			return;
 
 		referenceExtractor.getReferences(resource)
-				.filter(ref -> ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase))
+				.filter(ref -> ReferenceType.RELATED_ARTIFACT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase))
 						|| ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase)))
 				.forEach(this::resolveLiteralInternalRelatedArtifactOrAttachmentUrl);
 	}

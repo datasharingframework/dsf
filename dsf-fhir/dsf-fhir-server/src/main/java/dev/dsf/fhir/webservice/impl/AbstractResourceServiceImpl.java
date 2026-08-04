@@ -300,10 +300,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	{
 		return switch (reference.getType(serverBase))
 		{
-			case LITERAL_INTERNAL, RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL ->
+			case LITERAL_INTERNAL, RELATED_ARTIFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL ->
 				referenceResolver.checkLiteralInternalReference(resource, reference, connection);
 
-			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+			case LITERAL_EXTERNAL, RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				referenceResolver.checkLiteralExternalReference(resource, reference);
 
 			case LOGICAL -> referenceResolver.checkLogicalReference(resource, reference, connection);
@@ -311,7 +311,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			case CANONICAL -> referenceResolver.checkCanonicalReference(resource, reference, connection);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
-			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
+			case RELATED_ARTIFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
 
 			case UNKNOWN -> Optional.of(responseGenerator.unknownReference(resource, reference));
 
