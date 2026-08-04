@@ -29,14 +29,14 @@ public interface PreferReturnOutcome
 {
 	OperationOutcome create(Resource resource);
 
-	OperationOutcome createConditionaly(Resource resource, String ifNoneExistCriteria);
+	OperationOutcome createConditionally(Resource resource, String ifNoneExistCriteria);
 
 	OperationOutcome createBinary(InputStream in, MediaType mediaType, String securityContextReference);
 
 
 	OperationOutcome update(Resource resource);
 
-	OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria);
+	OperationOutcome updateConditionally(Resource resource, Map<String, List<String>> criteria);
 
 	OperationOutcome updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
 

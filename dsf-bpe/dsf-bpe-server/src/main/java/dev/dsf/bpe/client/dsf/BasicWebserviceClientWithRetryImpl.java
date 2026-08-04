@@ -22,9 +22,10 @@ import java.util.Map;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 
-class BasicWebserviceCientWithRetryImpl extends AbstractWebserviceClientJerseyWithRetry implements BasicWebserviceClient
+class BasicWebserviceClientWithRetryImpl extends AbstractWebserviceClientJerseyWithRetry
+		implements BasicWebserviceClient
 {
-	BasicWebserviceCientWithRetryImpl(WebserviceClientJersey delegate, int nTimes, Duration delayMillis)
+	BasicWebserviceClientWithRetryImpl(WebserviceClientJersey delegate, int nTimes, Duration delayMillis)
 	{
 		super(delegate, nTimes, delayMillis);
 	}

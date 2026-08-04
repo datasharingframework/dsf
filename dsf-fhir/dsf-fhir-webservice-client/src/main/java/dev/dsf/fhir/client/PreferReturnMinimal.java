@@ -29,13 +29,13 @@ public interface PreferReturnMinimal
 {
 	IdType create(Resource resource);
 
-	IdType createConditionaly(Resource resource, String ifNoneExistCriteria);
+	IdType createConditionally(Resource resource, String ifNoneExistCriteria);
 
 	IdType createBinary(InputStream in, MediaType mediaType, String securityContextReference);
 
 	IdType update(Resource resource);
 
-	IdType updateConditionaly(Resource resource, Map<String, List<String>> criteria);
+	IdType updateConditionally(Resource resource, Map<String, List<String>> criteria);
 
 	IdType updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
 
