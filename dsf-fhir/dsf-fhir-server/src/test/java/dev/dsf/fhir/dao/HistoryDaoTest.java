@@ -43,7 +43,7 @@ import ca.uhn.fhir.context.FhirContext;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
 import dev.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
-import dev.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.HistoryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.PgObjectFactoryImpl;
 import dev.dsf.fhir.history.AtParameter;
@@ -92,7 +92,7 @@ public class HistoryDaoTest extends AbstractDbTest
 			.disable(Feature.AUTO_CLOSE_TARGET).build();
 	private final OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
 			fhirContext, objectMapper);
-	private final HistoryDao dao = new HistroyDaoJdbc(defaultDataSource, fhirContext,
+	private final HistoryDao dao = new HistoryDaoJdbc(defaultDataSource, fhirContext,
 			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext, objectMapper,
 					DATABASE_USERS_GROUP),
 			new PgObjectFactoryImpl(fhirContext, objectMapper));
