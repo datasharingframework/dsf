@@ -78,7 +78,7 @@ public class WebSocketSubscriptionManagerImpl
 		{
 			try
 			{
-				matcher.resloveReferencesForMatching(resource, daoProvider);
+				matcher.resolveReferencesForMatching(resource, daoProvider);
 			}
 			catch (SQLException e)
 			{

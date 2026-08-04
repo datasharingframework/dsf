@@ -512,7 +512,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	}
 
 	@Override
-	public void resloveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
+	public void resolveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
 	{
 		if (resource == null || !getResourceType().isInstance(resource))
 			return;
