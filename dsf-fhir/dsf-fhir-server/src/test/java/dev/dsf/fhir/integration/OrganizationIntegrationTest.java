@@ -21,9 +21,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
@@ -270,5 +275,96 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	{
 		expectBadRequest(() -> getWebserviceClient().searchWithStrictHandling(Organization.class,
 				Map.of("_revinclude", List.of("Endpoint:foo"))));
+	}
+
+	private Organization prepareForTestIllegalUpdate()
+	{
+		Bundle bundle = getWebserviceClient().search(Organization.class,
+				Map.of("identifier", List.of("http://dsf.dev/sid/organization-identifier|External_Test_Organization")));
+		assertNotNull(bundle);
+		assertNotNull(bundle.getEntry());
+		assertEquals(1, bundle.getEntry().size());
+		assertNotNull(bundle.getEntry().get(0).getResource());
+		assertTrue(bundle.getEntry().get(0).getResource() instanceof Organization);
+
+		Organization o = (Organization) bundle.getEntry().get(0).getResource();
+		o.getIdentifierFirstRep().setValue("Test_Organization2");
+		o.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(IntStream.range(0, 128).mapToObj(_ -> "f").collect(Collectors.joining())));
+		return o;
+	}
+
+	@Test
+	public void testIllegalUpdate() throws Exception
+	{
+		Organization o = prepareForTestIllegalUpdate();
+
+		expectForbidden(() -> getWebserviceClient().update(o));
+	}
+
+	@Test
+	public void testIllegalConditionalUpdateWithId() throws Exception
+	{
+		Organization o = prepareForTestIllegalUpdate();
+
+		expectForbidden(() -> getWebserviceClient().updateConditionaly(o,
+				Map.of("_id", List.of(o.getIdElement().getIdPart()))));
+	}
+
+	@Test
+	public void testIllegalConditionalUpdateWithoutId() throws Exception
+	{
+		Organization o = prepareForTestIllegalUpdate();
+
+		expectForbidden(() -> getWebserviceClient().updateConditionaly(o,
+				Map.of("_id", List.of(o.getIdElement().getIdPart()))));
+	}
+
+	@Test
+	public void testIllegalUpdateViaBundle() throws Exception
+	{
+		Organization o = prepareForTestIllegalUpdate();
+
+		Bundle b = new Bundle();
+		b.setType(BundleType.BATCH);
+
+		BundleEntryComponent entry = b.addEntry()
+				.setFullUrl(o.getIdElement().withServerBase(getBaseUrl(), "Organization").toVersionless().getValue());
+		entry.setResource(o).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Organization/" + o.getIdElement().getIdPart());
+
+		Bundle resultBundle = getWebserviceClient().postBundle(b);
+		assertNotNull(resultBundle);
+		assertNotNull(resultBundle.getEntry());
+		assertEquals(1, resultBundle.getEntry().size());
+		assertNotNull(resultBundle.getEntry().get(0));
+		assertNotNull(resultBundle.getEntry().get(0).getResponse());
+		assertNotNull(resultBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(resultBundle.getEntry().get(0).getResponse().getStatus().startsWith("403"));
+	}
+
+	@Test
+	public void testIllegalConditionalUpdateViaBundle() throws Exception
+	{
+		Organization o = prepareForTestIllegalUpdate();
+
+		Bundle b = new Bundle();
+		b.setType(BundleType.BATCH);
+
+		BundleEntryComponent entry = b.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		entry.setResource(o).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Organization?_id=" + o.getIdElement().getIdPart());
+
+		o.setIdElement(null);
+		o.getMeta().setVersionId(null);
+
+		Bundle resultBundle = getWebserviceClient().postBundle(b);
+		assertNotNull(resultBundle);
+		assertNotNull(resultBundle.getEntry());
+		assertEquals(1, resultBundle.getEntry().size());
+		assertNotNull(resultBundle.getEntry().get(0));
+		assertNotNull(resultBundle.getEntry().get(0).getResponse());
+		assertNotNull(resultBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(resultBundle.getEntry().get(0).getResponse().getStatus().startsWith("403"));
 	}
 }

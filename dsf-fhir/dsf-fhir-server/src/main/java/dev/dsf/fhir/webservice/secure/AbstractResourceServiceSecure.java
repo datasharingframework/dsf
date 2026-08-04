@@ -400,6 +400,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)
 	{
+		Objects.requireNonNull(newResource, "newResource");
+		Objects.requireNonNull(oldResource, "oldResource");
+		// intentionally guarding against object identity
+		if (newResource == oldResource)
+			throw new IllegalStateException("new resource same object as old resource");
+
 		resolveLiteralInternalRelatedArtifactOrAttachmentUrls(newResource);
 
 		final String resourceId = oldResource.getIdElement().getIdPart();
@@ -482,7 +488,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				resource.setIdElement(dbResourceId);
 				// more security checks and audit log in update method
-				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);
+				return update(resource.getIdElement().getIdPart(), resource, uri, headers, dbResource);
 			}
 
 			// update: resource has same id
@@ -494,7 +500,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					&& dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart()))
 			{
 				// more security checks and audit log in update method
-				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);
+				return update(resource.getIdElement().getIdPart(), resource, uri, headers, dbResource);
 			}
 
 			// update resource has different id -> 400 Bad Request
