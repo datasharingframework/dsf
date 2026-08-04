@@ -52,8 +52,8 @@ public class StaticResourcesService
 
 	private static final java.nio.file.Path OVERRIDE_RESOURCE_FOLDER = Paths.get("ui");
 
-	private static CacheControl NO_TRANSFORM = new CacheControl();
-	private static CacheControl NO_CACHE_NO_TRANSFORM = new CacheControl();
+	private static final CacheControl NO_TRANSFORM = new CacheControl();
+	private static final CacheControl NO_CACHE_NO_TRANSFORM = new CacheControl();
 	static
 	{
 		// no-transform set by default
