@@ -198,9 +198,9 @@ public class ResourceServiceSecureTest
 
 	public ResourceServiceSecureTest(String label, Class<Resource> resourceClass,
 			Class<BasicResourceService<Resource>> serviceClass, Class<ResourceDao<Resource>> daoClass,
-			Supplier<Resource> resouceSupplier,
+			Supplier<Resource> resourceSupplier,
 			ResourceServiceSecureFactory<Resource, BasicResourceService<Resource>, ResourceDao<Resource>> resourceServiceSecureFactory)
 	{
-		super(resourceClass, serviceClass, daoClass, resouceSupplier, resourceServiceSecureFactory);
+		super(resourceClass, serviceClass, daoClass, resourceSupplier, resourceServiceSecureFactory);
 	}
 }

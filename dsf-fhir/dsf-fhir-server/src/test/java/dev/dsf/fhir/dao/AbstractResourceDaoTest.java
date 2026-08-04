@@ -98,7 +98,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 			permanentDeleteDataSource.unwrap(BasicDataSource.class).close();
 	}
 
-	protected final Class<D> resouceClass;
+	protected final Class<D> resourceClass;
 	protected final QuadFunction<DataSource, DataSource, FhirContext, ObjectMapper, C> daoCreator;
 
 	protected final FhirContext fhirContext = FhirContext.forR4();
@@ -108,10 +108,10 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 			.disable(Feature.AUTO_CLOSE_TARGET).build();
 	protected C dao;
 
-	protected AbstractResourceDaoTest(Class<D> resouceClass,
+	protected AbstractResourceDaoTest(Class<D> resourceClass,
 			QuadFunction<DataSource, DataSource, FhirContext, ObjectMapper, C> daoCreator)
 	{
-		this.resouceClass = resouceClass;
+		this.resourceClass = resourceClass;
 		this.daoCreator = daoCreator;
 	}
 

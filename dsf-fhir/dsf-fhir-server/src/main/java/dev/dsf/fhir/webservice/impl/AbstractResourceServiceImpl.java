@@ -580,7 +580,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
 		R updatedResource = exceptionHandler
-				.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName, () ->
+				.handleSqlExAndResourceNotFoundExAndResourceVersionNonMatchEx(resourceTypeName, () ->
 				{
 					try (Connection connection = dao.newReadWriteTransaction())
 					{

@@ -21,7 +21,7 @@ import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 
 @FunctionalInterface
-public interface SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException<R>
+public interface SupplierWithSqlAndResourceNotFoundAndResourceVersionNoMatchException<R>
 {
 	R get() throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
 }

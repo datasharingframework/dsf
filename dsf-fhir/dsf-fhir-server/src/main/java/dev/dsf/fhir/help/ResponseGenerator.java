@@ -899,7 +899,7 @@ public class ResponseGenerator
 
 	}
 
-	public Response bundleEntryResouceMissingId(int bundleIndex, String resourceTypeName)
+	public Response bundleEntryResourceMissingId(int bundleIndex, String resourceTypeName)
 	{
 		logger.warn("Bundle entry of type {} at bundle index {} is missing id value", resourceTypeName, bundleIndex);
 

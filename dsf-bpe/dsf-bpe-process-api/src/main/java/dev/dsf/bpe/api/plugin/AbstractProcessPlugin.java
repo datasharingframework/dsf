@@ -1113,7 +1113,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		};
 	}
 
-	private boolean isValidMetadataResouce(Object resource, String file)
+	private boolean isValidMetadataResource(Object resource, String file)
 	{
 		boolean urlOk = fhirConfig.hasMetadataResourceUrl(resource);
 		boolean versionDefined = fhirConfig.hasMetadataresourceVersion(resource);
@@ -1158,7 +1158,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	private boolean isValidActivityDefinition(String file, Object resource)
 	{
 		boolean hasProfile = hasProfile(file, resource, P_ACTIVITY_DEFINITION);
-		boolean metadataResourceOk = isValidMetadataResouce(resource, file);
+		boolean metadataResourceOk = isValidMetadataResource(resource, file);
 		boolean urlOk = fhirConfig.getActivityDefinitionUrl(resource)
 				.map(u -> ACTIVITY_DEFINITION_URL_PATTERN.matcher(u).matches()).orElse(false);
 
@@ -1173,17 +1173,17 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 	private boolean isValidCodeSystem(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_CODE_SYSTEM) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_CODE_SYSTEM) && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidLibrary(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_LIBRARY) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_LIBRARY) && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidMeasure(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_MEASURE) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_MEASURE) && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidNamingSystem(String file, Object resource)
@@ -1211,7 +1211,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 					file, getDefinitionName(), getDefinitionVersion());
 		}
 
-		return hasProfile && hasQuestionnaireItemsWithRequired && isValidMetadataResouce(resource, file);
+		return hasProfile && hasQuestionnaireItemsWithRequired && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidStructureDefinition(String file, Object resource)
@@ -1237,7 +1237,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		}
 
 		return hasProfile && hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion && baseDefinitionOk
-				&& isValidMetadataResouce(resource, file);
+				&& isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidTask(String file, Object resource, String localOrganizationIdentifierValue)
@@ -1378,7 +1378,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 	private boolean isValidValueSet(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_VALUE_SET) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_VALUE_SET) && isValidMetadataResource(resource, file);
 	}
 
 	private List<BpmnFileAndModel> filterBpmnModelsWithoutMatchingActivityDefinitions(
