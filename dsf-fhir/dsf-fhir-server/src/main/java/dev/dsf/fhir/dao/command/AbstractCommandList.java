@@ -103,7 +103,7 @@ abstract class AbstractCommandList
 		}
 	}
 
-	protected void auditLogAbbort(Command command)
+	protected void auditLogAbort(Command command)
 	{
 		if (command instanceof DeleteCommand)
 		{
