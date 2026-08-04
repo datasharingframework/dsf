@@ -16,6 +16,7 @@
 package dev.dsf.bpe.test.service;
 
 import static dev.dsf.bpe.test.PluginTestExecutor.expectNotNull;
+import static dev.dsf.bpe.test.PluginTestExecutor.expectNull;
 import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
 
 import dev.dsf.bpe.test.AbstractTest;
@@ -61,5 +62,13 @@ public class JsonVariableTestGet extends AbstractTest implements ServiceTask
 
 		expectNotNull(variable);
 		expectSame(JsonVariableTestSet.TEST_INTEGER, variable);
+	}
+
+	@PluginTest
+	public void getJsonNullVariable(Variables variables) throws Exception
+	{
+		JsonPojo variable = variables.getVariable(JsonVariableTestSet.JSON_NULL_VARIABLE);
+
+		expectNull(variable);
 	}
 }

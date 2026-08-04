@@ -177,6 +177,8 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 
 	CapabilityStatement getConformance();
 
+	StructureDefinition getSnapshot(String id);
+
 	StructureDefinition generateSnapshot(String url);
 
 	StructureDefinition generateSnapshot(StructureDefinition differential);
