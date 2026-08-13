@@ -51,6 +51,7 @@ import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import dev.dsf.common.config.AbstractCertificateAndProxyConfig;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
 import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
@@ -993,6 +994,8 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	@Bean
 	public ProxyConfig proxyConfig()
 	{
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy, false);
+
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}
 

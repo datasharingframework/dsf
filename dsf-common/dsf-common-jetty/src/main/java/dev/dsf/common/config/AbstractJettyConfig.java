@@ -239,7 +239,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
-	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or against (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+	@Documentation(description = "Forward proxy no-proxy list: Target URLs will match exact domains `example.com`, against one level sub-domains `*.example.com`, one or more level sub-domains `**.example.com`, against IP-addresses and CIDR Networks if the target URL is specified as IP-address (IPv6 in square brackets), if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "sub.exact.com:80, *.one.level.wildcard.com, **.multilevel.com:443, 192.168.1.1, 192.168.1.0/24:80, [2001:db8::1]:443, [2001:db8::/32]")
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('[,\\s]+')}")
 	private List<String> proxyNoProxy;
 
@@ -519,6 +519,8 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 	@Lazy
 	public ProxyConfig proxyConfig()
 	{
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy, false);
+
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}
 
