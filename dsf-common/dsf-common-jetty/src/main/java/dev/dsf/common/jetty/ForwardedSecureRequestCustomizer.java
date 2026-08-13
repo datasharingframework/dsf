@@ -16,6 +16,8 @@
 package dev.dsf.common.jetty;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
@@ -28,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
+import dev.dsf.common.config.network.InetSocketAddressMatcher;
 
 public class ForwardedSecureRequestCustomizer implements Customizer
 {
@@ -40,15 +43,32 @@ public class ForwardedSecureRequestCustomizer implements Customizer
 	private static final Logger logger = LoggerFactory.getLogger(ForwardedSecureRequestCustomizer.class);
 
 	private final String clientCertHeaderName;
+	private final InetSocketAddressMatcher trustedProxyMatcher;
 
-	public ForwardedSecureRequestCustomizer(String clientCertHeaderName)
+	public ForwardedSecureRequestCustomizer(String clientCertHeaderName, InetSocketAddressMatcher trustedProxyMatcher)
 	{
 		this.clientCertHeaderName = Objects.requireNonNull(clientCertHeaderName, "clientCertHeaderName");
+		this.trustedProxyMatcher = trustedProxyMatcher;
 	}
 
 	@Override
 	public Request customize(Request request, Mutable responseHeaders)
 	{
+		SocketAddress remote = request.getConnectionMetaData().getConnection().getEndPoint().getRemoteSocketAddress();
+		if (!(remote instanceof InetSocketAddress))
+		{
+			logger.warn("Ignoring {} header from untrusted reverse proxy, remote address not a InetSocketAddress",
+					clientCertHeaderName);
+			return request;
+		}
+
+		if (!trustedProxyMatcher.matches((InetSocketAddress) remote))
+		{
+			logger.warn("Ignoring {} header from untrusted reverse proxy {}", clientCertHeaderName,
+					((InetSocketAddress) remote).getAddress().getHostAddress());
+			return request;
+		}
+
 		X509Certificate clientCert = getClientCert(request);
 
 		if (clientCert != null)

@@ -21,6 +21,7 @@ import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +57,11 @@ import org.slf4j.LoggerFactory;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
+import dev.dsf.common.config.network.DynamicHostnameMatcher;
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
+import dev.dsf.common.config.network.InetSocketAddressMatcher;
+import dev.dsf.common.config.network.InetSocketAddressMatcherList;
+import dev.dsf.common.config.network.StaticCidrMatcher;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
 
@@ -140,13 +146,15 @@ public final class JettyServer
 	}
 
 	public static Function<Server, ServerConnector> httpConnector(String host, int port,
-			String clientCertificateHeaderName)
+			String clientCertificateHeaderName, Duration trustedReverseProxiesDnsRefreshTimeout,
+			List<HostSpec> trustedReverseProxies)
 	{
 		return server ->
 		{
 			ServerConnector connector = new ServerConnector(server,
-					httpConnectionFactory(new ForwardedRequestCustomizer(),
-							new ForwardedSecureRequestCustomizer(clientCertificateHeaderName)));
+					httpConnectionFactory(new ForwardedRequestCustomizer(), new ForwardedSecureRequestCustomizer(
+							clientCertificateHeaderName,
+							createTrustedProxyMatcher(trustedReverseProxiesDnsRefreshTimeout, trustedReverseProxies))));
 			connector.setHost(host);
 			connector.setPort(port);
 
@@ -155,7 +163,8 @@ public final class JettyServer
 	}
 
 	public static Function<Server, ServerConnector> httpConnector(ServerSocketChannel channel,
-			String clientCertificateHeaderName)
+			String clientCertificateHeaderName, Duration trustedReverseProxiesDnsRefreshTimeout,
+			List<HostSpec> trustedReverseProxies)
 	{
 		return server ->
 		{
@@ -163,7 +172,9 @@ public final class JettyServer
 			{
 				ServerConnector connector = new ServerConnector(server,
 						httpConnectionFactory(new ForwardedRequestCustomizer(),
-								new ForwardedSecureRequestCustomizer(clientCertificateHeaderName)));
+								new ForwardedSecureRequestCustomizer(clientCertificateHeaderName,
+										createTrustedProxyMatcher(trustedReverseProxiesDnsRefreshTimeout,
+												trustedReverseProxies))));
 				connector.open(channel);
 				setHostAndPort(channel, connector);
 
@@ -176,6 +187,40 @@ public final class JettyServer
 
 				throw new RuntimeException(e);
 			}
+		};
+	}
+
+	private static InetSocketAddressMatcher createTrustedProxyMatcher(Duration trustedReverseProxiesDnsRefreshTimeout,
+			List<HostSpec> trustedReverseProxies)
+	{
+		if (trustedReverseProxies == null)
+		{
+			logger.warn("Trusted reverse proxy matcher disabled");
+
+			return InetSocketAddressMatcher.ALL;
+		}
+		else
+		{
+			InetSocketAddressMatcher matcher = new InetSocketAddressMatcherList(
+					trustedReverseProxies.stream().map(toMatcher(trustedReverseProxiesDnsRefreshTimeout)));
+
+			logger.info("Trusted reverse proxy matcher config: {}", matcher.toString());
+
+			return matcher;
+		}
+	}
+
+	private static Function<HostSpec, InetSocketAddressMatcher> toMatcher(
+			Duration trustedReverseProxiesDnsRefreshTimeout)
+	{
+		return hostSpec ->
+		{
+			if (hostSpec.isIp())
+				return StaticCidrMatcher.of(hostSpec);
+			else if (hostSpec.isDomainOrWildcard())
+				return DynamicHostnameMatcher.of(trustedReverseProxiesDnsRefreshTimeout, hostSpec);
+			else
+				throw new IllegalArgumentException("hostSpec not supported");
 		};
 	}
 

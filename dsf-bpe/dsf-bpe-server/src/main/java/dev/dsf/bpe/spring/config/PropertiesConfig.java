@@ -48,7 +48,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
-import dev.dsf.common.config.AbstractCertificateConfig;
+import dev.dsf.common.config.AbstractCertificateAndProxyConfig;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
 import dev.dsf.common.db.migration.DbMigratorConfig;
@@ -58,7 +58,7 @@ import dev.dsf.common.ui.theme.Theme;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class PropertiesConfig extends AbstractCertificateConfig implements InitializingBean
+public class PropertiesConfig extends AbstractCertificateAndProxyConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
