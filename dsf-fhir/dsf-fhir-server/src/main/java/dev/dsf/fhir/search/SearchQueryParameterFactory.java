@@ -110,9 +110,29 @@ public final class SearchQueryParameterFactory<R extends Resource>
 		return includeParameterValues.stream();
 	}
 
-	public SearchQueryParameter<R> createQueryParameter()
+	public SearchQueryParameter<R> createQueryParameter(String value)
 	{
-		return supplier.get();
+		if (containsUnescapedComma(value))
+			return new SearchQueryParameterOrGroup<>(supplier);
+		else
+			return supplier.get();
+	}
+
+	private boolean containsUnescapedComma(String value)
+	{
+		if (value == null || value.isBlank())
+			return false;
+
+		for (int i = 0; i < value.length(); i++)
+		{
+			char c = value.charAt(i);
+			if (c == '\\' && i + 1 < value.length() && value.charAt(i + 1) == ',')
+				i++;
+			else if (c == ',')
+				return true;
+		}
+
+		return false;
 	}
 
 	public SearchQuerySortParameter createQuerySortParameter()

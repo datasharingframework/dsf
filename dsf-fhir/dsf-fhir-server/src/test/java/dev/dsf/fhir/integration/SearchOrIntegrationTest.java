@@ -47,7 +47,7 @@ public class SearchOrIntegrationTest extends AbstractIntegrationTest
 		endpoint.setStatus(EndpointStatus.ACTIVE);
 		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
 				.setCode("hl7-fhir-rest");
-		endpoint.setName("Endpoint " + identifierValue);
+		endpoint.setName(name(identifierValue));
 		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
 				.setCode("Task");
 		endpoint.addPayloadMimeType("application/fhir+json");
@@ -58,6 +58,11 @@ public class SearchOrIntegrationTest extends AbstractIntegrationTest
 
 		getReadAccessHelper().addLocal(endpoint);
 		return endpoint;
+	}
+
+	private String name(String identifierValue)
+	{
+		return "Endpoint " + identifierValue;
 	}
 
 	private Set<String> identifierValues(Bundle bundle)
@@ -145,5 +150,44 @@ public class SearchOrIntegrationTest extends AbstractIntegrationTest
 				selfLink.contains("ora") && selfLink.contains("orb"));
 		assertEquals("self link should contain exactly one identifier parameter: " + selfLink, 1,
 				selfLink.split("identifier=", -1).length - 1);
+	}
+
+	@Test
+	public void testSearchResultSortOrder() throws Exception
+	{
+		getWebserviceClient().create(createEndpoint("ora"));
+		getWebserviceClient().create(createEndpoint("orb"));
+
+		Bundle result1 = getWebserviceClient().search(Endpoint.class,
+				Map.of("identifier", List.of(token("ora") + "," + token("orb")), "_sort", List.of("name")));
+
+		assertNotNull(result1);
+		assertEquals(2, result1.getTotal());
+		assertNotNull(result1.getEntry());
+		assertNotNull(result1.getEntry().get(0));
+		assertNotNull(result1.getEntry().get(0).getResource());
+		assertTrue(result1.getEntry().get(0).getResource() instanceof Endpoint);
+		assertNotNull(result1.getEntry().get(1));
+		assertNotNull(result1.getEntry().get(1).getResource());
+		assertTrue(result1.getEntry().get(1).getResource() instanceof Endpoint);
+
+		assertEquals(name("ora"), ((Endpoint) result1.getEntry().get(0).getResource()).getName());
+		assertEquals(name("orb"), ((Endpoint) result1.getEntry().get(1).getResource()).getName());
+
+		Bundle result2 = getWebserviceClient().search(Endpoint.class,
+				Map.of("identifier", List.of(token("ora") + "," + token("orb")), "_sort", List.of("-name")));
+
+		assertNotNull(result2);
+		assertEquals(2, result2.getTotal());
+		assertNotNull(result1.getEntry());
+		assertNotNull(result1.getEntry().get(0));
+		assertNotNull(result1.getEntry().get(0).getResource());
+		assertTrue(result1.getEntry().get(0).getResource() instanceof Endpoint);
+		assertNotNull(result1.getEntry().get(1));
+		assertNotNull(result1.getEntry().get(1).getResource());
+		assertTrue(result1.getEntry().get(1).getResource() instanceof Endpoint);
+
+		assertEquals(name("orb"), ((Endpoint) result2.getEntry().get(0).getResource()).getName());
+		assertEquals(name("ora"), ((Endpoint) result2.getEntry().get(1).getResource()).getName());
 	}
 }
