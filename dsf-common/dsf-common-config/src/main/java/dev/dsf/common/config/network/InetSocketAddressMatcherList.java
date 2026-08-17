@@ -42,19 +42,19 @@ public class InetSocketAddressMatcherList implements InetSocketAddressMatcher
 	 * @param networks
 	 *            may be <code>null</code>, <code>null</code> values are filtered
 	 */
-	public InetSocketAddressMatcherList(Stream<? extends InetSocketAddressMatcher> networks)
+	public InetSocketAddressMatcherList(Collection<? extends InetSocketAddressMatcher> networks)
 	{
-		this(networks == null ? null : networks.filter(Objects::nonNull).toList());
+		this(networks == null ? null : networks.stream());
 	}
 
 	/**
 	 * @param networks
 	 *            may be <code>null</code>, <code>null</code> values are filtered
 	 */
-	// null value filter in #matches(InetSocketAddress)
-	public InetSocketAddressMatcherList(Collection<? extends InetSocketAddressMatcher> networks)
+	public InetSocketAddressMatcherList(Stream<? extends InetSocketAddressMatcher> networks)
 	{
-		this.networks = networks == null ? List.of() : List.copyOf(networks);
+		this.networks = networks == null ? List.of()
+				: networks.filter(Objects::nonNull).map(InetSocketAddressMatcher.class::cast).toList();
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class InetSocketAddressMatcherList implements InetSocketAddressMatcher
 		if (address == null)
 			return false;
 
-		return networks.stream().filter(Objects::nonNull).anyMatch(n -> n.matches(address));
+		return networks.stream().anyMatch(n -> n.matches(address));
 	}
 
 	public List<InetSocketAddressMatcher> getNetworks()

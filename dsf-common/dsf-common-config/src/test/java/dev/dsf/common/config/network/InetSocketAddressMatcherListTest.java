@@ -15,11 +15,10 @@
  */
 package dev.dsf.common.config.network;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,6 +32,15 @@ public class InetSocketAddressMatcherListTest
 	{
 		new InetSocketAddressMatcherList((Stream<InetSocketAddressMatcher>) null);
 		new InetSocketAddressMatcherList((Collection<InetSocketAddressMatcher>) null);
+	}
+
+	@Test
+	public void constructorMustFilterNullValues() throws Exception
+	{
+		InetSocketAddressMatcherList m = new InetSocketAddressMatcherList(
+				Arrays.asList(null, InetSocketAddressMatcher.ALL));
+		assertNotNull(m.getNetworks());
+		assertEquals(1, m.getNetworks().size());
 	}
 
 	@Test
