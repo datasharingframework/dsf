@@ -30,7 +30,7 @@ public class InetSocketAddressMatcherList implements InetSocketAddressMatcher
 	private final List<InetSocketAddressMatcher> networks;
 
 	/**
-	 * @param networks,
+	 * @param networks
 	 *            <code>null</code> values are ignored
 	 */
 	public InetSocketAddressMatcherList(InetSocketAddressMatcher... networks)
