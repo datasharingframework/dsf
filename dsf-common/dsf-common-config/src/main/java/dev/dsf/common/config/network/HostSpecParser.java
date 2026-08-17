@@ -512,9 +512,9 @@ public final class HostSpecParser
 			Objects.requireNonNull(kind, "kind");
 			Objects.requireNonNull(host, "host");
 
-			if (kind == Kind.IPV4 && prefixLength != MAX_IPV4_PREFIX)
+			if (kind == Kind.IPV4 && (prefixLength == null || prefixLength != MAX_IPV4_PREFIX))
 				throw new IllegalArgumentException("Invalid prefix length: " + prefixLength);
-			else if (kind == Kind.IPV6 && prefixLength != MAX_IPV6_PREFIX)
+			else if (kind == Kind.IPV6 && (prefixLength == null || prefixLength != MAX_IPV6_PREFIX))
 				throw new IllegalArgumentException("Invalid prefix length: " + prefixLength);
 			else if (prefixLength != null)
 			{

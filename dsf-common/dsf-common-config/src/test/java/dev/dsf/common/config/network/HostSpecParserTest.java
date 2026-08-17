@@ -17,6 +17,7 @@ package dev.dsf.common.config.network;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
@@ -304,5 +305,25 @@ public class HostSpecParserTest
 	{
 		String input = "foo" + '\0' + "bar.example";
 		HostSpecParser.parse(input);
+	}
+
+	@Test
+	public void hostSpecMustRehectIllegalValues() throws Exception
+	{
+		assertThrows(NullPointerException.class, () -> new HostSpec(null, null, null, null));
+		assertThrows(NullPointerException.class, () -> new HostSpec(Kind.DOMAIN, null, null, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.DOMAIN, "host", 666, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.DOMAIN, "host", null, -1));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.DOMAIN, "host", null, 65_535 + 1));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV4, "127.0.0.1", null, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV4, "127.0.0.1", 32 + 1, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV4, "127.0.0.1", 32 - 1, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV4_CIDR, "127.0.0.1/32", 32 + 1, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV4_CIDR, "127.0.0.1/32", -1, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV6, "[::1]", null, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV6, "[::1]", 128 + 1, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV6, "[::1]", 128 - 1, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV6_CIDR, "[::1/128]", 128 + 1, null));
+		assertThrows(IllegalArgumentException.class, () -> new HostSpec(Kind.IPV6_CIDR, "[::1/128]", -1, null));
 	}
 }
