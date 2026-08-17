@@ -112,6 +112,7 @@ public class DynamicHostnameMatcher implements InetSocketAddressMatcher
 		refresh();
 	}
 
+	@Override
 	public boolean matches(InetSocketAddress address)
 	{
 		if (address == null || address.isUnresolved())
