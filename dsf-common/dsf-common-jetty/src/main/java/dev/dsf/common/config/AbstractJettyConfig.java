@@ -127,7 +127,9 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 
 	@Documentation(description = "Defines allowed source IPs for the reverse proxy, supported definitions: by hostname - resolved periodically (see *DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY_HOSTNAME_REFRESH_TIMEOUT*), by single IPv4 or IPv6 address, by IPv4 CIDR or IPv6 CIDR network; comma or space separated list, YAML block scalars supported; use `"
 			+ HOST_SPEC_LIST_DISABLED
-			+ "` to allow all incoming IP addresses", example = "proxy, ingress.cluster.local, 192.168.1.1, 192.168.1.0/24, [2001:db8::1], [2001:db8::/32]")
+			+ "` to allow all incoming IP addresses", example = "proxy, ingress.cluster.local, 192.168.1.1, 192.168.1.0/24, [2001:db8::1], [2001:db8::/32]", recommendation = "In Kubernetes deployments set `"
+					+ HOST_SPEC_LIST_DISABLED
+					+ "` and use [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies)")
 	@Value("#{'${dev.dsf.server.auth.trust.reverse.proxy:proxy}'.trim().split('[,\\s]+')}")
 	private List<String> trustedReverseProxies;
 
