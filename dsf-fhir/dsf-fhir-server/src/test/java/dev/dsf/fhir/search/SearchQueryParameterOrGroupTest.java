@@ -98,6 +98,24 @@ public class SearchQueryParameterOrGroupTest
 
 	@Test
 	@SuppressWarnings("unchecked")
+	public void configureShouldCreateOneParameterForSingleValueWithNoComma()
+	{
+		when(firstParameter.configure(any(), any(), any())).thenReturn(firstParameter);
+		when(supplier.get()).thenReturn(firstParameter, secondParameter);
+
+		List<SearchQueryParameterError> errors = new ArrayList<>();
+
+		orGroup.configure(errors, "name", "foo");
+
+		assertEquals(1, orGroup.getSearchParameters().size());
+		assertSame(firstParameter, orGroup.getSearchParameters().get(0));
+
+		verify(firstParameter).configure(errors, "name", "foo");
+		verify(supplier, times(1)).get();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
 	public void configureShouldIgnoreBlankValues()
 	{
 		when(firstParameter.configure(any(), any(), any())).thenReturn(firstParameter);

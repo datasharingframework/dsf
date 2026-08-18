@@ -268,7 +268,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 					if (queryParameterFactory != null)
 					{
 						e.getValue().stream().filter(v -> v != null && !v.isBlank())
-								.forEach(value -> searchParameters.add(queryParameterFactory.createQueryParameter(value)
+								.forEach(value -> searchParameters.add(queryParameterFactory.createQueryParameter()
 										.configure(errors, e.getKey(), value)));
 					}
 					else

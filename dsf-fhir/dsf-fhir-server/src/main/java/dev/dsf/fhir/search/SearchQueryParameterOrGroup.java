@@ -60,11 +60,7 @@ public class SearchQueryParameterOrGroup<R extends Resource> implements SearchQu
 			String queryParameterValue)
 	{
 		searchParameters = splitValuesForOr(queryParameterValue).stream().filter(Predicate.not(String::isBlank))
-				.map(orValue ->
-				{
-					SearchQueryParameter<R> param = supplier.get();
-					return param.configure(errors, queryParameterName, orValue);
-				}).toList();
+				.map(orValue -> supplier.get().configure(errors, queryParameterName, orValue)).toList();
 
 		sqlParameterCounts = searchParameters.stream().mapToInt(SearchQueryParameter::getSqlParameterCount).toArray();
 
