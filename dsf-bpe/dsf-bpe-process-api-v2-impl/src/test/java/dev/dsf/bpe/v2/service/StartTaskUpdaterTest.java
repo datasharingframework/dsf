@@ -106,7 +106,7 @@ public class StartTaskUpdaterTest
 		return new StartTaskUpdaterImpl(dsfClientProvider, () -> task, taskHolder);
 	}
 
-	private Task getTask(StartTaskUpdater updater)
+	private Task getTask()
 	{
 		return taskHolder == null ? null : taskHolder.get();
 	}
@@ -123,7 +123,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		TaskOutputComponent output = findOutput(actualTask, SYSTEM, CODE, VERSION);
 
@@ -142,7 +142,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		TaskOutputComponent output = findOutput(actualTask, SYSTEM, CODE, VERSION);
 
@@ -164,7 +164,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		assertEquals(2, actualTask.getOutput().size());
 
@@ -192,7 +192,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		TaskOutputComponent modified = findOutput(actualTask, SYSTEM, CODE, VERSION);
 
@@ -216,7 +216,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		TaskOutputComponent modified = findOutput(actualTask, SYSTEM, CODE, VERSION);
 
@@ -241,7 +241,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		assertEquals(2, actualTask.getOutput().size());
 
@@ -269,7 +269,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		assertNull(findOutput(actualTask, SYSTEM, CODE, VERSION));
 
@@ -292,7 +292,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		assertEquals(1, actualTask.getOutput().size());
 
@@ -355,7 +355,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		assertEquals(3, actualTask.getOutput().size());
 
@@ -383,7 +383,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		assertEquals(1, actualTask.getOutput().size());
 
@@ -412,7 +412,7 @@ public class StartTaskUpdaterTest
 
 		verifyUpdate(task);
 
-		Task actualTask = getTask(updater);
+		Task actualTask = getTask();
 
 		assertEquals(4, actualTask.getOutput().size());
 
