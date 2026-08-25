@@ -321,7 +321,7 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	@Value("${dev.dsf.bpe.mail.client.certificate:#{null}}")
 	private String mailClientCertificateFile;
 
-	@Documentation(description = "Private key corresponging to the SMTP server client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate_private_key.pem")
+	@Documentation(description = "Private key corresponding to the SMTP server client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate_private_key.pem")
 	@Value("${dev.dsf.bpe.mail.client.certificate.private.key:#{null}}")
 	private String mailClientCertificatePrivateKeyFile;
 
@@ -333,7 +333,7 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	@Value("${dev.dsf.bpe.mail.smime.p12Keystore:#{null}}")
 	private String mailSmimeSigningKeyStoreFile;
 
-	@Documentation(description = "Password to decrypt the PKCS12 encoded S/MIMIE certificate file", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/smime_certificate.p12.password")
+	@Documentation(description = "Password to decrypt the PKCS12 encoded S/MIME certificate file", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/smime_certificate.p12.password")
 	@Value("${dev.dsf.bpe.mail.smime.p12Keystore.password:#{null}}")
 	private char[] mailSmimeSigningKeyStorePassword;
 
