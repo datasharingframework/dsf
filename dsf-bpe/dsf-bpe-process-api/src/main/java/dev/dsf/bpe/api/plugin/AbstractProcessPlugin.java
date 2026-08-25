@@ -243,9 +243,9 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		}
 		catch (BeansException | ClassNotFoundException | ClassCastException e)
 		{
-			logger.debug("Unable check if {} is super class of {}", className,
-					getDefaultUserTaskListenerClass().getName(), e);
-			logger.warn("Unable check if {} is super class of {}: {} - {}", className,
+			logger.debug("Unable check if {} is subclass of {}", className, getDefaultUserTaskListenerClass().getName(),
+					e);
+			logger.warn("Unable check if {} is subclass of {}: {} - {}", className,
 					getDefaultUserTaskListenerClass().getName(), e.getClass().getName(), e.getMessage());
 
 			throw new RuntimeException(e);
