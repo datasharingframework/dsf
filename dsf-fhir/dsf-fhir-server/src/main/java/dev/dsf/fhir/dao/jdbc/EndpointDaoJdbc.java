@@ -109,7 +109,7 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 					{
 						logger.warn("Found multiple Endpoints with url {}", address);
 						throw new SQLException(
-								"Found multiple Organizations with url " + address + ", single result expected");
+								"Found multiple Endpoints with url " + address + ", single result expected");
 					}
 					else
 					{
