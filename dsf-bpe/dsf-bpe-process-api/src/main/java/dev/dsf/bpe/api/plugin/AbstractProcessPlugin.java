@@ -1116,7 +1116,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	private boolean isValidMetadataResource(Object resource, String file)
 	{
 		boolean urlOk = fhirConfig.hasMetadataResourceUrl(resource);
-		boolean versionDefined = fhirConfig.hasMetadataresourceVersion(resource);
+		boolean versionDefined = fhirConfig.hasMetadataResourceVersion(resource);
 		boolean versionOk = versionDefined && fhirConfig.getMetadataResourceVersion(resource)
 				.map(v -> v.equals(getDefinitionResourceVersion())).orElse(false);
 
