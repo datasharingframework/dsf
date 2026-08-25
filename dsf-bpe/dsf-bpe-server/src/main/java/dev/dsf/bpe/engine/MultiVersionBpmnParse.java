@@ -149,7 +149,7 @@ public class MultiVersionBpmnParse extends BpmnParse
 			List<FieldDeclaration> fieldDeclarations = parseFieldDeclarations(executionListenerElement);
 
 			logger.debug("Modifying {} for {} in BPMN element with id '{}'",
-					MultiVersionClassDelegateTaskListener.class.getName(), className,
+					MultiVersionClassDelegateExecutionListener.class.getName(), className,
 					getElementId(executionListenerElement));
 			return new MultiVersionClassDelegateExecutionListener(className, fieldDeclarations, delegateProvider);
 		}
