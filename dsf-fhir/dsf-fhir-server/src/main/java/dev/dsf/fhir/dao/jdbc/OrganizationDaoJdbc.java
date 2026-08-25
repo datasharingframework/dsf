@@ -151,7 +151,7 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 				}
 				else
 				{
-					logger.warn("Organization with identifier {} not found", identifierValue);
+					logger.debug("Organization with identifier {} not found", identifierValue);
 					return Optional.empty();
 				}
 			}

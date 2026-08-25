@@ -120,7 +120,7 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 				}
 				else
 				{
-					logger.warn("Endpoint with url {} not found", address);
+					logger.debug("Endpoint with url {} not found", address);
 					return Optional.empty();
 				}
 			}
