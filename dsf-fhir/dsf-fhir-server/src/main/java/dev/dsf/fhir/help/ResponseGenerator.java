@@ -702,7 +702,7 @@ public class ResponseGenerator
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
 						+ " with id " + resource.getId()
-						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex));
 	}
 
 	public OperationOutcome referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, Resource resource,
