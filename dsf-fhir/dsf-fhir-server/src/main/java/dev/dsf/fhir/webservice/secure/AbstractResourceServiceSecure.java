@@ -691,7 +691,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				Response response = delegate.search(uri, headers);
 				return response;
-			}, status -> audit.info("Search of {} for identity '{} successful, status: {} {}'", resourceTypeName,
+			}, status -> audit.info("Search of {} for identity '{}' successful, status: {} {}", resourceTypeName,
 					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("Search of {} for identity '{}' failed, status: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));

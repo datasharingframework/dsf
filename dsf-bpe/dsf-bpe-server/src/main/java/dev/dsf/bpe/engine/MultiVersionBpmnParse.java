@@ -133,7 +133,7 @@ public class MultiVersionBpmnParse extends BpmnParse
 		else
 		{
 			TaskListener taskListener = super.parseTaskListener(taskListenerElement, taskElementId);
-			logger.debug("Not modifying {} in BPMN element with id '{}", taskListener.getClass().getName(),
+			logger.debug("Not modifying {} in BPMN element with id '{}'", taskListener.getClass().getName(),
 					getElementId(taskListenerElement));
 			return taskListener;
 		}
