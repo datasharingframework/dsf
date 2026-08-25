@@ -759,8 +759,8 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		if (!getDefinitionResourceVersion().equals(processKeyAndVersion.getVersion()))
 		{
 			logger.warn(
-					"Operaton version tag of process in '{}' does not match process plugin version (tag: {} vs. plugin: {})",
-					fileAndModel.file(), processKeyAndVersion.getVersion(), getDefinitionVersion());
+					"Operaton version tag of process in '{}' does not match process plugin resource version (tag: {} vs. plugin: {})",
+					fileAndModel.file(), processKeyAndVersion.getVersion(), getDefinitionResourceVersion());
 			return false;
 		}
 		if (!PROCESS_ID_PATTERN.matcher(processKeyAndVersion.getId()).matches())
