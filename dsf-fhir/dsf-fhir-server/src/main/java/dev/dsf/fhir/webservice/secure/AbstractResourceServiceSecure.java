@@ -188,7 +188,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		if (reasonCreateAllowed.isEmpty())
 		{
-			audit.info("Create of resource {} denied for user '{}'", resourceTypeName, getCurrentIdentity().getName());
+			audit.info("Create of resource {} denied for identity '{}'", resourceTypeName,
+					getCurrentIdentity().getName());
 			return forbidden("create");
 		}
 		else
@@ -196,17 +197,17 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			return withResourceValidation(resource, validationRules::failOnErrorOrFatalBeforeCreate, uri, headers,
 					"Create", () ->
 					{
-						audit.info("Create of resource {} allowed for user '{}', reason: {}", resourceTypeName,
+						audit.info("Create of resource {} allowed for identity '{}', reason: {}", resourceTypeName,
 								getCurrentIdentity().getName(), reasonCreateAllowed.get());
 
 						Response created = logResultStatus(() ->
 						{
 							Response response = delegate.create(resource, uri, headers);
 							return response;
-						}, status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
+						}, status -> audit.info("Create of resource {} for identity '{}' successful, status: {} {}",
 								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
 								status.getReasonPhrase()),
-								status -> audit.info("Create of resource {} for user '{}' failed, status: {} {}",
+								status -> audit.info("Create of resource {} for identity '{}' failed, status: {} {}",
 										resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
 										status.getReasonPhrase()));
 
@@ -605,7 +606,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("{} to delete not found for user '{}'", resourceTypeName, getCurrentIdentity().getName());
+			audit.info("{} to delete not found for identity '{}'", resourceTypeName, getCurrentIdentity().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}
 	}
@@ -738,7 +739,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("{} to permanently delete not found for user '{}'", resourceTypeName,
+			audit.info("{} to permanently delete not found for identity '{}'", resourceTypeName,
 					getCurrentIdentity().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}

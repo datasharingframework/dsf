@@ -102,12 +102,12 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{
-			audit.info("Root History denied for user '{}'", getCurrentIdentity().getName());
+			audit.info("Root History denied for identity '{}'", getCurrentIdentity().getName());
 			return forbidden("history");
 		}
 		else
 		{
-			audit.info("Root History allowed for user '{}': {}", getCurrentIdentity().getName(),
+			audit.info("Root History allowed for identiy '{}': {}", getCurrentIdentity().getName(),
 					reasonHistoryAllowed.get());
 			return delegate.history(uri, headers);
 		}
