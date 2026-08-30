@@ -1849,6 +1849,34 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(responseBundle.getEntry().get(0).getResponse().getEtag());
 		assertEquals("W/\"1\"", responseBundle.getEntry().get(0).getResponse().getEtag());
 	}
+	
+	@Test
+	public void testCreateBinaryWithNonExistingSecurityContextViaBatchBundle() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.getSecurityContext().setReference("ResearchStudy/"+UUID.randomUUID().toString());
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(binary).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Binary");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+
+		assertNull(responseBundle.getEntry().get(0).getResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertEquals("403 Forbidden", responseBundle.getEntry().get(0).getResponse().getStatus());
+	}
 
 	@Test
 	public void testCreateNotAllowedExternalUserViaBatchBundle() throws Exception
