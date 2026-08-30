@@ -112,7 +112,7 @@ public final class SearchQueryParameterFactory<R extends Resource>
 
 	public SearchQueryParameter<R> createQueryParameter()
 	{
-		return supplier.get();
+		return new SearchQueryParameterOrGroup<>(supplier);
 	}
 
 	public SearchQuerySortParameter createQuerySortParameter()

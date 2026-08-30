@@ -83,6 +83,4 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 	 * @return not <code>null</code>, not blank
 	 */
 	String getBundleUriQueryParameterValue();
-
-	String getParameterName();
 }
