@@ -107,10 +107,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
-		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		UriComponents components = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
 		// check standard update request url: e.g. Patient/123
-		if (eruComponentes.getPathSegments().size() == 2 && eruComponentes.getQueryParams().isEmpty())
+		if (components.getPathSegments().size() == 2 && components.getQueryParams().isEmpty())
 		{
 			if (!entry.hasFullUrl() || entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 			{
@@ -119,7 +119,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			}
 			else if (!resource.hasIdElement() || !resource.getIdElement().hasIdPart())
 			{
-				Response response = responseGenerator.bundleEntryResouceMissingId(index,
+				Response response = responseGenerator.bundleEntryResourceMissingId(index,
 						resource.getResourceType().name());
 				throw new WebApplicationException(response);
 			}
@@ -139,8 +139,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				Response response = responseGenerator.badBundleEntryFullUrl(index, entry.getFullUrl());
 				throw new WebApplicationException(response);
 			}
-			else if (!expectedResourceTypeName.equals(eruComponentes.getPathSegments().get(0))
-					|| !expectedId.equals(eruComponentes.getPathSegments().get(1)))
+			else if (!expectedResourceTypeName.equals(components.getPathSegments().get(0))
+					|| !expectedId.equals(components.getPathSegments().get(1)))
 			{
 				Response response = responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl());
 				throw new WebApplicationException(response);
@@ -148,7 +148,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 
 		// check conditional update request url: e.g. Patient?...
-		else if (eruComponentes.getPathSegments().size() == 1 && !eruComponentes.getQueryParams().isEmpty())
+		else if (components.getPathSegments().size() == 1 && !components.getQueryParams().isEmpty())
 		{
 			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 			{
@@ -183,10 +183,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	private boolean addMissingIdToTranslationTableAndCheckConditionFindsResource(Map<String, IdType> idTranslationTable,
 			Connection connection)
 	{
-		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
-		String resourceTypeName = componentes.getPathSegments().get(0);
+		UriComponents components = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		String resourceTypeName = components.getPathSegments().get(0);
 		Map<String, List<String>> queryParameters = parameterConverter
-				.urlDecodeQueryParameters(componentes.getQueryParams());
+				.urlDecodeQueryParameters(components.getQueryParams());
 
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
@@ -337,7 +337,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		Optional<Long> ifMatch = Optional.ofNullable(entry.getRequest().getIfMatch())
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
-		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName,
+		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResourceVersionNonMatchEx(
+				resourceTypeName,
 				() -> updateWithTransaction(largeObjectManager, connection, resource, ifMatch.orElse(null)));
 	}
 

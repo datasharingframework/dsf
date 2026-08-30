@@ -108,19 +108,19 @@ public class ReadCommand extends AbstractCommand implements Command
 		if (requestUrl.startsWith(URL_UUID_PREFIX))
 			requestUrl = idTranslationTable.getOrDefault(requestUrl, new IdType(requestUrl)).getValue();
 
-		UriComponents componentes = UriComponentsBuilder.fromUriString(requestUrl).build();
-		resourceTypeName = componentes.getPathSegments().get(0);
+		UriComponents components = UriComponentsBuilder.fromUriString(requestUrl).build();
+		resourceTypeName = components.getPathSegments().get(0);
 
-		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
-			readById(connection, resourceTypeName, componentes.getPathSegments().get(1));
-		else if (componentes.getPathSegments().size() == 4
-				&& Constants.PARAM_HISTORY.equals(componentes.getPathSegments().get(2))
-				&& componentes.getQueryParams().isEmpty())
-			readByIdAndVersion(connection, resourceTypeName, componentes.getPathSegments().get(1),
-					componentes.getPathSegments().get(3));
-		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
+		if (components.getPathSegments().size() == 2 && components.getQueryParams().isEmpty())
+			readById(connection, resourceTypeName, components.getPathSegments().get(1));
+		else if (components.getPathSegments().size() == 4
+				&& Constants.PARAM_HISTORY.equals(components.getPathSegments().get(2))
+				&& components.getQueryParams().isEmpty())
+			readByIdAndVersion(connection, resourceTypeName, components.getPathSegments().get(1),
+					components.getPathSegments().get(3));
+		else if (components.getPathSegments().size() == 1 && !components.getQueryParams().isEmpty())
 			readByCondition(connection, resourceTypeName,
-					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
+					parameterConverter.urlDecodeQueryParameters(components.getQueryParams()));
 		else
 		{
 			Response response = responseGenerator.badReadRequestUrl(index, requestUrl);

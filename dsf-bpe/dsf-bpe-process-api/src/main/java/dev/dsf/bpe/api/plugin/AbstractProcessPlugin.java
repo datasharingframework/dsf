@@ -243,9 +243,9 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		}
 		catch (BeansException | ClassNotFoundException | ClassCastException e)
 		{
-			logger.debug("Unable check if {} is super class of {}", className,
-					getDefaultUserTaskListenerClass().getName(), e);
-			logger.warn("Unable check if {} is super class of {}: {} - {}", className,
+			logger.debug("Unable check if {} is subclass of {}", className, getDefaultUserTaskListenerClass().getName(),
+					e);
+			logger.warn("Unable check if {} is subclass of {}: {} - {}", className,
 					getDefaultUserTaskListenerClass().getName(), e.getClass().getName(), e.getMessage());
 
 			throw new RuntimeException(e);
@@ -759,8 +759,8 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		if (!getDefinitionResourceVersion().equals(processKeyAndVersion.getVersion()))
 		{
 			logger.warn(
-					"Operaton version tag of process in '{}' does not match process plugin version (tag: {} vs. plugin: {})",
-					fileAndModel.file(), processKeyAndVersion.getVersion(), getDefinitionVersion());
+					"Operaton version tag of process in '{}' does not match process plugin resource version (tag: {} vs. plugin: {})",
+					fileAndModel.file(), processKeyAndVersion.getVersion(), getDefinitionResourceVersion());
 			return false;
 		}
 		if (!PROCESS_ID_PATTERN.matcher(processKeyAndVersion.getId()).matches())
@@ -1113,10 +1113,10 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		};
 	}
 
-	private boolean isValidMetadataResouce(Object resource, String file)
+	private boolean isValidMetadataResource(Object resource, String file)
 	{
 		boolean urlOk = fhirConfig.hasMetadataResourceUrl(resource);
-		boolean versionDefined = fhirConfig.hasMetadataresourceVersion(resource);
+		boolean versionDefined = fhirConfig.hasMetadataResourceVersion(resource);
 		boolean versionOk = versionDefined && fhirConfig.getMetadataResourceVersion(resource)
 				.map(v -> v.equals(getDefinitionResourceVersion())).orElse(false);
 
@@ -1158,7 +1158,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 	private boolean isValidActivityDefinition(String file, Object resource)
 	{
 		boolean hasProfile = hasProfile(file, resource, P_ACTIVITY_DEFINITION);
-		boolean metadataResourceOk = isValidMetadataResouce(resource, file);
+		boolean metadataResourceOk = isValidMetadataResource(resource, file);
 		boolean urlOk = fhirConfig.getActivityDefinitionUrl(resource)
 				.map(u -> ACTIVITY_DEFINITION_URL_PATTERN.matcher(u).matches()).orElse(false);
 
@@ -1173,17 +1173,17 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 	private boolean isValidCodeSystem(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_CODE_SYSTEM) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_CODE_SYSTEM) && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidLibrary(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_LIBRARY) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_LIBRARY) && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidMeasure(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_MEASURE) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_MEASURE) && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidNamingSystem(String file, Object resource)
@@ -1211,7 +1211,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 					file, getDefinitionName(), getDefinitionVersion());
 		}
 
-		return hasProfile && hasQuestionnaireItemsWithRequired && isValidMetadataResouce(resource, file);
+		return hasProfile && hasQuestionnaireItemsWithRequired && isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidStructureDefinition(String file, Object resource)
@@ -1237,7 +1237,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 		}
 
 		return hasProfile && hasStructureDefinitionTaskDsfValueSetBindingsWithoutVersion && baseDefinitionOk
-				&& isValidMetadataResouce(resource, file);
+				&& isValidMetadataResource(resource, file);
 	}
 
 	private boolean isValidTask(String file, Object resource, String localOrganizationIdentifierValue)
@@ -1378,7 +1378,7 @@ public abstract class AbstractProcessPlugin<UTL> implements ProcessPlugin
 
 	private boolean isValidValueSet(String file, Object resource)
 	{
-		return hasProfile(file, resource, P_VALUE_SET) && isValidMetadataResouce(resource, file);
+		return hasProfile(file, resource, P_VALUE_SET) && isValidMetadataResource(resource, file);
 	}
 
 	private List<BpmnFileAndModel> filterBpmnModelsWithoutMatchingActivityDefinitions(

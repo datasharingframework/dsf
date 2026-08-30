@@ -321,7 +321,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 					{
 						errors.add(new SearchQueryParameterError(
 								SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES, PARAMETER_SORT, null,
-								"More than one " + PARAMETER_SORT + " query parameter valus `" + value + "`"));
+								"More than one " + PARAMETER_SORT + " query parameter value `" + value + "`"));
 					}
 				}
 				else
@@ -512,7 +512,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	}
 
 	@Override
-	public void resloveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
+	public void resolveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
 	{
 		if (resource == null || !getResourceType().isInstance(resource))
 			return;
@@ -532,7 +532,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		if (!exceptions.isEmpty())
 		{
-			SQLException sqlException = new SQLException("Error while resoling references");
+			SQLException sqlException = new SQLException("Error while resolving references");
 			exceptions.forEach(sqlException::addSuppressed);
 			throw sqlException;
 		}

@@ -29,18 +29,18 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import jakarta.ws.rs.core.MediaType;
 
-class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
+class BasicFhirWebserviceClientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
 		implements BasicFhirWebserviceClient
 {
-	BasicFhirWebserviceCientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
+	BasicFhirWebserviceClientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
 	{
 		super(delegate, nTimes, delay);
 	}
 
 	@Override
-	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
+	public <R extends Resource> R updateConditionally(R resource, Map<String, List<String>> criteria)
 	{
-		return retry(() -> delegate.updateConditionaly(resource, criteria));
+		return retry(() -> delegate.updateConditionally(resource, criteria));
 	}
 
 	@Override
@@ -62,9 +62,9 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
-	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
+	public <R extends Resource> R createConditionally(R resource, String ifNoneExistCriteria)
 	{
-		return retry(() -> delegate.createConditionaly(resource, ifNoneExistCriteria));
+		return retry(() -> delegate.createConditionally(resource, ifNoneExistCriteria));
 	}
 
 	@Override
@@ -201,11 +201,11 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
-	public void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
+	public void deleteConditionally(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
 	{
 		retry(() ->
 		{
-			delegate.deleteConditionaly(resourceClass, criteria);
+			delegate.deleteConditionally(resourceClass, criteria);
 			return null;
 		});
 	}

@@ -30,7 +30,7 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 {
 	void delete(Class<? extends Resource> resourceClass, String id);
 
-	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
+	void deleteConditionally(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
 	void deletePermanently(Class<? extends Resource> resourceClass, String id);
 

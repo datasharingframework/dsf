@@ -352,10 +352,10 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 				.filter(e -> EXTENSION_READ_ACCESS_ORGANIZATION.equals(e.getUrl())).collect(Collectors.toList());
 
 		return coding.hasExtension() && exts.size() == 1
-				&& isValidExtensionReadAccesOrganization(exts.get(0), organizationWithIdentifierExists);
+				&& isValidExtensionReadAccessOrganization(exts.get(0), organizationWithIdentifierExists);
 	}
 
-	private boolean isValidExtensionReadAccesOrganization(Extension extension,
+	private boolean isValidExtensionReadAccessOrganization(Extension extension,
 			Predicate<Identifier> organizationWithIdentifierExists)
 	{
 		return extension.hasValue() && extension.getValue() instanceof Identifier value

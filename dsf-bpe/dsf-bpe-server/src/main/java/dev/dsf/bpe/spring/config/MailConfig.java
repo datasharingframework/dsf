@@ -88,11 +88,11 @@ public class MailConfig implements InitializingBean
 		KeyStore trustStore = propertiesConfig.getMailServerTrustStore();
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
 		KeyStore keyStore = propertiesConfig.getMailClientKeyStore(keyStorePassword);
-		KeyStore signStore = propertiesConfig.getMailSmimeSigingKeyStore();
+		KeyStore signStore = propertiesConfig.getMailSmimeSigningKeyStore();
 
 		return new SmtpMailService(fromAddress, toAddresses, toAddressesCc, replyToAddresses, useSmtps,
 				mailServerHostname, mailServerPort, mailServerUsername, mailServerPassword, trustStore, keyStore,
-				keyStorePassword, signStore, propertiesConfig.getMailSmimeSigingKeyStorePassword(),
+				keyStorePassword, signStore, propertiesConfig.getMailSmimeSigningKeyStorePassword(),
 				propertiesConfig.getSendMailOnErrorLogEvent(), propertiesConfig.getMailOnErrorLogEventBufferSize(),
 				propertiesConfig.getMailOnErrorLogEventDebugLogLocation());
 	}
@@ -106,7 +106,7 @@ public class MailConfig implements InitializingBean
 					"Mail client config: {fromAddress: {}, toAddresses: {}, toAddressesCc: {}, replyToAddresses: {},"
 							+ " useSmtps: {}, mailServerHostname: {}, mailServerPort: {}, mailServerUsername: {},"
 							+ " mailServerPassword: {}, trustStore: {}, clientCertificate: {}, clientCertificatePrivateKey: {},"
-							+ " clientCertificatePrivateKeyPassword: {}, smimeSigingKeyStore: {}, smimeSigingKeyStorePassword: {},"
+							+ " clientCertificatePrivateKeyPassword: {}, smimeSigningKeyStore: {}, smimeSigningKeyStorePassword: {},"
 							+ " sendTestMailOnStartup: {}, sendMailOnErrorLogEvent: {}, mailOnErrorLogEventBufferSize: {},"
 							+ " mailOnErrorLogEventDebugLogLocation: {}}",
 					propertiesConfig.getMailFromAddress(), propertiesConfig.getMailToAddresses(),
@@ -118,8 +118,8 @@ public class MailConfig implements InitializingBean
 					propertiesConfig.getMailClientCertificateFile(),
 					propertiesConfig.getMailClientCertificatePrivateKeyFile(),
 					propertiesConfig.getMailClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
-					propertiesConfig.getMailSmimeSigingKeyStoreFile(),
-					propertiesConfig.getMailSmimeSigingKeyStorePassword() != null ? "***" : "null",
+					propertiesConfig.getMailSmimeSigningKeyStoreFile(),
+					propertiesConfig.getMailSmimeSigningKeyStorePassword() != null ? "***" : "null",
 					propertiesConfig.getSendTestMailOnStartup(), propertiesConfig.getSendMailOnErrorLogEvent(),
 					propertiesConfig.getMailOnErrorLogEventBufferSize(),
 					propertiesConfig.getMailOnErrorLogEventDebugLogLocation());

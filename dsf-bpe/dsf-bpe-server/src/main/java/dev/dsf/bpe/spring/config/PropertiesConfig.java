@@ -48,9 +48,10 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
-import dev.dsf.common.config.AbstractCertificateConfig;
+import dev.dsf.common.config.AbstractCertificateAndProxyConfig;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
 import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
@@ -58,7 +59,7 @@ import dev.dsf.common.ui.theme.Theme;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class PropertiesConfig extends AbstractCertificateConfig implements InitializingBean
+public class PropertiesConfig extends AbstractCertificateAndProxyConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
@@ -320,7 +321,7 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.mail.client.certificate:#{null}}")
 	private String mailClientCertificateFile;
 
-	@Documentation(description = "Private key corresponging to the SMTP server client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate_private_key.pem")
+	@Documentation(description = "Private key corresponding to the SMTP server client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted. Requires SMTP over TLS to be enabled via *DEV_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate_private_key.pem")
 	@Value("${dev.dsf.bpe.mail.client.certificate.private.key:#{null}}")
 	private String mailClientCertificatePrivateKeyFile;
 
@@ -330,11 +331,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 
 	@Documentation(description = "PKCS12 encoded file with S/MIME certificate, private key and certificate chain to enable send mails to be S/MIME signed", recommendation = "Use docker secret file to configure", example = "/run/secrets/smime_certificate.p12")
 	@Value("${dev.dsf.bpe.mail.smime.p12Keystore:#{null}}")
-	private String mailSmimeSigingKeyStoreFile;
+	private String mailSmimeSigningKeyStoreFile;
 
-	@Documentation(description = "Password to decrypt the PKCS12 encoded S/MIMIE certificate file", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/smime_certificate.p12.password")
+	@Documentation(description = "Password to decrypt the PKCS12 encoded S/MIME certificate file", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/smime_certificate.p12.password")
 	@Value("${dev.dsf.bpe.mail.smime.p12Keystore.password:#{null}}")
-	private char[] mailSmimeSigingKeyStorePassword;
+	private char[] mailSmimeSigningKeyStorePassword;
 
 	@Documentation(description = "To enable a test mail being send on startup of the BPE, set to `true`; requires SMTP server to be configured")
 	@Value("${dev.dsf.bpe.mail.sendTestMailOnStartup:false}")
@@ -910,23 +911,23 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 					"dev.dsf.bpe.mail.client.certificate", "dev.dsf.bpe.mail.client.certificate.private.key");
 	}
 
-	public String getMailSmimeSigingKeyStoreFile()
+	public String getMailSmimeSigningKeyStoreFile()
 	{
-		return mailSmimeSigingKeyStoreFile;
+		return mailSmimeSigningKeyStoreFile;
 	}
 
-	public char[] getMailSmimeSigingKeyStorePassword()
+	public char[] getMailSmimeSigningKeyStorePassword()
 	{
-		return mailSmimeSigingKeyStorePassword;
+		return mailSmimeSigningKeyStorePassword;
 	}
 
 	@Bean
-	public KeyStore getMailSmimeSigingKeyStore()
+	public KeyStore getMailSmimeSigningKeyStore()
 	{
-		if (getMailSmimeSigingKeyStoreFile() == null)
+		if (getMailSmimeSigningKeyStoreFile() == null)
 			return null;
 		else
-			return createKeyStoreFromP12(getMailSmimeSigingKeyStoreFile(), getMailSmimeSigingKeyStorePassword(),
+			return createKeyStoreFromP12(getMailSmimeSigningKeyStoreFile(), getMailSmimeSigningKeyStorePassword(),
 					"dev.dsf.bpe.mail.smime.p12Keystore");
 	}
 
@@ -993,6 +994,8 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Bean
 	public ProxyConfig proxyConfig()
 	{
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy, false);
+
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}
 

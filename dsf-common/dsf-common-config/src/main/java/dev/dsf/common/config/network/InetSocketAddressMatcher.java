@@ -13,15 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.fhir.function;
+package dev.dsf.common.config.network;
 
-import java.sql.SQLException;
+import java.net.InetSocketAddress;
 
-import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
-import dev.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-
-@FunctionalInterface
-public interface SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException<R>
+public interface InetSocketAddressMatcher
 {
-	R get() throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
+	/**
+	 * Matches all of the incoming addresses
+	 */
+	InetSocketAddressMatcher ALL = _ -> true;
+
+	/**
+	 * Matches none of the incoming addresses
+	 */
+	InetSocketAddressMatcher NONE = _ -> false;
+
+	/**
+	 * @param address
+	 *            not <code>null</code>
+	 * @return <code>true</code> if given <b>address</b> matches one of the configured networks
+	 */
+	boolean matches(InetSocketAddress address);
 }

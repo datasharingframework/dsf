@@ -108,7 +108,7 @@ public class QuestionnaireResponseAuthorizationRule
 		else
 		{
 			logger.warn("Create of QuestionnaireResponse unauthorized for identity '{}', no role {}",
-					identity.getName(), deleteRole);
+					identity.getName(), createRole);
 
 			return Optional.empty();
 		}

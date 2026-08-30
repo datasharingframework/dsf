@@ -15,39 +15,59 @@
  */
 package dev.dsf.common.config;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
+import dev.dsf.common.config.network.InetSocketAddressMatcher;
+import dev.dsf.common.config.network.InetSocketAddressMatcherList;
+import dev.dsf.common.config.network.StaticCidrMatcher;
+import dev.dsf.common.config.network.StaticHostnameMatcher;
+
 public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProxyConfigImpl.class);
 
+	private static final Pattern IPV4_LITERAL = Pattern.compile("^[0-9]{1,3}(?:\\.[0-9]{1,3}){3}$");
+
 	private final String url;
 	private final String username;
 	private final char[] password;
-	private final List<String> noProxyUrls = new ArrayList<>();
 
-	public ProxyConfigImpl(String url, String username, char[] password, Collection<String> noProxyUrls)
+	private final List<HostSpec> noProxyUrls;
+	private final InetSocketAddressMatcher noProxyMatcher;
+
+	public ProxyConfigImpl(String url, String username, char[] password, Collection<HostSpec> noProxyUrls)
 	{
 		this.url = nullIfUrlInvalid(url);
 		this.username = username;
 		this.password = password;
 
-		if (noProxyUrls != null)
-			this.noProxyUrls.addAll(noProxyUrls.stream().filter(s -> s != null && !s.isBlank()).toList());
+		this.noProxyUrls = noProxyUrls == null ? List.of() : List.copyOf(noProxyUrls);
 
+		noProxyMatcher = new InetSocketAddressMatcherList(this.noProxyUrls.stream().map(ProxyConfigImpl::toMatcher));
+	}
+
+	private static InetSocketAddressMatcher toMatcher(HostSpec hostSpec)
+	{
+		if (hostSpec.isIp())
+			return StaticCidrMatcher.of(hostSpec);
+		else if (hostSpec.isDomainOrWildcard())
+			return StaticHostnameMatcher.of(hostSpec);
+		else
+			throw new IllegalArgumentException("hostSpec not supported");
 	}
 
 	private static String nullIfUrlInvalid(String url)
@@ -82,7 +102,7 @@ public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		logger.info("Forward proxy config: {url: {}, username: {}, password: {}, no-proxy: {}}", url, username,
-				password != null ? "***" : "null", noProxyUrls);
+				password != null ? "***" : "null", noProxyMatcher.toString());
 	}
 
 	@Override
@@ -94,7 +114,7 @@ public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 	@Override
 	public boolean isEnabled()
 	{
-		return url != null && !noProxyUrls.contains("*");
+		return url != null;
 	}
 
 	@Override
@@ -121,39 +141,53 @@ public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 	@Override
 	public List<String> getNoProxyUrls()
 	{
-		return Collections.unmodifiableList(noProxyUrls);
+		return noProxyUrls.stream().map(HostSpec::toString).toList();
 	}
 
 	@Override
 	public boolean isNoProxyUrl(String targetUrl)
 	{
-		if (noProxyUrls.contains("*"))
-			return true;
-
 		if (targetUrl == null || targetUrl.isBlank())
 			return false;
 
+		Optional<InetSocketAddress> targetAddress = toSocketAddress(targetUrl);
+		if (targetAddress.isEmpty())
+			return false;
+		else
+			return noProxyMatcher.matches(targetAddress.get());
+	}
+
+	private boolean isLikelyIpLiteral(String host)
+	{
+		return host.indexOf(':') >= 0 || IPV4_LITERAL.matcher(host).matches();
+	}
+
+	private Optional<InetSocketAddress> toSocketAddress(String targetUrl)
+	{
 		try
 		{
 			URI u = new URI(targetUrl);
 
+			String scheme = u.getScheme();
 			String host = u.getHost();
-			if (host == null)
+
+			if (scheme == null || host == null)
 			{
-				logger.debug("Given targetUrl '{}' is malformed, no host value", targetUrl);
-				return false;
+				logger.debug("Invalid target URL: scheme null or host null");
+				return Optional.empty();
 			}
 
-			String subHost = Stream.of(u.getHost().split("\\.")).skip(1).collect(Collectors.joining("."));
-			int port = u.getPort() == -1 ? getDefaultPort(u.getScheme()) : u.getPort();
+			int port = u.getPort() >= 0 ? u.getPort() : getDefaultPort(scheme);
 
-			return noProxyUrls.stream().anyMatch(s -> s.equals(host) || s.equals(host + ":" + port) || s.equals(subHost)
-					|| s.equals(subHost + ":" + port));
+			if (isLikelyIpLiteral(host))
+				return Optional.of(new InetSocketAddress(InetAddress.ofLiteral(host), port));
+			else
+				return Optional.of(InetSocketAddress.createUnresolved(host, port));
 		}
-		catch (URISyntaxException e)
+		catch (URISyntaxException | IllegalArgumentException e)
 		{
-			logger.debug("Given targetUrl '{}' is malformed: {}", targetUrl, e.getMessage());
-			return false;
+			logger.debug("Invalid target URL: {}", e.getMessage());
+			return Optional.empty();
 		}
 	}
 
@@ -163,7 +197,7 @@ public class ProxyConfigImpl implements ProxyConfig, InitializingBean
 		{
 			case "http", "ws" -> 80;
 			case "https", "wss" -> 443;
-			default -> throw new IllegalArgumentException("Schema " + scheme + " not supported");
+			default -> throw new IllegalArgumentException("Scheme '" + scheme + "' not supported");
 		};
 	}
 }

@@ -86,8 +86,8 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		if (BundleType.BATCH.equals(bundle.getType()) || BundleType.TRANSACTION.equals(bundle.getType()))
 		{
 			logger.info(
-					"Handling of batch or transaction bundles generaly allowed for all, entries will be individualy evaluated");
-			return Optional.of("Allowed for all, entries individualy evaluated");
+					"Handling of batch or transaction bundles generally allowed for all, entries will be individually evaluated");
+			return Optional.of("Allowed for all, entries individually evaluated");
 		}
 		else
 		{
@@ -102,12 +102,12 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentIdentity());
 		if (reasonHistoryAllowed.isEmpty())
 		{
-			audit.info("Root History denied for user '{}'", getCurrentIdentity().getName());
+			audit.info("Root History denied for identity '{}'", getCurrentIdentity().getName());
 			return forbidden("history");
 		}
 		else
 		{
-			audit.info("Root History allowed for user '{}': {}", getCurrentIdentity().getName(),
+			audit.info("Root History allowed for identiy '{}': {}", getCurrentIdentity().getName(),
 					reasonHistoryAllowed.get());
 			return delegate.history(uri, headers);
 		}

@@ -44,14 +44,14 @@ import dev.dsf.fhir.history.filter.HistoryIdentityFilter;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.SearchQueryParameter;
 
-public class HistroyDaoJdbc implements HistoryDao, InitializingBean
+public class HistoryDaoJdbc implements HistoryDao, InitializingBean
 {
 	private final DataSource dataSource;
 	private final FhirContext fhirContext;
 	private final BinaryDaoJdbc binaryDao;
 	private final PgObjectFactory pgObjectFactory;
 
-	public HistroyDaoJdbc(DataSource dataSource, FhirContext fhirContext, BinaryDaoJdbc binaryDao,
+	public HistoryDaoJdbc(DataSource dataSource, FhirContext fhirContext, BinaryDaoJdbc binaryDao,
 			PgObjectFactory pgObjectFactory)
 	{
 		this.dataSource = dataSource;

@@ -29,10 +29,10 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import jakarta.ws.rs.core.MediaType;
 
-class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
+class BasicFhirWebserviceClientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
 		implements BasicFhirWebserviceClient
 {
-	BasicFhirWebserviceCientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
+	BasicFhirWebserviceClientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
 	{
 		super(delegate, nTimes, delay);
 	}

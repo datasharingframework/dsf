@@ -2416,7 +2416,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	{
 		Task created = prepareForTestIllegalUpdate();
 
-		expectForbidden(() -> getWebserviceClient().updateConditionaly(created,
+		expectForbidden(() -> getWebserviceClient().updateConditionally(created,
 				Map.of("_id", List.of(created.getIdElement().getIdPart()))));
 	}
 
@@ -2428,7 +2428,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		created.setIdElement(null);
 		created.getMeta().setVersionId(null);
 
-		expectForbidden(() -> getWebserviceClient().updateConditionaly(created, Map.of("_id", List.of(id))));
+		expectForbidden(() -> getWebserviceClient().updateConditionally(created, Map.of("_id", List.of(id))));
 	}
 
 	@Test

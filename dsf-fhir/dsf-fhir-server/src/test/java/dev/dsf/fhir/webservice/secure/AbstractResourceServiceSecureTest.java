@@ -93,7 +93,7 @@ public abstract class AbstractResourceServiceSecureTest<R extends Resource, S ex
 	protected final Class<R> resourceClass;
 	protected final Class<S> serviceClass;
 	protected final Class<D> daoClass;
-	protected final Supplier<R> resouceSupplier;
+	protected final Supplier<R> resourceSupplier;
 	protected final ResourceServiceSecureFactory<R, S, D> resourceServiceSecureFactory;
 
 	protected final ValidationRules validationRules = new ValidationRules(SERVER_BASE);
@@ -115,12 +115,12 @@ public abstract class AbstractResourceServiceSecureTest<R extends Resource, S ex
 	protected S resourceServiceSecure;
 
 	public AbstractResourceServiceSecureTest(Class<R> resourceClass, Class<S> serviceClass, Class<D> daoClass,
-			Supplier<R> resouceSupplier, ResourceServiceSecureFactory<R, S, D> resourceServiceSecureFactory)
+			Supplier<R> resourceSupplier, ResourceServiceSecureFactory<R, S, D> resourceServiceSecureFactory)
 	{
 		this.resourceClass = resourceClass;
 		this.serviceClass = serviceClass;
 		this.daoClass = daoClass;
-		this.resouceSupplier = resouceSupplier;
+		this.resourceSupplier = resourceSupplier;
 		this.resourceServiceSecureFactory = resourceServiceSecureFactory;
 
 		delegate = mock(serviceClass);
@@ -175,7 +175,7 @@ public abstract class AbstractResourceServiceSecureTest<R extends Resource, S ex
 
 	protected final R createResource()
 	{
-		return resouceSupplier.get();
+		return resourceSupplier.get();
 	}
 
 	protected final R createResourceWithIdAndVersion()
@@ -448,7 +448,7 @@ public abstract class AbstractResourceServiceSecureTest<R extends Resource, S ex
 	}
 
 	@Test
-	public void expectForbiddenCreateAllowedNonValidResouce() throws Exception
+	public void expectForbiddenCreateAllowedNonValidResource() throws Exception
 	{
 		R resource = createResourceWithIdAndVersion();
 
@@ -516,7 +516,7 @@ public abstract class AbstractResourceServiceSecureTest<R extends Resource, S ex
 	}
 
 	@Test
-	public void historyResouceMustEnforceHistoryAuthorization()
+	public void historyResourceMustEnforceHistoryAuthorization()
 	{
 		when(delegate.history(anyString(), any(), any())).thenReturn(mock(Response.class));
 

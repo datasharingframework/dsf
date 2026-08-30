@@ -82,6 +82,7 @@ import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
 import dev.dsf.common.buildinfo.BuildInfoReader;
 import dev.dsf.common.buildinfo.BuildInfoReaderImpl;
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.jetty.HttpClientWithGetRetry;
@@ -96,7 +97,7 @@ import jakarta.servlet.SessionCookieConfig;
 
 @Configuration
 @PropertySource(value = "file:conf/jetty.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public abstract class AbstractJettyConfig extends AbstractCertificateConfig
+public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractJettyConfig.class);
 
@@ -123,6 +124,18 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Documentation(description = "Name of HTTP header with client certificate from reverse proxy")
 	@Value("${dev.dsf.server.auth.client.certificate.header:X-ClientCert}")
 	private String clientCertificateHeaderName;
+
+	@Documentation(description = "Defines allowed source IPs for the reverse proxy, supported definitions: by hostname - resolved periodically (see *DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY_HOSTNAME_REFRESH_TIMEOUT*), by single IPv4 or IPv6 address, by IPv4 CIDR or IPv6 CIDR network; comma or space separated list, YAML block scalars supported; use `"
+			+ HOST_SPEC_LIST_DISABLED
+			+ "` to allow all incoming IP addresses", example = "proxy, ingress.cluster.local, 192.168.1.1, 192.168.1.0/24, [2001:db8::1], [2001:db8::/32]", recommendation = "In Kubernetes deployments set `"
+					+ HOST_SPEC_LIST_DISABLED
+					+ "` and use [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies)")
+	@Value("#{'${dev.dsf.server.auth.trust.reverse.proxy:proxy}'.trim().split('[,\\s]+')}")
+	private List<String> trustedReverseProxies;
+
+	@Documentation(description = "Refresh timeout after which a trusted reverse proxy hostname is re-resolved", recommendation = "The refresh timeout should be chosen according to the acceptable stale-authorization window and e.g. the expected reverse-proxy replacement time")
+	@Value("${dev.dsf.server.auth.trust.reverse.proxy.hostname.refresh.timeout:PT10S}")
+	private String trustedReverseProxiesRefreshTimeout;
 
 	@Documentation(description = "Folder with PEM encoded files (*.crt, *.pem) or a single PEM encoded file with one or more trusted full CA chains to validate client certificates for https connections from local and remote clients", recommendation = "Add file to default folder via bind mount or use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_ca_chains}")
@@ -228,7 +241,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
-	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or against (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+	@Documentation(description = "Forward proxy no-proxy list: Target URLs will match exact domains `example.com`, against one level sub-domains `*.example.com`, one or more level sub-domains `**.example.com`, against IP-addresses and CIDR Networks if the target URL is specified as IP-address (IPv6 in square brackets), if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "sub.exact.com:80, *.one.level.wildcard.com, **.multilevel.com:443, 192.168.1.1, 192.168.1.0/24:80, [2001:db8::1]:443, [2001:db8::/32]")
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('[,\\s]+')}")
 	private List<String> proxyNoProxy;
 
@@ -240,7 +253,12 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 
 	protected final Function<Server, ServerConnector> httpApiConnector()
 	{
-		return JettyServer.httpConnector(apiHost, apiPort, clientCertificateHeaderName);
+		Duration trustedReverseProxiesDnsRefreshTimeout = Duration.parse(trustedReverseProxiesRefreshTimeout);
+		List<HostSpec> trustedReverseProxies = parseHostSpecList("dev.dsf.server.auth.trust.reverse.proxy",
+				this.trustedReverseProxies, true);
+
+		return JettyServer.httpConnector(apiHost, apiPort, clientCertificateHeaderName,
+				trustedReverseProxiesDnsRefreshTimeout, trustedReverseProxies);
 	}
 
 	protected final Function<Server, ServerConnector> httpsApiConnector()
@@ -503,6 +521,8 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Lazy
 	public ProxyConfig proxyConfig()
 	{
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy, false);
+
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}
 

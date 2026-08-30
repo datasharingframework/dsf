@@ -27,7 +27,7 @@ public class DocumentReferenceIdentityFilter extends AbstractMetaTagAuthorizatio
 	private static final FhirServerRole READ_ROLE = FhirServerRoleImpl.read(ResourceType.DocumentReference);
 
 	private static final String RESOURCE_TABLE = "current_document_references";
-	private static String RESOURCE_ID_COLUMN = "document_reference_id";
+	private static final String RESOURCE_ID_COLUMN = "document_reference_id";
 
 	public DocumentReferenceIdentityFilter(Identity identity)
 	{
