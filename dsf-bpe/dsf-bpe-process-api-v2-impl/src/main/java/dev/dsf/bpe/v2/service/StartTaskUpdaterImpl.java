@@ -46,6 +46,8 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 	@Override
 	public void addOutput(Coding outputType, Type outputValue)
 	{
+		checkOutputType(outputType);
+
 		Task task = getStartTask.get();
 		task.addOutput().setValue(outputValue).getType().addCoding(outputType);
 
@@ -64,16 +66,15 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 
 	private Optional<TaskOutputComponent> doGetOutput(Task task, Coding outputType)
 	{
-		return task.getOutput().stream().filter(matchesSystemAndCodeOptionallyVersion(outputType)).findFirst();
+		return task.getOutput().stream().filter(matchesSystemCodeAndVersion(outputType)).findFirst();
 	}
 
-	private Predicate<TaskOutputComponent> matchesSystemAndCodeOptionallyVersion(Coding outputType)
+	private Predicate<TaskOutputComponent> matchesSystemCodeAndVersion(Coding outputType)
 	{
 		return o -> o.getType().getCoding().stream()
 				.anyMatch(c -> Objects.equals(c.getSystem(), outputType.getSystem())
-						&& Objects.equals(c.getCode(), outputType.getCode()) && outputType.hasVersion()
-								? Objects.equals(c.getVersion(), outputType.getVersion())
-								: true);
+						&& Objects.equals(c.getCode(), outputType.getCode())
+						&& Objects.equals(c.getVersion(), outputType.getVersion()));
 	}
 
 	@Override
@@ -85,8 +86,7 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 
 		doGetOutput(task, outputType)
 				.orElseThrow(() -> new IllegalArgumentException("Output for type " + outputType.getSystem() + "|"
-						+ outputType.getCode()
-						+ (outputType.hasVersion() ? " (version: " + outputType.getVersion() + ") not found" : "")))
+						+ outputType.getCode() + " (version: " + outputType.getVersion() + ") not found"))
 				.setValue(outputValue);
 
 		Task updated = dsfClientProvider.getLocal().update(task);
@@ -101,11 +101,11 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 		Task task = getStartTask.get();
 
 		List<TaskOutputComponent> filtered = task.getOutput().stream()
-				.filter(matchesSystemAndCodeOptionallyVersion(outputType).negate()).toList();
+				.filter(matchesSystemCodeAndVersion(outputType).negate()).toList();
 
 		if (task.getOutput().size() == filtered.size())
 			throw new IllegalArgumentException("Output for type " + outputType.getSystem() + "|" + outputType.getCode()
-					+ (outputType.hasVersion() ? " (version: " + outputType.getVersion() + ") not found" : ""));
+					+ " (version: " + outputType.getVersion() + ") not found");
 
 		task.setOutput(filtered);
 
