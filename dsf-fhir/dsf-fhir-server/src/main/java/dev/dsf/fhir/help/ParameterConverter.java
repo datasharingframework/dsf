@@ -26,6 +26,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import dev.dsf.fhir.adapter.FhirAdapter;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
+import dev.dsf.fhir.service.patch.FhirPathPatchService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -58,10 +61,30 @@ public class ParameterConverter
 			MediaType.APPLICATION_XML, MediaType.TEXT_XML);
 
 	private final ExceptionHandler exceptionHandler;
+	private final FhirPathPatchService fhirPathPatchService;
 
-	public ParameterConverter(ExceptionHandler exceptionHandler)
+	public ParameterConverter(ExceptionHandler exceptionHandler, FhirPathPatchService fhirPathPatchService)
 	{
 		this.exceptionHandler = exceptionHandler;
+		this.fhirPathPatchService = fhirPathPatchService;
+	}
+
+	/**
+	 * Applies the given FHIRPath Patch to a copy of the given resource.
+	 *
+	 * @param <R>
+	 *            the resource type
+	 * @param resource
+	 *            the resource to patch, not <code>null</code>
+	 * @param patch
+	 *            the FHIRPath Patch as a {@link Parameters} resource, not <code>null</code>
+	 * @return a patched copy of the given resource
+	 * @throws dev.dsf.fhir.service.patch.FhirPatchException
+	 *             if the patch is invalid or can not be applied
+	 */
+	public <R extends Resource> R applyPatch(R resource, Parameters patch)
+	{
+		return fhirPathPatchService.apply(resource, patch);
 	}
 
 	/**

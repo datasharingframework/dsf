@@ -94,6 +94,12 @@ abstract class AbstractCommandList
 					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex(), resultOutcome,
 					result.getResponse().getStatus());
 		}
+		else if (command instanceof PatchCommand)
+		{
+			audit.info("Patch of {} for identity '{}' via bundle at index {} {}, status: {}",
+					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex(), resultOutcome,
+					result.getResponse().getStatus());
+		}
 		else if (command instanceof ReadCommand)
 		{
 			audit.info("{} of {} for identity '{}' via bundle at index {} {}, status: {}",
@@ -118,6 +124,11 @@ abstract class AbstractCommandList
 		else if (command instanceof UpdateCommand)
 		{
 			audit.info("Update of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
+					command.getIdentity().getName(), command.getIndex());
+		}
+		else if (command instanceof PatchCommand)
+		{
+			audit.info("Patch of {} for identity '{}' via bundle at index {} aborted", command.getResourceTypeName(),
 					command.getIdentity().getName(), command.getIndex());
 		}
 		else if (command instanceof ReadCommand r)

@@ -364,6 +364,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addInteraction().setCode(TypeRestfulInteraction.READ);
 			r.addInteraction().setCode(TypeRestfulInteraction.VREAD);
 			r.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
+			r.addInteraction().setCode(TypeRestfulInteraction.PATCH);
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 

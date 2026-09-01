@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
@@ -232,6 +233,24 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					"Request url " + entry.getRequest().getUrl() + " for method DELETE not supported");
 	}
 
+	// patch (FHIRPath Patch), standard and conditional
+	private Command patch(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
+			BundleEntryComponent entry, Resource resource, boolean enableValidation)
+	{
+		if (entry.getRequest().getUrl() == null || entry.getRequest().getUrl().isBlank())
+			throw new BadBundleException(
+					"Request url " + entry.getRequest().getUrl() + " for method PATCH not supported");
+
+		if (!(resource instanceof Parameters parameters))
+			throw new BadBundleException("Request body for PATCH at index " + index
+					+ " must be a Parameters resource (FHIRPath Patch), but was "
+					+ (resource == null ? "null" : resource.getResourceType().name()));
+
+		return new PatchCommand(index, identity, returnType, bundle, entry, serverBase, authorizationHelper, parameters,
+				daoProvider, exceptionHandler, parameterConverter, responseGenerator, referenceCleaner, eventGenerator,
+				defaultProfileProvider, enableValidation);
+	}
+
 	@Override
 	public CommandList createCommands(Bundle bundle, Identity identity, PreferReturnType returnType,
 			PreferHandlingType handlingType, boolean enableValidation)
@@ -295,6 +314,10 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					case PUT -> resolveReferences(
 							put(index, identity, returnType, bundle, entry, entry.getResource(), enableValidation),
 							index, identity, returnType, bundle, entry, entry.getResource(), HTTPVerb.PUT);
+
+					// no resolveReferences: the resource is the patch document (Parameters), not the target
+					case PATCH -> Stream.of(
+							patch(index, identity, returnType, bundle, entry, entry.getResource(), enableValidation));
 
 					default -> throw new BadBundleException("Request method " + entry.getRequest().getMethod()
 							+ " at index " + index + " not supported with resource");

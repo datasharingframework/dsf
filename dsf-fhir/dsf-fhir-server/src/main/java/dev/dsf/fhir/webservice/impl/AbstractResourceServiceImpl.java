@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
@@ -656,6 +657,19 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	@Override
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
+	{
+		throw new UnsupportedOperationException("Implemented and delegated by security layer");
+	}
+
+	@Override
+	public Response patch(String id, Parameters patch, UriInfo uri, HttpHeaders headers)
+	{
+		// the security layer applies the patch to the current resource and delegates to update
+		throw new UnsupportedOperationException("Implemented and delegated by security layer");
+	}
+
+	@Override
+	public Response patch(Parameters patch, UriInfo uri, HttpHeaders headers)
 	{
 		throw new UnsupportedOperationException("Implemented and delegated by security layer");
 	}

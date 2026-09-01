@@ -279,6 +279,54 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
+	PreferReturn patch(PreferReturnType returnType, Class<? extends Resource> resourceType, String id, Parameters patch)
+	{
+		Objects.requireNonNull(returnType, "returnType");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(patch, "patch");
+
+		Builder builder = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
+				.header(Constants.HEADER_PREFER, returnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW);
+
+		Response response = builder.method("PATCH", Entity.entity(patch, Constants.CT_FHIR_JSON_NEW));
+
+		logStatusAndHeaders(response);
+
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return toPreferReturn(returnType, resourceType, response);
+		else
+			throw handleError(response);
+	}
+
+	PreferReturn patchConditionaly(PreferReturnType returnType, Class<? extends Resource> resourceType,
+			Parameters patch, Map<String, List<String>> criteria)
+	{
+		Objects.requireNonNull(returnType, "returnType");
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(patch, "patch");
+		Objects.requireNonNull(criteria, "criteria");
+		if (criteria.isEmpty())
+			throw new IllegalArgumentException("criteria map empty");
+
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
+
+		for (Entry<String, List<String>> entry : criteria.entrySet())
+			target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+
+		Builder builder = target.request().accept(Constants.CT_FHIR_JSON_NEW).header(Constants.HEADER_PREFER,
+				returnType.getHeaderValue());
+
+		Response response = builder.method("PATCH", Entity.entity(patch, Constants.CT_FHIR_JSON_NEW));
+
+		logStatusAndHeaders(response);
+
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return toPreferReturn(returnType, resourceType, response);
+		else
+			throw handleError(response);
+	}
+
 	PreferReturn updateBinary(PreferReturnType returnType, String id, InputStream in, MediaType mediaType,
 			String securityContextReference)
 	{
@@ -343,6 +391,21 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	public <R extends Resource> R update(R resource)
 	{
 		return (R) update(PreferReturnType.REPRESENTATION, resource).getResource();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends Resource> R patch(Class<R> resourceType, String id, Parameters patch)
+	{
+		return (R) patch(PreferReturnType.REPRESENTATION, resourceType, id, patch).getResource();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends Resource> R patchConditionaly(Class<R> resourceType, Parameters patch,
+			Map<String, List<String>> criteria)
+	{
+		return (R) patchConditionaly(PreferReturnType.REPRESENTATION, resourceType, patch, criteria).getResource();
 	}
 
 	@Override

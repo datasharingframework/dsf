@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
+import dev.dsf.fhir.service.patch.FhirPatchException;
 import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.webservice.specification.BasicResourceService;
@@ -451,6 +453,68 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 						return updated;
 					});
+		}
+	}
+
+	@Override
+	public Response patch(String id, Parameters patch, UriInfo uri, HttpHeaders headers)
+	{
+		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
+
+		if (dbResource.isEmpty())
+		{
+			audit.info("Patch of non existing {}/{} denied for identity '{}'", resourceTypeName, id,
+					getCurrentIdentity().getName());
+			return responseGenerator.notFound(id, resourceTypeName);
+		}
+
+		R oldResource = referenceCleaner.cleanLiteralReferences(dbResource.get());
+		R patchedResource;
+		try
+		{
+			patchedResource = parameterConverter.applyPatch(oldResource, patch);
+		}
+		catch (FhirPatchException e)
+		{
+			audit.info("Patch of {}/{} denied for identity '{}', invalid patch: {}", resourceTypeName, id,
+					getCurrentIdentity().getName(), e.getMessage());
+			return responseGenerator.badRequestPatch(e.getMessage());
+		}
+
+		// patch is applied to a copy of the current resource; keep its id and let the update path handle
+		// authorization (as an update), If-Match, versioning and the Prefer header
+		patchedResource.setIdElement(oldResource.getIdElement());
+		return update(id, patchedResource, uri, headers, oldResource);
+	}
+
+	@Override
+	public Response patch(Parameters patch, UriInfo uri, HttpHeaders headers)
+	{
+		Map<String, List<String>> queryParameters = uri.getQueryParameters();
+		PartialResult<R> result = getExisting(queryParameters);
+
+		// No matches: 404 Not Found (conditional patch does not create)
+		if (result.getTotal() <= 0)
+		{
+			audit.info("Conditional patch of {} denied for identity '{}', no match", resourceTypeName,
+					getCurrentIdentity().getName());
+			return responseGenerator.patchTargetNotFound(resourceTypeName, UriComponentsBuilder.newInstance()
+					.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
+		}
+
+		// One match: patch the matching resource (delegates to the standard patch which re-reads by id)
+		else if (result.getTotal() == 1)
+			return patch(result.getPartialResult().get(0).getIdElement().getIdPart(), patch, uri, headers);
+
+		// Multiple matches: 412 Precondition Failed, criteria not selective enough
+		else
+		{
+			audit.info(
+					"Conditional patch of {} denied for identity '{}', criteria not selective enough, multiple matches",
+					resourceTypeName, getCurrentIdentity().getName());
+			return responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder.newInstance()
+					.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
 		}
 	}
 
