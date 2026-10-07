@@ -61,6 +61,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.ValidationRules;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Response;
@@ -84,13 +85,14 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 	public UpdateCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter, ValidationRules validationRules,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
 			DefaultProfileProvider defaultProfileProvider, boolean enableValidation)
 	{
 		super(3, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
-				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
+				exceptionHandler, parameterConverter, validationRules, responseGenerator, referenceExtractor,
+				referenceResolver);
 
 		this.responseGenerator = responseGenerator;
 		this.referenceCleaner = referenceCleaner;
@@ -441,6 +443,15 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			return uuid.get();
 
 		throw new RuntimeException("Error while retrieving id from id translation table");
+	}
+
+	@Override
+	public void checkReferences(Map<String, IdType> idTranslationTable, Connection connection)
+			throws SQLException, WebApplicationException
+	{
+		// version -1 as we are checking against the pre-update resource
+		referencesHelper.checkReferences(idTranslationTable, connection,
+				ref -> validationRules.checkReferenceAfterUpdate(resource, ref, v -> v - 1));
 	}
 
 	@Override

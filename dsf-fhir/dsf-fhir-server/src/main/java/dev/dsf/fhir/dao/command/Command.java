@@ -45,6 +45,12 @@ public interface Command
 	void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager, Connection connection,
 			ValidationHelper validationHelper) throws SQLException, WebApplicationException;
 
+	default void checkReferences(Map<String, IdType> idTranslationTable, Connection connection)
+			throws SQLException, WebApplicationException
+	{
+
+	};
+
 	default Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
 		return Optional.empty();

@@ -190,13 +190,13 @@ abstract class AbstractCommandList
 					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex(), resultOutcome,
 					result.getResponse().getStatus());
 		}
-		else if (command instanceof CreateCommand || command instanceof CheckReferencesCommand cr && cr.isCreate())
+		else if (command instanceof CreateCommand)
 		{
 			audit.info("Create of {} for identity '{}' via bundle at index {} {}, status: {}",
 					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex(), resultOutcome,
 					result.getResponse().getStatus());
 		}
-		else if (command instanceof UpdateCommand || command instanceof CheckReferencesCommand cr && cr.isUpdate())
+		else if (command instanceof UpdateCommand)
 		{
 			audit.info("Update of {} for identity '{}' via bundle at index {} {}, status: {}",
 					command.getResourceTypeName(), command.getIdentity().getName(), command.getIndex(), resultOutcome,

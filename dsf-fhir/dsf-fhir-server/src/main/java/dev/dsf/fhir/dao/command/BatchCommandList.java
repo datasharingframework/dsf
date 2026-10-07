@@ -174,10 +174,12 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 
 		try
 		{
-			logger.debug("Running execute of {} for entry at index {}", command.getClass().getSimpleName(),
+			logger.debug("Running execute and check-references of {} for entry at index {}", command.getClass().getSimpleName(),
 					command.getIndex());
 			command.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
 
+			command.checkReferences(idTranslationTable, connection);
+			
 			if (!connection.getAutoCommit())
 				connection.commit();
 		}

@@ -91,7 +91,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 
 				execute(connection, validationHelper, largeObjectManager, idTranslationTable);
 
-				postExecute(connection, largeObjectManager, transactionEventHandler);
+				checkReferences(connection, largeObjectManager, idTranslationTable);
+
+				postExecute(connection, largeObjectManager, idTranslationTable, transactionEventHandler);
 
 				if (hasModifyingCommands)
 				{
@@ -256,8 +258,55 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 		}
 	}
 
-	private void postExecute(Connection connection, LargeObjectManager largeObjectManager, EventHandler eventHandler)
-			throws Exception
+	private void checkReferences(Connection connection, LargeObjectManager largeObjectManager,
+			Map<String, IdType> idTranslationTable) throws Exception
+	{
+		for (int i = 0; i < commands.size(); i++)
+		{
+			CommandResult cR = commands.get(i);
+			Command c = cR.getCommand();
+
+			try
+			{
+				logger.debug("Running check-references of {} for entry at index {}", c.getClass().getSimpleName(),
+						c.getIndex());
+
+				c.checkReferences(idTranslationTable, connection);
+			}
+			catch (Exception e)
+			{
+				logger.debug(
+						"Error while running check-references of {} for entry at index {}, rolling back transaction",
+						c.getClass().getSimpleName(), c.getIndex(), e);
+				logger.warn(
+						"Error while running check-references of {} for entry at index {}, rolling back transaction: {} - {}",
+						c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
+
+				if (hasModifyingCommands)
+				{
+					logger.debug("Rolling back DB transaction");
+					tryRollback(connection, largeObjectManager, e);
+				}
+
+				try
+				{
+					commands.stream().map(CommandResult::getCommand).sorted(Comparator.comparing(Command::getIndex))
+							.filter(r -> r.getIndex() != c.getIndex()).forEach(this::auditLogAbort);
+					auditLogResult(cR);
+				}
+				catch (Exception e1)
+				{
+					logger.debug("Error while writing to audit log", e1);
+					logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(), e1.getMessage());
+				}
+
+				throw e;
+			}
+		}
+	}
+
+	private void postExecute(Connection connection, LargeObjectManager largeObjectManager,
+			Map<String, IdType> idTranslationTable, EventHandler eventHandler) throws Exception
 	{
 		for (int i = 0; i < commands.size(); i++)
 		{
