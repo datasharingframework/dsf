@@ -125,6 +125,7 @@ services:
       --https-certificate-key-file=/run/secrets/keycloak.key.plain
       --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
       --spi-truststore-file-password=password
+      --features-disabled=twitter-broker,identity-brokering-api
 
   forward-proxy:
     build: ./forward-proxy
