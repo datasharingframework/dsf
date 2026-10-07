@@ -17,19 +17,15 @@ package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Function;
 
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PSQLException;
@@ -39,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import dev.dsf.fhir.dao.jdbc.LargeObjectManager;
 import dev.dsf.fhir.dao.jdbc.LargeObjectManagerJdbc;
+import dev.dsf.fhir.event.EventHandler;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator;
@@ -57,19 +54,16 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 			ExceptionHandler exceptionHandler, List<? extends Command> commands,
 			Function<Connection, TransactionResources> transactionResourceFactory, ResponseGenerator responseGenerator)
 	{
-		super(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler, commands);
+		super(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler, commands,
+				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
 
 		this.transactionResourceFactory = transactionResourceFactory;
 		this.responseGenerator = responseGenerator;
-
-		Collections.sort(this.commands,
-				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
 	}
 
 	@Override
 	public Bundle execute() throws WebApplicationException
 	{
-		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) (commands.size() / 0.75) + 1);
 		try
 		{
 			TransactionEventHandler transactionEventHandler;
@@ -92,120 +86,12 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 						: LargeObjectManager.NO_OP;
 
 				Map<String, IdType> idTranslationTable = new HashMap<>();
-				for (Command c : commands)
-				{
-					try
-					{
-						logger.debug("Running pre-execute of command {} for entry at index {}", c.getClass().getName(),
-								c.getIndex());
-						c.preExecute(idTranslationTable, connection, validationHelper, snapshotGenerator);
-					}
-					catch (Exception e)
-					{
-						logger.debug(
-								"Error while running pre-execute of command {} for entry at index {}, aborting transaction",
-								c.getClass().getSimpleName(), c.getIndex(), e);
-						logger.warn(
-								"Error while running pre-execute of command {} for entry at index {}, aborting transaction: {} - {}",
-								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
 
-						try
-						{
-							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
-							auditLogResult(c, toEntry(e));
-						}
-						catch (Exception e1)
-						{
-							logger.debug("Error while writing to audit log", e1);
-							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
-									e1.getMessage());
-						}
+				preExecute(connection, validationHelper, snapshotGenerator, idTranslationTable);
 
-						throw e;
-					}
-				}
+				execute(connection, validationHelper, largeObjectManager, idTranslationTable);
 
-				for (Command c : commands)
-				{
-					try
-					{
-						logger.debug("Running execute of command {} for entry at index {}", c.getClass().getName(),
-								c.getIndex());
-						c.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
-					}
-					catch (Exception e)
-					{
-						logger.debug("Error while executing command {} for entry at index {}, rolling back transaction",
-								c.getClass().getSimpleName(), c.getIndex(), e);
-						logger.warn(
-								"Error while executing command {} for entry at index {}, rolling back transaction: {} - {}",
-								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
-
-						if (hasModifyingCommands)
-						{
-							logger.debug("Rolling back DB transaction");
-							tryRollback(connection, largeObjectManager, e);
-						}
-
-						if (e instanceof PSQLException s
-								&& PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
-							e = new WebApplicationException(e, responseGenerator.duplicateResourceExists());
-
-						try
-						{
-							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
-							auditLogResult(c, toEntry(e));
-						}
-						catch (Exception e1)
-						{
-							logger.debug("Error while writing to audit log", e1);
-							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
-									e1.getMessage());
-						}
-
-						throw e;
-					}
-				}
-
-				for (Command c : commands)
-				{
-					try
-					{
-						logger.debug("Running post-execute of command {} for entry at index {}", c.getClass().getName(),
-								c.getIndex());
-						Optional<BundleEntryComponent> optResult = c.postExecute(connection, transactionEventHandler);
-						optResult.ifPresent(result -> results.putIfAbsent(c.getIndex(), result));
-					}
-					catch (Exception e)
-					{
-						logger.debug(
-								"Error while running post-execute of command {} for entry at index {}, rolling back transaction",
-								c.getClass().getSimpleName(), c.getIndex(), e);
-						logger.warn(
-								"Error while running post-execute of command {} for entry at index {}, rolling back transaction: {} - {}",
-								c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
-
-						if (hasModifyingCommands)
-						{
-							logger.debug("Rolling back DB transaction");
-							tryRollback(connection, largeObjectManager, e);
-						}
-
-						try
-						{
-							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
-							auditLogResult(c, toEntry(e));
-						}
-						catch (Exception e1)
-						{
-							logger.debug("Error while writing to audit log", e1);
-							logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(),
-									e1.getMessage());
-						}
-
-						throw e;
-					}
-				}
+				postExecute(connection, largeObjectManager, transactionEventHandler);
 
 				if (hasModifyingCommands)
 				{
@@ -241,25 +127,27 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 				logger.warn("Error while handling events: {} - {}", e.getClass().getName(), e.getMessage());
 			}
 
-			try
-			{
-				results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).forEach(e ->
-				{
-					Command command = commands.get(e.getKey());
-					BundleEntryComponent result = e.getValue();
-					auditLogResult(command, result);
-				});
-			}
-			catch (Exception e)
-			{
-				logger.debug("Error while writing to audit log", e);
-				logger.warn("Error while writing to audit log: {} - {}", e.getClass().getName(), e.getMessage());
-			}
-
 			Bundle result = new Bundle();
 			result.setType(BundleType.TRANSACTIONRESPONSE);
-			results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).map(Entry::getValue)
-					.forEach(result::addEntry);
+
+			commands.stream().filter(CommandResult::hasResult)
+					.sorted(Comparator.comparing(cR -> cR.getCommand().getIndex())).forEach(cR ->
+					{
+						cR.convertExceptionToResult(this::internalServerError);
+
+						try
+						{
+							auditLogResult(cR);
+						}
+						catch (Exception e)
+						{
+							logger.debug("Error while writing to audit log", e);
+							logger.warn("Error while writing to audit log: {} - {}", e.getClass().getName(),
+									e.getMessage());
+						}
+
+						result.addEntry(cR.getResult());
+					});
 
 			return result;
 		}
@@ -274,6 +162,143 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 		catch (Exception e)
 		{
 			throw exceptionHandler.internalServerErrorBundleTransaction(e);
+		}
+	}
+
+	private void preExecute(Connection connection, ValidationHelper validationHelper,
+			SnapshotGenerator snapshotGenerator, Map<String, IdType> idTranslationTable) throws Exception
+	{
+		for (int i = 0; i < commands.size(); i++)
+		{
+			CommandResult cR = commands.get(i);
+			Command c = cR.getCommand();
+
+			try
+			{
+				logger.debug("Running pre-execute of {} for entry at index {}", c.getClass().getSimpleName(),
+						c.getIndex());
+				c.preExecute(idTranslationTable, connection, validationHelper, snapshotGenerator);
+			}
+			catch (Exception e)
+			{
+				logger.debug("Error while running pre-execute of {} for entry at index {}, aborting transaction",
+						c.getClass().getSimpleName(), c.getIndex(), e);
+				logger.warn(
+						"Error while running pre-execute of {} for entry at index {}, aborting transaction: {} - {}",
+						c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
+
+				cR.setException(e);
+				cR.convertExceptionToResult(this::internalServerError);
+
+				try
+				{
+					commands.stream().map(CommandResult::getCommand).sorted(Comparator.comparing(Command::getIndex))
+							.filter(r -> r.getIndex() != c.getIndex()).forEach(this::auditLogAbort);
+					auditLogResult(cR);
+				}
+				catch (Exception e1)
+				{
+					logger.debug("Error while writing to audit log", e1);
+					logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(), e1.getMessage());
+				}
+
+				throw e;
+			}
+		}
+	}
+
+	private void execute(Connection connection, ValidationHelper validationHelper,
+			LargeObjectManager largeObjectManager, Map<String, IdType> idTranslationTable) throws Exception
+	{
+		for (int i = 0; i < commands.size(); i++)
+		{
+			CommandResult cR = commands.get(i);
+			Command c = cR.getCommand();
+
+			try
+			{
+				logger.debug("Running execute of {} for entry at index {}", c.getClass().getSimpleName(), c.getIndex());
+				c.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
+			}
+			catch (Exception e)
+			{
+				logger.debug("Error while executing {} for entry at index {}, rolling back transaction",
+						c.getClass().getSimpleName(), c.getIndex(), e);
+				logger.warn("Error while executing {} for entry at index {}, rolling back transaction: {} - {}",
+						c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
+
+				if (hasModifyingCommands)
+				{
+					logger.debug("Rolling back DB transaction");
+					tryRollback(connection, largeObjectManager, e);
+				}
+
+				if (e instanceof PSQLException s && PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
+					e = new WebApplicationException(responseGenerator.duplicateResourceExists());
+
+				cR.setException(e);
+				cR.convertExceptionToResult(this::internalServerError);
+
+				try
+				{
+					commands.stream().map(CommandResult::getCommand).sorted(Comparator.comparing(Command::getIndex))
+							.filter(r -> r.getIndex() != c.getIndex()).forEach(this::auditLogAbort);
+					auditLogResult(cR);
+				}
+				catch (Exception e1)
+				{
+					logger.debug("Error while writing to audit log", e1);
+					logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(), e1.getMessage());
+				}
+
+				throw e;
+			}
+		}
+	}
+
+	private void postExecute(Connection connection, LargeObjectManager largeObjectManager, EventHandler eventHandler)
+			throws Exception
+	{
+		for (int i = 0; i < commands.size(); i++)
+		{
+			CommandResult cR = commands.get(i);
+			Command c = cR.getCommand();
+
+			try
+			{
+				logger.debug("Running post-execute of {} for entry at index {}", c.getClass().getSimpleName(),
+						c.getIndex());
+
+				c.postExecute(connection, eventHandler).ifPresent(cR::setResult);
+			}
+			catch (Exception e)
+			{
+				logger.debug("Error while running post-execute of {} for entry at index {}, rolling back transaction",
+						c.getClass().getSimpleName(), c.getIndex(), e);
+				logger.warn(
+						"Error while running post-execute of {} for entry at index {}, rolling back transaction: {} - {}",
+						c.getClass().getSimpleName(), c.getIndex(), e.getClass().getName(), e.getMessage());
+
+				if (hasModifyingCommands)
+				{
+					logger.debug("Rolling back DB transaction");
+					tryRollback(connection, largeObjectManager, e);
+				}
+
+				try
+				{
+					commands.stream().map(CommandResult::getCommand).sorted(Comparator.comparing(Command::getIndex))
+							.filter(r -> r.getIndex() != c.getIndex()).forEach(this::auditLogAbort);
+					auditLogResult(cR);
+				}
+				catch (Exception e1)
+				{
+					logger.debug("Error while writing to audit log", e1);
+					logger.warn("Error while writing to audit log: {} - {}", e1.getClass().getName(), e1.getMessage());
+				}
+
+				throw e;
+			}
 		}
 	}
 

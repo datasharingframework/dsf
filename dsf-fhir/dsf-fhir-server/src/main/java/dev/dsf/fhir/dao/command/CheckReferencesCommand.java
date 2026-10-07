@@ -66,7 +66,7 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 
 	private boolean checkReferenceAfterUpdate(ResourceReference ref)
 	{
-		if (HTTPVerb.PUT.equals(verb))
+		if (isUpdate())
 		{
 			// version -1 as we are checking against the pre-update resource
 			return validationRules.checkReferenceAfterUpdate(resource, ref, v -> v - 1);
@@ -75,9 +75,13 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 		return true;
 	}
 
-	@Override
-	public String getResourceTypeName()
+	public boolean isCreate()
 	{
-		throw new UnsupportedOperationException();
+		return HTTPVerb.POST.equals(verb);
+	}
+
+	public boolean isUpdate()
+	{
+		return HTTPVerb.PUT.equals(verb);
 	}
 }
