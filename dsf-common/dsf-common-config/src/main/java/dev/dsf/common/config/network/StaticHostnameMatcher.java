@@ -23,6 +23,24 @@ import java.util.Objects;
 
 import dev.dsf.common.config.network.HostSpecParser.HostSpec;
 
+/**
+ * Matches socket addresses against a statically configured hostname pattern with optional port matching.
+ * <p>
+ * Supported hostname patterns are:
+ * <ul>
+ * <li>Exact hostnames, which match the specified hostname only.</li>
+ * <li>Single-level wildcards ({@code *.example.invalid}), which match exactly one subdomain level.</li>
+ * <li>Multi-level wildcards ({@code .example.invalid}), which match one or more subdomain levels.</li>
+ * </ul>
+ * Hostname comparisons are case-insensitive. Wildcard patterns require the candidate hostname to end with the specified
+ * suffix, preceded by a dot. The suffix itself does not match a wildcard pattern.
+ * <p>
+ * A {@link HostSpec} may specify a port to restrict matches to that port. If no port is specified, any port is
+ * accepted.
+ * <p>
+ * A {@code null} socket address never matches. The original hostname representation is used for matching without
+ * requiring a reverse DNS lookup.
+ */
 public final class StaticHostnameMatcher implements InetSocketAddressMatcher
 {
 	public static InetSocketAddressMatcherList of(HostSpec... hostSpecs)

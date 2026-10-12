@@ -26,6 +26,23 @@ import java.util.Objects;
 
 import dev.dsf.common.config.network.HostSpecParser.HostSpec;
 
+/**
+ * Matches resolved socket addresses against statically configured IPv4 or IPv6 addresses and CIDR network ranges, with
+ * optional port matching.
+ * <p>
+ * Supported host specifications include individual IPv4 and IPv6 addresses, which are treated as full-length network
+ * prefixes, and IPv4 and IPv6 CIDR ranges, which match addresses sharing the specified network prefix.
+ * <p>
+ * Matching compares the binary address representations and requires the candidate address and configured network to use
+ * the same address family. IPv4 and IPv6 addresses therefore never match each other. CIDR matching compares all
+ * complete prefix bytes and, when necessary, the remaining prefix bits.
+ * <p>
+ * A {@link HostSpec} may specify a port to restrict matches to that port. If no port is specified, any port is
+ * accepted.
+ * <p>
+ * A {@code null} or unresolved socket address never matches. Matching uses the resolved binary address and does not
+ * perform hostname-based matching.
+ */
 public class StaticCidrMatcher implements InetSocketAddressMatcher
 {
 	public static InetSocketAddressMatcherList of(HostSpec... hostSpecs)
