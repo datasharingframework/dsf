@@ -131,7 +131,10 @@ public class StaticCidrMatcher implements InetSocketAddressMatcher
 	{
 		try
 		{
-			return InetAddress.getByAddress(network).getHostAddress() + "/" + prefixLength
+			InetAddress address = InetAddress.getByAddress(network);
+			boolean isIpv6 = address.getAddress().length == 16;
+
+			return (isIpv6 ? "[" : "") + address.getHostAddress() + "/" + prefixLength + (isIpv6 ? "]" : "")
 					+ (port == null ? "" : ":" + port);
 		}
 		catch (UnknownHostException e)
