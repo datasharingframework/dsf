@@ -48,8 +48,7 @@ public interface Command
 	default void checkReferences(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
-
-	};
+	}
 
 	default Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
