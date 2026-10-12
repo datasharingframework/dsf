@@ -137,7 +137,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 	@Value("#{'${dev.dsf.server.auth.trust.reverse.proxy:proxy}'.trim().split('[,\\s]+')}")
 	private List<String> trustedReverseProxies;
 
-	@Documentation(description = "Refresh timeout after which a trusted reverse proxy hostname is re-resolved", recommendation = "The refresh timeout should be chosen according to the acceptable stale-authorization window and e.g. the expected reverse-proxy replacement time")
+	@Documentation(description = "Refresh timeout after which a trusted reverse proxy hostname is re-resolved", recommendation = "The refresh timeout should be chosen according to the acceptable stale-authorization window and e.g. the expected reverse-proxy replacement time; users may also need to change the Java [networkaddress.cache...](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/doc-files/net-properties.html#address-cache-heading) security properties")
 	@Value("${dev.dsf.server.auth.trust.reverse.proxy.hostname.refresh.timeout:PT10S}")
 	private String trustedReverseProxiesRefreshTimeout;
 
