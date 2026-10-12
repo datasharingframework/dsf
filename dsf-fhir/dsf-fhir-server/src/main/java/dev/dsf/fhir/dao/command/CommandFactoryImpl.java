@@ -244,16 +244,16 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 		if (bundle.getType() != null)
 		{
-			List<Command> commands = IntStream.range(0, bundle.getEntry().size())
-					.mapToObj(index -> createCommand(index, identity, returnType, handlingType, bundle,
-							bundle.getEntry().get(index), enableValidation))
+			List<Command> commands = IntStream
+					.range(0, bundle.getEntry().size()).mapToObj(index -> createCommand(index, identity, returnType,
+							handlingType, bundle, bundle.getEntry().get(index), enableValidation))
 					.collect(Collectors.toList());
 
 			return switch (bundle.getType())
 			{
-				case BATCH -> new BatchCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup,
-						exceptionHandler, commands, validationHelper, snapshotGenerator, eventHandler,
-						responseGenerator);
+				case BATCH ->
+					new BatchCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler,
+							commands, validationHelper, snapshotGenerator, eventHandler, responseGenerator);
 
 				case TRANSACTION -> new TransactionCommandList(dataSource, permanentDeleteDataSource, dbUsersGroup,
 						exceptionHandler, commands, transactionResourcesFactory, responseGenerator);
@@ -286,8 +286,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			{
 				return switch (entry.getRequest().getMethod())
 				{
-					case POST -> post(index, identity, returnType, bundle, entry, entry.getResource(),
-							enableValidation);
+					case POST ->
+						post(index, identity, returnType, bundle, entry, entry.getResource(), enableValidation);
 					case PUT -> put(index, identity, returnType, bundle, entry, entry.getResource(), enableValidation);
 
 					default -> throw new BadBundleException("Request method " + entry.getRequest().getMethod()

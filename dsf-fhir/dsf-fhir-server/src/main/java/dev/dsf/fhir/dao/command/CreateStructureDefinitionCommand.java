@@ -42,8 +42,8 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
-import dev.dsf.fhir.validation.ValidationRules;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import dev.dsf.fhir.validation.ValidationRules;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 

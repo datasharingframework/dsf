@@ -497,7 +497,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		Bundle b = createBundleWithGroupResource(BundleType.TRANSACTION, GroupType.PERSON);
 
 		expectForbidden(() -> getWebserviceClient().postBundle(b));
-		
+
 		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
 		List<Group> all = groupDao.readAll();
 		assertNotNull(all);
@@ -513,7 +513,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(result);
 		assertEquals(1, result.getEntry().size());
 		assertEquals("403 Forbidden", result.getEntry().get(0).getResponse().getStatus());
-		
+
 		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
 		List<Group> all = groupDao.readAll();
 		assertNotNull(all);
@@ -526,7 +526,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		Bundle b = createBundleWithGroupResource(BundleType.TRANSACTION, null);
 
 		expectForbidden(() -> getWebserviceClient().postBundle(b));
-		
+
 		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
 		List<Group> all = groupDao.readAll();
 		assertNotNull(all);

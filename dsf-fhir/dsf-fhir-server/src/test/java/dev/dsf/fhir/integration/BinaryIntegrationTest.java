@@ -1935,7 +1935,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(responseBundle.getEntry().get(0).getResponse().getEtag());
 		assertEquals("W/\"1\"", responseBundle.getEntry().get(0).getResponse().getEtag());
 	}
-	
+
 	@Test
 	public void testCreateBinaryWithNonExistingSecurityContextViaBatchBundle() throws Exception
 	{
@@ -1945,7 +1945,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.getSecurityContext().setReference("ResearchStudy/"+UUID.randomUUID().toString());
+		binary.getSecurityContext().setReference("ResearchStudy/" + UUID.randomUUID().toString());
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
