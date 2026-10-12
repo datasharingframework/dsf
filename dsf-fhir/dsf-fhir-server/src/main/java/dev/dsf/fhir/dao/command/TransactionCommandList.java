@@ -93,7 +93,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 
 				checkReferences(connection, largeObjectManager, idTranslationTable);
 
-				postExecute(connection, largeObjectManager, idTranslationTable, transactionEventHandler);
+				postExecute(connection, largeObjectManager, transactionEventHandler);
 
 				if (hasModifyingCommands)
 				{
@@ -305,8 +305,8 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 		}
 	}
 
-	private void postExecute(Connection connection, LargeObjectManager largeObjectManager,
-			Map<String, IdType> idTranslationTable, EventHandler eventHandler) throws Exception
+	private void postExecute(Connection connection, LargeObjectManager largeObjectManager, EventHandler eventHandler)
+			throws Exception
 	{
 		for (int i = 0; i < commands.size(); i++)
 		{
