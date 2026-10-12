@@ -128,9 +128,8 @@ public class DynamicHostnameMatcherTest
 		DynamicHostnameMatcher matcher = matcher(new MutableClock(currentTime), _ ->
 		{
 			if (fail.get())
-			{
 				throw new UnknownHostException("DNS failure");
-			}
+
 			return new InetAddress[] { allowed };
 		});
 

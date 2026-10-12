@@ -107,7 +107,7 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		}
 		else
 		{
-			audit.info("Root History allowed for identiy '{}': {}", getCurrentIdentity().getName(),
+			audit.info("Root History allowed for identity '{}': {}", getCurrentIdentity().getName(),
 					reasonHistoryAllowed.get());
 			return delegate.history(uri, headers);
 		}
