@@ -325,11 +325,8 @@ public abstract class AbstractCertificateAndProxyConfig
 		}
 	}
 
-	protected List<HostSpec> parseHostSpecList(String propertyName, List<String> values, boolean supportDisabled)
+	protected List<HostSpec> parseHostSpecList(String propertyName, List<String> values)
 	{
-		if (supportDisabled && values != null && values.size() == 1 && HOST_SPEC_LIST_DISABLED.equals(values.get(0)))
-			return List.of();
-
 		try
 		{
 			return HostSpecParser.parse(values);

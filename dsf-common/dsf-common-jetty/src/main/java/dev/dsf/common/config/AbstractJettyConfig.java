@@ -82,7 +82,11 @@ import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
 import dev.dsf.common.buildinfo.BuildInfoReader;
 import dev.dsf.common.buildinfo.BuildInfoReaderImpl;
+import dev.dsf.common.config.network.DynamicHostnameMatcher;
 import dev.dsf.common.config.network.HostSpecParser.HostSpec;
+import dev.dsf.common.config.network.InetSocketAddressMatcher;
+import dev.dsf.common.config.network.InetSocketAddressMatcherList;
+import dev.dsf.common.config.network.StaticCidrMatcher;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.jetty.HttpClientWithGetRetry;
@@ -253,12 +257,39 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 
 	protected final Function<Server, ServerConnector> httpApiConnector()
 	{
+		return JettyServer.httpConnector(apiHost, apiPort, clientCertificateHeaderName, createTrustedProxyMatcher());
+	}
+
+	private InetSocketAddressMatcher createTrustedProxyMatcher()
+	{
+		if (trustedReverseProxies.size() == 1 && HOST_SPEC_LIST_DISABLED.equals(trustedReverseProxies.get(0)))
+		{
+			logger.warn("Trusted reverse proxy matcher disabled");
+			return InetSocketAddressMatcher.ALL;
+		}
+
 		Duration trustedReverseProxiesDnsRefreshTimeout = Duration.parse(trustedReverseProxiesRefreshTimeout);
 		List<HostSpec> trustedReverseProxies = parseHostSpecList("dev.dsf.server.auth.trust.reverse.proxy",
-				this.trustedReverseProxies, true);
+				this.trustedReverseProxies);
 
-		return JettyServer.httpConnector(apiHost, apiPort, clientCertificateHeaderName,
-				trustedReverseProxiesDnsRefreshTimeout, trustedReverseProxies);
+		InetSocketAddressMatcher matcher = new InetSocketAddressMatcherList(
+				trustedReverseProxies.stream().map(toMatcher(trustedReverseProxiesDnsRefreshTimeout)));
+
+		logger.info("Trusted reverse proxy matcher config: {}", matcher.toString());
+		return matcher;
+	}
+
+	private Function<HostSpec, InetSocketAddressMatcher> toMatcher(Duration trustedReverseProxiesDnsRefreshTimeout)
+	{
+		return hostSpec ->
+		{
+			if (hostSpec.isIp())
+				return StaticCidrMatcher.of(hostSpec);
+			else if (hostSpec.isDomain())
+				return DynamicHostnameMatcher.of(trustedReverseProxiesDnsRefreshTimeout, hostSpec);
+			else
+				throw new IllegalArgumentException("hostSpec not supported");
+		};
 	}
 
 	protected final Function<Server, ServerConnector> httpsApiConnector()
@@ -521,7 +552,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 	@Lazy
 	public ProxyConfig proxyConfig()
 	{
-		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy, false);
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy);
 
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}

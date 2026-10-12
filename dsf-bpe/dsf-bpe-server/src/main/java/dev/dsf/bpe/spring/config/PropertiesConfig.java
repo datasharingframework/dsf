@@ -994,7 +994,7 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	@Bean
 	public ProxyConfig proxyConfig()
 	{
-		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy, false);
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy);
 
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}

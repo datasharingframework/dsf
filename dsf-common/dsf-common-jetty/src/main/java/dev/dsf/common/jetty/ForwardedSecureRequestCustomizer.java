@@ -45,10 +45,16 @@ public class ForwardedSecureRequestCustomizer implements Customizer
 	private final String clientCertHeaderName;
 	private final InetSocketAddressMatcher trustedProxyMatcher;
 
+	/**
+	 * @param clientCertHeaderName
+	 *            not <code>null</code>
+	 * @param trustedProxyMatcher
+	 *            not <code>null</code>
+	 */
 	public ForwardedSecureRequestCustomizer(String clientCertHeaderName, InetSocketAddressMatcher trustedProxyMatcher)
 	{
 		this.clientCertHeaderName = Objects.requireNonNull(clientCertHeaderName, "clientCertHeaderName");
-		this.trustedProxyMatcher = trustedProxyMatcher;
+		this.trustedProxyMatcher = Objects.requireNonNull(trustedProxyMatcher, "trustedProxyMatcher");
 	}
 
 	@Override
