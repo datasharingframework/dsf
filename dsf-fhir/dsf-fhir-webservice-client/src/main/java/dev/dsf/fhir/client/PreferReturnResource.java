@@ -29,14 +29,14 @@ public interface PreferReturnResource
 {
 	<R extends Resource> R create(R resource);
 
-	<R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria);
+	<R extends Resource> R createConditionally(R resource, String ifNoneExistCriteria);
 
 	Binary createBinary(InputStream in, MediaType mediaType, String securityContextReference);
 
 
 	<R extends Resource> R update(R resource);
 
-	<R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
+	<R extends Resource> R updateConditionally(R resource, Map<String, List<String>> criteria);
 
 	Binary updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
 

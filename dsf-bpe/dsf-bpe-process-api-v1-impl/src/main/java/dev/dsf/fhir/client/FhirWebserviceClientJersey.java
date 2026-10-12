@@ -747,7 +747,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, Duration.ofMillis(delayMillis));
+		return new BasicFhirWebserviceClientWithRetryImpl(this, nTimes, Duration.ofMillis(delayMillis));
 	}
 
 	@Override
@@ -756,7 +756,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (delayMillis < 0)
 			throw new IllegalArgumentException("delayMillis < 0");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, Duration.ofMillis(delayMillis));
+		return new BasicFhirWebserviceClientWithRetryImpl(this, RETRY_FOREVER, Duration.ofMillis(delayMillis));
 	}
 
 	@Override

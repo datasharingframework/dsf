@@ -399,6 +399,7 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 			this.verifyAuthorizedParty = verifyAuthorizedParty;
 		}
 
+		@Override
 		public String baseUrl()
 		{
 			if (baseUrl != null && baseUrl.endsWith("/"))
@@ -407,6 +408,7 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 				return baseUrl;
 		}
 
+		@Override
 		public String discoveryPath()
 		{
 			if (discoveryPath != null && !discoveryPath.startsWith("/"))
@@ -508,6 +510,7 @@ public record FhirClientConfigYaml(@JsonProperty(FhirClientConfigYaml.PROPERTY_B
 		this.oidcAuth = oidcAuth;
 	}
 
+	@Override
 	public String baseUrl()
 	{
 		if (baseUrl != null && baseUrl.endsWith("/"))

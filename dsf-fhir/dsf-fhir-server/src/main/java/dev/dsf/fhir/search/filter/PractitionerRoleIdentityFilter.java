@@ -27,7 +27,7 @@ public class PractitionerRoleIdentityFilter extends AbstractMetaTagAuthorization
 	private static final FhirServerRole READ_ROLE = FhirServerRoleImpl.read(ResourceType.PractitionerRole);
 
 	private static final String RESOURCE_TABLE = "current_practitioner_roles";
-	private static String RESOURCE_ID_COLUMN = "practitioner_role_id";
+	private static final String RESOURCE_ID_COLUMN = "practitioner_role_id";
 
 	public PractitionerRoleIdentityFilter(Identity identity)
 	{
