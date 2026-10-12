@@ -338,6 +338,92 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testReadNotAllowedExternalUserViaSecurityContextAfterUpdate() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getTotal());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+		getReadAccessHelper().addOrganization(rs, org);
+
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy createdRs = researchStudyDao.create(rs);
+		assertNotNull(createdRs);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+
+		createdRs.getMeta().setTag(null);
+		getReadAccessHelper().addLocal(createdRs);
+
+		ResearchStudy updatedRs = researchStudyDao.update(createdRs);
+		assertNotNull(updatedRs);
+
+		expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testReadNotAllowedExternalUserViaSecurityContextAfterDelete() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(PageAndCount.single())
+						.configureParameters(Map.of("name", List.of("External Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getTotal());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+		getReadAccessHelper().addOrganization(rs, org);
+
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy createdRs = researchStudyDao.create(rs);
+		assertNotNull(createdRs);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+
+		researchStudyDao.delete(UUID.fromString(createdRs.getIdElement().getIdPart()));
+
+		expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart()));
+	}
+
+	@Test
 	public void testReadAllowedExternalUserViaSecurityContextDocumentReference() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
