@@ -81,7 +81,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				if (cR.hasException())
 					indexesWithError.add(cR.getCommand().getIndex());
 			});
-			
+
 			if (hasModifyingCommands)
 			{
 				connection.setReadOnly(false);
@@ -97,7 +97,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				if (cR.hasException())
 					indexesWithError.add(cR.getCommand().getIndex());
 			});
-			
+
 			if (hasModifyingCommands)
 			{
 				connection.setReadOnly(initialReadOnly);
