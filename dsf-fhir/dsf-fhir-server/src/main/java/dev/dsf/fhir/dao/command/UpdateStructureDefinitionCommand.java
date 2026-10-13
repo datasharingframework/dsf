@@ -46,6 +46,7 @@ import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import dev.dsf.fhir.validation.ValidationRules;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
@@ -62,14 +63,14 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	public UpdateStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter, ValidationRules validationRules, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
 			DefaultProfileProvider defaultProfileProvider, boolean enableValidation, StructureDefinitionDao snapshotDao)
 	{
 		super(index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
-				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-				referenceCleaner, eventGenerator, defaultProfileProvider, enableValidation);
+				exceptionHandler, parameterConverter, validationRules, responseGenerator, referenceExtractor,
+				referenceResolver, referenceCleaner, eventGenerator, defaultProfileProvider, enableValidation);
 
 		this.snapshotDao = snapshotDao;
 	}

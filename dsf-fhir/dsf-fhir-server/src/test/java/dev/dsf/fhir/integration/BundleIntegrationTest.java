@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -61,6 +64,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.fhir.dao.GroupDao;
 import dev.dsf.fhir.dao.PatientDao;
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 
@@ -150,7 +154,10 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		request.setMethod(HTTPVerb.DELETE);
 		request.setUrl("StructureDefinition/" + newSid.getIdPart());
 
-		getWebserviceClient().withMinimalReturn().postBundle(deleteBundle);
+		Bundle returnBundle = getWebserviceClient().withMinimalReturn().postBundle(deleteBundle);
+		assertNotNull(returnBundle);
+		assertNotNull(returnBundle.getEntry());
+		assertEquals(1, returnBundle.getEntry().size());
 
 		assertFalse(testProfileSupported(taskProfileUrl));
 		StructureDefinitionDao sDdao = getSpringWebApplicationContext().getBean("structureDefinitionDao",
@@ -211,6 +218,50 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 			assertTrue(result.next());
 			assertEquals(1, result.getInt(1));
 		}
+	}
+
+	@Test
+	public void testPostTransactionBundleAlternativeEntryOrder() throws Exception
+	{
+		Patient p0 = new Patient();
+		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		Patient p1 = dao.create(p0);
+
+		List<HTTPVerb> entrySortOrder = List.of(HTTPVerb.GET, HTTPVerb.PUT, HTTPVerb.POST, HTTPVerb.DELETE);
+
+		Bundle bundle = createTestBundle(BundleType.TRANSACTION, p1.getIdElement());
+		bundle.setEntry(bundle.getEntry().stream()
+				.sorted(Comparator.comparing(e -> entrySortOrder.indexOf(e.getRequest().getMethod()))).toList());
+
+		Bundle rBundle = getWebserviceClient().postBundle(bundle);
+
+		checkReturnBundle(BundleType.TRANSACTIONRESPONSE, rBundle, bundle.getEntry().size(),
+				List.of("200 OK", "200 OK", "200 OK", "404 Not Found", "200 OK", "201 Created", "200 OK", "200 OK"));
+
+		DataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", DataSource.class);
+		try (Connection connection = dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM current_patients");
+				ResultSet result = statement.executeQuery())
+		{
+			assertTrue(result.next());
+			assertEquals(1, result.getInt(1));
+		}
+	}
+
+	@Test
+	public void testPostTransactionBundleWithBadEntry() throws Exception
+	{
+		Patient p0 = new Patient();
+		PatientDao dao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		Patient p1 = dao.create(p0);
+
+		List<HTTPVerb> entrySortOrder = List.of(HTTPVerb.GET, HTTPVerb.PUT, HTTPVerb.POST, HTTPVerb.DELETE);
+
+		Bundle bundle = createTestBundle(BundleType.TRANSACTION, p1.getIdElement());
+		bundle.setEntry(bundle.getEntry().stream()
+				.sorted(Comparator.comparing(e -> entrySortOrder.indexOf(e.getRequest().getMethod()))).toList());
+
+		expectForbidden(() -> getMinimalWebserviceClient().postBundle(bundle));
 	}
 
 	@Test
@@ -305,7 +356,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		{
 			assertTrue(rBundle.getEntry().get(i).hasResponse());
 			assertTrue(rBundle.getEntry().get(i).getResponse().hasStatus());
-			assertEquals(rBundle.getEntry().get(i).getResponse().getStatus(), expectedStatus.get(i));
+			assertEquals(expectedStatus.get(i), rBundle.getEntry().get(i).getResponse().getStatus());
 		}
 	}
 
@@ -422,5 +473,137 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		{
 			return fhirContext.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
+	}
+
+	@Test
+	public void testBatchBundleWithNonResolvableReference() throws Exception
+	{
+		Bundle b = createBundleWithGroupResource(BundleType.BATCH, GroupType.PERSON);
+
+		Bundle result = getWebserviceClient().postBundle(b);
+		assertNotNull(result);
+		assertEquals(1, result.getEntry().size());
+		assertEquals("403 Forbidden", result.getEntry().get(0).getResponse().getStatus());
+
+		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
+		List<Group> all = groupDao.readAll();
+		assertNotNull(all);
+		assertEquals(0, all.size());
+	}
+
+	@Test
+	public void testTransactionBundleWithNonResolvableReference() throws Exception
+	{
+		Bundle b = createBundleWithGroupResource(BundleType.TRANSACTION, GroupType.PERSON);
+
+		expectForbidden(() -> getWebserviceClient().postBundle(b));
+
+		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
+		List<Group> all = groupDao.readAll();
+		assertNotNull(all);
+		assertEquals(0, all.size());
+	}
+
+	@Test
+	public void testBatchBundleWithoutGroupTypeAndNonResolvableReference() throws Exception
+	{
+		Bundle b = createBundleWithGroupResource(BundleType.BATCH, null);
+
+		Bundle result = getWebserviceClient().postBundle(b);
+		assertNotNull(result);
+		assertEquals(1, result.getEntry().size());
+		assertEquals("403 Forbidden", result.getEntry().get(0).getResponse().getStatus());
+
+		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
+		List<Group> all = groupDao.readAll();
+		assertNotNull(all);
+		assertEquals(0, all.size());
+	}
+
+	@Test
+	public void testTransactionBundleWithoutGroupTypeAndNonResolvableReference() throws Exception
+	{
+		Bundle b = createBundleWithGroupResource(BundleType.TRANSACTION, null);
+
+		expectForbidden(() -> getWebserviceClient().postBundle(b));
+
+		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
+		List<Group> all = groupDao.readAll();
+		assertNotNull(all);
+		assertEquals(0, all.size());
+	}
+
+	private Bundle createBundleWithGroupResource(BundleType bundleType, GroupType groupType)
+	{
+		Group g = new Group();
+		getReadAccessHelper().addAll(g);
+		g.setType(groupType);
+		g.setActual(false);
+		g.getManagingEntity().setReference("Organization/" + UUID.randomUUID().toString());
+
+		Bundle b = new Bundle().setType(bundleType);
+		BundleEntryComponent e = b.addEntry();
+		e.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		e.setResource(g);
+		e.getRequest().setMethod(HTTPVerb.POST).setUrl("Group");
+		return b;
+	}
+
+	@Test
+	public void batchConditionalCreateMultipleMatches() throws Exception
+	{
+		PatientDao patientDao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		for (int i = 0; i < 2; i++)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("system").setValue("duplicate");
+			patientDao.create(patient);
+		}
+
+		Bundle request = new Bundle().setType(BundleType.BATCH);
+		request.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID()).setResource(new Patient().setActive(true))
+				.getRequest().setMethod(HTTPVerb.POST).setUrl("Patient").setIfNoneExist("identifier=system|duplicate");
+
+		Bundle result = getWebserviceClient().postBundle(request);
+
+		assertNotNull(result);
+		assertEquals(BundleType.BATCHRESPONSE, result.getType());
+		assertEquals(1, result.getEntry().size());
+		assertEquals("412 Precondition Failed", result.getEntryFirstRep().getResponse().getStatus());
+
+		assertEquals(2, patientDao.readAll().size());
+	}
+
+	@Test
+	public void batchConditionalCreateMultipleMatchesPLusOkResource() throws Exception
+	{
+		PatientDao patientDao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		for (int i = 0; i < 2; i++)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("system").setValue("duplicate");
+			patientDao.create(patient);
+		}
+
+		Bundle request = new Bundle().setType(BundleType.BATCH);
+		request.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID()).setResource(new Patient().setActive(true))
+				.getRequest().setMethod(HTTPVerb.POST).setUrl("Patient").setIfNoneExist("identifier=system|duplicate");
+		request.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID())
+				.setResource(getReadAccessHelper().addAll(new Group()).setType(GroupType.ANIMAL).setActual(false))
+				.getRequest().setMethod(HTTPVerb.POST).setUrl("Group");
+
+		Bundle result = getWebserviceClient().postBundle(request);
+
+		assertNotNull(result);
+
+		assertEquals(BundleType.BATCHRESPONSE, result.getType());
+		assertEquals(2, result.getEntry().size());
+		assertEquals("412 Precondition Failed", result.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", result.getEntry().get(1).getResponse().getStatus());
+
+		assertEquals(2, patientDao.readAll().size());
+
+		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
+		assertEquals(1, groupDao.readAll().size());
 	}
 }

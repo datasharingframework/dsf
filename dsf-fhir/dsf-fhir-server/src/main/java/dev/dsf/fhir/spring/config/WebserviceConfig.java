@@ -933,8 +933,7 @@ public class WebserviceConfig
 	private RootServiceImpl rootServiceImpl()
 	{
 		return new RootServiceImpl(commandConfig.commandFactory(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter(), helperConfig.exceptionHandler(), referenceConfig.referenceCleaner(),
-				historyConfig.historyService());
+				helperConfig.parameterConverter(), referenceConfig.referenceCleaner(), historyConfig.historyService());
 	}
 
 	@Bean
