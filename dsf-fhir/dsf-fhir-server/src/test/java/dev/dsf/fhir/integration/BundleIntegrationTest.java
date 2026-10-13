@@ -548,4 +548,62 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		e.getRequest().setMethod(HTTPVerb.POST).setUrl("Group");
 		return b;
 	}
+
+	@Test
+	public void batchConditionalCreateMultipleMatches() throws Exception
+	{
+		PatientDao patientDao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		for (int i = 0; i < 2; i++)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("system").setValue("duplicate");
+			patientDao.create(patient);
+		}
+
+		Bundle request = new Bundle().setType(BundleType.BATCH);
+		request.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID()).setResource(new Patient().setActive(true))
+				.getRequest().setMethod(HTTPVerb.POST).setUrl("Patient").setIfNoneExist("identifier=system|duplicate");
+
+		Bundle result = getWebserviceClient().postBundle(request);
+
+		assertNotNull(result);
+		assertEquals(BundleType.BATCHRESPONSE, result.getType());
+		assertEquals(1, result.getEntry().size());
+		assertEquals("412 Precondition Failed", result.getEntryFirstRep().getResponse().getStatus());
+
+		assertEquals(2, patientDao.readAll().size());
+	}
+
+	@Test
+	public void batchConditionalCreateMultipleMatchesPLusOkResource() throws Exception
+	{
+		PatientDao patientDao = getSpringWebApplicationContext().getBean(PatientDao.class);
+		for (int i = 0; i < 2; i++)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("system").setValue("duplicate");
+			patientDao.create(patient);
+		}
+
+		Bundle request = new Bundle().setType(BundleType.BATCH);
+		request.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID()).setResource(new Patient().setActive(true))
+				.getRequest().setMethod(HTTPVerb.POST).setUrl("Patient").setIfNoneExist("identifier=system|duplicate");
+		request.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID())
+				.setResource(getReadAccessHelper().addAll(new Group()).setType(GroupType.ANIMAL).setActual(false))
+				.getRequest().setMethod(HTTPVerb.POST).setUrl("Group");
+
+		Bundle result = getWebserviceClient().postBundle(request);
+
+		assertNotNull(result);
+
+		assertEquals(BundleType.BATCHRESPONSE, result.getType());
+		assertEquals(2, result.getEntry().size());
+		assertEquals("412 Precondition Failed", result.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", result.getEntry().get(1).getResponse().getStatus());
+
+		assertEquals(2, patientDao.readAll().size());
+
+		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
+		assertEquals(1, groupDao.readAll().size());
+	}
 }
