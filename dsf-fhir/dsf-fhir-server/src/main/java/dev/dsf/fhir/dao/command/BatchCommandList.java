@@ -72,14 +72,6 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			int initialTransactionIsolationLevel = connection.getTransactionIsolation();
 
 			Map<String, IdType> idTranslationTable = new HashMap<>();
-
-			if (hasModifyingCommands)
-			{
-				connection.setReadOnly(false);
-				connection.setAutoCommit(false);
-				connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-			}
-
 			Set<Integer> indexesWithError = new HashSet<>();
 
 			commands.forEach(cR ->
@@ -89,6 +81,13 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				if (cR.hasException())
 					indexesWithError.add(cR.getCommand().getIndex());
 			});
+			
+			if (hasModifyingCommands)
+			{
+				connection.setReadOnly(false);
+				connection.setAutoCommit(false);
+				connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			}
 
 			commands.stream().filter(Predicate.not(CommandResult::hasException)).forEach(cR ->
 			{
@@ -98,7 +97,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				if (cR.hasException())
 					indexesWithError.add(cR.getCommand().getIndex());
 			});
-
+			
 			if (hasModifyingCommands)
 			{
 				connection.setReadOnly(initialReadOnly);
