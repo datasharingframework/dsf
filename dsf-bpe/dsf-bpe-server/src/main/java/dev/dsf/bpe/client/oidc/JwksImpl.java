@@ -40,6 +40,7 @@ public class JwksImpl implements Jwks
 		private final String alg;
 		private final String crv;
 		private final String use;
+		private final List<String> keyOps;
 		private final String n;
 		private final String e;
 		private final String x;
@@ -48,14 +49,15 @@ public class JwksImpl implements Jwks
 		@JsonCreator
 		public JwksKeyImpl(@JsonProperty("kid") String kid, @JsonProperty("kty") String kty,
 				@JsonProperty("alg") String alg, @JsonProperty("crv") String crv, @JsonProperty("use") String use,
-				@JsonProperty("n") String n, @JsonProperty("e") String e, @JsonProperty("x") String x,
-				@JsonProperty("y") String y)
+				@JsonProperty("key_ops") List<String> keyOps, @JsonProperty("n") String n, @JsonProperty("e") String e,
+				@JsonProperty("x") String x, @JsonProperty("y") String y)
 		{
 			this.kid = kid;
 			this.kty = kty;
 			this.alg = alg;
 			this.crv = crv;
 			this.use = use;
+			this.keyOps = keyOps == null ? List.of() : List.copyOf(keyOps);
 			this.n = n;
 			this.e = e;
 			this.x = x;
@@ -90,6 +92,12 @@ public class JwksImpl implements Jwks
 		public String getUse()
 		{
 			return use;
+		}
+
+		@Override
+		public List<String> getKeyOps()
+		{
+			return keyOps;
 		}
 
 		@Override

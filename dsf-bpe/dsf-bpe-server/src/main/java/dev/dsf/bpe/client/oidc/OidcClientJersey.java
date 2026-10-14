@@ -23,14 +23,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Level;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.IncorrectClaimException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
@@ -43,6 +40,8 @@ import com.auth0.jwt.interfaces.Verification;
 import dev.dsf.bpe.api.client.oidc.Configuration;
 import dev.dsf.bpe.api.client.oidc.OidcClientException;
 import dev.dsf.bpe.client.oidc.JwksImpl.JwksKeyImpl;
+import dev.dsf.common.oidc.BaseJwtVerifier;
+import dev.dsf.common.oidc.BaseJwtVerifierImpl;
 import dev.dsf.common.oidc.BaseOidcClientJersey;
 import dev.dsf.common.oidc.Jwks;
 import dev.dsf.common.oidc.Jwks.JwksKey;
@@ -67,9 +66,10 @@ public class OidcClientJersey extends BaseOidcClientJersey
 
 	private final String clientId;
 	private final char[] clientSecret;
-	private final Duration notBeforeIssuedAtExpiresAtLeewaySeconds;
 	private final List<String> requiredAudiences = new ArrayList<>();
 	private final boolean verifyAuthorizedParty;
+
+	private final BaseJwtVerifier accessTokenVerifier;
 
 	/**
 	 * @param baseUrl
@@ -99,7 +99,7 @@ public class OidcClientJersey extends BaseOidcClientJersey
 	 * @param readTimeout
 	 *            not <code>null</code>
 	 * @param logRequestsAndResponses
-	 * @param notBeforeIssuedAtExpiresAtLeewaySeconds
+	 * @param notBeforeIssuedAtExpiresAtLeeway
 	 *            not <code>null</code>
 	 * @param requiredAudiences
 	 *            may be <code>null</code>
@@ -108,7 +108,7 @@ public class OidcClientJersey extends BaseOidcClientJersey
 	public OidcClientJersey(String baseUrl, String discoveryPath, String clientId, char[] clientSecret,
 			KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String proxySchemeHostPort,
 			String proxyUserName, char[] proxyPassword, String userAgentValue, Duration connectTimeout,
-			Duration readTimeout, boolean logRequestsAndResponses, Duration notBeforeIssuedAtExpiresAtLeewaySeconds,
+			Duration readTimeout, boolean logRequestsAndResponses, Duration notBeforeIssuedAtExpiresAtLeeway,
 			List<String> requiredAudiences, boolean verifyAuthorizedParty)
 	{
 		super(baseUrl, discoveryPath, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName,
@@ -116,11 +116,12 @@ public class OidcClientJersey extends BaseOidcClientJersey
 
 		this.clientId = clientId;
 		this.clientSecret = clientSecret;
-		this.notBeforeIssuedAtExpiresAtLeewaySeconds = Objects.requireNonNull(notBeforeIssuedAtExpiresAtLeewaySeconds,
-				"notBeforeIssuedAtExpiresAtLeewaySeconds");
 		if (requiredAudiences != null)
 			this.requiredAudiences.addAll(requiredAudiences);
 		this.verifyAuthorizedParty = verifyAuthorizedParty;
+
+		accessTokenVerifier = new BaseJwtVerifierImpl("Access", baseUrl, this::getJwks,
+				notBeforeIssuedAtExpiresAtLeeway);
 	}
 
 	private void logUnexpectedResponseAndClose(Response response)
@@ -176,63 +177,41 @@ public class OidcClientJersey extends BaseOidcClientJersey
 	{
 		try
 		{
-			DecodedJWT decoded = JWT.decode(accessToken);
-			String keyId = decoded.getKeyId();
+			Verification v = accessTokenVerifier.createVerification(accessToken);
 
-			if (keyId == null)
-				throw new OidcClientException("Access token has no kid property");
+			if (requiredAudiences.size() == 1)
+				v.withAudience(requiredAudiences.get(0));
+			else if (requiredAudiences.size() > 1)
+				v.withAudience(requiredAudiences.toArray(String[]::new));
 
-			Optional<JwksKey> key = jwks.getKey(keyId);
-			if (key.isEmpty() || !key.get().use().equals("sig"))
-				throw new OidcClientException("Access token key with kid '" + keyId + "'  and use 'sig' not in JWKS");
+			if (verifyAuthorizedParty)
+				v.withClaim("azp", clientId);
 
-			Optional<Algorithm> algorithm = key.flatMap(JwksKey::toAlgorithm);
-			if (algorithm.isEmpty())
-			{
-				throw new OidcClientException("Access token key with kid '" + keyId
-						+ "' has unsupported type (kty) / algorithm (alg) / key-size in JWKS");
-			}
-
-			try
-			{
-				Verification v = JWT.require(algorithm.get())
-						.acceptLeeway(notBeforeIssuedAtExpiresAtLeewaySeconds.getSeconds());
-
-				if (requiredAudiences.size() == 1)
-					v.withAudience(requiredAudiences.get(0));
-				else if (requiredAudiences.size() > 1)
-					v.withAudience(requiredAudiences.toArray(String[]::new));
-
-				if (verifyAuthorizedParty)
-					v.withClaim("azp", clientId);
-
-				return v.build().verify(decoded);
-			}
-			catch (AlgorithmMismatchException e)
-			{
-				throw new OidcClientException(
-						"JWT verification failed: algorithm not '" + algorithm.get().getName() + "'", e);
-			}
-			catch (SignatureVerificationException e)
-			{
-				throw new OidcClientException("JWT verification failed: signature invalid", e);
-			}
-			catch (TokenExpiredException e)
-			{
-				throw new OidcClientException("JWT verification failed: token expired", e);
-			}
-			catch (IncorrectClaimException e)
-			{
-				throw new OidcClientException("JWT verification failed: claim contained unexpected value", e);
-			}
-			catch (JWTVerificationException e)
-			{
-				throw new OidcClientException("JWT verification failed", e);
-			}
+			return v.build().verify(accessToken);
+		}
+		catch (AlgorithmMismatchException e)
+		{
+			throw new OidcClientException("JWT verification failed: JWKS/token algorithm mismatch", e);
+		}
+		catch (SignatureVerificationException e)
+		{
+			throw new OidcClientException("JWT verification failed: signature invalid", e);
+		}
+		catch (TokenExpiredException e)
+		{
+			throw new OidcClientException("JWT verification failed: token expired", e);
+		}
+		catch (IncorrectClaimException e)
+		{
+			throw new OidcClientException("JWT verification failed: claim contained unexpected value", e);
 		}
 		catch (JWTDecodeException e)
 		{
 			throw new OidcClientException("Unable to parse access token", e);
+		}
+		catch (JWTVerificationException e)
+		{
+			throw new OidcClientException("JWT verification failed", e);
 		}
 	}
 
@@ -273,9 +252,8 @@ public class OidcClientJersey extends BaseOidcClientJersey
 
 			private dev.dsf.bpe.api.client.oidc.Jwks toJwksImpl(Jwks jwks)
 			{
-				return new JwksImpl(jwks.getKeys().stream().map(
-						k -> new JwksKeyImpl(k.kid(), k.kty(), k.alg(), k.crv(), k.use(), k.n(), k.e(), k.x(), k.y()))
-						.toList());
+				return new JwksImpl(jwks.getKeys().stream().map(k -> new JwksKeyImpl(k.kid(), k.kty(), k.alg(), k.crv(),
+						k.use(), k.keyOps(), k.n(), k.e(), k.x(), k.y())).toList());
 			}
 
 			private Configuration toConfigurationImpl(OidcConfiguration configuration)
@@ -287,7 +265,7 @@ public class OidcClientJersey extends BaseOidcClientJersey
 			private Jwks toJwks(dev.dsf.bpe.api.client.oidc.Jwks jwks)
 			{
 				return new Jwks(jwks.getKeys().stream().map(k -> new JwksKey(k.getKid(), k.getKty(), k.getAlg(),
-						k.getCrv(), k.getUse(), k.getN(), k.getE(), k.getX(), k.getY())).toList());
+						k.getCrv(), k.getUse(), k.getKeyOps(), k.getN(), k.getE(), k.getX(), k.getY())).toList());
 			}
 		};
 	}
