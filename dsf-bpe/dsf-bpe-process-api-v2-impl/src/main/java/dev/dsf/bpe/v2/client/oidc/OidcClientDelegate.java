@@ -15,6 +15,7 @@
  */
 package dev.dsf.bpe.v2.client.oidc;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -174,6 +175,11 @@ public class OidcClientDelegate implements OidcClient
 			return delegate.getUse();
 		}
 
+		public List<String> getKeyOps()
+		{
+			return delegate.getKeyOps();
+		}
+
 		@Override
 		public String getN()
 		{
@@ -236,6 +242,13 @@ public class OidcClientDelegate implements OidcClient
 		public String getUse()
 		{
 			return delegate.getUse();
+		}
+
+		@Override
+		public List<String> getKeyOps()
+		{
+			// TODO add getKeyOps method to JwksKey in API v3
+			return delegate instanceof JwksKeyApiDelegate d ? d.getKeyOps() : List.of();
 		}
 
 		@Override
