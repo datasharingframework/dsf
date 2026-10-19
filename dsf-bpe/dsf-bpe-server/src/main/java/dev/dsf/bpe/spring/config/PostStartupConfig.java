@@ -47,8 +47,8 @@ public class PostStartupConfig
 		operatonConfig.processEngineConfiguration().getJobExecutor().start();
 		logger.info("Starting process engine JobExecutor [Done]");
 
-		fhirConfig.fhirConnectorTask().connect();
-		fhirConfig.fhirConnectorQuestionnaireResponse().connect();
+		fhirConfig.taskFhirConnector().connect();
+		fhirConfig.questionnaireResponseFhirConnector().connect();
 		// websocket connect is an async operation
 	}
 }

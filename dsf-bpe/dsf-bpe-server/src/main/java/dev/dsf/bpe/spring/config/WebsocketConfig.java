@@ -69,7 +69,7 @@ public class WebsocketConfig
 	}
 
 	@Bean
-	public LocalFhirConnector fhirConnectorTask()
+	public LocalFhirConnector taskFhirConnector()
 	{
 		return new LocalFhirConnectorImpl<>(Task.class, dsfClientConfig.clientProvider(),
 				taskSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
@@ -95,7 +95,7 @@ public class WebsocketConfig
 	}
 
 	@Bean
-	public LocalFhirConnector fhirConnectorQuestionnaireResponse()
+	public LocalFhirConnector questionnaireResponseFhirConnector()
 	{
 		return new LocalFhirConnectorImpl<>(QuestionnaireResponse.class, dsfClientConfig.clientProvider(),
 				questionnaireResponseSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
