@@ -213,6 +213,10 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.subscription.retry.sleep:PT5S}")
 	private String websocketRetrySleep;
 
+	@Documentation(description = "Set to `false` to exclude WebSocket connection checks from the status webservice (e.g., Docker health checks)")
+	@Value("${dev.dsf.bpe.fhir.subscription.health.check:true}")
+	private boolean websocketHealthCheck;
+
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
 	@Value("${dev.dsf.bpe.process.plugin.directory:process}")
 	private String processPluginDirectory;
@@ -714,6 +718,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	public Duration getWebsocketRetrySleepMillis()
 	{
 		return Duration.parse(websocketRetrySleep);
+	}
+
+	public boolean getWebsocketHealthCheck()
+	{
+		return websocketHealthCheck;
 	}
 
 	public int getWebsocketMaxRetries()

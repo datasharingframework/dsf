@@ -17,6 +17,7 @@ package dev.dsf.bpe.spring.config;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.operaton.bpm.engine.ProcessEngine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ import dev.dsf.bpe.ui.ThymeleafTemplateServiceImpl;
 import dev.dsf.bpe.webservice.ProcessService;
 import dev.dsf.bpe.webservice.RootService;
 import dev.dsf.common.auth.logout.LogoutService;
+import dev.dsf.common.status.health.DatabaseHealthCheck;
+import dev.dsf.common.status.health.HealthCheck;
 import dev.dsf.common.status.webservice.StatusService;
 import dev.dsf.common.ui.webservice.StaticResourcesService;
 
@@ -42,6 +45,9 @@ public class WebserviceConfig
 
 	@Autowired
 	private PropertiesConfig propertiesConfig;
+
+	@Autowired
+	private WebsocketConfig websocketConfig;
 
 	@Bean
 	public ThymeleafTemplateService thymeleafTemplateService()
@@ -83,6 +89,11 @@ public class WebserviceConfig
 	@Bean
 	public StatusService statusService()
 	{
-		return new StatusService(daoConfig.dataSource(), propertiesConfig.getJettyStatusConnectorPort());
+		List<HealthCheck> healthChecks = propertiesConfig.getWebsocketHealthCheck()
+				? List.of(new DatabaseHealthCheck(daoConfig.dataSource()), websocketConfig.taskWebsocketHealthCheck(),
+						websocketConfig.questionnaireResponseWebsocketHealthCheck())
+				: List.of(new DatabaseHealthCheck(daoConfig.dataSource()));
+
+		return new StatusService(propertiesConfig.getJettyStatusConnectorPort(), healthChecks);
 	}
 }

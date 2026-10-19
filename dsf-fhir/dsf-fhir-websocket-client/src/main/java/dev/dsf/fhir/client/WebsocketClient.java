@@ -26,6 +26,8 @@ public interface WebsocketClient
 {
 	void connect();
 
+	boolean isConnected();
+
 	void disconnect();
 
 	void setResourceHandler(Consumer<Resource> handler, Supplier<IParser> parserFactory);

@@ -15,12 +15,16 @@
  */
 package dev.dsf.bpe.spring.config;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.dsf.bpe.status.health.WebsocketHealthCheck;
 import dev.dsf.bpe.subscription.ConcurrentSubscriptionHandlerFactory;
 import dev.dsf.bpe.subscription.LocalFhirConnector;
 import dev.dsf.bpe.subscription.LocalFhirConnectorImpl;
@@ -30,6 +34,7 @@ import dev.dsf.bpe.subscription.ResourceHandler;
 import dev.dsf.bpe.subscription.SubscriptionHandlerFactory;
 import dev.dsf.bpe.subscription.TaskHandler;
 import dev.dsf.bpe.subscription.TaskSubscriptionHandlerFactory;
+import dev.dsf.common.status.health.HealthCheck;
 
 @Configuration
 public class WebsocketConfig
@@ -74,7 +79,19 @@ public class WebsocketConfig
 		return new LocalFhirConnectorImpl<>(Task.class, dsfClientConfig.clientProvider(),
 				taskSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getTaskSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
-				propertiesConfig.getWebsocketMaxRetries());
+				propertiesConfig.getWebsocketMaxRetries(), taskConnectExecutor());
+	}
+
+	@Bean
+	public ExecutorService taskConnectExecutor()
+	{
+		return Executors.newSingleThreadExecutor(r -> new Thread(r, "task-websocket-connector"));
+	}
+
+	@Bean
+	public HealthCheck taskWebsocketHealthCheck()
+	{
+		return new WebsocketHealthCheck("Task", taskFhirConnector());
 	}
 
 	@Bean
@@ -100,6 +117,19 @@ public class WebsocketConfig
 		return new LocalFhirConnectorImpl<>(QuestionnaireResponse.class, dsfClientConfig.clientProvider(),
 				questionnaireResponseSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
-				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());
+				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries(),
+				questionnaireResponseConnectExecutor());
+	}
+
+	@Bean
+	public ExecutorService questionnaireResponseConnectExecutor()
+	{
+		return Executors.newSingleThreadExecutor(r -> new Thread(r, "questionnaire-response-websocket-connector"));
+	}
+
+	@Bean
+	public HealthCheck questionnaireResponseWebsocketHealthCheck()
+	{
+		return new WebsocketHealthCheck("QuestionnaireResponse", questionnaireResponseFhirConnector());
 	}
 }

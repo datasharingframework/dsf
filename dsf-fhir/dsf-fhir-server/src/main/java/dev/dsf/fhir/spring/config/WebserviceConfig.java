@@ -15,11 +15,14 @@
  */
 package dev.dsf.fhir.spring.config;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.common.auth.logout.LogoutService;
+import dev.dsf.common.status.health.DatabaseHealthCheck;
 import dev.dsf.common.status.webservice.StatusService;
 import dev.dsf.common.ui.webservice.StaticResourcesService;
 import dev.dsf.fhir.exception.DataFormatExceptionHandler;
@@ -967,6 +970,7 @@ public class WebserviceConfig
 	@Bean
 	public StatusService statusService()
 	{
-		return new StatusService(daoConfig.dataSource(), propertiesConfig.getJettyStatusConnectorPort());
+		return new StatusService(propertiesConfig.getJettyStatusConnectorPort(),
+				List.of(new DatabaseHealthCheck(daoConfig.dataSource())));
 	}
 }
