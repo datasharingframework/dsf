@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -53,14 +54,31 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 	private final Function<Connection, TransactionResources> transactionResourceFactory;
 	private final ResponseGenerator responseGenerator;
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param dbUsersGroup
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param commands
+	 *            may be <code>null</code>
+	 * @param transactionResourceFactory
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 */
 	public TransactionCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
 			ExceptionHandler exceptionHandler, List<? extends Command> commands,
 			Function<Connection, TransactionResources> transactionResourceFactory, ResponseGenerator responseGenerator)
 	{
 		super(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler, commands);
 
-		this.transactionResourceFactory = transactionResourceFactory;
-		this.responseGenerator = responseGenerator;
+		this.transactionResourceFactory = Objects.requireNonNull(transactionResourceFactory,
+				"transactionResourceFactory");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
 
 		Collections.sort(this.commands,
 				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));

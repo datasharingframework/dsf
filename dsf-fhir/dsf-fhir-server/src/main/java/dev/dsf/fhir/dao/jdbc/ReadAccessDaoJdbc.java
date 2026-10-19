@@ -24,29 +24,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.sql.DataSource;
-
 import org.postgresql.util.PGobject;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import dev.dsf.fhir.dao.ReadAccessDao;
 
-public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
+public class ReadAccessDaoJdbc implements ReadAccessDao
 {
-	private final DataSource dataSource;
-
-	public ReadAccessDaoJdbc(DataSource dataSource)
-	{
-		this.dataSource = dataSource;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dataSource, "dataSource");
-	}
-
 	@Override
 	public List<String> getAccessTypes(Connection connection, UUID resourceId, long version, boolean localIdentity,
 			UUID organizationId) throws SQLException

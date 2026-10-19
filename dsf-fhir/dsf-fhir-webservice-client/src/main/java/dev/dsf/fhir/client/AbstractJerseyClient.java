@@ -59,6 +59,33 @@ public class AbstractJerseyClient
 				Duration.ZERO, Duration.ZERO, false, null);
 	}
 
+	/**
+	 * @param baseUrl
+	 *            not <code>null</code>
+	 * @param trustStore
+	 *            may be <code>null</code>
+	 * @param keyStore
+	 *            may be <code>null</code>
+	 * @param keyStorePassword
+	 *            may be <code>null</code>
+	 * @param objectMapper
+	 *            may be <code>null</code>
+	 * @param componentsToRegister
+	 *            may be <code>null</code>
+	 * @param proxySchemeHostPort
+	 *            may be <code>null</code>
+	 * @param proxyUserName
+	 *            may be <code>null</code>
+	 * @param proxyPassword
+	 *            may be <code>null</code>
+	 * @param connectTimeout
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param readTimeout
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param logRequests
+	 * @param userAgentValue
+	 *            may be <code>null</code>
+	 */
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			ObjectMapper objectMapper, Collection<?> componentsToRegister, String proxySchemeHostPort,
 			String proxyUserName, char[] proxyPassword, Duration connectTimeout, Duration readTimeout,

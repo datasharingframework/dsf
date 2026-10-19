@@ -16,47 +16,31 @@
 package dev.dsf.bpe.subscription;
 
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 
-public class ConcurrentSubscriptionHandlerFactory<R extends Resource>
-		implements SubscriptionHandlerFactory<R>, InitializingBean
+public class ConcurrentSubscriptionHandlerFactory<R extends Resource> implements SubscriptionHandlerFactory<R>
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConcurrentSubscriptionHandlerFactory.class);
 
 	private final SubscriptionHandlerFactory<R> delegate;
-	private final ThreadPoolExecutor executor;
+	private final ExecutorService executor;
 
 	/**
-	 * @param corePoolSize
-	 *            <code>&gt; 0</code>
 	 * @param delegate
 	 *            not <code>null</code>
+	 * @param executor
+	 *            not <code>null</code>
 	 */
-	public ConcurrentSubscriptionHandlerFactory(int corePoolSize, SubscriptionHandlerFactory<R> delegate)
+	public ConcurrentSubscriptionHandlerFactory(SubscriptionHandlerFactory<R> delegate, ExecutorService executor)
 	{
-		if (corePoolSize <= 0)
-			throw new IllegalArgumentException("corePoolSize <= 0");
-
-		this.delegate = delegate;
-
-		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-				(_, _) -> logger.error("Unable to handle Task - execution rejected"));
-		executor.allowCoreThreadTimeOut(true);
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(delegate, "delegate");
+		this.delegate = Objects.requireNonNull(delegate, "delegate");
+		this.executor = Objects.requireNonNull(executor, "executor");
 	}
 
 	@Override

@@ -47,7 +47,6 @@ import org.operaton.bpm.model.bpmn.instance.MessageEventDefinition;
 import org.operaton.bpm.model.bpmn.instance.StartEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.Constants;
@@ -55,7 +54,7 @@ import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 
-public class TaskHandler extends AbstractResourceHandler implements ResourceHandler<Task>, InitializingBean
+public class TaskHandler extends AbstractResourceHandler implements ResourceHandler<Task>
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskHandler.class);
 
@@ -114,22 +113,25 @@ public class TaskHandler extends AbstractResourceHandler implements ResourceHand
 	private final RuntimeService runtimeService;
 	private final WebserviceClient webserviceClient;
 
+	/**
+	 * @param repositoryService
+	 *            not <code>null</code>
+	 * @param processPluginManager
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param runtimeService
+	 *            not <code>null</code>
+	 * @param webserviceClient
+	 *            not <code>null</code>
+	 */
 	public TaskHandler(RepositoryService repositoryService, ProcessPluginManager processPluginManager,
 			FhirContext fhirContext, RuntimeService runtimeService, WebserviceClient webserviceClient)
 	{
 		super(repositoryService, processPluginManager, fhirContext);
 
-		this.runtimeService = runtimeService;
-		this.webserviceClient = webserviceClient;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(runtimeService, "runtimeService");
-		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		this.runtimeService = Objects.requireNonNull(runtimeService, "runtimeService");
+		this.webserviceClient = Objects.requireNonNull(webserviceClient, "webserviceClient");
 	}
 
 	@Override

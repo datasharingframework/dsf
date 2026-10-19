@@ -17,6 +17,7 @@ package dev.dsf.fhir.dao.command;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -46,13 +47,25 @@ abstract class AbstractCommandList
 	protected final boolean hasModifyingCommands;
 	protected final boolean hasBinaryModifyingCommands;
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param dbUsersGroup
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param commands
+	 *            may be <code>null</code>
+	 */
 	protected AbstractCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
 			ExceptionHandler exceptionHandler, List<? extends Command> commands)
 	{
-		this.dataSource = dataSource;
-		this.permanentDeleteDataSource = permanentDeleteDataSource;
-		this.dbUsersGroup = dbUsersGroup;
-		this.exceptionHandler = exceptionHandler;
+		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+		this.permanentDeleteDataSource = Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
+		this.dbUsersGroup = Objects.requireNonNull(dbUsersGroup, "dbUsersGroup");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 
 		if (commands != null)
 			this.commands.addAll(commands);

@@ -20,18 +20,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 import dev.dsf.bpe.v2.client.fhir.FhirClientFactory;
-import dev.dsf.bpe.v2.config.ProxyConfig;
 
-public class FhirClientProviderImpl implements FhirClientProvider, InitializingBean
+public class FhirClientProviderImpl implements FhirClientProvider
 {
 	private final FhirContext fhirContext;
-	private final ProxyConfig proxyConfig;
 	private final OidcClientProvider oidcClientProvider;
 	private final String userAgent;
 	private final ClientConfigProvider configProvider;
@@ -41,8 +37,6 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	/**
 	 * @param fhirContext
 	 *            not <code>null</code>
-	 * @param proxyConfig
-	 *            not <code>null</code>
 	 * @param oidcClientProvider
 	 *            not <code>null</code>
 	 * @param userAgent
@@ -50,24 +44,13 @@ public class FhirClientProviderImpl implements FhirClientProvider, InitializingB
 	 * @param configProvider
 	 *            not <code>null</code>
 	 */
-	public FhirClientProviderImpl(FhirContext fhirContext, ProxyConfig proxyConfig,
-			OidcClientProvider oidcClientProvider, String userAgent, ClientConfigProvider configProvider)
+	public FhirClientProviderImpl(FhirContext fhirContext, OidcClientProvider oidcClientProvider, String userAgent,
+			ClientConfigProvider configProvider)
 	{
-		this.fhirContext = fhirContext;
-		this.proxyConfig = proxyConfig;
-		this.oidcClientProvider = oidcClientProvider;
-		this.userAgent = userAgent;
-		this.configProvider = configProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
-		Objects.requireNonNull(userAgent, "userAgent");
-		Objects.requireNonNull(configProvider, "configProvider");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.oidcClientProvider = Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
+		this.userAgent = Objects.requireNonNull(userAgent, "userAgent");
+		this.configProvider = Objects.requireNonNull(configProvider, "configProvider");
 	}
 
 	private Optional<IGenericClient> doGetById(ClientConfig clientConfig)

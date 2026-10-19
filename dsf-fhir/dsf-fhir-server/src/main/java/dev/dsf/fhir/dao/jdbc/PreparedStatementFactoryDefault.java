@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Resource;
@@ -30,9 +31,33 @@ import ca.uhn.fhir.context.FhirContext;
 
 class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPreparedStatementFactory<R>
 {
+	/**
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param resourceTable
+	 *            not <code>null</code>, not blank
+	 * @param resourceIdColumn
+	 *            not <code>null</code>, not blank
+	 * @param resourceColumn
+	 *            not <code>null</code>, not blank
+	 */
 	PreparedStatementFactoryDefault(FhirContext fhirContext, ObjectMapper objectMapper, Class<R> resourceType,
 			String resourceTable, String resourceIdColumn, String resourceColumn)
 	{
+		Objects.requireNonNull(resourceTable, "resourceTable");
+		if (resourceTable.isBlank())
+			throw new IllegalArgumentException("resourceTable blank");
+		Objects.requireNonNull(resourceIdColumn, "resourceIdColumn");
+		if (resourceIdColumn.isBlank())
+			throw new IllegalArgumentException("resourceIdColumn blank");
+		Objects.requireNonNull(resourceColumn, "resourceColumn");
+		if (resourceColumn.isBlank())
+			throw new IllegalArgumentException("resourceColumn blank");
+
 		super(fhirContext, objectMapper, resourceType, createSql(resourceTable, resourceIdColumn, resourceColumn),
 				readByIdSql(resourceTable, resourceIdColumn, resourceColumn),
 				readByIdAndVersionSql(resourceTable, resourceIdColumn, resourceColumn),

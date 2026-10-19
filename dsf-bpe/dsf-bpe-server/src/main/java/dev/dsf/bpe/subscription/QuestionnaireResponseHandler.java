@@ -30,7 +30,6 @@ import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.operaton.bpm.engine.variable.value.PrimitiveValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.Constants;
@@ -39,29 +38,32 @@ import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 
 public class QuestionnaireResponseHandler extends AbstractResourceHandler
-		implements ResourceHandler<QuestionnaireResponse>, InitializingBean
+		implements ResourceHandler<QuestionnaireResponse>
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseHandler.class);
 
 	private final TaskService userTaskService;
 	private final WebserviceClient webserviceClient;
 
+	/**
+	 * @param repositoryService
+	 *            not <code>null</code>
+	 * @param processPluginManager
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param userTaskService
+	 *            not <code>null</code>
+	 * @param webserviceClient
+	 *            not <code>null</code>
+	 */
 	public QuestionnaireResponseHandler(RepositoryService repositoryService, ProcessPluginManager processPluginManager,
 			FhirContext fhirContext, TaskService userTaskService, WebserviceClient webserviceClient)
 	{
 		super(repositoryService, processPluginManager, fhirContext);
 
-		this.userTaskService = userTaskService;
-		this.webserviceClient = webserviceClient;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(userTaskService, "userTaskService");
-		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		this.userTaskService = Objects.requireNonNull(userTaskService, "userTaskService");
+		this.webserviceClient = Objects.requireNonNull(webserviceClient, "webserviceClient");
 	}
 
 	@Override

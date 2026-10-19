@@ -20,33 +20,33 @@ import static dev.dsf.bpe.test.PluginTestExecutor.expectSame;
 
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import dev.dsf.bpe.test.PluginTest;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 
-public class EnvironmentVariableTest extends AbstractTest implements InitializingBean
+public class EnvironmentVariableTest extends AbstractTest
 {
 	private final String envVariableMandatory;
 	private final String envVariableOptional;
 	private final String envVariableProxyUrl;
 
+	/**
+	 * @param api
+	 *            not <code>null</code>
+	 * @param envVariableMandatory
+	 *            not <code>null</code>
+	 * @param envVariableOptional
+	 *            not <code>null</code>
+	 * @param envVariableProxyUrl
+	 *            not <code>null</code>
+	 */
 	public EnvironmentVariableTest(ProcessPluginApi api, String envVariableMandatory, String envVariableOptional,
 			String envVariableProxyUrl)
 	{
 		super(api);
 
-		this.envVariableMandatory = envVariableMandatory;
-		this.envVariableOptional = envVariableOptional;
-		this.envVariableProxyUrl = envVariableProxyUrl;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(envVariableMandatory, "envVariableMandatory");
-		Objects.requireNonNull(envVariableOptional, "envVariableOptional");
-		Objects.requireNonNull(envVariableProxyUrl, "envVariableProxyUrl");
+		this.envVariableMandatory = Objects.requireNonNull(envVariableMandatory, "envVariableMandatory");
+		this.envVariableOptional = Objects.requireNonNull(envVariableOptional, "envVariableOptional");
+		this.envVariableProxyUrl = Objects.requireNonNull(envVariableProxyUrl, "envVariableProxyUrl");
 	}
 
 	@PluginTest

@@ -21,7 +21,6 @@ import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
-import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,22 +29,21 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
-public class PgObjectFactoryImpl implements PgObjectFactory, InitializingBean
+public class PgObjectFactoryImpl implements PgObjectFactory
 {
 	private final FhirContext fhirContext;
 	private final ObjectMapper objectMapper;
 
+	/**
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 */
 	public PgObjectFactoryImpl(FhirContext fhirContext, ObjectMapper objectMapper)
 	{
-		this.fhirContext = fhirContext;
-		this.objectMapper = objectMapper;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(objectMapper, "objectMapper");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
 	}
 
 	@Override

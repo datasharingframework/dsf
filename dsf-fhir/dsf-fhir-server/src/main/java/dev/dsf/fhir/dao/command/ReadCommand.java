@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -79,6 +80,34 @@ public class ReadCommand extends AbstractCommand implements Command
 	private Response responseResult;
 	private boolean search;
 
+	/**
+	 * @param index
+	 * @param identity
+	 * @param returnType
+	 *            not <code>null</code>
+	 * @param bundle
+	 *            not <code>null</code>
+	 * @param entry
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 * @param defaultPageCount
+	 *            <code>&gt;= 0</code>
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param handlingType
+	 *            not <code>null</code>
+	 */
 	public ReadCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			int defaultPageCount, DaoProvider daoProvider, ParameterConverter parameterConverter,
@@ -87,14 +116,16 @@ public class ReadCommand extends AbstractCommand implements Command
 	{
 		super(5, index, identity, returnType, bundle, entry, serverBase, authorizationHelper);
 
+		if (defaultPageCount < 0)
+			throw new IllegalArgumentException("defaultPageCount < 0");
 		this.defaultPageCount = defaultPageCount;
 
-		this.daoProvider = daoProvider;
-		this.parameterConverter = parameterConverter;
-		this.responseGenerator = responseGenerator;
-		this.exceptionHandler = exceptionHandler;
-		this.referenceCleaner = referenceCleaner;
-		this.handlingType = handlingType;
+		this.daoProvider = Objects.requireNonNull(daoProvider, "daoProvider");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		this.handlingType = Objects.requireNonNull(handlingType, "handlingType");
 	}
 
 	@Override

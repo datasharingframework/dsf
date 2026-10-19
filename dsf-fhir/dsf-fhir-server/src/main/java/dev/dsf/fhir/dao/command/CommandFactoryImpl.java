@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.dao.ResourceDao;
@@ -54,7 +53,7 @@ import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.ValidationRules;
 
-public class CommandFactoryImpl implements InitializingBean, CommandFactory
+public class CommandFactoryImpl implements CommandFactory
 {
 	private static final Logger logger = LoggerFactory.getLogger(CommandFactoryImpl.class);
 
@@ -79,6 +78,48 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final DefaultProfileProvider defaultProfileProvider;
 	private final Function<Connection, TransactionResources> transactionResourcesFactory;
 
+	/**
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param defaultPageCount
+	 *            <code>&gt;= 0</code>
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param dbUsersGroup
+	 *            not <code>null</code>
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param referenceExtractor
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param eventHandler
+	 *            not <code>null</code>
+	 * @param eventGenerator
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 * @param validationHelper
+	 *            not <code>null</code>
+	 * @param snapshotGenerator
+	 *            not <code>null</code>
+	 * @param validationRules
+	 *            not <code>null</code>
+	 * @param defaultProfileProvider
+	 *            not <code>null</code>
+	 * @param transactionResourcesFactory
+	 *            not <code>null</code>
+	 */
 	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource,
 			DataSource permanentDeleteDataSource, String dbUsersGroup, DaoProvider daoProvider,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
@@ -89,49 +130,29 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			DefaultProfileProvider defaultProfileProvider,
 			Function<Connection, TransactionResources> transactionResourcesFactory)
 	{
-		this.serverBase = serverBase;
+		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
+		if (defaultPageCount < 0)
+			throw new IllegalArgumentException("defaultPageCount < 0");
 		this.defaultPageCount = defaultPageCount;
-		this.dataSource = dataSource;
-		this.permanentDeleteDataSource = permanentDeleteDataSource;
-		this.dbUsersGroup = dbUsersGroup;
-		this.daoProvider = daoProvider;
-		this.referenceExtractor = referenceExtractor;
-		this.referenceResolver = referenceResolver;
-		this.referenceCleaner = referenceCleaner;
-		this.responseGenerator = responseGenerator;
-		this.exceptionHandler = exceptionHandler;
-		this.parameterConverter = parameterConverter;
-		this.eventHandler = eventHandler;
-		this.eventGenerator = eventGenerator;
+		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+		this.permanentDeleteDataSource = Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
+		this.dbUsersGroup = Objects.requireNonNull(dbUsersGroup, "dbUsersGroup");
+		this.daoProvider = Objects.requireNonNull(daoProvider, "daoProvider");
+		this.referenceExtractor = Objects.requireNonNull(referenceExtractor, "referenceExtractor");
+		this.referenceResolver = Objects.requireNonNull(referenceResolver, "referenceResolver");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
+		this.eventHandler = Objects.requireNonNull(eventHandler, "eventHandler");
+		this.eventGenerator = Objects.requireNonNull(eventGenerator, "eventGenerator");
 		this.authorizationHelper = authorizationHelper;
-		this.validationHelper = validationHelper;
-		this.snapshotGenerator = snapshotGenerator;
-		this.validationRules = validationRules;
-		this.defaultProfileProvider = defaultProfileProvider;
-		this.transactionResourcesFactory = transactionResourcesFactory;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(serverBase, "serverBase");
-		Objects.requireNonNull(dataSource, "dataSource");
-		Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
-
-		Objects.requireNonNull(daoProvider, "daoProvider");
-		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
-		Objects.requireNonNull(referenceResolver, "referenceResolver");
-		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
-		Objects.requireNonNull(responseGenerator, "responseGenerator");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(parameterConverter, "parameterConverter");
-		Objects.requireNonNull(eventHandler, "eventHandler");
-		Objects.requireNonNull(eventGenerator, "eventGenerator");
-		Objects.requireNonNull(authorizationHelper, "authorizationHelper");
-		Objects.requireNonNull(validationHelper, "validationHelper");
-		Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
-		Objects.requireNonNull(validationRules, "validationRules");
-		Objects.requireNonNull(transactionResourcesFactory, "transactionResourcesFactory");
+		this.validationHelper = Objects.requireNonNull(validationHelper, "validationHelper");
+		this.snapshotGenerator = Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
+		this.validationRules = Objects.requireNonNull(validationRules, "validationRules");
+		this.defaultProfileProvider = Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
+		this.transactionResourcesFactory = Objects.requireNonNull(transactionResourcesFactory,
+				"transactionResourcesFactory");
 	}
 
 	// head

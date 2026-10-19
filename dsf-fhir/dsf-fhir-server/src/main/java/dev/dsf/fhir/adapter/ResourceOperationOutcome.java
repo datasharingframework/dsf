@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
@@ -35,7 +34,7 @@ import dev.dsf.fhir.dao.StatisticsDao.Statistics;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.webservice.impl.RootServiceImpl;
 
-public class ResourceOperationOutcome extends AbstractThymeleafContext implements ThymeleafContext, InitializingBean
+public class ResourceOperationOutcome extends AbstractThymeleafContext implements ThymeleafContext
 {
 	private record Element(String status, Boolean active, String type, String title, String subtitle, String unit,
 			String value, String link)
@@ -52,20 +51,20 @@ public class ResourceOperationOutcome extends AbstractThymeleafContext implement
 	private final StatisticsDao statisticsDao;
 	private final ExceptionHandler exceptionHandler;
 
+	/**
+	 * @param buildInfoReader
+	 *            not <code>null</code>
+	 * @param statisticsDao
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 */
 	public ResourceOperationOutcome(BuildInfoReader buildInfoReader, StatisticsDao statisticsDao,
 			ExceptionHandler exceptionHandler)
 	{
-		this.buildInfoReader = buildInfoReader;
-		this.statisticsDao = statisticsDao;
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
-		Objects.requireNonNull(statisticsDao, "statisticsDao");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.buildInfoReader = Objects.requireNonNull(buildInfoReader, "buildInfoReader");
+		this.statisticsDao = Objects.requireNonNull(statisticsDao, "statisticsDao");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 	}
 
 	@Override

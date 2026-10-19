@@ -31,7 +31,6 @@ import org.eclipse.jetty.websocket.core.exception.CloseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
@@ -46,7 +45,7 @@ import jakarta.websocket.MessageHandler.Whole;
 import jakarta.websocket.PongMessage;
 import jakarta.websocket.Session;
 
-public class ServerEndpoint extends Endpoint implements InitializingBean, DisposableBean
+public class ServerEndpoint extends Endpoint implements DisposableBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ServerEndpoint.class);
 
@@ -60,15 +59,13 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 
 	private final WebSocketSubscriptionManager subscriptionManager;
 
+	/**
+	 * @param subscriptionManager
+	 *            not <code>null</code>
+	 */
 	public ServerEndpoint(WebSocketSubscriptionManager subscriptionManager)
 	{
-		this.subscriptionManager = subscriptionManager;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(subscriptionManager, "subscriptionManager");
+		this.subscriptionManager = Objects.requireNonNull(subscriptionManager, "subscriptionManager");
 	}
 
 	@Override

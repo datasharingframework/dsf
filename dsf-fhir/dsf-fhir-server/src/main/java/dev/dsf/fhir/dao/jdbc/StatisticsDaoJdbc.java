@@ -23,11 +23,9 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import dev.dsf.fhir.dao.StatisticsDao;
 
-public class StatisticsDaoJdbc implements StatisticsDao, InitializingBean
+public class StatisticsDaoJdbc implements StatisticsDao
 {
 	private static final String QUERY = """
 			SELECT
@@ -63,15 +61,13 @@ public class StatisticsDaoJdbc implements StatisticsDao, InitializingBean
 
 	private final DataSource dataSource;
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 */
 	public StatisticsDaoJdbc(DataSource dataSource)
 	{
-		this.dataSource = dataSource;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dataSource, "dataSource");
+		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
 	}
 
 	@Override

@@ -17,28 +17,25 @@ package dev.dsf.bpe.status.health;
 
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import dev.dsf.bpe.subscription.LocalFhirConnector;
 import dev.dsf.common.status.health.HealthCheck;
 import dev.dsf.common.status.health.HealthStatus;
 
-public class WebsocketHealthCheck implements HealthCheck, InitializingBean
+public class WebsocketHealthCheck implements HealthCheck
 {
 	private final String component;
 	private final LocalFhirConnector connector;
 
+	/**
+	 * @param component
+	 *            not <code>null</code>
+	 * @param connector
+	 *            not <code>null</code>
+	 */
 	public WebsocketHealthCheck(String component, LocalFhirConnector connector)
 	{
-		this.component = component;
-		this.connector = connector;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(component, "component");
-		Objects.requireNonNull(connector, "connector");
+		this.component = Objects.requireNonNull(component, "component");
+		this.connector = Objects.requireNonNull(connector, "connector");
 	}
 
 	@Override

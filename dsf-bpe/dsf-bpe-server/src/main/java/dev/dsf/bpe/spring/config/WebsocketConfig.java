@@ -17,12 +17,19 @@ package dev.dsf.bpe.spring.config;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import dev.dsf.bpe.status.health.WebsocketHealthCheck;
 import dev.dsf.bpe.subscription.ConcurrentSubscriptionHandlerFactory;
@@ -39,6 +46,8 @@ import dev.dsf.common.status.health.HealthCheck;
 @Configuration
 public class WebsocketConfig
 {
+	private static final Logger logger = LoggerFactory.getLogger(WebsocketConfig.class);
+
 	@Autowired
 	private PropertiesConfig propertiesConfig;
 
@@ -57,6 +66,28 @@ public class WebsocketConfig
 	@Autowired
 	private PluginConfig pluginConfig;
 
+
+	@Bean
+	@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public ExecutorService resourceExecutor(String resource)
+	{
+		int corePoolSize = propertiesConfig.getProcessStartOrContinueThreads();
+
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES,
+				new LinkedBlockingQueue<>(),
+				(_, _) -> logger.error("Unable to handle {} - execution rejected", resource));
+		executor.allowCoreThreadTimeOut(true);
+
+		return executor;
+	}
+
+	@Bean
+	@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public ExecutorService connectExecutor(String threadNamePrefix)
+	{
+		return Executors.newSingleThreadExecutor(r -> new Thread(r, threadNamePrefix + "-websocket-connector"));
+	}
+
 	@Bean
 	public ResourceHandler<Task> taskHandler()
 	{
@@ -69,8 +100,9 @@ public class WebsocketConfig
 	@Bean
 	public SubscriptionHandlerFactory<Task> taskSubscriptionHandlerFactory()
 	{
-		return new ConcurrentSubscriptionHandlerFactory<>(propertiesConfig.getProcessStartOrContinueThreads(),
-				new TaskSubscriptionHandlerFactory(taskHandler(), daoConfig.lastEventTimeDaoTask()));
+		return new ConcurrentSubscriptionHandlerFactory<>(
+				new TaskSubscriptionHandlerFactory(taskHandler(), daoConfig.lastEventTimeDaoTask()),
+				resourceExecutor("Task"));
 	}
 
 	@Bean
@@ -79,13 +111,7 @@ public class WebsocketConfig
 		return new LocalFhirConnectorImpl<>(Task.class, dsfClientConfig.clientProvider(),
 				taskSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getTaskSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
-				propertiesConfig.getWebsocketMaxRetries(), taskConnectExecutor());
-	}
-
-	@Bean
-	public ExecutorService taskConnectExecutor()
-	{
-		return Executors.newSingleThreadExecutor(r -> new Thread(r, "task-websocket-connector"));
+				propertiesConfig.getWebsocketMaxRetries(), connectExecutor("task"));
 	}
 
 	@Bean
@@ -106,9 +132,10 @@ public class WebsocketConfig
 	@Bean
 	public SubscriptionHandlerFactory<QuestionnaireResponse> questionnaireResponseSubscriptionHandlerFactory()
 	{
-		return new ConcurrentSubscriptionHandlerFactory<>(propertiesConfig.getProcessStartOrContinueThreads(),
+		return new ConcurrentSubscriptionHandlerFactory<>(
 				new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(),
-						daoConfig.lastEventTimeDaoQuestionnaireResponse()));
+						daoConfig.lastEventTimeDaoQuestionnaireResponse()),
+				resourceExecutor("QuestionnaireResponse"));
 	}
 
 	@Bean
@@ -118,13 +145,7 @@ public class WebsocketConfig
 				questionnaireResponseSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
 				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
 				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries(),
-				questionnaireResponseConnectExecutor());
-	}
-
-	@Bean
-	public ExecutorService questionnaireResponseConnectExecutor()
-	{
-		return Executors.newSingleThreadExecutor(r -> new Thread(r, "questionnaire-response-websocket-connector"));
+				connectExecutor("questionnaire-response"));
 	}
 
 	@Bean

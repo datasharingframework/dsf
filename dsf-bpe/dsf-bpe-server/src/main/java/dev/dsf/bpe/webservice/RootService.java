@@ -26,7 +26,6 @@ import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.operaton.bpm.engine.runtime.ActivityInstance;
 import org.operaton.bpm.engine.runtime.ProcessInstance;
-import org.springframework.beans.factory.InitializingBean;
 import org.thymeleaf.context.Context;
 
 import dev.dsf.bpe.ui.ThymeleafTemplateService;
@@ -40,29 +39,28 @@ import jakarta.ws.rs.core.StreamingOutput;
 
 @RolesAllowed("ADMIN")
 @Path(RootService.PATH)
-public class RootService extends AbstractService implements InitializingBean
+public class RootService extends AbstractService
 {
 	public static final String PATH = "";
 
 	private final RepositoryService repositoryService;
 	private final RuntimeService runtimeService;
 
+	/**
+	 * @param templateService
+	 *            not <code>null</code>
+	 * @param repositoryService
+	 *            not <code>null</code>
+	 * @param runtimeService
+	 *            not <code>null</code>
+	 */
 	public RootService(ThymeleafTemplateService templateService, RepositoryService repositoryService,
 			RuntimeService runtimeService)
 	{
 		super(templateService, "root");
 
-		this.repositoryService = repositoryService;
-		this.runtimeService = runtimeService;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(repositoryService, "repositoryService");
-		Objects.requireNonNull(runtimeService, "runtimeService");
+		this.repositoryService = Objects.requireNonNull(repositoryService, "repositoryService");
+		this.runtimeService = Objects.requireNonNull(runtimeService, "runtimeService");
 	}
 
 	@GET

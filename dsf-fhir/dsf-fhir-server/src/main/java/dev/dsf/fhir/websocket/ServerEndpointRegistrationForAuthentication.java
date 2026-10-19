@@ -17,27 +17,29 @@ package dev.dsf.fhir.websocket;
 
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.socket.server.standard.ServerEndpointRegistration;
 
 import jakarta.websocket.Endpoint;
 
-public class ServerEndpointRegistrationForAuthentication extends ServerEndpointRegistration implements InitializingBean
+public class ServerEndpointRegistrationForAuthentication extends ServerEndpointRegistration
 {
 	private final Configurator containerDefaultConfigurator;
 
-	public ServerEndpointRegistrationForAuthentication(Configurator containerDefaultConfigurator, String path,
-			Endpoint endpoint)
+	/**
+	 * @param path
+	 *            not <code>null</code>, not blank
+	 * @param endpoint
+	 *            not <code>null</code>
+	 * @param containerDefaultConfigurator
+	 *            not <code>null</code>
+	 */
+	public ServerEndpointRegistrationForAuthentication(String path, Endpoint endpoint,
+			Configurator containerDefaultConfigurator)
 	{
 		super(path, endpoint);
 
-		this.containerDefaultConfigurator = containerDefaultConfigurator;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(containerDefaultConfigurator, "containerDefaultConfigurator");
+		this.containerDefaultConfigurator = Objects.requireNonNull(containerDefaultConfigurator,
+				"containerDefaultConfigurator");
 	}
 
 	@Override

@@ -117,11 +117,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] dsfClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted, not negative, 0 represents infinity", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.read:PT60S}")
 	private String dsfClientReadTimeoutRemote;
 
-	@Documentation(description = "Timeout until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout until a connection is established with a remote DSF FHIR server, not negative, 0 represents infinity", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.remote.timeout.connect:PT5S}")
 	private String dsfClientConnectTimeoutRemote;
 
@@ -129,11 +129,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.remote.verbose:false}")
 	private boolean dsfClientVerboseRemote;
 
-	@Documentation(description = "Timeout until reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout until reading a resource from the local DSF FHIR server is aborted, not negative, 0 represents infinity", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.local.timeout.read:PT60S}")
 	private String dsfClientReadTimeoutLocal;
 
-	@Documentation(description = "Timeout until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout until a connection is established with the local DSF FHIR server, not negative, 0 represents infinity", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.bpe.fhir.client.local.timeout.connect:PT2S}")
 	private String dsfClientConnectTimeoutLocal;
 
@@ -161,11 +161,11 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.oidc.verify.authorized.party:true}")
 	private boolean fhirClientConnectionsConfigDefaultOidcVerifyAuthorizedParty;
 
-	@Documentation(description = "FHIR server connections YAML: Default value for properties `connect-timeout` and `oidc-auth.connect-timeout`")
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `connect-timeout` and `oidc-auth.connect-timeout`, not negative, 0 represents infinity")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.timeout.connect:PT2S}")
 	private String fhirClientConnectionsConfigDefaultConnectTimeout;
 
-	@Documentation(description = "FHIR server connections YAML: Default value for properties `read-timeout` and `oidc-auth.read-timeout`")
+	@Documentation(description = "FHIR server connections YAML: Default value for properties `read-timeout` and `oidc-auth.read-timeout`, not negative, 0 represents infinity")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.default.timeout.read:PT10M}")
 	private String fhirClientConnectionsConfigDefaultReadTimeout;
 
@@ -181,19 +181,19 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache:true}")
 	private boolean fhirClientConnectionsConfigOidcClientCacheEnabled;
 
-	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of the 'openid-configuration' discovery resource")
+	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of the 'openid-configuration' discovery resource, not negative")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.configuration.resource:PT1H}")
 	private String fhirClientConnectionsConfigOidcClientCacheConfigurationResourceTimeout;
 
-	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of the jwks resource")
+	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of the jwks resource, not negative")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.jwks.resource:PT1H}")
 	private String fhirClientConnectionsConfigOidcClientCacheJwksResourceTimeout;
 
-	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of access tokens before they expire, duration is subtracted from the expires at value of the access token")
+	@Documentation(description = "OIDC 'Client Credentials Grant' client cache timeout of access tokens before they expire, duration is subtracted from the expires at value of the access token, not negative")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.cache.timeout.access.token:PT10S}")
 	private String fhirClientConnectionsConfigOidcClientCacheAccessTokenBeforeExpirationTimeout;
 
-	@Documentation(description = "OIDC 'Client Credentials Grant' client access token time validation leeway for 'Not Before', 'Issued At' and 'Expires At' values")
+	@Documentation(description = "OIDC 'Client Credentials Grant' client access token time validation leeway for 'Not Before', 'Issued At' and 'Expires At' values, not negative")
 	@Value("${dev.dsf.bpe.fhir.client.connections.config.oidc.time.validation.leeway:PT10S}")
 	private String fhirClientConnectionsConfigOidcClientNotBeforeIssuedAtExpiresAtLeeway;
 

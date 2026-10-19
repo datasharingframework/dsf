@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -50,7 +49,7 @@ import dev.dsf.fhir.search.SearchQuery;
 import dev.dsf.fhir.search.SearchQueryParameterError;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 
-public class ReferenceResolverImpl implements ReferenceResolver, InitializingBean
+public class ReferenceResolverImpl implements ReferenceResolver
 {
 	private static final Logger logger = LoggerFactory.getLogger(ReferenceResolverImpl.class);
 
@@ -64,26 +63,29 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	private final ClientProvider clientProvider;
 	private final ParameterConverter parameterConverter;
 
+	/**
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param clientProvider
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>o
+	 */
 	public ReferenceResolverImpl(String serverBase, DaoProvider daoProvider, ResponseGenerator responseGenerator,
 			ExceptionHandler exceptionHandler, ClientProvider clientProvider, ParameterConverter parameterConverter)
 	{
-		this.serverBase = serverBase;
-		this.daoProvider = daoProvider;
-		this.responseGenerator = responseGenerator;
-		this.exceptionHandler = exceptionHandler;
-		this.clientProvider = clientProvider;
-		this.parameterConverter = parameterConverter;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(serverBase, "serverBase");
-		Objects.requireNonNull(daoProvider, "daoProvider");
-		Objects.requireNonNull(responseGenerator, "responseGenerator");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
+		this.daoProvider = Objects.requireNonNull(daoProvider, "daoProvider");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.clientProvider = Objects.requireNonNull(clientProvider, "clientProvider");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 
 	@Override

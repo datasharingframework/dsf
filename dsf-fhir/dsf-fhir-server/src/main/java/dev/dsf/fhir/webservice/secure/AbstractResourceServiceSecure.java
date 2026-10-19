@@ -31,7 +31,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -66,7 +65,7 @@ import jakarta.ws.rs.core.Response.StatusType;
 import jakarta.ws.rs.core.UriInfo;
 
 public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R extends Resource, S extends BasicResourceService<R>>
-		extends AbstractServiceSecure<S> implements BasicResourceService<R>, InitializingBean
+		extends AbstractServiceSecure<S> implements BasicResourceService<R>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
 
@@ -82,6 +81,36 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final ValidationRules validationRules;
 	protected final DefaultProfileProvider defaultProfileProvider;
 
+	/**
+	 * @param delegate
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param referenceExtractor
+	 *            not <code>null</code>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param dao
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param authorizationRule
+	 *            not <code>null</code>
+	 * @param resourceValidator
+	 *            not <code>null</code>
+	 * @param validationRules
+	 *            not <code>null</code>
+	 * @param defaultProfileProvider
+	 *            not <code>null</code>
+	 */
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			ReferenceExtractor referenceExtractor, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
@@ -91,35 +120,17 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
-		this.referenceCleaner = referenceCleaner;
-		this.referenceExtractor = referenceExtractor;
-		this.resourceType = resourceType;
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		this.referenceExtractor = Objects.requireNonNull(referenceExtractor, "referenceExtractor");
+		this.resourceType = Objects.requireNonNull(resourceType, "resourceType");
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
-		this.dao = dao;
-		this.exceptionHandler = exceptionHandler;
-		this.parameterConverter = parameterConverter;
-		this.authorizationRule = authorizationRule;
-		this.resourceValidator = resourceValidator;
-		this.validationRules = validationRules;
-		this.defaultProfileProvider = defaultProfileProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
-		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
-		Objects.requireNonNull(dao, "dao");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(parameterConverter, "parameterConverter");
-		Objects.requireNonNull(authorizationRule, "authorizationRule");
-		Objects.requireNonNull(resourceValidator, "resourceValidator");
-		Objects.requireNonNull(validationRules, "validationRules");
-		Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
+		this.dao = Objects.requireNonNull(dao, "dao");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
+		this.authorizationRule = Objects.requireNonNull(authorizationRule, "authorizationRule");
+		this.resourceValidator = Objects.requireNonNull(resourceValidator, "resourceValidator");
+		this.validationRules = Objects.requireNonNull(validationRules, "validationRules");
+		this.defaultProfileProvider = Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
 	}
 
 	private String toValidationLogMessage(ValidationResult validationResult)

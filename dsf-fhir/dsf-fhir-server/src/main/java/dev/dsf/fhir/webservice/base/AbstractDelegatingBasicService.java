@@ -17,24 +17,19 @@ package dev.dsf.fhir.webservice.base;
 
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import dev.dsf.fhir.authentication.CurrentIdentityProvider;
 
-public class AbstractDelegatingBasicService<S extends BasicService> extends AbstractBasicService
-		implements BasicService, InitializingBean
+public class AbstractDelegatingBasicService<S extends BasicService> extends AbstractBasicService implements BasicService
 {
 	protected final S delegate;
 
+	/**
+	 * @param delegate
+	 *            not <code>null</code>
+	 */
 	public AbstractDelegatingBasicService(S delegate)
 	{
-		this.delegate = delegate;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(delegate, "delegate");
+		this.delegate = Objects.requireNonNull(delegate, "delegate");
 	}
 
 	@Override

@@ -55,6 +55,44 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	private boolean requestResourceHasSnapshot;
 	private StructureDefinition resourceWithSnapshot;
 
+	/**
+	 * @param index
+	 * @param identity
+	 *            not <code>null</code>
+	 * @param returnType
+	 *            not <code>null</code>
+	 * @param bundle
+	 *            not <code>null</code>
+	 * @param entry
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param dao
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param referenceExtractor
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param eventGenerator
+	 *            not <code>null</code>
+	 * @param defaultProfileProvider
+	 *            not <code>null</code>
+	 * @param enableValidation
+	 * @param snapshotDao
+	 *            not <code>null</code>
+	 */
 	public CreateStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,

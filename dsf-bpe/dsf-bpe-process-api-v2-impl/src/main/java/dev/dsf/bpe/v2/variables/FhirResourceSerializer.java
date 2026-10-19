@@ -28,29 +28,26 @@ import org.operaton.bpm.engine.impl.variable.serializer.ValueFields;
 import org.operaton.bpm.engine.variable.impl.value.UntypedValueImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dsf.bpe.v2.variables.FhirResourceValues.FhirResourceValue;
 
-public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourceValue> implements InitializingBean
+public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourceValue>
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirResourceSerializer.class);
 
 	private final FhirContext fhirContext;
 
+	/**
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 */
 	public FhirResourceSerializer(FhirContext fhirContext)
 	{
 		super(FhirResourceValues.VALUE_TYPE);
 
-		this.fhirContext = fhirContext;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(fhirContext, "fhirContext");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
 	@Override

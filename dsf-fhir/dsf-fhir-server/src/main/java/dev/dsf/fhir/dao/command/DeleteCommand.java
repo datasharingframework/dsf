@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -70,6 +71,30 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 	private Class<? extends Resource> resourceType;
 	private String id;
 
+	/**
+	 * @param index
+	 * @param identity
+	 * @param returnType
+	 *            not <code>null</code>
+	 * @param bundle
+	 *            not <code>null</code>
+	 * @param entry
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param eventGenerator
+	 *            not <code>null</code>
+	 */
 	public DeleteCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			ResponseGenerator responseGenerator, DaoProvider daoProvider, ExceptionHandler exceptionHandler,
@@ -77,11 +102,11 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 	{
 		super(1, index, identity, returnType, bundle, entry, serverBase, authorizationHelper);
 
-		this.responseGenerator = responseGenerator;
-		this.daoProvider = daoProvider;
-		this.exceptionHandler = exceptionHandler;
-		this.parameterConverter = parameterConverter;
-		this.eventGenerator = eventGenerator;
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
+		this.daoProvider = Objects.requireNonNull(daoProvider, "daoProvider");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
+		this.eventGenerator = Objects.requireNonNull(eventGenerator, "eventGenerator");
 	}
 
 	@Override

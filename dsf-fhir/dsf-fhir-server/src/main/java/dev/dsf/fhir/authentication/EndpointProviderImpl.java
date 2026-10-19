@@ -24,30 +24,29 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 
-public class EndpointProviderImpl implements EndpointProvider, InitializingBean
+public class EndpointProviderImpl implements EndpointProvider
 {
 	private final ExceptionHandler exceptionHandler;
 	private final EndpointDao dao;
 	private final String serverBaseUrl;
 
+	/**
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param dao
+	 *            not <code>null</code>
+	 * @param serverBaseUrl
+	 *            not <code>null</code>
+	 */
 	public EndpointProviderImpl(ExceptionHandler exceptionHandler, EndpointDao dao, String serverBaseUrl)
 	{
-		this.exceptionHandler = exceptionHandler;
-		this.dao = dao;
-		this.serverBaseUrl = serverBaseUrl;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(dao, "dao");
-		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.dao = Objects.requireNonNull(dao, "dao");
+		this.serverBaseUrl = Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 	}
 
 	@Override

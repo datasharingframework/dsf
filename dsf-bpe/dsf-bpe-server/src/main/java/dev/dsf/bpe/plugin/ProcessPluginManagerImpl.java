@@ -39,7 +39,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.api.plugin.BpmnFileAndModel;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
@@ -48,7 +47,7 @@ import dev.dsf.bpe.client.dsf.BasicWebserviceClient;
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.engine.ProcessPluginConsumer;
 
-public class ProcessPluginManagerImpl implements ProcessPluginManager, InitializingBean
+public class ProcessPluginManagerImpl implements ProcessPluginManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginManagerImpl.class);
 
@@ -71,6 +70,24 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 
 	private Map<ProcessIdAndVersion, ProcessPlugin> pluginsByProcessIdAndVersion;
 
+	/**
+	 * @param processPluginConsumers
+	 *            may be <code>null</code>
+	 * @param processPluginLoader
+	 *            not <code>null</code>
+	 * @param bpmnProcessStateChangeService
+	 *            not <code>null</code>
+	 * @param fhirResourceHandler
+	 *            not <code>null</code>
+	 * @param localEndpointAddress
+	 *            not <code>null</code>
+	 * @param localWebserviceClient
+	 *            not <code>null</code>
+	 * @param fhirServerRequestMaxRetries
+	 *            &gt;= -1
+	 * @param fhirServerRetryDelay
+	 *            not <code>null</code>
+	 */
 	public ProcessPluginManagerImpl(List<ProcessPluginConsumer> processPluginConsumers,
 			ProcessPluginLoader processPluginLoader, BpmnProcessStateChangeService bpmnProcessStateChangeService,
 			FhirResourceHandler fhirResourceHandler, String localEndpointAddress,
@@ -79,29 +96,17 @@ public class ProcessPluginManagerImpl implements ProcessPluginManager, Initializ
 		if (processPluginConsumers != null)
 			this.processPluginConsumers.addAll(processPluginConsumers);
 
-		this.processPluginLoader = processPluginLoader;
-		this.bpmnProcessStateChangeService = bpmnProcessStateChangeService;
-		this.fhirResourceHandler = fhirResourceHandler;
+		this.processPluginLoader = Objects.requireNonNull(processPluginLoader, "processPluginLoader");
+		this.bpmnProcessStateChangeService = Objects.requireNonNull(bpmnProcessStateChangeService,
+				"bpmnProcessStateChangeService");
+		this.fhirResourceHandler = Objects.requireNonNull(fhirResourceHandler, "fhirResourceHandler");
 
-		this.localEndpointAddress = localEndpointAddress;
-		this.localWebserviceClient = localWebserviceClient;
-		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
-		this.fhirServerRetryDelay = fhirServerRetryDelay;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(processPluginLoader, "processPluginLoader");
-		Objects.requireNonNull(bpmnProcessStateChangeService, "bpmnProcessStateChangeService");
-		Objects.requireNonNull(fhirResourceHandler, "fhirResourceHandler");
-
-		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
-		Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
-
+		this.localEndpointAddress = Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
+		this.localWebserviceClient = Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
 		if (fhirServerRequestMaxRetries < -1)
 			throw new IllegalArgumentException("fhirServerRequestMaxRetries < -1");
-		Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
+		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
+		this.fhirServerRetryDelay = Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
 	}
 
 	@Override

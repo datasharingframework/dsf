@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
@@ -56,7 +55,7 @@ import dev.dsf.fhir.service.ResourceReference;
 import dev.dsf.fhir.service.ResourceReference.ReferenceType;
 
 public abstract class AbstractAuthorizationRule<R extends Resource, D extends ResourceDao<R>>
-		implements AuthorizationRule<R>, InitializingBean
+		implements AuthorizationRule<R>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractAuthorizationRule.class);
 
@@ -79,17 +78,33 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	protected final FhirServerRole permanentDeleteRole;
 	protected final FhirServerRole websocketRole;
 
+	/**
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param organizationProvider
+	 *            not <code>null</code>
+	 * @param readAccessHelper
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 */
 	public AbstractAuthorizationRule(Class<R> resourceType, DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
-		this.resourceType = resourceType;
-		this.daoProvider = daoProvider;
-		this.serverBase = serverBase;
-		this.referenceResolver = referenceResolver;
-		this.organizationProvider = organizationProvider;
-		this.readAccessHelper = readAccessHelper;
-		this.parameterConverter = parameterConverter;
+		this.resourceType = Objects.requireNonNull(resourceType, "resourceType");
+		this.daoProvider = Objects.requireNonNull(daoProvider, "daoProvider");
+		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
+		this.referenceResolver = Objects.requireNonNull(referenceResolver, "referenceResolver");
+		this.organizationProvider = Objects.requireNonNull(organizationProvider, "organizationProvider");
+		this.readAccessHelper = Objects.requireNonNull(readAccessHelper, "readAccessHelper");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
 
 		createRole = FhirServerRoleImpl.create(resourceType);
 		readRole = FhirServerRoleImpl.read(resourceType);
@@ -99,18 +114,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		searchRole = FhirServerRoleImpl.search(resourceType);
 		permanentDeleteRole = FhirServerRoleImpl.permanentDelete(resourceType);
 		websocketRole = FhirServerRoleImpl.websocket(resourceType);
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(daoProvider, "daoProvider");
-		Objects.requireNonNull(serverBase, "serverBase");
-		Objects.requireNonNull(referenceResolver, "referenceResolver");
-		Objects.requireNonNull(organizationProvider, "organizationProvider");
-		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
-		Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 
 	@Override

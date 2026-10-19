@@ -25,23 +25,20 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
-public class ReferenceCleanerImpl implements ReferenceCleaner, InitializingBean
+public class ReferenceCleanerImpl implements ReferenceCleaner
 {
 	private static final Logger logger = LoggerFactory.getLogger(ReferenceCleanerImpl.class);
 
 	private final ReferenceExtractor referenceExtractor;
 
+	/**
+	 * @param referenceExtractor
+	 *            not <code>null</code>
+	 */
 	public ReferenceCleanerImpl(ReferenceExtractor referenceExtractor)
 	{
-		this.referenceExtractor = referenceExtractor;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
+		this.referenceExtractor = Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 	}
 
 	@Override

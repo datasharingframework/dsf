@@ -27,25 +27,21 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.InitializingBean;
-
-public class LastEventTimeDaoJdbc extends AbstractDaoJdbc implements LastEventTimeDao, InitializingBean
+public class LastEventTimeDaoJdbc extends AbstractDaoJdbc implements LastEventTimeDao
 {
 	private final String type;
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param type
+	 *            not <code>null</code>, not blank
+	 */
 	public LastEventTimeDaoJdbc(DataSource dataSource, String type)
 	{
 		super(dataSource);
 
-		this.type = type;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(type, "type");
+		this.type = Objects.requireNonNull(type, "type");
 		if (type.isBlank())
 			throw new IllegalArgumentException("type is blank");
 	}
