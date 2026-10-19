@@ -198,19 +198,19 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	private String fhirClientConnectionsConfigOidcClientNotBeforeIssuedAtExpiresAtLeeway;
 
 	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.search.parameter:?criteria:exact=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.subscription.task.search.parameter:?criteria:exact=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String taskSubscriptionSearchParameter;
 
 	@Documentation(description = "Subscription to receive notifications about questionnaire response resources from the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria:exact=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	@Value("${dev.dsf.bpe.fhir.subscription.questionnaireresponse.search.parameter:?criteria:exact=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String questionnaireResponseSubscriptionSearchParameter;
 
 	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.max:-1}")
+	@Value("${dev.dsf.bpe.fhir.subscription.retry.max:-1}")
 	private int websocketMaxRetries;
 
 	@Documentation(description = "Time between two retries to establish a websocket connection with the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.task.subscription.retry.sleep:PT5S}")
+	@Value("${dev.dsf.bpe.fhir.subscription.retry.sleep:PT5S}")
 	private String websocketRetrySleep;
 
 	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
