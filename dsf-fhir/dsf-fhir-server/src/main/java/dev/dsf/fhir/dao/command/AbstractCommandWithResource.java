@@ -27,6 +27,7 @@ import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.prefer.PreferReturnType;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
+import dev.dsf.fhir.validation.ValidationRules;
 
 public abstract class AbstractCommandWithResource<R extends Resource, D extends ResourceDao<R>> extends AbstractCommand
 		implements Command
@@ -35,12 +36,13 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 	protected final D dao;
 	protected final ExceptionHandler exceptionHandler;
 	protected final ParameterConverter parameterConverter;
+	protected final ValidationRules validationRules;
 	protected final ReferencesHelper<R> referencesHelper;
 
 	public AbstractCommandWithResource(int transactionPriority, int index, Identity identity,
 			PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry, String serverBase,
 			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter, ValidationRules validationRules, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
 		super(transactionPriority, index, identity, returnType, bundle, entry, serverBase, authorizationHelper);
@@ -49,6 +51,7 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
+		this.validationRules = validationRules;
 
 		referencesHelper = new ReferencesHelperImpl<>(index, resource, serverBase, referenceExtractor,
 				referenceResolver, responseGenerator);

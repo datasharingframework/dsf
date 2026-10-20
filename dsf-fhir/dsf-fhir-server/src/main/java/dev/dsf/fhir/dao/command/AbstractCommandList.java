@@ -15,13 +15,16 @@
  */
 package dev.dsf.fhir.dao.command;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,25 +40,119 @@ abstract class AbstractCommandList
 {
 	private static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 
+	public static final class CommandResult
+	{
+		private final Command command;
+
+		private BundleEntryComponent result;
+		private Exception exception;
+
+		public CommandResult(Command command)
+		{
+			this.command = command;
+		}
+
+		public Command getCommand()
+		{
+			return command;
+		}
+
+		public void setResult(BundleEntryComponent result)
+		{
+			Objects.requireNonNull(result, "result");
+			if (hasException())
+				throw new IllegalStateException("Exception set");
+
+			this.result = result;
+		}
+
+		public BundleEntryComponent getResult()
+		{
+			return result;
+		}
+
+		public boolean hasResult()
+		{
+			return result != null;
+		}
+
+		public void setException(Exception exception)
+		{
+			Objects.requireNonNull(exception, "exception");
+			if (hasException())
+				throw new IllegalStateException("Exception set");
+
+			this.exception = exception;
+		}
+
+		public void addSuppressedException(Throwable exception)
+		{
+			Objects.requireNonNull(exception, "exception");
+			if (!hasException())
+				throw new IllegalStateException("Exception not set");
+
+			this.exception.addSuppressed(exception);
+		}
+
+		public Exception getException()
+		{
+			return exception;
+		}
+
+		public boolean hasException()
+		{
+			return exception != null;
+		}
+
+		public void convertExceptionToResult(Function<Exception, Exception> internalServerErrorConverter)
+		{
+			if (hasException())
+			{
+				result = toEntry(exception, internalServerErrorConverter);
+				exception = null;
+			}
+		}
+
+		private BundleEntryComponent toEntry(Exception exception,
+				Function<Exception, Exception> internalServerErrorConverter)
+		{
+			BundleEntryComponent entry = new BundleEntryComponent();
+			BundleEntryResponseComponent response = entry.getResponse();
+
+			if (!(exception instanceof WebApplicationException w)
+					|| !(w.getResponse().getEntity() instanceof OperationOutcome))
+			{
+				exception = internalServerErrorConverter.apply(exception);
+			}
+
+			Response httpResponse = ((WebApplicationException) exception).getResponse();
+			response.setStatus(httpResponse.getStatusInfo().getStatusCode() + " "
+					+ httpResponse.getStatusInfo().getReasonPhrase());
+			response.setOutcome((OperationOutcome) httpResponse.getEntity());
+
+			return entry;
+		}
+	}
+
 	protected final DataSource dataSource;
 	protected final DataSource permanentDeleteDataSource;
 	protected final String dbUsersGroup;
 	protected final ExceptionHandler exceptionHandler;
 
-	protected final List<Command> commands = new ArrayList<>();
+	protected final List<CommandResult> commands;
 	protected final boolean hasModifyingCommands;
 	protected final boolean hasBinaryModifyingCommands;
 
 	protected AbstractCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
-			ExceptionHandler exceptionHandler, List<? extends Command> commands)
+			ExceptionHandler exceptionHandler, List<? extends Command> commands, Comparator<Command> sortOrder)
 	{
 		this.dataSource = dataSource;
 		this.permanentDeleteDataSource = permanentDeleteDataSource;
 		this.dbUsersGroup = dbUsersGroup;
 		this.exceptionHandler = exceptionHandler;
 
-		if (commands != null)
-			this.commands.addAll(commands);
+		this.commands = commands == null ? List.of()
+				: commands.stream().sorted(sortOrder).map(CommandResult::new).toList();
 
 		hasModifyingCommands = hasModifyingCommands(commands);
 		hasBinaryModifyingCommands = hasModifyingCommands && hasBinaryModifyingCommands(commands);
@@ -72,8 +169,19 @@ abstract class AbstractCommandList
 				&& Binary.class.getAnnotation(ResourceDef.class).name().equals(m.getResourceTypeName()));
 	}
 
+	protected void auditLogResult(CommandResult commandResult)
+	{
+		if (commandResult.hasException())
+			throw new IllegalArgumentException("CommandResult has exception");
+
+		auditLogResult(commandResult.getCommand(), commandResult.getResult());
+	}
+
 	protected void auditLogResult(Command command, BundleEntryComponent result)
 	{
+		Objects.requireNonNull(command, "command");
+		Objects.requireNonNull(result, "result");
+
 		String resultOutcome = failed(result) ? "failed" : "successful";
 
 		if (command instanceof DeleteCommand)
@@ -129,7 +237,7 @@ abstract class AbstractCommandList
 
 	private boolean failed(BundleEntryComponent result)
 	{
-		if (result != null && result.hasResponse() && result.getResponse().hasStatus())
+		if (result.hasResponse() && result.getResponse().hasStatus())
 		{
 			String status = result.getResponse().getStatus();
 			if (status.length() >= 3 && status.matches("[0-9]{3}.*"))
@@ -138,25 +246,6 @@ abstract class AbstractCommandList
 		}
 
 		return false;
-	}
-
-	protected BundleEntryComponent toEntry(Exception exception)
-	{
-		var entry = new BundleEntryComponent();
-		var response = entry.getResponse();
-
-		if (!(exception instanceof WebApplicationException w)
-				|| !(w.getResponse().getEntity() instanceof OperationOutcome))
-		{
-			exception = internalServerError(exception);
-		}
-
-		Response httpResponse = ((WebApplicationException) exception).getResponse();
-		response.setStatus(
-				httpResponse.getStatusInfo().getStatusCode() + " " + httpResponse.getStatusInfo().getReasonPhrase());
-		response.setOutcome((OperationOutcome) httpResponse.getEntity());
-
-		return entry;
 	}
 
 	protected abstract Exception internalServerError(Exception exception);

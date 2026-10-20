@@ -29,8 +29,6 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.dao.command.CommandList;
-import dev.dsf.fhir.dao.exception.BadBundleException;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
@@ -363,22 +361,6 @@ public class ExceptionHandler
 			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
 
 			return onSqlException.get();
-		}
-	}
-
-	public CommandList handleBadBundleException(Supplier<CommandList> commandListCreator)
-	{
-		try
-		{
-			return commandListCreator.get();
-		}
-		catch (BadBundleException e)
-		{
-			logger.debug("Error while creating command list for bundle", e);
-			logger.warn("Error while creating command list for bundle: {}", e.getMessage());
-
-			Response response = responseGenerator.badBundleRequest(e.getMessage());
-			throw new WebApplicationException(response);
 		}
 	}
 }
