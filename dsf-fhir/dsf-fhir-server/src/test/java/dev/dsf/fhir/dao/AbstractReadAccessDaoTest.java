@@ -58,10 +58,10 @@ public abstract class AbstractReadAccessDaoTest<D extends Resource, C extends Re
 {
 	private final ReadAccessHelperImpl readAccessHelper = new ReadAccessHelperImpl();
 
-	protected AbstractReadAccessDaoTest(Class<D> resouceClass,
+	protected AbstractReadAccessDaoTest(Class<D> resourceClass,
 			QuadFunction<DataSource, DataSource, FhirContext, ObjectMapper, C> daoCreator)
 	{
-		super(resouceClass, daoCreator);
+		super(resourceClass, daoCreator);
 	}
 
 	protected void assertReadAccessEntryCount(int totalExpectedCount, int expectedCount, Resource resource,

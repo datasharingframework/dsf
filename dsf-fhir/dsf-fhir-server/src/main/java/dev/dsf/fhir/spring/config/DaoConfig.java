@@ -64,7 +64,7 @@ import dev.dsf.fhir.dao.jdbc.DocumentReferenceDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
-import dev.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
+import dev.dsf.fhir.dao.jdbc.HistoryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.LibraryDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 import dev.dsf.fhir.dao.jdbc.MeasureDaoJdbc;
@@ -357,7 +357,7 @@ public class DaoConfig
 	@Bean
 	public HistoryDao historyDao()
 	{
-		return new HistroyDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao(),
+		return new HistoryDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao(),
 				new PgObjectFactoryImpl(fhirConfig.fhirContext(), jsonConfig.objectMapper()));
 	}
 

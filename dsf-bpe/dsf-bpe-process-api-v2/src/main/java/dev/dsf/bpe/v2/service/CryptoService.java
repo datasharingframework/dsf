@@ -326,7 +326,7 @@ public interface CryptoService
 	/**
 	 * @param certificate
 	 *            not <code>null</code>
-	 * @return <code>true</code> if the given <b>certificate</b> not-after field is after {@link ZonedDateTime#now()}
+	 * @return <code>true</code> if {@link ZonedDateTime#now()} is after the given <b>certificate</b>s not-after field
 	 */
 	boolean isCertificateExpired(X509Certificate certificate);
 

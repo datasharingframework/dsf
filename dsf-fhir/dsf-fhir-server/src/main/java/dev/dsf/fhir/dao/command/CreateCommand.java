@@ -59,6 +59,7 @@ import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceExtractor;
 import dev.dsf.fhir.service.ReferenceResolver;
 import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.ValidationRules;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Response;
@@ -82,13 +83,14 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 	public CreateCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter, ValidationRules validationRules,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator,
 			DefaultProfileProvider defaultProfileProvider, boolean enableValidation)
 	{
 		super(2, index, identity, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
-				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
+				exceptionHandler, parameterConverter, validationRules, responseGenerator, referenceExtractor,
+				referenceResolver);
 
 		this.responseGenerator = responseGenerator;
 		this.referenceCleaner = referenceCleaner;
@@ -105,10 +107,10 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
-		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		UriComponents components = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
 		// check standard create request url: e.g. Patient
-		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
+		if (components.getPathSegments().size() == 1 && components.getQueryParams().isEmpty())
 		{
 			if (!entry.hasFullUrl() || !entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 			{
@@ -226,8 +228,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (!ifNoneExist.contains("?"))
 			ifNoneExist = '?' + ifNoneExist;
 
-		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExist).build();
-		String path = componentes.getPath();
+		UriComponents components = UriComponentsBuilder.fromUriString(ifNoneExist).build();
+		String path = components.getPath();
 		if (path != null && !path.isBlank())
 		{
 			Response response = responseGenerator.badIfNoneExistHeaderValue("no resource", ifNoneExist);
@@ -235,7 +237,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 
 		Map<String, List<String>> queryParameters = parameterConverter
-				.urlDecodeQueryParameters(componentes.getQueryParams());
+				.urlDecodeQueryParameters(components.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
@@ -268,6 +270,14 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 
 		return Optional.empty();
+	}
+
+	@Override
+	public void checkReferences(Map<String, IdType> idTranslationTable, Connection connection)
+			throws SQLException, WebApplicationException
+	{
+		referencesHelper.checkReferences(idTranslationTable, connection,
+				ref -> validationRules.checkReferenceAfterCreate(resource, ref));
 	}
 
 	@Override
