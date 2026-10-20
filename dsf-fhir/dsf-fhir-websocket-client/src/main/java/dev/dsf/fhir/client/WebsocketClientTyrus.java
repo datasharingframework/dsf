@@ -144,7 +144,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 	public void connect()
 	{
 		if (manager != null)
-			throw new IllegalStateException("Allready connecting/connected");
+			throw new IllegalStateException("Already connecting/connected");
 
 		closed = false;
 

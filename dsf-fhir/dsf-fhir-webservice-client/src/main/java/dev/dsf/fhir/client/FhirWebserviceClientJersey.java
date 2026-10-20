@@ -187,7 +187,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	PreferReturn createConditionaly(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
+	PreferReturn createConditionally(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -250,7 +250,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	PreferReturn updateConditionaly(PreferReturnType returnType, Resource resource, Map<String, List<String>> criteria)
+	PreferReturn updateConditionally(PreferReturnType returnType, Resource resource, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -326,9 +326,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
+	public <R extends Resource> R createConditionally(R resource, String ifNoneExistCriteria)
 	{
-		return (R) createConditionaly(PreferReturnType.REPRESENTATION, resource, ifNoneExistCriteria).getResource();
+		return (R) createConditionally(PreferReturnType.REPRESENTATION, resource, ifNoneExistCriteria).getResource();
 	}
 
 	@Override
@@ -347,9 +347,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
+	public <R extends Resource> R updateConditionally(R resource, Map<String, List<String>> criteria)
 	{
-		return (R) updateConditionaly(PreferReturnType.REPRESENTATION, resource, criteria).getResource();
+		return (R) updateConditionally(PreferReturnType.REPRESENTATION, resource, criteria).getResource();
 	}
 
 	@Override
@@ -384,7 +384,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
+	public void deleteConditionally(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(resourceClass, "resourceClass");
 		Objects.requireNonNull(criteria, "criteria");
@@ -897,7 +897,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (delay == null || delay.isNegative())
 			throw new IllegalArgumentException("delay null or negative");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delay);
+		return new BasicFhirWebserviceClientWithRetryImpl(this, nTimes, delay);
 	}
 
 	@Override
@@ -906,7 +906,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (delay == null || delay.isNegative())
 			throw new IllegalArgumentException("delay null or negative");
 
-		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, delay);
+		return new BasicFhirWebserviceClientWithRetryImpl(this, RETRY_FOREVER, delay);
 	}
 
 	@Override

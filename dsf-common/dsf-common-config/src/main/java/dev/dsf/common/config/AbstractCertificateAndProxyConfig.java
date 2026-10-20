@@ -33,9 +33,13 @@ import de.hsheilbronn.mi.utils.crypto.io.KeyStoreReader;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
 import de.hsheilbronn.mi.utils.crypto.keypair.KeyPairValidator;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
+import dev.dsf.common.config.network.HostSpecParser;
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
 
-public abstract class AbstractCertificateConfig
+public abstract class AbstractCertificateAndProxyConfig
 {
+	public static final String HOST_SPEC_LIST_DISABLED = "disabled";
+
 	private static final class RuntimeIOException extends RuntimeException
 	{
 		private static final long serialVersionUID = 1L;
@@ -318,6 +322,18 @@ public abstract class AbstractCertificateConfig
 		catch (IOException | KeyStoreException e)
 		{
 			throw new RuntimeException(e);
+		}
+	}
+
+	protected List<HostSpec> parseHostSpecList(String propertyName, List<String> values)
+	{
+		try
+		{
+			return HostSpecParser.parse(values);
+		}
+		catch (IllegalArgumentException e)
+		{
+			throw new IllegalArgumentException(errorMessage(propertyName, e.getMessage()), e);
 		}
 	}
 }

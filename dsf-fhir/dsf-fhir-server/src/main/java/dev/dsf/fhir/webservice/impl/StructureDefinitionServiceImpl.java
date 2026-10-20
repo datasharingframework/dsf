@@ -79,14 +79,14 @@ public class StructureDefinitionServiceImpl extends
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			AuthorizationRuleProvider authorizationRuleProvider, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SnapshotGenerator sanapshotGenerator, HistoryService historyService, ValidationRules validationRules)
+			SnapshotGenerator snapshotGenerator, HistoryService historyService, ValidationRules validationRules)
 	{
 		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
 				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService, validationRules);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
-		this.snapshotGenerator = sanapshotGenerator;
+		this.snapshotGenerator = snapshotGenerator;
 	}
 
 	@Override

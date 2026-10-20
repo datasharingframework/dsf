@@ -88,15 +88,15 @@ public class DeleteCommand extends AbstractCommand implements ModifyingCommand
 	public void execute(Map<String, IdType> idTranslationTable, LargeObjectManager largeObjectManager,
 			Connection connection, ValidationHelper validationHelper) throws SQLException, WebApplicationException
 	{
-		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
-		resourceTypeName = componentes.getPathSegments().get(0);
+		UriComponents components = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		resourceTypeName = components.getPathSegments().get(0);
 
-		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
-			deleteById(idTranslationTable, connection, componentes.getPathSegments().get(0),
-					componentes.getPathSegments().get(1));
-		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
-			deleteByCondition(idTranslationTable, connection, componentes.getPathSegments().get(0),
-					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
+		if (components.getPathSegments().size() == 2 && components.getQueryParams().isEmpty())
+			deleteById(idTranslationTable, connection, components.getPathSegments().get(0),
+					components.getPathSegments().get(1));
+		else if (components.getPathSegments().size() == 1 && !components.getQueryParams().isEmpty())
+			deleteByCondition(idTranslationTable, connection, components.getPathSegments().get(0),
+					parameterConverter.urlDecodeQueryParameters(components.getQueryParams()));
 		else
 		{
 			Response response = responseGenerator.badDeleteRequestUrl(index, entry.getRequest().getUrl());

@@ -69,7 +69,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateWithRelatedArtefactUnknownUrl() throws Exception
+	public void testCreateWithRelatedArtifactUnknownUrl() throws Exception
 	{
 		String url = "https://foo.bar";
 		ResearchStudy researchStudy = getResearchStudy(url);
@@ -85,7 +85,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactUnknownUrl() throws Exception
+	public void testCreateViaBundleWithRelatedArtifactUnknownUrl() throws Exception
 	{
 		String url = "https://foo.bar";
 		ResearchStudy researchStudy = getResearchStudy(url);
@@ -113,7 +113,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactTemporaryUrl() throws Exception
+	public void testCreateViaBundleWithRelatedArtifactTemporaryUrl() throws Exception
 	{
 		String binaryUrl = "urn:uuid:" + UUID.randomUUID().toString();
 		Binary binary = getBinary();
@@ -152,7 +152,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactConditionalUrl() throws Exception
+	public void testCreateViaBundleWithRelatedArtifactConditionalUrl() throws Exception
 	{
 		Binary binary = getBinary();
 		Binary binaryResult = getWebserviceClient().create(binary);
@@ -187,7 +187,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactRelativeLiteralInternalUrl() throws Exception
+	public void testCreateViaBundleWithRelatedArtifactRelativeLiteralInternalUrl() throws Exception
 	{
 		Binary binary = getBinary();
 		Binary binaryResult = getWebserviceClient().create(binary);
@@ -222,7 +222,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactAbsoluteLiteralInternalUrl() throws Exception
+	public void testCreateViaBundleWithRelatedArtifactAbsoluteLiteralInternalUrl() throws Exception
 	{
 		Binary binary = getBinary();
 		Binary binaryResult = getWebserviceClient().create(binary);
@@ -258,7 +258,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateWithRelatedArtefactRelativeLiteralInternalUrl() throws Exception
+	public void testCreateWithRelatedArtifactRelativeLiteralInternalUrl() throws Exception
 	{
 		Binary binary = getBinary();
 		Binary binaryResult = getWebserviceClient().create(binary);
@@ -282,7 +282,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateWithRelatedArtefactRelativeLiteralInternalUrlNonExisting() throws Exception
+	public void testCreateWithRelatedArtifactRelativeLiteralInternalUrlNonExisting() throws Exception
 	{
 		ResearchStudy researchStudy = getResearchStudy("Binary/" + UUID.randomUUID().toString());
 
@@ -290,7 +290,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactRelativeLiteralInternalUrlNonExisting() throws Exception
+	public void testCreateViaBundleWithRelatedArtifactRelativeLiteralInternalUrlNonExisting() throws Exception
 	{
 		ResearchStudy researchStudy = getResearchStudy("Binary/" + UUID.randomUUID().toString());
 
@@ -302,7 +302,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateWithRelatedArtefactAbsoluteLiteralInternalUrl() throws Exception
+	public void testCreateWithRelatedArtifactAbsoluteLiteralInternalUrl() throws Exception
 	{
 		Binary binary = getBinary();
 		Binary binaryResult = getWebserviceClient().create(binary);
@@ -326,7 +326,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateWithRelatedArtefactAbsoluteLiteralExternalUrl() throws Exception
+	public void testCreateWithRelatedArtifactAbsoluteLiteralExternalUrl() throws Exception
 	{
 		String literalExternalUrl = "https://www.foo.bar/fhir/Binary/" + UUID.randomUUID().toString();
 		ResearchStudy researchStudy = getResearchStudy(literalExternalUrl);
@@ -342,7 +342,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactAbsoluteLiteralExternalUrl() throws Exception
+	public void testCreateViaBundleWithRelatedArtifactAbsoluteLiteralExternalUrl() throws Exception
 	{
 		String literalExternalUrl = "https://www.foo.bar/fhir/Binary/" + UUID.randomUUID().toString();
 		ResearchStudy researchStudy = getResearchStudy(literalExternalUrl);
