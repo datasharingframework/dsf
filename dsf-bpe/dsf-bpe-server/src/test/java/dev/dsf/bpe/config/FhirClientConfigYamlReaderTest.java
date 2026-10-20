@@ -148,6 +148,7 @@ public class FhirClientConfigYamlReaderTest
 
 	private static record YamlAndErrorCount(String yaml, int errorCount)
 	{
+		@Override
 		public String yaml()
 		{
 			return replaceTestProperties(yaml);

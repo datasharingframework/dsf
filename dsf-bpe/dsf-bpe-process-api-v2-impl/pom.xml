@@ -123,6 +123,12 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
+						<goals>
+							<!-- for surefire javaagent config -->
+							<goal>properties</goal>
+						</goals>
+					</execution>
+					<execution>
 						<id>copy-api-v2-dependencies-to-docker</id>
 						<phase>pre-integration-test</phase>
 						<goals>
@@ -288,6 +294,13 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

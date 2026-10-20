@@ -96,7 +96,7 @@ public class ReferenceResolverImpl implements ReferenceResolver
 
 		return switch (reference.getType(serverBase))
 		{
-			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+			case LITERAL_EXTERNAL, RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				clientProvider.endpointExists(reference.getServerBase(serverBase));
 
 			case LOGICAL -> exceptionHandler.handleSqlException(
@@ -120,9 +120,9 @@ public class ReferenceResolverImpl implements ReferenceResolver
 		return switch (type)
 		{
 			case LITERAL_INTERNAL -> resolveLiteralInternalReference(reference, connection);
-			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+			case LITERAL_EXTERNAL, RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				resolveLiteralExternalReference(reference);
-			case CONDITIONAL, RELATED_ARTEFACT_CONDITIONAL_URL, ATTACHMENT_CONDITIONAL_URL ->
+			case CONDITIONAL, RELATED_ARTIFACT_CONDITIONAL_URL, ATTACHMENT_CONDITIONAL_URL ->
 				resolveConditionalReference(reference, connection);
 			case LOGICAL -> resolveLogicalReference(reference, connection);
 
@@ -191,7 +191,7 @@ public class ReferenceResolverImpl implements ReferenceResolver
 	{
 		Objects.requireNonNull(reference, "reference");
 		throwIfReferenceTypeUnexpected(reference.getType(serverBase), EnumSet.of(ReferenceType.LITERAL_EXTERNAL,
-				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL));
+				ReferenceType.RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL));
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
@@ -236,7 +236,7 @@ public class ReferenceResolverImpl implements ReferenceResolver
 
 		ReferenceType referenceType = reference.getType(serverBase);
 		throwIfReferenceTypeUnexpected(referenceType, EnumSet.of(ReferenceType.CONDITIONAL,
-				ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL, ReferenceType.ATTACHMENT_CONDITIONAL_URL));
+				ReferenceType.RELATED_ARTIFACT_CONDITIONAL_URL, ReferenceType.ATTACHMENT_CONDITIONAL_URL));
 
 		String referenceValue = reference.getValue();
 		String referenceLocation = reference.getLocation();
@@ -327,7 +327,7 @@ public class ReferenceResolverImpl implements ReferenceResolver
 			String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 					.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
 
-			if (EnumSet.of(ReferenceType.CONDITIONAL, ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL,
+			if (EnumSet.of(ReferenceType.CONDITIONAL, ReferenceType.RELATED_ARTIFACT_CONDITIONAL_URL,
 					ReferenceType.ATTACHMENT_CONDITIONAL_URL).contains(referenceType))
 			{
 				logger.warn("Conditional reference {} at {} in resource contains unsupported queryparameter{} {}",
@@ -359,7 +359,7 @@ public class ReferenceResolverImpl implements ReferenceResolver
 				logger.warn("Found {} matches for reference at {} with identifier '{}|{}'", overallCount,
 						resourceReference.getLocation(), resourceReference.getReference().getIdentifier().getSystem(),
 						resourceReference.getReference().getIdentifier().getValue());
-			else if (EnumSet.of(ReferenceType.CONDITIONAL, ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL,
+			else if (EnumSet.of(ReferenceType.CONDITIONAL, ReferenceType.RELATED_ARTIFACT_CONDITIONAL_URL,
 					ReferenceType.ATTACHMENT_CONDITIONAL_URL).contains(referenceType))
 				logger.warn("Found {} matches for reference at {} with condition '{}'", overallCount,
 						resourceReference.getLocation(),
@@ -388,7 +388,7 @@ public class ReferenceResolverImpl implements ReferenceResolver
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
 		throwIfReferenceTypeUnexpected(reference.getType(serverBase), EnumSet.of(ReferenceType.LITERAL_INTERNAL,
-				ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL));
+				ReferenceType.RELATED_ARTIFACT_LITERAL_INTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL));
 
 		IdType id = new IdType(reference.getValue());
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
@@ -426,7 +426,7 @@ public class ReferenceResolverImpl implements ReferenceResolver
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		throwIfReferenceTypeUnexpected(reference.getType(serverBase), EnumSet.of(ReferenceType.LITERAL_EXTERNAL,
-				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL));
+				ReferenceType.RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL));
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 		String referenceValue = reference.getValue();

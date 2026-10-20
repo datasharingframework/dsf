@@ -42,7 +42,7 @@ import dev.dsf.fhir.history.filter.HistoryIdentityFilter;
 import dev.dsf.fhir.search.PageAndCount;
 import dev.dsf.fhir.search.SearchQueryParameter;
 
-public class HistroyDaoJdbc implements HistoryDao
+public class HistoryDaoJdbc implements HistoryDao
 {
 	private final DataSource dataSource;
 	private final BinaryDaoJdbc binaryDao;
@@ -56,7 +56,7 @@ public class HistroyDaoJdbc implements HistoryDao
 	 * @param pgObjectFactory
 	 *            not <code>null</code>
 	 */
-	public HistroyDaoJdbc(DataSource dataSource, BinaryDaoJdbc binaryDao, PgObjectFactory pgObjectFactory)
+	public HistoryDaoJdbc(DataSource dataSource, BinaryDaoJdbc binaryDao, PgObjectFactory pgObjectFactory)
 	{
 		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
 		this.binaryDao = Objects.requireNonNull(binaryDao, "binaryDao");

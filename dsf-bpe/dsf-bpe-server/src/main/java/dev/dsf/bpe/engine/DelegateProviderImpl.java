@@ -181,7 +181,7 @@ public class DelegateProviderImpl implements DelegateProvider
 
 		try
 		{
-			searchInProgessTasks(execution.getBusinessKey()).forEach(task ->
+			searchInProgressTasks(execution.getBusinessKey()).forEach(task ->
 			{
 				try
 				{
@@ -215,7 +215,7 @@ public class DelegateProviderImpl implements DelegateProvider
 				"Plugin for process " + processIdAndVersion + " not found");
 	}
 
-	protected final Stream<Task> searchInProgessTasks(String businessKey)
+	protected final Stream<Task> searchInProgressTasks(String businessKey)
 	{
 		List<Stream<BundleEntryComponent>> resources = new ArrayList<>();
 
@@ -223,7 +223,7 @@ public class DelegateProviderImpl implements DelegateProvider
 		int page = 1;
 		while (hasMore)
 		{
-			Bundle resultBundle = searchInProgessTasks(page++);
+			Bundle resultBundle = searchInProgressTasks(page++);
 
 			resources.add(resultBundle.getEntry().stream().filter(BundleEntryComponent::hasSearch)
 					.filter(BundleEntryComponent::hasResource));
@@ -237,7 +237,7 @@ public class DelegateProviderImpl implements DelegateProvider
 				.filter(r -> r instanceof Task).map(r -> (Task) r).filter(hasBusinessKey(businessKey));
 	}
 
-	private Bundle searchInProgessTasks(int page)
+	private Bundle searchInProgressTasks(int page)
 	{
 		// TODO add business-key custom search parameter to FHIR server
 

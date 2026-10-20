@@ -274,7 +274,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	{
 		if (reference == null)
 		{
-			logger.warn("Null reference while checking if user part of referenced organization");
+			logger.warn("Null reference while checking if identity part of referenced organization");
 
 			return false;
 		}
@@ -285,7 +285,8 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			ReferenceType type = resReference.getType(serverBase);
 			if (!EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(type))
 			{
-				logger.warn("Reference of type {} not supported while checking if user part of referenced organization",
+				logger.warn(
+						"Reference of type {} not supported while checking if identity part of referenced organization",
 						type);
 
 				return false;
@@ -299,7 +300,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 						.equals(resource.get().getIdElement().getIdPart());
 				if (!sameOrganization)
 					logger.warn(
-							"Current user not part of organization {} while checking if user part of referenced organization",
+							"Current identity not part of organization {} while checking if identity part of referenced organization",
 							resource.get().getIdElement().getValue());
 
 				return sameOrganization;
@@ -307,7 +308,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			else
 			{
 				logger.warn(
-						"Reference to organization could not be resolved while checking if user part of referenced organization");
+						"Reference to organization could not be resolved while checking if identity part of referenced organization");
 
 				return false;
 			}

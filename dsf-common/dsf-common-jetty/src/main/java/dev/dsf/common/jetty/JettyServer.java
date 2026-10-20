@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateFormatter.X500PrincipalFormat;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreFormatter;
+import dev.dsf.common.config.network.InetSocketAddressMatcher;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
 
@@ -140,42 +141,17 @@ public final class JettyServer
 	}
 
 	public static Function<Server, ServerConnector> httpConnector(String host, int port,
-			String clientCertificateHeaderName)
+			String clientCertificateHeaderName, InetSocketAddressMatcher trustedProxyMatcher)
 	{
 		return server ->
 		{
 			ServerConnector connector = new ServerConnector(server,
 					httpConnectionFactory(new ForwardedRequestCustomizer(),
-							new ForwardedSecureRequestCustomizer(clientCertificateHeaderName)));
+							new ForwardedSecureRequestCustomizer(clientCertificateHeaderName, trustedProxyMatcher)));
 			connector.setHost(host);
 			connector.setPort(port);
 
 			return connector;
-		};
-	}
-
-	public static Function<Server, ServerConnector> httpConnector(ServerSocketChannel channel,
-			String clientCertificateHeaderName)
-	{
-		return server ->
-		{
-			try
-			{
-				ServerConnector connector = new ServerConnector(server,
-						httpConnectionFactory(new ForwardedRequestCustomizer(),
-								new ForwardedSecureRequestCustomizer(clientCertificateHeaderName)));
-				connector.open(channel);
-				setHostAndPort(channel, connector);
-
-				return connector;
-			}
-			catch (IOException e)
-			{
-				logger.debug("Unable to open server socket channel", e);
-				logger.warn("Unable to open server socket channel: {} - {}", e.getClass().getName(), e.getMessage());
-
-				throw new RuntimeException(e);
-			}
 		};
 	}
 

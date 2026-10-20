@@ -75,7 +75,7 @@ public class WebSocketSubscriptionManagerImpl implements WebSocketSubscriptionMa
 		{
 			try
 			{
-				matcher.resloveReferencesForMatching(resource, daoProvider);
+				matcher.resolveReferencesForMatching(resource, daoProvider);
 			}
 			catch (SQLException e)
 			{
@@ -228,7 +228,8 @@ public class WebSocketSubscriptionManagerImpl implements WebSocketSubscriptionMa
 			{
 				executor.shutdownNow();
 				if (!executor.awaitTermination(60, TimeUnit.SECONDS))
-					logger.warn("EventManager executor did not terminate");
+					logger.warn("{} executor did not terminate",
+							WebSocketSubscriptionManagerImpl.class.getSimpleName());
 			}
 		}
 		catch (InterruptedException ie)

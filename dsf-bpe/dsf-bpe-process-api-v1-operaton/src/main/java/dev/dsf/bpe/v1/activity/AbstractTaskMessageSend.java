@@ -280,7 +280,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate
 					exception.getMessage());
 		}
 
-		// if we are not a multi instance message send task or all sends have failed (targets emtpy)
+		// if we are not a multi instance message send task or all sends have failed (targets empty)
 		else
 		{
 			logger.debug("Error while executing Task message send {}", getClass().getName(), exception);
