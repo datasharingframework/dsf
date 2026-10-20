@@ -17,6 +17,7 @@ package dev.dsf.common.status.health;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -24,9 +25,13 @@ public class DatabaseHealthCheck implements HealthCheck
 {
 	private final DataSource dataSource;
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 */
 	public DatabaseHealthCheck(DataSource dataSource)
 	{
-		this.dataSource = dataSource;
+		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
 	}
 
 	@Override
