@@ -702,7 +702,7 @@ public class ResponseGenerator
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
 						+ " with id " + resource.getId()
-						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex));
 	}
 
 	public OperationOutcome referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, Resource resource,
@@ -778,10 +778,10 @@ public class ResponseGenerator
 
 	public Response badCreateRequestUrl(int bundleIndex, String url)
 	{
-		logger.warn("Bad crate request url {} at bundle index {}", url, bundleIndex);
+		logger.warn("Bad create request url {} at bundle index {}", url, bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Bad crete request url " + url + " at bundle index " + bundleIndex);
+				"Bad create request url " + url + " at bundle index " + bundleIndex);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
@@ -899,7 +899,7 @@ public class ResponseGenerator
 
 	}
 
-	public Response bundleEntryResouceMissingId(int bundleIndex, String resourceTypeName)
+	public Response bundleEntryResourceMissingId(int bundleIndex, String resourceTypeName)
 	{
 		logger.warn("Bundle entry of type {} at bundle index {} is missing id value", resourceTypeName, bundleIndex);
 

@@ -63,7 +63,9 @@ import javax.net.ssl.TrustManager;
 public interface CryptoService
 {
 	/**
-	 * Key encapsulation mechanism with encrypt and decrypt methods.
+	 * Key encapsulation mechanism with encrypt and decrypt methods.<br>
+	 * <br>
+	 * <b>Starting with DSF 2.1.1 plain-texts are limited to 250 MiB</b>
 	 */
 	public interface Kem
 	{
@@ -324,7 +326,7 @@ public interface CryptoService
 	/**
 	 * @param certificate
 	 *            not <code>null</code>
-	 * @return <code>true</code> if the given <b>certificate</b> not-after field is after {@link ZonedDateTime#now()}
+	 * @return <code>true</code> if {@link ZonedDateTime#now()} is after the given <b>certificate</b>s not-after field
 	 */
 	boolean isCertificateExpired(X509Certificate certificate);
 

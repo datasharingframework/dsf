@@ -107,6 +107,7 @@
 				<executions>
 					<execution>
 						<goals>
+							<!-- for surefire javaagent config -->
 							<goal>properties</goal>
 						</goals>
 					</execution>

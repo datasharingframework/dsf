@@ -221,7 +221,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 			{
 				scheduler.shutdownNow();
 				if (!scheduler.awaitTermination(60, TimeUnit.SECONDS))
-					logger.warn("EventEndpoint scheduler did not terminate");
+					logger.warn("{} scheduler did not terminate", ServerEndpoint.class.getSimpleName());
 			}
 		}
 		catch (InterruptedException ie)

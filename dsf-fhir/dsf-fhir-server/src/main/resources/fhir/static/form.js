@@ -1108,12 +1108,10 @@ function handlePendingTask() {
 			const count = baseIdCount.get(baseId) || 0
 			baseIdCount.set(baseId, count + 1)
 
-			const suffix = count === 0 ? "" : `|${count}`
-
 			if (count > 0)
-				appendInputRowAfter(baseId)
+				appendInputRowAfter(`${baseId}|${count - 1}`)
 
-			const fullId = (id) => id + suffix
+			const fullId = (suffix) => `${baseId}|${count}${suffix != null ? `-${suffix}` : ""}`
 
 			const primitiveValue =
 				values.boolean ?? values.string ?? values.integer ??
@@ -1121,7 +1119,7 @@ function handlePendingTask() {
 				values.dateTime ?? values.instant ?? values.uri
 
 			if (primitiveValue != null) {
-				const id = fullId(baseId + (values.boolean !== undefined ? `-${values.boolean}` : ""))
+				const id = fullId(values.boolean)
 
 				const input = getInputById(id)
 
@@ -1138,14 +1136,14 @@ function handlePendingTask() {
 				const { reference, identifier } = values.reference
 
 				if (reference) {
-					const input = getInputById(fullId(baseId))
+					const input = getInputById(fullId())
 					if (input) input.value = reference
 
 				} else if (identifier) {
 					const { system, value } = identifier
 
-					const inputSystem = getInputById(fullId(baseId + "-system"))
-					const inputValue = getInputById(fullId(baseId + "-value"))
+					const inputSystem = getInputById(fullId("system"))
+					const inputValue = getInputById(fullId("value"))
 
 					if (inputSystem) inputSystem.value = system
 					if (inputValue) inputValue.value = value
@@ -1153,16 +1151,16 @@ function handlePendingTask() {
 			} else if (values.identifier) {
 				const { system, value } = values.identifier
 
-				const inputSystem = getInputById(fullId(baseId + "-system"))
-				const inputValue = getInputById(fullId(baseId + "-value"))
+				const inputSystem = getInputById(fullId("system"))
+				const inputValue = getInputById(fullId("value"))
 
 				if (inputSystem) inputSystem.value = system
 				if (inputValue) inputValue.value = value
 			} else if (values.coding) {
 				const { system, code } = values.coding
 
-				const inputSystem = getInputById(fullId(baseId + "-system"))
-				const inputCode = getInputById(fullId(baseId + "-code"))
+				const inputSystem = getInputById(fullId("system"))
+				const inputCode = getInputById(fullId("code"))
 
 				if (inputSystem) inputSystem.value = system
 				if (inputCode) inputCode.value = code
@@ -1173,7 +1171,7 @@ function handlePendingTask() {
 
 				Object.entries(fields).forEach(([key, val]) => {
 					if (val == null) return
-					const input = getInputById(fullId(`${baseId}-${key}`))
+					const input = getInputById(fullId(key))
 					if (input) input.value = val
 				})
 			}

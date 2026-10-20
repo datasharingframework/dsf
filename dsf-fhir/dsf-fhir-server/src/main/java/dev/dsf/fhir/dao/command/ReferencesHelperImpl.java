@@ -85,7 +85,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 			case TEMPORARY -> resolveTemporary(reference, idTranslationTable, reference.getReference()::getReference,
 					reference.getReference()::setReferenceElement);
 
-			case RELATED_ARTEFACT_TEMPORARY_URL -> resolveTemporary(reference, idTranslationTable,
+			case RELATED_ARTIFACT_TEMPORARY_URL -> resolveTemporary(reference, idTranslationTable,
 					reference.getRelatedArtifact()::getUrl, newIdToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
 
 			case ATTACHMENT_TEMPORARY_URL -> resolveTemporary(reference, idTranslationTable,
@@ -95,13 +95,13 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 				resolveConditional(reference, connection, target -> reference.getReference().setReferenceElement(
 						new IdType(target.getResourceType().name(), target.getIdElement().getIdPart())));
 
-			case RELATED_ARTEFACT_CONDITIONAL_URL ->
+			case RELATED_ARTIFACT_CONDITIONAL_URL ->
 				resolveConditional(reference, connection, targetToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
 
 			case ATTACHMENT_CONDITIONAL_URL ->
 				resolveConditional(reference, connection, targetToAbsoluteUrl(reference.getAttachment()::setUrl));
 
-			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL -> resolveLiteralInternalUrl(reference::getRelatedArtifact,
+			case RELATED_ARTIFACT_LITERAL_INTERNAL_URL -> resolveLiteralInternalUrl(reference::getRelatedArtifact,
 					RelatedArtifact::getUrl, RelatedArtifact::setUrl);
 
 			case ATTACHMENT_LITERAL_INTERNAL_URL ->
@@ -227,10 +227,10 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	{
 		return switch (reference.getType(serverBase))
 		{
-			case LITERAL_INTERNAL, RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL ->
+			case LITERAL_INTERNAL, RELATED_ARTIFACT_LITERAL_INTERNAL_URL, ATTACHMENT_LITERAL_INTERNAL_URL ->
 				referenceResolver.checkLiteralInternalReference(resource, reference, connection, index);
 
-			case LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
+			case LITERAL_EXTERNAL, RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL ->
 				referenceResolver.checkLiteralExternalReference(resource, reference, index);
 
 			case LOGICAL -> referenceResolver.checkLogicalReference(resource, reference, connection, index);
@@ -238,7 +238,7 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 			case CANONICAL -> referenceResolver.checkCanonicalReference(resource, reference, connection, index);
 
 			// unknown URLs to non FHIR servers in related artifacts must not be checked
-			case RELATED_ARTEFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
+			case RELATED_ARTIFACT_UNKNOWN_URL, ATTACHMENT_UNKNOWN_URL -> Optional.empty();
 
 			case UNKNOWN -> Optional.of(responseGenerator.unknownReference(resource, reference, index));
 

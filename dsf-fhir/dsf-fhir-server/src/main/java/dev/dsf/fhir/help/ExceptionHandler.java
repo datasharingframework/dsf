@@ -29,8 +29,6 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.fhir.dao.command.CommandList;
-import dev.dsf.fhir.dao.exception.BadBundleException;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
 import dev.dsf.fhir.dao.exception.ResourceNotFoundException;
 import dev.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
@@ -39,7 +37,7 @@ import dev.dsf.fhir.function.RunnableWithSqlAndResourceNotFoundException;
 import dev.dsf.fhir.function.RunnableWithSqlException;
 import dev.dsf.fhir.function.RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException;
 import dev.dsf.fhir.function.SupplierWithSqlAndResourceDeletedException;
-import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException;
+import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResourceVersionNoMatchException;
 import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import dev.dsf.fhir.function.SupplierWithSqlException;
 import jakarta.ws.rs.WebApplicationException;
@@ -132,8 +130,8 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
-	public <T> T handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(String resourceTypeName,
-			SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException<T> s)
+	public <T> T handleSqlExAndResourceNotFoundExAndResourceVersionNonMatchEx(String resourceTypeName,
+			SupplierWithSqlAndResourceNotFoundAndResourceVersionNoMatchException<T> s)
 	{
 		try
 		{
@@ -363,22 +361,6 @@ public class ExceptionHandler
 			logger.warn("Error while accessing DB: {} - {}", e.getClass().getName(), e.getMessage());
 
 			return onSqlException.get();
-		}
-	}
-
-	public CommandList handleBadBundleException(Supplier<CommandList> commandListCreator)
-	{
-		try
-		{
-			return commandListCreator.get();
-		}
-		catch (BadBundleException e)
-		{
-			logger.debug("Error while creating command list for bundle", e);
-			logger.warn("Error while creating command list for bundle: {}", e.getMessage());
-
-			Response response = responseGenerator.badBundleRequest(e.getMessage());
-			throw new WebApplicationException(response);
 		}
 	}
 }

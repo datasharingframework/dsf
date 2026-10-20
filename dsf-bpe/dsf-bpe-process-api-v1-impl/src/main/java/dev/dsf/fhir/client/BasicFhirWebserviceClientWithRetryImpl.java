@@ -29,10 +29,10 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import jakarta.ws.rs.core.MediaType;
 
-class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
+class BasicFhirWebserviceClientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
 		implements BasicFhirWebserviceClient
 {
-	BasicFhirWebserviceCientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
+	BasicFhirWebserviceClientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
 	{
 		super(delegate, nTimes, delay);
 	}
@@ -92,30 +92,15 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
-	public BinaryInputStream readBinary(String id, String version, MediaType mediaType)
+	public InputStream readBinary(String id, String version, MediaType mediaType)
 	{
 		return retry(() -> delegate.readBinary(id, version, mediaType));
 	}
 
 	@Override
-	public BinaryInputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
-			Long rangeEndInclusive, Map<String, String> additionalHeaders)
-	{
-		return retry(
-				() -> delegate.readBinary(id, version, mediaType, rangeStart, rangeEndInclusive, additionalHeaders));
-	}
-
-	@Override
-	public BinaryInputStream readBinary(String id, MediaType mediaType)
+	public InputStream readBinary(String id, MediaType mediaType)
 	{
 		return retry(() -> delegate.readBinary(id, mediaType));
-	}
-
-	@Override
-	public BinaryInputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive,
-			Map<String, String> additionalHeaders)
-	{
-		return retry(() -> delegate.readBinary(id, mediaType, rangeStart, rangeEndInclusive, additionalHeaders));
 	}
 
 	@Override

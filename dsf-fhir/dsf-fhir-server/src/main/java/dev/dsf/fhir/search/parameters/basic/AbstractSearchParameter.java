@@ -37,12 +37,6 @@ public abstract class AbstractSearchParameter<R extends Resource>
 		this.parameterName = parameterName;
 	}
 
-	@Override
-	public final String getParameterName()
-	{
-		return parameterName;
-	}
-
 	protected final IllegalStateException notDefined()
 	{
 		return new IllegalStateException("not defined");

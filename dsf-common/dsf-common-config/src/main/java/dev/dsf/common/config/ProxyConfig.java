@@ -25,16 +25,16 @@ public interface ProxyConfig
 	String getUrl();
 
 	/**
-	 * @return <code>true</code> if a proxy url is configured and '*' is not set as a no-proxy url
+	 * @return <code>true</code> if a proxy url is configured
 	 */
 	boolean isEnabled();
 
 	/**
 	 * @param targetUrl
 	 *            may be <code>null</code>
-	 * @return <code>true</code> if a proxy url is configured, '*' is not set as a no-proxy url and the given
-	 *         <b>targetUrl</b> is not set as a no-proxy url, <code>false</code> if the given <b>targetUrl</b> is
-	 *         <code>null</code>, blank or configured as a no-proxy url
+	 * @return <code>true</code> if a proxy url is configured, and the given <b>targetUrl</b> is not set as a no-proxy
+	 *         url, <code>false</code> if the given <b>targetUrl</b> is <code>null</code>, blank or configured as a
+	 *         no-proxy url
 	 * @see #getNoProxyUrls()
 	 * @see String#isBlank()
 	 */

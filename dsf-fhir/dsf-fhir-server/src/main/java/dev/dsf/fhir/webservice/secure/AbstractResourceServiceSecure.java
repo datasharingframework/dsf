@@ -94,7 +94,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.referenceCleaner = referenceCleaner;
 		this.referenceExtractor = referenceExtractor;
 		this.resourceType = resourceType;
-		this.defaultProfileProvider = defaultProfileProvider;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
@@ -102,6 +101,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.authorizationRule = authorizationRule;
 		this.resourceValidator = resourceValidator;
 		this.validationRules = validationRules;
+		this.defaultProfileProvider = defaultProfileProvider;
 	}
 
 	@Override
@@ -188,7 +188,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		if (reasonCreateAllowed.isEmpty())
 		{
-			audit.info("Create of resource {} denied for user '{}'", resourceTypeName, getCurrentIdentity().getName());
+			audit.info("Create of resource {} denied for identity '{}'", resourceTypeName,
+					getCurrentIdentity().getName());
 			return forbidden("create");
 		}
 		else
@@ -196,17 +197,17 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			return withResourceValidation(resource, validationRules::failOnErrorOrFatalBeforeCreate, uri, headers,
 					"Create", () ->
 					{
-						audit.info("Create of resource {} allowed for user '{}', reason: {}", resourceTypeName,
+						audit.info("Create of resource {} allowed for identity '{}', reason: {}", resourceTypeName,
 								getCurrentIdentity().getName(), reasonCreateAllowed.get());
 
 						Response created = logResultStatus(() ->
 						{
 							Response response = delegate.create(resource, uri, headers);
 							return response;
-						}, status -> audit.info("Create of resource {} for user '{}' successful, status: {} {}",
+						}, status -> audit.info("Create of resource {} for identity '{}' successful, status: {} {}",
 								resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
 								status.getReasonPhrase()),
-								status -> audit.info("Create of resource {} for user '{}' failed, status: {} {}",
+								status -> audit.info("Create of resource {} for identity '{}' failed, status: {} {}",
 										resourceTypeName, getCurrentIdentity().getName(), status.getStatusCode(),
 										status.getReasonPhrase()));
 
@@ -230,7 +231,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			return;
 
 		referenceExtractor.getReferences(resource)
-				.filter(ref -> ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase))
+				.filter(ref -> ReferenceType.RELATED_ARTIFACT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase))
 						|| ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase)))
 				.forEach(this::resolveLiteralInternalRelatedArtifactOrAttachmentUrl);
 	}
@@ -400,6 +401,12 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)
 	{
+		Objects.requireNonNull(newResource, "newResource");
+		Objects.requireNonNull(oldResource, "oldResource");
+		// intentionally guarding against object identity
+		if (newResource == oldResource)
+			throw new IllegalStateException("new resource same object as old resource");
+
 		resolveLiteralInternalRelatedArtifactOrAttachmentUrls(newResource);
 
 		final String resourceId = oldResource.getIdElement().getIdPart();
@@ -454,20 +461,24 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Map<String, List<String>> queryParameters = uri.getQueryParameters();
 		PartialResult<R> result = getExisting(queryParameters);
 
-		// No matches, no id provided: The server creates the resource.
-		if (result.getTotal() <= 0 && !resource.hasId())
+		// No matches
+		if (result.getTotal() <= 0)
 		{
-			// more security checks and audit log in create method
-			return create(resource, uri, headers);
-		}
+			// no id provided: The server creates the resource.
+			if (!resource.hasId())
+			{
+				// more security checks and audit log in create method
+				return create(resource, uri, headers);
+			}
 
-		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
-		// if it does not support Update as Create) -> reject
-		else if (result.getTotal() <= 0 && resource.hasId())
-		{
-			audit.info("Create as update of non existing {} denied for identity '{}'", resourceTypeName,
-					getCurrentIdentity().getName());
-			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
+			// id provided: The server treats the interaction as an Update as Create interaction (or rejects it, if it
+			// does not support Update as Create) -> reject
+			else
+			{
+				audit.info("Create as update of non existing {} denied for identity '{}'", resourceTypeName,
+						getCurrentIdentity().getName());
+				return responseGenerator.updateAsCreateNotAllowed(resourceTypeName);
+			}
 		}
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
@@ -482,7 +493,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				resource.setIdElement(dbResourceId);
 				// more security checks and audit log in update method
-				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);
+				return update(resource.getIdElement().getIdPart(), resource, uri, headers, dbResource);
 			}
 
 			// update: resource has same id
@@ -494,7 +505,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					&& dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart()))
 			{
 				// more security checks and audit log in update method
-				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);
+				return update(resource.getIdElement().getIdPart(), resource, uri, headers, dbResource);
 			}
 
 			// update resource has different id -> 400 Bad Request
@@ -513,7 +524,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
 		// not selective enough preferably with an OperationOutcome
-		else // if (result.getOverallCount() > 1)
+		else
 		{
 			audit.info(
 					"Update of {} denied for identity '{}', conditional update criteria not selective enough, multiple matches",
@@ -595,7 +606,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("{} to delete not found for user '{}'", resourceTypeName, getCurrentIdentity().getName());
+			audit.info("{} to delete not found for identity '{}'", resourceTypeName, getCurrentIdentity().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}
 	}
@@ -617,7 +628,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentIdentity(), PageAndCount.single());
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(PageAndCount.single());
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query.getUnsupportedQueryParameters();
@@ -680,7 +691,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				Response response = delegate.search(uri, headers);
 				return response;
-			}, status -> audit.info("Search of {} for identity '{} successful, status: {} {}'", resourceTypeName,
+			}, status -> audit.info("Search of {} for identity '{}' successful, status: {} {}", resourceTypeName,
 					getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()),
 					status -> audit.info("Search of {} for identity '{}' failed, status: {} {}", resourceTypeName,
 							getCurrentIdentity().getName(), status.getStatusCode(), status.getReasonPhrase()));
@@ -728,7 +739,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("{} to permanently delete not found for user '{}'", resourceTypeName,
+			audit.info("{} to permanently delete not found for identity '{}'", resourceTypeName,
 					getCurrentIdentity().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}

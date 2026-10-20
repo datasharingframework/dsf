@@ -29,18 +29,18 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import jakarta.ws.rs.core.MediaType;
 
-class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
+class BasicFhirWebserviceClientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
 		implements BasicFhirWebserviceClient
 {
-	BasicFhirWebserviceCientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
+	BasicFhirWebserviceClientWithRetryImpl(FhirWebserviceClientJersey delegate, int nTimes, Duration delay)
 	{
 		super(delegate, nTimes, delay);
 	}
 
 	@Override
-	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
+	public <R extends Resource> R updateConditionally(R resource, Map<String, List<String>> criteria)
 	{
-		return retry(() -> delegate.updateConditionaly(resource, criteria));
+		return retry(() -> delegate.updateConditionally(resource, criteria));
 	}
 
 	@Override
@@ -62,9 +62,9 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
-	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
+	public <R extends Resource> R createConditionally(R resource, String ifNoneExistCriteria)
 	{
-		return retry(() -> delegate.createConditionaly(resource, ifNoneExistCriteria));
+		return retry(() -> delegate.createConditionally(resource, ifNoneExistCriteria));
 	}
 
 	@Override
@@ -92,15 +92,30 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
-	public InputStream readBinary(String id, String version, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType)
 	{
 		return retry(() -> delegate.readBinary(id, version, mediaType));
 	}
 
 	@Override
-	public InputStream readBinary(String id, MediaType mediaType)
+	public BinaryInputStream readBinary(String id, String version, MediaType mediaType, Long rangeStart,
+			Long rangeEndInclusive, Map<String, String> additionalHeaders)
+	{
+		return retry(
+				() -> delegate.readBinary(id, version, mediaType, rangeStart, rangeEndInclusive, additionalHeaders));
+	}
+
+	@Override
+	public BinaryInputStream readBinary(String id, MediaType mediaType)
 	{
 		return retry(() -> delegate.readBinary(id, mediaType));
+	}
+
+	@Override
+	public BinaryInputStream readBinary(String id, MediaType mediaType, Long rangeStart, Long rangeEndInclusive,
+			Map<String, String> additionalHeaders)
+	{
+		return retry(() -> delegate.readBinary(id, mediaType, rangeStart, rangeEndInclusive, additionalHeaders));
 	}
 
 	@Override
@@ -137,6 +152,12 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	public CapabilityStatement getConformance()
 	{
 		return retry(() -> delegate.getConformance());
+	}
+
+	@Override
+	public StructureDefinition getSnapshot(String id)
+	{
+		return retry(() -> delegate.getSnapshot(id));
 	}
 
 	@Override
@@ -180,11 +201,11 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
-	public void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
+	public void deleteConditionally(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
 	{
 		retry(() ->
 		{
-			delegate.deleteConditionaly(resourceClass, criteria);
+			delegate.deleteConditionally(resourceClass, criteria);
 			return null;
 		});
 	}
