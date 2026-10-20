@@ -307,7 +307,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	{
 		Organization o = prepareForTestIllegalUpdate();
 
-		expectForbidden(() -> getWebserviceClient().updateConditionaly(o,
+		expectForbidden(() -> getWebserviceClient().updateConditionally(o,
 				Map.of("_id", List.of(o.getIdElement().getIdPart()))));
 	}
 
@@ -316,7 +316,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	{
 		Organization o = prepareForTestIllegalUpdate();
 
-		expectForbidden(() -> getWebserviceClient().updateConditionaly(o,
+		expectForbidden(() -> getWebserviceClient().updateConditionally(o,
 				Map.of("_id", List.of(o.getIdElement().getIdPart()))));
 	}
 

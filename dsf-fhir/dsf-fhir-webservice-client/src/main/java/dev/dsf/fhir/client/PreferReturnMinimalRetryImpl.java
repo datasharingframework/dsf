@@ -41,10 +41,10 @@ class PreferReturnMinimalRetryImpl extends AbstractFhirWebserviceClientJerseyWit
 	}
 
 	@Override
-	public IdType createConditionaly(Resource resource, String ifNoneExistCriteria)
+	public IdType createConditionally(Resource resource, String ifNoneExistCriteria)
 	{
 		return retry(
-				() -> delegate.createConditionaly(PreferReturnType.MINIMAL, resource, ifNoneExistCriteria).getId());
+				() -> delegate.createConditionally(PreferReturnType.MINIMAL, resource, ifNoneExistCriteria).getId());
 	}
 
 	@Override
@@ -61,9 +61,9 @@ class PreferReturnMinimalRetryImpl extends AbstractFhirWebserviceClientJerseyWit
 	}
 
 	@Override
-	public IdType updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+	public IdType updateConditionally(Resource resource, Map<String, List<String>> criteria)
 	{
-		return retry(() -> delegate.updateConditionaly(PreferReturnType.MINIMAL, resource, criteria).getId());
+		return retry(() -> delegate.updateConditionally(PreferReturnType.MINIMAL, resource, criteria).getId());
 	}
 
 	@Override

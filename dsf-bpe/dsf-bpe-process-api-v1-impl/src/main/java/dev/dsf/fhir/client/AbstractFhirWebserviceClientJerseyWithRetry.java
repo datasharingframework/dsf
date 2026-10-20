@@ -65,7 +65,8 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 					if (tryNumber < nTimes || nTimes == RetryClient.RETRY_FOREVER)
 					{
 						logger.warn("Caught {} - {}; trying again in {}s{}", e.getClass().getName(), e.getMessage(),
-								delay, nTimes == RetryClient.RETRY_FOREVER ? " (retry " + (tryNumber + 1) + ")" : "");
+								delay.toSeconds(),
+								nTimes == RetryClient.RETRY_FOREVER ? " (retry " + (tryNumber + 1) + ")" : "");
 
 						try
 						{

@@ -136,7 +136,7 @@ public class Jwks
 				case "ES512" -> Algorithm.ECDSA512(keyProvider);
 
 				default -> {
-					logger.warn("JWKS crv property value '{}' not one of 'ES256', 'ES384' or 'ES512'", alg);
+					logger.warn("JWKS alg property value '{}' not one of 'ES256', 'ES384' or 'ES512'", alg);
 					yield null;
 				}
 			};

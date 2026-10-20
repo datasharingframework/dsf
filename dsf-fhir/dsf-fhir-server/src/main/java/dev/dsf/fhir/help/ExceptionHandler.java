@@ -39,7 +39,7 @@ import dev.dsf.fhir.function.RunnableWithSqlAndResourceNotFoundException;
 import dev.dsf.fhir.function.RunnableWithSqlException;
 import dev.dsf.fhir.function.RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException;
 import dev.dsf.fhir.function.SupplierWithSqlAndResourceDeletedException;
-import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException;
+import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResourceVersionNoMatchException;
 import dev.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import dev.dsf.fhir.function.SupplierWithSqlException;
 import jakarta.ws.rs.WebApplicationException;
@@ -132,8 +132,8 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
-	public <T> T handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(String resourceTypeName,
-			SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException<T> s)
+	public <T> T handleSqlExAndResourceNotFoundExAndResourceVersionNonMatchEx(String resourceTypeName,
+			SupplierWithSqlAndResourceNotFoundAndResourceVersionNoMatchException<T> s)
 	{
 		try
 		{

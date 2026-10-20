@@ -278,7 +278,7 @@ public class RoleConfig<R extends DsfRole>
 												if (value == null || value.isBlank())
 												{
 													logger.warn(
-															"Ignoring empty of blank practitioner-role in rule '{}'",
+															"Ignoring empty or blank practitioner-role in rule '{}'",
 															mappingKey);
 													return null;
 												}
@@ -312,7 +312,7 @@ public class RoleConfig<R extends DsfRole>
 					});
 				}
 				else
-					logger.warn("Ignoring invalud rule '{}'", mapping);
+					logger.warn("Ignoring invalid rule '{}'", mapping);
 			});
 		}
 	}

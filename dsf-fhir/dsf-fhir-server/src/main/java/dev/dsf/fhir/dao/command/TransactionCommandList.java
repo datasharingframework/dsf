@@ -111,7 +111,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 
 						try
 						{
-							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
+							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbort);
 							auditLogResult(c, toEntry(e));
 						}
 						catch (Exception e1)
@@ -153,7 +153,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 
 						try
 						{
-							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
+							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbort);
 							auditLogResult(c, toEntry(e));
 						}
 						catch (Exception e1)
@@ -193,7 +193,7 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 
 						try
 						{
-							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbbort);
+							commands.stream().limit(c.getIndex()).forEach(this::auditLogAbort);
 							auditLogResult(c, toEntry(e));
 						}
 						catch (Exception e1)

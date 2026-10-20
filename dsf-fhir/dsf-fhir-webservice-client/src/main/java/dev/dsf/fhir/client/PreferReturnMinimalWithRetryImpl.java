@@ -43,9 +43,9 @@ class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
 	}
 
 	@Override
-	public IdType createConditionaly(Resource resource, String ifNoneExistCriteria)
+	public IdType createConditionally(Resource resource, String ifNoneExistCriteria)
 	{
-		return delegate.createConditionaly(PreferReturnType.MINIMAL, resource, ifNoneExistCriteria).getId();
+		return delegate.createConditionally(PreferReturnType.MINIMAL, resource, ifNoneExistCriteria).getId();
 	}
 
 	@Override
@@ -61,9 +61,9 @@ class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
 	}
 
 	@Override
-	public IdType updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+	public IdType updateConditionally(Resource resource, Map<String, List<String>> criteria)
 	{
-		return delegate.updateConditionaly(PreferReturnType.MINIMAL, resource, criteria).getId();
+		return delegate.updateConditionally(PreferReturnType.MINIMAL, resource, criteria).getId();
 	}
 
 	@Override

@@ -54,7 +54,7 @@ public final class ProcessPluginFhirConfig<R, A, C, L, M, N, Q, S, T, V>
 	private final Function<Object, byte[]> encodeResource;
 	private final Function<Object, Optional<String>> getResourceName;
 
-	private final Predicate<Object> hasMetadataresourceVersion;
+	private final Predicate<Object> hasMetadataResourceVersion;
 	private final Predicate<Object> hasMetadataResourceUrl;
 	private final Function<Object, Optional<String>> getMetadataResourceVersion;
 
@@ -137,7 +137,7 @@ public final class ProcessPluginFhirConfig<R, A, C, L, M, N, Q, S, T, V>
 		this.getResourceName = getResourceName;
 
 		this.hasMetadataResourceUrl = hasMetadataResourceUrl;
-		this.hasMetadataresourceVersion = hasMetadataResourceVersion;
+		this.hasMetadataResourceVersion = hasMetadataResourceVersion;
 		this.getMetadataResourceVersion = getMetadataResourceVersion;
 
 		this.getActivityDefinitionUrl = getActivityDefinitionUrl;
@@ -284,9 +284,9 @@ public final class ProcessPluginFhirConfig<R, A, C, L, M, N, Q, S, T, V>
 		return isMetadataResource(metadataResource) && hasMetadataResourceUrl.test(metadataResource);
 	}
 
-	public boolean hasMetadataresourceVersion(Object metadataResource)
+	public boolean hasMetadataResourceVersion(Object metadataResource)
 	{
-		return isMetadataResource(metadataResource) && hasMetadataresourceVersion.test(metadataResource);
+		return isMetadataResource(metadataResource) && hasMetadataResourceVersion.test(metadataResource);
 	}
 
 	public Optional<String> getMetadataResourceVersion(Object metadataResource)

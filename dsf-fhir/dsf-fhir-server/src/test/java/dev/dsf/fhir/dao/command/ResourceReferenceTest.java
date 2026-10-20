@@ -127,7 +127,7 @@ public class ResourceReferenceTest
 	}
 
 	@Test
-	public void testGetTypeRelatedArtefact() throws Exception
+	public void testGetTypeRelatedArtifact() throws Exception
 	{
 		var r1 = new ResourceReference("Foo.bar",
 				new RelatedArtifact().setType(DOCUMENTATION).setUrl("urn:uuid:" + UUID.randomUUID().toString()));
@@ -150,19 +150,19 @@ public class ResourceReferenceTest
 		var r9 = new ResourceReference("Foo.bar",
 				new RelatedArtifact().setType(DOCUMENTATION).setUrl(UUID.randomUUID().toString()));
 
-		assertEquals(ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL, r1.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_TEMPORARY_URL, r1.getType(serverBase));
 
-		assertEquals(ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL, r2.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_CONDITIONAL_URL, r2.getType(serverBase));
 
-		assertEquals(ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL, r3.getType(serverBase));
-		assertEquals(ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL, r4.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_LITERAL_INTERNAL_URL, r3.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_LITERAL_INTERNAL_URL, r4.getType(serverBase));
 
-		assertEquals(ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, r5.getType(serverBase));
-		assertEquals(ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, r6.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, r5.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_LITERAL_EXTERNAL_URL, r6.getType(serverBase));
 
-		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r7.getType(serverBase));
-		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r8.getType(serverBase));
-		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r9.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_UNKNOWN_URL, r7.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_UNKNOWN_URL, r8.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTIFACT_UNKNOWN_URL, r9.getType(serverBase));
 	}
 
 	@Test

@@ -77,7 +77,7 @@ public class SubscriptionIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateOkNoPayloadAllreadyExistsWithPayload() throws Exception
+	public void testCreateOkNoPayloadAlreadyExistsWithPayload() throws Exception
 	{
 		Subscription t = newSubscription("Task?status=completed");
 
@@ -94,7 +94,7 @@ public class SubscriptionIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateNotOkNoPayloadAllreadyExistsWithoutPayload() throws Exception
+	public void testCreateNotOkNoPayloadAlreadyExistsWithoutPayload() throws Exception
 	{
 		Subscription t = newSubscription("Task?status=completed");
 		t.getChannel().setPayload(null);

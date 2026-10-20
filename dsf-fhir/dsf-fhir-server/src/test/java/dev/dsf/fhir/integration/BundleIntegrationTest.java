@@ -76,7 +76,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList,
+		Bundle updatedBundle = getWebserviceClient().updateConditionally(allowList,
 				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(updatedBundle);
@@ -90,7 +90,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList,
+		IdType id = getWebserviceClient().withMinimalReturn().updateConditionally(allowList,
 				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(id);
@@ -104,7 +104,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(allowList,
+		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionally(allowList,
 				Map.of("identifier", List.of("http://dsf.dev/fhir/CodeSystem/update-allow-list|allow_list")));
 
 		assertNotNull(outcome);
