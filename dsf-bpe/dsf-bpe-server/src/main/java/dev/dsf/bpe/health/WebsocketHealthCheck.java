@@ -13,37 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dsf.common.status.health;
+package dev.dsf.bpe.health;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Objects;
 
-import javax.sql.DataSource;
+import dev.dsf.bpe.subscription.LocalFhirConnector;
+import dev.dsf.common.status.health.HealthCheck;
+import dev.dsf.common.status.health.HealthStatus;
 
-public class DatabaseHealthCheck implements HealthCheck
+public class WebsocketHealthCheck implements HealthCheck
 {
-	private final DataSource dataSource;
+	private final String component;
+	private final LocalFhirConnector connector;
 
 	/**
-	 * @param dataSource
+	 * @param component
+	 *            not <code>null</code>
+	 * @param connector
 	 *            not <code>null</code>
 	 */
-	public DatabaseHealthCheck(DataSource dataSource)
+	public WebsocketHealthCheck(String component, LocalFhirConnector connector)
 	{
-		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+		this.component = Objects.requireNonNull(component, "component");
+		this.connector = Objects.requireNonNull(connector, "connector");
 	}
 
 	@Override
 	public HealthStatus check()
 	{
-		try (Connection _ = dataSource.getConnection())
-		{
-			return new HealthStatus("Database", true, "Connection is healthy");
-		}
-		catch (SQLException e)
-		{
-			return new HealthStatus("Database", false, "Connection failed - " + e.getSQLState());
-		}
+		boolean connected = connector.isConnected();
+
+		return new HealthStatus(component + " Websocket", connected, connected ? "Connected" : "Not connected");
 	}
 }

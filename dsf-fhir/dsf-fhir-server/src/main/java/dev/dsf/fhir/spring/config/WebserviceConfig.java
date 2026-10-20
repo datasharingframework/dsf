@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import dev.dsf.common.auth.logout.LogoutService;
-import dev.dsf.common.status.health.DatabaseHealthCheck;
+import dev.dsf.common.db.health.DatabaseHealthCheck;
 import dev.dsf.common.status.webservice.StatusService;
 import dev.dsf.common.ui.webservice.StaticResourcesService;
 import dev.dsf.fhir.exception.DataFormatExceptionHandler;

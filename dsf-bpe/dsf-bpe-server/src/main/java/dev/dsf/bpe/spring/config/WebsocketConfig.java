@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import dev.dsf.bpe.status.health.WebsocketHealthCheck;
+import dev.dsf.bpe.health.WebsocketHealthCheck;
 import dev.dsf.bpe.subscription.ConcurrentSubscriptionHandlerFactory;
 import dev.dsf.bpe.subscription.LocalFhirConnector;
 import dev.dsf.bpe.subscription.LocalFhirConnectorImpl;
