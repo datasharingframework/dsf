@@ -22,6 +22,7 @@ import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.security.openid.OpenIdCredentials;
 import org.eclipse.jetty.security.openid.OpenIdLoginService;
+import org.eclipse.jetty.security.openid.OpenIdUserPrincipal;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Session;
 import org.slf4j.Logger;
@@ -54,16 +55,25 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 	@Override
 	public boolean validate(UserIdentity user)
 	{
-		if (!(user.getUserPrincipal() instanceof PractitionerIdentity identity))
+		if (!(user.getUserPrincipal() instanceof OpenIdUserPrincipal identity))
+		{
+			logger.warn("Login principal not OpenId");
 			return false;
+		}
 
-		if (identity.getCredentials().isEmpty())
+		if (user.getSubject().getPrincipals(PractitionerIdentity.class).isEmpty())
+		{
+			logger.warn("No practitioner identity principal");
+			return false;
+		}
+
+		if (identity.getCredentials() == null)
 		{
 			logger.warn("No credentials");
 			return false;
 		}
 
-		if (!identity.isNotExpired())
+		if (identity.getCredentials().isExpired())
 		{
 			logger.debug("ID Token has expired");
 			return false;

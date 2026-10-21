@@ -98,7 +98,7 @@ services:
         read_only: true
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.7
+    image: quay.io/keycloak/keycloak:26.8
     restart: "no"
     ports:
       - 127.0.0.1:8443:8443
@@ -212,6 +212,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-fhir
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic1_fhir.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.2
     networks:
       dic1-fhir-frontend:
         ipv4_address: 172.20.0.3
@@ -293,6 +294,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic2-fhir
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic2_fhir.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.18
     networks:
       dic2-fhir-frontend:
         ipv4_address: 172.20.0.19
@@ -372,6 +374,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic3-fhir
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic3_fhir.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.34
     networks:
       dic3-fhir-frontend:
         ipv4_address: 172.20.0.35
@@ -459,6 +462,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-fhir
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_fhir.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.50
     networks:
       ttp-fhir-frontend:
         ipv4_address: 172.20.0.51
@@ -547,6 +551,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic1_bpe.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.66
       DEV_DSF_PROXY_URL: http://forward-proxy:8080
       DEV_DSF_PROXY_USERNAME: proxy_user
       DEV_DSF_PROXY_PASSWORD: proxy_password
@@ -667,6 +672,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic2-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic2_bpe.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.82
     networks:
       dic2-bpe-frontend:
         ipv4_address: 172.20.0.83
@@ -756,6 +762,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic3-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic3_bpe.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.98
     networks:
       dic3-bpe-frontend:
         ipv4_address: 172.20.0.99
@@ -846,6 +853,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: ttp-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_ttp_bpe.secret
+      DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.114
     networks:
       ttp-bpe-frontend:
         ipv4_address: 172.20.0.115
