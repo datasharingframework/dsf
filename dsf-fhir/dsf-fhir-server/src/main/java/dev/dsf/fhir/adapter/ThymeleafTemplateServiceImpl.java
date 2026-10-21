@@ -355,7 +355,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 
 		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
 		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"" + result.group(1)
-				+ "?_format=html\">" + result.group(1) + "</a>\"&gt");
+				+ "?_format=html\">" + result.group(1) + "</a>\"/&gt");
 
 		return content;
 	}
