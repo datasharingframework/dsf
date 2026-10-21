@@ -57,7 +57,7 @@ public class DsfLoginService implements LoginService
 		@Override
 		public Subject getSubject()
 		{
-			return null;
+			return new Subject(true, Set.of(principal), Set.of(), Set.of());
 		}
 
 		@Override

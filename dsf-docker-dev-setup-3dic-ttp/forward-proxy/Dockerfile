@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM alpine:3.22
+FROM alpine:3.24
 RUN apk add --no-cache tinyproxy
 COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
 CMD ["tinyproxy", "-d"]
