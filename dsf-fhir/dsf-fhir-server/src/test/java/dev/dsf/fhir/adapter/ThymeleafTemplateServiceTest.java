@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018-2025 Heilbronn University of Applied Sciences
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.dsf.fhir.adapter;
 
 import static org.junit.Assert.assertEquals;
@@ -19,7 +34,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import dev.dsf.common.ui.theme.Theme;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
@@ -56,10 +70,12 @@ public class ThymeleafTemplateServiceTest
 		Mockito.when(uriInfo.getPath()).thenReturn("");
 		Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
 
-		ThymeleafTemplateService thymeleafTemplateService = new ThymeleafTemplateServiceImpl(BASE_URL, theme, fhirContext, contexts, false, false);
+		ThymeleafTemplateService thymeleafTemplateService = new ThymeleafTemplateServiceImpl(BASE_URL, theme,
+				fhirContext, contexts, false, false);
 
 		ByteArrayOutputStream xmlOutputStream = new ByteArrayOutputStream();
-		thymeleafTemplateService.writeTo(getExampleOrganization(), Organization.class, MEDIA_TYPE, uriInfo, securityContext, xmlOutputStream);
+		thymeleafTemplateService.writeTo(getExampleOrganization(), Organization.class, MEDIA_TYPE, uriInfo,
+				securityContext, xmlOutputStream);
 		String xmlContent = toString(xmlOutputStream.toByteArray());
 
 		assertEquals(1, getNumSelfClosingReferencesWithSlash(xmlContent));
@@ -67,7 +83,8 @@ public class ThymeleafTemplateServiceTest
 		xmlOutputStream.close();
 
 		xmlOutputStream = new ByteArrayOutputStream();
-		thymeleafTemplateService.writeTo(getExampleOrganizationAffiliation(), OrganizationAffiliation.class, MEDIA_TYPE, uriInfo, securityContext, xmlOutputStream);
+		thymeleafTemplateService.writeTo(getExampleOrganizationAffiliation(), OrganizationAffiliation.class, MEDIA_TYPE,
+				uriInfo, securityContext, xmlOutputStream);
 		xmlContent = toString(xmlOutputStream.toByteArray());
 
 		assertEquals(3, getNumSelfClosingReferencesWithSlash(xmlContent));
@@ -78,8 +95,7 @@ public class ThymeleafTemplateServiceTest
 	{
 		Organization organization = new Organization();
 		organization.setId(UUID.randomUUID().toString());
-		organization.addEndpoint()
-				.setReference("Endpoint/" + UUID.randomUUID());
+		organization.addEndpoint().setReference("Endpoint/" + UUID.randomUUID());
 		return organization;
 	}
 
@@ -87,10 +103,9 @@ public class ThymeleafTemplateServiceTest
 	{
 		OrganizationAffiliation organizationAffiliation = new OrganizationAffiliation();
 		organizationAffiliation.setId(UUID.randomUUID().toString());
-		organizationAffiliation.setOrganization(new Reference("Organization/" +  UUID.randomUUID()));
-		organizationAffiliation.setParticipatingOrganization(new Reference("Organization/" +  UUID.randomUUID()));
-		organizationAffiliation.addEndpoint()
-				.setReference("Endpoint/" +  UUID.randomUUID());
+		organizationAffiliation.setOrganization(new Reference("Organization/" + UUID.randomUUID()));
+		organizationAffiliation.setParticipatingOrganization(new Reference("Organization/" + UUID.randomUUID()));
+		organizationAffiliation.addEndpoint().setReference("Endpoint/" + UUID.randomUUID());
 
 		return organizationAffiliation;
 	}
@@ -104,10 +119,10 @@ public class ThymeleafTemplateServiceTest
 	{
 		int matches = 0;
 		Matcher matcher = SELF_CLOSING_TAG_PATTERN.matcher(content);
-		while(matcher.find())
-		{
+
+		while (matcher.find())
 			matches++;
-		}
+
 		return matches;
 	}
 
@@ -115,10 +130,10 @@ public class ThymeleafTemplateServiceTest
 	{
 		int matches = 0;
 		Matcher matcher = NO_SELF_CLOSING_TAG_PATTERN.matcher(content);
-		while(matcher.find())
-		{
+
+		while (matcher.find())
 			matches++;
-		}
+
 		return matches;
 	}
 }
